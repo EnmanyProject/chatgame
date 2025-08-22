@@ -1,0 +1,224 @@
+{
+  "START": {
+    "steps": [
+      {
+        "type": "narration",
+        "text": "아침 햇살이 창문 사이로 스며든다. 옆집에서 들려오는 발소리에 문득 고개를 돌린다."
+      },
+      {
+        "type": "line",
+        "who": "수연",
+        "text": "좋은 아침이에요! 오늘도 화창한 날씨네요.",
+        "psych": "밝은 미소를 지으며 인사한다"
+      },
+      {
+        "type": "choice",
+        "options": [
+          {
+            "text": "좋은 아침이에요! 정말 날씨가 좋네요.",
+            "affDelta": 2,
+            "next": "POSITIVE_RESPONSE"
+          },
+          {
+            "text": "네... 좋은 아침이에요.",
+            "affDelta": 0,
+            "next": "NEUTRAL_RESPONSE"
+          },
+          {
+            "text": "아직 졸려서... 안녕하세요.",
+            "affDelta": -1,
+            "next": "SLEEPY_RESPONSE"
+          }
+        ]
+      }
+    ]
+  },
+  "POSITIVE_RESPONSE": {
+    "steps": [
+      {
+        "type": "line",
+        "who": "수연",
+        "text": "그러게요! 이런 날엔 산책하기 딱 좋을 것 같아요.",
+        "psych": "눈이 반짝이며 기뻐한다"
+      },
+      {
+        "type": "choice",
+        "options": [
+          {
+            "text": "혹시... 같이 산책하실래요?",
+            "affDelta": 3,
+            "next": "WALK_TOGETHER"
+          },
+          {
+            "text": "그렇네요. 좋은 하루 되세요!",
+            "affDelta": 1,
+            "next": "END_CONVERSATION"
+          }
+        ]
+      }
+    ]
+  },
+  "NEUTRAL_RESPONSE": {
+    "steps": [
+      {
+        "type": "line",
+        "who": "수연",
+        "text": "네, 좋은 하루 보내세요.",
+        "psych": "살짝 아쉬운 표정을 짓는다"
+      },
+      {
+        "type": "goto",
+        "next": "END_CONVERSATION"
+      }
+    ]
+  },
+  "SLEEPY_RESPONSE": {
+    "steps": [
+      {
+        "type": "line",
+        "who": "수연",
+        "text": "아직 잠이 덜 깨셨나 보네요. 충분히 쉬세요.",
+        "psych": "조심스럽게 미소 짓는다"
+      },
+      {
+        "type": "choice",
+        "options": [
+          {
+            "text": "죄송해요. 평소보다 일찍 일어나서...",
+            "affDelta": 1,
+            "next": "APOLOGIZE"
+          },
+          {
+            "text": "네, 그럼 이만...",
+            "affDelta": -1,
+            "next": "END_CONVERSATION"
+          }
+        ]
+      }
+    ]
+  },
+  "WALK_TOGETHER": {
+    "steps": [
+      {
+        "type": "line",
+        "who": "수연",
+        "text": "정말요? 좋아요! 근처 공원에 벚꽃이 예쁘게 피었거든요.",
+        "psych": "얼굴이 환해지며 기뻐한다"
+      },
+      {
+        "type": "narration",
+        "text": "함께 걸으며 자연스럽게 대화가 이어진다. 수연의 웃음소리가 봄바람에 실려온다."
+      },
+      {
+        "type": "line",
+        "who": "수연",
+        "text": "이렇게 같이 산책하니까 너무 좋네요. 평소에 혼자 걸을 때가 많았거든요.",
+        "psych": "살짝 수줍어하며 털어놓는다"
+      },
+      {
+        "type": "choice",
+        "options": [
+          {
+            "text": "앞으로 자주 같이 산책해요.",
+            "affDelta": 3,
+            "next": "PROMISE_WALKS"
+          },
+          {
+            "text": "저도 같이 걸으니까 기분이 좋아요.",
+            "affDelta": 2,
+            "next": "HAPPY_TOGETHER"
+          },
+          {
+            "text": "혼자 걷는 것도 나름 좋은데요.",
+            "affDelta": -2,
+            "next": "AWKWARD_MOMENT"
+          }
+        ]
+      }
+    ]
+  },
+  "APOLOGIZE": {
+    "steps": [
+      {
+        "type": "line",
+        "who": "수연",
+        "text": "괜찮아요. 일찍 일어나시느라 수고 많으셨어요.",
+        "psych": "따뜻한 미소를 보인다"
+      },
+      {
+        "type": "goto",
+        "next": "END_CONVERSATION"
+      }
+    ]
+  },
+  "PROMISE_WALKS": {
+    "steps": [
+      {
+        "type": "line",
+        "who": "수연",
+        "text": "정말요? 약속이에요! 내일도 같은 시간에 만나요.",
+        "psych": "환한 미소와 함께 약속을 한다"
+      },
+      {
+        "type": "narration",
+        "text": "새로운 일상의 시작을 알리는 따뜻한 약속이 오고 갔다."
+      },
+      {
+        "type": "line",
+        "who": "내레이션",
+        "text": "게임을 완료했습니다! 수연과의 좋은 관계를 만들어나가세요."
+      }
+    ]
+  },
+  "HAPPY_TOGETHER": {
+    "steps": [
+      {
+        "type": "line",
+        "who": "수연",
+        "text": "저도요! 오늘 정말 즐거웠어요.",
+        "psych": "진심어린 미소를 짓는다"
+      },
+      {
+        "type": "goto",
+        "next": "END_CONVERSATION"
+      }
+    ]
+  },
+  "AWKWARD_MOMENT": {
+    "steps": [
+      {
+        "type": "line",
+        "who": "수연",
+        "text": "아... 그렇군요.",
+        "psych": "미묘하게 실망한 표정을 보인다"
+      },
+      {
+        "type": "narration",
+        "text": "잠시 어색한 침묵이 흐른다."
+      },
+      {
+        "type": "goto",
+        "next": "END_CONVERSATION"
+      }
+    ]
+  },
+  "END_CONVERSATION": {
+    "steps": [
+      {
+        "type": "line",
+        "who": "수연",
+        "text": "그럼 좋은 하루 보내세요!",
+        "psych": "손을 흔들며 인사한다"
+      },
+      {
+        "type": "narration",
+        "text": "하루의 만남이 끝났다. 선택에 따라 관계가 달라질 것이다."
+      },
+      {
+        "type": "line",
+        "who": "내레이션",
+        "text": "데모 시나리오가 끝났습니다. 새로운 시나리오를 불러오거나 처음부터 다시 시작해보세요!"
+      }
+    ]
+  }
+}
