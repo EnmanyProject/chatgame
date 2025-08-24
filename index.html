@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💕 후배와의 대화</title>
+    <link rel="stylesheet" href="assets/styles/chat.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 채팅 앱 컨테이너 -->
+    <div class="chat-container">
+        <!-- 헤더 -->
+        <header class="chat-header">
+            <div class="contact-info">
+                <div class="profile-pic">
+                    <img src="assets/images/yuna.svg" alt="윤아" class="avatar">
+                    <div class="online-indicator"></div>
+                </div>
+                <div class="contact-details">
+                    <h1 class="contact-name">윤아 💕</h1>
+                    <span class="last-seen">방금 전</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="settingsBtn" class="header-btn">⚙️</button>
+            </div>
+        </header>
+
+        <!-- 메시지 영역 -->
+        <main class="messages-container" id="messagesContainer">
+            <div class="message-day">
+                <span class="day-label">오늘</span>
+            </div>
+        </main>
+
+        <!-- 입력 영역 -->
+        <footer class="input-container">
+            <div class="input-wrapper">
+                <input type="text" id="messageInput" class="message-input" placeholder="메시지를 입력하세요..." disabled>
+                <button id="sendBtn" class="send-btn" disabled>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+        </footer>
+
+        <!-- 선택지 영역 -->
+        <div class="choices-overlay" id="choicesOverlay">
+            <div class="choices-container" id="choicesContainer">
+                <!-- 선택지들이 동적으로 추가됨 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 프로필 사진 변경 모달 -->
+    <div id="profileModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📸 프로필 사진 변경</h2>
+                <button class="modal-close" id="closeProfileModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-preview">
+                    <img id="profilePreview" src="assets/images/yuna.svg" alt="미리보기" class="preview-image">
+                    <p class="preview-label">현재 프로필</p>
+                </div>
+                
+                <div class="upload-section">
+                    <h3>새 사진 업로드</h3>
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="profileUpload" accept="image/*" class="file-input" hidden>
+                        <div class="upload-content">
+                            <span class="upload-icon">📷</span>
+                            <p>사진을 선택하거나 여기에 드래그하세요</p>
+                            <button class="upload-btn" id="selectPhotoBtn">사진 선택</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="preset-section">
+                    <h3>기본 이미지</h3>
+                    <div class="preset-grid">
+                        <img src="assets/images/yuna.svg" class="preset-img active" data-src="assets/images/yuna.svg" alt="윤아 기본">
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button id="saveProfileBtn" class="save-btn" disabled>저장하기</button>
+                    <button id="resetProfileBtn" class="reset-btn">기본으로 되돌리기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 설정 모달 -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>설정</h2>
+                <button class="modal-close" id="closeSettingsModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <h3>게임 설정</h3>
+                    <label class="setting-item">
+                        <span>타이핑 속도</span>
+                        <input type="range" id="typingSpeed" min="1" max="10" value="5">
+                    </label>
+                    <label class="setting-item">
+                        <input type="checkbox" id="autoMode">
+                        <span>자동 진행 모드</span>
+                    </label>
+                </div>
+                
+                <!-- ✨ 개선된 AI 설정 섹션 ✨ -->
+                <div class="setting-group">
+                    <h3>🤖 AI 설정</h3>
+                    
+                    <div style="background: #1a1a1a; border-radius: 12px; padding: 20px; border: 1px solid #333; margin: 15px 0;">
+                        <h4 style="color: #fff; font-size: 16px; margin: 0 0 8px 0;">OpenAI API 키 설정</h4>
+                        <p style="color: #aaa; font-size: 13px; margin: 0 0 15px 0;">새로운 API 키를 입력하고 저장 버튼을 눌러주세요</p>
+                        
+                        <input type="password" id="openaiApiKey" placeholder="sk-proj-... 또는 sk-... 형태의 키를 입력하세요" style="
+                            width: 100%;
+                            background: #222;
+                            border: 2px solid #444;
+                            border-radius: 10px;
+                            padding: 12px 16px;
+                            color: #fff;
+                            font-size: 14px;
+                            margin-bottom: 15px;
+                            box-sizing: border-box;
+                        ">
+                        
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <button type="button" onclick="saveApiKey()" style="
+                                background: linear-gradient(135deg, #ff69b4, #ff1493);
+                                border: none;
+                                color: white;
+                                padding: 16px 32px;
+                                border-radius: 8px;
+                                font-size: 16px;
+                                font-weight: 600;
+                                cursor: pointer;
+                                margin-right: 10px;
+                                box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+                                transition: all 0.2s ease;
+                            ">💾 저장하기</button>
+                            <button type="button" onclick="clearApiKey()" style="
+                                background: #666;
+                                border: none;
+                                color: white;
+                                padding: 12px 24px;
+                                border-radius: 8px;
+                                font-size: 14px;
+                                font-weight: 600;
+                                cursor: pointer;
+                            ">🗑️ 키 삭제</button>
+                        </div>
+                        
+                        <div id="apiStatus" style="padding: 10px; background: #222; border-radius: 8px; margin-bottom: 15px;">
+                            <span id="apiStatusText" style="color: #ccc; font-size: 13px;">API 키 상태: 미설정</span>
+                        </div>
+                        
+                        <div style="background: rgba(255, 105, 180, 0.05); border: 1px solid rgba(255, 105, 180, 0.2); border-radius: 8px; padding: 15px;">
+                            <p style="color: #ff69b4; font-size: 13px; font-weight: 600; margin: 0 0 10px 0;"><strong>💡 도움말:</strong></p>
+                            <ul style="margin: 0; padding-left: 20px; color: #ccc; font-size: 12px; line-height: 1.5;">
+                                <li>OpenAI 계정에서 새 API 키를 발급받아 입력해주세요</li>
+                                <li>API 키는 브라우저에만 안전하게 저장됩니다</li>
+                                <li>키 발급: <a href="https://platform.openai.com/api-keys" target="_blank" style="color: #ff69b4;">platform.openai.com/api-keys</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <label class="setting-item">
+                        <input type="checkbox" id="aiMode">
+                        <span>AI 대화 모드 활성화</span>
+                    </label>
+                </div>
+                
+                <div class="setting-group">
+                    <h3>스토리 정보</h3>
+                    <div class="story-info">
+                        <p><strong>캐릭터:</strong> 윤아 (후배, 20세)</p>
+                        <p><strong>관계:</strong> 창용 오빠를 좋아하는 후배</p>
+                        <p><strong>상황:</strong> 어제 술 마신 후 기억이 가물가물한 상태</p>
+                        <p><strong>호감도:</strong> <span id="affectionLevel">75</span>%</p>
+                        <p><strong>친밀도:</strong> <span id="intimacyLevel">0</span>%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로딩 화면 -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>대화를 불러오는 중...</p>
+        </div>
+    </div>
+
+    <!-- ✨ API 키 관리 함수 ✨ -->
+    <script>
+    function saveApiKey() {
+        const apiKey = document.getElementById('openaiApiKey').value.trim();
+        if (apiKey && apiKey.startsWith('sk-')) {
+            localStorage.setItem('openai_api_key', apiKey);
+            document.getElementById('apiStatusText').textContent = 'API 키 상태: 저장됨 ✅';
+            alert('✅ API 키가 저장되었습니다! 페이지를 새로고침합니다.');
+            location.reload();
+        } else {
+            alert('❌ 올바른 API 키를 입력해주세요 (sk-로 시작)');
+        }
+    }
+    
+    function clearApiKey() {
+        if (confirm('저장된 API 키를 삭제하시겠습니까?')) {
+            localStorage.removeItem('openai_api_key');
+            document.getElementById('apiStatusText').textContent = 'API 키 상태: 미설정';
+            alert('API 키가 삭제되었습니다.');
+        }
+    }
+    
+    // 페이지 로드시 API 키 상태 확인
+    window.addEventListener('load', function() {
+        const savedKey = localStorage.getItem('openai_api_key');
+        if (savedKey) {
+            document.getElementById('apiStatusText').textContent = 'API 키 상태: 저장됨 ✅';
+        }
+    });
+    </script>
+
+    <!-- JavaScript -->
+    <script src="js/chat-config.js"></script>
+    <script src="js/ai-manager.js"></script>
+    <script src="js/profile-manager.js"></script>
+    <script src="js/chat-engine.js"></script>
+    <script src="js/chat-ui.js"></script>
+    <script src="js/chat-main.js"></script>
+</body>
+</html>
