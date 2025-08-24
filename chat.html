@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💕 후배와의 대화</title>
+    <link rel="stylesheet" href="assets/styles/chat.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 채팅 앱 컨테이너 -->
+    <div class="chat-container">
+        <!-- 헤더 -->
+        <header class="chat-header">
+            <div class="contact-info">
+                <div class="profile-pic">
+                    <img src="assets/images/yuna.svg" alt="윤아" class="avatar">
+                    <div class="online-indicator"></div>
+                </div>
+                <div class="contact-details">
+                    <h1 class="contact-name">윤아 💕</h1>
+                    <span class="last-seen">방금 전</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="settingsBtn" class="header-btn">⚙️</button>
+            </div>
+        </header>
+
+        <!-- 메시지 영역 -->
+        <main class="messages-container" id="messagesContainer">
+            <div class="message-day">
+                <span class="day-label">오늘</span>
+            </div>
+        </main>
+
+        <!-- 입력 영역 -->
+        <footer class="input-container">
+            <div class="input-wrapper">
+                <input type="text" id="messageInput" class="message-input" placeholder="메시지를 입력하세요..." disabled>
+                <button id="sendBtn" class="send-btn" disabled>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+        </footer>
+
+        <!-- 선택지 영역 -->
+        <div class="choices-overlay" id="choicesOverlay">
+            <div class="choices-container" id="choicesContainer">
+                <!-- 선택지들이 동적으로 추가됨 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 설정 모달 -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>설정</h2>
+                <button class="modal-close" id="closeSettingsModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <h3>게임 설정</h3>
+                    <label class="setting-item">
+                        <span>타이핑 속도</span>
+                        <input type="range" id="typingSpeed" min="1" max="10" value="5">
+                    </label>
+                    <label class="setting-item">
+                        <input type="checkbox" id="autoMode">
+                        <span>자동 진행 모드</span>
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <h3>AI 설정</h3>
+                    <label class="setting-item">
+                        <span>OpenAI API 키</span>
+                        <input type="password" id="openaiApiKey" placeholder="sk-...">
+                    </label>
+                    <label class="setting-item">
+                        <input type="checkbox" id="aiMode">
+                        <span>AI 대화 모드</span>
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <h3>스토리 정보</h3>
+                    <div class="story-info">
+                        <p><strong>캐릭터:</strong> 윤아 (후배, 20세)</p>
+                        <p><strong>관계:</strong> 창용 오빠를 좋아하는 후배</p>
+                        <p><strong>상황:</strong> 어제 술 마신 후 기억이 가물가물한 상태</p>
+                        <p><strong>호감도:</strong> <span id="affectionLevel">75</span>%</p>
+                        <p><strong>친밀도:</strong> <span id="intimacyLevel">0</span>%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로딩 화면 -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>대화를 불러오는 중...</p>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/chat-config.js"></script>
+    <script src="js/ai-manager.js"></script>
+    <script src="js/chat-engine.js"></script>
+    <script src="js/chat-ui.js"></script>
+    <script src="js/chat-main.js"></script>
+</body>
+</html>
