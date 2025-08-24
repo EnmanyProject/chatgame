@@ -54,10 +54,19 @@ body {
 }
 
 .avatar {
-    width: 45px;
-    height: 45px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     border: 2px solid #ff69b4;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    object-fit: cover;
+}
+
+.avatar:hover {
+    border-color: #ff1493;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 105, 180, 0.4);
 }
 
 .online-indicator {
@@ -568,6 +577,163 @@ body {
         border-radius: 0;
         border: none;
     }
+}
+
+/* 프로필 사진 변경 모달 */
+.profile-preview {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.preview-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid #ff69b4;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.preview-label {
+    color: #aaa;
+    font-size: 14px;
+    margin: 0;
+}
+
+.upload-section {
+    margin-bottom: 25px;
+}
+
+.upload-area {
+    border: 2px dashed #555;
+    border-radius: 12px;
+    padding: 30px 20px;
+    text-align: center;
+    background: #222;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.upload-area:hover,
+.upload-area.dragover {
+    border-color: #ff69b4;
+    background: #2a1a2a;
+}
+
+.upload-content {
+    pointer-events: none;
+}
+
+.upload-icon {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 15px;
+}
+
+.upload-area p {
+    color: #aaa;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.upload-btn {
+    background: #ff69b4;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+    pointer-events: all;
+}
+
+.upload-btn:hover {
+    background: #ff1493;
+}
+
+.preset-section {
+    margin-bottom: 25px;
+}
+
+.preset-section h3 {
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.preset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 15px;
+}
+
+.preset-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid #555;
+    object-fit: cover;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.preset-img:hover {
+    border-color: #ff69b4;
+    transform: scale(1.05);
+}
+
+.preset-img.active {
+    border-color: #ff69b4;
+    box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.save-btn, .reset-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.save-btn {
+    background: #ff69b4;
+    color: white;
+}
+
+.save-btn:hover:not(:disabled) {
+    background: #ff1493;
+}
+
+.save-btn:disabled {
+    background: #555;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.reset-btn {
+    background: #333;
+    color: white;
+    border: 1px solid #555;
+}
+
+.reset-btn:hover {
+    background: #444;
+    border-color: #777;
+}
+
+.file-input {
+    display: none;
 }
 
 /* 유틸리티 클래스 */

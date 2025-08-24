@@ -56,6 +56,46 @@
         </div>
     </div>
 
+    <!-- 프로필 사진 변경 모달 -->
+    <div id="profileModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📸 프로필 사진 변경</h2>
+                <button class="modal-close" id="closeProfileModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-preview">
+                    <img id="profilePreview" src="assets/images/yuna.svg" alt="미리보기" class="preview-image">
+                    <p class="preview-label">현재 프로필</p>
+                </div>
+                
+                <div class="upload-section">
+                    <h3>새 사진 업로드</h3>
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="profileUpload" accept="image/*" class="file-input" hidden>
+                        <div class="upload-content">
+                            <span class="upload-icon">📷</span>
+                            <p>사진을 선택하거나 여기에 드래그하세요</p>
+                            <button class="upload-btn" id="selectPhotoBtn">사진 선택</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="preset-section">
+                    <h3>기본 이미지</h3>
+                    <div class="preset-grid">
+                        <img src="assets/images/yuna.svg" class="preset-img active" data-src="assets/images/yuna.svg" alt="윤아 기본">
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button id="saveProfileBtn" class="save-btn" disabled>저장하기</button>
+                    <button id="resetProfileBtn" class="reset-btn">기본으로 되돌리기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 설정 모달 -->
     <div id="settingsModal" class="modal hidden">
         <div class="modal-content">
@@ -111,6 +151,7 @@
     <!-- JavaScript -->
     <script src="js/chat-config.js"></script>
     <script src="js/ai-manager.js"></script>
+    <script src="js/profile-manager.js"></script>
     <script src="js/chat-engine.js"></script>
     <script src="js/chat-ui.js"></script>
     <script src="js/chat-main.js"></script>

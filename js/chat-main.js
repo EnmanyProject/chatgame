@@ -3,6 +3,7 @@ class ChatApp {
     constructor() {
         this.chatEngine = null;
         this.chatUI = null;
+        this.profileManager = null;
         this.isInitialized = false;
         
         this.init();
@@ -23,6 +24,13 @@ class ChatApp {
             // UI 매니저 초기화
             this.chatUI = new ChatUI();
             window.chatUI = this.chatUI;
+
+            // 프로필 매니저 초기화
+            if (window.ProfileManager) {
+                this.profileManager = new window.ProfileManager();
+                window.profileManager = this.profileManager;
+                console.log('✅ Profile Manager initialized');
+            }
 
             // 엔진 초기화
             this.chatEngine = new ChatEngine();
