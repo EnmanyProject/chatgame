@@ -126,11 +126,30 @@
                         
                         <div class="api-key-input-group">
                             <input type="password" id="openaiApiKey" placeholder="sk-proj-... 또는 sk-... 형태의 키를 입력하세요" class="api-key-input">
-                            <div class="api-key-buttons">
-                                <button type="button" id="saveApiKeyBtn" class="api-btn primary">
+                            <div style="display: flex; gap: 12px; justify-content: center;">
+                                <button type="button" id="saveApiKeyBtn" onclick="saveApiKey()" style="
+                                    background: linear-gradient(135deg, #ff69b4, #ff1493);
+                                    border: none;
+                                    color: white;
+                                    padding: 16px 32px;
+                                    border-radius: 8px;
+                                    font-size: 16px;
+                                    font-weight: 600;
+                                    cursor: pointer;
+                                    box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+                                ">
                                     💾 저장하기
                                 </button>
-                                <button type="button" id="clearApiKeyBtn" class="api-btn danger">
+                                <button type="button" id="clearApiKeyBtn" onclick="clearApiKey()" style="
+                                    background: #666;
+                                    border: none;
+                                    color: white;
+                                    padding: 12px 24px;
+                                    border-radius: 8px;
+                                    font-size: 14px;
+                                    font-weight: 600;
+                                    cursor: pointer;
+                                ">
                                     🗑️ 키 삭제
                                 </button>
                             </div>
@@ -179,6 +198,26 @@
             <p>대화를 불러오는 중...</p>
         </div>
     </div>
+
+    <!-- API 키 관리 함수 -->
+    <script>
+    function saveApiKey() {
+        const apiKey = document.getElementById('openaiApiKey').value.trim();
+        if (apiKey && apiKey.startsWith('sk-')) {
+            localStorage.setItem('openai_api_key', apiKey);
+            alert('✅ API 키가 저장되었습니다! 페이지를 새로고침합니다.');
+            location.reload();
+        } else {
+            alert('❌ 올바른 API 키를 입력해주세요 (sk-로 시작)');
+        }
+    }
+    function clearApiKey() {
+        if (confirm('저장된 API 키를 삭제하시겠습니까?')) {
+            localStorage.removeItem('openai_api_key');
+            alert('API 키가 삭제되었습니다.');
+        }
+    }
+    </script>
 
     <!-- JavaScript -->
     <script src="js/chat-config.js"></script>
