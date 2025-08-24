@@ -584,7 +584,168 @@
             });
             
             console.log('🎯 설정 버튼을 클릭하고 API 키를 입력해보세요!');
+            
+            // 기본 채팅 기능 활성화
+            initBasicChat();
         });
+        
+        // 기본 채팅 시스템 (API 키 없이도 작동)
+        function initBasicChat() {
+            const messageInput = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const messagesContainer = document.getElementById('messagesContainer');
+            
+            // 입력창과 버튼 활성화
+            messageInput.disabled = false;
+            sendBtn.disabled = false;
+            
+            // Enter 키로 메시지 전송
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // 전송 버튼 클릭
+            sendBtn.addEventListener('click', sendMessage);
+            
+            console.log('💬 기본 채팅 시스템 활성화됨');
+        }
+        
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message) return;
+            
+            // 사용자 메시지 표시
+            addMessage('user', message);
+            messageInput.value = '';
+            
+            // 윤아 응답 (1초 후)
+            setTimeout(() => {
+                const response = getBasicResponse(message);
+                addMessage('yuna', response);
+            }, 1000);
+        }
+        
+        function addMessage(sender, text) {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender === 'user' ? 'sent' : 'received'}`;
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            bubbleDiv.textContent = text;
+            
+            // 메시지 버블 스타일
+            if (sender === 'user') {
+                bubbleDiv.style.cssText = `
+                    background: #ff69b4;
+                    color: #fff;
+                    border-radius: 18px;
+                    border-bottom-right-radius: 4px;
+                    padding: 12px 16px;
+                    max-width: 80%;
+                    margin-left: auto;
+                    word-wrap: break-word;
+                `;
+                messageDiv.style.alignItems = 'flex-end';
+            } else {
+                bubbleDiv.style.cssText = `
+                    background: #333;
+                    color: #fff;
+                    border-radius: 18px;
+                    border-bottom-left-radius: 4px;
+                    padding: 12px 16px;
+                    max-width: 80%;
+                    word-wrap: break-word;
+                `;
+                messageDiv.style.alignItems = 'flex-start';
+            }
+            
+            messageDiv.style.cssText += `
+                margin-bottom: 15px;
+                display: flex;
+                flex-direction: column;
+                animation: messageSlide 0.3s ease-out;
+            `;
+            
+            messageDiv.appendChild(bubbleDiv);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function getBasicResponse(userMessage) {
+            const message = userMessage.toLowerCase();
+            
+            // 기본 반응 패턴들
+            const responses = {
+                // 인사
+                '안녕': ['안녕하세요! 😊', '안녕하세요 창용 오빠! 💕', '오빠 안녕! ㅎㅎ'],
+                '하이': ['하이~! 😄', '반가워요! 💕'],
+                '헬로': ['헬로우~! 👋', '안녕하세요! 😊'],
+                
+                // 감정 표현
+                '좋아해': ['저도 오빠 좋아해요! 💕💕', '정말요? 너무 기뻐요! ㅋㅋㅋ', '오빠가 그렇게 말해주시니 행복해요 🥰'],
+                '사랑해': ['저도 오빠 사랑해요! 💕', '진짜요?? 저도 오빠 너무 사랑해요! 😍'],
+                '예뻐': ['오빠가 그렇게 말해주시니 기분 좋아요 😊', '고마워요 오빠 💕', 'ㅎㅎ 부끄러워요 😳'],
+                
+                // 질문
+                '어떻게 생각해': ['좋은 생각 같아요! ㅎㅎ', '오빠 생각이 맞는 것 같아요 😊', '저도 그렇게 생각해요!'],
+                '뭐해': ['오빠랑 얘기하고 있어요! 💕', '오빠 생각하고 있었어요 ㅎㅎ', '그냥 멍하니 있었어요 😅'],
+                
+                // 부정적 반응
+                '싫어': ['ㅜㅜ 왜요? 제가 뭘 잘못했나요?', '아... 그렇구나요 😢', '죄송해요...'],
+                '화나': ['오빠 화나셨어요? ㅜㅜ', '제가 뭔가 잘못했나요? 😰'],
+                
+                // 일상 대화
+                '점심': ['오빠는 점심 뭐 드실 거예요?', '같이 점심 먹어요! 😊'],
+                '피곤': ['오빠 많이 피곤하세요? 푹 쉬세요 💕', '고생 많으셨어요 ㅜㅜ'],
+                '졸려': ['일찍 주무세요! 😴', '푹 자고 내일 봐요~ 💕'],
+                
+                // 기본값들
+                'default': [
+                    '그렇구나요! ㅎㅎ 😊',
+                    '오빠 말씀이 맞는 것 같아요!',
+                    '흥미롭네요! 더 얘기해주세요 💕',
+                    'ㅎㅎ 재미있어요!',
+                    '오빠랑 이야기하니까 좋아요 😊',
+                    '정말요? 신기해요!',
+                    '그런 일이 있었군요! ㅎㅎ',
+                    '오빠 생각은 어떠세요?'
+                ]
+            };
+            
+            // 키워드 매칭
+            for (let keyword in responses) {
+                if (keyword !== 'default' && message.includes(keyword)) {
+                    const options = responses[keyword];
+                    return options[Math.floor(Math.random() * options.length)];
+                }
+            }
+            
+            // 기본 응답
+            const defaultResponses = responses.default;
+            return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+        }
+        
+        // 메시지 슬라이드 애니메이션 CSS 추가
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes messageSlide {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
