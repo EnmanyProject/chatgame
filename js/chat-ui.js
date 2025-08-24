@@ -33,7 +33,10 @@ class ChatUI {
         // 설정 버튼
         const settingsBtn = document.getElementById('settingsBtn');
         if (settingsBtn) {
-            settingsBtn.addEventListener('click', () => this.showSettings());
+            settingsBtn.addEventListener('click', () => {
+                this.showSettings();
+                this.addApiKeyUI(); // API 키 UI 추가
+            });
         }
 
         // 설정 모달 닫기
@@ -432,6 +435,185 @@ class ChatUI {
                 notification.remove();
             }
         }, 3000);
+    }
+
+    // API 키 설정 UI를 동적으로 추가
+    addApiKeyUI() {
+        console.log('🔧 Adding API Key UI dynamically...');
+        
+        // 이미 추가되었는지 확인
+        if (document.getElementById('saveApiKeyBtn')) {
+            console.log('✅ API Key UI already exists');
+            return;
+        }
+
+        // AI 설정 그룹 찾기
+        const settingGroups = document.querySelectorAll('.setting-group');
+        let aiSettingGroup = null;
+        
+        settingGroups.forEach(group => {
+            const h3 = group.querySelector('h3');
+            if (h3 && h3.textContent.includes('AI 설정')) {
+                aiSettingGroup = group;
+            }
+        });
+
+        if (!aiSettingGroup) {
+            console.error('❌ AI 설정 그룹을 찾을 수 없습니다');
+            return;
+        }
+
+        // 기존 API 키 입력 요소 찾기
+        const apiKeyInput = aiSettingGroup.querySelector('#openaiApiKey');
+        if (!apiKeyInput) {
+            console.error('❌ API 키 입력창을 찾을 수 없습니다');
+            return;
+        }
+
+        // 기존 label 요소를 새로운 구조로 교체
+        const parentLabel = apiKeyInput.closest('.setting-item');
+        
+        // 새로운 API 키 섹션 HTML 생성
+        const newApiSection = document.createElement('div');
+        newApiSection.innerHTML = `
+            <div class="api-key-section" style="
+                background: #1a1a1a;
+                border-radius: 12px;
+                padding: 20px;
+                border: 1px solid #333;
+                margin: 15px 0;
+            ">
+                <div class="api-key-header">
+                    <h4 style="color: #fff; font-size: 16px; margin: 0 0 8px 0;">OpenAI API 키 설정</h4>
+                    <p style="color: #aaa; font-size: 13px; margin: 0 0 20px 0;">새로운 API 키를 입력하고 저장 버튼을 눌러주세요</p>
+                </div>
+                
+                <div class="api-key-input-group" style="margin-bottom: 20px;">
+                    <input type="password" id="newApiKeyInput" placeholder="sk-proj-... 또는 sk-... 형태의 키를 입력하세요" style="
+                        width: 100%;
+                        background: #222;
+                        border: 2px solid #444;
+                        border-radius: 10px;
+                        padding: 12px 16px;
+                        color: #fff;
+                        font-size: 14px;
+                        font-family: 'Courier New', monospace;
+                        margin-bottom: 15px;
+                        box-sizing: border-box;
+                    ">
+                    <div style="display: flex; gap: 12px; justify-content: center;">
+                        <button type="button" id="saveApiKeyBtn" style="
+                            background: linear-gradient(135deg, #ff69b4, #ff1493);
+                            border: none;
+                            color: white;
+                            padding: 16px 32px;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            min-width: 120px;
+                            justify-content: center;
+                            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+                            transition: all 0.2s ease;
+                        ">
+                            💾 저장하기
+                        </button>
+                        <button type="button" id="clearApiKeyBtn" style="
+                            background: linear-gradient(135deg, #666, #555);
+                            border: none;
+                            color: white;
+                            padding: 12px 24px;
+                            border-radius: 8px;
+                            font-size: 14px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            min-width: 120px;
+                            justify-content: center;
+                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                        ">
+                            🗑️ 키 삭제
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="apiStatus" style="
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 12px 16px;
+                    background: #222;
+                    border-radius: 10px;
+                    border: 1px solid #444;
+                    margin-bottom: 20px;
+                ">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #666;"></div>
+                    <span id="apiStatusText" style="color: #ccc; font-size: 13px;">API 키 상태: 미설정</span>
+                </div>
+                
+                <div style="
+                    background: rgba(255, 105, 180, 0.05);
+                    border: 1px solid rgba(255, 105, 180, 0.2);
+                    border-radius: 8px;
+                    padding: 15px;
+                ">
+                    <p style="color: #ff69b4; font-size: 13px; font-weight: 600; margin: 0 0 10px 0;"><strong>💡 도움말:</strong></p>
+                    <ul style="margin: 0; padding-left: 20px; color: #ccc; font-size: 12px; line-height: 1.5;">
+                        <li>OpenAI 계정에서 새 API 키를 발급받아 입력해주세요</li>
+                        <li>API 키는 브라우저에만 안전하게 저장됩니다</li>
+                        <li>키 발급: <a href="https://platform.openai.com/api-keys" target="_blank" style="color: #ff69b4; text-decoration: none; font-weight: 600;">platform.openai.com/api-keys</a></li>
+                    </ul>
+                </div>
+            </div>
+        `;
+
+        // 기존 요소를 새 요소로 교체
+        parentLabel.parentNode.replaceChild(newApiSection, parentLabel);
+
+        // 이벤트 리스너 추가
+        this.bindApiKeyEvents();
+        
+        console.log('✅ API 키 UI가 성공적으로 추가되었습니다!');
+    }
+
+    // API 키 관련 이벤트 바인딩
+    bindApiKeyEvents() {
+        const saveBtn = document.getElementById('saveApiKeyBtn');
+        const clearBtn = document.getElementById('clearApiKeyBtn');
+        const apiKeyInput = document.getElementById('newApiKeyInput');
+
+        if (saveBtn && apiKeyInput) {
+            saveBtn.addEventListener('click', () => {
+                const apiKey = apiKeyInput.value.trim();
+                if (apiKey && apiKey.startsWith('sk-')) {
+                    // 로컬 스토리지에 저장
+                    localStorage.setItem('openai_api_key', apiKey);
+                    this.showNotification('API 키가 저장되었습니다! 🤖', 'success');
+                    apiKeyInput.value = '';
+                    
+                    // 페이지 새로고침하여 재연결
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    this.showNotification('올바른 API 키를 입력해주세요 (sk-로 시작)', 'error');
+                }
+            });
+        }
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                if (confirm('저장된 API 키를 삭제하시겠습니까?')) {
+                    localStorage.removeItem('openai_api_key');
+                    this.showNotification('API 키가 삭제되었습니다.', 'info');
+                }
+            });
+        }
     }
 }
 
