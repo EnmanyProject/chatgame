@@ -3,20 +3,410 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💕 후배와의 대화</title>
-    <link rel="stylesheet" href="assets/styles/chat.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>💕 후배와의 대화 - 참빠 특별버전</title>
+    <style>
+        /* 모든 스타일을 인라인으로 포함 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .chat-container {
+            width: min(100vw, 400px);
+            height: min(100vh, 800px);
+            max-width: 400px;
+            max-height: 800px;
+            background: #000;
+            border: 2px solid #333;
+            border-radius: 25px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+        .chat-header {
+            background: #111;
+            padding: 15px 20px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .contact-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .profile-pic {
+            position: relative;
+        }
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid #ff69b4;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            object-fit: cover;
+        }
+        .avatar:hover {
+            border-color: #ff1493;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 105, 180, 0.4);
+        }
+        .online-indicator {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background: #4ade80;
+            border-radius: 50%;
+            border: 2px solid #111;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .contact-details {
+            display: flex;
+            flex-direction: column;
+        }
+        .contact-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+            color: #fff;
+        }
+        .last-seen {
+            font-size: 12px;
+            color: #888;
+        }
+        .header-btn {
+            background: rgba(255, 105, 180, 0.1);
+            border: 2px solid rgba(255, 105, 180, 0.3);
+            font-size: 24px;
+            color: #ff69b4;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            animation: settingsPulse 2s infinite;
+        }
+        .header-btn:hover {
+            background: rgba(255, 105, 180, 0.2);
+            border-color: #ff69b4;
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 105, 180, 0.3);
+        }
+        @keyframes settingsPulse {
+            0%, 100% { 
+                box-shadow: 0 0 5px rgba(255, 105, 180, 0.3);
+                border-color: rgba(255, 105, 180, 0.3);
+            }
+            50% { 
+                box-shadow: 0 0 20px rgba(255, 105, 180, 0.6);
+                border-color: rgba(255, 105, 180, 0.8);
+            }
+        }
+        .messages-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            background: #000;
+        }
+        .day-label {
+            background: #333;
+            color: #aaa;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            display: inline-block;
+        }
+        .message-day {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .input-container {
+            padding: 15px 20px;
+            border-top: 1px solid #333;
+            background: #111;
+        }
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #222;
+            border-radius: 20px;
+            padding: 8px 15px;
+        }
+        .message-input {
+            flex: 1;
+            border: none;
+            background: none;
+            color: #fff;
+            font-size: 16px;
+            padding: 8px 0;
+            outline: none;
+        }
+        .message-input::placeholder {
+            color: #666;
+        }
+        .send-btn {
+            background: #ff69b4;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .send-btn:hover:not(:disabled) {
+            background: #ff1493;
+        }
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* 모달 스타일 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background: #111;
+            border-radius: 15px;
+            max-width: 350px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        .modal-header {
+            padding: 20px 20px 10px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h2 {
+            margin: 0;
+            color: #fff;
+            font-size: 20px;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+        .modal-close:hover {
+            background: #333;
+            color: #fff;
+        }
+        .modal-body {
+            padding: 20px;
+        }
+        .setting-group {
+            margin-bottom: 25px;
+        }
+        .setting-group h3 {
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            color: #ccc;
+            cursor: pointer;
+        }
+        .setting-item input[type="range"] {
+            width: 100px;
+        }
+        .setting-item input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        
+        /* API 키 설정 스타일 */
+        .api-section {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #333;
+            margin: 15px 0;
+        }
+        .api-title {
+            color: #fff;
+            font-size: 16px;
+            margin: 0 0 8px 0;
+        }
+        .api-help {
+            color: #aaa;
+            font-size: 13px;
+            margin: 0 0 15px 0;
+        }
+        .api-input {
+            width: 100%;
+            background: #222;
+            border: 2px solid #444;
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        .api-input:focus {
+            outline: none;
+            border-color: #ff69b4;
+        }
+        .button-container {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .save-button {
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            border: none;
+            color: white;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 10px;
+            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+            transition: all 0.2s ease;
+        }
+        .save-button:hover {
+            background: linear-gradient(135deg, #ff1493, #c71585);
+            transform: translateY(-2px);
+        }
+        .clear-button {
+            background: #666;
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .clear-button:hover {
+            background: #777;
+        }
+        .api-status {
+            padding: 10px;
+            background: #222;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            color: #ccc;
+            font-size: 13px;
+        }
+        .api-help-box {
+            background: rgba(255, 105, 180, 0.05);
+            border: 1px solid rgba(255, 105, 180, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .api-help-box p {
+            color: #ff69b4;
+            font-size: 13px;
+            font-weight: 600;
+            margin: 0 0 10px 0;
+        }
+        .api-help-box ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #ccc;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        .api-help-box a {
+            color: #ff69b4;
+            text-decoration: none;
+        }
+        .loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+        .loading-screen.show {
+            display: flex;
+        }
+        .loading-content {
+            text-align: center;
+            color: #fff;
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #333;
+            border-top-color: #ff69b4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-    <!-- 채팅 앱 컨테이너 -->
     <div class="chat-container">
-        <!-- 헤더 -->
         <header class="chat-header">
             <div class="contact-info">
                 <div class="profile-pic">
-                    <img src="assets/images/yuna.svg" alt="윤아" class="avatar">
+                    <img src="https://via.placeholder.com/60x60/ff69b4/ffffff?text=윤아" alt="윤아" class="avatar">
                     <div class="online-indicator"></div>
                 </div>
                 <div class="contact-details">
@@ -25,18 +415,16 @@
                 </div>
             </div>
             <div class="header-actions">
-                <button id="settingsBtn" class="header-btn">⚙️</button>
+                <button id="settingsBtn" class="header-btn" onclick="showSettings()">⚙️</button>
             </div>
         </header>
 
-        <!-- 메시지 영역 -->
         <main class="messages-container" id="messagesContainer">
             <div class="message-day">
                 <span class="day-label">오늘</span>
             </div>
         </main>
 
-        <!-- 입력 영역 -->
         <footer class="input-container">
             <div class="input-wrapper">
                 <input type="text" id="messageInput" class="message-input" placeholder="메시지를 입력하세요..." disabled>
@@ -47,61 +435,14 @@
                 </button>
             </div>
         </footer>
-
-        <!-- 선택지 영역 -->
-        <div class="choices-overlay" id="choicesOverlay">
-            <div class="choices-container" id="choicesContainer">
-                <!-- 선택지들이 동적으로 추가됨 -->
-            </div>
-        </div>
-    </div>
-
-    <!-- 프로필 사진 변경 모달 -->
-    <div id="profileModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>📸 프로필 사진 변경</h2>
-                <button class="modal-close" id="closeProfileModal">✕</button>
-            </div>
-            <div class="modal-body">
-                <div class="profile-preview">
-                    <img id="profilePreview" src="assets/images/yuna.svg" alt="미리보기" class="preview-image">
-                    <p class="preview-label">현재 프로필</p>
-                </div>
-                
-                <div class="upload-section">
-                    <h3>새 사진 업로드</h3>
-                    <div class="upload-area" id="uploadArea">
-                        <input type="file" id="profileUpload" accept="image/*" class="file-input" hidden>
-                        <div class="upload-content">
-                            <span class="upload-icon">📷</span>
-                            <p>사진을 선택하거나 여기에 드래그하세요</p>
-                            <button class="upload-btn" id="selectPhotoBtn">사진 선택</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="preset-section">
-                    <h3>기본 이미지</h3>
-                    <div class="preset-grid">
-                        <img src="assets/images/yuna.svg" class="preset-img active" data-src="assets/images/yuna.svg" alt="윤아 기본">
-                    </div>
-                </div>
-
-                <div class="modal-actions">
-                    <button id="saveProfileBtn" class="save-btn" disabled>저장하기</button>
-                    <button id="resetProfileBtn" class="reset-btn">기본으로 되돌리기</button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- 설정 모달 -->
-    <div id="settingsModal" class="modal hidden">
+    <div id="settingsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>설정</h2>
-                <button class="modal-close" id="closeSettingsModal">✕</button>
+                <button class="modal-close" onclick="hideSettings()">✕</button>
             </div>
             <div class="modal-body">
                 <div class="setting-group">
@@ -116,62 +457,30 @@
                     </label>
                 </div>
                 
-                <!-- ✨ 개선된 AI 설정 섹션 ✨ -->
                 <div class="setting-group">
                     <h3>🤖 AI 설정</h3>
                     
-                    <div style="background: #1a1a1a; border-radius: 12px; padding: 20px; border: 1px solid #333; margin: 15px 0;">
-                        <h4 style="color: #fff; font-size: 16px; margin: 0 0 8px 0;">OpenAI API 키 설정</h4>
-                        <p style="color: #aaa; font-size: 13px; margin: 0 0 15px 0;">새로운 API 키를 입력하고 저장 버튼을 눌러주세요</p>
+                    <div class="api-section">
+                        <h4 class="api-title">OpenAI API 키 설정</h4>
+                        <p class="api-help">새로운 API 키를 입력하고 저장 버튼을 눌러주세요</p>
                         
-                        <input type="password" id="openaiApiKey" placeholder="sk-proj-... 또는 sk-... 형태의 키를 입력하세요" style="
-                            width: 100%;
-                            background: #222;
-                            border: 2px solid #444;
-                            border-radius: 10px;
-                            padding: 12px 16px;
-                            color: #fff;
-                            font-size: 14px;
-                            margin-bottom: 15px;
-                            box-sizing: border-box;
-                        ">
+                        <input type="password" id="openaiApiKey" class="api-input" placeholder="sk-proj-... 또는 sk-... 형태의 키를 입력하세요">
                         
-                        <div style="text-align: center; margin-bottom: 15px;">
-                            <button type="button" onclick="saveApiKey()" style="
-                                background: linear-gradient(135deg, #ff69b4, #ff1493);
-                                border: none;
-                                color: white;
-                                padding: 16px 32px;
-                                border-radius: 8px;
-                                font-size: 16px;
-                                font-weight: 600;
-                                cursor: pointer;
-                                margin-right: 10px;
-                                box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
-                                transition: all 0.2s ease;
-                            ">💾 저장하기</button>
-                            <button type="button" onclick="clearApiKey()" style="
-                                background: #666;
-                                border: none;
-                                color: white;
-                                padding: 12px 24px;
-                                border-radius: 8px;
-                                font-size: 14px;
-                                font-weight: 600;
-                                cursor: pointer;
-                            ">🗑️ 키 삭제</button>
+                        <div class="button-container">
+                            <button type="button" class="save-button" onclick="saveApiKey()">💾 저장하기</button>
+                            <button type="button" class="clear-button" onclick="clearApiKey()">🗑️ 키 삭제</button>
                         </div>
                         
-                        <div id="apiStatus" style="padding: 10px; background: #222; border-radius: 8px; margin-bottom: 15px;">
-                            <span id="apiStatusText" style="color: #ccc; font-size: 13px;">API 키 상태: 미설정</span>
+                        <div id="apiStatus" class="api-status">
+                            <span id="apiStatusText">API 키 상태: 미설정</span>
                         </div>
                         
-                        <div style="background: rgba(255, 105, 180, 0.05); border: 1px solid rgba(255, 105, 180, 0.2); border-radius: 8px; padding: 15px;">
-                            <p style="color: #ff69b4; font-size: 13px; font-weight: 600; margin: 0 0 10px 0;"><strong>💡 도움말:</strong></p>
-                            <ul style="margin: 0; padding-left: 20px; color: #ccc; font-size: 12px; line-height: 1.5;">
+                        <div class="api-help-box">
+                            <p><strong>💡 도움말:</strong></p>
+                            <ul>
                                 <li>OpenAI 계정에서 새 API 키를 발급받아 입력해주세요</li>
                                 <li>API 키는 브라우저에만 안전하게 저장됩니다</li>
-                                <li>키 발급: <a href="https://platform.openai.com/api-keys" target="_blank" style="color: #ff69b4;">platform.openai.com/api-keys</a></li>
+                                <li>키 발급: <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a></li>
                             </ul>
                         </div>
                     </div>
@@ -180,17 +489,6 @@
                         <input type="checkbox" id="aiMode">
                         <span>AI 대화 모드 활성화</span>
                     </label>
-                </div>
-                
-                <div class="setting-group">
-                    <h3>스토리 정보</h3>
-                    <div class="story-info">
-                        <p><strong>캐릭터:</strong> 윤아 (후배, 20세)</p>
-                        <p><strong>관계:</strong> 창용 오빠를 좋아하는 후배</p>
-                        <p><strong>상황:</strong> 어제 술 마신 후 기억이 가물가물한 상태</p>
-                        <p><strong>호감도:</strong> <span id="affectionLevel">75</span>%</p>
-                        <p><strong>친밀도:</strong> <span id="intimacyLevel">0</span>%</p>
-                    </div>
                 </div>
             </div>
         </div>
@@ -204,43 +502,89 @@
         </div>
     </div>
 
-    <!-- ✨ API 키 관리 함수 ✨ -->
     <script>
-    function saveApiKey() {
-        const apiKey = document.getElementById('openaiApiKey').value.trim();
-        if (apiKey && apiKey.startsWith('sk-')) {
-            localStorage.setItem('openai_api_key', apiKey);
-            document.getElementById('apiStatusText').textContent = 'API 키 상태: 저장됨 ✅';
-            alert('✅ API 키가 저장되었습니다! 페이지를 새로고침합니다.');
-            location.reload();
-        } else {
-            alert('❌ 올바른 API 키를 입력해주세요 (sk-로 시작)');
+        // 설정 모달 관리
+        function showSettings() {
+            console.log('⚙️ 설정 모달 열기');
+            document.getElementById('settingsModal').classList.add('show');
+            updateApiStatus();
         }
-    }
-    
-    function clearApiKey() {
-        if (confirm('저장된 API 키를 삭제하시겠습니까?')) {
-            localStorage.removeItem('openai_api_key');
-            document.getElementById('apiStatusText').textContent = 'API 키 상태: 미설정';
-            alert('API 키가 삭제되었습니다.');
+        
+        function hideSettings() {
+            console.log('❌ 설정 모달 닫기');
+            document.getElementById('settingsModal').classList.remove('show');
         }
-    }
-    
-    // 페이지 로드시 API 키 상태 확인
-    window.addEventListener('load', function() {
-        const savedKey = localStorage.getItem('openai_api_key');
-        if (savedKey) {
-            document.getElementById('apiStatusText').textContent = 'API 키 상태: 저장됨 ✅';
+        
+        // API 키 관리
+        function saveApiKey() {
+            console.log('💾 API 키 저장 시도');
+            const apiKey = document.getElementById('openaiApiKey').value.trim();
+            
+            if (!apiKey) {
+                alert('❌ API 키를 입력해주세요');
+                return;
+            }
+            
+            if (!apiKey.startsWith('sk-')) {
+                alert('❌ 올바른 API 키를 입력해주세요 (sk-로 시작)');
+                return;
+            }
+            
+            try {
+                localStorage.setItem('openai_api_key', apiKey);
+                updateApiStatus();
+                alert('✅ API 키가 저장되었습니다! 페이지를 새로고침합니다.');
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } catch (error) {
+                console.error('저장 오류:', error);
+                alert('❌ 저장에 실패했습니다. 다시 시도해주세요.');
+            }
         }
-    });
+        
+        function clearApiKey() {
+            if (confirm('저장된 API 키를 삭제하시겠습니까?')) {
+                localStorage.removeItem('openai_api_key');
+                updateApiStatus();
+                alert('API 키가 삭제되었습니다.');
+            }
+        }
+        
+        function updateApiStatus() {
+            const statusText = document.getElementById('apiStatusText');
+            const savedKey = localStorage.getItem('openai_api_key');
+            
+            if (savedKey) {
+                statusText.textContent = 'API 키 상태: 저장됨 ✅';
+                statusText.style.color = '#4ade80';
+            } else {
+                statusText.textContent = 'API 키 상태: 미설정';
+                statusText.style.color = '#ccc';
+            }
+        }
+        
+        // 페이지 로드시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📱 참빠 전용 특별버전 로드됨');
+            updateApiStatus();
+            
+            // 모달 바깥 클릭시 닫기
+            document.getElementById('settingsModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideSettings();
+                }
+            });
+            
+            // ESC 키로 모달 닫기
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.getElementById('settingsModal').classList.contains('show')) {
+                    hideSettings();
+                }
+            });
+            
+            console.log('🎯 설정 버튼을 클릭하고 API 키를 입력해보세요!');
+        });
     </script>
-
-    <!-- JavaScript -->
-    <script src="js/chat-config.js"></script>
-    <script src="js/ai-manager.js"></script>
-    <script src="js/profile-manager.js"></script>
-    <script src="js/chat-engine.js"></script>
-    <script src="js/chat-ui.js"></script>
-    <script src="js/chat-main.js"></script>
 </body>
 </html>
