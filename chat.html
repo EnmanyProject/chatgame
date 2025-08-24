@@ -115,68 +115,73 @@
                         <span>자동 진행 모드</span>
                     </label>
                 </div>
+                
+                <!-- ✨ 개선된 AI 설정 섹션 ✨ -->
                 <div class="setting-group">
                     <h3>🤖 AI 설정</h3>
                     
-                    <div class="api-key-section">
-                        <div class="api-key-header">
-                            <h4>OpenAI API 키 설정</h4>
-                            <p class="api-help-text">새로운 API 키를 입력하고 저장 버튼을 눌러주세요</p>
+                    <div style="background: #1a1a1a; border-radius: 12px; padding: 20px; border: 1px solid #333; margin: 15px 0;">
+                        <h4 style="color: #fff; font-size: 16px; margin: 0 0 8px 0;">OpenAI API 키 설정</h4>
+                        <p style="color: #aaa; font-size: 13px; margin: 0 0 15px 0;">새로운 API 키를 입력하고 저장 버튼을 눌러주세요</p>
+                        
+                        <input type="password" id="openaiApiKey" placeholder="sk-proj-... 또는 sk-... 형태의 키를 입력하세요" style="
+                            width: 100%;
+                            background: #222;
+                            border: 2px solid #444;
+                            border-radius: 10px;
+                            padding: 12px 16px;
+                            color: #fff;
+                            font-size: 14px;
+                            margin-bottom: 15px;
+                            box-sizing: border-box;
+                        ">
+                        
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <button type="button" onclick="saveApiKey()" style="
+                                background: linear-gradient(135deg, #ff69b4, #ff1493);
+                                border: none;
+                                color: white;
+                                padding: 16px 32px;
+                                border-radius: 8px;
+                                font-size: 16px;
+                                font-weight: 600;
+                                cursor: pointer;
+                                margin-right: 10px;
+                                box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+                                transition: all 0.2s ease;
+                            ">💾 저장하기</button>
+                            <button type="button" onclick="clearApiKey()" style="
+                                background: #666;
+                                border: none;
+                                color: white;
+                                padding: 12px 24px;
+                                border-radius: 8px;
+                                font-size: 14px;
+                                font-weight: 600;
+                                cursor: pointer;
+                            ">🗑️ 키 삭제</button>
                         </div>
                         
-                        <div class="api-key-input-group">
-                            <input type="password" id="openaiApiKey" placeholder="sk-proj-... 또는 sk-... 형태의 키를 입력하세요" class="api-key-input">
-                            <div style="display: flex; gap: 12px; justify-content: center;">
-                                <button type="button" id="saveApiKeyBtn" onclick="saveApiKey()" style="
-                                    background: linear-gradient(135deg, #ff69b4, #ff1493);
-                                    border: none;
-                                    color: white;
-                                    padding: 16px 32px;
-                                    border-radius: 8px;
-                                    font-size: 16px;
-                                    font-weight: 600;
-                                    cursor: pointer;
-                                    box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
-                                ">
-                                    💾 저장하기
-                                </button>
-                                <button type="button" id="clearApiKeyBtn" onclick="clearApiKey()" style="
-                                    background: #666;
-                                    border: none;
-                                    color: white;
-                                    padding: 12px 24px;
-                                    border-radius: 8px;
-                                    font-size: 14px;
-                                    font-weight: 600;
-                                    cursor: pointer;
-                                ">
-                                    🗑️ 키 삭제
-                                </button>
-                            </div>
+                        <div id="apiStatus" style="padding: 10px; background: #222; border-radius: 8px; margin-bottom: 15px;">
+                            <span id="apiStatusText" style="color: #ccc; font-size: 13px;">API 키 상태: 미설정</span>
                         </div>
                         
-                        <div class="api-status" id="apiStatus">
-                            <div class="status-indicator"></div>
-                            <span id="apiStatusText">API 키 상태: 미설정</span>
-                        </div>
-                        
-                        <div class="api-instructions">
-                            <p><strong>💡 도움말:</strong></p>
-                            <ul>
+                        <div style="background: rgba(255, 105, 180, 0.05); border: 1px solid rgba(255, 105, 180, 0.2); border-radius: 8px; padding: 15px;">
+                            <p style="color: #ff69b4; font-size: 13px; font-weight: 600; margin: 0 0 10px 0;"><strong>💡 도움말:</strong></p>
+                            <ul style="margin: 0; padding-left: 20px; color: #ccc; font-size: 12px; line-height: 1.5;">
                                 <li>OpenAI 계정에서 새 API 키를 발급받아 입력해주세요</li>
                                 <li>API 키는 브라우저에만 안전하게 저장됩니다</li>
-                                <li>키 발급: <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a></li>
+                                <li>키 발급: <a href="https://platform.openai.com/api-keys" target="_blank" style="color: #ff69b4;">platform.openai.com/api-keys</a></li>
                             </ul>
                         </div>
                     </div>
-                    
-                    <div class="divider"></div>
                     
                     <label class="setting-item">
                         <input type="checkbox" id="aiMode">
                         <span>AI 대화 모드 활성화</span>
                     </label>
                 </div>
+                
                 <div class="setting-group">
                     <h3>스토리 정보</h3>
                     <div class="story-info">
@@ -199,24 +204,35 @@
         </div>
     </div>
 
-    <!-- API 키 관리 함수 -->
+    <!-- ✨ API 키 관리 함수 ✨ -->
     <script>
     function saveApiKey() {
         const apiKey = document.getElementById('openaiApiKey').value.trim();
         if (apiKey && apiKey.startsWith('sk-')) {
             localStorage.setItem('openai_api_key', apiKey);
+            document.getElementById('apiStatusText').textContent = 'API 키 상태: 저장됨 ✅';
             alert('✅ API 키가 저장되었습니다! 페이지를 새로고침합니다.');
             location.reload();
         } else {
             alert('❌ 올바른 API 키를 입력해주세요 (sk-로 시작)');
         }
     }
+    
     function clearApiKey() {
         if (confirm('저장된 API 키를 삭제하시겠습니까?')) {
             localStorage.removeItem('openai_api_key');
+            document.getElementById('apiStatusText').textContent = 'API 키 상태: 미설정';
             alert('API 키가 삭제되었습니다.');
         }
     }
+    
+    // 페이지 로드시 API 키 상태 확인
+    window.addEventListener('load', function() {
+        const savedKey = localStorage.getItem('openai_api_key');
+        if (savedKey) {
+            document.getElementById('apiStatusText').textContent = 'API 키 상태: 저장됨 ✅';
+        }
+    });
     </script>
 
     <!-- JavaScript -->
