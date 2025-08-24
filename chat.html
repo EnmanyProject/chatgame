@@ -119,8 +119,15 @@
                     <h3>AI 설정</h3>
                     <label class="setting-item">
                         <span>OpenAI API 키</span>
-                        <input type="password" id="openaiApiKey" placeholder="sk-...">
+                        <div class="api-key-wrapper">
+                            <input type="password" id="openaiApiKey" placeholder="sk-...">
+                            <button type="button" id="saveApiKeyBtn" class="api-btn">저장</button>
+                            <button type="button" id="clearApiKeyBtn" class="api-btn secondary">삭제</button>
+                        </div>
                     </label>
+                    <div class="api-status" id="apiStatus">
+                        <span id="apiStatusText">API 키 상태: 미설정</span>
+                    </div>
                     <label class="setting-item">
                         <input type="checkbox" id="aiMode">
                         <span>AI 대화 모드</span>

@@ -532,6 +532,70 @@ body {
     color: #ff69b4;
 }
 
+/* API 키 설정 */
+.api-key-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+}
+
+.api-key-wrapper input[type="password"] {
+    flex: 1;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #fff;
+    font-size: 14px;
+}
+
+.api-btn {
+    background: #ff69b4;
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.api-btn:hover {
+    background: #ff1493;
+}
+
+.api-btn.secondary {
+    background: #666;
+}
+
+.api-btn.secondary:hover {
+    background: #777;
+}
+
+.api-status {
+    margin: 8px 0 15px 0;
+    padding: 8px 12px;
+    background: #222;
+    border-radius: 8px;
+    border-left: 3px solid #666;
+}
+
+.api-status.connected {
+    border-left-color: #4ade80;
+}
+
+.api-status.error {
+    border-left-color: #ef4444;
+}
+
+.api-status span {
+    color: #ccc;
+    font-size: 12px;
+}
+
 /* 로딩 화면 */
 .loading-screen {
     position: absolute;

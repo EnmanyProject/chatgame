@@ -46,6 +46,9 @@ class ChatApp {
             this.chatEngine = new ChatEngine();
             window.chatEngine = this.chatEngine;
 
+            // API 키 설정 이벤트 바인딩
+            this.setupApiKeyEvents();
+
             // 로딩 표시
             this.chatUI.showLoading();
 
@@ -208,6 +211,78 @@ class ChatApp {
             }
         } catch (error) {
             console.error('Failed to load settings:', error);
+        }
+    }
+
+    // API 키 설정 이벤트 바인딩
+    setupApiKeyEvents() {
+        const saveBtn = document.getElementById('saveApiKeyBtn');
+        const clearBtn = document.getElementById('clearApiKeyBtn');
+        const apiKeyInput = document.getElementById('openaiApiKey');
+        const apiStatus = document.getElementById('apiStatus');
+        const apiStatusText = document.getElementById('apiStatusText');
+
+        // 저장 버튼 이벤트
+        if (saveBtn && apiKeyInput) {
+            saveBtn.addEventListener('click', () => {
+                const apiKey = apiKeyInput.value.trim();
+                if (apiKey && apiKey.startsWith('sk-')) {
+                    if (this.chatEngine?.aiManager?.saveApiKey(apiKey)) {
+                        this.chatUI?.showNotification('API 키가 저장되었습니다! 🤖', 'success');
+                        this.updateApiKeyStatus();
+                        apiKeyInput.value = '';
+                    } else {
+                        this.chatUI?.showNotification('API 키 저장에 실패했습니다.', 'error');
+                    }
+                } else {
+                    this.chatUI?.showNotification('올바른 API 키를 입력해주세요 (sk-로 시작)', 'error');
+                }
+            });
+        }
+
+        // 삭제 버튼 이벤트
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                if (confirm('저장된 API 키를 삭제하시겠습니까?')) {
+                    this.chatEngine?.aiManager?.clearApiKey();
+                    this.chatUI?.showNotification('API 키가 삭제되었습니다.', 'info');
+                    this.updateApiKeyStatus();
+                }
+            });
+        }
+
+        // 초기 상태 업데이트
+        setTimeout(() => {
+            this.updateApiKeyStatus();
+        }, 2000);
+    }
+
+    // API 키 상태 업데이트
+    updateApiKeyStatus() {
+        const apiStatus = document.getElementById('apiStatus');
+        const apiStatusText = document.getElementById('apiStatusText');
+
+        if (apiStatus && apiStatusText && this.chatEngine?.aiManager) {
+            const status = this.chatEngine.aiManager.getApiKeyStatus();
+            
+            apiStatus.className = 'api-status';
+            
+            switch (status) {
+                case 'connected':
+                    apiStatus.classList.add('connected');
+                    apiStatusText.textContent = 'API 키 상태: 연결됨 ✅';
+                    break;
+                case 'not_connected':
+                    apiStatus.classList.add('error');
+                    apiStatusText.textContent = 'API 키 상태: 연결 실패 ❌';
+                    break;
+                case 'invalid_key':
+                    apiStatus.classList.add('error');
+                    apiStatusText.textContent = 'API 키 상태: 잘못된 키 형식 ⚠️';
+                    break;
+                default:
+                    apiStatusText.textContent = 'API 키 상태: 미설정 ⚪';
+            }
         }
     }
 

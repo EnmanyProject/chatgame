@@ -1,8 +1,8 @@
 // AI 연결 관리 시스템
 class AIManager {
     constructor() {
-        // OpenAI API 설정 (실제 키는 여기에 입력)
-        this.apiKey = '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';
+        // OpenAI API 설정 - 로컬 스토리지에서 불러오기
+        this.apiKey = this.getStoredApiKey();
         this.apiUrl = 'https://api.openai.com/v1/chat/completions';
         this.model = 'gpt-3.5-turbo';
         this.maxTokens = 150;
@@ -23,8 +23,9 @@ class AIManager {
         console.log('🤖 AI Manager initializing...');
         
         // API 키 검증
-        if (!this.apiKey || this.apiKey === 'YOUR_OPENAI_API_KEY_HERE') {
-            console.warn('⚠️ OpenAI API key not configured');
+        if (!this.apiKey) {
+            console.warn('⚠️ OpenAI API key not found. Please enter in settings.');
+            this.promptForApiKey();
             return false;
         }
         
@@ -272,15 +273,84 @@ ${this.getResponseGuideByAffection(affection)}
         return responseList[Math.floor(Math.random() * responseList.length)];
     }
 
-    // API 키 설정 (필요시)
+    // 로컬 스토리지에서 API 키 가져오기
+    getStoredApiKey() {
+        try {
+            const storedKey = localStorage.getItem('openai_api_key');
+            if (storedKey && storedKey !== 'null' && storedKey !== '') {
+                console.log('✅ API key loaded from storage');
+                return storedKey;
+            }
+        } catch (error) {
+            console.error('❌ Failed to load API key from storage:', error);
+        }
+        return null;
+    }
+
+    // API 키 저장
+    saveApiKey(apiKey) {
+        try {
+            if (apiKey && apiKey.trim() !== '') {
+                localStorage.setItem('openai_api_key', apiKey.trim());
+                this.apiKey = apiKey.trim();
+                console.log('✅ API key saved to storage');
+                this.testConnection();
+                return true;
+            }
+        } catch (error) {
+            console.error('❌ Failed to save API key:', error);
+        }
+        return false;
+    }
+
+    // API 키 입력 프롬프트
+    promptForApiKey() {
+        setTimeout(() => {
+            const apiKey = prompt('OpenAI API 키를 입력해주세요 (sk-로 시작):', '');
+            if (apiKey && apiKey.startsWith('sk-')) {
+                if (this.saveApiKey(apiKey)) {
+                    if (window.chatUI) {
+                        window.chatUI.showNotification('API 키가 저장되었습니다! 🤖', 'success');
+                    }
+                    // 페이지 새로고침하여 재연결
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                }
+            } else if (apiKey !== null) {
+                alert('올바른 OpenAI API 키를 입력해주세요.');
+            }
+        }, 1000);
+    }
+
+    // API 키 설정 (설정창에서 호출)
     setApiKey(apiKey) {
-        this.apiKey = apiKey;
-        this.testConnection();
+        return this.saveApiKey(apiKey);
+    }
+
+    // API 키 삭제
+    clearApiKey() {
+        try {
+            localStorage.removeItem('openai_api_key');
+            this.apiKey = null;
+            this.isConnected = false;
+            console.log('🗑️ API key cleared from storage');
+        } catch (error) {
+            console.error('❌ Failed to clear API key:', error);
+        }
     }
 
     // 연결 상태 확인
     isAIConnected() {
-        return this.isConnected && this.apiKey !== 'YOUR_OPENAI_API_KEY_HERE';
+        return this.isConnected && this.apiKey && this.apiKey.startsWith('sk-');
+    }
+
+    // 현재 API 키 상태 확인
+    getApiKeyStatus() {
+        if (!this.apiKey) return 'no_key';
+        if (!this.apiKey.startsWith('sk-')) return 'invalid_key';
+        if (this.isConnected) return 'connected';
+        return 'not_connected';
     }
 
     // 친밀도 가져오기
