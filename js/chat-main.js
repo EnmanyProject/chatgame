@@ -26,10 +26,20 @@ class ChatApp {
             window.chatUI = this.chatUI;
 
             // 프로필 매니저 초기화
+            console.log('🔍 Checking ProfileManager availability...');
+            console.log('- window.ProfileManager exists:', !!window.ProfileManager);
+            
             if (window.ProfileManager) {
-                this.profileManager = new window.ProfileManager();
-                window.profileManager = this.profileManager;
-                console.log('✅ Profile Manager initialized');
+                try {
+                    console.log('🚀 Creating ProfileManager instance...');
+                    this.profileManager = new window.ProfileManager();
+                    window.profileManager = this.profileManager;
+                    console.log('✅ Profile Manager initialized successfully');
+                } catch (error) {
+                    console.error('❌ Profile Manager initialization failed:', error);
+                }
+            } else {
+                console.error('❌ ProfileManager class not found! Check if profile-manager.js is loaded.');
             }
 
             // 엔진 초기화

@@ -1,13 +1,18 @@
 // 프로필 사진 관리 시스템
 class ProfileManager {
     constructor() {
+        console.log('📸 ProfileManager constructor called');
+        
         this.currentProfileSrc = 'assets/images/yuna.svg';
         this.defaultProfileSrc = 'assets/images/yuna.svg';
         this.tempProfileSrc = null;
         
+        console.log('🔧 Initializing ProfileManager components...');
         this.initializeElements();
         this.bindEvents();
         this.loadSavedProfile();
+        
+        console.log('🎉 ProfileManager fully initialized');
     }
 
     // DOM 요소 초기화
@@ -332,5 +337,21 @@ class ProfileManager {
 
 // 전역 객체로 등록
 if (typeof window !== 'undefined') {
+    console.log('📁 profile-manager.js file loaded');
     window.ProfileManager = ProfileManager;
+    console.log('🌐 ProfileManager class registered to window object');
+    
+    // 디버깅용 전역 함수
+    window.testProfileModal = function() {
+        console.log('🧪 Testing profile modal...');
+        if (window.profileManager) {
+            window.profileManager.openProfileModal();
+        } else {
+            console.error('❌ profileManager instance not found');
+        }
+    };
+    
+    console.log('🧪 Test function registered: window.testProfileModal()');
+} else {
+    console.error('❌ Window object not available');
 }
