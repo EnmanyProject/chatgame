@@ -116,21 +116,46 @@
                     </label>
                 </div>
                 <div class="setting-group">
-                    <h3>AI 설정</h3>
-                    <label class="setting-item">
-                        <span>OpenAI API 키</span>
-                        <div class="api-key-wrapper">
-                            <input type="password" id="openaiApiKey" placeholder="sk-...">
-                            <button type="button" id="saveApiKeyBtn" class="api-btn">저장</button>
-                            <button type="button" id="clearApiKeyBtn" class="api-btn secondary">삭제</button>
+                    <h3>🤖 AI 설정</h3>
+                    
+                    <div class="api-key-section">
+                        <div class="api-key-header">
+                            <h4>OpenAI API 키 설정</h4>
+                            <p class="api-help-text">새로운 API 키를 입력하고 저장 버튼을 눌러주세요</p>
                         </div>
-                    </label>
-                    <div class="api-status" id="apiStatus">
-                        <span id="apiStatusText">API 키 상태: 미설정</span>
+                        
+                        <div class="api-key-input-group">
+                            <input type="password" id="openaiApiKey" placeholder="sk-proj-... 또는 sk-... 형태의 키를 입력하세요" class="api-key-input">
+                            <div class="api-key-buttons">
+                                <button type="button" id="saveApiKeyBtn" class="api-btn primary">
+                                    💾 저장하기
+                                </button>
+                                <button type="button" id="clearApiKeyBtn" class="api-btn danger">
+                                    🗑️ 키 삭제
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="api-status" id="apiStatus">
+                            <div class="status-indicator"></div>
+                            <span id="apiStatusText">API 키 상태: 미설정</span>
+                        </div>
+                        
+                        <div class="api-instructions">
+                            <p><strong>💡 도움말:</strong></p>
+                            <ul>
+                                <li>OpenAI 계정에서 새 API 키를 발급받아 입력해주세요</li>
+                                <li>API 키는 브라우저에만 안전하게 저장됩니다</li>
+                                <li>키 발급: <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a></li>
+                            </ul>
+                        </div>
                     </div>
+                    
+                    <div class="divider"></div>
+                    
                     <label class="setting-item">
                         <input type="checkbox" id="aiMode">
-                        <span>AI 대화 모드</span>
+                        <span>AI 대화 모드 활성화</span>
                     </label>
                 </div>
                 <div class="setting-group">
