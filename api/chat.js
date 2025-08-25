@@ -14,7 +14,7 @@ const YUNA_PROMPT = `너는 윤아라는 20세 대학생 후배야. 창용 오�
 
 150자 이내로 자연스럽게 답변해줘.`;
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // CORS 헤더 설정
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
