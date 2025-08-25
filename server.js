@@ -48,7 +48,13 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'https://enmanyproject.github.io'}`);
-});
+// Vercel용 export
+module.exports = app;
+
+// 로컬 개발용
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'https://enmanyproject.github.io'}`);
+  });
+}
