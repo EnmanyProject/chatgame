@@ -1,11 +1,10 @@
 // AI 서버 통신 관리 시스템
 class AIManager {
     constructor() {
-        // 서버 API 설정
-        this.serverUrl = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000' 
-            : 'https://chatgame-production.up.railway.app';
-        this.apiUrl = `${this.serverUrl}/api/chat`;
+        // Netlify Functions API 설정
+        this.apiUrl = window.location.hostname === 'localhost' 
+            ? 'http://localhost:8888/.netlify/functions/chat'
+            : '/.netlify/functions/chat';
         
         // AI 연결 상태
         this.isConnected = false;
