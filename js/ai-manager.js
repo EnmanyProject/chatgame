@@ -29,17 +29,11 @@ class AIManager {
     // 서버 연결 테스트
     async testConnection() {
         try {
-            const response = await fetch(`${this.serverUrl}/health`);
-            
-            if (response.ok) {
-                this.isConnected = true;
-                console.log('✅ Server connection established');
-            } else {
-                console.error('❌ Server connection failed:', response.status);
-                this.isConnected = false;
-            }
+            // Netlify Functions는 별도의 health check 없이 바로 사용 가능
+            this.isConnected = true;
+            console.log('✅ Netlify Functions connection ready');
         } catch (error) {
-            console.error('❌ Server connection error:', error);
+            console.error('❌ Connection setup error:', error);
             this.isConnected = false;
         }
     }
@@ -201,9 +195,7 @@ class AIManager {
 
     // 서버 URL 설정 (개발/배포 환경에 따라)
     setServerUrl(url) {
-        this.serverUrl = url;
-        this.apiUrl = `${this.serverUrl}/api/chat`;
-        console.log('🔧 Server URL updated:', this.serverUrl);
+        console.log('🔧 Using Netlify Functions - URL setting not needed');
     }
 
     // 디버그 정보
@@ -213,7 +205,7 @@ class AIManager {
             processing: this.isProcessing,
             intimacy: this.intimacyLevel,
             historyLength: this.conversationHistory.length,
-            serverUrl: this.serverUrl
+            apiUrl: this.apiUrl
         };
     }
 }
