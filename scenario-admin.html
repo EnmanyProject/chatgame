@@ -246,6 +246,58 @@
         </div>
 
         <div class="admin-panel">
+            <!-- AI 설정 섹션 -->
+            <div class="panel-section">
+                <h2 class="section-title">
+                    🤖 AI 서버 관리
+                </h2>
+                <div class="form-group">
+                    <label for="adminPassword">관리자 비밀번호</label>
+                    <input type="password" id="adminPassword" placeholder="관리자 비밀번호를 입력하세요">
+                </div>
+                <button type="button" class="btn" onclick="connectToServer()">서버 연결</button>
+                
+                <div id="serverStatus" style="margin: 15px 0; padding: 10px; background: #333; border-radius: 8px; display: none;">
+                    <div class="status-text" id="serverStatusText">연결 상태 확인 중...</div>
+                </div>
+                
+                <div id="aiSettings" style="display: none;">
+                    <h3 style="color: #ff69b4; margin: 20px 0 10px 0;">AI 모델 설정</h3>
+                    <div class="form-group">
+                        <label for="aiModel">AI 모델</label>
+                        <select id="aiModel">
+                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            <option value="gpt-4">GPT-4</option>
+                            <option value="gpt-4-turbo-preview">GPT-4 Turbo Preview</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="aiTemperature">Temperature (0.0-2.0)</label>
+                        <input type="number" id="aiTemperature" min="0" max="2" step="0.1" value="0.8">
+                    </div>
+                    <div class="form-group">
+                        <label for="aiMaxTokens">최대 토큰 수</label>
+                        <input type="number" id="aiMaxTokens" min="10" max="1000" value="150">
+                    </div>
+                    <div class="form-group">
+                        <label for="aiSystemPrompt">시스템 프롬프트</label>
+                        <textarea id="aiSystemPrompt" rows="8" placeholder="AI 캐릭터 설정 프롬프트를 입력하세요..."></textarea>
+                    </div>
+                    <button type="button" class="btn" onclick="updateAISettings()">AI 설정 저장</button>
+                    
+                    <h3 style="color: #ff69b4; margin: 20px 0 10px 0;">서버 통계</h3>
+                    <div id="serverStats" style="background: #333; padding: 15px; border-radius: 8px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; color: #ccc;">
+                            <div>총 요청 수: <span id="totalRequests">-</span></div>
+                            <div>사용된 토큰: <span id="totalTokens">-</span></div>
+                            <div>고유 사용자: <span id="uniqueUsers">-</span></div>
+                            <div>가동 시간: <span id="uptime">-</span></div>
+                        </div>
+                        <button type="button" class="btn btn-secondary" onclick="refreshStats()" style="margin-top: 10px;">통계 새로고침</button>
+                    </div>
+                </div>
+            </div>
+            
             <!-- 메타데이터 섹션 -->
             <div class="panel-section">
                 <h2 class="section-title">
@@ -643,6 +695,144 @@
             URL.revokeObjectURL(url);
             
             updateStatus('시나리오 JSON 파일을 다운로드했습니다.');
+        }
+
+        // AI 서버 관리 기능
+        let serverUrl = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000' 
+            : 'https://your-server-domain.com';
+        
+        let adminPassword = '';
+        let serverConnected = false;
+        
+        // 서버 연결
+        async function connectToServer() {
+            const password = document.getElementById('adminPassword').value;
+            if (!password) {
+                alert('관리자 비밀번호를 입력해주세요.');
+                return;
+            }
+            
+            adminPassword = password;
+            document.getElementById('serverStatus').style.display = 'block';
+            document.getElementById('serverStatusText').textContent = '서버 연결 중...';
+            
+            try {
+                // 서버 상태 확인
+                const healthResponse = await fetch(`${serverUrl}/health`);
+                if (!healthResponse.ok) {
+                    throw new Error('Server not responding');
+                }
+                
+                // 관리자 인증 확인
+                const settingsResponse = await fetch(`${serverUrl}/api/admin/settings`, {
+                    headers: {
+                        'admin-password': adminPassword
+                    }
+                });
+                
+                if (!settingsResponse.ok) {
+                    throw new Error('Authentication failed');
+                }
+                
+                const data = await settingsResponse.json();
+                serverConnected = true;
+                
+                document.getElementById('serverStatusText').textContent = '✅ 서버 연결 성공!';
+                document.getElementById('aiSettings').style.display = 'block';
+                
+                // 현재 설정 로드
+                loadAISettings(data.settings);
+                loadServerStats(data.stats);
+                
+                updateStatus('AI 서버에 연결되었습니다.');
+                
+            } catch (error) {
+                document.getElementById('serverStatusText').textContent = '❌ 연결 실패: ' + error.message;
+                serverConnected = false;
+            }
+        }
+        
+        // AI 설정 로드
+        function loadAISettings(settings) {
+            document.getElementById('aiModel').value = settings.model || 'gpt-3.5-turbo';
+            document.getElementById('aiTemperature').value = settings.temperature || 0.8;
+            document.getElementById('aiMaxTokens').value = settings.max_tokens || 150;
+            document.getElementById('aiSystemPrompt').value = settings.system_prompt || '';
+        }
+        
+        // 서버 통계 로드
+        function loadServerStats(stats) {
+            document.getElementById('totalRequests').textContent = stats.totalRequests || 0;
+            document.getElementById('totalTokens').textContent = stats.totalTokensUsed || 0;
+            document.getElementById('uniqueUsers').textContent = stats.uniqueUsers || 0;
+            document.getElementById('uptime').textContent = stats.uptimeFormatted || '-';
+        }
+        
+        // AI 설정 업데이트
+        async function updateAISettings() {
+            if (!serverConnected) {
+                alert('먼저 서버에 연결해주세요.');
+                return;
+            }
+            
+            const settings = {
+                model: document.getElementById('aiModel').value,
+                temperature: parseFloat(document.getElementById('aiTemperature').value),
+                max_tokens: parseInt(document.getElementById('aiMaxTokens').value),
+                system_prompt: document.getElementById('aiSystemPrompt').value
+            };
+            
+            try {
+                const response = await fetch(`${serverUrl}/api/admin/settings`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'admin-password': adminPassword
+                    },
+                    body: JSON.stringify(settings)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to update settings');
+                }
+                
+                const data = await response.json();
+                updateStatus('AI 설정이 업데이트되었습니다.');
+                
+                // 알림 표시
+                alert('AI 설정이 성공적으로 저장되었습니다!');
+                
+            } catch (error) {
+                alert('설정 저장 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+        
+        // 통계 새로고침
+        async function refreshStats() {
+            if (!serverConnected) {
+                alert('먼저 서버에 연결해주세요.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${serverUrl}/api/admin/stats`, {
+                    headers: {
+                        'admin-password': adminPassword
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch stats');
+                }
+                
+                const data = await response.json();
+                loadServerStats(data.stats);
+                updateStatus('서버 통계를 새로고침했습니다.');
+                
+            } catch (error) {
+                alert('통계 로드 중 오류가 발생했습니다: ' + error.message);
+            }
         }
 
         // 메시지 편집 (간단한 구현)
