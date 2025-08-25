@@ -4,7 +4,7 @@ class AIManager {
         // 서버 API 설정
         this.serverUrl = window.location.hostname === 'localhost' 
             ? 'http://localhost:3000' 
-            : 'https://chatgame-theta.vercel.app';
+            : 'https://chatgame-production.up.railway.app';
         this.apiUrl = `${this.serverUrl}/api/chat`;
         
         // AI 연결 상태
