@@ -1,84 +1,124 @@
-# 💕 윤아와의 AI 채팅 게임
+# 🚀 윤아 채팅 게임 서버
 
-> AI 기반 대화형 연애 시뮬레이션 게임
+Node.js Express 기반의 AI 채팅 게임 백엔드 서버입니다.
 
-## 🎮 게임 소개
+## 🛠️ 설치 및 실행
 
-어제 술을 마신 후 기억이 가물가물한 상황에서 시작되는 후배 윤아와의 특별한 대화!
-OpenAI GPT를 활용해 실시간으로 반응하는 지능형 캐릭터와 자연스러운 대화를 나눠보세요.
-
-## ✨ 주요 기능
-
-### 🤖 AI 기반 대화
-- **OpenAI GPT-3.5** 를 활용한 자연스러운 대화
-- 사용자 입력에 따른 **개인화된 응답**
-- 캐릭터 페르소나 일관성 유지
-
-### 📊 감정 시스템
-- **호감도**: 선택지와 대화에 따라 변화하는 수치
-- **친밀도**: AI와의 대화 품질에 따라 증가하는 관계 깊이
-- **실시간 반응**: 감정 상태에 따른 이모티콘 반응 (ㅋㅋㅋㅋㅋ, ㅜㅜ 등)
-
-### 🎯 최적화된 대화 흐름
-- **토큰 효율성**: 선택지 3개 → 자유 입력 1개 패턴으로 AI 비용 최소화
-- **자연스러운 진행**: 선택 후 자동으로 이어지는 스토리 흐름
-- **모바일 최적화**: 채팅앱과 같은 직관적 인터페이스
-
-## 🎨 인터페이스 특징
-
-- 📱 **모바일 우선 디자인**: 400x800 폰 화면 비율
-- 🌙 **다크 테마**: 검은 배경과 핑크 포인트 컬러
-- 💬 **실시간 채팅**: 타이핑 인디케이터, 메시지 애니메이션
-- ⚙️ **설정 시스템**: 타이핑 속도, 호감도/친밀도 확인
-
-## 🚀 플레이 방법
-
-1. **게임 시작**: 윤아의 메시지로 시작되는 대화
-2. **선택지 응답**: 3번의 선택지로 기본적인 대화 진행
-3. **자유 대화**: 4번째마다 나타나는 입력창에서 자유롭게 대화
-4. **AI 반응**: 입력한 내용을 분석해 윤아가 실시간으로 반응
-5. **관계 발전**: 호감도와 친밀도를 높여 윤아와의 관계 발전
-
-## 🛠️ 기술 스택
-
-- **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
-- **AI**: OpenAI GPT-3.5-turbo API
-- **Hosting**: GitHub Pages
-- **Design**: Mobile-first responsive design
-
-## 🎲 게임 플로우
-
-```
-시작 → 선택지 3개 → 스토리 진행 → AI 입력창 → 
-윤아 반응 → 호감도/친밀도 변화 → 다음 사이클 반복
+### 1. 의존성 설치
+```bash
+cd server
+npm install
 ```
 
-## 📱 접속 방법
+### 2. 환경 변수 설정
+`.env` 파일을 생성하고 다음 내용을 입력하세요:
 
-**웹 브라우저**: 배포 후 링크 제공
+```env
+# OpenAI API 설정
+OPENAI_API_KEY=your_openai_api_key_here
 
-**모바일 권장**: 스마트폰에서 최적화된 경험 제공
+# 서버 설정
+PORT=3000
+NODE_ENV=production
 
-## 🎯 특별한 점
+# CORS 설정
+FRONTEND_URL=https://enmanyproject.github.io
 
-1. **실제 AI와 대화**: 미리 정해진 답변이 아닌 실시간 AI 생성 응답
-2. **감정 추적**: 대화 내용에 따라 변화하는 캐릭터 감정
-3. **한국어 최적화**: 자연스러운 한국어 대화와 이모티콘 사용
-4. **경제적 설계**: AI 토큰 사용량을 최소화한 효율적 시스템
+# 관리자 인증
+ADMIN_PASSWORD=your_secure_admin_password
 
-## 🎨 캐릭터 소개
+# AI 설정
+AI_MODEL=gpt-3.5-turbo
+AI_TEMPERATURE=0.8
+AI_MAX_TOKENS=150
+```
 
-### 윤아 (20세, 대학생 후배)
-- **성격**: 밝고 적극적, 순수하면서도 적극적
-- **관계**: 창용 오빠를 1년 넘게 좋아해온 후배
-- **특징**: 이모티콘을 자주 사용하며 솔직한 감정 표현
+### 3. 서버 실행
+```bash
+# 개발 모드 (nodemon 사용)
+npm run dev
 
-## ⚡ 시스템 요구사항
+# 프로덕션 모드
+npm start
+```
 
-- **브라우저**: Chrome, Safari, Firefox 등 모던 브라우저
-- **인터넷 연결**: AI 응답 생성을 위한 안정적인 인터넷 필요
-- **기기**: PC, 스마트폰, 태블릿 모두 지원
+## 📡 API 엔드포인트
 
----
+### 사용자 API
+- `POST /api/chat` - AI 채팅 메시지 생성
+- `GET /health` - 서버 상태 확인
 
-**💕 윤아와의 특별한 대화를 시작해보세요! 🎮**
+### 관리자 API (인증 필요)
+- `GET /api/admin/settings` - AI 설정 조회
+- `POST /api/admin/settings` - AI 설정 변경
+- `GET /api/admin/stats` - 서버 통계 조회
+- `POST /api/admin/reset-stats` - 통계 초기화
+
+## 🔐 보안 기능
+
+- **API 키 보안**: OpenAI API 키를 서버에서만 관리
+- **관리자 인증**: 관리 기능에 패스워드 기반 인증
+- **Rate Limiting**: DDoS 방지를 위한 요청 제한
+- **CORS 설정**: 허용된 도메인에서만 접근 가능
+- **Helmet**: 기본 보안 헤더 설정
+
+## 🌐 배포 옵션
+
+### 1. Heroku 배포
+```bash
+# Heroku CLI 설치 후
+heroku create your-app-name
+heroku config:set OPENAI_API_KEY=your_key_here
+heroku config:set ADMIN_PASSWORD=your_password
+heroku config:set FRONTEND_URL=https://enmanyproject.github.io
+git push heroku main
+```
+
+### 2. Vercel 배포
+```bash
+# Vercel CLI 설치 후
+vercel
+# 환경 변수를 Vercel 대시보드에서 설정
+```
+
+### 3. Railway 배포
+```bash
+# Railway CLI 설치 후
+railway login
+railway init
+railway up
+# 환경 변수를 Railway 대시보드에서 설정
+```
+
+## 📊 모니터링
+
+서버는 다음 메트릭을 추적합니다:
+- 총 API 요청 수
+- 사용된 토큰 수
+- 고유 사용자 수
+- 서버 가동 시간
+
+관리자 패널(`scenario-admin.html`)에서 확인할 수 있습니다.
+
+## 🔧 개발
+
+### 폴더 구조
+```
+server/
+├── routes/
+│   ├── api.js          # 사용자 API
+│   └── admin.js        # 관리자 API
+├── server.js           # 메인 서버 파일
+├── package.json        # 의존성 및 스크립트
+├── .env.example        # 환경 변수 예시
+└── README.md          # 이 파일
+```
+
+### 환경 변수
+- `OPENAI_API_KEY`: OpenAI API 키 (필수)
+- `PORT`: 서버 포트 (기본값: 3000)
+- `FRONTEND_URL`: 프론트엔드 URL (CORS용)
+- `ADMIN_PASSWORD`: 관리자 패스워드 (필수)
+- `AI_MODEL`: 사용할 AI 모델
+- `AI_TEMPERATURE`: AI 응답 창의성 (0.0-2.0)
+- `AI_MAX_TOKENS`: 최대 토큰 수
