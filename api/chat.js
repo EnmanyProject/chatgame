@@ -1,4 +1,4 @@
-import { OpenAI } from 'openai';
+const { OpenAI } = require('openai');
 
 // OpenAI 클라이언트 초기화
 const openai = new OpenAI({
@@ -24,7 +24,7 @@ const YUNA_SYSTEM_PROMPT = `너는 윤아라는 20세 대학생 후배야. 창�
 
 응답은 150자 이내로 간결하게 해줘.`;
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // CORS 설정
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
