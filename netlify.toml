@@ -1,13 +1,7 @@
 [build]
   functions = "netlify/functions"
   publish = "."
+  command = ""
 
 [build.environment]
   NODE_VERSION = "18"
-
-[[headers]]
-  for = "/api/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Headers = "Content-Type"
-    Access-Control-Allow-Methods = "POST, OPTIONS"
