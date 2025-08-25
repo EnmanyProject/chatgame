@@ -30,7 +30,7 @@ app.use('/api', require('./routes/api'));
 app.use('/api/admin', require('./routes/admin'));
 
 // 정적 파일 제공 (프론트엔드)
-app.use(express.static('../'));
+app.use(express.static('./'));
 
 // 기본 라우트
 app.get('/health', (req, res) => {
