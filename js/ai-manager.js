@@ -1,10 +1,10 @@
 // AI 서버 통신 관리 시스템
 class AIManager {
     constructor() {
-        // Netlify Functions API 설정
+        // Vercel API Routes 설정
         this.apiUrl = window.location.hostname === 'localhost' 
-            ? 'http://localhost:8888/.netlify/functions/chat'
-            : '/.netlify/functions/chat';
+            ? 'http://localhost:3000/api/chat'
+            : '/api/chat';
         
         // AI 연결 상태
         this.isConnected = false;
@@ -31,7 +31,7 @@ class AIManager {
         try {
             // Netlify Functions는 별도의 health check 없이 바로 사용 가능
             this.isConnected = true;
-            console.log('✅ Netlify Functions connection ready');
+            console.log('✅ Vercel API Routes connection ready');
         } catch (error) {
             console.error('❌ Connection setup error:', error);
             this.isConnected = false;
@@ -195,7 +195,7 @@ class AIManager {
 
     // 서버 URL 설정 (개발/배포 환경에 따라)
     setServerUrl(url) {
-        console.log('🔧 Using Netlify Functions - URL setting not needed');
+        console.log('🔧 Using Vercel API Routes - URL setting not needed');
     }
 
     // 디버그 정보

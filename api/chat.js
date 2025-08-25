@@ -14,51 +14,33 @@ const YUNA_PROMPT = `너는 윤아라는 20세 대학생 후배야. 창용 오�
 
 150자 이내로 자연스럽게 답변해줘.`;
 
-exports.handler = async (event, context) => {
+export default async function handler(req, res) {
   // CORS 헤더 설정
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  };
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
 
   // OPTIONS 요청 처리 (CORS preflight)
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: '',
-    };
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
   }
 
   // POST만 허용
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      headers,
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     // 요청 데이터 파싱
-    const { message, conversationHistory = [], userStats = {} } = JSON.parse(event.body);
+    const { message, conversationHistory = [], userStats = {} } = req.body;
 
     if (!message) {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ error: 'Message is required' }),
-      };
+      return res.status(400).json({ error: 'Message is required' });
     }
 
     // OpenAI API 키 확인
     if (!process.env.OPENAI_API_KEY) {
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({ error: 'Server configuration error' }),
-      };
+      return res.status(500).json({ error: 'Server configuration error' });
     }
 
     // 대화 히스토리 구성 (최근 6개만)
@@ -90,30 +72,22 @@ exports.handler = async (event, context) => {
     // 호감도 변화 계산
     const affectionChange = calculateAffectionChange(message);
 
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({
-        success: true,
-        response: aiResponse,
-        emotion: emotion,
-        affectionChange: affectionChange,
-      }),
-    };
+    return res.status(200).json({
+      success: true,
+      response: aiResponse,
+      emotion: emotion,
+      affectionChange: affectionChange,
+    });
 
   } catch (error) {
     console.error('Chat function error:', error);
     
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ 
-        error: 'AI 응답 생성에 실패했습니다.',
-        details: error.message
-      }),
-    };
+    return res.status(500).json({ 
+      error: 'AI 응답 생성에 실패했습니다.',
+      details: error.message
+    });
   }
-};
+}
 
 // 감정 분석 함수
 function analyzeEmotion(text) {
