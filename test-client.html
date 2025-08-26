@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 테스트 클라이언트</title>
+    <style>
+        body { 
+            font-family: monospace; 
+            padding: 20px; 
+            background: #1a1a1a; 
+            color: #fff; 
+        }
+        .test-result { 
+            background: #333; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+            border-left: 4px solid #4CAF50;
+        }
+        .test-error { 
+            border-left-color: #f44336; 
+        }
+        button { 
+            background: #007AFF; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 5px;
+        }
+        button:hover { 
+            background: #0051D5; 
+        }
+        pre { 
+            background: #222; 
+            padding: 10px; 
+            border-radius: 3px; 
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 API 테스트 클라이언트</h1>
+    
+    <div>
+        <h2>Phase 1: 기본 인프라 테스트</h2>
+        <button onclick="testPing()">🏓 Ping API 테스트</button>
+        <button onclick="testOldApi()">📝 기존 API 테스트</button>
+        <button onclick="clearResults()">🗑️ 결과 지우기</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        async function testPing() {
+            const results = document.getElementById('results');
+            
+            try {
+                const response = await fetch('/api/ping');
+                const data = await response.json();
+                
+                results.innerHTML += `
+                    <div class="test-result">
+                        <h3>✅ Ping API 성공</h3>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                results.innerHTML += `
+                    <div class="test-result test-error">
+                        <h3>❌ Ping API 실패</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function testOldApi() {
+            const results = document.getElementById('results');
+            
+            try {
+                const response = await fetch('/api/hello');
+                const data = await response.json();
+                
+                results.innerHTML += `
+                    <div class="test-result">
+                        <h3>✅ 기존 Hello API 성공</h3>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                results.innerHTML += `
+                    <div class="test-result test-error">
+                        <h3>❌ 기존 Hello API 실패</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        // 페이지 로드시 자동 테스트
+        window.addEventListener('load', () => {
+            console.log('🚀 API 테스트 클라이언트 로드됨');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "yuna-chat-game",
+  "version": "1.0.0",
+  "description": "AI 채팅 게임",
+  "dependencies": {
+    "openai": "^4.20.1"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}

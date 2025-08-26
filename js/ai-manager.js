@@ -1,11 +1,10 @@
-// AI 연결 관리 시스템
+// AI 서버 통신 관리 시스템
 class AIManager {
     constructor() {
-        // OpenAI API 설정 - 로컬 스토리지에서 불러오기
-        this.apiKey = this.getStoredApiKey();
-        this.apiUrl = 'https://api.openai.com/v1/chat/completions';
-        this.model = 'gpt-3.5-turbo';
-        this.maxTokens = 150;
+        // Vercel API Routes 설정
+        this.apiUrl = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api/chat'
+            : '/api/chat';
         
         // AI 연결 상태
         this.isConnected = false;
@@ -22,98 +21,47 @@ class AIManager {
     async init() {
         console.log('🤖 AI Manager initializing...');
         
-        // API 키 검증
-        if (!this.apiKey) {
-            console.warn('⚠️ OpenAI API key not found. Please enter in settings.');
-            this.promptForApiKey();
-            return false;
-        }
-        
-        // 연결 테스트
+        // 서버 연결 테스트
         await this.testConnection();
         return true;
     }
 
-    // API 연결 테스트
+    // 로컬 AI 시뮬레이션 연결
     async testConnection() {
         try {
-            const response = await fetch(this.apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.apiKey}`
-                },
-                body: JSON.stringify({
-                    model: this.model,
-                    messages: [
-                        { role: 'user', content: 'test' }
-                    ],
-                    max_tokens: 10
-                })
-            });
-
-            if (response.ok) {
-                this.isConnected = true;
-                console.log('✅ AI connection established');
-            } else {
-                console.error('❌ AI connection failed:', response.status);
-                this.isConnected = false;
-            }
+            // 하드코딩된 응답으로 항상 연결 성공
+            this.isConnected = true;
+            console.log('✅ Local AI Simulation ready - No server required');
         } catch (error) {
-            console.error('❌ AI connection error:', error);
+            console.error('❌ Connection setup error:', error);
             this.isConnected = false;
         }
     }
 
-    // 사용자 입력을 기반으로 AI 응답 생성 (호감도 고려)
+    // 사용자 입력을 기반으로 AI 응답 생성 (하드코딩된 응답)
     async generateResponse(userInput, currentAffection, conversationContext, affectionLevel) {
-        if (!this.isConnected || this.isProcessing) {
+        if (this.isProcessing) {
             return this.getFallbackResponse(userInput, currentAffection);
         }
 
         this.isProcessing = true;
 
         try {
-            // 시스템 프롬프트 생성 (호감도 레벨 포함)
-            const systemPrompt = this.createSystemPrompt(currentAffection, conversationContext, affectionLevel);
+            // 시뮬레이션을 위한 약간의 지연
+            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
             
-            // 대화 히스토리 준비
-            const messages = [
-                { role: 'system', content: systemPrompt },
-                ...this.getRecentConversation(),
-                { role: 'user', content: userInput }
-            ];
-
-            const response = await fetch(this.apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.apiKey}`
-                },
-                body: JSON.stringify({
-                    model: this.model,
-                    messages: messages,
-                    max_tokens: this.maxTokens,
-                    temperature: 0.8,
-                    frequency_penalty: 0.3,
-                    presence_penalty: 0.3
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`API Error: ${response.status}`);
-            }
-
-            const data = await response.json();
-            const aiResponse = data.choices[0].message.content.trim();
+            const aiResponse = this.getSmartResponse(userInput, currentAffection);
             
             // 대화 히스토리에 추가
             this.addToHistory(userInput, aiResponse);
             
-            // 친밀도 업데이트
-            this.updateIntimacy(userInput, aiResponse);
+            // 친밀도 변화 시뮬레이션
+            const intimacyChange = this.calculateIntimacyChange(userInput);
+            this.intimacyLevel = Math.min(100, Math.max(0, this.intimacyLevel + intimacyChange));
             
             console.log('🤖 AI Response:', aiResponse);
+            console.log('💕 Intimacy Level:', this.intimacyLevel);
+            
             return aiResponse;
 
         } catch (error) {
@@ -122,36 +70,6 @@ class AIManager {
         } finally {
             this.isProcessing = false;
         }
-    }
-
-    // 시스템 프롬프트 생성 (호감도 상세 레벨 포함)
-    createSystemPrompt(affection, context, affectionLevel) {
-        const intimacyLevel = this.getIntimacyLevel();
-        
-        return `당신은 20세 대학생 후배 "윤아"입니다. 창용 오빠를 1년 넘게 좋아해왔고, 어제 고백했습니다.
-
-현재 감정 상태:
-- 호감도: ${affection}% - ${affectionLevel || this.getAffectionLevel(affection)}
-- 친밀도: ${this.intimacyLevel}% (${intimacyLevel})
-- 대화 상황: ${context}
-
-성격과 말투:
-- 밝고 적극적이며 솔직한 성격
-- 창용 오빠를 진심으로 사랑함
-- 감정 표현이 풍부하고 자연스러움
-- 상황에 맞는 이모티콘 적극 사용
-
-호감도별 반응 가이드:
-${this.getResponseGuideByAffection(affection)}
-
-응답 제약:
-1. 30-60자 이내의 자연스러운 한 문장
-2. 현재 호감도 레벨에 맞는 감정 표현
-3. 상황에 맞는 적절한 이모티콘 1-2개 사용
-4. 창용 오빠에 대한 일관된 애정 표현 유지
-5. 대화를 자연스럽게 이어갈 수 있는 응답
-
-중요: 호감도 ${affection}%에 맞게 ${affectionLevel}의 감정으로 반응하세요.`;
     }
 
     // 최근 대화 히스토리 가져오기
@@ -172,24 +90,94 @@ ${this.getResponseGuideByAffection(affection)}
         }
     }
 
-    // 친밀도 업데이트
-    updateIntimacy(userInput, aiResponse) {
-        // 긍정적 키워드 체크
-        const positiveWords = ['좋아', '사랑', '예뻐', '고마워', '행복', '기뻐'];
-        const negativeWords = ['싫어', '별로', '화나', '짜증'];
+    // 키워드 기반 스마트 응답 생성
+    getSmartResponse(userInput, affection) {
+        const input = userInput.toLowerCase();
+        
+        // 키워드별 응답 패턴
+        const responsePatterns = {
+            greetings: {
+                keywords: ['안녕', '하이', '헬로', '좋은', '아침', '저녁'],
+                responses: [
+                    '안녕하세요! 창용 오빠 ㅎㅎ 오늘 하루 어떠셨어요?',
+                    '오빠! 안녕하세요~ 보고 싶었어요 💕',
+                    '헤이~ 창용 오빠! 오늘도 멋있으시네요 ㅋㅋ'
+                ]
+            },
+            compliments: {
+                keywords: ['예쁘', '좋아', '사랑', '최고', '멋있', '잘생'],
+                responses: [
+                    '오빠가 그렇게 말해주시니까 너무 기뻐요! ㅜㅜ 정말이에요?',
+                    'ㅋㅋㅋ 창용 오빠도 정말 멋있어요! 💕',
+                    '에헤헤~ 오빠 때문에 기분이 너무 좋아져요 ㅎㅎ',
+                    '오빠만 그렇게 생각해주시면 돼요 💕 고마워요!'
+                ]
+            },
+            questions: {
+                keywords: ['뭐해', '뭐하', '어떻', '어디', '언제', '왜', '누구'],
+                responses: [
+                    '지금은 오빠 생각하면서 공부하고 있었어요 ㅎㅎ',
+                    '오빠랑 얘기하는 게 제일 재밌어요! ㅋㅋ',
+                    '음... 비밀이에요~ 궁금하면 더 자주 연락해요 💕',
+                    '오빠는 지금 뭐하고 계세요? 저도 궁금해요!'
+                ]
+            },
+            memory: {
+                keywords: ['기억', '어제', '전에', '그때', '예전'],
+                responses: [
+                    '어제 오빠랑 있었던 일 정말 기억에 남아요! ㅎㅎ',
+                    '오빠는 기억 안 나세요? ㅜㅜ 저는 다 기억하고 있는데...',
+                    '그때 정말 재밌었잖아요~ 또 그런 시간 가져요! 💕',
+                    '오빠랑의 추억들은 다 소중해요 ㅋㅋ'
+                ]
+            },
+            food: {
+                keywords: ['먹', '배고', '음식', '밥', '커피', '카페'],
+                responses: [
+                    '오빠 배고프세요? 맛있는 거 같이 먹어요! ㅎㅎ',
+                    '저도 배고파요~ 오빠가 사주시는 거죠? ㅋㅋ',
+                    '카페 가고 싶어요! 오빠랑 같이 가면 더 맛있을 것 같아요 💕',
+                    '오빠는 뭘 좋아하세요? 저도 그거 좋아해요! ㅎㅎ'
+                ]
+            },
+            negative: {
+                keywords: ['싫어', '안해', '그만', '귀찮', '화나', '짜증'],
+                responses: [
+                    'ㅜㅜ 왜요... 제가 뭔가 잘못했나요?',
+                    '오빠... 화내지 마세요 ㅠㅠ',
+                    '미안해요... 앞으로 더 잘할게요!',
+                    '오빠 기분이 안 좋으신가봐요? 괜찮아질 거예요!'
+                ]
+            }
+        };
 
-        const hasPositive = positiveWords.some(word => userInput.includes(word));
-        const hasNegative = negativeWords.some(word => userInput.includes(word));
-
-        if (hasPositive && !hasNegative) {
-            this.intimacyLevel = Math.min(100, this.intimacyLevel + 3);
-        } else if (hasNegative && !hasPositive) {
-            this.intimacyLevel = Math.max(0, this.intimacyLevel - 2);
-        } else {
-            this.intimacyLevel = Math.min(100, this.intimacyLevel + 1);
+        // 키워드 매칭으로 카테고리 찾기
+        for (const [category, data] of Object.entries(responsePatterns)) {
+            if (data.keywords.some(keyword => input.includes(keyword))) {
+                const responses = data.responses;
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
         }
 
-        console.log(`💕 Intimacy updated: ${this.intimacyLevel}%`);
+        // 호감도에 따른 기본 응답
+        return this.getFallbackResponse(userInput, affection);
+    }
+
+    // 친밀도 변화 계산
+    calculateIntimacyChange(userInput) {
+        const input = userInput.toLowerCase();
+        const positiveWords = ['좋아', '예쁘', '사랑', '고마워', '최고', '멋있'];
+        const negativeWords = ['싫어', '귀찮', '그만', '화나'];
+        
+        let change = 0;
+        positiveWords.forEach(word => {
+            if (input.includes(word)) change += 2;
+        });
+        negativeWords.forEach(word => {
+            if (input.includes(word)) change -= 3;
+        });
+        
+        return change;
     }
 
     // 호감도 레벨 텍스트
@@ -201,41 +189,6 @@ ${this.getResponseGuideByAffection(affection)}
         return '매우 낮음';
     }
 
-    // 호감도별 상세 반응 가이드
-    getResponseGuideByAffection(affection) {
-        if (affection >= 90) {
-            return `- 매우 열정적이고 적극적으로 반응
-- "ㅋㅋㅋㅋㅋ", "와아아", "정말?!" 등 강한 감정 표현
-- 💕💕, 🥰, 😍 등 사랑 이모티콘 적극 사용
-- 창용 오빠에 대한 직접적인 애정 표현
-- 예시: "ㅋㅋㅋㅋㅋ 창용 오빠 정말 최고예요! 💕💕"`;
-        } else if (affection >= 80) {
-            return `- 기쁘고 애정적으로 반응
-- "ㅎㅎㅎ", "그렇구나", "기뻐요" 등 긍정적 표현
-- 💕, 😊, 😘 등 기쁜 이모티콘 사용
-- 자연스러운 애정 표현
-- 예시: "ㅎㅎㅎ 그렇게 말해주시니 너무 기뻐요 💕"`;
-        } else if (affection >= 60) {
-            return `- 친근하고 밝게 반응
-- "ㅎㅎ", "그래요", "맞아요" 등 친근한 표현
-- 😊, ㅎㅎ, 🙂 등 밝은 이모티콘 사용
-- 적당한 거리감 유지
-- 예시: "ㅎㅎ 창용 오빠 말씀이 맞네요 😊"`;
-        } else if (affection >= 40) {
-            return `- 조금 어색하지만 예의바르게 반응
-- "음..", "그렇네요", "아.." 등 중성적 표현
-- 😅, 🤔, 😐 등 어색한 이모티콘 사용
-- 거리감을 두는 느낌
-- 예시: "음.. 그렇게 생각하시는군요 😅"`;
-        } else {
-            return `- 실망하거나 서운해하며 반응
-- "ㅜㅜ", "아..", "그런가요.." 등 아쉬운 표현
-- 😢, ㅜㅜ, 😞 등 슬픈 이모티콘 사용
-- 상처받은 느낌 표현
-- 예시: "ㅜㅜ 그렇게 생각하시는 거였군요..."`;
-        }
-    }
-
     // 친밀도 레벨 텍스트
     getIntimacyLevel() {
         if (this.intimacyLevel >= 80) return '매우 친밀';
@@ -245,23 +198,29 @@ ${this.getResponseGuideByAffection(affection)}
         return '매우 어색';
     }
 
-    // AI 연결 실패시 폴백 응답
+    // 기본 응답 (호감도별)
     getFallbackResponse(userInput, affection) {
         const responses = {
             high: [
-                'ㅋㅋㅋㅋㅋ 창용 오빠 정말 💕',
-                '오빠가 그렇게 말해주니까 너무 기뻐요 ㅎㅎ',
-                '진짜요?? 저도 오빠가 너무 좋아요 💕💕'
+                '오빠~ 저랑 더 많은 얘기해요! 너무 좋아요 💕',
+                'ㅋㅋㅋ 창용 오빠 정말! 항상 재밌는 말씀을 하시네요~',
+                '오빠와 함께 있으면 시간 가는 줄 모르겠어요 ㅎㅎ',
+                '진짜요?? 저도 오빠 생각을 항상 하고 있어요 💕💕',
+                '오빠만 있으면 뭐든 다 좋아요! ㅎㅎ'
             ],
             medium: [
-                'ㅎㅎ 그렇게 생각해주시는군요',
-                '오빠 말씀 감사해요 😊',
-                '그런 말 들으니까 기분 좋네요 ㅎㅎ'
+                'ㅎㅎ 그렇게 생각해주시는군요~',
+                '오빠 말씀 듣고 있으면 재밌어요 😊',
+                '그런 말 들으니까 기분 좋네요 ㅎㅎ',
+                '오빠는 항상 특별한 말씀을 하시네요!',
+                '음... 더 얘기해주세요! 궁금해요 ㅋㅋ'
             ],
             low: [
-                'ㅜㅜ 그렇게 생각하시는군요',
-                '아... 그런가요? 😅',
-                '음... 알겠어요 ㅠㅠ'
+                'ㅜㅜ 그렇게 생각하시는군요...',
+                '아... 그런가요? 😅 제가 부족한가봐요',
+                '음... 알겠어요 ㅠㅠ',
+                '오빠가 그렇게 말씀하시니까... 그런 것 같아요',
+                '다음에는 더 잘할게요... ㅜㅜ'
             ]
         };
 
@@ -273,82 +232,13 @@ ${this.getResponseGuideByAffection(affection)}
         return responseList[Math.floor(Math.random() * responseList.length)];
     }
 
-    // 로컬 스토리지에서 API 키 가져오기
-    getStoredApiKey() {
-        try {
-            const storedKey = localStorage.getItem('openai_api_key');
-            if (storedKey && storedKey !== 'null' && storedKey !== '') {
-                console.log('✅ API key loaded from storage');
-                return storedKey;
-            }
-        } catch (error) {
-            console.error('❌ Failed to load API key from storage:', error);
-        }
-        return null;
-    }
-
-    // API 키 저장
-    saveApiKey(apiKey) {
-        try {
-            if (apiKey && apiKey.trim() !== '') {
-                localStorage.setItem('openai_api_key', apiKey.trim());
-                this.apiKey = apiKey.trim();
-                console.log('✅ API key saved to storage');
-                this.testConnection();
-                return true;
-            }
-        } catch (error) {
-            console.error('❌ Failed to save API key:', error);
-        }
-        return false;
-    }
-
-    // API 키 입력 프롬프트
-    promptForApiKey() {
-        setTimeout(() => {
-            const apiKey = prompt('OpenAI API 키를 입력해주세요 (sk-로 시작):', '');
-            if (apiKey && apiKey.startsWith('sk-')) {
-                if (this.saveApiKey(apiKey)) {
-                    if (window.chatUI) {
-                        window.chatUI.showNotification('API 키가 저장되었습니다! 🤖', 'success');
-                    }
-                    // 페이지 새로고침하여 재연결
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1500);
-                }
-            } else if (apiKey !== null) {
-                alert('올바른 OpenAI API 키를 입력해주세요.');
-            }
-        }, 1000);
-    }
-
-    // API 키 설정 (설정창에서 호출)
-    setApiKey(apiKey) {
-        return this.saveApiKey(apiKey);
-    }
-
-    // API 키 삭제
-    clearApiKey() {
-        try {
-            localStorage.removeItem('openai_api_key');
-            this.apiKey = null;
-            this.isConnected = false;
-            console.log('🗑️ API key cleared from storage');
-        } catch (error) {
-            console.error('❌ Failed to clear API key:', error);
-        }
-    }
-
     // 연결 상태 확인
     isAIConnected() {
-        return this.isConnected && this.apiKey && this.apiKey.startsWith('sk-');
+        return this.isConnected;
     }
 
-    // 현재 API 키 상태 확인
-    getApiKeyStatus() {
-        if (!this.apiKey) return 'no_key';
-        if (!this.apiKey.startsWith('sk-')) return 'invalid_key';
+    // 서버 상태 확인
+    getConnectionStatus() {
         if (this.isConnected) return 'connected';
         return 'not_connected';
     }
@@ -365,6 +255,11 @@ ${this.getResponseGuideByAffection(affection)}
         console.log('🔄 Conversation history cleared');
     }
 
+    // 서버 URL 설정 (개발/배포 환경에 따라)
+    setServerUrl(url) {
+        console.log('🔧 Using Vercel API Routes - URL setting not needed');
+    }
+
     // 디버그 정보
     getDebugInfo() {
         return {
@@ -372,7 +267,7 @@ ${this.getResponseGuideByAffection(affection)}
             processing: this.isProcessing,
             intimacy: this.intimacyLevel,
             historyLength: this.conversationHistory.length,
-            model: this.model
+            apiUrl: this.apiUrl
         };
     }
 }
