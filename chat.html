@@ -580,6 +580,31 @@
             }
         }
         
+        // 호감도 및 친밀도 관리
+        let currentAffection = 75;
+        let currentIntimacy = 0;
+        
+        function getCurrentAffection() {
+            return currentAffection;
+        }
+        
+        function getCurrentIntimacy() {
+            return currentIntimacy;
+        }
+        
+        function updateAffection(newAffection) {
+            currentAffection = Math.max(0, Math.min(100, newAffection));
+            console.log(`💕 호감도 업데이트: ${currentAffection}`);
+        }
+        
+        function showLoading() {
+            document.getElementById('loadingScreen').classList.add('show');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingScreen').classList.remove('show');
+        }
+        
         // 페이지 로드시 초기화
         document.addEventListener('DOMContentLoaded', function() {
             console.log('📱 참빠 전용 특별버전 로드됨');
@@ -629,7 +654,7 @@
             console.log('💬 기본 채팅 시스템 활성화됨');
         }
         
-        function sendMessage() {
+        async function sendMessage() {
             const messageInput = document.getElementById('messageInput');
             const message = messageInput.value.trim();
             
@@ -639,21 +664,58 @@
             addMessage('user', message);
             messageInput.value = '';
             
-            // 윤아 응답 (1초 후)
-            setTimeout(() => {
-                const response = getBasicResponse(message);
-                addMessage('yuna', response);
-            }, 1000);
+            // 로딩 표시
+            showLoading();
+            
+            try {
+                // 서버 API 호출
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        affection: getCurrentAffection(),
+                        intimacy: getCurrentIntimacy()
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // 윤아 응답 표시 (감정 포함)
+                    addMessage('yuna', data.response, data.emotion_display);
+                    updateAffection(data.character.current_affection);
+                } else {
+                    // 에러시 기본 응답
+                    const fallbackResponse = getBasicResponse(message);
+                    addMessage('yuna', fallbackResponse);
+                }
+            } catch (error) {
+                console.error('Chat API Error:', error);
+                // 네트워크 에러시 기본 응답
+                const fallbackResponse = getBasicResponse(message);
+                addMessage('yuna', fallbackResponse);
+            } finally {
+                hideLoading();
+            }
         }
         
-        function addMessage(sender, text) {
+        function addMessage(sender, text, emotion = null) {
             const messagesContainer = document.getElementById('messagesContainer');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender === 'user' ? 'sent' : 'received'}`;
             
             const bubbleDiv = document.createElement('div');
             bubbleDiv.className = 'message-bubble';
-            bubbleDiv.textContent = text;
+            
+            // 감정 표시가 있으면 추가
+            if (emotion && sender !== 'user') {
+                bubbleDiv.innerHTML = `<span style="margin-right: 8px;">${emotion}</span>${text}`;
+            } else {
+                bubbleDiv.textContent = text;
+            }
             
             // 메시지 버블 스타일
             if (sender === 'user') {
