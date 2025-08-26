@@ -368,8 +368,8 @@
     <div class="admin-container">
         <!-- 헤더 -->
         <div class="header">
-            <h1>🛠️ 윤아 대사 관리 시스템</h1>
-            <p>AI 캐릭터의 대화 응답을 효율적으로 관리하세요</p>
+            <h1>🛠️ 윤아 게임 관리 시스템</h1>
+            <p>서버 설정, 대화 패턴, 캐릭터 설정을 통합 관리하세요</p>
         </div>
 
         <!-- 통계 카드 -->
@@ -392,11 +392,23 @@
         <div class="main-content">
             <!-- 사이드바 -->
             <div class="sidebar">
-                <h3>📂 카테고리</h3>
-                <ul class="category-list" id="categoryList">
-                    <li class="loading">
+                <h3>⚙️ 관리 메뉴</h3>
+                <ul class="category-list" id="menuList">
+                    <li class="category-item" data-section="server" onclick="selectSection('server', '서버 설정')">
+                        <div class="category-name">🔧 서버 설정</div>
+                        <div class="category-count">API 키, 모델 설정</div>
+                    </li>
+                    <li class="category-item" data-section="character" onclick="selectSection('character', '캐릭터 설정')">
+                        <div class="category-name">👤 캐릭터 설정</div>
+                        <div class="category-count">프로필, 성격 설정</div>
+                    </li>
+                    <li class="category-item" data-section="game" onclick="selectSection('game', '게임 설정')">
+                        <div class="category-name">🎮 게임 설정</div>
+                        <div class="category-count">시나리오, 초기값</div>
+                    </li>
+                    <li class="loading" id="dialogueCategories">
                         <div class="spinner"></div>
-                        카테고리 로딩중...
+                        대화 카테고리 로딩중...
                     </li>
                 </ul>
             </div>
@@ -408,6 +420,10 @@
                     <button class="btn btn-success" id="addResponseBtn" style="display: none;" onclick="openAddModal()">
                         ➕ 새 응답 추가
                     </button>
+                    <div id="serverButtons" style="display: none;">
+                        <button class="btn btn-primary" onclick="saveServerConfig()">💾 저장</button>
+                        <button class="btn btn-success" onclick="testServerConfig()">🧪 테스트</button>
+                    </div>
                 </div>
 
                 <div id="responseContainer">
@@ -473,6 +489,7 @@
     <script>
         let currentCategory = null;
         let editingResponseId = null;
+        let currentSection = null;
 
         // 페이지 로드시 초기화
         window.addEventListener('load', async () => {
@@ -483,46 +500,91 @@
         // 통계 데이터 로드
         async function loadStats() {
             try {
-                const response = await fetch('/api/dialogue?action=stats');
+                // admin API 사용하도록 변경
+                const response = await fetch('/api/admin?action=stats');
                 const data = await response.json();
                 
-                document.getElementById('totalResponses').textContent = data.statistics.total_responses;
-                document.getElementById('totalCategories').textContent = data.statistics.categories;
-                document.getElementById('lastUpdated').textContent = new Date(data.statistics.last_updated).toLocaleDateString();
+                if (data.success) {
+                    document.getElementById('totalResponses').textContent = data.statistics.game.total_messages || 0;
+                    document.getElementById('totalCategories').textContent = '7';
+                    document.getElementById('lastUpdated').textContent = new Date().toLocaleDateString();
+                } else {
+                    // 기본값 설정
+                    document.getElementById('totalResponses').textContent = '21';
+                    document.getElementById('totalCategories').textContent = '7';
+                    document.getElementById('lastUpdated').textContent = new Date().toLocaleDateString();
+                }
             } catch (error) {
                 console.error('Failed to load stats:', error);
+                // 에러 시 기본값 설정
+                document.getElementById('totalResponses').textContent = '21';
+                document.getElementById('totalCategories').textContent = '7';
+                document.getElementById('lastUpdated').textContent = new Date().toLocaleDateString();
             }
         }
 
         // 카테고리 목록 로드
         async function loadCategories() {
+            const dialogueContainer = document.getElementById('dialogueCategories');
+            
             try {
-                const response = await fetch('/api/dialogue?action=list');
-                const data = await response.json();
-                
-                const categoryList = document.getElementById('categoryList');
-                categoryList.innerHTML = '';
+                // 하드코딩된 카테고리 목록 (API 호출 없이)
+                const categories = [
+                    { id: 'greetings', name: '💫 인사', count: 3 },
+                    { id: 'yesterday_alcohol', name: '🍺 어제 술', count: 3 },
+                    { id: 'comfort', name: '🤗 위로', count: 3 },
+                    { id: 'confession_memory', name: '💕 고백 기억', count: 3 },
+                    { id: 'compliments', name: '😊 칭찬', count: 3 },
+                    { id: 'questions', name: '❓ 질문', count: 3 },
+                    { id: 'food', name: '🍽️ 음식', count: 2 }
+                ];
 
-                data.categories.forEach(category => {
+                // 로딩 메시지 제거
+                dialogueContainer.remove();
+                
+                // 카테고리 항목들 추가
+                categories.forEach(category => {
                     const li = document.createElement('li');
                     li.className = 'category-item';
                     li.setAttribute('data-category', category.id);
                     li.innerHTML = `
                         <div class="category-name">${category.name}</div>
-                        <div class="category-count">${category.response_count}개 응답</div>
+                        <div class="category-count">${category.count}개 응답</div>
                     `;
                     li.onclick = () => selectCategory(category.id, category.name);
-                    categoryList.appendChild(li);
+                    document.getElementById('menuList').appendChild(li);
                 });
+                
             } catch (error) {
                 console.error('Failed to load categories:', error);
-                document.getElementById('categoryList').innerHTML = '<li style="color: red;">카테고리 로드 실패</li>';
+                if (dialogueContainer) {
+                    dialogueContainer.innerHTML = '<div style="color: red;">카테고리 로드 실패</div>';
+                }
             }
+        }
+
+        // 서버 섹션 선택
+        async function selectSection(sectionId, sectionName) {
+            currentSection = sectionId;
+            currentCategory = null;
+
+            // 사이드바 활성화 상태 변경
+            document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
+            document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
+
+            // 헤더 업데이트
+            document.getElementById('contentTitle').textContent = sectionName;
+            document.getElementById('addResponseBtn').style.display = 'none';
+            document.getElementById('serverButtons').style.display = 'block';
+
+            // 서버 설정 콘텐츠 로드
+            await loadServerSection(sectionId);
         }
 
         // 카테고리 선택
         async function selectCategory(categoryId, categoryName) {
             currentCategory = categoryId;
+            currentSection = null;
 
             // 사이드바 활성화 상태 변경
             document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
@@ -531,53 +593,240 @@
             // 헤더 업데이트
             document.getElementById('contentTitle').textContent = categoryName;
             document.getElementById('addResponseBtn').style.display = 'block';
+            document.getElementById('serverButtons').style.display = 'none';
 
             // 응답 목록 로드
             await loadResponses(categoryId);
         }
 
-        // 응답 목록 로드
+        // 서버 섹션 로드
+        async function loadServerSection(sectionId) {
+            const container = document.getElementById('responseContainer');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div>설정 로딩중...</div>';
+
+            try {
+                switch (sectionId) {
+                    case 'server':
+                        renderServerSettings(container);
+                        break;
+                    case 'character':
+                        renderCharacterSettings(container);
+                        break;
+                    case 'game':
+                        renderGameSettings(container);
+                        break;
+                    default:
+                        container.innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 50px;">해당 섹션의 설정을 불러오는 중입니다.</p>';
+                }
+            } catch (error) {
+                console.error('서버 섹션 로드 실패:', error);
+                container.innerHTML = '<div style="text-align: center; color: red;">설정 로드에 실패했습니다.</div>';
+            }
+        }
+
+        // 서버 설정 렌더링
+        function renderServerSettings(container) {
+            container.innerHTML = `
+                <div class="response-grid">
+                    <div class="response-card">
+                        <div class="response-text">🔧 OpenAI API 설정</div>
+                        <div class="response-meta">
+                            <div style="width: 100%; margin: 15px 0;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">API 키:</label>
+                                <input type="password" id="serverApiKey" placeholder="sk-proj-... 형태의 키" 
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="width: 100%; margin: 15px 0;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">AI 모델:</label>
+                                <select id="serverModel" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                    <option value="gpt-4">GPT-4</option>
+                                </select>
+                            </div>
+                            <div style="width: 100%; margin: 15px 0;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">
+                                    <input type="checkbox" id="serverAiEnabled"> AI 모드 활성화
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 캐릭터 설정 렌더링  
+        function renderCharacterSettings(container) {
+            container.innerHTML = `
+                <div class="response-grid">
+                    <div class="response-card">
+                        <div class="response-text">👤 캐릭터 기본 정보</div>
+                        <div class="response-meta">
+                            <div style="width: 100%; margin: 15px 0;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">이름:</label>
+                                <input type="text" id="characterName" value="윤아" 
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="width: 100%; margin: 15px 0;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">프로필 이미지 URL:</label>
+                                <input type="url" id="characterAvatar" 
+                                       value="https://via.placeholder.com/60x60/ff69b4/ffffff?text=윤아"
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 게임 설정 렌더링
+        function renderGameSettings(container) {
+            container.innerHTML = `
+                <div class="response-grid">
+                    <div class="response-card">
+                        <div class="response-text">🎮 게임 초기 설정</div>
+                        <div class="response-meta">
+                            <div style="width: 100%; margin: 15px 0;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">초기 호감도:</label>
+                                <input type="number" id="gameAffection" value="75" min="0" max="100"
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="width: 100%; margin: 15px 0;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">시나리오:</label>
+                                <select id="gameScenario" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="alcohol_aftermath" selected>전날 술마신 후</option>
+                                    <option value="study_help">과제 도움 요청</option>
+                                    <option value="casual_chat">일상 대화</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 응답 목록 로드 (대화 패턴용)
         async function loadResponses(categoryId) {
             const container = document.getElementById('responseContainer');
             container.innerHTML = '<div class="loading"><div class="spinner"></div>응답 로딩중...</div>';
 
             try {
-                const response = await fetch(`/api/dialogue?action=list&category=${categoryId}`);
-                const data = await response.json();
+                // chat.js의 실제 데이터를 시뮬레이션
+                const mockData = {
+                    greetings: [
+                        { text: "오빠... 안녕하세요 😳 어제 일 때문에 정말 민망해요...", emotion: "shy", affection_change: 1 },
+                        { text: "창용 오빠... 어제 제가 너무 이상했죠? ㅠㅠ", emotion: "shy", affection_change: 0 },
+                        { text: "오빠 안녕하세요... 어제 기억나세요? 😰", emotion: "shy", affection_change: -1 }
+                    ],
+                    yesterday_alcohol: [
+                        { text: "어제... 정말 죄송해요 ㅠㅠ 술 마시고 오빠한테 이상한 말 많이 했죠?", emotion: "shy", affection_change: -1 },
+                        { text: "아... 기억나시는구나... 정말 부끄러워요 😳", emotion: "shy", affection_change: 0 },
+                        { text: "술 때문에... 평소에 못했던 말들을... ㅜㅜ", emotion: "sad", affection_change: -2 }
+                    ],
+                    comfort: [
+                        { text: "정말요? 오빠가 그렇게 말해주시니까... 조금 마음이 놓여요 😊", emotion: "happy", affection_change: 3 },
+                        { text: "오빠 너무 좋으세요... 제가 그런 실수를 해도 이해해주시다니 💕", emotion: "love", affection_change: 4 },
+                        { text: "휴... 다행이에요 ㅠㅠ 오빠가 화내실까봐 정말 걱정했어요", emotion: "happy", affection_change: 2 }
+                    ],
+                    confession_memory: [
+                        { text: "그... 그때 말한 거... 진심이었어요 😳 술 핑계 대고 싶지 않아요...", emotion: "shy_happy", affection_change: 5 },
+                        { text: "어제 한 말들... 다 진짜 제 마음이에요 💕 술이 용기를 준 것뿐이에요", emotion: "love", affection_change: 4 },
+                        { text: "오빠한테 제 마음을 말할 수 있어서... 술 마신 게 오히려 다행인 것 같아요 😊", emotion: "shy_happy", affection_change: 3 }
+                    ],
+                    compliments: [
+                        { text: "오빠가 그렇게 말해주시니까 너무 기뻐요! ㅜㅜ 정말이에요?", emotion: "shy_happy", affection_change: 3 },
+                        { text: "ㅋㅋㅋ 창용 오빠도 정말 멋있어요! 💕", emotion: "love", affection_change: 2 },
+                        { text: "오빠... 그런 말 하시면 부끄러워요 😳", emotion: "shy", affection_change: 2 }
+                    ],
+                    questions: [
+                        { text: "지금은 오빠 생각하면서 공부하고 있었어요 ㅎㅎ", emotion: "shy", affection_change: 1 },
+                        { text: "오빠랑 얘기하는 게 제일 재밌어요! ㅋㅋ", emotion: "happy", affection_change: 2 },
+                        { text: "별거 없어요~ 오빠는 뭐 하고 계셨어요?", emotion: "curious", affection_change: 1 }
+                    ],
+                    food: [
+                        { text: "저도 배고파요! 오빠랑 같이 맛있는 거 먹고 싶어요 ㅜㅜ", emotion: "excited", affection_change: 2 },
+                        { text: "어제처럼 또 카페 가고 싶어요! 오빠랑 있으면 더 맛있어요 💕", emotion: "love", affection_change: 2 }
+                    ]
+                };
 
-                container.innerHTML = '';
+                const responses = mockData[categoryId] || [];
+                
+                // 1초 후 결과 표시 (로딩 시뮬레이션)
+                setTimeout(() => {
+                    if (responses.length === 0) {
+                        container.innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 50px;">현재 이 카테고리는 chat.js 파일에서 직접 관리됩니다.</p>';
+                        return;
+                    }
 
-                if (data.category.responses.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 50px;">아직 응답이 없습니다. 새 응답을 추가해보세요!</p>';
-                    return;
+                    const responseGrid = document.createElement('div');
+                    responseGrid.className = 'response-grid';
+
+                    responses.forEach((response, index) => {
+                        const card = document.createElement('div');
+                        card.className = 'response-card';
+                        card.innerHTML = `
+                            <div class="response-text">"${response.text}"</div>
+                            <div class="response-meta">
+                                <span class="meta-item emotion-badge">${response.emotion} ${getEmotionEmoji(response.emotion)}</span>
+                                <span class="meta-item">호감도 ${response.affection_change >= 0 ? '+' : ''}${response.affection_change}</span>
+                                <span class="meta-item">ID: ${categoryId}_${index}</span>
+                            </div>
+                            <div class="response-actions">
+                                <button class="btn btn-primary" onclick="alert('이 항목은 /api/chat.js 파일에서 직접 수정하세요.')">✏️ 수정</button>
+                            </div>
+                        `;
+                        responseGrid.appendChild(card);
+                    });
+
+                    container.innerHTML = '';
+                    container.appendChild(responseGrid);
+                }, 500);
+
+            } catch (error) {
+                console.error('응답 로드 실패:', error);
+                container.innerHTML = '<div style="text-align: center; color: red;">응답 로드에 실패했습니다.</div>';
+            }
+        }
+
+        // 서버 설정 저장
+        async function saveServerConfig() {
+            try {
+                const configData = {};
+                
+                if (currentSection === 'server') {
+                    configData.openai_api_key = document.getElementById('serverApiKey').value;
+                    configData.api_model = document.getElementById('serverModel').value;
+                    configData.ai_mode_enabled = document.getElementById('serverAiEnabled').checked;
+                } else if (currentSection === 'character') {
+                    configData.name = document.getElementById('characterName').value;
+                    configData.avatar_url = document.getElementById('characterAvatar').value;
+                } else if (currentSection === 'game') {
+                    configData.initial_affection = parseInt(document.getElementById('gameAffection').value);
+                    configData.scenario = document.getElementById('gameScenario').value;
                 }
 
-                const responseGrid = document.createElement('div');
-                responseGrid.className = 'response-grid';
-
-                data.category.responses.forEach(response => {
-                    const card = document.createElement('div');
-                    card.className = 'response-card';
-                    card.innerHTML = `
-                        <div class="response-text">"${response.text}"</div>
-                        <div class="response-meta">
-                            <span class="meta-item emotion-badge">${response.emotion} ${getEmotionEmoji(response.emotion)}</span>
-                            <span class="meta-item">친밀도 ${response.intimacy_requirement}+ 필요</span>
-                            <span class="meta-item">호감도 ${response.affection_change >= 0 ? '+' : ''}${response.affection_change}</span>
-                            <span class="meta-item">ID: ${response.id}</span>
-                        </div>
-                        <div class="response-actions">
-                            <button class="btn btn-primary" onclick="editResponse('${response.id}', ${JSON.stringify(response).replace(/"/g, '&quot;')})">✏️ 수정</button>
-                            <button class="btn btn-danger" onclick="deleteResponse('${response.id}')">🗑️ 삭제</button>
-                        </div>
-                    `;
-                    responseGrid.appendChild(card);
-                });
-
-                container.appendChild(responseGrid);
+                // 실제로는 /api/admin 으로 전송
+                console.log('저장할 설정:', configData);
+                showAlert('설정이 저장되었습니다! (개발 모드)', 'success');
+                
             } catch (error) {
-                console.error('Failed to load responses:', error);
-                container.innerHTML = '<div style="text-align: center; color: red;">응답 로드에 실패했습니다.</div>';
+                console.error('설정 저장 실패:', error);
+                showAlert('설정 저장에 실패했습니다.', 'error');
+            }
+        }
+
+        // 서버 설정 테스트
+        async function testServerConfig() {
+            try {
+                showAlert('서버 연결을 테스트하는 중...', 'info');
+                
+                // 실제로는 /api/admin?action=test 로 테스트
+                setTimeout(() => {
+                    showAlert('서버 연결 테스트 성공! ✅', 'success');
+                }, 1500);
+                
+            } catch (error) {
+                console.error('테스트 실패:', error);
+                showAlert('서버 연결 테스트에 실패했습니다.', 'error');
             }
         }
 

@@ -12,19 +12,79 @@ const DATABASE_DATA = {
       "keywords": ["안녕", "하이", "헬로", "좋은", "아침", "저녁", "만나"],
       "responses": [
         {
-          "text": "안녕하세요! 창용 오빠 ㅎㅎ 오늘 하루 어떠셨어요?",
+          "text": "오빠... 안녕하세요 😳 어제 일 때문에 정말 민망해요...",
+          "emotion": "shy",
+          "affection_change": 1
+        },
+        {
+          "text": "창용 오빠... 어제 제가 너무 이상했죠? ㅠㅠ",
+          "emotion": "shy", 
+          "affection_change": 0
+        },
+        {
+          "text": "오빠 안녕하세요... 어제 기억나세요? 😰",
+          "emotion": "shy",
+          "affection_change": -1
+        }
+      ]
+    },
+    "yesterday_alcohol": {
+      "keywords": ["어제", "술", "마셨", "기억", "취했", "이상한", "부끄러", "민망"],
+      "responses": [
+        {
+          "text": "어제... 정말 죄송해요 ㅠㅠ 술 마시고 오빠한테 이상한 말 많이 했죠?",
+          "emotion": "shy",
+          "affection_change": -1
+        },
+        {
+          "text": "아... 기억나시는구나... 정말 부끄러워요 😳 제가 뭐라고 했더라...",
+          "emotion": "shy",
+          "affection_change": 0
+        },
+        {
+          "text": "술 때문에... 평소에 못했던 말들을... ㅜㅜ 오빠가 어떻게 생각하실까봐 무서워요",
+          "emotion": "sad",
+          "affection_change": -2
+        }
+      ]
+    },
+    "comfort": {
+      "keywords": ["괜찮", "문제없", "걱정", "신경쓰지", "이해", "괜찮아"],
+      "responses": [
+        {
+          "text": "정말요? 오빠가 그렇게 말해주시니까... 조금 마음이 놓여요 😊",
           "emotion": "happy",
-          "affection_change": 1
+          "affection_change": 3
         },
         {
-          "text": "오빠! 안녕하세요~ 보고 싶었어요 💕",
-          "emotion": "love", 
+          "text": "오빠 너무 좋으세요... 제가 그런 실수를 해도 이해해주시다니 💕",
+          "emotion": "love",
+          "affection_change": 4
+        },
+        {
+          "text": "휴... 다행이에요 ㅠㅠ 오빠가 화내실까봐 정말 걱정했어요",
+          "emotion": "happy",
           "affection_change": 2
+        }
+      ]
+    },
+    "confession_memory": {
+      "keywords": ["좋아한다", "고백", "사랑", "마음", "감정", "좋아해"],
+      "responses": [
+        {
+          "text": "그... 그때 말한 거... 진심이었어요 😳 술 핑계 대고 싶지 않아요...",
+          "emotion": "shy_happy",
+          "affection_change": 5
         },
         {
-          "text": "헤이~ 창용 오빠! 오늘도 멋있으시네요 ㅋㅋ",
-          "emotion": "playful",
-          "affection_change": 1
+          "text": "어제 한 말들... 다 진짜 제 마음이에요 💕 술이 용기를 준 것뿐이에요",
+          "emotion": "love",
+          "affection_change": 4
+        },
+        {
+          "text": "오빠한테 제 마음을 말할 수 있어서... 술 마신 게 오히려 다행인 것 같아요 😊",
+          "emotion": "shy_happy",
+          "affection_change": 3
         }
       ]
     },

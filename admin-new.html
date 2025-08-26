@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛠️ 윤아 게임 관리 시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.2em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #3498db;
+            display: block;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            height: fit-content;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .sidebar h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+
+        .category-list {
+            list-style: none;
+        }
+
+        .category-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .category-item:hover {
+            background: #e3f2fd;
+            border-left-color: #2196f3;
+        }
+
+        .category-item.active {
+            background: #e8f5e8;
+            border-left-color: #4caf50;
+        }
+
+        .category-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .category-count {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .content-area {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 20px;
+        }
+
+        .content-title {
+            color: #2c3e50;
+            font-size: 1.8em;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #27ae60;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .form-section h4 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #7f8c8d;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .server-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .status-online {
+            width: 12px;
+            height: 12px;
+            background: #2ecc71;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 헤더 -->
+        <div class="header">
+            <h1>🛠️ 윤아 게임 관리 시스템</h1>
+            <p>서버 설정, 대화 패턴, 캐릭터 설정을 통합 관리하세요</p>
+        </div>
+
+        <!-- 통계 카드 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-number" id="serverStatus">●</span>
+                <div class="stat-label">서버 상태</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="totalMessages">-</span>
+                <div class="stat-label">총 메시지 수</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="configSections">5</span>
+                <div class="stat-label">설정 섹션</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="lastUpdated">-</span>
+                <div class="stat-label">마지막 업데이트</div>
+            </div>
+        </div>
+
+        <!-- 메인 콘텐츠 -->
+        <div class="main-content">
+            <!-- 사이드바 -->
+            <div class="sidebar">
+                <h3>⚙️ 관리 메뉴</h3>
+                <ul class="category-list" id="menuList">
+                    <li class="category-item" data-section="server" onclick="selectSection('server', '서버 설정')">
+                        <div class="category-name">🔧 서버 설정</div>
+                        <div class="category-count">API 키, 모델 설정</div>
+                    </li>
+                    <li class="category-item" data-section="character" onclick="selectSection('character', '캐릭터 설정')">
+                        <div class="category-name">👤 캐릭터 설정</div>
+                        <div class="category-count">프로필, 성격 설정</div>
+                    </li>
+                    <li class="category-item" data-section="game" onclick="selectSection('game', '게임 설정')">
+                        <div class="category-name">🎮 게임 설정</div>
+                        <div class="category-count">시나리오, 초기값</div>
+                    </li>
+                    <li class="category-item" data-section="dialogue" onclick="selectSection('dialogue', '대화 패턴')">
+                        <div class="category-name">💬 대화 패턴</div>
+                        <div class="category-count">응답 데이터베이스</div>
+                    </li>
+                    <li class="category-item" data-section="statistics" onclick="selectSection('statistics', '서버 통계')">
+                        <div class="category-name">📊 서버 통계</div>
+                        <div class="category-count">사용량, 성능</div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 콘텐츠 영역 -->
+            <div class="content-area">
+                <div class="content-header">
+                    <h2 class="content-title" id="contentTitle">관리 메뉴를 선택하세요</h2>
+                    <div id="actionButtons" style="display: none;">
+                        <button class="btn btn-primary" id="saveBtn" onclick="saveCurrentSection()">💾 저장</button>
+                        <button class="btn btn-success" id="testBtn" onclick="testConnection()">🧪 테스트</button>
+                    </div>
+                </div>
+
+                <div id="mainContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        관리 시스템을 불러오는 중...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSection = null;
+        let currentConfig = {};
+
+        // 페이지 로드시 초기화
+        window.addEventListener('load', async () => {
+            await loadServerStats();
+            await loadInitialData();
+            console.log('🛠️ 윤아 게임 관리 시스템 로드됨');
+        });
+
+        // 서버 통계 로드
+        async function loadServerStats() {
+            try {
+                const response = await fetch('/api/admin?action=stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('serverStatus').textContent = '🟢';
+                    document.getElementById('serverStatus').style.color = '#2ecc71';
+                    document.getElementById('totalMessages').textContent = data.statistics.game.total_messages || 0;
+                    document.getElementById('lastUpdated').textContent = new Date().toLocaleDateString();
+                }
+            } catch (error) {
+                console.error('서버 통계 로드 실패:', error);
+                document.getElementById('serverStatus').textContent = '🔴';
+                document.getElementById('serverStatus').style.color = '#e74c3c';
+            }
+        }
+
+        // 초기 데이터 로드
+        async function loadInitialData() {
+            try {
+                const response = await fetch('/api/admin');
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentConfig = data.config;
+                }
+            } catch (error) {
+                console.error('초기 데이터 로드 실패:', error);
+            }
+        }
+
+        // 섹션 선택
+        async function selectSection(sectionId, sectionName) {
+            currentSection = sectionId;
+
+            // 사이드바 활성화 상태 변경
+            document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
+            document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
+
+            // 헤더 업데이트
+            document.getElementById('contentTitle').textContent = sectionName;
+            document.getElementById('actionButtons').style.display = 'block';
+
+            // 섹션 콘텐츠 로드
+            await loadSectionContent(sectionId);
+        }
+
+        // 섹션 콘텐츠 로드
+        async function loadSectionContent(sectionId) {
+            const container = document.getElementById('mainContainer');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div>설정을 불러오는 중...</div>';
+
+            try {
+                switch (sectionId) {
+                    case 'server':
+                        renderServerSettings();
+                        break;
+                    case 'character':
+                        renderCharacterSettings();
+                        break;
+                    case 'game':
+                        renderGameSettings();
+                        break;
+                    case 'dialogue':
+                        await renderDialogueSettings();
+                        break;
+                    case 'statistics':
+                        await renderStatistics();
+                        break;
+                    default:
+                        container.innerHTML = '<p>알 수 없는 섹션입니다.</p>';
+                }
+            } catch (error) {
+                console.error('섹션 콘텐츠 로드 실패:', error);
+                container.innerHTML = '<div class="alert alert-error">콘텐츠 로드에 실패했습니다.</div>';
+            }
+        }
+
+        // 서버 설정 렌더링
+        function renderServerSettings() {
+            const container = document.getElementById('mainContainer');
+            const config = currentConfig.server || {};
+            
+            container.innerHTML = `
+                <div class="server-status">
+                    <div class="status-online"></div>
+                    <strong>서버 상태: 온라인</strong>
+                </div>
+                
+                <div class="form-section">
+                    <h4>🤖 OpenAI API 설정</h4>
+                    <div class="form-group">
+                        <label class="form-label">API 키</label>
+                        <input type="password" class="form-input" id="openaiApiKey" 
+                               value="${config.openai_api_key || ''}" 
+                               placeholder="sk-proj-... 또는 sk-... 형태의 키를 입력하세요">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">AI 모델</label>
+                        <select class="form-select" id="apiModel">
+                            <option value="gpt-3.5-turbo" ${config.api_model === 'gpt-3.5-turbo' ? 'selected' : ''}>GPT-3.5 Turbo</option>
+                            <option value="gpt-4" ${config.api_model === 'gpt-4' ? 'selected' : ''}>GPT-4</option>
+                            <option value="gpt-4-turbo" ${config.api_model === 'gpt-4-turbo' ? 'selected' : ''}>GPT-4 Turbo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">최대 토큰 수</label>
+                        <input type="number" class="form-input" id="maxTokens" 
+                               value="${config.max_tokens || 150}" min="50" max="1000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Temperature (창의성)</label>
+                        <input type="range" class="form-input" id="temperature" 
+                               value="${config.temperature || 0.8}" min="0" max="2" step="0.1">
+                        <span id="temperatureValue">${config.temperature || 0.8}</span>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4>⚙️ 서버 설정</h4>
+                    <div class="form-group">
+                        <label class="form-label">시스템 프롬프트</label>
+                        <textarea class="form-textarea" id="systemPrompt" rows="4">${config.system_prompt || ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="aiModeEnabled" ${config.ai_mode_enabled ? 'checked' : ''}> 
+                            AI 모드 활성화
+                        </label>
+                    </div>
+                </div>
+            `;
+
+            // Temperature 슬라이더 이벤트
+            document.getElementById('temperature').addEventListener('input', function() {
+                document.getElementById('temperatureValue').textContent = this.value;
+            });
+        }
+
+        // 캐릭터 설정 렌더링
+        function renderCharacterSettings() {
+            const container = document.getElementById('mainContainer');
+            const config = currentConfig.character || {};
+            
+            container.innerHTML = `
+                <div class="form-section">
+                    <h4>👤 기본 정보</h4>
+                    <div class="form-group">
+                        <label class="form-label">이름</label>
+                        <input type="text" class="form-input" id="characterName" 
+                               value="${config.name || ''}" placeholder="캐릭터 이름">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">나이</label>
+                        <input type="number" class="form-input" id="characterAge" 
+                               value="${config.age || ''}" min="18" max="30">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">관계 설정</label>
+                        <input type="text" class="form-input" id="relationship" 
+                               value="${config.relationship || ''}" placeholder="플레이어와의 관계">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4>🎭 성격 설정</h4>
+                    <div class="form-group">
+                        <label class="form-label">성격 특성 (쉼표로 구분)</label>
+                        <input type="text" class="form-input" id="personality" 
+                               value="${config.personality ? config.personality.join(', ') : ''}" 
+                               placeholder="예: 밝음, 적극적, 순수함">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">말하기 스타일 (쉼표로 구분)</label>
+                        <input type="text" class="form-input" id="speechStyle" 
+                               value="${config.speech_style ? config.speech_style.join(', ') : ''}" 
+                               placeholder="예: 반말, 친근하고 애교스럽게">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4>🖼️ 프로필 설정</h4>
+                    <div class="form-group">
+                        <label class="form-label">프로필 이미지 URL</label>
+                        <input type="url" class="form-input" id="avatarUrl" 
+                               value="${config.avatar_url || ''}" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">상태 메시지</label>
+                        <input type="text" class="form-input" id="statusMessage" 
+                               value="${config.status_message || ''}" placeholder="예: 방금 전">
+                    </div>
+                </div>
+            `;
+        }
+
+        // 게임 설정 렌더링
+        function renderGameSettings() {
+            const container = document.getElementById('mainContainer');
+            const config = currentConfig.game || {};
+            
+            container.innerHTML = `
+                <div class="form-section">
+                    <h4>🎮 게임 초기 설정</h4>
+                    <div class="form-group">
+                        <label class="form-label">초기 호감도</label>
+                        <input type="number" class="form-input" id="initialAffection" 
+                               value="${config.initial_affection || 75}" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">초기 친밀도</label>
+                        <input type="number" class="form-input" id="initialIntimacy" 
+                               value="${config.initial_intimacy || 0}" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">최대 호감도</label>
+                        <input type="number" class="form-input" id="maxAffection" 
+                               value="${config.max_affection || 100}" min="50" max="200">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4>📝 시나리오 설정</h4>
+                    <div class="form-group">
+                        <label class="form-label">현재 시나리오</label>
+                        <select class="form-select" id="gameScenario">
+                            <option value="alcohol_aftermath" ${config.scenario === 'alcohol_aftermath' ? 'selected' : ''}>전날 술마신 후</option>
+                            <option value="casual_chat" ${config.scenario === 'casual_chat' ? 'selected' : ''}>일상 대화</option>
+                            <option value="study_help" ${config.scenario === 'study_help' ? 'selected' : ''}>과제 도움 요청</option>
+                            <option value="confession" ${config.scenario === 'confession' ? 'selected' : ''}>고백 상황</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">초기 메시지들 (줄바꿈으로 구분)</label>
+                        <textarea class="form-textarea" id="initialMessages" rows="6">${config.initial_messages ? config.initial_messages.join('\n') : ''}</textarea>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 대화 패턴 설정 렌더링
+        async function renderDialogueSettings() {
+            const container = document.getElementById('mainContainer');
+            
+            container.innerHTML = `
+                <div class="form-section">
+                    <h4>💬 대화 패턴 관리</h4>
+                    <p>현재는 서버의 chat.js 파일에서 직접 관리됩니다.</p>
+                    <p>주요 대화 패턴:</p>
+                    <ul style="margin: 15px 0; padding-left: 20px;">
+                        <li><strong>인사:</strong> 안녕, 하이, 헬로</li>
+                        <li><strong>어제 술 관련:</strong> 어제, 술, 기억, 부끄러</li>
+                        <li><strong>위로:</strong> 괜찮, 이해, 신경쓰지</li>
+                        <li><strong>고백 기억:</strong> 좋아한다, 마음, 감정</li>
+                        <li><strong>칭찬:</strong> 예쁘, 좋아, 최고</li>
+                        <li><strong>질문:</strong> 뭐해, 어떻, 어디</li>
+                    </ul>
+                    <div class="alert alert-success">
+                        <strong>참고:</strong> 대화 패턴은 /api/chat.js 파일의 dialogue_patterns 객체에서 수정할 수 있습니다.
+                    </div>
+                </div>
+            `;
+        }
+
+        // 통계 렌더링
+        async function renderStatistics() {
+            const container = document.getElementById('mainContainer');
+            
+            try {
+                const response = await fetch('/api/admin?action=stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const stats = data.statistics;
+                    
+                    container.innerHTML = `
+                        <div class="form-section">
+                            <h4>🖥️ 서버 정보</h4>
+                            <p><strong>업타임:</strong> ${Math.floor(stats.server.uptime / 3600)}시간 ${Math.floor((stats.server.uptime % 3600) / 60)}분</p>
+                            <p><strong>플랫폼:</strong> ${stats.server.platform}</p>
+                            <p><strong>Node.js 버전:</strong> ${stats.server.node_version}</p>
+                            <p><strong>메모리 사용량:</strong> ${Math.round(stats.server.memory_usage.heapUsed / 1024 / 1024)}MB</p>
+                        </div>
+
+                        <div class="form-section">
+                            <h4>🔗 API 엔드포인트</h4>
+                            <p><strong>채팅 API:</strong> ${stats.api.chat_endpoint}</p>
+                            <p><strong>프로필 API:</strong> ${stats.api.profile_endpoint}</p>
+                            <p><strong>관리 API:</strong> ${stats.api.admin_endpoint}</p>
+                            <p><strong>테스트 API:</strong> ${stats.api.test_endpoint}</p>
+                        </div>
+
+                        <div class="form-section">
+                            <h4>📊 게임 통계</h4>
+                            <p><strong>총 대화 수:</strong> ${stats.game.total_conversations}</p>
+                            <p><strong>총 메시지 수:</strong> ${stats.game.total_messages}</p>
+                            <p><strong>마지막 업데이트:</strong> ${new Date(stats.game.last_updated).toLocaleString()}</p>
+                            <p><strong>버전:</strong> ${stats.game.version}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                container.innerHTML = '<div class="alert alert-error">통계 데이터 로드에 실패했습니다.</div>';
+            }
+        }
+
+        // 현재 섹션 저장
+        async function saveCurrentSection() {
+            if (!currentSection) {
+                showAlert('저장할 섹션이 선택되지 않았습니다.', 'error');
+                return;
+            }
+
+            try {
+                let updateData = {};
+                
+                switch (currentSection) {
+                    case 'server':
+                        updateData = {
+                            openai_api_key: document.getElementById('openaiApiKey').value,
+                            api_model: document.getElementById('apiModel').value,
+                            max_tokens: parseInt(document.getElementById('maxTokens').value),
+                            temperature: parseFloat(document.getElementById('temperature').value),
+                            system_prompt: document.getElementById('systemPrompt').value,
+                            ai_mode_enabled: document.getElementById('aiModeEnabled').checked
+                        };
+                        break;
+                    case 'character':
+                        updateData = {
+                            name: document.getElementById('characterName').value,
+                            age: parseInt(document.getElementById('characterAge').value),
+                            relationship: document.getElementById('relationship').value,
+                            personality: document.getElementById('personality').value.split(',').map(s => s.trim()),
+                            speech_style: document.getElementById('speechStyle').value.split(',').map(s => s.trim()),
+                            avatar_url: document.getElementById('avatarUrl').value,
+                            status_message: document.getElementById('statusMessage').value
+                        };
+                        break;
+                    case 'game':
+                        updateData = {
+                            initial_affection: parseInt(document.getElementById('initialAffection').value),
+                            initial_intimacy: parseInt(document.getElementById('initialIntimacy').value),
+                            max_affection: parseInt(document.getElementById('maxAffection').value),
+                            scenario: document.getElementById('gameScenario').value,
+                            initial_messages: document.getElementById('initialMessages').value.split('\n').filter(s => s.trim())
+                        };
+                        break;
+                }
+
+                const response = await fetch(`/api/admin?action=config&section=${currentSection}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('설정이 성공적으로 저장되었습니다!', 'success');
+                    currentConfig[currentSection] = { ...currentConfig[currentSection], ...updateData };
+                } else {
+                    showAlert('저장에 실패했습니다: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('저장 오류:', error);
+                showAlert('저장 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 연결 테스트
+        async function testConnection() {
+            try {
+                showAlert('서버 연결을 테스트하는 중...', 'info');
+                
+                const response = await fetch('/api/admin?action=test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ test_type: 'basic' })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('서버 연결 테스트가 성공했습니다! ✅', 'success');
+                } else {
+                    showAlert('연결 테스트에 실패했습니다.', 'error');
+                }
+            } catch (error) {
+                console.error('테스트 오류:', error);
+                showAlert('연결 테스트 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 알림 표시
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'info' ? 'success' : type}`;
+            alertDiv.textContent = message;
+            
+            document.querySelector('.admin-container').insertBefore(alertDiv, document.querySelector('.header').nextSibling);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
