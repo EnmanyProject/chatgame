@@ -528,30 +528,32 @@
             const dialogueContainer = document.getElementById('dialogueCategories');
             
             try {
-                // 하드코딩된 카테고리 목록 (API 호출 없이)
-                const categories = [
-                    { id: 'greetings', name: '💫 인사', count: 3 },
-                    { id: 'yesterday_alcohol', name: '🍺 어제 술', count: 3 },
-                    { id: 'comfort', name: '🤗 위로', count: 3 },
-                    { id: 'confession_memory', name: '💕 고백 기억', count: 3 },
-                    { id: 'compliments', name: '😊 칭찬', count: 3 },
-                    { id: 'questions', name: '❓ 질문', count: 3 },
-                    { id: 'food', name: '🍽️ 음식', count: 2 }
-                ];
-
-                // 로딩 메시지 제거
-                dialogueContainer.remove();
+                // 실제 대사 데이터 API 호출
+                const response = await fetch('/api/admin?action=dialogue');
+                const data = await response.json();
                 
-                // 카테고리 항목들 추가
-                categories.forEach(category => {
+                if (!data.success) {
+                    throw new Error(data.message || '대화 데이터 로딩 실패');
+                }
+                
+                const dialogueData = data.dialogue;
+                window.currentDialogueData = dialogueData; // 전역 저장
+                
+                const choices = dialogueData.choices || [];
+
+                // 기존 내용 제거
+                dialogueContainer.innerHTML = '';
+                
+                // 선택지 목록 생성
+                choices.forEach((choice, index) => {
                     const li = document.createElement('li');
                     li.className = 'category-item';
-                    li.setAttribute('data-category', category.id);
+                    li.setAttribute('data-choice', choice.id);
                     li.innerHTML = `
-                        <div class="category-name">${category.name}</div>
-                        <div class="category-count">${category.count}개 응답</div>
+                        <div class="category-name">선택지 ${choice.id}: ${choice.situation}</div>
+                        <div class="category-count">${choice.yuna_messages ? choice.yuna_messages.length : 1}개 메시지</div>
                     `;
-                    li.onclick = () => selectCategory(category.id, category.name);
+                    li.onclick = () => selectChoice(choice.id, choice);
                     document.getElementById('menuList').appendChild(li);
                 });
                 
@@ -1021,6 +1023,160 @@
             const modal = document.getElementById('responseModal');
             if (event.target === modal) {
                 closeModal();
+            }
+        }
+
+        // 선택지 선택
+        async function selectChoice(choiceId, choiceData) {
+            currentCategory = choiceId;
+            currentSection = null;
+
+            // 사이드바 활성화 상태 변경
+            document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
+            document.querySelector(`[data-choice="${choiceId}"]`).classList.add('active');
+
+            // 헤더 업데이트
+            document.getElementById('contentTitle').textContent = `선택지 ${choiceId} 편집`;
+            document.getElementById('addResponseBtn').style.display = 'none';
+            document.getElementById('serverButtons').style.display = 'none';
+
+            // 선택지 편집 UI 생성
+            loadChoiceEditor(choiceData);
+        }
+
+        // 선택지 편집기 로드
+        function loadChoiceEditor(choiceData) {
+            const contentArea = document.getElementById('contentArea');
+            
+            let html = `
+                <div class="choice-editor">
+                    <div class="form-group">
+                        <label>상황 설명:</label>
+                        <input type="text" id="situation_${choiceData.id}" value="${choiceData.situation}" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>윤아 메시지들:</label>
+                        <div id="messages_${choiceData.id}">
+            `;
+            
+            (choiceData.yuna_messages || [choiceData.yuna_message]).forEach((msg, index) => {
+                if (msg) {
+                    html += `
+                        <div class="message-input">
+                            <input type="text" value="${msg}" class="form-control message-text" data-index="${index}">
+                            <button class="btn-remove" onclick="removeMessage(${choiceData.id}, ${index})">×</button>
+                        </div>
+                    `;
+                }
+            });
+            
+            html += `
+                        </div>
+                        <button class="btn btn-secondary" onclick="addMessage(${choiceData.id})">메시지 추가</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>선택지 옵션들:</label>
+                        <div id="options_${choiceData.id}">
+            `;
+            
+            if (choiceData.options) {
+                choiceData.options.forEach((option, index) => {
+                    html += `
+                        <div class="option-group">
+                            <h4>옵션 ${option.id}</h4>
+                            <input type="text" placeholder="선택지 텍스트" value="${option.text}" class="form-control option-text" data-option="${option.id}">
+                            <textarea placeholder="윤아 응답" class="form-control option-response" data-option="${option.id}">${option.response}</textarea>
+                            <input type="number" placeholder="호감도 변화" value="${option.affection_change}" class="form-control option-affection" data-option="${option.id}" min="-10" max="10">
+                        </div>
+                    `;
+                });
+            }
+            
+            html += `
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="saveChoice(${choiceData.id})">저장</button>
+                        <button class="btn btn-secondary" onclick="cancelEdit()">취소</button>
+                    </div>
+                </div>
+                
+                <style>
+                .choice-editor { padding: 20px; }
+                .form-group { margin-bottom: 20px; }
+                .form-group label { display: block; margin-bottom: 8px; font-weight: bold; }
+                .message-input { display: flex; margin-bottom: 8px; }
+                .message-input .form-control { flex: 1; }
+                .btn-remove { background: #dc3545; color: white; border: none; padding: 8px 12px; margin-left: 8px; cursor: pointer; }
+                .option-group { background: #f8f9fa; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
+                .option-group h4 { margin: 0 0 10px 0; }
+                .option-group .form-control { margin-bottom: 8px; }
+                .form-actions { text-align: right; margin-top: 30px; }
+                .btn { padding: 10px 20px; margin-left: 10px; border: none; cursor: pointer; border-radius: 5px; }
+                .btn-primary { background: #007bff; color: white; }
+                .btn-secondary { background: #6c757d; color: white; }
+                </style>
+            `;
+            
+            contentArea.innerHTML = html;
+        }
+
+        // 선택지 저장
+        async function saveChoice(choiceId) {
+            try {
+                // 현재 데이터 수집
+                const situation = document.getElementById(`situation_${choiceId}`).value;
+                const messageInputs = document.querySelectorAll(`#messages_${choiceId} .message-text`);
+                const messages = Array.from(messageInputs).map(input => input.value).filter(msg => msg.trim());
+                
+                // 옵션 데이터 수집
+                const options = [];
+                const optionGroups = document.querySelectorAll(`#options_${choiceId} .option-group`);
+                optionGroups.forEach(group => {
+                    const textInput = group.querySelector('.option-text');
+                    const responseInput = group.querySelector('.option-response');
+                    const affectionInput = group.querySelector('.option-affection');
+                    
+                    if (textInput && responseInput) {
+                        options.push({
+                            id: textInput.dataset.option,
+                            text: textInput.value,
+                            response: responseInput.value,
+                            emotion: "happy",
+                            affection_change: parseInt(affectionInput.value) || 0
+                        });
+                    }
+                });
+
+                // 전역 데이터 업데이트
+                const choice = window.currentDialogueData.choices.find(c => c.id === choiceId);
+                if (choice) {
+                    choice.situation = situation;
+                    choice.yuna_messages = messages;
+                    choice.options = options;
+                    
+                    // 서버에 저장
+                    const response = await fetch('/api/admin?action=dialogue', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            dialogue: window.currentDialogueData
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        showAlert('저장되었습니다!', 'success');
+                    } else {
+                        throw new Error(result.message || '저장 실패');
+                    }
+                }
+            } catch (error) {
+                console.error('Save failed:', error);
+                showAlert('저장에 실패했습니다: ' + error.message, 'error');
             }
         }
     </script>

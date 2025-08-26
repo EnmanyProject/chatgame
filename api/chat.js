@@ -328,14 +328,37 @@ module.exports = (req, res) => {
           category = 'gpt_response';
           matchedKeywords = [];
         } catch (gptError) {
-          console.error('GPT API failed, falling back to pattern matching:', gptError);
-          // GPT 실패 시 기존 패턴 매칭으로 fallback
-          const fallbackResponse = findResponse(message.trim(), parseInt(affection));
-          responseText = fallbackResponse.text;
-          emotion = fallbackResponse.emotion;
-          affectionChange = fallbackResponse.affection_change;
-          category = fallbackResponse.category;
-          matchedKeywords = fallbackResponse.matched_keywords;
+          console.error('GPT API failed:', gptError);
+          // GPT 실패 시 에러 메시지 반환
+          responseText = "앗... GPT 오류가 발생했어요 😅 잠깐만 기다려주세요!";
+          emotion = 'confused';
+          affectionChange = 0;
+          category = 'gpt_error';
+          matchedKeywords = [];
+          
+          // 에러 정보를 응답에 포함
+          return res.status(200).json({
+            success: true,
+            response: responseText,
+            emotion: emotion,
+            emotion_display: DATABASE_DATA.emotions[emotion]?.display || '😅',
+            emotion_color: DATABASE_DATA.emotions[emotion]?.color || '#DDA0DD',
+            affection_change: affectionChange,
+            category: category,
+            matched_keywords: matchedKeywords,
+            used_gpt: false,
+            gpt_error: true,
+            error_message: '죄송해요, AI 응답 중 문제가 발생했어요!',
+            character: {
+              name: DATABASE_DATA.character.name,
+              current_affection: parseInt(affection)
+            },
+            metadata: {
+              timestamp: new Date().toISOString(),
+              input_length: message.trim().length,
+              mode: 'gpt_error'
+            }
+          });
         }
       } else {
         // 기존 패턴 매칭 사용
