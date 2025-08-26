@@ -188,7 +188,20 @@ function findResponse(userInput, affectionLevel) {
   for (const [categoryKey, category] of Object.entries(DATABASE_DATA.dialogue_patterns)) {
     if (category.keywords.some(keyword => input.includes(keyword))) {
       const responses = category.responses;
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      // 호감도에 따라 더 적절한 응답 선택 및 응답 단축
+      let filteredResponses = responses;
+      if (affectionLevel >= 80) {
+        filteredResponses = responses.filter(r => r.affection_change >= 2) || responses;
+      } else if (affectionLevel <= 30) {
+        filteredResponses = responses.filter(r => r.affection_change <= 1) || responses;
+      }
+      const randomResponse = filteredResponses[Math.floor(Math.random() * filteredResponses.length)];
+      
+      // 응답 텍스트를 더 짧고 자연스럽게 수정
+      if (randomResponse.text.length > 30) {
+        const sentences = randomResponse.text.split(/[.!?]/);
+        randomResponse.text = sentences[0] + (sentences[0].includes('😊') ? '' : ' 😊');
+      }
       
       return {
         ...randomResponse,
@@ -236,25 +249,27 @@ let GPT_CONFIG = {
   enabled: false
 };
 
-// GPT API 호출 함수
-async function callGPTAPI(message, affection, intimacy) {
+// GPT 분석 엔진 - 사용자 입력 분석 및 적절한 응답 선택
+async function analyzeUserInputWithGPT(message, affection, intimacy, currentContext) {
   if (!GPT_CONFIG.enabled || !GPT_CONFIG.api_key) {
     throw new Error('GPT API not configured or disabled');
   }
 
-  const systemPrompt = `당신은 윤아입니다. 20세 대학생으로 창용 오빠를 1년 넘게 좋아하는 후배입니다.
+  const systemPrompt = `당신은 어드벤처 게임의 분석 엔진입니다. 사용자 입력을 분석하여 적절한 윤아의 반응을 결정해주세요.
 
-성격: 밝고 적극적이며 순수함, 감정 표현이 풍부
-말하기 스타일: 반말, 친근하고 애교스럽게, 이모티콘 자주 사용
-현재 상황: 어제 술 마시고 오빠에게 고백한 후 부끄러워하는 상황
-현재 호감도: ${affection}/100, 친밀도: ${intimacy}/100
+윤아 캐릭터 설정:
+- 20세 대학생, 창용 오빠를 1년 넘게 좋아하는 후배
+- 성격: 밝고 적극적, 순수함, 감정 표현 풍부
+- 현재 상황: 해장국을 끓여주러 온 상황
+- 현재 호감도: ${affection}/100
 
-다음 규칙을 따라주세요:
-1. 150자 이내로 답변
-2. 반말 사용 (오빠에게)
-3. 이모티콘 사용 (😊, 😳, ㅎㅎ, ㅜㅜ 등)
-4. 윤아의 성격에 맞게 밝고 애교스럽게
-5. 호감도가 높을수록 더 적극적이고 애정표현 많이`;
+사용자 입력을 분석하고 다음 JSON 형식으로 응답하세요:
+{
+  "response": "윤아의 짧은 반응 (50자 이내, 반말, 이모티콘 포함)",
+  "emotion": "감정 (happy/shy/love/excited/curious/sad 중 하나)",
+  "affection_change": "호감도 변화 (-3~+5 범위의 정수)",
+  "analysis": "입력 분석 결과 (간단히)"
+}`;
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -267,10 +282,10 @@ async function callGPTAPI(message, affection, intimacy) {
         model: GPT_CONFIG.model,
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: message }
+          { role: 'user', content: `상황: ${currentContext || '해장국 상황'}\n사용자 입력: "${message}"` }
         ],
-        max_tokens: GPT_CONFIG.max_tokens,
-        temperature: GPT_CONFIG.temperature,
+        max_tokens: 200,
+        temperature: 0.7,
       }),
     });
 
@@ -279,9 +294,18 @@ async function callGPTAPI(message, affection, intimacy) {
     }
 
     const data = await response.json();
-    return data.choices[0].message.content.trim();
+    const result = JSON.parse(data.choices[0].message.content.trim());
+    
+    // 기본값 설정 및 검증
+    return {
+      response: result.response || "그렇구나~ ㅎㅎ",
+      emotion: result.emotion || "neutral",
+      affection_change: Math.max(-3, Math.min(5, parseInt(result.affection_change) || 0)),
+      analysis: result.analysis || "일반적인 응답"
+    };
+    
   } catch (error) {
-    console.error('GPT API call failed:', error);
+    console.error('GPT Analysis failed:', error);
     throw error;
   }
 }
@@ -319,46 +343,33 @@ module.exports = (req, res) => {
 
       let responseText, emotion, affectionChange, category, matchedKeywords;
 
-      // GPT API 사용 여부 확인
+      // GPT 분석 엔진 사용 여부 확인
       if (use_gpt && GPT_CONFIG.enabled && GPT_CONFIG.api_key) {
         try {
-          responseText = await callGPTAPI(message.trim(), parseInt(affection), parseInt(intimacy));
-          emotion = 'happy';
-          affectionChange = Math.floor(Math.random() * 3) + 1; // 1-3 랜덤
-          category = 'gpt_response';
-          matchedKeywords = [];
-        } catch (gptError) {
-          console.error('GPT API failed:', gptError);
-          // GPT 실패 시 에러 메시지 반환
-          responseText = "앗... GPT 오류가 발생했어요 😅 잠깐만 기다려주세요!";
-          emotion = 'confused';
-          affectionChange = 0;
-          category = 'gpt_error';
-          matchedKeywords = [];
+          const analysisResult = await analyzeUserInputWithGPT(
+            message.trim(), 
+            parseInt(affection), 
+            parseInt(intimacy),
+            req.body.context || '해장국 상황'
+          );
           
-          // 에러 정보를 응답에 포함
-          return res.status(200).json({
-            success: true,
-            response: responseText,
-            emotion: emotion,
-            emotion_display: DATABASE_DATA.emotions[emotion]?.display || '😅',
-            emotion_color: DATABASE_DATA.emotions[emotion]?.color || '#DDA0DD',
-            affection_change: affectionChange,
-            category: category,
-            matched_keywords: matchedKeywords,
-            used_gpt: false,
-            gpt_error: true,
-            error_message: '죄송해요, AI 응답 중 문제가 발생했어요!',
-            character: {
-              name: DATABASE_DATA.character.name,
-              current_affection: parseInt(affection)
-            },
-            metadata: {
-              timestamp: new Date().toISOString(),
-              input_length: message.trim().length,
-              mode: 'gpt_error'
-            }
-          });
+          responseText = analysisResult.response;
+          emotion = analysisResult.emotion;
+          affectionChange = analysisResult.affection_change;
+          category = 'gpt_analysis';
+          matchedKeywords = [analysisResult.analysis];
+        } catch (gptError) {
+          console.error('GPT Analysis failed:', gptError);
+          // GPT 실패 시 패턴 매칭으로 폴백
+          const fallbackResponse = findResponse(message.trim(), parseInt(affection));
+          responseText = "음... 그렇구나 ㅎㅎ GPT 분석이 안되네요 😅";
+          emotion = fallbackResponse.emotion;
+          affectionChange = fallbackResponse.affection_change;
+          category = 'gpt_fallback';
+          matchedKeywords = ['gpt_analysis_failed'];
+          
+          // 에러 정보를 응답에 포함하지만 계속 진행
+          console.log('GPT 분석 실패로 패턴 매칭 사용:', gptError.message);
         }
       } else {
         // 기존 패턴 매칭 사용

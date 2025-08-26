@@ -681,7 +681,7 @@
                         }, Math.random() * 1000 + 1000);
                     }
                 } 
-                // 자유 채팅 모드
+                // 어드벤처 게임 분석 모드 
                 else {
                     const response = await fetch('/api/chat', {
                         method: 'POST',
@@ -690,18 +690,26 @@
                             message: message,
                             affection: gameState.affection,
                             intimacy: gameState.intimacy,
-                            use_gpt: true
+                            context: `해장국 시나리오, 현재 호감도: ${gameState.affection}`,
+                            use_gpt: true // GPT 분석 엔진 사용
                         })
                     });
                     
                     const data = await response.json();
                     
                     if (data.success) {
+                        const oldAffection = gameState.affection;
                         gameState.affection = data.character.current_affection;
                         
                         setTimeout(() => {
                             hideTypingIndicator();
                             displayYunaMessage(data.response, data.emotion_display);
+                            
+                            // 어드벤처 게임 진행 체크
+                            checkGameProgression(oldAffection, gameState.affection);
+                        }, Math.random() * 1000 + 800);
+                        
+                        console.log('GPT 분석 결과:', data.matched_keywords);
                             
                             // GPT 오류 시 추가 안내 메시지
                             if (data.gpt_error && data.error_message) {
@@ -759,6 +767,34 @@
             messageDiv.appendChild(bubbleDiv);
             container.appendChild(messageDiv);
             container.scrollTop = container.scrollHeight;
+        }
+
+        // 어드벤처 게임 진행 상황 체크
+        function checkGameProgression(oldAffection, newAffection) {
+            // 호감도 변화에 따른 게임 진행 - 특별 이벤트 발생
+            if (newAffection >= 90 && oldAffection < 90) {
+                setTimeout(() => {
+                    displayYunaMessage("오빠... 정말 고마워요 💕 저 정말 행복해요!", "💕");
+                }, 2000);
+                setTimeout(() => {
+                    displayYunaMessage("오빠랑 더 많은 시간을 보내고 싶어요 ㅎㅎ", "😊");
+                }, 3500);
+            } else if (newAffection <= 20 && oldAffection > 20) {
+                setTimeout(() => {
+                    displayYunaMessage("오빠... 혹시 제가 뭔가 잘못했나요? ㅠㅠ", "😢");
+                }, 2000);
+                setTimeout(() => {
+                    displayYunaMessage("조금 더 잘해볼게요...", "😰");
+                }, 3500);
+            } else if (newAffection >= 70 && oldAffection < 70) {
+                setTimeout(() => {
+                    displayYunaMessage("오빠랑 얘기하니까 정말 좋아요 ㅎㅎ", "😊");
+                }, 1500);
+            } else if (newAffection >= 50 && oldAffection < 50) {
+                setTimeout(() => {
+                    displayYunaMessage("오빠 정말 좋으세요~ ㅋㅋ", "😄");
+                }, 1500);
+            }
         }
     </script>
 </body>
