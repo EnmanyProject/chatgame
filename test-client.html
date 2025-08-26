@@ -46,39 +46,31 @@
     
     <div>
         <h2>Phase 1: 기본 인프라 테스트</h2>
-        <button onclick="testPing()">🏓 Ping API 테스트</button>
-        <button onclick="testOldApi()">📝 기존 API 테스트</button>
+        <button onclick="testHello()">🏓 Hello API 테스트</button>
+        <button onclick="testBasicApi()">📝 Test API 테스트</button>
         <button onclick="clearResults()">🗑️ 결과 지우기</button>
+    </div>
+    
+    <div style="margin-top: 30px;">
+        <h2>Phase 2: 채팅 API 테스트</h2>
+        <div style="margin: 15px 0;">
+            <input type="text" id="chatInput" placeholder="윤아에게 메시지 입력..." style="width: 300px; padding: 10px; border-radius: 5px; border: 1px solid #666; background: #333; color: #fff;">
+            <button onclick="testChatAPI()" style="margin-left: 10px;">💬 채팅 테스트</button>
+        </div>
+        <div style="margin: 10px 0;">
+            <label>호감도: </label>
+            <input type="range" id="affectionSlider" min="0" max="100" value="75" oninput="updateAffection()">
+            <span id="affectionValue">75</span>%
+        </div>
+        <div>
+            <button onclick="testChatScenarios()">🎭 시나리오 테스트</button>
+        </div>
     </div>
     
     <div id="results"></div>
 
     <script>
-        async function testPing() {
-            const results = document.getElementById('results');
-            
-            try {
-                const response = await fetch('/api/ping');
-                const data = await response.json();
-                
-                results.innerHTML += `
-                    <div class="test-result">
-                        <h3>✅ Ping API 성공</h3>
-                        <p><strong>Status:</strong> ${response.status}</p>
-                        <pre>${JSON.stringify(data, null, 2)}</pre>
-                    </div>
-                `;
-            } catch (error) {
-                results.innerHTML += `
-                    <div class="test-result test-error">
-                        <h3>❌ Ping API 실패</h3>
-                        <p><strong>Error:</strong> ${error.message}</p>
-                    </div>
-                `;
-            }
-        }
-        
-        async function testOldApi() {
+        async function testHello() {
             const results = document.getElementById('results');
             
             try {
@@ -87,7 +79,7 @@
                 
                 results.innerHTML += `
                     <div class="test-result">
-                        <h3>✅ 기존 Hello API 성공</h3>
+                        <h3>✅ Hello API 성공</h3>
                         <p><strong>Status:</strong> ${response.status}</p>
                         <pre>${JSON.stringify(data, null, 2)}</pre>
                     </div>
@@ -95,12 +87,124 @@
             } catch (error) {
                 results.innerHTML += `
                     <div class="test-result test-error">
-                        <h3>❌ 기존 Hello API 실패</h3>
+                        <h3>❌ Hello API 실패</h3>
                         <p><strong>Error:</strong> ${error.message}</p>
                     </div>
                 `;
             }
         }
+        
+        async function testBasicApi() {
+            const results = document.getElementById('results');
+            
+            try {
+                const response = await fetch('/api/test');
+                const data = await response.json();
+                
+                results.innerHTML += `
+                    <div class="test-result">
+                        <h3>✅ Test API 성공</h3>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                results.innerHTML += `
+                    <div class="test-result test-error">
+                        <h3>❌ Test API 실패</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function testChatAPI() {
+            const results = document.getElementById('results');
+            const chatInput = document.getElementById('chatInput');
+            const affection = document.getElementById('affectionSlider').value;
+            const message = chatInput.value.trim();
+            
+            if (!message) {
+                alert('메시지를 입력해주세요!');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        affection: parseInt(affection),
+                        intimacy: 0
+                    })
+                });
+                
+                const data = await response.json();
+                
+                results.innerHTML += `
+                    <div class="test-result">
+                        <h3>✅ 채팅 API 성공</h3>
+                        <p><strong>입력:</strong> "${message}"</p>
+                        <p><strong>윤아 응답:</strong> ${data.response || '응답 없음'}</p>
+                        <p><strong>감정:</strong> ${data.emotion_display || ''} ${data.emotion || ''}</p>
+                        <p><strong>호감도 변화:</strong> ${data.affection_change > 0 ? '+' : ''}${data.affection_change || 0}</p>
+                        <p><strong>카테고리:</strong> ${data.category || '없음'}</p>
+                        <p><strong>매칭된 키워드:</strong> ${data.matched_keywords ? data.matched_keywords.join(', ') : '없음'}</p>
+                        <details>
+                            <summary>전체 응답 데이터</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                
+                // 입력창 비우기
+                chatInput.value = '';
+                
+            } catch (error) {
+                results.innerHTML += `
+                    <div class="test-result test-error">
+                        <h3>❌ 채팅 API 실패</h3>
+                        <p><strong>입력:</strong> "${message}"</p>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function testChatScenarios() {
+            const scenarios = [
+                { message: '안녕하세요!', affection: 75 },
+                { message: '너무 예쁘다', affection: 60 },
+                { message: '뭐하고 있어?', affection: 80 },
+                { message: '배고파', affection: 70 },
+                { message: '사랑해', affection: 90 },
+                { message: '그냥 말이야', affection: 30 }
+            ];
+            
+            for (const scenario of scenarios) {
+                document.getElementById('chatInput').value = scenario.message;
+                document.getElementById('affectionSlider').value = scenario.affection;
+                updateAffection();
+                await testChatAPI();
+                await new Promise(resolve => setTimeout(resolve, 500)); // 0.5초 대기
+            }
+        }
+        
+        function updateAffection() {
+            const slider = document.getElementById('affectionSlider');
+            const valueSpan = document.getElementById('affectionValue');
+            valueSpan.textContent = slider.value;
+        }
+        
+        // Enter 키로 채팅 테스트
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && document.activeElement.id === 'chatInput') {
+                testChatAPI();
+            }
+        });
         
         function clearResults() {
             document.getElementById('results').innerHTML = '';
