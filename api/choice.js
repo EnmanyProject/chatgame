@@ -10,129 +10,129 @@ const DATABASE_DATA = {
   "choices": [
     {
       "id": 1,
-      "situation": "윤아가 어제 술 마신 후 일어난 일로 부끄러워하고 있습니다.",
+      "situation": "윤아가 해장국을 끓여주러 왔습니다.",
       "yuna_messages": [
-        "창용 오빠... 안녕하세요 😳",
-        "어제... 제가 술 마시고 이상한 말 많이 했죠? ㅠㅠ", 
-        "정말 부끄러워서...",
-        "오빠한테 뭐라고 말해야 할지 모르겠어요... 😰"
+        "오빠~ 일어나세요! 😊",
+        "어제 많이 드셨죠? ㅋㅋ",
+        "해장국 끓여왔어요!",
+        "얼른 일어나서 드세요~ 😋"
       ],
       "options": [
         {
           "id": "A",
-          "text": "괜찮아, 별거 아니었어",
-          "response": "정말요?! 오빠가 그렇게 말해주시니까... 조금 마음이 놓여요 😊 사실 정말 걱정했거든요...",
-          "emotion": "relieved",
-          "affection_change": 3
+          "text": "고마워, 윤아야",
+          "response": "헤헤~ 별거 아니에요! 😊 오빠가 아파보이니까 걱정됐어요.",
+          "emotion": "happy",
+          "affection_change": 2
         },
         {
           "id": "B", 
-          "text": "어떤 말을 했는데?",
-          "response": "아... 그게... 😳 오빠한테... 제가... 좋아한다고... 말했어요 ㅜㅜ 너무 부끄러워요!",
-          "emotion": "shy",
+          "text": "아직 졸려...",
+          "response": "안 돼요~ 😤 식기 전에 드셔야 해요! 일어나세요!",
+          "emotion": "playful",
           "affection_change": 1
         },
         {
           "id": "C",
-          "text": "기억 안 나는데?",
-          "response": "정말요? 혹시 오빠도 많이 드셨나요? ㅋㅋ 그럼 다행이에요... 아니 다행인가? 😅",
-          "emotion": "confused",
-          "affection_change": 0
+          "text": "언제 왔어?",
+          "response": "방금 전에 왔어요! 😋 오빠 잠든 거 보고 조용히 해장국 끓였어요~",
+          "emotion": "caring",
+          "affection_change": 1
         }
       ]
     },
     {
       "id": 2,
-      "situation": "첫 번째 선택에 따른 후속 대화",
+      "situation": "해장국을 먹으며 대화가 계속됩니다.",
       "depends_on": 1,
       "variations": {
         "A": {
           "yuna_messages": [
-            "오빠 너무 좋으세요... 💕",
-            "그런데 정말 기억나는 게 없으세요?",
-            "제가 뭐라고 했는지..."
+            "그래도 오빠가 좋아해주시니까 기뻐요! 😊",
+            "이 해장국은 우리 엄마 레시피예요~",
+            "어때요? 맛있어요?"
           ],
           "options": [
             {
               "id": "A",
-              "text": "솔직히 기억나지만 괜찮다고 했잖아",
-              "response": "아... 역시 기억나시는군요 😳 그런데도 괜찮다고 해주시다니... 정말 감사해요!",
-              "emotion": "grateful",
-              "affection_change": 4
+              "text": "정말 맛있어, 고마워",
+              "response": "헤헤~ 다행이에요! 😍 엄마가 가르쳐주신 비법이 있거든요!",
+              "emotion": "proud",
+              "affection_change": 2
             },
             {
               "id": "B",
-              "text": "정말 기억이 안 나",
-              "response": "그렇구나... 그럼 제가 다시 말해드릴까요? 😊 용기내서...",
-              "emotion": "hopeful",
+              "text": "너도 같이 먹을래?",
+              "response": "저요? 😳 좋아요! 오빠랑 같이 먹으면 더 맛있을 것 같아요~",
+              "emotion": "shy_happy",
               "affection_change": 2
             },
             {
               "id": "C",
-              "text": "중요한 건 지금이야",
-              "response": "지금이요...? 무슨 뜻이세요? 😳 혹시... 오빠도...?",
+              "text": "엄마 레시피구나",
+              "response": "네! 😊 나중에 오빠한테도 가르쳐드릴게요. 배우고 싶으세요?",
               "emotion": "excited",
-              "affection_change": 5
+              "affection_change": 1
             }
           ]
         },
         "B": {
           "yuna_messages": [
-            "이제 말해버렸으니까... 😳",
-            "오빠는 어떻게 생각하세요?",
-            "제 마음에 대해서..."
+            "아... 아직 잠이 덜 깨셨나봐요 😅",
+            "그럼 제가 오빠 깨워드릴게요!",
+            "어떻게 하면 좋을까요?"
           ],
           "options": [
             {
               "id": "A",
-              "text": "나도 너를 좋아해",
-              "response": "정말요?! 😍 꿈인가요...? 진짜로 그렇게 생각해주시는 거예요?!",
-              "emotion": "ecstatic",
-              "affection_change": 10
+              "text": "알겠어, 일어날게",
+              "response": "와! 😍 드디어 일어나셨네요! 해장국 빨리 드세요~",
+              "emotion": "excited",
+              "affection_change": 2
             },
             {
               "id": "B",
-              "text": "친구로서 좋아해",
-              "response": "아... 그렇구나요 😢 그래도 친구라도 좋아요... 계속 곁에 있어도 되죠?",
-              "emotion": "sad_understanding",
-              "affection_change": -2
+              "text": "5분만 더...",
+              "response": "안 돼요! 😤 해장국이 식어요! 정말 맛있는데 아까워요~",
+              "emotion": "pouty",
+              "affection_change": 1
             },
             {
               "id": "C",
-              "text": "시간이 필요해",
-              "response": "네... 알겠어요 😊 기다릴게요, 오빠! 제가 더 좋은 사람이 되도록 노력할게요!",
-              "emotion": "determined",
-              "affection_change": 3
+              "text": "네가 깨워줘",
+              "response": "네? 😳 어... 어떻게요? 오빠 어깨 흔들어드릴까요?",
+              "emotion": "shy",
+              "affection_change": 2
             }
           ]
         },
         "C": {
           "yuna_messages": [
-            "ㅋㅋㅋ 그럼 우리 둘 다 기억이 없네요! 😄",
-            "그런데... 혹시 궁금하지 않으세요?",
-            "제가 뭐라고 했는지..."
+            "아까 전이요! 😋",
+            "오빠 자고 계실 때 몰래 들어와서~",
+            "조용히 해장국 끓였어요!"
           ],
           "options": [
             {
               "id": "A",
-              "text": "궁금하다",
-              "response": "사실... 오빠를 좋아한다고 고백했어요 😳 이제 기억나세요?",
-              "emotion": "confessing",
-              "affection_change": 3
+              "text": "몰래 들어왔다고?",
+              "response": "아... 죄송해요 😅 문 열려있길래... 오빠 아픈 것 같아서 걱정됐거든요!",
+              "emotion": "apologetic",
+              "affection_change": 1
             },
             {
               "id": "B",
-              "text": "과거는 과거야",
-              "response": "와... 오빠 진짜 쿨하시네요! 😎 그럼 새로 시작하는 기분이에요!",
-              "emotion": "impressed",
+              "text": "고생 많았겠다",
+              "response": "아니에요! 😊 오빠를 위해서라면 전혀 고생이 아니에요~",
+              "emotion": "happy",
               "affection_change": 2
             },
             {
               "id": "C",
-              "text": "다시 말해봐",
-              "response": "지금 말하라는 거예요? 😳 용기내서... 오빠, 저는... 오빠를 좋아해요! 💕",
-              "emotion": "brave_confession",
-              "affection_change": 6
+              "text": "정말 착하다",
+              "response": "헤헤... 😳 오빠가 그렇게 말해주시니까 기뻐요! 더 잘해드릴게요!",
+              "emotion": "shy_happy",
+              "affection_change": 2
             }
           ]
         }
@@ -140,45 +140,52 @@ const DATABASE_DATA = {
     },
     {
       "id": 3,
-      "situation": "세 번째 선택 - 관계 정리",
+      "situation": "해장국을 다 먹고 마무리 대화",
       "depends_on": 2,
       "yuna_messages": [
-        "오빠와 이렇게 얘기하다 보니...",
-        "정말 많은 생각이 들어요 😊",
-        "앞으로 우리 어떻게 지내면 좋을까요?"
+        "해장국 다 드셨네요! 😊",
+        "기분이 좀 나아지셨어요?",
+        "오빠 몸 관리 잘 해야 해요!"
       ],
       "options": [
         {
           "id": "A",
-          "text": "천천히 알아가자",
-          "response": "네! 좋아요 😊 오빠와 함께라면 천천히라도 행복할 것 같아요! 많은 얘기 나눠요!",
-          "emotion": "happy_future",
-          "affection_change": 4
+          "text": "덕분에 완전히 나았어",
+          "response": "정말요?! 😍 다행이에요! 윤아가 만든 해장국 효과가 있네요~",
+          "emotion": "proud",
+          "affection_change": 2
         },
         {
           "id": "B",
-          "text": "지금처럼 편하게",
-          "response": "그것도 좋네요! 😄 편하게 지내는 것도 소중하죠. 오빠랑은 어떻게든 행복해요!",
-          "emotion": "comfortable",
-          "affection_change": 3
+          "text": "자주 와서 해줘",
+          "response": "네! 😊 언제든지 말씀하세요! 오빠 아플 때마다 달려올게요!",
+          "emotion": "happy",
+          "affection_change": 2
         },
         {
           "id": "C",
-          "text": "더 가까워지고 싶어",
-          "response": "저도요! 😍 정말 많이요! 오빠와 더 많은 시간을 보내고 싶어요! 💕",
-          "emotion": "excited_close",
-          "affection_change": 6
+          "text": "너 때문에 더 아픈 것 같아",
+          "response": "네? 😳 왜요...? 혹시 제가 뭔가 잘못했나요? 아니면... 다른 의미인가요?",
+          "emotion": "confused",
+          "affection_change": 1
         }
       ]
     }
   ],
   "emotions": {
-    "relieved": {"display": "😌", "color": "#87CEEB"},
+    "happy": {"display": "😊", "color": "#FFD700"},
+    "playful": {"display": "😤", "color": "#87CEEB"},
+    "caring": {"display": "🥰", "color": "#FFB6C1"},
+    "proud": {"display": "😍", "color": "#FF69B4"},
+    "shy_happy": {"display": "😊😳", "color": "#FFB6C1"},
+    "excited": {"display": "🤗", "color": "#FF6347"},
+    "pouty": {"display": "😤", "color": "#FFA500"},
     "shy": {"display": "😳", "color": "#FFA07A"},
-    "confused": {"display": "😅", "color": "#DDA0DD"},
+    "apologetic": {"display": "😅", "color": "#DDA0DD"},
+    "confused": {"display": "😕", "color": "#DDA0DD"},
+    "relieved": {"display": "😌", "color": "#87CEEB"},
     "grateful": {"display": "🥰", "color": "#FFB6C1"},
     "hopeful": {"display": "😊", "color": "#98FB98"},
-    "excited": {"display": "😍", "color": "#FF69B4"},
     "ecstatic": {"display": "🤩", "color": "#FF1493"},
     "sad_understanding": {"display": "😢", "color": "#4682B4"},
     "determined": {"display": "😤", "color": "#FFA500"},
@@ -225,11 +232,11 @@ module.exports = (req, res) => {
       if (action === 'subjective_response' && subjective_answer) {
         const hasNextChoice = choice_number < 3;
         
-        // 윤아의 주관식 답변에 대한 반응
+        // 윤아의 주관식 답변에 대한 반응 (큰 호감도 변화)
         const subjectiveResponses = [
-          "와... 오빠가 그렇게 생각해주셨다니 😳 너무 기뻐요! 저도 오빠를 정말 좋아해요 💕",
-          "오빠의 취미가 그거구나! 😊 저도 같이 해보고 싶어요~ 가르쳐주실 거죠?",
-          "우와... 정말 멋진 계획이에요! ✨ 오빠와 그런 추억들을 만들 수 있다면... 정말 행복할 것 같아요! 💕"
+          "진짜요?! 😍 오빠가 제가 해주는 해장국을 좋아해주시다니... 너무 행복해요! 앞으로 더 자주 해드릴게요!",
+          "그렇구나... 😳 그럼 제가 더 잘 챙겨드려야겠어요! 오빠만의 전속 요리사가 되어드릴게요~ 💕",
+          "정말요?! 🥰 그럼 정말 자주 올게요! 매일매일 오빠 챙겨드리고 싶어요... 좋죠?"
         ];
 
         if (hasNextChoice) {
@@ -260,10 +267,10 @@ module.exports = (req, res) => {
           return res.status(200).json({
             success: true,
             yuna_response: subjectiveResponses[choice_number - 1],
-            emotion: "happy",
-            emotion_display: "😊",
-            emotion_color: "#FFD700",
-            affection_change: 2,
+            emotion: "ecstatic",
+            emotion_display: "🤩",
+            emotion_color: "#FF1493",
+            affection_change: 8,
             next_choice: nextChoice,
             has_next: true,
             metadata: {
@@ -280,9 +287,8 @@ module.exports = (req, res) => {
             emotion: "excited_close",
             emotion_display: "💞",
             emotion_color: "#FF1493",
-            affection_change: 3,
+            affection_change: 10,
             switch_to_gpt: true,
-            message: "이제부터 자유롭게 대화해보세요!",
             metadata: {
               timestamp: new Date().toISOString(),
               mode: 'free_chat_gpt',
@@ -391,9 +397,9 @@ module.exports = (req, res) => {
 
       // 각 선택지 후 주관식 질문 정의
       const subjectiveQuestions = [
-        "그런데 오빠는... 평소에 저를 어떻게 생각하고 계셨어요? 😳 정말 궁금해요!",
-        "오빠와 이야기하다 보니... 더 알고 싶어졌어요. 오빠의 취미는 뭐예요? 😊",
-        "마지막으로... 앞으로 저희가 어떤 추억을 만들면 좋을까요? 💕"
+        "오빠~ 궁금한 게 있는데... 저처럼 해장국 해주러 오는 후배 어때요? 😳 솔직하게 말해주세요!",
+        "그런데 오빠는 평소에 누가 챙겨줘요? 😊 가족? 아니면... 다른 누군가? 궁금해요~",
+        "마지막 질문이에요! 만약에 제가 앞으로도 자주 와서 챙겨드린다면... 어떨 것 같아요? 💕"
       ];
 
       // 선택지 응답 후 바로 주관식 질문 표시
