@@ -1,35 +1,172 @@
-import fs from 'fs';
-import path from 'path';
-
-// 대사 데이터베이스 파일 경로
-const DB_PATH = path.join(process.cwd(), 'data', 'dialogue_database.json');
-
-// 데이터베이스 읽기
-function readDatabase() {
-  try {
-    const data = fs.readFileSync(DB_PATH, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Failed to read dialogue database:', error);
-    return null;
+// Vercel 환경에서 파일 시스템 대신 인메모리 데이터베이스 사용
+const DATABASE_DATA = {
+  "version": "1.0.0",
+  "character": {
+    "name": "윤아",
+    "age": 20,
+    "personality": ["밝음", "적극적", "순수함", "감정 표현 풍부"],
+    "relationship": "창용 오빠를 1년 넘게 좋아하는 후배",
+    "speech_style": ["반말", "친근하고 애교스럽게", "이모티콘 자주 사용"]
+  },
+  "dialogue_categories": {
+    "greetings": {
+      "name": "인사",
+      "description": "인사말이나 만남 관련 대화",
+      "keywords": ["안녕", "하이", "헬로", "좋은", "아침", "저녁", "만나", "처음"],
+      "responses": [
+        {
+          "id": "greeting_001",
+          "text": "안녕하세요! 창용 오빠 ㅎㅎ 오늘 하루 어떠셨어요?",
+          "emotion": "happy",
+          "intimacy_requirement": 0,
+          "affection_change": 1,
+          "created_at": "2025-08-25",
+          "tags": ["기본", "일상"]
+        },
+        {
+          "id": "greeting_002", 
+          "text": "오빠! 안녕하세요~ 보고 싶었어요 💕",
+          "emotion": "love",
+          "intimacy_requirement": 20,
+          "affection_change": 2,
+          "created_at": "2025-08-25",
+          "tags": ["애정표현", "그리움"]
+        },
+        {
+          "id": "greeting_003",
+          "text": "헤이~ 창용 오빠! 오늘도 멋있으시네요 ㅋㅋ",
+          "emotion": "playful",
+          "intimacy_requirement": 10,
+          "affection_change": 1,
+          "created_at": "2025-08-25",
+          "tags": ["칭찬", "장난스러움"]
+        }
+      ]
+    },
+    "compliments": {
+      "name": "칭찬/호감표현",
+      "description": "사용자의 칭찬이나 호감표현에 대한 응답",
+      "keywords": ["예쁘", "좋아", "사랑", "최고", "멋있", "잘생", "귀여"],
+      "responses": [
+        {
+          "id": "compliment_001",
+          "text": "오빠가 그렇게 말해주시니까 너무 기뻐요! ㅜㅜ 정말이에요?",
+          "emotion": "shy_happy",
+          "intimacy_requirement": 0,
+          "affection_change": 3,
+          "created_at": "2025-08-25",
+          "tags": ["기쁨", "확인요청"]
+        },
+        {
+          "id": "compliment_002",
+          "text": "ㅋㅋㅋ 창용 오빠도 정말 멋있어요! 💕",
+          "emotion": "love",
+          "intimacy_requirement": 15,
+          "affection_change": 2,
+          "created_at": "2025-08-25",
+          "tags": ["맞칭찬", "애정표현"]
+        }
+      ]
+    },
+    "questions": {
+      "name": "질문/궁금증",
+      "description": "사용자의 질문이나 일상 궁금증에 대한 응답",
+      "keywords": ["뭐해", "뭐하", "어떻", "어디", "언제", "왜", "누구", "궁금"],
+      "responses": [
+        {
+          "id": "question_001",
+          "text": "지금은 오빠 생각하면서 공부하고 있었어요 ㅎㅎ",
+          "emotion": "shy",
+          "intimacy_requirement": 10,
+          "affection_change": 1,
+          "created_at": "2025-08-25",
+          "tags": ["공부", "생각"]
+        },
+        {
+          "id": "question_002",
+          "text": "오빠랑 얘기하는 게 제일 재밌어요! ㅋㅋ",
+          "emotion": "happy",
+          "intimacy_requirement": 5,
+          "affection_change": 2,
+          "created_at": "2025-08-25",
+          "tags": ["대화", "즐거움"]
+        }
+      ]
+    },
+    "default_high_affection": {
+      "name": "기본응답(고호감도)",
+      "description": "호감도 80 이상일 때 기본 응답",
+      "keywords": [],
+      "responses": [
+        {
+          "id": "default_high_001",
+          "text": "오빠~ 저랑 더 많은 얘기해요! 너무 좋아요 💕",
+          "emotion": "love",
+          "intimacy_requirement": 0,
+          "affection_change": 1,
+          "created_at": "2025-08-25",
+          "tags": ["기본", "애정표현"]
+        }
+      ]
+    },
+    "default_medium_affection": {
+      "name": "기본응답(중호감도)",
+      "description": "호감도 50-79일 때 기본 응답",
+      "keywords": [],
+      "responses": [
+        {
+          "id": "default_mid_001",
+          "text": "ㅎㅎ 그렇게 생각해주시는군요~",
+          "emotion": "neutral",
+          "intimacy_requirement": 0,
+          "affection_change": 0,
+          "created_at": "2025-08-25",
+          "tags": ["기본", "중성적"]
+        }
+      ]
+    },
+    "default_low_affection": {
+      "name": "기본응답(저호감도)",
+      "description": "호감도 50 미만일 때 기본 응답",
+      "keywords": [],
+      "responses": [
+        {
+          "id": "default_low_001",
+          "text": "ㅜㅜ 그렇게 생각하시는군요...",
+          "emotion": "sad",
+          "intimacy_requirement": 0,
+          "affection_change": 0,
+          "created_at": "2025-08-25",
+          "tags": ["기본", "슬픔"]
+        }
+      ]
+    }
+  },
+  "emotions": {
+    "happy": {"display": "😊", "color": "#FFD700"},
+    "love": {"display": "💕", "color": "#FF69B4"},
+    "shy": {"display": "😳", "color": "#FFA07A"},
+    "playful": {"display": "😄", "color": "#87CEEB"},
+    "caring": {"display": "🥰", "color": "#DDA0DD"},
+    "sad": {"display": "😢", "color": "#4682B4"},
+    "neutral": {"display": "😐", "color": "#808080"}
+  },
+  "statistics": {
+    "total_responses": 8,
+    "categories": 6,
+    "last_updated": "2025-08-25T00:00:00Z"
   }
+};
+
+// 데이터베이스 읽기 (인메모리)
+function readDatabase() {
+  return JSON.parse(JSON.stringify(DATABASE_DATA)); // 깊은 복사
 }
 
-// 데이터베이스 쓰기
+// 데이터베이스 쓰기 (읽기 전용 - Vercel에서 파일 쓰기 불가)
 function writeDatabase(data) {
-  try {
-    // 통계 업데이트
-    data.statistics.last_updated = new Date().toISOString();
-    data.statistics.categories = Object.keys(data.dialogue_categories).length;
-    data.statistics.total_responses = Object.values(data.dialogue_categories)
-      .reduce((total, category) => total + category.responses.length, 0);
-
-    fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
-    return true;
-  } catch (error) {
-    console.error('Failed to write dialogue database:', error);
-    return false;
-  }
+  console.log('Write operation not supported in Vercel environment');
+  return false; // Vercel에서는 파일 시스템 쓰기 불가
 }
 
 // 키워드 매칭으로 응답 찾기
