@@ -227,6 +227,65 @@ function findResponse(userInput, affectionLevel) {
   };
 }
 
+// GPT API 설정 (admin에서 설정 가능)
+let GPT_CONFIG = {
+  api_key: process.env.OPENAI_API_KEY || '',
+  model: 'gpt-3.5-turbo',
+  max_tokens: 150,
+  temperature: 0.8,
+  enabled: false
+};
+
+// GPT API 호출 함수
+async function callGPTAPI(message, affection, intimacy) {
+  if (!GPT_CONFIG.enabled || !GPT_CONFIG.api_key) {
+    throw new Error('GPT API not configured or disabled');
+  }
+
+  const systemPrompt = `당신은 윤아입니다. 20세 대학생으로 창용 오빠를 1년 넘게 좋아하는 후배입니다.
+
+성격: 밝고 적극적이며 순수함, 감정 표현이 풍부
+말하기 스타일: 반말, 친근하고 애교스럽게, 이모티콘 자주 사용
+현재 상황: 어제 술 마시고 오빠에게 고백한 후 부끄러워하는 상황
+현재 호감도: ${affection}/100, 친밀도: ${intimacy}/100
+
+다음 규칙을 따라주세요:
+1. 150자 이내로 답변
+2. 반말 사용 (오빠에게)
+3. 이모티콘 사용 (😊, 😳, ㅎㅎ, ㅜㅜ 등)
+4. 윤아의 성격에 맞게 밝고 애교스럽게
+5. 호감도가 높을수록 더 적극적이고 애정표현 많이`;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${GPT_CONFIG.api_key}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: GPT_CONFIG.model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: message }
+        ],
+        max_tokens: GPT_CONFIG.max_tokens,
+        temperature: GPT_CONFIG.temperature,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`GPT API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content.trim();
+  } catch (error) {
+    console.error('GPT API call failed:', error);
+    throw error;
+  }
+}
+
 module.exports = (req, res) => {
   // CORS 헤더
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -245,49 +304,88 @@ module.exports = (req, res) => {
     });
   }
 
-  try {
-    const { message, affection = 75, intimacy = 0 } = req.body || {};
+  const handleRequest = async () => {
+    try {
+      const { message, affection = 75, intimacy = 0, use_gpt = false } = req.body || {};
 
-    // 입력 검증
-    if (!message || typeof message !== 'string' || message.trim().length === 0) {
-      return res.status(400).json({ 
-        error: 'Invalid input',
-        message: 'Message is required and must be a non-empty string'
+      // 입력 검증
+      if (!message || typeof message !== 'string' || message.trim().length === 0) {
+        return res.status(400).json({ 
+          error: 'Invalid input',
+          message: 'Message is required and must be a non-empty string'
+        });
+      }
+
+      let responseText, emotion, affectionChange, category, matchedKeywords;
+
+      // GPT API 사용 여부 확인
+      if (use_gpt && GPT_CONFIG.enabled && GPT_CONFIG.api_key) {
+        try {
+          responseText = await callGPTAPI(message.trim(), parseInt(affection), parseInt(intimacy));
+          emotion = 'happy';
+          affectionChange = Math.floor(Math.random() * 3) + 1; // 1-3 랜덤
+          category = 'gpt_response';
+          matchedKeywords = [];
+        } catch (gptError) {
+          console.error('GPT API failed, falling back to pattern matching:', gptError);
+          // GPT 실패 시 기존 패턴 매칭으로 fallback
+          const fallbackResponse = findResponse(message.trim(), parseInt(affection));
+          responseText = fallbackResponse.text;
+          emotion = fallbackResponse.emotion;
+          affectionChange = fallbackResponse.affection_change;
+          category = fallbackResponse.category;
+          matchedKeywords = fallbackResponse.matched_keywords;
+        }
+      } else {
+        // 기존 패턴 매칭 사용
+        const response = findResponse(message.trim(), parseInt(affection));
+        responseText = response.text;
+        emotion = response.emotion;
+        affectionChange = response.affection_change;
+        category = response.category;
+        matchedKeywords = response.matched_keywords;
+      }
+
+      const emotionData = DATABASE_DATA.emotions[emotion] || DATABASE_DATA.emotions.neutral;
+
+      // 성공 응답
+      return res.status(200).json({
+        success: true,
+        response: responseText,
+        emotion: emotion,
+        emotion_display: emotionData.display,
+        emotion_color: emotionData.color,
+        affection_change: affectionChange,
+        category: category,
+        matched_keywords: matchedKeywords,
+        used_gpt: use_gpt && GPT_CONFIG.enabled,
+        character: {
+          name: DATABASE_DATA.character.name,
+          current_affection: Math.max(0, Math.min(100, parseInt(affection) + affectionChange))
+        },
+        metadata: {
+          timestamp: new Date().toISOString(),
+          input_length: message.trim().length,
+          mode: use_gpt && GPT_CONFIG.enabled ? 'gpt' : 'pattern_matching'
+        }
+      });
+
+    } catch (error) {
+      console.error('Chat API Error:', error);
+      
+      return res.status(500).json({ 
+        error: 'Internal server error',
+        message: 'AI 응답 생성에 실패했습니다.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
     }
+  };
 
-    // 응답 생성
-    const response = findResponse(message.trim(), parseInt(affection));
-    const emotionData = DATABASE_DATA.emotions[response.emotion] || DATABASE_DATA.emotions.neutral;
-
-    // 성공 응답
-    return res.status(200).json({
-      success: true,
-      response: response.text,
-      emotion: response.emotion,
-      emotion_display: emotionData.display,
-      emotion_color: emotionData.color,
-      affection_change: response.affection_change,
-      category: response.category,
-      matched_keywords: response.matched_keywords,
-      character: {
-        name: DATABASE_DATA.character.name,
-        current_affection: Math.max(0, Math.min(100, parseInt(affection) + response.affection_change))
-      },
-      metadata: {
-        timestamp: new Date().toISOString(),
-        input_length: message.trim().length,
-        processing_time: Date.now() - Date.now() // 실제로는 처리 시작 시간을 기록해야 함
-      }
-    });
-
-  } catch (error) {
-    console.error('Chat API Error:', error);
-    
-    return res.status(500).json({ 
-      error: 'Internal server error',
-      message: 'AI 응답 생성에 실패했습니다.',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
+  // 비동기 처리
+  handleRequest();
 }
+
+// GPT 설정 업데이트 함수 (admin API에서 호출)
+module.exports.updateGPTConfig = (config) => {
+  GPT_CONFIG = { ...GPT_CONFIG, ...config };
+};
