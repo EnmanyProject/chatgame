@@ -11,7 +11,12 @@ const DATABASE_DATA = {
     {
       "id": 1,
       "situation": "윤아가 어제 술 마신 후 일어난 일로 부끄러워하고 있습니다.",
-      "yuna_message": "창용 오빠... 안녕하세요 😳 어제... 제가 술 마시고 이상한 말 많이 했죠? ㅠㅠ 정말 부끄러워서... 오빠한테 뭐라고 말해야 할지 모르겠어요... 😰",
+      "yuna_messages": [
+        "창용 오빠... 안녕하세요 😳",
+        "어제... 제가 술 마시고 이상한 말 많이 했죠? ㅠㅠ", 
+        "정말 부끄러워서...",
+        "오빠한테 뭐라고 말해야 할지 모르겠어요... 😰"
+      ],
       "options": [
         {
           "id": "A",
@@ -42,7 +47,11 @@ const DATABASE_DATA = {
       "depends_on": 1,
       "variations": {
         "A": {
-          "yuna_message": "오빠 너무 좋으세요... 💕 그런데 정말 기억나는 게 없으세요? 제가 뭐라고 했는지...",
+          "yuna_messages": [
+            "오빠 너무 좋으세요... 💕",
+            "그런데 정말 기억나는 게 없으세요?",
+            "제가 뭐라고 했는지..."
+          ],
           "options": [
             {
               "id": "A",
@@ -68,7 +77,11 @@ const DATABASE_DATA = {
           ]
         },
         "B": {
-          "yuna_message": "이제 말해버렸으니까... 😳 오빠는 어떻게 생각하세요? 제 마음에 대해서...",
+          "yuna_messages": [
+            "이제 말해버렸으니까... 😳",
+            "오빠는 어떻게 생각하세요?",
+            "제 마음에 대해서..."
+          ],
           "options": [
             {
               "id": "A",
@@ -94,7 +107,11 @@ const DATABASE_DATA = {
           ]
         },
         "C": {
-          "yuna_message": "ㅋㅋㅋ 그럼 우리 둘 다 기억이 없네요! 😄 그런데... 혹시 궁금하지 않으세요? 제가 뭐라고 했는지...",
+          "yuna_messages": [
+            "ㅋㅋㅋ 그럼 우리 둘 다 기억이 없네요! 😄",
+            "그런데... 혹시 궁금하지 않으세요?",
+            "제가 뭐라고 했는지..."
+          ],
           "options": [
             {
               "id": "A",
@@ -125,7 +142,11 @@ const DATABASE_DATA = {
       "id": 3,
       "situation": "세 번째 선택 - 관계 정리",
       "depends_on": 2,
-      "yuna_message": "오빠와 이렇게 얘기하다 보니... 정말 많은 생각이 들어요 😊 앞으로 우리 어떻게 지내면 좋을까요?",
+      "yuna_messages": [
+        "오빠와 이렇게 얘기하다 보니...",
+        "정말 많은 생각이 들어요 😊",
+        "앞으로 우리 어떻게 지내면 좋을까요?"
+      ],
       "options": [
         {
           "id": "A",
@@ -223,7 +244,7 @@ module.exports = (req, res) => {
             if (variation) {
               nextChoice = {
                 id: choice_number + 1,
-                yuna_message: variation.yuna_message,
+                yuna_messages: variation.yuna_messages,
                 options: variation.options
               };
             }
@@ -231,7 +252,7 @@ module.exports = (req, res) => {
             // 3번째 선택지
             nextChoice = {
               id: choice_number + 1,
-              yuna_message: nextChoiceData.yuna_message,
+              yuna_messages: nextChoiceData.yuna_messages,
               options: nextChoiceData.options
             };
           }
@@ -299,12 +320,12 @@ module.exports = (req, res) => {
         });
       }
 
-      let options, yuna_message;
+      let options, yuna_messages;
 
       if (choice_number === 1) {
         // 첫 번째 선택
         options = currentChoice.options;
-        yuna_message = currentChoice.yuna_message;
+        yuna_messages = currentChoice.yuna_messages;
       } else if (choice_number === 2) {
         // 두 번째 선택 - 첫 번째 선택에 따라 분기
         const previous_choice = previous_choices[0];
@@ -316,11 +337,11 @@ module.exports = (req, res) => {
           });
         }
         options = variation.options;
-        yuna_message = variation.yuna_message;
+        yuna_messages = variation.yuna_messages;
       } else if (choice_number === 3) {
         // 세 번째 선택
         options = currentChoice.options;
-        yuna_message = currentChoice.yuna_message;
+        yuna_messages = currentChoice.yuna_messages;
       } else if (selected_option === 'CONTINUE') {
         // 주관식 질문 후 다음 선택지로 연결
         const nextChoiceData = DATABASE_DATA.choices[choice_number - 1];
