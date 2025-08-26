@@ -1,0 +1,3 @@
+Deployment trigger file - Force Vercel production deployment
+Timestamp: 2025-08-26 
+Purpose: Trigger fresh production deployment
