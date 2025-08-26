@@ -304,7 +304,8 @@ module.exports = (req, res) => {
     });
   }
 
-  const handleRequest = async () => {
+  // 비동기 처리로 즉시 실행
+  (async () => {
     try {
       const { message, affection = 75, intimacy = 0, use_gpt = false } = req.body || {};
 
@@ -358,7 +359,7 @@ module.exports = (req, res) => {
         affection_change: affectionChange,
         category: category,
         matched_keywords: matchedKeywords,
-        used_gpt: use_gpt && GPT_CONFIG.enabled,
+        used_gpt: use_gpt && GPT_CONFIG.enabled && GPT_CONFIG.api_key,
         character: {
           name: DATABASE_DATA.character.name,
           current_affection: Math.max(0, Math.min(100, parseInt(affection) + affectionChange))
@@ -366,7 +367,7 @@ module.exports = (req, res) => {
         metadata: {
           timestamp: new Date().toISOString(),
           input_length: message.trim().length,
-          mode: use_gpt && GPT_CONFIG.enabled ? 'gpt' : 'pattern_matching'
+          mode: use_gpt && GPT_CONFIG.enabled && GPT_CONFIG.api_key ? 'gpt' : 'pattern_matching'
         }
       });
 
@@ -379,10 +380,7 @@ module.exports = (req, res) => {
         details: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
     }
-  };
-
-  // 비동기 처리
-  handleRequest();
+  })();
 }
 
 // GPT 설정 업데이트 함수 (admin API에서 호출)

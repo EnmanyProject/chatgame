@@ -641,7 +641,18 @@
                                 <select id="serverModel" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                                     <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
                                     <option value="gpt-4">GPT-4</option>
+                                    <option value="gpt-4-turbo">GPT-4 Turbo</option>
                                 </select>
+                            </div>
+                            <div style="width: 100%; margin: 15px 0;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">최대 토큰 수:</label>
+                                <input type="number" id="serverMaxTokens" value="150" min="50" max="1000"
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="width: 100%; margin: 15px 0;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Temperature (창의성): <span id="tempValue">0.8</span></label>
+                                <input type="range" id="serverTemperature" value="0.8" min="0" max="2" step="0.1"
+                                       style="width: 100%;" oninput="document.getElementById('tempValue').textContent = this.value">
                             </div>
                             <div style="width: 100%; margin: 15px 0;">
                                 <label style="display: block; margin-bottom: 5px; font-weight: bold;">
@@ -796,6 +807,8 @@
                     configData.openai_api_key = document.getElementById('serverApiKey').value;
                     configData.api_model = document.getElementById('serverModel').value;
                     configData.ai_mode_enabled = document.getElementById('serverAiEnabled').checked;
+                    configData.max_tokens = parseInt(document.getElementById('serverMaxTokens')?.value) || 150;
+                    configData.temperature = parseFloat(document.getElementById('serverTemperature')?.value) || 0.8;
                 } else if (currentSection === 'character') {
                     configData.name = document.getElementById('characterName').value;
                     configData.avatar_url = document.getElementById('characterAvatar').value;
@@ -804,9 +817,23 @@
                     configData.scenario = document.getElementById('gameScenario').value;
                 }
 
-                // 실제로는 /api/admin 으로 전송
-                console.log('저장할 설정:', configData);
-                showAlert('설정이 저장되었습니다! (개발 모드)', 'success');
+                // 실제 API 호출
+                const response = await fetch(`/api/admin?action=config&section=${currentSection}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(configData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('설정이 성공적으로 저장되었습니다! ✅', 'success');
+                    if (result.gpt_updated) {
+                        showAlert('GPT API 설정도 업데이트되었습니다! 🤖', 'success');
+                    }
+                } else {
+                    showAlert('저장에 실패했습니다: ' + result.error, 'error');
+                }
                 
             } catch (error) {
                 console.error('설정 저장 실패:', error);
@@ -817,16 +844,51 @@
         // 서버 설정 테스트
         async function testServerConfig() {
             try {
-                showAlert('서버 연결을 테스트하는 중...', 'info');
-                
-                // 실제로는 /api/admin?action=test 로 테스트
-                setTimeout(() => {
-                    showAlert('서버 연결 테스트 성공! ✅', 'success');
-                }, 1500);
+                if (currentSection === 'server') {
+                    showAlert('GPT API 연결을 테스트하는 중... 🤖', 'info');
+                    
+                    // 실제 GPT API 테스트
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: '안녕하세요! 테스트 메시지입니다.',
+                            affection: 75,
+                            intimacy: 0,
+                            use_gpt: true
+                        })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success && result.used_gpt) {
+                        showAlert('GPT API 테스트 성공! ✅ GPT가 정상 작동합니다.', 'success');
+                        showAlert(`테스트 응답: "${result.response}"`, 'success');
+                    } else if (result.success && !result.used_gpt) {
+                        showAlert('⚠️ GPT API가 비활성화되어 패턴 매칭을 사용했습니다.', 'error');
+                    } else {
+                        showAlert('GPT API 테스트 실패: ' + result.message, 'error');
+                    }
+                } else {
+                    // 기타 섹션의 일반 테스트
+                    const response = await fetch('/api/admin?action=test', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ test_type: 'basic' })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        showAlert('서버 연결 테스트 성공! ✅', 'success');
+                    } else {
+                        showAlert('연결 테스트 실패', 'error');
+                    }
+                }
                 
             } catch (error) {
                 console.error('테스트 실패:', error);
-                showAlert('서버 연결 테스트에 실패했습니다.', 'error');
+                showAlert('테스트 중 오류가 발생했습니다.', 'error');
             }
         }
 

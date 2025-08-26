@@ -2,6 +2,15 @@
 const fs = require('fs').promises;
 const path = require('path');
 
+// chat.js의 GPT 설정 업데이트 함수 import
+let updateChatGPTConfig;
+try {
+  const chatModule = require('./chat.js');
+  updateChatGPTConfig = chatModule.updateGPTConfig;
+} catch (error) {
+  console.warn('Could not import chat module updateGPTConfig:', error.message);
+}
+
 // 기본 서버 설정
 const DEFAULT_CONFIG = {
   server: {
@@ -197,15 +206,34 @@ function updateServerConfig(req, res, section) {
       });
     }
     
-    // 특정 섹션 업데이트 (실제로는 메모리에서만 - 프로덕션에서는 파일/DB 저장)
+    // 특정 섹션 업데이트
     DEFAULT_CONFIG[section] = { ...DEFAULT_CONFIG[section], ...updateData };
     DEFAULT_CONFIG.statistics.last_updated = new Date().toISOString();
+    
+    // 서버 섹션일 경우 GPT 설정도 업데이트
+    if (section === 'server' && updateChatGPTConfig) {
+      const gptConfig = {
+        api_key: updateData.openai_api_key || DEFAULT_CONFIG.server.openai_api_key,
+        model: updateData.api_model || DEFAULT_CONFIG.server.api_model,
+        max_tokens: updateData.max_tokens || DEFAULT_CONFIG.server.max_tokens,
+        temperature: updateData.temperature || DEFAULT_CONFIG.server.temperature,
+        enabled: updateData.ai_mode_enabled !== undefined ? updateData.ai_mode_enabled : DEFAULT_CONFIG.server.ai_mode_enabled
+      };
+      
+      try {
+        updateChatGPTConfig(gptConfig);
+        console.log('GPT 설정 업데이트됨:', gptConfig);
+      } catch (error) {
+        console.error('GPT 설정 업데이트 실패:', error);
+      }
+    }
     
     return res.status(200).json({
       success: true,
       message: `${section} configuration updated successfully`,
       updated_section: section,
       new_config: DEFAULT_CONFIG[section],
+      gpt_updated: section === 'server',
       metadata: {
         timestamp: new Date().toISOString(),
         updated_fields: Object.keys(updateData)
