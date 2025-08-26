@@ -198,7 +198,78 @@ module.exports = (req, res) => {
 
   if (req.method === 'POST') {
     try {
-      const { choice_number, selected_option, previous_choices } = req.body || {};
+      const { choice_number, selected_option, previous_choices, subjective_answer, action } = req.body || {};
+
+      // 주관식 답변 처리
+      if (action === 'subjective_response' && subjective_answer) {
+        const hasNextChoice = choice_number < 3;
+        
+        // 윤아의 주관식 답변에 대한 반응
+        const subjectiveResponses = [
+          "와... 오빠가 그렇게 생각해주셨다니 😳 너무 기뻐요! 저도 오빠를 정말 좋아해요 💕",
+          "오빠의 취미가 그거구나! 😊 저도 같이 해보고 싶어요~ 가르쳐주실 거죠?",
+          "우와... 정말 멋진 계획이에요! ✨ 오빠와 그런 추억들을 만들 수 있다면... 정말 행복할 것 같아요! 💕"
+        ];
+
+        if (hasNextChoice) {
+          // 다음 선택지로 진행
+          const nextChoiceData = DATABASE_DATA.choices[choice_number];
+          let nextChoice = null;
+
+          if (choice_number === 1) {
+            // 2번째 선택지는 첫 번째 선택에 따라 결정
+            const firstChoice = previous_choices[0];
+            const variation = nextChoiceData.variations[firstChoice];
+            if (variation) {
+              nextChoice = {
+                id: choice_number + 1,
+                yuna_message: variation.yuna_message,
+                options: variation.options
+              };
+            }
+          } else if (choice_number === 2) {
+            // 3번째 선택지
+            nextChoice = {
+              id: choice_number + 1,
+              yuna_message: nextChoiceData.yuna_message,
+              options: nextChoiceData.options
+            };
+          }
+
+          return res.status(200).json({
+            success: true,
+            yuna_response: subjectiveResponses[choice_number - 1],
+            emotion: "happy",
+            emotion_display: "😊",
+            emotion_color: "#FFD700",
+            affection_change: 2,
+            next_choice: nextChoice,
+            has_next: true,
+            metadata: {
+              timestamp: new Date().toISOString(),
+              choice_number: choice_number + 1,
+              flow_stage: 'subjective_to_next_choice'
+            }
+          });
+        } else {
+          // 모든 선택지 완료 - GPT로 전환
+          return res.status(200).json({
+            success: true,
+            yuna_response: subjectiveResponses[choice_number - 1],
+            emotion: "excited_close",
+            emotion_display: "💞",
+            emotion_color: "#FF1493",
+            affection_change: 3,
+            switch_to_gpt: true,
+            message: "이제부터 자유롭게 대화해보세요!",
+            metadata: {
+              timestamp: new Date().toISOString(),
+              mode: 'free_chat_gpt',
+              flow_stage: 'subjective_to_gpt'
+            }
+          });
+        }
+      }
 
       if (!choice_number || !selected_option) {
         return res.status(400).json({
@@ -246,10 +317,43 @@ module.exports = (req, res) => {
         }
         options = variation.options;
         yuna_message = variation.yuna_message;
-      } else {
+      } else if (choice_number === 3) {
         // 세 번째 선택
         options = currentChoice.options;
         yuna_message = currentChoice.yuna_message;
+      } else if (selected_option === 'CONTINUE') {
+        // 주관식 질문 후 다음 선택지로 연결
+        const nextChoiceData = DATABASE_DATA.choices[choice_number - 1];
+        if (nextChoiceData) {
+          if (choice_number === 2) {
+            const previous_choice = previous_choices[0];
+            const variation = nextChoiceData.variations[previous_choice];
+            if (variation) {
+              return res.status(200).json({
+                success: true,
+                next_choice: {
+                  id: choice_number,
+                  yuna_message: variation.yuna_message,
+                  options: variation.options
+                }
+              });
+            }
+          } else {
+            return res.status(200).json({
+              success: true,
+              next_choice: {
+                id: choice_number,
+                yuna_message: nextChoiceData.yuna_message,
+                options: nextChoiceData.options
+              }
+            });
+          }
+        }
+        return res.status(200).json({
+          success: true,
+          switch_to_gpt: true,
+          message: "모든 선택지를 완료했습니다!"
+        });
       }
 
       // 선택된 옵션 찾기
@@ -264,34 +368,16 @@ module.exports = (req, res) => {
       const emotionData = DATABASE_DATA.emotions[selectedOption.emotion] || 
                          DATABASE_DATA.emotions.happy_future;
 
-      // 다음 선택지 있는지 확인
-      const hasNextChoice = choice_number < 3;
-      let nextChoice = null;
+      // 각 선택지 후 주관식 질문 정의
+      const subjectiveQuestions = [
+        "그런데 오빠는... 평소에 저를 어떻게 생각하고 계셨어요? 😳 정말 궁금해요!",
+        "오빠와 이야기하다 보니... 더 알고 싶어졌어요. 오빠의 취미는 뭐예요? 😊",
+        "마지막으로... 앞으로 저희가 어떤 추억을 만들면 좋을까요? 💕"
+      ];
 
-      if (hasNextChoice) {
-        const nextChoiceData = DATABASE_DATA.choices[choice_number];
-        if (nextChoiceData) {
-          if (choice_number === 1) {
-            // 2번째 선택지는 첫 번째 선택에 따라 결정
-            const nextVariation = nextChoiceData.variations[selected_option];
-            if (nextVariation) {
-              nextChoice = {
-                id: choice_number + 1,
-                yuna_message: nextVariation.yuna_message,
-                options: nextVariation.options
-              };
-            }
-          } else {
-            // 3번째 선택지
-            nextChoice = {
-              id: choice_number + 1,
-              yuna_message: nextChoiceData.yuna_message,
-              options: nextChoiceData.options
-            };
-          }
-        }
-      }
-
+      // 선택지 응답 후 바로 주관식 질문 표시
+      const hasSubjectiveQuestion = choice_number <= 3;
+      
       return res.status(200).json({
         success: true,
         yuna_response: selectedOption.response,
@@ -299,13 +385,17 @@ module.exports = (req, res) => {
         emotion_display: emotionData.display,
         emotion_color: emotionData.color,
         affection_change: selectedOption.affection_change,
-        next_choice: nextChoice,
-        has_next: hasNextChoice,
+        subjective_question: hasSubjectiveQuestion ? {
+          question: subjectiveQuestions[choice_number - 1],
+          choice_number: choice_number
+        } : null,
+        has_subjective: hasSubjectiveQuestion,
         metadata: {
           timestamp: new Date().toISOString(),
           choice_number: choice_number,
           selected_option: selected_option,
-          total_choices: 3
+          total_choices: 3,
+          flow_stage: 'choice_response'
         }
       });
 

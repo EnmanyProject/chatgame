@@ -199,36 +199,47 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-        .loading-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 999;
-        }
-        .loading-screen.show {
+        .typing-indicator {
             display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: #333;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            max-width: 80%;
+            margin-bottom: 15px;
         }
-        .loading-content {
-            text-align: center;
-            color: #fff;
+        .typing-dots {
+            display: flex;
+            gap: 4px;
         }
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #333;
-            border-top-color: #ff69b4;
+        .typing-dot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            background: #888;
+            animation: typingAnimation 1.4s infinite ease-in-out;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .typing-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        .typing-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+        @keyframes typingAnimation {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .typing-text {
+            color: #888;
+            font-size: 14px;
         }
         @keyframes messageSlide {
             from {
@@ -300,13 +311,7 @@
         </footer>
     </div>
 
-    <!-- 로딩 화면 -->
-    <div id="loadingScreen" class="loading-screen">
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <p>윤아가 답변을 준비하고 있어요...</p>
-        </div>
-    </div>
+    <!-- 입력중 표시는 JavaScript로 동적 생성 -->
 
     <script>
         // 게임 상태 관리
@@ -316,7 +321,9 @@
             affection: 75,
             intimacy: 0,
             messageCount: 0,
-            isFreeChatMode: false
+            isFreeChatMode: false,
+            waitingForInput: false,
+            currentQuestion: null
         };
 
         // 페이지 로드시 초기화
@@ -342,8 +349,41 @@
             }
         }
 
+        // 입력중 표시
+        function showTypingIndicator() {
+            const container = document.getElementById('messagesContainer');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message received';
+            typingDiv.id = 'typingIndicator';
+            
+            const indicatorDiv = document.createElement('div');
+            indicatorDiv.className = 'typing-indicator';
+            indicatorDiv.innerHTML = `
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+                <span class="typing-text">윤아가 입력중...</span>
+            `;
+            
+            typingDiv.appendChild(indicatorDiv);
+            container.appendChild(typingDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // 입력중 표시 제거
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
         // 윤아 메시지 표시
         function displayYunaMessage(message, emotion = null) {
+            hideTypingIndicator();
+            
             const container = document.getElementById('messagesContainer');
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message received';
@@ -396,8 +436,6 @@
 
         // 선택지 선택 처리
         async function selectChoice(optionId, choiceText) {
-            showLoading();
-            
             // 선택된 버튼 하이라이트
             document.querySelectorAll('.choice-button').forEach(btn => {
                 btn.classList.remove('selected');
@@ -408,6 +446,9 @@
 
             // 사용자 선택 표시
             displayUserChoice(choiceText);
+            
+            // 입력중 표시
+            showTypingIndicator();
             
             try {
                 const response = await fetch('/api/choice', {
@@ -427,38 +468,48 @@
                     gameState.previousChoices.push(optionId);
                     gameState.affection += data.affection_change || 0;
                     
-                    // 윤아 응답 표시
+                    // 윤아 응답 표시 (1-2초 후)
                     setTimeout(() => {
+                        hideTypingIndicator();
                         displayYunaMessage(data.yuna_response, data.emotion_display);
                         
-                        if (data.switch_to_gpt) {
-                            // GPT 모드로 전환
-                            switchToFreeChatMode();
-                        } else if (data.next_choice) {
-                            // 다음 선택지
-                            gameState.choiceNumber++;
-                            updateProgress(gameState.choiceNumber);
-                            
+                        // 서버에서 받은 주관식 질문 사용
+                        if (data.has_subjective && data.subjective_question) {
                             setTimeout(() => {
-                                displayYunaMessage(data.next_choice.yuna_message);
-                                displayChoices(data.next_choice.options);
-                                updateChoiceIndicator(gameState.choiceNumber);
-                            }, 1000);
-                        } else {
-                            // 선택지 완료 후 자유 채팅 모드로 전환
-                            setTimeout(() => {
-                                switchToFreeChatMode();
-                            }, 2000);
+                                displaySubjectiveQuestion(data.subjective_question.question);
+                            }, 1500);
                         }
-                        
-                        hideLoading();
-                    }, 1000);
+                    }, Math.random() * 1000 + 1000); // 1-2초 랜덤 딜레이
                 }
             } catch (error) {
                 console.error('선택지 처리 실패:', error);
                 displayError('응답 처리에 실패했습니다. 다시 시도해주세요.');
-                hideLoading();
+                hideTypingIndicator();
             }
+        }
+
+        // 주관식 질문 표시
+        function displaySubjectiveQuestion(question) {
+            gameState.currentQuestion = question;
+            gameState.waitingForInput = true;
+            
+            showTypingIndicator();
+            setTimeout(() => {
+                hideTypingIndicator();
+                displayYunaMessage(question);
+                
+                // 선택지 숨기고 입력창 표시
+                document.getElementById('choicesContainer').style.display = 'none';
+                document.getElementById('inputContainer').style.display = 'block';
+                document.getElementById('messageInput').focus();
+                document.getElementById('messageInput').placeholder = '윤아에게 답변해주세요...';
+                
+                // 입력 이벤트 리스너 설정 (아직 설정되지 않은 경우만)
+                if (!document.getElementById('messageInput').hasAttribute('data-listeners-set')) {
+                    initFreeChat();
+                    document.getElementById('messageInput').setAttribute('data-listeners-set', 'true');
+                }
+            }, 1000);
         }
 
         // 자유 채팅 모드로 전환
@@ -501,7 +552,7 @@
             messageInput.focus();
         }
 
-        // 자유 채팅 메시지 전송
+        // 메시지 전송 처리 (주관식/자유채팅 통합)
         async function sendFreeMessage() {
             const messageInput = document.getElementById('messageInput');
             const message = messageInput.value.trim();
@@ -513,37 +564,83 @@
             messageInput.value = '';
             gameState.messageCount++;
             
-            showLoading();
+            // 입력중 표시
+            showTypingIndicator();
             
             try {
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: message,
-                        affection: gameState.affection,
-                        intimacy: gameState.intimacy,
-                        use_gpt: true  // GPT 모드 사용
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    gameState.affection = data.character.current_affection;
+                // 주관식 답변인 경우 choice API 사용
+                if (gameState.waitingForInput) {
+                    const response = await fetch('/api/choice', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'subjective_response',
+                            choice_number: gameState.choiceNumber,
+                            subjective_answer: message,
+                            previous_choices: gameState.previousChoices
+                        })
+                    });
                     
-                    setTimeout(() => {
-                        displayYunaMessage(data.response, data.emotion_display);
-                        hideLoading();
-                    }, 1000);
-                } else {
-                    displayError('응답을 받을 수 없습니다.');
-                    hideLoading();
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        gameState.affection += data.affection_change || 0;
+                        
+                        setTimeout(() => {
+                            hideTypingIndicator();
+                            displayYunaMessage(data.yuna_response, data.emotion_display);
+                            
+                            // 다음 선택지가 있는 경우
+                            if (data.has_next && data.next_choice) {
+                                gameState.waitingForInput = false;
+                                gameState.choiceNumber++;
+                                updateProgress(gameState.choiceNumber);
+                                
+                                setTimeout(() => {
+                                    document.getElementById('inputContainer').style.display = 'none';
+                                    document.getElementById('choicesContainer').style.display = 'block';
+                                    displayChoices(data.next_choice.options);
+                                    displayYunaMessage(data.next_choice.yuna_message);
+                                }, 1500);
+                            } 
+                            // GPT로 전환
+                            else if (data.switch_to_gpt) {
+                                gameState.waitingForInput = false;
+                                setTimeout(() => {
+                                    switchToFreeChatMode();
+                                }, 1500);
+                            }
+                        }, Math.random() * 1000 + 1000);
+                    }
+                } 
+                // 자유 채팅 모드
+                else {
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: message,
+                            affection: gameState.affection,
+                            intimacy: gameState.intimacy,
+                            use_gpt: true
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        gameState.affection = data.character.current_affection;
+                        
+                        setTimeout(() => {
+                            hideTypingIndicator();
+                            displayYunaMessage(data.response, data.emotion_display);
+                        }, Math.random() * 1000 + 1000);
+                    }
                 }
             } catch (error) {
-                console.error('자유 채팅 실패:', error);
+                console.error('메시지 전송 실패:', error);
                 displayError('네트워크 오류가 발생했습니다.');
-                hideLoading();
+                hideTypingIndicator();
             }
         }
 
@@ -561,17 +658,14 @@
                 "선택지 2/3 - 관계를 발전시켜보세요", 
                 "선택지 3/3 - 미래를 결정해보세요"
             ];
-            indicator.textContent = messages[choiceNumber - 1] || "대화를 계속해보세요";
+            if (choiceNumber <= 3) {
+                indicator.textContent = messages[choiceNumber - 1];
+            } else {
+                indicator.textContent = "자유롭게 대화를 나눠보세요 💕";
+            }
         }
 
-        // 로딩 화면 표시/숨김
-        function showLoading() {
-            document.getElementById('loadingScreen').classList.add('show');
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingScreen').classList.remove('show');
-        }
+        // 로딩 함수들은 입력중 표시로 대체됨
 
         // 에러 메시지 표시
         function displayError(errorMessage) {
