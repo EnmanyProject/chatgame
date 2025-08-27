@@ -620,36 +620,70 @@
             }
         }
 
-        // 미리 정의된 선택지 표시
+        // 미리 정의된 선택지 표시 (36개 버전)
         function displayPredefinedChoices() {
-            const predefinedDialogues = [
-                {
-                    message: `${gameState.currentCharacter.name}: "${gameState.currentScenario.setting}에서 뵙게 되어 기쁩니다! 어떻게 하면 좋을까요?"`,
-                    choices: [
-                        { text: "함께 이야기를 나눠요", affection_impact: 2 },
-                        { text: "천천히 시작해볼까요?", affection_impact: 1 },
-                        { text: "뭘 하고 싶으신가요?", affection_impact: 0 }
-                    ]
-                },
-                {
-                    message: `${gameState.currentCharacter.name}: "좋은 생각이에요! 더 알고 싶어요."`,
-                    choices: [
-                        { text: "당신에 대해 궁금해요", affection_impact: 2 },
-                        { text: "이 장소가 좋네요", affection_impact: 1 },
-                        { text: "시간이 어떻게 가는지 몰랐어요", affection_impact: 1 }
-                    ]
-                },
-                {
-                    message: `${gameState.currentCharacter.name}: "정말 즐거운 시간이었어요! 마지막으로 하고 싶은 말이 있나요?"`,
-                    choices: [
-                        { text: "오늘 정말 즐거웠어요", affection_impact: 2 },
-                        { text: "또 만날 수 있을까요?", affection_impact: 3 },
-                        { text: "감사했습니다", affection_impact: 1 }
-                    ]
-                }
-            ];
+            const dialogueGroups = {
+                opening: [
+                    {
+                        message: `${gameState.currentCharacter.name}: "${gameState.currentScenario.setting}에서 뵙게 되어 기쁩니다! 어떻게 하면 좋을까요?"`,
+                        choices: [
+                            { text: "함께 이야기를 나눠요", affection_impact: 2 },
+                            { text: "천천히 시작해볼까요?", affection_impact: 1 },
+                            { text: "뭘 하고 싶으신가요?", affection_impact: 0 }
+                        ]
+                    },
+                    {
+                        message: `${gameState.currentCharacter.name}: "좋은 생각이에요! 더 알고 싶어요."`,
+                        choices: [
+                            { text: "당신에 대해 궁금해요", affection_impact: 2 },
+                            { text: "이 장소가 좋네요", affection_impact: 1 },
+                            { text: "시간이 어떻게 가는지 몰랐어요", affection_impact: 1 }
+                        ]
+                    }
+                ],
+                middle: [
+                    {
+                        message: `${gameState.currentCharacter.name}: "정말 편안하게 느껴져요. 당신과 함께라서 그런가 봐요."`,
+                        choices: [
+                            { text: "저도 같은 마음이에요", affection_impact: 2 },
+                            { text: "그런 말씀 감사해요", affection_impact: 1 },
+                            { text: "좋은 분위기네요", affection_impact: 1 }
+                        ]
+                    },
+                    {
+                        message: `${gameState.currentCharacter.name}: "이런 시간이 계속되면 좋겠어요."`,
+                        choices: [
+                            { text: "저도 그렇게 생각해요", affection_impact: 2 },
+                            { text: "시간이 빨라요", affection_impact: 1 },
+                            { text: "즐거운 시간이에요", affection_impact: 1 }
+                        ]
+                    }
+                ],
+                ending: [
+                    {
+                        message: `${gameState.currentCharacter.name}: "정말 즐거운 시간이었어요! 마지막으로 하고 싶은 말이 있나요?"`,
+                        choices: [
+                            { text: "오늘 정말 즐거웠어요", affection_impact: 2 },
+                            { text: "또 만날 수 있을까요?", affection_impact: 3 },
+                            { text: "감사했습니다", affection_impact: 1 }
+                        ]
+                    }
+                ]
+            };
 
-            const currentDialogue = predefinedDialogues[Math.min(gameState.choiceNumber - 1, predefinedDialogues.length - 1)];
+            // 진행도에 따른 대화 그룹 선택
+            let currentGroup;
+            if (gameState.choiceNumber <= 12) {
+                currentGroup = dialogueGroups.opening;
+            } else if (gameState.choiceNumber <= 30) {
+                currentGroup = dialogueGroups.middle;
+            } else {
+                currentGroup = dialogueGroups.ending;
+            }
+            
+            // 그룹 내에서 순환하여 선택
+            const groupIndex = (gameState.choiceNumber - 1) % currentGroup.length;
+            const currentDialogue = currentGroup[groupIndex];
             
             showTypingIndicator();
             setTimeout(() => {
@@ -729,15 +763,17 @@
             setTimeout(() => {
                 document.getElementById('choicesContainer').classList.remove('show');
                 
-                // 3번째 선택지마다 주관식 질문
-                if (gameState.choiceNumber % 3 === 0) {
+                // 새로운 주관식 질문 타이밍: 4번째, 8번째, 그 후 12번마다
+                const shouldShowSubjective = isSubjectiveQuestionTurn(gameState.choiceNumber);
+                
+                if (shouldShowSubjective) {
                     setTimeout(() => {
                         displaySubjectiveQuestion();
                     }, 1000);
                 } else {
                     // 다음 선택지 시퀀스
                     setTimeout(() => {
-                        if (gameState.choiceNumber < 9) { // 총 9번의 선택지
+                        if (gameState.choiceNumber < 36) { // 총 36번의 선택지
                             startChoiceSequence();
                         } else {
                             endGame();
@@ -747,16 +783,35 @@
             }, 1000);
         }
 
+        // 주관식 질문 타이밍 확인
+        function isSubjectiveQuestionTurn(choiceNum) {
+            // 4번째, 8번째 선택지 후
+            if (choiceNum === 4 || choiceNum === 8) return true;
+            
+            // 12번째 이후부터는 12번마다 (12, 24, 36)
+            if (choiceNum >= 12 && choiceNum % 12 === 0) return true;
+            
+            return false;
+        }
+
         // 주관식 질문 표시
         function displaySubjectiveQuestion() {
             const questions = [
                 `${gameState.currentCharacter.name}에게 하고 싶은 말이 있나요?`,
                 `지금 이 순간 어떤 기분이신가요?`,
-                `${gameState.currentCharacter.name}와 함께 하고 싶은 일이 있나요?`
+                `${gameState.currentCharacter.name}와 함께 하고 싶은 일이 있나요?`,
+                `${gameState.currentCharacter.name}에 대해 어떤 생각이 드시나요?`,
+                `이 시간을 어떻게 보내고 싶으신가요?`,
+                `${gameState.currentCharacter.name}에게서 느끼는 매력은 무엇인가요?`,
+                `지금까지의 시간은 어떠셨나요?`,
+                `${gameState.currentCharacter.name}와의 앞으로가 궁금하신가요?`,
+                `마지막으로 전하고 싶은 마음이 있다면?`
             ];
             
-            const questionIndex = Math.floor(gameState.choiceNumber / 3) - 1;
-            const question = questions[Math.min(questionIndex, questions.length - 1)];
+            // 주관식 질문 횟수 계산 (4번째=1, 8번째=2, 12번째=3, 24번째=4, 36번째=5)
+            const subjectiveCount = getSubjectiveQuestionCount(gameState.choiceNumber);
+            const questionIndex = Math.min(subjectiveCount - 1, questions.length - 1);
+            const question = questions[questionIndex];
             
             showTypingIndicator();
             setTimeout(() => {
@@ -773,7 +828,18 @@
             }, 1500);
         }
 
-        // 자유 메시지 전송
+        // 주관식 질문 횟수 계산
+        function getSubjectiveQuestionCount(choiceNum) {
+            let count = 0;
+            if (choiceNum >= 4) count++;
+            if (choiceNum >= 8) count++;
+            if (choiceNum >= 12) count++;
+            if (choiceNum >= 24) count++;
+            if (choiceNum >= 36) count++;
+            return count;
+        }
+
+        // 자유 메시지 전송 (주관식 답변)
         async function sendFreeMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
@@ -785,6 +851,11 @@
             gameState.messageCount++;
             gameState.waitingForInput = false;
             
+            // 주관식 답변에 대한 호감도 보너스 (10-30점)
+            const subjectiveBonus = calculateSubjectiveBonus(message);
+            gameState.affection += subjectiveBonus;
+            gameState.affection = Math.max(0, Math.min(100, gameState.affection));
+            
             // 입력창 숨기기
             document.getElementById('inputContainer').style.display = 'none';
             
@@ -793,24 +864,57 @@
             setTimeout(() => {
                 hideTypingIndicator();
                 
-                const responses = [
-                    `${gameState.currentCharacter.name}: "정말 좋은 말씀이네요! 저도 비슷한 생각을 했어요."`,
-                    `${gameState.currentCharacter.name}: "그렇게 생각해주셔서 감사해요. 마음이 따뜻해지네요."`,
-                    `${gameState.currentCharacter.name}: "와, 그런 생각을 하셨군요! 정말 흥미로워요."`
-                ];
-                
+                const responses = getSubjectiveResponses(subjectiveBonus);
                 const randomResponse = responses[Math.floor(Math.random() * responses.length)];
                 displayCharacterMessage(randomResponse);
                 
                 // 다음 단계 진행
                 setTimeout(() => {
-                    if (gameState.choiceNumber < 9) {
+                    if (gameState.choiceNumber < 36) {
                         startChoiceSequence();
                     } else {
                         endGame();
                     }
                 }, 2000);
             }, 1500);
+        }
+
+        // 주관식 답변 호감도 보너스 계산
+        function calculateSubjectiveBonus(message) {
+            const messageLength = message.length;
+            const positiveWords = ['좋', '사랑', '행복', '즐거', '기쁘', '감사', '고마', '멋지', '예쁘', '아름다', '따뜻', '소중'];
+            const hasPositiveWord = positiveWords.some(word => message.includes(word));
+            
+            // 길이와 긍정적 단어에 따른 보너스
+            let bonus = 10; // 기본 보너스
+            if (messageLength > 20) bonus += 5;
+            if (messageLength > 50) bonus += 5;
+            if (hasPositiveWord) bonus += 10;
+            
+            return Math.min(bonus, 30); // 최대 30점
+        }
+
+        // 주관식 답변에 따른 응답 생성
+        function getSubjectiveResponses(bonus) {
+            if (bonus >= 25) {
+                return [
+                    `${gameState.currentCharacter.name}: "와... 정말 마음이 따뜻해지는 말이에요. 저도 똑같은 마음이에요!" 💕`,
+                    `${gameState.currentCharacter.name}: "그런 말씀을 해주시다니... 정말 감동이에요. 행복해요!" ✨`,
+                    `${gameState.currentCharacter.name}: "이런 기분 처음이에요. 정말 특별한 시간이네요." 😊`
+                ];
+            } else if (bonus >= 15) {
+                return [
+                    `${gameState.currentCharacter.name}: "정말 좋은 말씀이네요! 저도 비슷한 생각을 했어요."`,
+                    `${gameState.currentCharacter.name}: "그렇게 생각해주셔서 감사해요. 마음이 따뜻해지네요."`,
+                    `${gameState.currentCharacter.name}: "와, 그런 생각을 하셨군요! 정말 흥미로워요."`
+                ];
+            } else {
+                return [
+                    `${gameState.currentCharacter.name}: "네, 알겠어요. 소중한 말씀 감사해요."`,
+                    `${gameState.currentCharacter.name}: "그렇게 생각하시는군요. 이해해요."`,
+                    `${gameState.currentCharacter.name}: "말씀해주셔서 고마워요."`
+                ];
+            }
         }
 
         // 타이핑 표시기
@@ -840,7 +944,7 @@
 
         // 진행도 업데이트
         function updateProgress(choiceNumber) {
-            const progress = (choiceNumber / 9) * 100;
+            const progress = (choiceNumber / 36) * 100;
             document.getElementById('progressBar').style.width = progress + '%';
         }
 
