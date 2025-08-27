@@ -13,9 +13,10 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f2f5;
+            background: #1a1a1a;
             height: 100vh;
             overflow: hidden;
+            color: #ffffff;
         }
 
         .app-container {
@@ -26,15 +27,15 @@
         /* 채팅방 목록 */
         .chat-list {
             width: 350px;
-            background: white;
-            border-right: 1px solid #e5e5e5;
+            background: #2c2c2c;
+            border-right: 1px solid #444444;
             display: flex;
             flex-direction: column;
         }
 
         .chat-list-header {
             padding: 20px;
-            background: #075e54;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             text-align: center;
         }
@@ -50,7 +51,7 @@
 
         .chat-room-item {
             padding: 15px 20px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid #404040;
             cursor: pointer;
             transition: background-color 0.2s ease;
             display: flex;
@@ -59,12 +60,12 @@
         }
 
         .chat-room-item:hover {
-            background: #f5f5f5;
+            background: #3c3c3c;
         }
 
         .chat-room-item.active {
-            background: #e7f3ff;
-            border-left: 3px solid #075e54;
+            background: #4a4a4a;
+            border-left: 3px solid #667eea;
         }
 
         .room-avatar {
@@ -88,19 +89,19 @@
             font-weight: 600;
             font-size: 16px;
             margin-bottom: 5px;
-            color: #2c3e50;
+            color: #ffffff;
         }
 
         .room-preview {
             font-size: 13px;
-            color: #7f8c8d;
+            color: #b0b0b0;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
         .character-badge {
-            background: #3498db;
+            background: #667eea;
             color: white;
             padding: 2px 6px;
             border-radius: 8px;
@@ -113,7 +114,7 @@
             flex: 1;
             display: none;
             flex-direction: column;
-            background: #e5ddd5;
+            background: #1e1e1e;
         }
 
         .chat-area.active {
@@ -121,9 +122,9 @@
         }
 
         .chat-header {
-            background: white;
+            background: #2c2c2c;
             padding: 15px 20px;
-            border-bottom: 1px solid #e5e5e5;
+            border-bottom: 1px solid #444444;
             display: flex;
             align-items: center;
             gap: 15px;
@@ -143,29 +144,30 @@
 
         .chat-info h3 {
             font-size: 16px;
-            color: #2c3e50;
+            color: #ffffff;
         }
 
         .chat-status {
             font-size: 12px;
-            color: #7f8c8d;
+            color: #b0b0b0;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
         .affection-mini {
-            background: #ecf0f1;
+            background: #4a4a4a;
             padding: 3px 8px;
             border-radius: 10px;
             font-size: 11px;
+            color: #ffffff;
         }
 
         .messages-container {
             flex: 1;
             padding: 20px;
             overflow-y: auto;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="%23ffffff" opacity="0.1"/></svg>') repeat;
+            background: #1e1e1e;
         }
 
         .message {
@@ -198,17 +200,17 @@
         }
 
         .message.sent .message-bubble {
-            background: #dcf8c6;
-            color: #333;
+            background: #667eea;
+            color: #ffffff;
             border-bottom-right-radius: 5px;
             margin-left: auto;
         }
 
         .message.received .message-bubble {
-            background: white;
-            color: #333;
+            background: #3c3c3c;
+            color: #ffffff;
             border-bottom-left-radius: 5px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
         .message-time {
@@ -223,13 +225,13 @@
         }
 
         .narration {
-            background: rgba(52, 152, 219, 0.1);
-            border-left: 3px solid #3498db;
+            background: rgba(102, 126, 234, 0.15);
+            border-left: 3px solid #667eea;
             padding: 10px 15px;
             margin: 15px 0;
             border-radius: 5px;
             font-style: italic;
-            color: #2c3e50;
+            color: #e0e0e0;
             text-align: center;
         }
 
@@ -240,9 +242,9 @@
         }
 
         .choice-btn {
-            background: white;
-            border: 2px solid #3498db;
-            color: #3498db;
+            background: #2c2c2c;
+            border: 2px solid #667eea;
+            color: #667eea;
             padding: 12px 16px;
             border-radius: 20px;
             cursor: pointer;
@@ -252,21 +254,21 @@
         }
 
         .choice-btn:hover {
-            background: #3498db;
+            background: #667eea;
             color: white;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(52,152,219,0.3);
+            box-shadow: 0 4px 8px rgba(102,126,234,0.4);
         }
 
         .typing-indicator {
             display: flex;
             align-items: center;
             gap: 10px;
-            background: white;
+            background: #3c3c3c;
             padding: 12px 16px;
             border-radius: 18px;
             border-bottom-left-radius: 5px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
             margin-bottom: 15px;
             max-width: fit-content;
         }
@@ -279,7 +281,7 @@
         .typing-dot {
             width: 6px;
             height: 6px;
-            background: #999;
+            background: #b0b0b0;
             border-radius: 50%;
             animation: typing 1.4s infinite ease-in-out;
         }
@@ -293,16 +295,16 @@
         }
 
         .input-container {
-            background: white;
+            background: #2c2c2c;
             padding: 15px 20px;
-            border-top: 1px solid #e5e5e5;
+            border-top: 1px solid #444444;
         }
 
         .input-group {
             display: flex;
             align-items: center;
             gap: 10px;
-            background: #f0f0f0;
+            background: #1a1a1a;
             border-radius: 25px;
             padding: 8px 15px;
         }
@@ -314,15 +316,20 @@
             padding: 8px 0;
             font-size: 14px;
             outline: none;
+            color: #ffffff;
+        }
+
+        .message-input::placeholder {
+            color: #888888;
         }
 
         .input-group.subjective-mode {
-            background: #e3f2fd;
-            border: 2px solid #2196f3;
+            background: #2a2a4a;
+            border: 2px solid #667eea;
         }
 
         .send-btn {
-            background: #075e54;
+            background: #667eea;
             color: white;
             border: none;
             border-radius: 50%;
@@ -336,7 +343,7 @@
         }
 
         .send-btn:hover {
-            background: #064e44;
+            background: #5a6fd8;
             transform: scale(1.1);
         }
 
@@ -351,20 +358,20 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f8f9fa;
+            background: #1e1e1e;
             flex-direction: column;
-            color: #7f8c8d;
+            color: #b0b0b0;
         }
 
         .welcome-screen h2 {
             margin-bottom: 10px;
-            color: #2c3e50;
+            color: #ffffff;
         }
 
         .loading {
             text-align: center;
             padding: 20px;
-            color: #999;
+            color: #888888;
         }
 
         .game-stats {
@@ -514,25 +521,84 @@
         // 시나리오와 캐릭터 로드
         async function loadScenariosAndCharacters() {
             try {
+                console.log('Loading scenarios and characters...');
+                
                 const [scenarioResponse, characterResponse] = await Promise.all([
                     fetch('/api/scenario?action=list&type=scenarios'),
                     fetch('/api/scenario?action=list&type=characters')
                 ]);
 
+                console.log('Response status:', scenarioResponse.status, characterResponse.status);
+
+                if (!scenarioResponse.ok || !characterResponse.ok) {
+                    throw new Error(`HTTP error! status: ${scenarioResponse.status}`);
+                }
+
                 const scenarioData = await scenarioResponse.json();
                 const characterData = await characterResponse.json();
 
+                console.log('Loaded data:', scenarioData, characterData);
+
                 if (scenarioData.success && characterData.success) {
-                    currentScenarios = scenarioData.scenarios.filter(s => s.active);
-                    currentCharacters = characterData.characters.filter(c => c.active);
+                    currentScenarios = (scenarioData.scenarios || []).filter(s => s.active !== false);
+                    currentCharacters = (characterData.characters || []).filter(c => c.active !== false);
+                    
+                    console.log('Filtered scenarios:', currentScenarios.length);
+                    console.log('Filtered characters:', currentCharacters.length);
+                    
                     displayChatRooms();
                 } else {
-                    throw new Error('Failed to load data');
+                    // 데이터가 없으면 기본 데이터 생성
+                    console.warn('No data found, creating defaults...');
+                    await createDefaultData();
                 }
             } catch (error) {
                 console.error('Failed to load scenarios and characters:', error);
                 document.getElementById('chat-rooms').innerHTML = 
-                    '<p style="padding: 20px; text-align: center; color: red;">데이터를 불러올 수 없습니다.</p>';
+                    `<p style="padding: 20px; text-align: center; color: red;">데이터를 불러올 수 없습니다.<br><small>오류: ${error.message}</small></p>`;
+            }
+        }
+
+        // 기본 데이터 생성
+        async function createDefaultData() {
+            try {
+                // 기본 시나리오 생성
+                await fetch('/api/scenario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'create',
+                        type: 'scenario',
+                        id: 'hangover_soup',
+                        title: '해장국 시나리오',
+                        description: '윤아가 해장국을 끓여주러 온 상황',
+                        setting: '오빠의 집, 숙취 상황',
+                        mood: '케어링, 달콤함',
+                        active: true
+                    })
+                });
+
+                // 기본 캐릭터 생성
+                await fetch('/api/scenario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'create',
+                        type: 'character',
+                        id: 'yuna_infp',
+                        name: '윤아',
+                        age: 20,
+                        mbti: 'INFP',
+                        relationship: '창용 오빠를 1년 넘게 좋아하는 후배',
+                        background: '예술을 전공하는 대학생, 감수성이 풍부함',
+                        active: true
+                    })
+                });
+
+                // 재로드
+                setTimeout(() => loadScenariosAndCharacters(), 1000);
+            } catch (error) {
+                console.error('Failed to create default data:', error);
             }
         }
 

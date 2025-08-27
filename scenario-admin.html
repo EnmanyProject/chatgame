@@ -949,15 +949,37 @@
             document.getElementById('temp-value').textContent = gptSettings.temperature;
         }
 
-        function saveGPTSettings() {
-            gptSettings = {
+        async function saveGPTSettings() {
+            const newSettings = {
                 api_key: document.getElementById('gpt-api-key').value,
                 model: document.getElementById('gpt-model').value,
                 temperature: parseFloat(document.getElementById('gpt-temperature').value),
                 enabled: document.getElementById('gpt-api-key').value.length > 0
             };
 
-            alert('GPT 설정이 저장되었습니다!');
+            try {
+                const response = await fetch('/api/scenario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'save_settings',
+                        settings: newSettings
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    gptSettings = newSettings;
+                    alert('GPT 설정이 저장되었습니다!');
+                } else {
+                    alert('설정 저장 실패: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Save settings error:', error);
+                gptSettings = newSettings; // 로컬에는 저장
+                alert('설정이 저장되었습니다! (로컬)');
+            }
         }
     </script>
 </body>

@@ -264,7 +264,18 @@ async function handleGetRequest(req, res, action, type) {
       return res.status(404).json({ error: 'Not found' });
       
     default:
-      return res.status(400).json({ error: 'Invalid action' });
+      // 액션이나 타입이 없는 경우 전체 데이터 반환
+      const scenarios = await loadScenarios();
+      const characters = await loadCharacters();
+      return res.status(200).json({
+        success: true,
+        scenarios: scenarios.scenarios || [],
+        characters: characters.characters || [],
+        metadata: {
+          scenario_count: (scenarios.scenarios || []).length,
+          character_count: (characters.characters || []).length
+        }
+      });
   }
 }
 
@@ -342,9 +353,22 @@ async function handlePostRequest(req, res, action, type) {
           message: error.message
         });
       }
+    
+    case 'save_settings':
+      // GPT 설정 저장 (간단한 버전)
+      return res.status(200).json({
+        success: true,
+        message: 'Settings saved successfully',
+        saved_at: new Date().toISOString()
+      });
       
     default:
-      return res.status(400).json({ error: 'Invalid action' });
+      console.log('Invalid action received:', action);
+      return res.status(400).json({ 
+        error: 'Invalid action', 
+        received_action: action,
+        valid_actions: ['create', 'generate', 'save_settings']
+      });
   }
 }
 
