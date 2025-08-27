@@ -92,7 +92,11 @@ async function loadScenarios() {
     RUNTIME_SCENARIOS = parsedData; // 메모리에 캐시
     return parsedData;
   } catch (error) {
-    console.log('File load failed, using default scenarios');
+    console.log('File load failed, creating default scenarios file');
+    // 디렉토리 생성
+    await fs.mkdir(path.dirname(SCENARIOS_FILE), { recursive: true });
+    // 기본 데이터로 파일 생성
+    await fs.writeFile(SCENARIOS_FILE, JSON.stringify(DEFAULT_SCENARIOS, null, 2), 'utf8');
     RUNTIME_SCENARIOS = DEFAULT_SCENARIOS;
     return DEFAULT_SCENARIOS;
   }
@@ -112,7 +116,11 @@ async function loadCharacters() {
     RUNTIME_CHARACTERS = parsedData; // 메모리에 캐시
     return parsedData;
   } catch (error) {
-    console.log('File load failed, using default characters');
+    console.log('File load failed, creating default characters file');
+    // 디렉토리 생성
+    await fs.mkdir(path.dirname(CHARACTERS_FILE), { recursive: true });
+    // 기본 데이터로 파일 생성
+    await fs.writeFile(CHARACTERS_FILE, JSON.stringify(DEFAULT_CHARACTERS, null, 2), 'utf8');
     RUNTIME_CHARACTERS = DEFAULT_CHARACTERS;
     return DEFAULT_CHARACTERS;
   }
@@ -132,9 +140,14 @@ async function loadDialogues() {
     RUNTIME_DIALOGUES = parsedData; // 메모리에 캐시
     return parsedData;
   } catch (error) {
-    console.log('Dialogue file load failed, initializing empty dialogues');
-    RUNTIME_DIALOGUES = {};
-    return {};
+    console.log('Dialogue file load failed, creating empty dialogues file');
+    // 디렉토리 생성
+    await fs.mkdir(path.dirname(DIALOGUES_FILE), { recursive: true });
+    // 빈 대화 객체로 파일 생성
+    const emptyDialogues = {};
+    await fs.writeFile(DIALOGUES_FILE, JSON.stringify(emptyDialogues, null, 2), 'utf8');
+    RUNTIME_DIALOGUES = emptyDialogues;
+    return emptyDialogues;
   }
 }
 
@@ -558,12 +571,20 @@ async function handlePostRequest(req, res, action, type) {
         saved_at: new Date().toISOString()
       });
       
+    case 'test':
+      // API 연결 테스트
+      return res.status(200).json({ 
+        success: true, 
+        message: 'API server is running',
+        timestamp: new Date().toISOString()
+      });
+      
     default:
       console.log('Invalid action received:', action);
       return res.status(400).json({ 
         error: 'Invalid action', 
         received_action: action,
-        valid_actions: ['create', 'generate', 'save_settings']
+        valid_actions: ['create', 'generate', 'save_settings', 'test']
       });
   }
 }

@@ -516,7 +516,10 @@
         async function refreshCharacterData() {
             if (gameState.currentCharacter) {
                 try {
-                    const response = await fetch('/api/scenario?action=list&type=characters');
+                    console.log('🔄 캐릭터 데이터 새로고침...');
+                    const response = await fetch('/api/scenario?action=list&type=characters', {
+                        timeout: 5000
+                    });
                     const data = await response.json();
                     
                     if (data.success) {
@@ -525,6 +528,7 @@
                         const updatedCharacter = availableCharacters.find(c => c.id === gameState.currentCharacter.id);
                         if (updatedCharacter) {
                             gameState.currentCharacter = updatedCharacter;
+                            console.log('✅ 캐릭터 데이터 업데이트됨');
                             
                             // 아바타 이미지 새로고침
                             if (updatedCharacter.avatar_url) {
@@ -533,7 +537,8 @@
                         }
                     }
                 } catch (error) {
-                    console.error('Failed to refresh character data:', error);
+                    console.error('❌ 캐릭터 데이터 새로고침 실패:', error);
+                    // 에러가 발생해도 게임 진행에 영향을 주지 않음
                 }
             }
         }
@@ -546,9 +551,20 @@
         });
 
         // 페이지 로드 시 시나리오 로드
-        document.addEventListener('DOMContentLoaded', function() {
-            loadScenarios();
-            setupEventListeners();
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 페이지 로드 완료, 초기화 시작...');
+            
+            try {
+                await loadScenarios();
+                setupEventListeners();
+                console.log('✅ 초기화 완료');
+            } catch (error) {
+                console.error('❌ 초기화 실패:', error);
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; background: red; color: white; padding: 10px; z-index: 9999;';
+                errorDiv.innerHTML = `초기화 실패: ${error.message} <button onclick="location.reload()">새로고침</button>`;
+                document.body.prepend(errorDiv);
+            }
         });
 
         // 이벤트 리스너 설정
@@ -565,23 +581,101 @@
             document.getElementById('sendBtn').addEventListener('click', sendFreeMessage);
         }
 
+        // API 연결 테스트
+        async function testApiConnection() {
+            console.log('🔍 API 연결 테스트 중...');
+            
+            try {
+                // 간단한 헬스 체크
+                const response = await fetch('/api/scenario?action=test', {
+                    method: 'GET',
+                    timeout: 5000
+                });
+                
+                console.log('🔗 API 연결 상태:', response.status);
+                return response.status < 500; // 5xx 에러가 아니면 연결됨
+                
+            } catch (error) {
+                console.error('💥 API 연결 실패:', error);
+                return false;
+            }
+        }
+
         // 시나리오 로드
         async function loadScenarios() {
+            console.log('🔄 시나리오 로딩 시작...');
+            
+            // 로딩 인디케이터 표시
+            const scenarioContainer = document.getElementById('scenarioButtons');
+            if (scenarioContainer) {
+                scenarioContainer.innerHTML = '<div style="text-align: center; color: #666;">🔄 시나리오 로딩 중...</div>';
+            }
+            
             try {
-                const response = await fetch('/api/scenario?action=list&type=scenarios');
-                const data = await response.json();
+                // 먼저 API 연결 테스트
+                const isApiConnected = await testApiConnection();
+                if (!isApiConnected) {
+                    throw new Error('API 서버에 연결할 수 없습니다');
+                }
                 
-                if (data.success && data.scenarios.length > 0) {
+                console.log('📡 API 요청 중: /api/scenario?action=list&type=scenarios');
+                const response = await fetch('/api/scenario?action=list&type=scenarios', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    timeout: 10000 // 10초 타임아웃
+                });
+                
+                console.log('📡 응답 상태:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('📦 받은 데이터:', data);
+                
+                if (data.success && data.scenarios && data.scenarios.length > 0) {
                     availableScenarios = data.scenarios.filter(s => s.active);
+                    console.log('✅ 활성 시나리오:', availableScenarios.length + '개');
                     displayScenarioButtons(availableScenarios);
                 } else {
-                    document.getElementById('scenarioButtons').innerHTML = 
-                        '<div style="color: #e74c3c;">활성화된 시나리오가 없습니다.</div>';
+                    console.warn('⚠️ 활성화된 시나리오가 없음');
+                    if (scenarioContainer) {
+                        scenarioContainer.innerHTML = 
+                            '<div style="color: #e74c3c;">활성화된 시나리오가 없습니다.</div>';
+                    }
                 }
             } catch (error) {
-                console.error('Failed to load scenarios:', error);
-                document.getElementById('scenarioButtons').innerHTML = 
-                    '<div style="color: #e74c3c;">시나리오를 불러올 수 없습니다.</div>';
+                console.error('❌ 시나리오 로딩 실패:', error);
+                
+                // Fallback: 하드코딩된 시나리오 사용
+                console.log('🚑 Fallback: 하드코딩된 시나리오 사용');
+                const fallbackScenarios = [
+                    {
+                        id: "hangover_confession",
+                        title: "어제 밤의 기억",
+                        description: "시우 오빠를 1년째 좋아하는 후배가 어제 술먹고 고백한 후 부끄러워하는 상황",
+                        setting: "다음날 아침, 메신저로 연락",
+                        mood: "부끄러움, 설렘, 긴장감",
+                        active: true
+                    }
+                ];
+                
+                if (scenarioContainer) {
+                    availableScenarios = fallbackScenarios;
+                    displayScenarioButtons(fallbackScenarios);
+                    
+                    // 경고 메시지 추가
+                    const warningDiv = document.createElement('div');
+                    warningDiv.style.cssText = 'background: #fff3cd; color: #856404; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ffeaa7;';
+                    warningDiv.innerHTML = `
+                        ⚠️ 서버에서 시나리오를 불러올 수 없어 기본 시나리오를 사용합니다.<br>
+                        <small>에러: ${error.message}</small><br>
+                        <button onclick="loadScenarios()" style="margin-top: 5px; padding: 3px 6px;">🔄 다시 시도</button>
+                    `;
+                    scenarioContainer.prepend(warningDiv);
+                }
             }
         }
 
@@ -605,24 +699,67 @@
         // 시나리오 선택
         async function selectScenario(scenarioId) {
             gameState.currentScenario = availableScenarios.find(s => s.id === scenarioId);
-            if (!gameState.currentScenario) return;
+            if (!gameState.currentScenario) {
+                console.error('선택한 시나리오를 찾을 수 없습니다:', scenarioId);
+                return;
+            }
+            
+            console.log('📚 시나리오 선택됨:', gameState.currentScenario.title);
 
             // 캐릭터 로드
             try {
-                const response = await fetch('/api/scenario?action=list&type=characters');
+                console.log('🔄 캐릭터 로딩 중...');
+                const response = await fetch('/api/scenario?action=list&type=characters', {
+                    timeout: 5000
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 
-                if (data.success && data.characters.length > 0) {
+                if (data.success && data.characters && data.characters.length > 0) {
                     availableCharacters = data.characters.filter(c => c.active);
+                    console.log('✅ 활성 캐릭터:', availableCharacters.length + '개');
+                    
                     // 첫 번째 활성 캐릭터 자동 선택
                     gameState.currentCharacter = availableCharacters[0];
+                    console.log('👤 선택된 캐릭터:', gameState.currentCharacter.name);
                     startGame();
                 } else {
-                    alert('활성화된 캐릭터가 없습니다.');
+                    throw new Error('활성화된 캐릭터가 없습니다');
                 }
             } catch (error) {
-                console.error('Failed to load characters:', error);
-                alert('캐릭터를 불러올 수 없습니다.');
+                console.error('❌ 캐릭터 로딩 실패:', error);
+                
+                // Fallback: 하드코딩된 캐릭터 사용
+                console.log('🚑 Fallback: 하드코딩된 캐릭터 사용');
+                const fallbackCharacter = {
+                    id: "yuna_infp",
+                    name: "윤아",
+                    age: 20,
+                    mbti: "INFP",
+                    personality_traits: {
+                        primary: ["감성적", "이상주의적", "창의적", "내향적"],
+                        secondary: ["공감능력 뛰어남", "완벽주의 성향", "감정 표현 풍부"],
+                        speech_style: ["부드럽고 따뜻한 말투", "감정적 표현 많음", "이모티콘 자주 사용"]
+                    },
+                    relationship: "시우 오빠를 1년 넘게 좋아하는 후배",
+                    background: "예술을 전공하는 대학생, 감수성이 풍부함",
+                    avatar_url: "",
+                    scenarios: ["hangover_confession"],
+                    active: true
+                };
+                
+                availableCharacters = [fallbackCharacter];
+                gameState.currentCharacter = fallbackCharacter;
+                
+                console.log('👤 Fallback 캐릭터 사용:', gameState.currentCharacter.name);
+                
+                // 경고 메시지와 함께 게임 시작
+                alert('⚠️ 서버에서 캐릭터를 불러올 수 없어 기본 캐릭터를 사용합니다.\n에러: ' + error.message);
+                startGame();
             }
         }
 
