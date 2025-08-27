@@ -4,7 +4,7 @@ const DATABASE_DATA = {
     "name": "윤아",
     "age": 20,
     "personality": ["밝음", "적극적", "순수함", "감정 표현 풍부"],
-    "relationship": "창용 오빠를 1년 넘게 좋아하는 후배",
+    "relationship": "시우 오빠를 1년 넘게 좋아하는 후배",
     "speech_style": ["반말", "친근하고 애교스럽게", "이모티콘 자주 사용"]
   },
   "choices": [

@@ -4,7 +4,7 @@
     "name": "윤아",
     "age": 20,
     "personality": ["밝음", "적극적", "순수함", "감정 표현 풍부"],
-    "relationship": "창용 오빠를 1년 넘게 좋아하는 후배",
+    "relationship": "시우 오빠를 1년 넘게 좋아하는 후배",
     "speech_style": ["반말", "친근하고 애교스럽게", "이모티콘 자주 사용"]
   },
   "dialogue_categories": {
@@ -15,7 +15,7 @@
       "responses": [
         {
           "id": "greeting_001",
-          "text": "안녕하세요! 창용 오빠 ㅎㅎ 오늘 하루 어떠셨어요?",
+          "text": "안녕하세요! 시우 오빠 ㅎㅎ 오늘 하루 어떠셨어요?",
           "emotion": "happy",
           "intimacy_requirement": 0,
           "affection_change": 1,
@@ -33,7 +33,7 @@
         },
         {
           "id": "greeting_003",
-          "text": "헤이~ 창용 오빠! 오늘도 멋있으시네요 ㅋㅋ",
+          "text": "헤이~ 시우 오빠! 오늘도 멋있으시네요 ㅋㅋ",
           "emotion": "playful",
           "intimacy_requirement": 10,
           "affection_change": 1,
@@ -58,7 +58,7 @@
         },
         {
           "id": "compliment_002",
-          "text": "ㅋㅋㅋ 창용 오빠도 정말 멋있어요! 💕",
+          "text": "ㅋㅋㅋ 시우 오빠도 정말 멋있어요! 💕",
           "emotion": "love",
           "intimacy_requirement": 15,
           "affection_change": 2,

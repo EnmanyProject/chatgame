@@ -43,7 +43,7 @@ const DEFAULT_CHARACTERS = {
         secondary: ["공감능력 뛰어남", "완벽주의 성향", "감정 표현 풍부"],
         speech_style: ["부드럽고 따뜻한 말투", "감정적 표현 많음", "이모티콘 자주 사용"]
       },
-      relationship: "창용 오빠를 1년 넘게 좋아하는 후배",
+      relationship: "시우 오빠를 1년 넘게 좋아하는 후배",
       background: "예술을 전공하는 대학생, 감수성이 풍부함",
       avatar_url: "https://via.placeholder.com/60x60/ff69b4/ffffff?text=윤아",
       scenarios: ["hangover_soup", "study_together"],

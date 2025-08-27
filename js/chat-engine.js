@@ -325,7 +325,7 @@ class ChatEngine {
 
         let reactionText = '';
         if (this.affection >= 80) {
-            reactionText = 'ㅋㅋㅋㅋㅋ 창용 오빠 너무 좋아요! 💕';
+            reactionText = 'ㅋㅋㅋㅋㅋ 시우 오빠 너무 좋아요! 💕';
         } else if (this.affection >= 60) {
             reactionText = 'ㅎㅎ 그렇게 말해주시니 기분 좋아요 😊';
         } else if (this.affection >= 40) {

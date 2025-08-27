@@ -378,6 +378,38 @@
             background: #555;
             border-color: #ff69b4;
         }
+        
+        /* 호감도 하트 스타일 */
+        .affection-hearts {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+            min-width: 100px;
+            justify-content: flex-end;
+        }
+        
+        .heart {
+            font-size: 16px;
+            color: #ff1493;
+            opacity: 0;
+            transform: scale(0);
+            animation: heartPop 0.5s ease-out forwards;
+        }
+        
+        @keyframes heartPop {
+            0% {
+                opacity: 0;
+                transform: scale(0) rotate(0deg);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.3) rotate(10deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
     </style>
 </head>
 <body>
@@ -407,6 +439,10 @@
                     <span id="scenarioInfo" class="last-seen">시나리오 선택</span>
                 </div>
             </div>
+            <!-- 호감도 하트 표시 -->
+            <div id="affectionHearts" class="affection-hearts">
+                <!-- 하트들이 여기에 동적으로 추가됩니다 -->
+            </div>
             <button id="restartBtn" class="restart-btn" onclick="resetGame()">🔄 다시 시작</button>
         </header>
 
@@ -435,7 +471,7 @@
             currentScenario: null,
             currentCharacter: null,
             choiceNumber: 0,
-            affection: 75,
+            affection: 0,  // 초기 호감도 0으로 변경
             messageCount: 0,
             previousChoices: [],
             waitingForInput: false,
@@ -444,6 +480,39 @@
 
         let availableScenarios = [];
         let availableCharacters = [];
+
+        // 캐릭터 데이터 새로고침 함수
+        async function refreshCharacterData() {
+            if (gameState.currentCharacter) {
+                try {
+                    const response = await fetch('/api/scenario?action=list&type=characters');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        availableCharacters = data.characters.filter(c => c.active);
+                        // 현재 캐릭터 업데이트
+                        const updatedCharacter = availableCharacters.find(c => c.id === gameState.currentCharacter.id);
+                        if (updatedCharacter) {
+                            gameState.currentCharacter = updatedCharacter;
+                            
+                            // 아바타 이미지 새로고침
+                            if (updatedCharacter.avatar_url) {
+                                document.getElementById('characterAvatar').src = updatedCharacter.avatar_url;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Failed to refresh character data:', error);
+                }
+            }
+        }
+
+        // 페이지 포커스 시 데이터 새로고침
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && gameState.currentCharacter) {
+                refreshCharacterData();
+            }
+        });
 
         // 페이지 로드 시 시나리오 로드
         document.addEventListener('DOMContentLoaded', function() {
@@ -581,6 +650,26 @@
         async function startChoiceSequence() {
             gameState.choiceNumber++;
             updateProgress(gameState.choiceNumber);
+            
+            // 윤아 해장국 시나리오 특별 선택지 (초기)
+            if (gameState.currentScenario.id === 'hangover_soup' && gameState.choiceNumber === 1) {
+                displayCharacterMessage('오빠~ 해장국 끓여드릴게요! 근데 정말 궁금한게 있어요...', 
+                    '(윤아가 부끄러워하면서도 용기를 내어 물어본다)', '😳');
+                
+                setTimeout(() => {
+                    displayCharacterMessage('오빠는... 저를 왜 좋아하세요?', '', '😊💕');
+                    
+                    setTimeout(() => {
+                        const specialChoices = [
+                            { text: '너는 내가 왜 좋아?', affection_impact: 5 },
+                            { text: '너는 내가 왜 좋아?', affection_impact: 5 },
+                            { text: '너는 내가 왜 좋아?', affection_impact: 5 }
+                        ];
+                        displayChoices(specialChoices);
+                    }, 1000);
+                }, 1500);
+                return;
+            }
             
             try {
                 // GPT 설정 가져오기
@@ -834,9 +923,24 @@
             displayUserMessage(choice.text);
             gameState.previousChoices.push(optionIndex);
             
+            // 윤아 해장국 시나리오 특별 응답 처리
+            if (gameState.currentScenario.id === 'hangover_soup' && 
+                gameState.choiceNumber === 1 && 
+                choice.text === '너는 내가 왜 좋아?') {
+                
+                setTimeout(() => {
+                    displayCharacterMessage('사람들이 오빠꺼가 크다고 해서요 😳💕', 
+                        '(윤아가 얼굴을 빨갛게 하면서도 솔직하게 대답한다)', '😍');
+                }, 1000);
+            }
+            
             // 호감도 업데이트
+            const oldAffection = gameState.affection;
             gameState.affection += choice.affection_impact || 0;
             gameState.affection = Math.max(0, Math.min(100, gameState.affection));
+            
+            // 하트 UI 업데이트
+            updateAffectionHearts(gameState.affection, oldAffection);
             
             // 선택지 숨기기
             setTimeout(() => {
@@ -862,15 +966,10 @@
             }, 1000);
         }
 
-        // 주관식 질문 타이밍 확인
+        // 주관식 질문 타이밍 확인 (3번마다)
         function isSubjectiveQuestionTurn(choiceNum) {
-            // 4번째, 8번째 선택지 후
-            if (choiceNum === 4 || choiceNum === 8) return true;
-            
-            // 12번째 이후부터는 12번마다 (12, 24, 36)
-            if (choiceNum >= 12 && choiceNum % 12 === 0) return true;
-            
-            return false;
+            // 3번마다 주관식 질문 (3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36)
+            return choiceNum % 3 === 0;
         }
 
         // 주관식 질문 표시
@@ -931,9 +1030,13 @@
             gameState.waitingForInput = false;
             
             // 주관식 답변에 대한 호감도 보너스 (10-30점)
+            const oldAffection = gameState.affection;
             const subjectiveBonus = calculateSubjectiveBonus(message);
             gameState.affection += subjectiveBonus;
             gameState.affection = Math.max(0, Math.min(100, gameState.affection));
+            
+            // 하트 UI 업데이트
+            updateAffectionHearts(gameState.affection, oldAffection);
             
             // 입력창 숨기기
             document.getElementById('inputContainer').style.display = 'none';
@@ -983,27 +1086,64 @@
             return Math.min(bonus, 30); // 최대 30점
         }
 
+        // 호감도에 따른 이모지 추가 함수
+        function addEmojisBasedOnAffection(text, affection) {
+            if (affection >= 80) {
+                // 매우 높은 호감도: 많은 이모지 사용
+                const emojis = ['💕', '✨', '😊', '💖', '🥰', '😍'];
+                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                return text + ' ' + randomEmoji;
+            } else if (affection >= 60) {
+                // 높은 호감도: 적당한 이모지 사용
+                const emojis = ['😊', '😌', '💖', '✨'];
+                if (Math.random() > 0.3) { // 70% 확률로 이모지 추가
+                    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                    return text + ' ' + randomEmoji;
+                }
+            } else if (affection >= 40) {
+                // 중간 호감도: 가끔 이모지 사용
+                const emojis = ['😊', '😌'];
+                if (Math.random() > 0.6) { // 40% 확률로 이모지 추가
+                    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                    return text + ' ' + randomEmoji;
+                }
+            } else if (affection >= 20) {
+                // 낮은 호감도: 거의 사용 안함
+                if (Math.random() > 0.8) { // 20% 확률로 이모지 추가
+                    return text + ' 😊';
+                }
+            }
+            // 매우 낮은 호감도: 이모지 사용 안함
+            return text;
+        }
+
         // 주관식 답변에 따른 응답 생성
         function getSubjectiveResponses(bonus) {
+            let responses;
             if (bonus >= 25) {
-                return [
-                    `${gameState.currentCharacter.name}: "와... 정말 마음이 따뜻해지는 말이에요. 저도 똑같은 마음이에요!" 💕`,
-                    `${gameState.currentCharacter.name}: "그런 말씀을 해주시다니... 정말 감동이에요. 행복해요!" ✨`,
-                    `${gameState.currentCharacter.name}: "이런 기분 처음이에요. 정말 특별한 시간이네요." 😊`
+                responses = [
+                    "와... 정말 마음이 따뜻해지는 말이에요. 저도 똑같은 마음이에요!",
+                    "그런 말씀을 해주시다니... 정말 감동이에요. 행복해요!",
+                    "이런 기분 처음이에요. 정말 특별한 시간이네요."
                 ];
             } else if (bonus >= 15) {
-                return [
-                    `${gameState.currentCharacter.name}: "정말 좋은 말씀이네요! 저도 비슷한 생각을 했어요."`,
-                    `${gameState.currentCharacter.name}: "그렇게 생각해주셔서 감사해요. 마음이 따뜻해지네요."`,
-                    `${gameState.currentCharacter.name}: "와, 그런 생각을 하셨군요! 정말 흥미로워요."`
+                responses = [
+                    "정말 좋은 말씀이네요! 저도 비슷한 생각을 했어요.",
+                    "그렇게 생각해주셔서 감사해요. 마음이 따뜻해지네요.",
+                    "와, 그런 생각을 하셨군요! 정말 흥미로워요."
                 ];
             } else {
-                return [
-                    `${gameState.currentCharacter.name}: "네, 알겠어요. 소중한 말씀 감사해요."`,
-                    `${gameState.currentCharacter.name}: "그렇게 생각하시는군요. 이해해요."`,
-                    `${gameState.currentCharacter.name}: "말씀해주셔서 고마워요."`
+                responses = [
+                    "네, 알겠어요. 소중한 말씀 감사해요.",
+                    "그렇게 생각하시는군요. 이해해요.",
+                    "말씀해주셔서 고마워요."
                 ];
             }
+            
+            // 호감도에 따라 이모지 추가
+            return responses.map(response => 
+                `${gameState.currentCharacter.name}: "${addEmojisBasedOnAffection(response, gameState.affection)}"`
+            );
         }
 
         // 타이핑 표시기
@@ -1035,6 +1175,32 @@
         function updateProgress(choiceNumber) {
             const progress = (choiceNumber / 36) * 100;
             document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        // 호감도 하트 업데이트
+        function updateAffectionHearts(newAffection, oldAffection = 0) {
+            const heartsContainer = document.getElementById('affectionHearts');
+            const newHeartCount = Math.floor(newAffection / 10);
+            const oldHeartCount = Math.floor(oldAffection / 10);
+            
+            // 새로운 하트가 생겼을 때만 애니메이션과 함께 추가
+            if (newHeartCount > oldHeartCount) {
+                for (let i = oldHeartCount; i < newHeartCount; i++) {
+                    setTimeout(() => {
+                        const heart = document.createElement('span');
+                        heart.className = 'heart';
+                        heart.textContent = '💖';
+                        heart.style.animationDelay = `${(i - oldHeartCount) * 0.1}s`;
+                        heartsContainer.appendChild(heart);
+                    }, 100);
+                }
+            }
+            // 하트가 줄어들었을 때
+            else if (newHeartCount < oldHeartCount) {
+                while (heartsContainer.children.length > newHeartCount) {
+                    heartsContainer.removeChild(heartsContainer.lastChild);
+                }
+            }
         }
 
         // 게임 종료

@@ -4,7 +4,7 @@ const DATABASE_DATA = {
     "name": "윤아",
     "age": 20,
     "personality": ["밝음", "적극적", "순수함", "감정 표현 풍부"],
-    "relationship": "창용 오빠를 1년 넘게 좋아하는 후배",
+    "relationship": "시우 오빠를 1년 넘게 좋아하는 후배",
     "speech_style": ["반말", "친근하고 애교스럽게", "이모티콘 자주 사용"]
   },
   "dialogue_patterns": {
@@ -17,7 +17,7 @@ const DATABASE_DATA = {
           "affection_change": 1
         },
         {
-          "text": "창용 오빠... 어제 제가 너무 이상했죠? ㅠㅠ",
+          "text": "시우 오빠... 어제 제가 너무 이상했죠? ㅠㅠ",
           "emotion": "shy", 
           "affection_change": 0
         },
@@ -97,7 +97,7 @@ const DATABASE_DATA = {
           "affection_change": 3
         },
         {
-          "text": "ㅋㅋㅋ 창용 오빠도 정말 멋있어요! 💕",
+          "text": "ㅋㅋㅋ 시우 오빠도 정말 멋있어요! 💕",
           "emotion": "love",
           "affection_change": 2
         },
@@ -258,7 +258,7 @@ async function analyzeUserInputWithGPT(message, affection, intimacy, currentCont
   const systemPrompt = `당신은 어드벤처 게임의 분석 엔진입니다. 사용자 입력을 분석하여 적절한 윤아의 반응을 결정해주세요.
 
 윤아 캐릭터 설정:
-- 20세 대학생, 창용 오빠를 1년 넘게 좋아하는 후배
+- 20세 대학생, 시우 오빠를 1년 넘게 좋아하는 후배
 - 성격: 밝고 적극적, 순수함, 감정 표현 풍부
 - 현재 상황: 해장국을 끓여주러 온 상황
 - 현재 호감도: ${affection}/100
