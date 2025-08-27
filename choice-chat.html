@@ -710,14 +710,6 @@
                         }, Math.random() * 1000 + 800);
                         
                         console.log('GPT 분석 결과:', data.matched_keywords);
-                            
-                            // GPT 오류 시 추가 안내 메시지
-                            if (data.gpt_error && data.error_message) {
-                                setTimeout(() => {
-                                    displayError(data.error_message);
-                                }, 1500);
-                            }
-                        }, Math.random() * 1000 + 1000);
                     } else {
                         hideTypingIndicator();
                         displayError('응답을 받을 수 없습니다. 잠시 후 다시 시도해주세요.');
