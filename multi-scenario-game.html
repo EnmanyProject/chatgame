@@ -546,8 +546,26 @@
             if (gameState.currentCharacter.avatar_url) {
                 document.getElementById('characterAvatar').src = gameState.currentCharacter.avatar_url;
                 document.getElementById('characterAvatar').onerror = function() {
-                    this.src = 'https://via.placeholder.com/50x50/ff69b4/ffffff?text=' + gameState.currentCharacter.name.charAt(0);
+                    // 기본 이미지로 Base64 아바타 사용
+                    this.src = 'data:image/svg+xml;base64,' + btoa(`
+                        <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50">
+                            <rect width="50" height="50" fill="#ff69b4"/>
+                            <text x="25" y="32" text-anchor="middle" fill="white" font-size="18" font-family="Arial, sans-serif">
+                                ${gameState.currentCharacter.name.charAt(0)}
+                            </text>
+                        </svg>
+                    `);
                 };
+            } else {
+                // 기본 아바타 설정
+                document.getElementById('characterAvatar').src = 'data:image/svg+xml;base64,' + btoa(`
+                    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50">
+                        <rect width="50" height="50" fill="#ff69b4"/>
+                        <text x="25" y="32" text-anchor="middle" fill="white" font-size="18" font-family="Arial, sans-serif">
+                            ${gameState.currentCharacter.name.charAt(0)}
+                        </text>
+                    </svg>
+                `);
             }
 
             // 첫 번째 대화 시작
@@ -640,12 +658,12 @@
                         ]
                     },
                     {
-                        dialogue: "좋은 생각이에요! 더 알고 싶어요.",
-                        narration: `${gameState.currentCharacter.name}의 눈이 호기심으로 반짝인다`,
+                        dialogue: "저도 좋았어요! 이런 곳에서 만나니까 더 좋네요. 당신은 어떠세요?",
+                        narration: `윤아가 미소를 지으며 관심을 보이는 것 같다. 대화가 자연스럽게 이어지고 있다. 어떻게 대답할까?`,
                         choices: [
-                            { text: "당신에 대해 궁금해요", affection_impact: 2 },
-                            { text: "이 장소가 좋네요", affection_impact: 1 },
-                            { text: "시간이 어떻게 가는지 몰랐어요", affection_impact: 1 }
+                            { text: "저도 좋아요! 윤아 씨에 대해 더 알고 싶어요 😊", affection_impact: 2 },
+                            { text: "여기 정말 좋은 곳이네요. 자주 오세요?", affection_impact: 1 },
+                            { text: "네, 시간이 빨리 지나가는 것 같아요", affection_impact: 1 }
                         ]
                     },
                     {
