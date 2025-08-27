@@ -886,8 +886,8 @@
                     setTimeout(() => {
                         const specialChoices = [
                             { text: '너는 내가 왜 좋아?', affection_impact: 8 },
-                            { text: '너는 내가 왜 좋아?', affection_impact: 8 },
-                            { text: '너는 내가 왜 좋아?', affection_impact: 8 }
+                            { text: '솔직히... 나도 잘 모르겠어', affection_impact: 5 },
+                            { text: '그런 건 나중에 얘기하자', affection_impact: 3 }
                         ];
                         displayChoices(specialChoices);
                     }, 1500);
@@ -907,8 +907,8 @@
                             displayCharacterMessage(selectedDialogue.dialogue, selectedDialogue.narration);
                             
                             setTimeout(() => {
-                                if (isSubjectiveQuestion(gameState.choiceNumber)) {
-                                    displaySubjectiveInput();
+                                if (isSubjectiveQuestionTurn(gameState.choiceNumber)) {
+                                    displaySubjectiveQuestion();
                                 } else {
                                     displayChoices(selectedDialogue.choices);
                                 }
@@ -987,27 +987,27 @@
                         dialogue: `${gameState.currentScenario.setting}에서 뵙게 되어 기쁩니다! 어떻게 하면 좋을까요?`,
                         narration: `첫 만남이라 조금 긴장된다. 어떤 말로 대화를 시작할까? 친근하게 시작하는 게 좋을까, 아니면 속내고 싶을까?`,
                         choices: [
-                            { text: "안녕하세요! 저도 만나서 반가워요 ☺️", affection_impact: 2 },
-                            { text: "네, 좋은 곳이네요. 어떻게 지내셨어요?", affection_impact: 1 },
-                            { text: "음... 뭐부터 이야기할까요?", affection_impact: 0 }
+                            { text: "안녕! 나도 만나서 반갑다 ☺️", affection_impact: 2 },
+                            { text: "여기 좋은 곳이네. 어떻게 지내?", affection_impact: 1 },
+                            { text: "음... 뭐부터 얘기할까?", affection_impact: 0 }
                         ]
                     },
                     {
                         dialogue: "저도 좋았어요! 이런 곳에서 만나니까 더 좋네요. 당신은 어떠세요?",
                         narration: `윤아가 미소를 지으며 관심을 보이는 것 같다. 대화가 자연스럽게 이어지고 있다. 어떻게 대답할까?`,
                         choices: [
-                            { text: "저도 좋아요! 윤아 씨에 대해 더 알고 싶어요 😊", affection_impact: 2 },
-                            { text: "여기 정말 좋은 곳이네요. 자주 오세요?", affection_impact: 1 },
-                            { text: "네, 시간이 빨리 지나가는 것 같아요", affection_impact: 1 }
+                            { text: "나도 좋다! 윤아에 대해 더 알고 싶어 😊", affection_impact: 2 },
+                            { text: "여기 정말 좋은 곳이네. 자주 와?", affection_impact: 1 },
+                            { text: "맞아, 시간이 빨리 지나가네", affection_impact: 1 }
                         ]
                     },
                     {
                         dialogue: "이런 대화가 정말 좋아요. 더 많은 이야기를 나누고 싶어요.",
                         narration: `${gameState.currentCharacter.name}가 편안한 표정을 짓는다`,
                         choices: [
-                            { text: "저도 같은 마음이에요", affection_impact: 2 },
-                            { text: "무엇에 대해 이야기할까요?", affection_impact: 1 },
-                            { text: "좋은 분위기네요", affection_impact: 1 }
+                            { text: "나도 같은 마음이야", affection_impact: 2 },
+                            { text: "뭐에 대해 얘기할까?", affection_impact: 1 },
+                            { text: "좋은 분위기네", affection_impact: 1 }
                         ]
                     }
                 ],
@@ -1016,27 +1016,27 @@
                         dialogue: "정말 편안하게 느껴져요. 당신과 함께라서 그런가 봐요.",
                         narration: `${gameState.currentCharacter.name}가 살짝 미소를 지으며 당신을 바라본다`,
                         choices: [
-                            { text: "저도 같은 마음이에요", affection_impact: 2 },
-                            { text: "그런 말씀 감사해요", affection_impact: 1 },
-                            { text: "좋은 분위기네요", affection_impact: 1 }
+                            { text: "나도 같은 마음이야", affection_impact: 2 },
+                            { text: "그런 말 고마워", affection_impact: 1 },
+                            { text: "좋은 분위기네", affection_impact: 1 }
                         ]
                     },
                     {
                         dialogue: "이런 시간이 계속되면 좋겠어요.",
                         narration: `${gameState.currentCharacter.name}가 아쉬운 듯한 표정을 짓는다`,
                         choices: [
-                            { text: "저도 그렇게 생각해요", affection_impact: 2 },
-                            { text: "시간이 빨라요", affection_impact: 1 },
-                            { text: "즐거운 시간이에요", affection_impact: 1 }
+                            { text: "나도 그렇게 생각해", affection_impact: 2 },
+                            { text: "시간이 빨라", affection_impact: 1 },
+                            { text: "즐거운 시간이야", affection_impact: 1 }
                         ]
                     },
                     {
                         dialogue: "당신과 이야기하니까 정말 행복해요.",
                         narration: `${gameState.currentCharacter.name}의 얼굴이 밝아진다`,
                         choices: [
-                            { text: "저도 정말 행복해요", affection_impact: 2 },
-                            { text: "당신 덕분이에요", affection_impact: 2 },
-                            { text: "좋은 시간 보내고 있어요", affection_impact: 1 }
+                            { text: "나도 정말 행복해", affection_impact: 2 },
+                            { text: "너 덕분이야", affection_impact: 2 },
+                            { text: "좋은 시간 보내고 있어", affection_impact: 1 }
                         ]
                     }
                 ],
@@ -1045,18 +1045,18 @@
                         dialogue: "정말 즐거운 시간이었어요! 마지막으로 하고 싶은 말이 있나요?",
                         narration: `${gameState.currentCharacter.name}가 아쉬운 듯 미소를 짓는다`,
                         choices: [
-                            { text: "오늘 정말 즐거웠어요", affection_impact: 2 },
-                            { text: "또 만날 수 있을까요?", affection_impact: 3 },
-                            { text: "감사했습니다", affection_impact: 1 }
+                            { text: "오늘 정말 즐거웠어", affection_impact: 2 },
+                            { text: "또 만날 수 있을까?", affection_impact: 3 },
+                            { text: "고마웠어", affection_impact: 1 }
                         ]
                     },
                     {
                         dialogue: "이제 헤어져야 하는군요. 정말 아쉬워요.",
                         narration: `${gameState.currentCharacter.name}가 살짝 슬픈 표정을 짓는다`,
                         choices: [
-                            { text: "저도 정말 아쉬워요", affection_impact: 2 },
-                            { text: "다음에 또 봐요", affection_impact: 1 },
-                            { text: "좋은 시간이었어요", affection_impact: 1 }
+                            { text: "나도 정말 아쉬워", affection_impact: 2 },
+                            { text: "다음에 또 보자", affection_impact: 1 },
+                            { text: "좋은 시간이었어", affection_impact: 1 }
                         ]
                     }
                 ]
