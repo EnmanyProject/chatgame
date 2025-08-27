@@ -540,13 +540,44 @@
                     <textarea id="character-background" class="form-control" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>프로필 사진 업로드</label>
-                    <input type="file" id="character-avatar-file" class="form-control" accept="image/*">
-                    <small class="form-text text-muted">이미지 파일을 선택하세요 (JPG, PNG, GIF, WebP 지원, 최대 5MB)</small>
-                    <div id="avatar-preview" style="margin-top: 10px; display: none;">
-                        <img id="avatar-preview-image" style="max-width: 100px; max-height: 100px; border-radius: 8px; border: 2px solid #ddd;">
-                        <p id="avatar-file-info" style="font-size: 12px; color: #666; margin: 5px 0;"></p>
+                    <label>프로필 사진 선택</label>
+                    
+                    <!-- 프로젝트 캐릭터 사진 선택 -->
+                    <div style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                        <h6 style="margin: 0 0 10px 0; color: #495057;">📁 프로젝트 캐릭터 사진</h6>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; margin-bottom: 10px;">
+                            <div style="position: relative; text-align: center;">
+                                <img src="photo/윤아.jpg" class="project-img" data-src="photo/윤아.jpg" alt="윤아 사진" 
+                                     style="width: 70px; height: 70px; object-fit: cover; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: all 0.3s;">
+                                <div style="font-size: 11px; margin-top: 5px; color: #666;">윤아</div>
+                            </div>
+                            <div style="position: relative; text-align: center;">
+                                <img src="photo/미나.png" class="project-img" data-src="photo/미나.png" alt="미나 사진"
+                                     style="width: 70px; height: 70px; object-fit: cover; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: all 0.3s;">
+                                <div style="font-size: 11px; margin-top: 5px; color: #666;">미나</div>
+                            </div>
+                            <div style="position: relative; text-align: center;">
+                                <img src="assets/images/yuna.svg" class="project-img" data-src="assets/images/yuna.svg" alt="윤아 기본"
+                                     style="width: 70px; height: 70px; object-fit: cover; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: all 0.3s;">
+                                <div style="font-size: 11px; margin-top: 5px; color: #666;">기본SVG</div>
+                            </div>
+                        </div>
+                        <small style="color: #6c757d;">💡 위의 이미지를 클릭하면 바로 선택됩니다</small>
                     </div>
+                    
+                    <!-- 파일 업로드 -->
+                    <div style="margin-bottom: 15px;">
+                        <h6 style="margin: 0 0 10px 0; color: #495057;">📤 새 이미지 업로드</h6>
+                        <input type="file" id="character-avatar-file" class="form-control" accept="image/*">
+                        <small class="form-text text-muted">이미지 파일을 선택하세요 (JPG, PNG, GIF, WebP 지원, 최대 5MB)</small>
+                    </div>
+                    
+                    <!-- 미리보기 -->
+                    <div id="avatar-preview" style="margin-top: 15px; display: none; text-align: center; padding: 15px; background: #e9ecef; border-radius: 8px;">
+                        <img id="avatar-preview-image" style="max-width: 100px; max-height: 100px; border-radius: 8px; border: 2px solid #007bff;">
+                        <p id="avatar-file-info" style="font-size: 12px; color: #666; margin: 5px 0 0 0;"></p>
+                    </div>
+                    
                     <input type="hidden" id="character-avatar-url" value="">
                 </div>
                 <button type="submit" class="btn btn-success">💾 저장</button>
@@ -675,6 +706,30 @@
             });
             // 파일 업로드 핸들러
             document.getElementById('character-avatar-file').addEventListener('change', handleAvatarUpload);
+            
+            // 프로젝트 이미지 선택 핸들러
+            document.querySelectorAll('.project-img').forEach(img => {
+                img.addEventListener('click', function() {
+                    // 모든 프로젝트 이미지 선택 해제
+                    document.querySelectorAll('.project-img').forEach(i => {
+                        i.style.border = '3px solid transparent';
+                    });
+                    
+                    // 클릭된 이미지 선택 표시
+                    this.style.border = '3px solid #007bff';
+                    
+                    // 이미지 URL 설정
+                    const imageSrc = this.getAttribute('data-src');
+                    document.getElementById('character-avatar-url').value = imageSrc;
+                    
+                    // 미리보기 표시
+                    document.getElementById('avatar-preview').style.display = 'block';
+                    document.getElementById('avatar-preview-image').src = imageSrc;
+                    document.getElementById('avatar-file-info').textContent = `프로젝트 이미지 선택됨: ${this.alt}`;
+                    
+                    console.log('✅ 프로젝트 이미지 선택:', imageSrc);
+                });
+            });
         }
 
         // 섹션 전환

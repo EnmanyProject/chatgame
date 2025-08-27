@@ -217,6 +217,76 @@ async function saveDialogues(data) {
   }
 }
 
+// GPT를 통한 주관식 응답 평가
+async function evaluateSubjectiveResponseWithGPT({character, scenario, userMessage, currentAffection, choiceNumber, characterMbti, gptConfig}) {
+  if (!gptConfig.enabled || !gptConfig.api_key) {
+    throw new Error('GPT API not configured');
+  }
+
+  const mbtiPrompt = createMBTIPrompt(character.mbti);
+  
+  const systemPrompt = `당신은 "${character.name}" 캐릭터로서 주관식 질문에 대한 답변을 평가하고 반응하는 AI입니다.
+
+캐릭터 정보:
+- 이름: ${character.name} (${character.age}세)
+- MBTI: ${character.mbti}
+- 성격: ${character.personality_traits.primary.join(', ')}
+- 말투: ${character.personality_traits.speech_style.join(', ')}
+- 관계: ${character.relationship}
+
+${mbtiPrompt}
+
+현재 상황:
+- 현재 호감도: ${currentAffection}
+- 선택 횟수: ${choiceNumber}
+- 시나리오: ${scenario.title}
+
+사용자의 답변을 MBTI 성격에 맞게 평가하고 반응해주세요.
+
+다음 JSON 형식으로 응답해주세요:
+{
+  "character_response": "캐릭터의 반응 (자연스럽고 감정이 담긴 50자 이내)",
+  "narration": "상황 설명 지문 (30자 이내)", 
+  "affection_change": 호감도_변화값_숫자(-10에서_+10사이),
+  "emotion": "감정_상태(happy/shy/love/excited/curious/sad/neutral)",
+  "mbti_analysis": "MBTI에_따른_반응_분석(한_줄)"
+}`;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${gptConfig.api_key}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: gptConfig.model || 'gpt-3.5-turbo',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `사용자 답변: "${userMessage}"\n\n이 답변에 대한 ${character.name}의 반응을 생성해주세요.` }
+        ],
+        max_tokens: 300,
+        temperature: gptConfig.temperature || 0.8,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`GPT API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const result = JSON.parse(data.choices[0].message.content.trim());
+    
+    // 호감도 변화값 검증
+    result.affection_change = Math.max(-10, Math.min(10, result.affection_change || 0));
+    
+    return result;
+  } catch (error) {
+    console.error('GPT subjective evaluation failed:', error);
+    throw error;
+  }
+}
+
 // GPT API를 통한 대사 생성
 async function generateDialogueWithGPT(character, scenario, situation, gptConfig) {
   if (!gptConfig.enabled || !gptConfig.api_key) {
@@ -563,6 +633,52 @@ async function handlePostRequest(req, res, action, type) {
         });
       }
     
+    case 'evaluate_subjective_response':
+      // GPT를 통한 주관식 응답 평가
+      const { character_id, scenario_id, user_message, current_affection, choice_number, character_mbti, gpt_config } = req.body;
+      
+      if (!gpt_config || !gpt_config.enabled || !gpt_config.api_key) {
+        return res.status(400).json({
+          error: 'GPT API not configured',
+          message: 'GPT API key is required for subjective response evaluation'
+        });
+      }
+
+      try {
+        const characters = await loadCharacters();
+        const scenarios = await loadScenarios();
+        
+        const character = characters.characters.find(c => c.id === character_id);
+        const scenario = scenarios.scenarios.find(s => s.id === scenario_id);
+        
+        if (!character || !scenario) {
+          return res.status(400).json({ error: 'Character or scenario not found' });
+        }
+
+        // GPT를 통한 MBTI 기반 응답 생성
+        const evaluationResult = await evaluateSubjectiveResponseWithGPT({
+          character,
+          scenario,
+          userMessage: user_message,
+          currentAffection: current_affection,
+          choiceNumber: choice_number,
+          characterMbti: character_mbti,
+          gptConfig: gpt_config
+        });
+
+        return res.status(200).json({
+          success: true,
+          ...evaluationResult
+        });
+        
+      } catch (error) {
+        console.error('Subjective response evaluation error:', error);
+        return res.status(500).json({
+          error: 'Failed to evaluate subjective response',
+          message: error.message
+        });
+      }
+
     case 'save_settings':
       // GPT 설정 저장 (간단한 버전)
       return res.status(200).json({
