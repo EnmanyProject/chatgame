@@ -2,10 +2,32 @@
 const fs = require('fs').promises;
 const path = require('path');
 
-// 시나리오 및 캐릭터 데이터 파일 경로
-const SCENARIOS_FILE = path.join(__dirname, '../data/scenarios.json');
-const CHARACTERS_FILE = path.join(__dirname, '../data/characters.json');
-const DIALOGUES_FILE = path.join(__dirname, '../data/dialogues.json');
+// fetch API가 없는 Node.js 환경을 위한 폴리필
+let fetch;
+if (typeof globalThis.fetch === 'undefined') {
+  try {
+    fetch = require('node-fetch');
+  } catch (error) {
+    // node-fetch가 없는 경우 간단한 대체 구현
+    fetch = null;
+  }
+} else {
+  fetch = globalThis.fetch;
+}
+
+// 시나리오 및 캐릭터 데이터 파일 경로 (Vercel 환경 고려)
+let SCENARIOS_FILE, CHARACTERS_FILE, DIALOGUES_FILE;
+try {
+  // Vercel 환경에서는 프로젝트 루트에서 상대경로로 접근
+  SCENARIOS_FILE = path.join(process.cwd(), 'data/scenarios.json');
+  CHARACTERS_FILE = path.join(process.cwd(), 'data/characters.json');
+  DIALOGUES_FILE = path.join(process.cwd(), 'data/dialogues.json');
+} catch (error) {
+  console.warn('Path resolution failed, using fallback paths');
+  SCENARIOS_FILE = './data/scenarios.json';
+  CHARACTERS_FILE = './data/characters.json';
+  DIALOGUES_FILE = './data/dialogues.json';
+}
 
 // 기본 시나리오 데이터
 const DEFAULT_SCENARIOS = {
@@ -79,50 +101,108 @@ let RUNTIME_SETTINGS = {}; // 설정 저장소
 
 // 파일에서 데이터 로드 (우선), 실패 시 메모리에서 로드, 그것도 실패 시 기본값
 async function loadScenarios() {
-  // 메모리에 있는 경우 우선 반환
-  if (RUNTIME_SCENARIOS) {
-    console.log('Loading scenarios from memory');
-    return RUNTIME_SCENARIOS;
-  }
-  
   try {
-    console.log('Attempting to load scenarios from file');
+    // 메모리에 있는 경우 우선 반환
+    if (RUNTIME_SCENARIOS) {
+      console.log('✅ Loading scenarios from memory');
+      return RUNTIME_SCENARIOS;
+    }
+    
+    console.log(`📁 Attempting to load scenarios from: ${SCENARIOS_FILE}`);
+    
+    // 파일 존재 확인
+    try {
+      await fs.access(SCENARIOS_FILE);
+      console.log('📁 Scenarios file exists, reading...');
+    } catch (accessError) {
+      console.log('📁 Scenarios file does not exist, will create default');
+      throw new Error('File does not exist');
+    }
+    
     const data = await fs.readFile(SCENARIOS_FILE, 'utf8');
+    console.log(`📁 Read ${data.length} bytes from scenarios file`);
+    
     const parsedData = JSON.parse(data);
+    console.log(`✅ Parsed scenarios: ${parsedData.scenarios?.length || 0} items`);
+    
     RUNTIME_SCENARIOS = parsedData; // 메모리에 캐시
     return parsedData;
+    
   } catch (error) {
-    console.log('File load failed, creating default scenarios file');
-    // 디렉토리 생성
-    await fs.mkdir(path.dirname(SCENARIOS_FILE), { recursive: true });
-    // 기본 데이터로 파일 생성
-    await fs.writeFile(SCENARIOS_FILE, JSON.stringify(DEFAULT_SCENARIOS, null, 2), 'utf8');
-    RUNTIME_SCENARIOS = DEFAULT_SCENARIOS;
-    return DEFAULT_SCENARIOS;
+    console.log(`⚠️ File load failed: ${error.message}, creating default scenarios`);
+    
+    try {
+      // 디렉토리 생성
+      await fs.mkdir(path.dirname(SCENARIOS_FILE), { recursive: true });
+      console.log(`📁 Created directory: ${path.dirname(SCENARIOS_FILE)}`);
+      
+      // 기본 데이터로 파일 생성
+      const defaultData = JSON.stringify(DEFAULT_SCENARIOS, null, 2);
+      await fs.writeFile(SCENARIOS_FILE, defaultData, 'utf8');
+      console.log(`✅ Created default scenarios file with ${defaultData.length} bytes`);
+      
+      RUNTIME_SCENARIOS = DEFAULT_SCENARIOS;
+      return DEFAULT_SCENARIOS;
+      
+    } catch (createError) {
+      console.error(`❌ Failed to create scenarios file: ${createError.message}`);
+      // 파일 생성도 실패한 경우 메모리만 사용
+      RUNTIME_SCENARIOS = DEFAULT_SCENARIOS;
+      return DEFAULT_SCENARIOS;
+    }
   }
 }
 
 async function loadCharacters() {
-  // 메모리에 있는 경우 우선 반환
-  if (RUNTIME_CHARACTERS) {
-    console.log('Loading characters from memory');
-    return RUNTIME_CHARACTERS;
-  }
-  
   try {
-    console.log('Attempting to load characters from file');
+    // 메모리에 있는 경우 우선 반환
+    if (RUNTIME_CHARACTERS) {
+      console.log('✅ Loading characters from memory');
+      return RUNTIME_CHARACTERS;
+    }
+    
+    console.log(`📁 Attempting to load characters from: ${CHARACTERS_FILE}`);
+    
+    // 파일 존재 확인
+    try {
+      await fs.access(CHARACTERS_FILE);
+      console.log('📁 Characters file exists, reading...');
+    } catch (accessError) {
+      console.log('📁 Characters file does not exist, will create default');
+      throw new Error('File does not exist');
+    }
+    
     const data = await fs.readFile(CHARACTERS_FILE, 'utf8');
+    console.log(`📁 Read ${data.length} bytes from characters file`);
+    
     const parsedData = JSON.parse(data);
+    console.log(`✅ Parsed characters: ${parsedData.characters?.length || 0} items`);
+    
     RUNTIME_CHARACTERS = parsedData; // 메모리에 캐시
     return parsedData;
+    
   } catch (error) {
-    console.log('File load failed, creating default characters file');
-    // 디렉토리 생성
-    await fs.mkdir(path.dirname(CHARACTERS_FILE), { recursive: true });
-    // 기본 데이터로 파일 생성
-    await fs.writeFile(CHARACTERS_FILE, JSON.stringify(DEFAULT_CHARACTERS, null, 2), 'utf8');
-    RUNTIME_CHARACTERS = DEFAULT_CHARACTERS;
-    return DEFAULT_CHARACTERS;
+    console.log(`⚠️ File load failed: ${error.message}, creating default characters`);
+    
+    try {
+      // 디렉토리 생성
+      await fs.mkdir(path.dirname(CHARACTERS_FILE), { recursive: true });
+      console.log(`📁 Created directory: ${path.dirname(CHARACTERS_FILE)}`);
+      
+      // 기본 데이터로 파일 생성
+      const defaultData = JSON.stringify(DEFAULT_CHARACTERS, null, 2);
+      await fs.writeFile(CHARACTERS_FILE, defaultData, 'utf8');
+      console.log(`✅ Created default characters file with ${defaultData.length} bytes`);
+      
+      RUNTIME_CHARACTERS = DEFAULT_CHARACTERS;
+      return DEFAULT_CHARACTERS;
+      
+    } catch (createError) {
+      console.error(`❌ Failed to create characters file: ${createError.message}`);
+      // 파일 생성도 실패한 경우 메모리만 사용
+      RUNTIME_CHARACTERS = DEFAULT_CHARACTERS;
+      return DEFAULT_CHARACTERS;
+    }
   }
 }
 
@@ -223,6 +303,10 @@ async function evaluateSubjectiveResponseWithGPT({character, scenario, userMessa
     throw new Error('GPT API not configured');
   }
 
+  if (!fetch) {
+    throw new Error('fetch API is not available in this environment');
+  }
+
   const mbtiPrompt = createMBTIPrompt(character.mbti);
   
   const systemPrompt = `당신은 "${character.name}" 캐릭터로서 주관식 질문에 대한 답변을 평가하고 반응하는 AI입니다.
@@ -291,6 +375,10 @@ ${mbtiPrompt}
 async function generateDialogueWithGPT(character, scenario, situation, gptConfig) {
   if (!gptConfig.enabled || !gptConfig.api_key) {
     throw new Error('GPT API not configured');
+  }
+
+  if (!fetch) {
+    throw new Error('fetch API is not available in this environment');
   }
 
   const mbtiPrompt = createMBTIPrompt(character.mbti);
@@ -367,7 +455,7 @@ function createMBTIPrompt(mbti) {
   return mbtiGuides[mbti] || '개성 있는 캐릭터로 표현해주세요.';
 }
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   // CORS 헤더
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -378,41 +466,43 @@ module.exports = (req, res) => {
     return res.status(200).end();
   }
 
-  // POST 요청의 경우 body에서, GET 요청의 경우 query에서 action을 가져옴
-  let action, type;
-  
-  if (req.method === 'POST') {
-    action = req.body.action || req.query.action;
-    type = req.body.type || req.query.type;
-  } else {
-    action = req.query.action;
-    type = req.query.type;
-  }
-
-  // 디버깅용 로그
-  console.log(`[${req.method}] /api/scenario - action: "${action}", type: "${type}"`);
-  if (req.method === 'POST') {
-    console.log('POST body:', JSON.stringify(req.body, null, 2));
-  }
-
   try {
+    // POST 요청의 경우 body에서, GET 요청의 경우 query에서 action을 가져옴
+    let action, type;
+    
+    if (req.method === 'POST') {
+      action = req.body?.action || req.query?.action;
+      type = req.body?.type || req.query?.type;
+    } else {
+      action = req.query?.action;
+      type = req.query?.type;
+    }
+
+    // 디버깅용 로그
+    console.log(`[${req.method}] /api/scenario - action: "${action}", type: "${type}"`);
+    if (req.method === 'POST' && req.body) {
+      console.log('POST body:', JSON.stringify(req.body, null, 2));
+    }
+
     switch (req.method) {
       case 'GET':
-        return handleGetRequest(req, res, action, type);
+        return await handleGetRequest(req, res, action, type);
       case 'POST':
-        return handlePostRequest(req, res, action, type);
+        return await handlePostRequest(req, res, action, type);
       case 'PUT':
-        return handlePutRequest(req, res, action, type);
+        return await handlePutRequest(req, res, action, type);
       case 'DELETE':
-        return handleDeleteRequest(req, res, action, type);
+        return await handleDeleteRequest(req, res, action, type);
       default:
         return res.status(405).json({ error: 'Method not allowed' });
     }
   } catch (error) {
     console.error('Scenario API Error:', error);
+    console.error('Error stack:', error.stack);
     return res.status(500).json({ 
       error: 'Internal server error',
-      message: error.message 
+      message: error.message,
+      timestamp: new Date().toISOString()
     });
   }
 };
