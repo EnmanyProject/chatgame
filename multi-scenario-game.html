@@ -839,14 +839,19 @@
             }
             
             function setDefaultAvatar() {
-                avatarElement.src = 'data:image/svg+xml;base64,' + btoa(`
+                // 한글 지원을 위한 UTF-8 인코딩
+                const svgString = `
                     <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50">
                         <circle cx="25" cy="25" r="25" fill="#ff69b4"/>
                         <text x="25" y="32" text-anchor="middle" fill="white" font-size="18" font-family="Arial, sans-serif" font-weight="bold">
                             ${gameState.currentCharacter.name.charAt(0)}
                         </text>
                     </svg>
-                `);
+                `;
+                
+                // UTF-8을 지원하는 인코딩 방식 사용
+                const encoded = btoa(unescape(encodeURIComponent(svgString)));
+                avatarElement.src = 'data:image/svg+xml;base64,' + encoded;
                 avatarElement.style.opacity = '1';
             }
 
