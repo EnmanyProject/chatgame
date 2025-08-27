@@ -1219,36 +1219,54 @@
             }
 
             try {
-                // FormData 생성
-                const formData = new FormData();
-                formData.append('avatar', file);
+                // 파일을 Base64로 변환
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        // 업로드 진행 표시
+                        document.getElementById('avatar-file-info').textContent = '업로드 중...';
+                        document.getElementById('avatar-preview').style.display = 'block';
 
-                // 업로드 진행 표시
-                document.getElementById('avatar-file-info').textContent = '업로드 중...';
-                document.getElementById('avatar-preview').style.display = 'block';
+                        // 서버에 업로드
+                        const response = await fetch('/api/upload', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                fileData: e.target.result,
+                                fileName: file.name,
+                                fileType: file.type
+                            })
+                        });
 
-                // 서버에 업로드
-                const response = await fetch('/api/upload', {
-                    method: 'POST',
-                    body: formData
-                });
+                        const data = await response.json();
 
-                const data = await response.json();
-
-                if (data.success) {
-                    // 성공시 미리보기 표시 및 URL 저장
-                    document.getElementById('avatar-preview-image').src = data.file.dataUrl;
-                    document.getElementById('avatar-file-info').textContent = 
-                        `${file.name} (${Math.round(file.size / 1024)}KB)`;
-                    document.getElementById('character-avatar-url').value = data.file.url;
-                } else {
-                    alert('업로드 실패: ' + data.error);
-                    event.target.value = '';
-                    document.getElementById('avatar-preview').style.display = 'none';
-                }
+                        if (data.success) {
+                            // 성공시 미리보기 표시 및 URL 저장
+                            document.getElementById('avatar-preview-image').src = data.file.dataUrl;
+                            document.getElementById('avatar-file-info').textContent = 
+                                `${file.name} (${Math.round(file.size / 1024)}KB)`;
+                            document.getElementById('character-avatar-url').value = data.file.url;
+                        } else {
+                            alert('업로드 실패: ' + data.error);
+                            event.target.value = '';
+                            document.getElementById('avatar-preview').style.display = 'none';
+                        }
+                    } catch (error) {
+                        console.error('Upload error:', error);
+                        alert('업로드 중 오류가 발생했습니다: ' + error.message);
+                        event.target.value = '';
+                        document.getElementById('avatar-preview').style.display = 'none';
+                    }
+                };
+                
+                // 파일 읽기 시작
+                reader.readAsDataURL(file);
+                
             } catch (error) {
-                console.error('Upload error:', error);
-                alert('업로드 중 오류가 발생했습니다: ' + error.message);
+                console.error('File read error:', error);
+                alert('파일 읽기 중 오류가 발생했습니다: ' + error.message);
                 event.target.value = '';
                 document.getElementById('avatar-preview').style.display = 'none';
             }

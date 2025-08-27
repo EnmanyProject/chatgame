@@ -1,10 +1,11 @@
-// Vercel 서버리스 환경에서 파일 업로드 처리
-import { IncomingForm } from 'formidable';
-import { promises as fs } from 'fs';
-import path from 'path';
-
-// Vercel에서는 /tmp 디렉토리만 쓰기 가능
-const UPLOAD_DIR = '/tmp/uploads';
+// Vercel 서버리스 환경에서 파일 업로드 처리 (Base64 방식)
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
+  },
+};
 
 // 메모리 기반 파일 저장소 (Vercel 서버리스 대응)
 let RUNTIME_FILES = {};
@@ -21,40 +22,31 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      // multipart/form-data 파싱
-      const form = new IncomingForm({
-        uploadDir: UPLOAD_DIR,
-        keepExtensions: true,
-        maxFileSize: 5 * 1024 * 1024, // 5MB 제한
-      });
-
-      // 업로드 디렉토리 생성
-      try {
-        await fs.mkdir(UPLOAD_DIR, { recursive: true });
-      } catch (error) {
-        // 이미 존재하는 경우 무시
+      const { fileData, fileName, fileType } = req.body;
+      
+      if (!fileData || !fileName) {
+        return res.status(400).json({ error: 'File data and name are required' });
       }
 
-      const [fields, files] = await form.parse(req);
-      
-      if (!files.avatar || !files.avatar[0]) {
-        return res.status(400).json({ error: 'No file uploaded' });
+      // Base64 데이터인지 확인
+      if (!fileData.startsWith('data:')) {
+        return res.status(400).json({ error: 'Invalid file data format' });
       }
 
-      const uploadedFile = files.avatar[0];
-      const fileExtension = path.extname(uploadedFile.originalFilename || '').toLowerCase();
+      // 파일 크기 체크 (대략적으로)
+      const base64Data = fileData.split(',')[1];
+      const sizeInBytes = (base64Data.length * 3) / 4;
+      if (sizeInBytes > 5 * 1024 * 1024) { // 5MB 제한
+        return res.status(400).json({ error: 'File too large (max 5MB)' });
+      }
+
+      // 이미지 파일 타입 확인
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      const detectedType = fileData.split(';')[0].split(':')[1];
       
-      // 이미지 파일만 허용
-      const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-      if (!allowedExtensions.includes(fileExtension)) {
+      if (!allowedTypes.includes(detectedType)) {
         return res.status(400).json({ error: 'Only image files are allowed' });
       }
-
-      // 파일 내용을 Base64로 인코딩하여 메모리에 저장
-      const fileBuffer = await fs.readFile(uploadedFile.filepath);
-      const base64Data = fileBuffer.toString('base64');
-      const mimeType = getMimeType(fileExtension);
-      const dataUrl = `data:${mimeType};base64,${base64Data}`;
       
       // 고유 파일 ID 생성
       const fileId = `avatar_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -62,34 +54,30 @@ export default async function handler(req, res) {
       // 메모리에 저장
       RUNTIME_FILES[fileId] = {
         id: fileId,
-        originalName: uploadedFile.originalFilename,
-        mimeType: mimeType,
-        size: uploadedFile.size,
-        dataUrl: dataUrl,
+        originalName: fileName,
+        mimeType: detectedType,
+        size: sizeInBytes,
+        dataUrl: fileData,
         uploadedAt: new Date().toISOString()
       };
-
-      // 임시 파일 삭제
-      try {
-        await fs.unlink(uploadedFile.filepath);
-      } catch (error) {
-        console.log('Failed to delete temp file:', error);
-      }
 
       return res.status(200).json({
         success: true,
         file: {
           id: fileId,
           url: `/api/upload?file=${fileId}`,
-          dataUrl: dataUrl,
-          size: uploadedFile.size,
-          name: uploadedFile.originalFilename
+          dataUrl: fileData,
+          size: Math.round(sizeInBytes),
+          name: fileName
         }
       });
 
     } catch (error) {
       console.error('Upload error:', error);
-      return res.status(500).json({ error: 'Upload failed: ' + error.message });
+      return res.status(500).json({ 
+        error: 'Upload failed: ' + error.message,
+        success: false 
+      });
     }
   }
 
@@ -115,18 +103,6 @@ export default async function handler(req, res) {
   }
 
   return res.status(405).json({ error: 'Method not allowed' });
-}
-
-// MIME 타입 결정
-function getMimeType(extension) {
-  const mimeTypes = {
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.png': 'image/png',
-    '.gif': 'image/gif',
-    '.webp': 'image/webp'
-  };
-  return mimeTypes[extension] || 'application/octet-stream';
 }
 
 // 파일 목록 조회 (관리용)
