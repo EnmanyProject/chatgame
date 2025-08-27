@@ -201,7 +201,22 @@ module.exports = (req, res) => {
     return res.status(200).end();
   }
 
-  const { action, type } = req.query;
+  // POST 요청의 경우 body에서, GET 요청의 경우 query에서 action을 가져옴
+  let action, type;
+  
+  if (req.method === 'POST') {
+    action = req.body.action || req.query.action;
+    type = req.body.type || req.query.type;
+  } else {
+    action = req.query.action;
+    type = req.query.type;
+  }
+
+  // 디버깅용 로그
+  console.log(`[${req.method}] /api/scenario - action: "${action}", type: "${type}"`);
+  if (req.method === 'POST') {
+    console.log('POST body:', JSON.stringify(req.body, null, 2));
+  }
 
   try {
     switch (req.method) {
