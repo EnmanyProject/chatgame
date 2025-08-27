@@ -6,6 +6,6 @@
     "openai": "^4.20.1"
   },
   "engines": {
-    "node": "22.x"
+    "node": "20.x"
   }
 }
