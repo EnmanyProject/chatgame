@@ -160,6 +160,12 @@
             color: #fff;
             border-bottom-left-radius: 4px;
         }
+        .message.received.narration .message-bubble {
+            background: #222;
+            color: #888;
+            font-style: italic;
+            border-bottom-left-radius: 4px;
+        }
         .message.sent .message-bubble {
             background: #ff69b4;
             color: #fff;
@@ -546,7 +552,7 @@
 
             // 첫 번째 대화 시작
             setTimeout(() => {
-                displayCharacterMessage(`${gameState.currentScenario.setting}에 오신 것을 환영합니다!`);
+                displayCharacterMessage(`${gameState.currentScenario.setting}에 오신 것을 환영합니다!`, '', '');
                 setTimeout(() => {
                     startChoiceSequence();
                 }, 1500);
@@ -598,7 +604,7 @@
                         
                         setTimeout(() => {
                             hideTypingIndicator();
-                            displayCharacterMessage(`${generated.narration} "${generated.dialogue}"`);
+                            displayCharacterMessage(generated.dialogue, generated.narration);
                             
                             setTimeout(() => {
                                 displayChoices(generated.choices.map(choice => ({
@@ -625,7 +631,8 @@
             const dialogueGroups = {
                 opening: [
                     {
-                        message: `${gameState.currentCharacter.name}: "${gameState.currentScenario.setting}에서 뵙게 되어 기쁩니다! 어떻게 하면 좋을까요?"`,
+                        dialogue: `${gameState.currentScenario.setting}에서 뵙게 되어 기쁩니다! 어떻게 하면 좋을까요?`,
+                        narration: `${gameState.currentCharacter.name}가 밝은 미소를 지으며 인사한다`,
                         choices: [
                             { text: "함께 이야기를 나눠요", affection_impact: 2 },
                             { text: "천천히 시작해볼까요?", affection_impact: 1 },
@@ -633,17 +640,28 @@
                         ]
                     },
                     {
-                        message: `${gameState.currentCharacter.name}: "좋은 생각이에요! 더 알고 싶어요."`,
+                        dialogue: "좋은 생각이에요! 더 알고 싶어요.",
+                        narration: `${gameState.currentCharacter.name}의 눈이 호기심으로 반짝인다`,
                         choices: [
                             { text: "당신에 대해 궁금해요", affection_impact: 2 },
                             { text: "이 장소가 좋네요", affection_impact: 1 },
                             { text: "시간이 어떻게 가는지 몰랐어요", affection_impact: 1 }
                         ]
+                    },
+                    {
+                        dialogue: "이런 대화가 정말 좋아요. 더 많은 이야기를 나누고 싶어요.",
+                        narration: `${gameState.currentCharacter.name}가 편안한 표정을 짓는다`,
+                        choices: [
+                            { text: "저도 같은 마음이에요", affection_impact: 2 },
+                            { text: "무엇에 대해 이야기할까요?", affection_impact: 1 },
+                            { text: "좋은 분위기네요", affection_impact: 1 }
+                        ]
                     }
                 ],
                 middle: [
                     {
-                        message: `${gameState.currentCharacter.name}: "정말 편안하게 느껴져요. 당신과 함께라서 그런가 봐요."`,
+                        dialogue: "정말 편안하게 느껴져요. 당신과 함께라서 그런가 봐요.",
+                        narration: `${gameState.currentCharacter.name}가 살짝 미소를 지으며 당신을 바라본다`,
                         choices: [
                             { text: "저도 같은 마음이에요", affection_impact: 2 },
                             { text: "그런 말씀 감사해요", affection_impact: 1 },
@@ -651,21 +669,41 @@
                         ]
                     },
                     {
-                        message: `${gameState.currentCharacter.name}: "이런 시간이 계속되면 좋겠어요."`,
+                        dialogue: "이런 시간이 계속되면 좋겠어요.",
+                        narration: `${gameState.currentCharacter.name}가 아쉬운 듯한 표정을 짓는다`,
                         choices: [
                             { text: "저도 그렇게 생각해요", affection_impact: 2 },
                             { text: "시간이 빨라요", affection_impact: 1 },
                             { text: "즐거운 시간이에요", affection_impact: 1 }
                         ]
+                    },
+                    {
+                        dialogue: "당신과 이야기하니까 정말 행복해요.",
+                        narration: `${gameState.currentCharacter.name}의 얼굴이 밝아진다`,
+                        choices: [
+                            { text: "저도 정말 행복해요", affection_impact: 2 },
+                            { text: "당신 덕분이에요", affection_impact: 2 },
+                            { text: "좋은 시간 보내고 있어요", affection_impact: 1 }
+                        ]
                     }
                 ],
                 ending: [
                     {
-                        message: `${gameState.currentCharacter.name}: "정말 즐거운 시간이었어요! 마지막으로 하고 싶은 말이 있나요?"`,
+                        dialogue: "정말 즐거운 시간이었어요! 마지막으로 하고 싶은 말이 있나요?",
+                        narration: `${gameState.currentCharacter.name}가 아쉬운 듯 미소를 짓는다`,
                         choices: [
                             { text: "오늘 정말 즐거웠어요", affection_impact: 2 },
                             { text: "또 만날 수 있을까요?", affection_impact: 3 },
                             { text: "감사했습니다", affection_impact: 1 }
+                        ]
+                    },
+                    {
+                        dialogue: "이제 헤어져야 하는군요. 정말 아쉬워요.",
+                        narration: `${gameState.currentCharacter.name}가 살짝 슬픈 표정을 짓는다`,
+                        choices: [
+                            { text: "저도 정말 아쉬워요", affection_impact: 2 },
+                            { text: "다음에 또 봐요", affection_impact: 1 },
+                            { text: "좋은 시간이었어요", affection_impact: 1 }
                         ]
                     }
                 ]
@@ -688,7 +726,9 @@
             showTypingIndicator();
             setTimeout(() => {
                 hideTypingIndicator();
-                displayCharacterMessage(currentDialogue.message);
+                
+                // 새로운 데이터 구조 사용 (dialogue, narration 분리)
+                displayCharacterMessage(currentDialogue.dialogue, currentDialogue.narration);
                 
                 setTimeout(() => {
                     displayChoices(currentDialogue.choices);
@@ -696,17 +736,38 @@
             }, 1500);
         }
 
-        // 캐릭터 메시지 표시
-        function displayCharacterMessage(message, emotion = '') {
+        // 캐릭터 메시지 표시 (대사와 지문 분리)
+        function displayCharacterMessage(dialogue, narration = '', emotion = '') {
             const container = document.getElementById('messagesContainer');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message received';
-            messageDiv.innerHTML = `
-                <div class="message-bubble">
-                    ${message} ${emotion}
-                </div>
-            `;
-            container.appendChild(messageDiv);
+            
+            // 지문이 있는 경우 먼저 표시
+            if (narration && narration.trim() !== '') {
+                const narrationDiv = document.createElement('div');
+                narrationDiv.className = 'message received narration';
+                narrationDiv.innerHTML = `
+                    <div class="message-bubble narration-bubble">
+                        (${narration})
+                    </div>
+                `;
+                container.appendChild(narrationDiv);
+            }
+            
+            // 대사 표시 (인용부호 제거)
+            if (dialogue && dialogue.trim() !== '') {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message received';
+                
+                // 인용부호 제거
+                let cleanDialogue = dialogue.replace(/^[""']|[""']$/g, '').trim();
+                
+                messageDiv.innerHTML = `
+                    <div class="message-bubble">
+                        ${cleanDialogue} ${emotion}
+                    </div>
+                `;
+                container.appendChild(messageDiv);
+            }
+            
             container.scrollTop = container.scrollHeight;
         }
 
@@ -816,7 +877,7 @@
             showTypingIndicator();
             setTimeout(() => {
                 hideTypingIndicator();
-                displayCharacterMessage(question);
+                displayCharacterMessage(question, '', '');
                 
                 // 입력창 활성화
                 setTimeout(() => {
@@ -866,7 +927,17 @@
                 
                 const responses = getSubjectiveResponses(subjectiveBonus);
                 const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                displayCharacterMessage(randomResponse);
+                
+                // 응답에서 캐릭터 이름과 대사 분리
+                const responseParts = randomResponse.split(': "');
+                let dialogue = '';
+                if (responseParts.length > 1) {
+                    dialogue = responseParts[1].replace(/"$/, '');
+                } else {
+                    dialogue = randomResponse.replace(`${gameState.currentCharacter.name}: `, '');
+                }
+                
+                displayCharacterMessage(dialogue, '', '');
                 
                 // 다음 단계 진행
                 setTimeout(() => {
@@ -954,16 +1025,20 @@
             setTimeout(() => {
                 hideTypingIndicator();
                 
-                let endingMessage = '';
+                let endingDialogue = '';
+                let emotion = '';
                 if (gameState.affection >= 85) {
-                    endingMessage = `${gameState.currentCharacter.name}: "정말 즐거운 시간이었어요! 앞으로도 자주 만나요!" 💕`;
+                    endingDialogue = '정말 즐거운 시간이었어요! 앞으로도 자주 만나요!';
+                    emotion = '💕';
                 } else if (gameState.affection >= 65) {
-                    endingMessage = `${gameState.currentCharacter.name}: "좋은 시간 보냈어요. 다음에 또 만나요!" 😊`;
+                    endingDialogue = '좋은 시간 보냈어요. 다음에 또 만나요!';
+                    emotion = '😊';
                 } else {
-                    endingMessage = `${gameState.currentCharacter.name}: "오늘 만나서 반가웠어요." 😌`;
+                    endingDialogue = '오늘 만나서 반가웠어요.';
+                    emotion = '😌';
                 }
                 
-                displayCharacterMessage(endingMessage);
+                displayCharacterMessage(endingDialogue, '', emotion);
                 
                 // 재시작 버튼 표시
                 setTimeout(() => {

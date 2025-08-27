@@ -526,9 +526,14 @@
                     <textarea id="character-background" class="form-control" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>프로필 사진 URL</label>
-                    <input type="url" id="character-profile-image" class="form-control" placeholder="https://example.com/image.jpg">
-                    <small class="form-text text-muted">게임에서 상대방 캐릭터로 표시될 이미지 URL</small>
+                    <label>프로필 사진 업로드</label>
+                    <input type="file" id="character-avatar-file" class="form-control" accept="image/*">
+                    <small class="form-text text-muted">이미지 파일을 선택하세요 (JPG, PNG, GIF, WebP 지원, 최대 5MB)</small>
+                    <div id="avatar-preview" style="margin-top: 10px; display: none;">
+                        <img id="avatar-preview-image" style="max-width: 100px; max-height: 100px; border-radius: 8px; border: 2px solid #ddd;">
+                        <p id="avatar-file-info" style="font-size: 12px; color: #666; margin: 5px 0;"></p>
+                    </div>
+                    <input type="hidden" id="character-avatar-url" value="">
                 </div>
                 <button type="submit" class="btn btn-success">💾 저장</button>
             </form>
@@ -581,6 +586,8 @@
             document.getElementById('gpt-temperature').addEventListener('input', function() {
                 document.getElementById('temp-value').textContent = this.value;
             });
+            // 파일 업로드 핸들러
+            document.getElementById('character-avatar-file').addEventListener('change', handleAvatarUpload);
         }
 
         // 섹션 전환
@@ -819,7 +826,16 @@
                     document.getElementById('character-mbti').value = character.mbti;
                     document.getElementById('character-relationship').value = character.relationship;
                     document.getElementById('character-background').value = character.background;
-                    document.getElementById('character-profile-image').value = character.avatar_url || '';
+                    document.getElementById('character-avatar-url').value = character.avatar_url || '';
+                    
+                    // 기존 아바타 이미지 미리보기 표시
+                    if (character.avatar_url) {
+                        document.getElementById('avatar-preview').style.display = 'block';
+                        document.getElementById('avatar-preview-image').src = character.avatar_url;
+                        document.getElementById('avatar-file-info').textContent = '기존 이미지 사용 중';
+                    } else {
+                        document.getElementById('avatar-preview').style.display = 'none';
+                    }
                     
                     // MBTI 선택 표시
                     document.querySelectorAll('.mbti-option').forEach(o => o.classList.remove('selected'));
@@ -828,6 +844,8 @@
             } else {
                 document.querySelector('#character-modal form').reset();
                 document.querySelectorAll('.mbti-option').forEach(o => o.classList.remove('selected'));
+                document.getElementById('avatar-preview').style.display = 'none';
+                document.getElementById('character-avatar-url').value = '';
             }
         }
 
@@ -900,7 +918,7 @@
                     secondary: ["GPT로 생성됨"],
                     speech_style: ["캐릭터 맞춤형"]
                 },
-                avatar_url: document.getElementById('character-profile-image').value || `https://via.placeholder.com/60x60/ff69b4/ffffff?text=${encodeURIComponent(document.getElementById('character-name').value)}`,
+                avatar_url: document.getElementById('character-avatar-url').value || `https://via.placeholder.com/60x60/ff69b4/ffffff?text=${encodeURIComponent(document.getElementById('character-name').value)}`,
                 scenarios: []
             };
 
@@ -1173,6 +1191,66 @@
             } catch (error) {
                 console.error('Save settings error:', error);
                 alert('설정 저장에 실패했습니다: ' + error.message);
+            }
+        }
+
+        // 아바타 파일 업로드 핸들러
+        async function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                document.getElementById('avatar-preview').style.display = 'none';
+                document.getElementById('character-avatar-url').value = '';
+                return;
+            }
+
+            // 파일 크기 체크 (5MB 제한)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('파일 크기는 5MB를 초과할 수 없습니다.');
+                event.target.value = '';
+                return;
+            }
+
+            // 파일 타입 체크
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('JPG, PNG, GIF, WebP 파일만 업로드할 수 있습니다.');
+                event.target.value = '';
+                return;
+            }
+
+            try {
+                // FormData 생성
+                const formData = new FormData();
+                formData.append('avatar', file);
+
+                // 업로드 진행 표시
+                document.getElementById('avatar-file-info').textContent = '업로드 중...';
+                document.getElementById('avatar-preview').style.display = 'block';
+
+                // 서버에 업로드
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // 성공시 미리보기 표시 및 URL 저장
+                    document.getElementById('avatar-preview-image').src = data.file.dataUrl;
+                    document.getElementById('avatar-file-info').textContent = 
+                        `${file.name} (${Math.round(file.size / 1024)}KB)`;
+                    document.getElementById('character-avatar-url').value = data.file.url;
+                } else {
+                    alert('업로드 실패: ' + data.error);
+                    event.target.value = '';
+                    document.getElementById('avatar-preview').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('업로드 중 오류가 발생했습니다: ' + error.message);
+                event.target.value = '';
+                document.getElementById('avatar-preview').style.display = 'none';
             }
         }
     </script>
