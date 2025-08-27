@@ -414,8 +414,9 @@
             </div>
             <div class="card">
                 <div class="form-group">
-                    <label>OpenAI API Key</label>
+                    <label>OpenAI API Key <span id="api-key-status" style="font-size: 12px;"></span></label>
                     <input type="password" id="gpt-api-key" class="form-control" placeholder="sk-...">
+                    <small class="form-text text-muted">한 번 입력하면 자동으로 저장되며, 다음 접속 시 자동으로 불러옵니다</small>
                 </div>
                 <div class="form-group">
                     <label>모델</label>
@@ -461,11 +462,6 @@
                 <div class="form-group">
                     <label>분위기</label>
                     <input type="text" id="scenario-mood" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>주인공 사진 URL</label>
-                    <input type="url" id="scenario-protagonist-image" class="form-control" placeholder="https://example.com/image.jpg">
-                    <small class="form-text text-muted">게임에서 주인공으로 표시될 이미지 URL</small>
                 </div>
                 <div class="form-group">
                     <label>활성 상태</label>
@@ -528,6 +524,11 @@
                 <div class="form-group">
                     <label>배경 설정</label>
                     <textarea id="character-background" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>프로필 사진 URL</label>
+                    <input type="url" id="character-profile-image" class="form-control" placeholder="https://example.com/image.jpg">
+                    <small class="form-text text-muted">게임에서 상대방 캐릭터로 표시될 이미지 URL</small>
                 </div>
                 <button type="submit" class="btn btn-success">💾 저장</button>
             </form>
@@ -799,7 +800,6 @@
                     document.getElementById('scenario-description').value = scenario.description || '';
                     document.getElementById('scenario-setting').value = scenario.setting || '';
                     document.getElementById('scenario-mood').value = scenario.mood || '';
-                    document.getElementById('scenario-protagonist-image').value = scenario.protagonist_image || '';
                     document.getElementById('scenario-active').value = scenario.active.toString();
                 }
             } else {
@@ -819,6 +819,7 @@
                     document.getElementById('character-mbti').value = character.mbti;
                     document.getElementById('character-relationship').value = character.relationship;
                     document.getElementById('character-background').value = character.background;
+                    document.getElementById('character-profile-image').value = character.avatar_url || '';
                     
                     // MBTI 선택 표시
                     document.querySelectorAll('.mbti-option').forEach(o => o.classList.remove('selected'));
@@ -844,7 +845,6 @@
                 description: document.getElementById('scenario-description').value,
                 setting: document.getElementById('scenario-setting').value,
                 mood: document.getElementById('scenario-mood').value,
-                protagonist_image: document.getElementById('scenario-protagonist-image').value,
                 active: document.getElementById('scenario-active').value === 'true'
             };
 
@@ -887,8 +887,8 @@
         async function saveCharacter(event) {
             event.preventDefault();
             
+            const characterId = document.getElementById('character-id').value;
             const characterData = {
-                id: document.getElementById('character-id').value,
                 name: document.getElementById('character-name').value,
                 age: parseInt(document.getElementById('character-age').value),
                 mbti: document.getElementById('character-mbti').value,
@@ -900,16 +900,30 @@
                     secondary: ["GPT로 생성됨"],
                     speech_style: ["캐릭터 맞춤형"]
                 },
-                avatar_url: `https://via.placeholder.com/60x60/ff69b4/ffffff?text=${encodeURIComponent(document.getElementById('character-name').value)}`,
+                avatar_url: document.getElementById('character-profile-image').value || `https://via.placeholder.com/60x60/ff69b4/ffffff?text=${encodeURIComponent(document.getElementById('character-name').value)}`,
                 scenarios: []
             };
 
             try {
-                const response = await fetch('/api/scenario', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'create', type: 'character', ...characterData })
-                });
+                // 기존 캐릭터가 있는지 확인
+                const existingCharacter = currentCharacters.find(c => c.id === characterId);
+                
+                let response;
+                if (existingCharacter) {
+                    // 수정
+                    response = await fetch(`/api/scenario?type=character&id=${characterId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(characterData)
+                    });
+                } else {
+                    // 새로 생성
+                    response = await fetch('/api/scenario', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'create', type: 'character', id: characterId, ...characterData })
+                    });
+                }
 
                 const data = await response.json();
 
@@ -1111,6 +1125,16 @@
             document.getElementById('gpt-model').value = gptSettings.model;
             document.getElementById('gpt-temperature').value = gptSettings.temperature;
             document.getElementById('temp-value').textContent = gptSettings.temperature;
+            
+            // API 키 상태 표시
+            const statusElement = document.getElementById('api-key-status');
+            if (gptSettings.api_key && gptSettings.api_key.length > 0) {
+                statusElement.textContent = '(저장됨 ✓)';
+                statusElement.style.color = '#27ae60';
+            } else {
+                statusElement.textContent = '(미설정)';
+                statusElement.style.color = '#e74c3c';
+            }
         }
 
         async function saveGPTSettings() {

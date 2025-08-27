@@ -15,7 +15,6 @@ const DEFAULT_SCENARIOS = {
       description: "윤아가 해장국을 끓여주러 온 상황",
       setting: "오빠의 집, 숙취 상황",
       mood: "케어링, 달콤함",
-      protagonist_image: "https://via.placeholder.com/60x60/4ade80/ffffff?text=🧑",
       created_at: new Date().toISOString(),
       active: true
     },
@@ -25,7 +24,6 @@ const DEFAULT_SCENARIOS = {
       description: "도서관에서 같이 공부하는 상황",
       setting: "조용한 도서관",
       mood: "집중, 은밀한 대화",
-      protagonist_image: "https://via.placeholder.com/60x60/3498db/ffffff?text=📚",
       created_at: new Date().toISOString(),
       active: false
     }
@@ -76,6 +74,7 @@ const DEFAULT_CHARACTERS = {
 let RUNTIME_SCENARIOS = null;
 let RUNTIME_CHARACTERS = null;
 let RUNTIME_DIALOGUES = {}; // 생성된 대화 저장소 {scenario_id: [dialogues]}
+let RUNTIME_SETTINGS = {}; // 설정 저장소
 
 // 파일에서 데이터 로드 (우선), 실패 시 메모리에서 로드, 그것도 실패 시 기본값
 async function loadScenarios() {
@@ -378,7 +377,6 @@ async function handlePostRequest(req, res, action, type) {
             description: req.body.description || '',
             setting: req.body.setting || '',
             mood: req.body.mood || '',
-            protagonist_image: req.body.protagonist_image || '',
             active: req.body.active !== undefined ? req.body.active : true,
             created_at: new Date().toISOString()
           };
