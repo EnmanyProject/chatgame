@@ -529,6 +529,19 @@
         </div>
     </div>
 
+    <!-- 대화 보기 모달 -->
+    <div id="dialogues-modal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 id="dialogues-modal-title">시나리오 대화 내역</h3>
+                <button class="close-btn" onclick="closeModal('dialogues-modal')">&times;</button>
+            </div>
+            <div id="dialogues-content" style="max-height: 500px; overflow-y: auto;">
+                <p style="text-align: center; color: #666; padding: 50px;">로딩 중...</p>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentScenarios = [];
         let currentCharacters = [];
@@ -602,7 +615,7 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <h3>${scenario.title}</h3>
+                    <h3 style="cursor: pointer; color: #3498db;" onclick="viewScenarioDialogues('${scenario.id}', '${scenario.title}')">${scenario.title}</h3>
                     <p><strong>설정:</strong> ${scenario.setting || 'N/A'}</p>
                     <p><strong>분위기:</strong> ${scenario.mood || 'N/A'}</p>
                     <p>${scenario.description}</p>
@@ -611,6 +624,7 @@
                             ${scenario.active ? '활성' : '비활성'}
                         </span>
                         <div>
+                            <button class="btn btn-primary" onclick="viewScenarioDialogues('${scenario.id}', '${scenario.title}')">대화 보기</button>
                             <button class="btn btn-warning" onclick="editScenario('${scenario.id}')">수정</button>
                             <button class="btn btn-danger" onclick="deleteScenario('${scenario.id}')">삭제</button>
                         </div>
@@ -939,6 +953,80 @@
                     alert('오류: ' + error.message);
                 }
             }
+        }
+
+        // 시나리오 대화 보기
+        async function viewScenarioDialogues(scenarioId, scenarioTitle) {
+            document.getElementById('dialogues-modal-title').textContent = `${scenarioTitle} - 생성된 대화 내역`;
+            document.getElementById('dialogues-content').innerHTML = '<p style="text-align: center; color: #666; padding: 50px;">로딩 중...</p>';
+            
+            // 모달 열기
+            document.getElementById('dialogues-modal').classList.add('active');
+            
+            try {
+                const response = await fetch(`/api/scenario?action=get&type=dialogues&id=${scenarioId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayDialogues(data.dialogues);
+                } else {
+                    document.getElementById('dialogues-content').innerHTML = 
+                        '<p style="text-align: center; color: #e74c3c; padding: 50px;">대화 내역을 불러올 수 없습니다.</p>';
+                }
+            } catch (error) {
+                console.error('Failed to load dialogues:', error);
+                document.getElementById('dialogues-content').innerHTML = 
+                    '<p style="text-align: center; color: #e74c3c; padding: 50px;">오류가 발생했습니다.</p>';
+            }
+        }
+
+        // 대화 내역 표시
+        function displayDialogues(dialogues) {
+            const container = document.getElementById('dialogues-content');
+            
+            if (dialogues.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666; padding: 50px;">아직 생성된 대화가 없습니다.</p>';
+                return;
+            }
+            
+            let html = '';
+            dialogues.forEach((dialogue, index) => {
+                const content = dialogue.generated_content;
+                html += `
+                    <div style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <strong style="color: #3498db;">${dialogue.character_name}</strong>
+                            <small style="color: #666;">${new Date(dialogue.created_at).toLocaleString()}</small>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                            <strong>상황:</strong> ${dialogue.situation}
+                        </div>
+                        
+                        <div style="margin-bottom: 10px;">
+                            <strong style="color: #e74c3c;">💬 대사:</strong> "${content.dialogue}"
+                        </div>
+                        
+                        <div style="margin-bottom: 10px;">
+                            <strong style="color: #27ae60;">📝 지문:</strong> ${content.narration}
+                        </div>
+                        
+                        <div style="margin-bottom: 10px;">
+                            <strong style="color: #f39c12;">😊 감정:</strong> ${content.emotion}
+                        </div>
+                        
+                        <div>
+                            <strong style="color: #9b59b6;">🔀 선택지:</strong>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                ${content.choices.map(choice => 
+                                    `<li>${choice.text} <span style="color: #666;">(호감도: ${choice.affection_impact > 0 ? '+' : ''}${choice.affection_impact})</span></li>`
+                                ).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
         }
 
         // GPT 설정 관리

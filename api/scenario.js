@@ -73,6 +73,7 @@ const DEFAULT_CHARACTERS = {
 // 메모리 기반 데이터 저장소 (Vercel 서버리스 환경 대응)
 let RUNTIME_SCENARIOS = null;
 let RUNTIME_CHARACTERS = null;
+let RUNTIME_DIALOGUES = {}; // 생성된 대화 저장소 {scenario_id: [dialogues]}
 
 // 파일에서 데이터 로드 (우선), 실패 시 메모리에서 로드, 그것도 실패 시 기본값
 async function loadScenarios() {
@@ -323,6 +324,16 @@ async function handleGetRequest(req, res, action, type) {
         if (character) {
           return res.status(200).json({ success: true, character });
         }
+      } else if (type === 'dialogues') {
+        // 특정 시나리오의 대화 조회
+        const scenario_id = id;
+        const dialogues = RUNTIME_DIALOGUES[scenario_id] || [];
+        return res.status(200).json({ 
+          success: true, 
+          dialogues,
+          scenario_id,
+          count: dialogues.length
+        });
       }
       return res.status(404).json({ error: 'Not found' });
       
@@ -458,11 +469,29 @@ async function handlePostRequest(req, res, action, type) {
       
       try {
         const generatedContent = await generateDialogueWithGPT(character, scenario, situation, gpt_config);
+        
+        // 생성된 대화를 메모리에 저장
+        if (!RUNTIME_DIALOGUES[scenario_id]) {
+          RUNTIME_DIALOGUES[scenario_id] = [];
+        }
+        
+        const dialogueEntry = {
+          id: `dialogue_${Date.now()}`,
+          character_id,
+          character_name: character.name,
+          situation,
+          generated_content: generatedContent,
+          created_at: new Date().toISOString()
+        };
+        
+        RUNTIME_DIALOGUES[scenario_id].push(dialogueEntry);
+        
         return res.status(200).json({
           success: true,
           generated: generatedContent,
           character: character.name,
-          scenario: scenario.title
+          scenario: scenario.title,
+          dialogue_id: dialogueEntry.id
         });
       } catch (error) {
         return res.status(500).json({
