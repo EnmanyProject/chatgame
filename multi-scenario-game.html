@@ -200,6 +200,27 @@
             color: #888;
         }
 
+        .protagonist-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .protagonist-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #4ade80;
+            object-fit: cover;
+        }
+
+        .protagonist-label {
+            font-size: 10px;
+            color: #888;
+            font-weight: 600;
+        }
+
         .scenario-selector-container {
             padding: 15px 20px;
             background: #111;
@@ -294,6 +315,10 @@
                     <h2 class="contact-name" id="character-name-display">캐릭터</h2>
                     <span class="last-seen" id="scenario-title-display">시나리오</span>
                 </div>
+            </div>
+            <div class="protagonist-info" id="protagonist-info" style="display: none;">
+                <img src="" alt="주인공" id="protagonist-image" class="protagonist-avatar">
+                <span class="protagonist-label">ME</span>
             </div>
         </div>
 
@@ -398,6 +423,17 @@
             document.getElementById('scenario-title-display').textContent = selectedScenario.title;
             document.getElementById('character-avatar').textContent = selectedCharacter.name.charAt(0);
             
+            // 주인공 이미지 설정
+            if (selectedScenario.protagonist_image) {
+                const protagonistImg = document.getElementById('protagonist-image');
+                protagonistImg.src = selectedScenario.protagonist_image;
+                protagonistImg.onerror = function() {
+                    // 이미지 로드 실패 시 기본 이미지로 대체
+                    this.src = 'https://via.placeholder.com/30x30/4ade80/ffffff?text=ME';
+                };
+                document.getElementById('protagonist-info').style.display = 'flex';
+            }
+            
             // 초기 메시지 표시
             displayInitialMessage();
         }
@@ -471,12 +507,28 @@
         // 특정 상황에 대한 대화 생성 요청
         async function generateDialogueForSituation(situation) {
             try {
-                const gptConfig = {
-                    enabled: true,
-                    api_key: 'sk-test', // 실제로는 시나리오 관리에서 설정된 키 사용
+                // 로컬 스토리지에서 GPT 설정 가져오기
+                let gptConfig = {
+                    enabled: false,
+                    api_key: '',
                     model: 'gpt-3.5-turbo',
                     temperature: 0.8
                 };
+                
+                const savedSettings = localStorage.getItem('gptSettings');
+                if (savedSettings) {
+                    try {
+                        gptConfig = JSON.parse(savedSettings);
+                    } catch (e) {
+                        console.log('GPT 설정 파싱 실패');
+                    }
+                }
+                
+                // GPT 설정이 없거나 비활성화된 경우 미리 정의된 응답 사용
+                if (!gptConfig.enabled || !gptConfig.api_key) {
+                    displayPredefinedResponse(situation);
+                    return;
+                }
                 
                 const response = await fetch('/api/scenario', {
                     method: 'POST',
@@ -505,12 +557,41 @@
                     }, 2000);
                 } else {
                     console.error('대화 생성 실패:', data.error);
-                    displayCharacterMessage('죄송해요, 잠시 생각할 시간이 필요해요. 😅');
+                    displayPredefinedResponse(situation);
                 }
             } catch (error) {
                 console.error('대화 생성 중 오류:', error);
-                displayCharacterMessage('연결에 문제가 있어요. 다시 시도해주세요. 😢');
+                displayPredefinedResponse(situation);
             }
+        }
+
+        // 미리 정의된 응답 표시 (GPT가 없을 때)
+        function displayPredefinedResponse(situation) {
+            const responses = {
+                '첫 만남과 인사': {
+                    message: `${selectedCharacter.name}: "안녕하세요! ${selectedScenario.setting}에서 뵙게 되어 반갑네요."`,
+                    choices: [
+                        { text: "안녕하세요! 처음 뵙겠습니다.", affection_impact: 1 },
+                        { text: "반갑습니다. 잘 부탁드려요.", affection_impact: 2 },
+                        { text: "안녕하세요.", affection_impact: 0 }
+                    ]
+                }
+            };
+            
+            const response = responses[situation] || {
+                message: `${selectedCharacter.name}: "어떻게 하면 좋을까요?"`,
+                choices: [
+                    { text: "좋은 생각이에요!", affection_impact: 1 },
+                    { text: "조금 더 생각해볼까요?", affection_impact: 0 },
+                    { text: "다른 방법은 어떨까요?", affection_impact: 1 }
+                ]
+            };
+            
+            displayCharacterMessage(response.message);
+            
+            setTimeout(() => {
+                displayChoices(response.choices);
+            }, 2000);
         }
 
         // 선택지 표시
