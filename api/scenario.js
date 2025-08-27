@@ -5,16 +5,17 @@ const path = require('path');
 // 시나리오 및 캐릭터 데이터 파일 경로
 const SCENARIOS_FILE = path.join(__dirname, '../data/scenarios.json');
 const CHARACTERS_FILE = path.join(__dirname, '../data/characters.json');
+const DIALOGUES_FILE = path.join(__dirname, '../data/dialogues.json');
 
 // 기본 시나리오 데이터
 const DEFAULT_SCENARIOS = {
   scenarios: [
     {
-      id: "hangover_soup",
-      title: "해장국 시나리오",
-      description: "윤아가 해장국을 끓여주러 온 상황",
-      setting: "오빠의 집, 숙취 상황",
-      mood: "케어링, 달콤함",
+      id: "hangover_confession",
+      title: "어제 밤의 기억",
+      description: "시우 오빠를 1년째 좋아하는 후배가 어제 술먹고 고백한 후 부끄러워하는 상황",
+      setting: "다음날 아침, 메신저로 연락",
+      mood: "부끄러움, 설렘, 긴장감",
       created_at: new Date().toISOString(),
       active: true
     },
@@ -117,6 +118,26 @@ async function loadCharacters() {
   }
 }
 
+async function loadDialogues() {
+  // 메모리에 있는 경우 우선 반환
+  if (RUNTIME_DIALOGUES && Object.keys(RUNTIME_DIALOGUES).length > 0) {
+    console.log('Loading dialogues from memory');
+    return RUNTIME_DIALOGUES;
+  }
+  
+  try {
+    console.log('Attempting to load dialogues from file');
+    const data = await fs.readFile(DIALOGUES_FILE, 'utf8');
+    const parsedData = JSON.parse(data);
+    RUNTIME_DIALOGUES = parsedData; // 메모리에 캐시
+    return parsedData;
+  } catch (error) {
+    console.log('Dialogue file load failed, initializing empty dialogues');
+    RUNTIME_DIALOGUES = {};
+    return {};
+  }
+}
+
 // 데이터 저장 (메모리 우선, 파일 저장은 시도해보지만 실패해도 무시)
 async function saveScenarios(data) {
   try {
@@ -156,6 +177,29 @@ async function saveCharacters(data) {
     return true;
   } catch (error) {
     console.error('Failed to save characters:', error);
+    return false;
+  }
+}
+
+async function saveDialogues(data) {
+  try {
+    // 메모리에 저장 (필수)
+    RUNTIME_DIALOGUES = data;
+    console.log('Dialogues saved to memory');
+    
+    // 파일 저장 시도 (옵션, 실패해도 무시)
+    try {
+      // 디렉토리 생성 시도
+      await fs.mkdir(path.dirname(DIALOGUES_FILE), { recursive: true });
+      await fs.writeFile(DIALOGUES_FILE, JSON.stringify(data, null, 2), 'utf8');
+      console.log('Dialogues also saved to file');
+    } catch (fileError) {
+      console.log('File save failed, but memory save succeeded');
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Failed to save dialogues:', error);
     return false;
   }
 }
@@ -328,6 +372,7 @@ async function handleGetRequest(req, res, action, type) {
       } else if (type === 'dialogues') {
         // 특정 시나리오의 대화 조회
         const scenario_id = id;
+        await loadDialogues(); // 파일에서 최신 대화 로드
         const dialogues = RUNTIME_DIALOGUES[scenario_id] || [];
         return res.status(200).json({ 
           success: true, 
@@ -471,7 +516,8 @@ async function handlePostRequest(req, res, action, type) {
       try {
         const generatedContent = await generateDialogueWithGPT(character, scenario, situation, gpt_config);
         
-        // 생성된 대화를 메모리에 저장
+        // 생성된 대화를 메모리와 파일에 저장
+        await loadDialogues(); // 최신 대화 로드
         if (!RUNTIME_DIALOGUES[scenario_id]) {
           RUNTIME_DIALOGUES[scenario_id] = [];
         }
@@ -486,6 +532,9 @@ async function handlePostRequest(req, res, action, type) {
         };
         
         RUNTIME_DIALOGUES[scenario_id].push(dialogueEntry);
+        
+        // 파일에 영구 저장
+        await saveDialogues(RUNTIME_DIALOGUES);
         
         return res.status(200).json({
           success: true,
