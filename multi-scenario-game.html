@@ -1160,9 +1160,9 @@
                     dialogue: adjustedContent.dialogue || '안녕하세요!',
                     narration: adjustedContent.narration || '',
                     choices: adjustedContent.choices || [
-                        { text: "좋아요", affection_impact: 1 },
-                        { text: "그럼요", affection_impact: 1 },
-                        { text: "네", affection_impact: 1 }
+                        { text: "좋아", affection_impact: 1 },
+                        { text: "그래", affection_impact: 1 },
+                        { text: "응", affection_impact: 1 }
                     ]
                 };
             }
@@ -1343,7 +1343,14 @@
                 container.appendChild(messageDiv);
             }
             
-            container.scrollTop = container.scrollHeight;
+            // 강화된 자동 스크롤
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+                container.scrollTo({
+                    top: container.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 100);
         }
 
         // 사용자 메시지 표시
@@ -1357,7 +1364,14 @@
                 </div>
             `;
             container.appendChild(messageDiv);
-            container.scrollTop = container.scrollHeight;
+            // 강화된 자동 스크롤
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+                container.scrollTo({
+                    top: container.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 100);
         }
 
         // 선택지 표시
@@ -1745,7 +1759,14 @@
                 </div>
             `;
             container.appendChild(typingDiv);
-            container.scrollTop = container.scrollHeight;
+            // 강화된 자동 스크롤
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+                container.scrollTo({
+                    top: container.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 100);
         }
 
         function hideTypingIndicator() {
@@ -1834,7 +1855,14 @@
                         <button class="back-btn" onclick="resetGame()">🔄 다른 시나리오로 다시 시작</button>
                     `;
                     container.appendChild(restartDiv);
-                    container.scrollTop = container.scrollHeight;
+                    // 강화된 자동 스크롤
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+                container.scrollTo({
+                    top: container.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 100);
                 }, 2000);
             }, 1500);
         }
