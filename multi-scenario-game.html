@@ -1474,8 +1474,8 @@
             }, 1000);
         }
 
-        // MBTI 기반 GPT 주관식 답변 평가 및 응답 생성
-        async function handleSubjectiveResponse(userMessage) {
+        // MBTI 기반 GPT 주관식 답변 평가 및 응답 생성 - 임시 비활성화
+        async function handleSubjectiveResponse_DISABLED(userMessage) {
             showTypingIndicator();
             
             try {
@@ -1608,11 +1608,11 @@
             // 입력창 숨기기
             document.getElementById('inputContainer').style.display = 'none';
             
-            if (gameState.isSubjectiveMode) {
-                // 주관식 모드: MBTI 기반 GPT 평가 및 응답 생성
-                await handleSubjectiveResponse(message);
-                gameState.isSubjectiveMode = false;
-            } else {
+            // 임시로 간단한 로직으로 대체
+            // if (gameState.isSubjectiveMode) {
+            //     await handleSubjectiveResponse(message);
+            //     gameState.isSubjectiveMode = false;
+            // } else {
                 // 일반 자유 채팅 모드 (기존 로직)
                 const oldAffection = gameState.affection;
                 const subjectiveBonus = calculateSubjectiveBonus(message);
@@ -1647,7 +1647,7 @@
                         }
                     }, 2000);
                 }, 1500);
-            }
+            // }
         }
 
         // 주관식 답변 호감도 보너스 계산
