@@ -233,18 +233,18 @@ async function handleGetRequest(req, res, action, type) {
         const scenarios = await loadScenarios();
         return res.status(200).json({
           success: true,
-          scenarios: scenarios.scenarios,
-          metadata: { count: scenarios.scenarios.length }
+          scenarios: scenarios.scenarios || [],
+          metadata: { count: (scenarios.scenarios || []).length }
         });
       } else if (type === 'characters') {
         const characters = await loadCharacters();
         return res.status(200).json({
           success: true,
-          characters: characters.characters,
-          metadata: { count: characters.characters.length }
+          characters: characters.characters || [],
+          metadata: { count: (characters.characters || []).length }
         });
       }
-      break;
+      return res.status(400).json({ error: 'Invalid type parameter' });
       
     case 'get':
       const { id } = req.query;
@@ -276,7 +276,11 @@ async function handlePostRequest(req, res, action, type) {
         const scenarios = await loadScenarios();
         const newScenario = {
           id: req.body.id || `scenario_${Date.now()}`,
-          ...req.body,
+          title: req.body.title || 'Untitled Scenario',
+          description: req.body.description || '',
+          setting: req.body.setting || '',
+          mood: req.body.mood || '',
+          active: req.body.active !== undefined ? req.body.active : true,
           created_at: new Date().toISOString()
         };
         scenarios.scenarios.push(newScenario);
@@ -288,7 +292,19 @@ async function handlePostRequest(req, res, action, type) {
         const characters = await loadCharacters();
         const newCharacter = {
           id: req.body.id || `character_${Date.now()}`,
-          ...req.body,
+          name: req.body.name || 'Unknown Character',
+          age: req.body.age || 20,
+          mbti: req.body.mbti || 'INFP',
+          relationship: req.body.relationship || '',
+          background: req.body.background || '',
+          personality_traits: req.body.personality_traits || {
+            primary: ["친근함"],
+            secondary: ["감정 표현 풍부"],
+            speech_style: ["자연스러운 말투"]
+          },
+          avatar_url: req.body.avatar_url || `https://via.placeholder.com/60x60/ff69b4/ffffff?text=${encodeURIComponent(req.body.name || 'C')}`,
+          scenarios: req.body.scenarios || [],
+          active: req.body.active !== undefined ? req.body.active : true,
           created_at: new Date().toISOString()
         };
         characters.characters.push(newCharacter);
