@@ -70,29 +70,66 @@ const DEFAULT_CHARACTERS = {
   ]
 };
 
-// 파일에서 데이터 로드
+// 메모리 기반 데이터 저장소 (Vercel 서버리스 환경 대응)
+let RUNTIME_SCENARIOS = null;
+let RUNTIME_CHARACTERS = null;
+
+// 파일에서 데이터 로드 (우선), 실패 시 메모리에서 로드, 그것도 실패 시 기본값
 async function loadScenarios() {
+  // 메모리에 있는 경우 우선 반환
+  if (RUNTIME_SCENARIOS) {
+    console.log('Loading scenarios from memory');
+    return RUNTIME_SCENARIOS;
+  }
+  
   try {
+    console.log('Attempting to load scenarios from file');
     const data = await fs.readFile(SCENARIOS_FILE, 'utf8');
-    return JSON.parse(data);
+    const parsedData = JSON.parse(data);
+    RUNTIME_SCENARIOS = parsedData; // 메모리에 캐시
+    return parsedData;
   } catch (error) {
+    console.log('File load failed, using default scenarios');
+    RUNTIME_SCENARIOS = DEFAULT_SCENARIOS;
     return DEFAULT_SCENARIOS;
   }
 }
 
 async function loadCharacters() {
+  // 메모리에 있는 경우 우선 반환
+  if (RUNTIME_CHARACTERS) {
+    console.log('Loading characters from memory');
+    return RUNTIME_CHARACTERS;
+  }
+  
   try {
+    console.log('Attempting to load characters from file');
     const data = await fs.readFile(CHARACTERS_FILE, 'utf8');
-    return JSON.parse(data);
+    const parsedData = JSON.parse(data);
+    RUNTIME_CHARACTERS = parsedData; // 메모리에 캐시
+    return parsedData;
   } catch (error) {
+    console.log('File load failed, using default characters');
+    RUNTIME_CHARACTERS = DEFAULT_CHARACTERS;
     return DEFAULT_CHARACTERS;
   }
 }
 
-// 파일에 데이터 저장
+// 데이터 저장 (메모리 우선, 파일 저장은 시도해보지만 실패해도 무시)
 async function saveScenarios(data) {
   try {
-    await fs.writeFile(SCENARIOS_FILE, JSON.stringify(data, null, 2), 'utf8');
+    // 메모리에 저장 (필수)
+    RUNTIME_SCENARIOS = data;
+    console.log('Scenarios saved to memory');
+    
+    // 파일 저장 시도 (옵션, 실패해도 무시)
+    try {
+      await fs.writeFile(SCENARIOS_FILE, JSON.stringify(data, null, 2), 'utf8');
+      console.log('Scenarios also saved to file');
+    } catch (fileError) {
+      console.log('File save failed, but memory save succeeded');
+    }
+    
     return true;
   } catch (error) {
     console.error('Failed to save scenarios:', error);
@@ -102,7 +139,18 @@ async function saveScenarios(data) {
 
 async function saveCharacters(data) {
   try {
-    await fs.writeFile(CHARACTERS_FILE, JSON.stringify(data, null, 2), 'utf8');
+    // 메모리에 저장 (필수)
+    RUNTIME_CHARACTERS = data;
+    console.log('Characters saved to memory');
+    
+    // 파일 저장 시도 (옵션, 실패해도 무시)
+    try {
+      await fs.writeFile(CHARACTERS_FILE, JSON.stringify(data, null, 2), 'utf8');
+      console.log('Characters also saved to file');
+    } catch (fileError) {
+      console.log('File save failed, but memory save succeeded');
+    }
+    
     return true;
   } catch (error) {
     console.error('Failed to save characters:', error);
@@ -299,47 +347,101 @@ async function handlePostRequest(req, res, action, type) {
   switch (action) {
     case 'create':
       if (type === 'scenario') {
-        const scenarios = await loadScenarios();
-        const newScenario = {
-          id: req.body.id || `scenario_${Date.now()}`,
-          title: req.body.title || 'Untitled Scenario',
-          description: req.body.description || '',
-          setting: req.body.setting || '',
-          mood: req.body.mood || '',
-          active: req.body.active !== undefined ? req.body.active : true,
-          created_at: new Date().toISOString()
-        };
-        scenarios.scenarios.push(newScenario);
-        
-        if (await saveScenarios(scenarios)) {
-          return res.status(201).json({ success: true, scenario: newScenario });
+        try {
+          const scenarios = await loadScenarios();
+          const scenarioId = req.body.id || `scenario_${Date.now()}`;
+          
+          // 중복 ID 체크
+          if (scenarios.scenarios.some(s => s.id === scenarioId)) {
+            return res.status(400).json({ 
+              error: 'Duplicate ID', 
+              message: `Scenario with ID "${scenarioId}" already exists` 
+            });
+          }
+          
+          const newScenario = {
+            id: scenarioId,
+            title: req.body.title || 'Untitled Scenario',
+            description: req.body.description || '',
+            setting: req.body.setting || '',
+            mood: req.body.mood || '',
+            active: req.body.active !== undefined ? req.body.active : true,
+            created_at: new Date().toISOString()
+          };
+          
+          scenarios.scenarios.push(newScenario);
+          console.log('Created new scenario:', newScenario.id);
+          
+          if (await saveScenarios(scenarios)) {
+            return res.status(201).json({ success: true, scenario: newScenario });
+          } else {
+            throw new Error('Save operation failed');
+          }
+          
+        } catch (error) {
+          console.error('Scenario creation error:', error);
+          return res.status(500).json({ 
+            error: 'Failed to create scenario',
+            message: error.message,
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+          });
         }
-      } else if (type === 'character') {
-        const characters = await loadCharacters();
-        const newCharacter = {
-          id: req.body.id || `character_${Date.now()}`,
-          name: req.body.name || 'Unknown Character',
-          age: req.body.age || 20,
-          mbti: req.body.mbti || 'INFP',
-          relationship: req.body.relationship || '',
-          background: req.body.background || '',
-          personality_traits: req.body.personality_traits || {
-            primary: ["친근함"],
-            secondary: ["감정 표현 풍부"],
-            speech_style: ["자연스러운 말투"]
-          },
-          avatar_url: req.body.avatar_url || `https://via.placeholder.com/60x60/ff69b4/ffffff?text=${encodeURIComponent(req.body.name || 'C')}`,
-          scenarios: req.body.scenarios || [],
-          active: req.body.active !== undefined ? req.body.active : true,
-          created_at: new Date().toISOString()
-        };
-        characters.characters.push(newCharacter);
         
-        if (await saveCharacters(characters)) {
-          return res.status(201).json({ success: true, character: newCharacter });
+      } else if (type === 'character') {
+        try {
+          const characters = await loadCharacters();
+          const characterId = req.body.id || `character_${Date.now()}`;
+          
+          // 중복 ID 체크
+          if (characters.characters.some(c => c.id === characterId)) {
+            return res.status(400).json({ 
+              error: 'Duplicate ID', 
+              message: `Character with ID "${characterId}" already exists` 
+            });
+          }
+          
+          const newCharacter = {
+            id: characterId,
+            name: req.body.name || 'Unknown Character',
+            age: req.body.age || 20,
+            mbti: req.body.mbti || 'INFP',
+            relationship: req.body.relationship || '',
+            background: req.body.background || '',
+            personality_traits: req.body.personality_traits || {
+              primary: ["친근함"],
+              secondary: ["감정 표현 풍부"],
+              speech_style: ["자연스러운 말투"]
+            },
+            avatar_url: req.body.avatar_url || `https://via.placeholder.com/60x60/ff69b4/ffffff?text=${encodeURIComponent(req.body.name || 'C')}`,
+            scenarios: req.body.scenarios || [],
+            active: req.body.active !== undefined ? req.body.active : true,
+            created_at: new Date().toISOString()
+          };
+          
+          characters.characters.push(newCharacter);
+          console.log('Created new character:', newCharacter.id);
+          
+          if (await saveCharacters(characters)) {
+            return res.status(201).json({ success: true, character: newCharacter });
+          } else {
+            throw new Error('Save operation failed');
+          }
+          
+        } catch (error) {
+          console.error('Character creation error:', error);
+          return res.status(500).json({ 
+            error: 'Failed to create character',
+            message: error.message,
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+          });
         }
       }
-      return res.status(500).json({ error: 'Failed to create' });
+      
+      return res.status(400).json({ 
+        error: 'Invalid type', 
+        message: 'Type must be either "scenario" or "character"',
+        received_type: type 
+      });
       
     case 'generate':
       const { character_id, scenario_id, situation, gpt_config } = req.body;
