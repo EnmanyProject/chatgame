@@ -350,7 +350,7 @@
         <div class="nav-tabs">
             <button class="nav-tab active" onclick="showSection('scenarios')">📚 시나리오 관리</button>
             <button class="nav-tab" onclick="showSection('characters')">👥 캐릭터 관리</button>
-            <button class="nav-tab" onclick="showSection('dialogues')">💬 현재 대사 메모리</button>
+            <button class="nav-tab" onclick="showSection('dialogues')">🎭 실제 게임 대사 관리</button>
             <button class="nav-tab" onclick="showSection('generator')">🎯 대사 생성기</button>
             <button class="nav-tab" onclick="showSection('settings')">⚙️ 설정</button>
         </div>
@@ -377,15 +377,16 @@
             </div>
         </div>
 
-        <!-- 현재 대사 메모리 섹션 -->
+        <!-- 실제 게임 대사 관리 섹션 -->
         <div id="dialogues-section" class="content-section">
             <div class="section-header">
-                <h2>💬 현재 대사 메모리</h2>
-                <button class="btn btn-primary" onclick="loadCurrentDialogues()">🔄 메모리 새로고침</button>
-                <button class="btn btn-warning" onclick="clearDialogueMemory()">🗑️ 메모리 초기화</button>
+                <h2>🎭 실제 게임 대사 관리</h2>
+                <button class="btn btn-primary" onclick="loadGameDialogues()">📖 게임 대사 불러오기</button>
+                <button class="btn btn-success" onclick="saveDialogueChanges()">💾 변경사항 저장</button>
+                <button class="btn btn-warning" onclick="resetToDefault()">🔄 기본값으로 재설정</button>
             </div>
             <div id="dialogues-container" class="card" style="padding: 20px;">
-                <p style="text-align: center; color: #666;">메모리 새로고침 버튼을 눌러 현재 저장된 대사들을 확인하세요.</p>
+                <p style="text-align: center; color: #666;">"게임 대사 불러오기" 버튼을 눌러 실제 플레이되는 대사들을 확인하고 수정하세요.</p>
             </div>
         </div>
 
@@ -1616,105 +1617,310 @@
             }
         }
 
-        // === 대사 메모리 관리 함수들 ===
-        async function loadCurrentDialogues() {
-            try {
-                console.log('현재 저장된 대사 데이터 로딩...');
-                
-                const response = await fetch('/api/scenario?action=get&type=dialogues');
-                const data = await response.json();
-                
-                const container = document.getElementById('dialogues-container');
-                
-                if (data.success && data.dialogues) {
-                    displayDialogues(data.dialogues);
-                } else {
-                    container.innerHTML = '<p style="text-align: center; color: #999;">저장된 대사가 없습니다.</p>';
-                }
-            } catch (error) {
-                console.error('대사 로딩 실패:', error);
-                document.getElementById('dialogues-container').innerHTML = '<p style="color: red;">대사 로딩 중 오류가 발생했습니다.</p>';
-            }
+        // === 실제 게임 대사 관리 함수들 ===
+        let currentGameDialogues = null;
+        let dialogueChanges = {};
+        
+        function loadGameDialogues() {
+            console.log('🎭 실제 게임 대사 불러오는 중...');
+            
+            // 실제 게임에서 사용되는 대사 구조 (chat_story.json 기반)
+            currentGameDialogues = {
+                opening: [
+                    {
+                        id: 'opening_1',
+                        dialogue: "시우 오빠!! 일어나셨어요??",
+                        narration: "(아침 9시, 휴대폰이 계속 울린다. 머리가 지끈거리는 가운데 확인해보니 후배 윤아에게서 온 메시지들이다.)",
+                        choices: [
+                            { text: "어제 뭔 일이 있었지?", affection_impact: 0 },
+                            { text: "아직 머리가 아파서...", affection_impact: -2 },
+                            { text: "윤아야, 고생했어", affection_impact: 3 }
+                        ]
+                    },
+                    {
+                        id: 'opening_2',
+                        dialogue: "어제 정말 고마웠어요 ㅠㅠ 시우 오빠가 집까지 데려다 주셔서...",
+                        narration: "(어제 뭔가 있었던 것 같은데... 기억이 잘 안 난다.)",
+                        choices: [
+                            { text: "집까지? 무슨 일이 있었는데", affection_impact: 1 },
+                            { text: "기억이 가물가물해서...", affection_impact: -1 },
+                            { text: "괜찮아, 당연한 거야", affection_impact: 2 }
+                        ]
+                    }
+                ],
+                middle: [
+                    {
+                        id: 'middle_1',
+                        dialogue: "혹시... 어제 제가 고백한 거 기억나세요??",
+                        narration: "(뭐?! 고백?? 이게 무슨 상황이지?)",
+                        choices: [
+                            { text: "고백? 정말로??", affection_impact: 2 },
+                            { text: "기억이 잘 안 나네...", affection_impact: -3 },
+                            { text: "천천히 말해줄래?", affection_impact: 4 }
+                        ]
+                    },
+                    {
+                        id: 'middle_2',
+                        dialogue: "어제 회식 끝나고 오빠랑 카페 갔잖아요? 거기서 제가... 울면서 고백했어요 ㅠㅠ",
+                        narration: "(아, 카페... 그런 일이 있었나?)",
+                        choices: [
+                            { text: "카페에서 뭔 일이 있었는데?", affection_impact: 2 },
+                            { text: "정말 기억이 안 나네", affection_impact: -1 },
+                            { text: "자세히 말해줄래?", affection_impact: 3 }
+                        ]
+                    },
+                    {
+                        id: 'middle_3',
+                        dialogue: "그랬더니 시우 오빠가 제 머리를 쓰다듬어 주시면서... '윤아야... 나도 너를...' 이라고 하시다가 말았어요!",
+                        narration: "(나도 너를...? 그 뒤에 뭐라고 하려던 거지??)",
+                        choices: [
+                            { text: "내가 뭐라고 했는데?", affection_impact: 2 },
+                            { text: "정말 그랬나?", affection_impact: 0 },
+                            { text: "계속 말해줘", affection_impact: 1 }
+                        ]
+                    }
+                ],
+                climax: [
+                    {
+                        id: 'climax_1',
+                        dialogue: "그 뒤에 뭐라고 하실 건지 너무너무 궁금했는데... 갑자기 비가 와서 우산 같이 쓰고 집까지 왔어요 🌧️",
+                        narration: "(비가 왔나? 우산을... 같이 썼다고?)",
+                        choices: [
+                            { text: "우산... 같이 썼구나", affection_impact: 2 },
+                            { text: "비가 언제 왔지?", affection_impact: 0 },
+                            { text: "로맨틱했겠네", affection_impact: 4 }
+                        ]
+                    },
+                    {
+                        id: 'climax_2',
+                        dialogue: "제 집 앞에서 시우 오빠가 그러셨어요... '내일 대답해줄게' 라고 하시면서... 볼에 뽀뽀도... 😳",
+                        narration: "(뽀뽀?? 내가 정말 그랬나?? 완전히 기억이...)",
+                        choices: [
+                            { text: "뽀뽀를... 했다고?", affection_impact: 1 },
+                            { text: "내가 정말 그랬나?", affection_impact: -1 },
+                            { text: "어떤 기분이었어?", affection_impact: 3 }
+                        ]
+                    }
+                ],
+                ending: [
+                    {
+                        id: 'ending_1',
+                        dialogue: "그래서... 오늘이 바로 그 내일이에요!! 💕💕 시우 오빠... 지금도 그 마음 그대로세요??",
+                        narration: "(이제 정말로 대답해야 할 시간이 왔다...)",
+                        choices: [
+                            { text: "나도 윤아를 좋아해", affection_impact: 10 },
+                            { text: "조금 더 생각해볼 시간을...", affection_impact: -3 },
+                            { text: "우선 친구로 지내자", affection_impact: -5 }
+                        ]
+                    },
+                    {
+                        id: 'ending_2',
+                        dialogue: "아! 그리고 지금 시우 오빠 집 앞에 와있어요 ㅎㅎ 해장국 재료 다 사가지고 왔거든요!",
+                        narration: "(집 앞에 있다고?? 해장국까지... 정말 세심한 아이구나.)",
+                        choices: [
+                            { text: "벌써 왔어?", affection_impact: 0 },
+                            { text: "해장국까지... 고마워", affection_impact: 3 },
+                            { text: "올라와도 돼", affection_impact: 2 }
+                        ]
+                    },
+                    {
+                        id: 'ending_3',
+                        dialogue: "야호!! 바로 올라갈게요!! 🙌 문 열어주세요~ 해장국 끓여드릴게요!! 그리고... 어제의 답변도 들려주세요 💕",
+                        narration: "(윤아와의 특별한 하루가 시작된다...)",
+                        choices: [
+                            { text: "문 열어줄게, 올라와", affection_impact: 3 },
+                            { text: "조금만 기다려", affection_impact: 1 },
+                            { text: "정말 고마워, 윤아야", affection_impact: 4 }
+                        ]
+                ]
+            };
+            
+            displayGameDialogues();
         }
 
-        function displayDialogues(dialogues) {
-            const container = document.getElementById('dialogues-container');
-            
-            if (Object.keys(dialogues).length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #999;">저장된 대사가 없습니다.</p>';
+        function displayGameDialogues() {
+            if (!currentGameDialogues) {
+                console.error('게임 대사 데이터가 없습니다.');
                 return;
             }
 
-            let html = '<div class="dialogues-list">';
-            
-            Object.entries(dialogues).forEach(([scenarioId, scenarioDialogues]) => {
-                if (Array.isArray(scenarioDialogues) && scenarioDialogues.length > 0) {
+            const container = document.getElementById('dialogues-container');
+            let html = '<div class="game-dialogues-list">';
+
+            Object.entries(currentGameDialogues).forEach(([stage, dialogues]) => {
+                const stageNames = {
+                    'opening': '🌅 초기 대화 (어제 밤의 기억)',
+                    'middle': '💬 중간 대화 (고백의 진실)', 
+                    'climax': '💕 클라이맥스 (비와 뽀뽀)',
+                    'ending': '🌟 종료 대화 (오늘이 그 내일)'
+                };
+                
+                html += `
+                    <div class="stage-section" style="margin-bottom: 40px; padding: 25px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h3 style="color: #2c3e50; margin-bottom: 20px; font-size: 1.5em;">${stageNames[stage] || stage}</h3>
+                        <div class="dialogues-grid" style="display: grid; gap: 20px;">
+                `;
+
+                dialogues.forEach((dialogue, index) => {
+                    const dialogueId = dialogue.id;
+                    const hasChanges = dialogueChanges[dialogueId] ? ' (수정됨)' : '';
+                    
                     html += `
-                        <div class="scenario-dialogues" style="margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-                            <h3 style="color: #2c3e50; margin-bottom: 15px;">📖 시나리오: ${scenarioId}</h3>
-                            <div class="dialogues-grid" style="display: grid; gap: 15px;">
-                    `;
-                    
-                    scenarioDialogues.forEach((dialogue, index) => {
-                        html += `
-                            <div class="dialogue-card" style="padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #3498db;">
-                                <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 10px;">
-                                    <strong style="color: #2c3e50;">대사 #${index + 1}</strong>
-                                    <button class="btn-small" onclick="editDialogue('${scenarioId}', ${index})" style="background: #f39c12; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">✏️ 수정</button>
-                                </div>
-                                ${dialogue.dialogue ? `<p><strong>대화:</strong> ${dialogue.dialogue}</p>` : ''}
-                                ${dialogue.narration ? `<p><strong>지문:</strong> <em>${dialogue.narration}</em></p>` : ''}
-                                ${dialogue.choices && dialogue.choices.length > 0 ? `
-                                    <div style="margin-top: 10px;">
-                                        <strong>선택지:</strong>
-                                        <ul style="margin: 5px 0 0 20px;">
-                                            ${dialogue.choices.map(choice => `<li>${choice.text} (호감도: ${choice.affection_impact})</li>`).join('')}
-                                        </ul>
-                                    </div>
-                                ` : ''}
+                        <div class="dialogue-card" style="padding: 20px; background: white; border-radius: 12px; border-left: 5px solid #3498db; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <strong style="color: #2c3e50; font-size: 1.1em;">대사 #${index + 1}${hasChanges}</strong>
+                                <button onclick="editGameDialogue('${dialogueId}')" style="background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;">✏️ 수정</button>
                             </div>
-                        `;
-                    });
-                    
-                    html += '</div></div>';
-                }
+                            
+                            <div style="margin-bottom: 15px; padding: 12px; background: #e8f4f8; border-radius: 8px;">
+                                <strong style="color: #2980b9;">윤아의 대화:</strong>
+                                <p style="margin: 5px 0 0 0; font-style: italic;">"${dialogue.dialogue}"</p>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px; padding: 12px; background: #fef9e7; border-radius: 8px;">
+                                <strong style="color: #f39c12;">플레이어 심리:</strong>
+                                <p style="margin: 5px 0 0 0; color: #8B4513; font-style: italic;">${dialogue.narration}</p>
+                            </div>
+                            
+                            <div style="padding: 12px; background: #f8f9fa; border-radius: 8px;">
+                                <strong style="color: #27ae60;">플레이어 선택지:</strong>
+                                <ul style="margin: 8px 0 0 20px; color: #2c3e50;">
+                                    ${dialogue.choices.map((choice, choiceIndex) => `
+                                        <li style="margin: 5px 0;">
+                                            "${choice.text}" 
+                                            <span style="color: #e67e22; font-weight: bold;">(+${choice.affection_impact} 호감도)</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div></div>';
             });
-            
+
             html += '</div>';
             container.innerHTML = html;
         }
 
-        async function editDialogue(scenarioId, dialogueIndex) {
-            // 간단한 수정 인터페이스 (추후 모달로 개선 가능)
-            const newDialogue = prompt('새로운 대사를 입력하세요:');
-            if (newDialogue) {
-                try {
-                    // 대사 수정 API 호출 (구현 필요)
-                    console.log('대사 수정:', { scenarioId, dialogueIndex, newDialogue });
-                    alert('대사 수정 기능은 향후 구현 예정입니다.');
-                } catch (error) {
-                    console.error('대사 수정 실패:', error);
-                    alert('대사 수정 중 오류가 발생했습니다.');
-                }
+        function editGameDialogue(dialogueId) {
+            // 현재 대사 찾기
+            let targetDialogue = null;
+            let targetStage = null;
+            
+            Object.entries(currentGameDialogues).forEach(([stage, dialogues]) => {
+                dialogues.forEach(dialogue => {
+                    if (dialogue.id === dialogueId) {
+                        targetDialogue = dialogue;
+                        targetStage = stage;
+                    }
+                });
+            });
+
+            if (!targetDialogue) {
+                alert('대사를 찾을 수 없습니다.');
+                return;
+            }
+
+            // 수정 모달 생성
+            const modalHTML = `
+                <div id="edit-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 30px; border-radius: 15px; width: 80%; max-width: 800px; max-height: 80%; overflow-y: auto;">
+                        <h3>🎭 대사 수정: ${dialogueId}</h3>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: bold; margin-bottom: 8px;">윤아의 대화:</label>
+                            <textarea id="edit-dialogue" style="width: 100%; height: 80px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">${targetDialogue.dialogue}</textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: bold; margin-bottom: 8px;">플레이어 심리 (지문):</label>
+                            <textarea id="edit-narration" style="width: 100%; height: 60px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">${targetDialogue.narration}</textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 25px;">
+                            <label style="display: block; font-weight: bold; margin-bottom: 12px;">플레이어 선택지:</label>
+                            <div id="choices-container">
+                                ${targetDialogue.choices.map((choice, index) => `
+                                    <div style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                        <label style="display: block; margin-bottom: 5px;">선택지 ${index + 1}:</label>
+                                        <input type="text" id="choice-${index}-text" value="${choice.text}" style="width: 70%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-right: 10px;">
+                                        <label style="margin-left: 10px; margin-right: 5px;">호감도:</label>
+                                        <input type="number" id="choice-${index}-impact" value="${choice.affection_impact}" style="width: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: center;">
+                            <button onclick="saveDialogueEdit('${dialogueId}')" style="background: #27ae60; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin-right: 15px; cursor: pointer; font-weight: bold;">💾 저장</button>
+                            <button onclick="closeEditModal()" style="background: #95a5a6; color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">❌ 취소</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        function saveDialogueEdit(dialogueId) {
+            const dialogue = document.getElementById('edit-dialogue').value;
+            const narration = document.getElementById('edit-narration').value;
+            
+            // 현재 대사 찾아서 업데이트
+            Object.entries(currentGameDialogues).forEach(([stage, dialogues]) => {
+                dialogues.forEach(dialogueObj => {
+                    if (dialogueObj.id === dialogueId) {
+                        dialogueObj.dialogue = dialogue;
+                        dialogueObj.narration = narration;
+                        
+                        // 선택지 업데이트
+                        dialogueObj.choices.forEach((choice, index) => {
+                            const textInput = document.getElementById(`choice-${index}-text`);
+                            const impactInput = document.getElementById(`choice-${index}-impact`);
+                            
+                            if (textInput && impactInput) {
+                                choice.text = textInput.value;
+                                choice.affection_impact = parseInt(impactInput.value) || 0;
+                            }
+                        });
+                        
+                        // 변경사항 기록
+                        dialogueChanges[dialogueId] = true;
+                    }
+                });
+            });
+
+            closeEditModal();
+            displayGameDialogues();
+            
+            console.log('✅ 대사 수정 완료:', dialogueId);
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('edit-modal');
+            if (modal) {
+                modal.remove();
             }
         }
 
-        async function clearDialogueMemory() {
-            if (confirm('정말로 모든 대사 메모리를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-                try {
-                    const response = await fetch('/api/scenario?action=reset');
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        alert('대사 메모리가 초기화되었습니다.');
-                        loadCurrentDialogues();
-                    } else {
-                        alert('메모리 초기화에 실패했습니다.');
-                    }
-                } catch (error) {
-                    console.error('메모리 초기화 실패:', error);
-                    alert('메모리 초기화 중 오류가 발생했습니다.');
-                }
+        function saveDialogueChanges() {
+            if (Object.keys(dialogueChanges).length === 0) {
+                alert('변경된 대사가 없습니다.');
+                return;
+            }
+
+            // 실제로는 여기서 multi-scenario-game.html 파일을 업데이트하거나 서버에 저장해야 합니다
+            console.log('💾 저장할 변경사항:', currentGameDialogues);
+            alert(`${Object.keys(dialogueChanges).length}개의 대사 변경사항이 메모리에 저장되었습니다.\n\n실제 게임에 반영하려면 개발자가 multi-scenario-game.html 파일을 업데이트해야 합니다.`);
+        }
+
+        function resetToDefault() {
+            if (confirm('모든 변경사항을 취소하고 기본값으로 되돌리시겠습니까?')) {
+                dialogueChanges = {};
+                loadGameDialogues();
+                alert('기본값으로 재설정되었습니다.');
             }
         }
     </script>

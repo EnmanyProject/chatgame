@@ -1499,8 +1499,8 @@
             }, 1000);
         }
 
-        // MBTI 기반 GPT 주관식 답변 평가 및 응답 생성 - 임시 비활성화
-        async function handleSubjectiveResponse_DISABLED(userMessage) {
+        // MBTI 기반 GPT 주관식 답변 평가 및 응답 생성
+        async function handleSubjectiveResponse(userMessage) {
             showTypingIndicator();
             
             try {
@@ -1522,10 +1522,12 @@
                 }
 
                 if (gptConfig.enabled && gptConfig.api_key) {
+                    console.log('💡 GPT API를 사용한 주관식 평가 시작...');
                     // GPT를 통한 MBTI 기반 평가 및 응답 생성
                     const response = await fetch('/api/scenario', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
+                        timeout: 10000, // 10초 타임아웃 추가
                         body: JSON.stringify({
                             action: 'evaluate_subjective_response',
                             character_id: gameState.currentCharacter.id,
@@ -1568,6 +1570,7 @@
                 }
                 
                 // GPT 비활성화 시 기본 처리
+                console.log('⚙️ GPT API 비활성화됨, 기본 로컬 처리로 진행...');
                 hideTypingIndicator();
                 const basicBonus = calculateSubjectiveBonus(userMessage);
                 const oldAffection = gameState.affection;
@@ -1633,11 +1636,11 @@
             // 입력창 숨기기
             document.getElementById('inputContainer').style.display = 'none';
             
-            // 임시로 간단한 로직으로 대체
-            // if (gameState.isSubjectiveMode) {
-            //     await handleSubjectiveResponse(message);
-            //     gameState.isSubjectiveMode = false;
-            // } else {
+            if (gameState.isSubjectiveMode) {
+                // 주관식 모드: MBTI 기반 GPT 평가 및 응답 생성
+                await handleSubjectiveResponse(message);
+                gameState.isSubjectiveMode = false;
+            } else {
                 // 일반 자유 채팅 모드 (기존 로직)
                 const oldAffection = gameState.affection;
                 const subjectiveBonus = calculateSubjectiveBonus(message);
@@ -1672,7 +1675,7 @@
                         }
                     }, 2000);
                 }, 1500);
-            // }
+            }
         }
 
         // 주관식 답변 호감도 보너스 계산
