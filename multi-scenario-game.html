@@ -649,6 +649,26 @@
             } catch (error) {
                 console.error('❌ 시나리오 로딩 실패:', error);
                 
+                // 먼저 서버 캐시 리셋 시도
+                try {
+                    console.log('🔧 서버 캐시 리셋 시도...');
+                    await fetch('/api/scenario?action=reset');
+                    console.log('✅ 서버 캐시 리셋 성공');
+                    
+                    // 리셋 후 다시 시도
+                    const retryResponse = await fetch('/api/scenario?action=list&type=scenarios');
+                    const retryData = await retryResponse.json();
+                    
+                    if (retryData.success && retryData.scenarios && retryData.scenarios.length > 0) {
+                        availableScenarios = retryData.scenarios.filter(s => s.active);
+                        displayScenarioButtons(availableScenarios);
+                        console.log('✅ 캐시 리셋 후 시나리오 로딩 성공');
+                        return;
+                    }
+                } catch (resetError) {
+                    console.log('❌ 서버 캐시 리셋 실패:', resetError);
+                }
+                
                 // Fallback: 하드코딩된 시나리오 사용
                 console.log('🚑 Fallback: 하드코딩된 시나리오 사용');
                 const fallbackScenarios = [
@@ -672,10 +692,26 @@
                     warningDiv.innerHTML = `
                         ⚠️ 서버에서 시나리오를 불러올 수 없어 기본 시나리오를 사용합니다.<br>
                         <small>에러: ${error.message}</small><br>
+                        <button onclick="resetServerCache()" style="margin-top: 5px; padding: 3px 6px;">🔧 서버 캐시 리셋</button>
                         <button onclick="loadScenarios()" style="margin-top: 5px; padding: 3px 6px;">🔄 다시 시도</button>
                     `;
                     scenarioContainer.prepend(warningDiv);
                 }
+            }
+        }
+
+        // 서버 캐시 리셋 함수
+        async function resetServerCache() {
+            try {
+                console.log('🔧 서버 캐시 강제 리셋...');
+                await fetch('/api/scenario?action=reset');
+                console.log('✅ 서버 캐시 리셋 완료');
+                
+                // 리셋 후 시나리오 다시 로드
+                await loadScenarios();
+            } catch (error) {
+                console.error('❌ 서버 캐시 리셋 실패:', error);
+                alert('서버 캐시 리셋에 실패했습니다: ' + error.message);
             }
         }
 
@@ -1244,7 +1280,7 @@
             const currentEmoticons = emoticons[emotionLevel] || emoticons['neutral'];
             
             // 이미 이모티콘이 있으면 교체하지 않음
-            if (dialogue.match(/[😀-🙏]/)) {
+            if (dialogue.match(/[\u{1F600}-\u{1F64F}]|\u{1F300}-\u{1F5FF}|\u{1F680}-\u{1F6FF}|\u{2600}-\u{26FF}|\u{2700}-\u{27BF}/u)) {
                 return dialogue;
             }
             

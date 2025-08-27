@@ -46,7 +46,7 @@ const DEFAULT_CHARACTERS = {
       },
       relationship: "시우 오빠를 1년 넘게 좋아하는 후배",
       background: "예술을 전공하는 대학생, 감수성이 풍부함",
-      avatar_url: "https://via.placeholder.com/60x60/ff69b4/ffffff?text=윤아",
+      avatar_url: "",
       scenarios: ["hangover_soup", "study_together"],
       created_at: new Date().toISOString(),
       active: true
@@ -63,7 +63,7 @@ const DEFAULT_CHARACTERS = {
       },
       relationship: "같은 과 선배, 친근한 관계",
       background: "학생회 활동을 하는 적극적인 선배",
-      avatar_url: "https://via.placeholder.com/60x60/87ceeb/ffffff?text=미나",
+      avatar_url: "",
       scenarios: ["study_together"],
       created_at: new Date().toISOString(),
       active: true
@@ -482,7 +482,7 @@ async function handlePostRequest(req, res, action, type) {
               secondary: ["감정 표현 풍부"],
               speech_style: ["자연스러운 말투"]
             },
-            avatar_url: req.body.avatar_url || `https://via.placeholder.com/60x60/ff69b4/ffffff?text=${encodeURIComponent(req.body.name || 'C')}`,
+            avatar_url: req.body.avatar_url || "",
             scenarios: req.body.scenarios || [],
             active: req.body.active !== undefined ? req.body.active : true,
             created_at: new Date().toISOString()
@@ -579,12 +579,47 @@ async function handlePostRequest(req, res, action, type) {
         timestamp: new Date().toISOString()
       });
       
+    case 'reset':
+      // 메모리 캐시 완전 초기화
+      RUNTIME_SCENARIOS = null;
+      RUNTIME_CHARACTERS = null;
+      RUNTIME_DIALOGUES = {};
+      RUNTIME_SETTINGS = {};
+      
+      console.log('🔧 Memory cache completely reset');
+      
+      // 즉시 파일에서 다시 로드
+      try {
+        const reloadedScenarios = await loadScenarios();
+        const reloadedCharacters = await loadCharacters();
+        const reloadedDialogues = await loadDialogues();
+        
+        return res.status(200).json({ 
+          success: true, 
+          message: 'Memory cache reset and reloaded successfully',
+          data: {
+            scenarios_count: reloadedScenarios.scenarios?.length || 0,
+            characters_count: reloadedCharacters.characters?.length || 0,
+            dialogues_count: Object.keys(reloadedDialogues).length || 0
+          },
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Reset and reload error:', error);
+        return res.status(200).json({ 
+          success: true, 
+          message: 'Memory cache reset (reload failed)',
+          error: error.message,
+          timestamp: new Date().toISOString()
+        });
+      }
+      
     default:
       console.log('Invalid action received:', action);
       return res.status(400).json({ 
         error: 'Invalid action', 
         received_action: action,
-        valid_actions: ['create', 'generate', 'save_settings', 'test']
+        valid_actions: ['create', 'generate', 'save_settings', 'test', 'reset']
       });
   }
 }

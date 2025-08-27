@@ -1,0 +1,22 @@
+{
+  "scenarios": [
+    {
+      "id": "hangover_confession",
+      "title": "어제 밤의 기억",
+      "description": "시우 오빠를 1년째 좋아하는 후배가 어제 술먹고 고백한 후 부끄러워하는 상황",
+      "setting": "다음날 아침, 메신저로 연락",
+      "mood": "부끄러움, 설렘, 긴장감",
+      "created_at": "2025-08-27T10:00:00.000Z",
+      "active": true
+    },
+    {
+      "id": "study_together", 
+      "title": "함께 공부하기",
+      "description": "도서관에서 같이 공부하는 상황",
+      "setting": "조용한 도서관",
+      "mood": "집중, 은밀한 대화",
+      "created_at": "2025-08-27T10:00:00.000Z",
+      "active": false
+    }
+  ]
+}
