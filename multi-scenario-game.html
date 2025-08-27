@@ -1636,17 +1636,18 @@
                         dialogue = randomResponse.replace(`${gameState.currentCharacter.name}: `, '');
                     }
                 
-                displayCharacterMessage(dialogue, '', '');
+                    displayCharacterMessage(dialogue, '', '');
                 
-                // 다음 단계 진행
-                setTimeout(() => {
-                    if (gameState.choiceNumber < 36) {
-                        startChoiceSequence();
-                    } else {
-                        endGame();
-                    }
-                }, 2000);
-            }, 1500);
+                    // 다음 단계 진행
+                    setTimeout(() => {
+                        if (gameState.choiceNumber < 36) {
+                            startChoiceSequence();
+                        } else {
+                            endGame();
+                        }
+                    }, 2000);
+                }, 1500);
+            }
         }
 
         // 주관식 답변 호감도 보너스 계산
