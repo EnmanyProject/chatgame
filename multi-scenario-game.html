@@ -512,8 +512,22 @@
             previousChoices: [],
             waitingForInput: false,
             isFreeChatMode: false,
-            isSubjectiveMode: false  // 주관식 모드 플래그 추가
+            isSubjectiveMode: false,  // 주관식 모드 플래그 추가
+            isProcessing: false,  // 처리 중 플래그 (중복 입력 방지)
+            canInput: true  // 입력 가능 여부
         };
+
+        // 스크롤 자동 이동 함수
+        function scrollToBottom() {
+            const container = document.getElementById('messagesContainer');
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+                container.scrollTo({
+                    top: container.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 100);
+        }
 
         let availableScenarios = [];
         let availableCharacters = [];
@@ -877,8 +891,14 @@
 
         // 선택지 시퀀스 시작
         async function startChoiceSequence() {
+            // 입력 다시 활성화
+            gameState.isProcessing = false;
+            gameState.canInput = true;
+            
             gameState.choiceNumber++;
             updateProgress(gameState.choiceNumber);
+            
+            console.log('🎯 선택지 시퀀스 시작 - 턴', gameState.choiceNumber);
             
             // 윤아 어제 밤 고백 시나리오 특별 선택지 (초기)
             if (gameState.currentScenario.id === 'hangover_confession' && gameState.choiceNumber === 1) {
@@ -957,31 +977,53 @@
 
                     const data = await response.json();
                     
-                    if (data.success) {
+                    if (data.success && data.generated) {
                         const generated = data.generated;
-                        showTypingIndicator();
+                        console.log('✅ GPT 생성 데이터:', generated);
                         
-                        setTimeout(() => {
-                            hideTypingIndicator();
-                            displayCharacterMessage(generated.dialogue, generated.narration);
+                        // generated 객체 검증
+                        if (generated.dialogue && generated.choices) {
+                            showTypingIndicator();
                             
                             setTimeout(() => {
-                                displayChoices(generated.choices.map(choice => ({
-                                    text: choice.text,
-                                    affection_impact: choice.affection_impact || 0
-                                })));
-                            }, 1000);
-                        }, 1500);
-                        return;
+                                hideTypingIndicator();
+                                displayCharacterMessage(generated.dialogue, generated.narration || '');
+                                scrollToBottom(); // 스크롤 자동 이동 추가
+                                
+                                setTimeout(() => {
+                                    displayChoices(generated.choices.map(choice => ({
+                                        text: choice.text,
+                                        affection_impact: choice.affection_impact || 0
+                                    })));
+                                    
+                                    // 처리 완료 후 상태 복원
+                                    gameState.isProcessing = false;
+                                    gameState.canInput = true;
+                                }, 1000);
+                            }, 1500);
+                            return;
+                        } else {
+                            console.warn('⚠️ GPT 응답에 필수 데이터 누락:', generated);
+                        }
+                    } else {
+                        console.warn('⚠️ GPT API 실패 또는 데이터 없음:', data);
                     }
                 }
                 
                 // 3순위: GPT 실패 또는 미설정 시 기본 대화
                 displayPredefinedChoices();
                 
+                // 처리 완료 후 상태 복원
+                gameState.isProcessing = false;
+                gameState.canInput = true;
+                
             } catch (error) {
                 console.error('선택지 생성 실패:', error);
                 displayPredefinedChoices();
+                
+                // 오류 발생 시에도 상태 복원
+                gameState.isProcessing = false;
+                gameState.canInput = true;
             }
         }
 
@@ -1124,9 +1166,13 @@
                 
                 // 조정된 대화 내용 사용 (dialogue, narration 분리)
                 displayCharacterMessage(adjustedDialogue.dialogue, adjustedDialogue.narration);
+                scrollToBottom(); // 스크롤 자동 이동 추가
                 
                 setTimeout(() => {
                     displayChoices(adjustedDialogue.choices);
+                    // 선택지 표시 후 처리 상태 복원
+                    gameState.isProcessing = false;
+                    gameState.canInput = true;
                 }, 1000);
             }, 1500);
         }
@@ -1349,14 +1395,7 @@
                 container.appendChild(messageDiv);
             }
             
-            // 강화된 자동 스크롤
-            setTimeout(() => {
-                container.scrollTop = container.scrollHeight;
-                container.scrollTo({
-                    top: container.scrollHeight,
-                    behavior: 'smooth'
-                });
-            }, 100);
+            scrollToBottom();
         }
 
         // 사용자 메시지 표시
@@ -1370,14 +1409,7 @@
                 </div>
             `;
             container.appendChild(messageDiv);
-            // 강화된 자동 스크롤
-            setTimeout(() => {
-                container.scrollTop = container.scrollHeight;
-                container.scrollTo({
-                    top: container.scrollHeight,
-                    behavior: 'smooth'
-                });
-            }, 100);
+            scrollToBottom();
         }
 
         // 선택지 표시
@@ -1385,23 +1417,44 @@
             const container = document.getElementById('choicesContainer');
             container.innerHTML = '';
             
+            // 입력 다시 활성화 (선택지가 표시되면 선택 가능)
+            gameState.canInput = true;
+            gameState.isProcessing = false;
+            
             choices.forEach((choice, index) => {
                 const button = document.createElement('button');
                 button.className = 'choice-button';
                 button.style.animationDelay = `${index * 0.1}s`;
                 button.textContent = choice.text;
+                button.disabled = false; // 버튼 활성화
                 button.onclick = () => selectChoice(choice, index);
                 container.appendChild(button);
             });
             
             container.classList.add('show');
+            scrollToBottom(); // 선택지가 나오면 스크롤 이동
+            
+            console.log('🎮 선택지 표시됨:', choices.map(c => c.text));
         }
 
         // 선택지 선택
         async function selectChoice(choice, optionIndex) {
+            // 중복 입력 방지 및 진행 중 체크
+            if (gameState.isProcessing || !gameState.canInput) {
+                console.log('🚫 입력이 제한된 상태입니다.');
+                return;
+            }
+            
+            // 처리 중 상태로 변경
+            gameState.isProcessing = true;
+            gameState.canInput = false;
+            
+            console.log('✅ 선택지 선택:', choice.text, '(옵션 인덱스:', optionIndex, ')');
+            
             // 선택된 버튼 표시
             document.querySelectorAll('.choice-button').forEach((btn, idx) => {
                 btn.classList.remove('selected');
+                btn.disabled = true; // 모든 버튼 비활성화
                 if (idx === optionIndex) {
                     btn.classList.add('selected');
                 }
@@ -1409,6 +1462,7 @@
 
             // 사용자 선택 표시
             displayUserMessage(choice.text);
+            scrollToBottom(); // 스크롤 자동 이동
             gameState.previousChoices.push(optionIndex);
             
             // 윤아 어제 밤 고백 시나리오 특별 응답 처리
@@ -1768,14 +1822,7 @@
                 </div>
             `;
             container.appendChild(typingDiv);
-            // 강화된 자동 스크롤
-            setTimeout(() => {
-                container.scrollTop = container.scrollHeight;
-                container.scrollTo({
-                    top: container.scrollHeight,
-                    behavior: 'smooth'
-                });
-            }, 100);
+            scrollToBottom();
         }
 
         function hideTypingIndicator() {
@@ -1864,14 +1911,7 @@
                         <button class="back-btn" onclick="resetGame()">🔄 다른 시나리오로 다시 시작</button>
                     `;
                     container.appendChild(restartDiv);
-                    // 강화된 자동 스크롤
-            setTimeout(() => {
-                container.scrollTop = container.scrollHeight;
-                container.scrollTo({
-                    top: container.scrollHeight,
-                    behavior: 'smooth'
-                });
-            }, 100);
+                    scrollToBottom();
                 }, 2000);
             }, 1500);
         }
