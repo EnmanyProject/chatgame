@@ -11,13 +11,20 @@ module.exports = (req, res) => {
   }
 
   try {
+    console.log('API 호출:', req.method, req.query, req.body);
+    
     // 기본 테스트 응답
     if (req.query.action === 'test' || (!req.query.action && !req.body?.action)) {
+      console.log('테스트 API 호출됨');
       return res.status(200).json({ 
         success: true, 
         message: 'Scenario API is working',
         timestamp: new Date().toISOString(),
-        method: req.method
+        method: req.method,
+        env: {
+          hasOpenAI: !!process.env.OPENAI_API_KEY,
+          nodeEnv: process.env.NODE_ENV
+        }
       });
     }
 
@@ -83,6 +90,22 @@ module.exports = (req, res) => {
     if (action === 'generate') {
       const { character_id, scenario_id, situation, gpt_config } = req.body;
       
+      // 환경변수에서 OpenAI API 키 가져오기
+      const apiKey = process.env.OPENAI_API_KEY || gpt_config?.api_key;
+      if (!apiKey) {
+        return res.status(200).json({
+          success: true,
+          generated: {
+            dialogue: "죄송해요, 지금 생각이 잘 안나네요 😅",
+            narration: "시스템 설정을 확인해주세요.",
+            choices: [
+              {"text": "괜찮다", "affection_impact": 0},
+              {"text": "나중에 다시 말해줘", "affection_impact": 0}
+            ]
+          }
+        });
+      }
+      
       console.log('GPT 생성 요청:', { character_id, scenario_id, situation });
       
       try {
@@ -112,7 +135,7 @@ module.exports = (req, res) => {
         const gptResponse = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${gpt_config.api_key}`,
+            'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
