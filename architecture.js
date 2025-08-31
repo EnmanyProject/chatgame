@@ -52,17 +52,34 @@ class GameArchitecture {
         try {
             this.logger.info('🎮 게임 시작...');
             
-            // 1. 데이터 초기화
-            await this.getModule('dataSchema').initialize();
+            const modules = [
+                { name: 'dataSchema', method: 'initialize' },
+                { name: 'gameLogic', method: 'prepare' },
+                { name: 'episodeManager', method: 'activate' },
+                { name: 'saveSystem', method: 'ready' }
+            ];
             
-            // 2. 게임 로직 준비
-            await this.getModule('gameLogic').prepare();
-            
-            // 3. 에피소드 매니저 활성화
-            await this.getModule('episodeManager').activate();
-            
-            // 4. 저장 시스템 준비
-            await this.getModule('saveSystem').ready();
+            // 모듈별 초기화 with 에러 처리
+            for (const { name, method } of modules) {
+                try {
+                    this.logger.info(`🔧 모듈 ${name} 초기화 중...`);
+                    const module = this.getModule(name);
+                    
+                    if (typeof module[method] === 'function') {
+                        await module[method]();
+                    } else {
+                        await module.initialize();
+                    }
+                    
+                    this.logger.info(`✅ 모듈 ${name} 초기화 완료`);
+                } catch (error) {
+                    this.logger.error(`❌ 모듈 ${name} 초기화 실패:`, error.message);
+                    // 치명적이지 않은 경우 계속 진행
+                    if (name === 'dataSchema') {
+                        throw new Error(`필수 모듈 ${name} 초기화 실패: ${error.message}`);
+                    }
+                }
+            }
             
             this.eventBus.emit('game:started');
             return { success: true, message: '게임이 성공적으로 시작되었습니다' };
@@ -97,8 +114,20 @@ class GameStateManager {
             data: { ...this.gameData }
         });
         
+        // 히스토리 제한 (최근 50개만 유지)
+        if (this.stateHistory.length > 50) {
+            this.stateHistory = this.stateHistory.slice(-50);
+            console.log('📚 상태 히스토리 정리됨 (50개 제한)');
+        }
+        
         this.currentState = newState;
-        Object.assign(this.gameData, data);
+        
+        // 데이터 유효성 검사 (기본적인 타입 체크)
+        if (data && typeof data === 'object') {
+            Object.assign(this.gameData, data);
+        } else if (data !== undefined) {
+            console.warn('⚠️ 잘못된 상태 데이터 타입:', typeof data);
+        }
         
         console.log(`🔄 상태 변경: ${this.stateHistory[this.stateHistory.length - 1].from} → ${newState}`);
     }
@@ -239,26 +268,152 @@ class BaseModule {
 }
 
 // 📄 임시 모듈 클래스들 (각각 별도 파일로 분리 예정)
-// DataSchemaModule은 dataSchema.js에서 실제 구현됨 - 여기서는 제거됨
+class DataSchemaModule extends BaseModule {
+    constructor() { 
+        super('dataSchema'); 
+        this.schemas = new Map();
+        this.validators = new Map();
+    }
+    
+    async initialize() {
+        console.log('📊 데이터 스키마 모듈 초기화...');
+        
+        // 기본 스키마 정의
+        this.defineSchemas();
+        
+        await super.initialize();
+        console.log('✅ 데이터 스키마 초기화 완료');
+    }
+    
+    defineSchemas() {
+        // 플레이어 스키마
+        this.schemas.set('player', {
+            name: { type: 'string', required: true },
+            id: { type: 'number', required: true },
+            affection: { type: 'number', default: 0 },
+            choices: { type: 'array', default: [] }
+        });
+        
+        // 에피소드 스키마
+        this.schemas.set('episode', {
+            id: { type: 'string', required: true },
+            title: { type: 'string', required: true },
+            character: { type: 'string', required: true },
+            scenario: { type: 'string', required: true }
+        });
+        
+        console.log('📋 기본 스키마 정의 완료');
+    }
+    
+    validate(schemaName, data) {
+        const schema = this.schemas.get(schemaName);
+        if (!schema) {
+            throw new Error(`스키마 '${schemaName}'를 찾을 수 없습니다`);
+        }
+        
+        // 간단한 유효성 검사
+        for (const [field, rules] of Object.entries(schema)) {
+            if (rules.required && !data.hasOwnProperty(field)) {
+                throw new Error(`필수 필드 '${field}'가 누락되었습니다`);
+            }
+        }
+        
+        return true;
+    }
+}
 
 class GameLogicModule extends BaseModule {
-    constructor() { super('gameLogic'); }
-    async prepare() { console.log('⚙️ 게임 로직 준비됨'); }
+    constructor() { 
+        super('gameLogic'); 
+        this.rules = new Map();
+    }
+    
+    async prepare() { 
+        console.log('⚙️ 게임 로직 모듈 초기화...');
+        this.initializeRules();
+        await super.initialize();
+        console.log('✅ 게임 로직 준비 완료'); 
+    }
+    
+    initializeRules() {
+        // 기본 게임 규칙 정의
+        this.rules.set('affection_change', { min: -10, max: 10 });
+        this.rules.set('max_choices', 50);
+        console.log('📜 게임 규칙 초기화 완료');
+    }
 }
 
 class EpisodeManagerModule extends BaseModule {
-    constructor() { super('episodeManager'); }
-    async activate() { console.log('📖 에피소드 매니저 활성화됨'); }
+    constructor() { 
+        super('episodeManager'); 
+        this.episodes = new Map();
+        this.currentEpisode = null;
+    }
+    
+    async activate() { 
+        console.log('📖 에피소드 매니저 모듈 초기화...');
+        this.loadDefaultEpisodes();
+        await super.initialize();
+        console.log('✅ 에피소드 매니저 활성화 완료'); 
+    }
+    
+    loadDefaultEpisodes() {
+        // 기본 에피소드 정의
+        this.episodes.set('ep001', {
+            id: 'ep001',
+            title: '어제 밤의 기억',
+            character: 'yoona',
+            scenario: 'romantic'
+        });
+        console.log('📚 기본 에피소드 로드 완료');
+    }
 }
 
 class SaveSystemModule extends BaseModule {
-    constructor() { super('saveSystem'); }
-    async ready() { console.log('💾 저장 시스템 준비됨'); }
+    constructor() { 
+        super('saveSystem'); 
+        this.saves = new Map();
+    }
+    
+    async ready() { 
+        console.log('💾 저장 시스템 모듈 초기화...');
+        this.initializeStorage();
+        await super.initialize();
+        console.log('✅ 저장 시스템 준비 완료'); 
+    }
+    
+    initializeStorage() {
+        // 로컬스토리지 지원 확인
+        try {
+            if (typeof localStorage !== 'undefined') {
+                console.log('💿 로컬스토리지 사용 가능');
+            } else {
+                console.warn('⚠️ 로컬스토리지 사용 불가능');
+            }
+        } catch (error) {
+            console.warn('⚠️ 스토리지 초기화 경고:', error.message);
+        }
+    }
 }
 
 class AdminPanelModule extends BaseModule {
-    constructor() { super('adminPanel'); }
-    async onInitialize() { console.log('👨‍💼 관리자 패널 초기화됨'); }
+    constructor() { 
+        super('adminPanel'); 
+        this.isEnabled = false;
+    }
+    
+    async onInitialize() { 
+        console.log('👨‍💼 관리자 패널 모듈 초기화...');
+        this.checkAdminAccess();
+        console.log('✅ 관리자 패널 초기화 완료'); 
+    }
+    
+    checkAdminAccess() {
+        // 개발 환경에서만 활성화
+        this.isEnabled = window.location.hostname === 'localhost' || 
+                        window.location.hostname.includes('127.0.0.1');
+        console.log(`🔐 관리자 패널 ${this.isEnabled ? '활성화' : '비활성화'}`);
+    }
 }
 
 // 🚀 전역 게임 인스턴스 및 시작 함수
