@@ -179,47 +179,73 @@ async function callClaudeAPI(requestData) {
   }
 }
 
-// Fallback 응답 시스템 (기존 하드코딩된 고품질 응답)
+// Fallback 응답 시스템 (자연스러운 대화체 선택지)
 function getFallbackResponse(req, res) {
-  console.log('Using fallback responses - Claude API unavailable');
+  console.log('Using improved dialogue-style responses - v2.1.0');
   
-  const fallbackResponses = [
+  const naturalDialogueResponses = [
     {
       dialogue: "오빠... 어제는 정말 미안해 😳 취해서 그런 말까지 했는데, 기억나지도 않아서 더 부끄러워 💦",
       narration: "윤아가 얼굴을 붉히며 손으로 얼굴을 가린다. 진심이었지만 용기가 나지 않는 것 같다.",
       choices: [
-        {"text": "괜찮다고 다정하게 말해준다", "affection_impact": 2},
-        {"text": "어떤 말을 했는지 궁금하다고 한다", "affection_impact": 0},
-        {"text": "진심이었는지 조심스럽게 물어본다", "affection_impact": 1}
+        {"text": "전혀 신경 안 써도 돼. 우리 사이인데 뭘 그래?", "affection_impact": 2},
+        {"text": "음... 어떤 이야기였는지 살짝 궁금하긴 하네 😅", "affection_impact": 0},
+        {"text": "혹시 정말 마음에서 나온 말이었나?", "affection_impact": 1}
       ]
     },
     {
       dialogue: "사실은... 술 핑계였어 😔 평소에 말 못했던 진심이었는데, 이렇게 어색해질까봐 무서워",
       narration: "윤아의 목소리가 떨리며, 눈물이 살짝 맺힌다. 1년 동안 숨겨왔던 마음을 털어놓고 있다.",
       choices: [
-        {"text": "나도 같은 마음이었다고 고백한다", "affection_impact": 3},
-        {"text": "용기내줘서 고맙다고 말한다", "affection_impact": 2},
-        {"text": "시간을 두고 생각해보자고 한다", "affection_impact": -1}
+        {"text": "사실 나도... 너를 계속 생각하고 있었어", "affection_impact": 3},
+        {"text": "이렇게 말해줘서 정말 고마워. 많이 힘들었을 텐데", "affection_impact": 2},
+        {"text": "그래... 우리 둘이 천천히 어떻게 할지 생각해보자", "affection_impact": -1}
       ]
     },
     {
       dialogue: "오빠가 싫어할까봐 걱정했는데... 이렇게 말해주니까 마음이 좀 놓여 😌 고마워",
       narration: "윤아가 안도의 표정을 지으며 작은 미소를 짓는다. 차분해진 분위기가 따뜻하게 느껴진다.",
       choices: [
-        {"text": "앞으로 더 많이 대화하자고 제안한다", "affection_impact": 2},
-        {"text": "언제든 편하게 말하라고 격려한다", "affection_impact": 1},
-        {"text": "커피라도 한잔 하자고 제안한다", "affection_impact": 2}
+        {"text": "앞으로도 이렇게 서로 마음 털어놓고 지내자", "affection_impact": 2},
+        {"text": "밀어두지 말고 나한테 뭐든 얘기해. 그게 좋을 것 같아", "affection_impact": 1},
+        {"text": "아 그럼... 우리 커피 한잔이라도 마시면서 얘기할까?", "affection_impact": 2}
+      ]
+    },
+    {
+      dialogue: "오빠랑 이렇게 대화하니까 너무 좋아... 😊 마음이 편해져",
+      narration: "윤아가 자연스럽게 미소를 지으며, 처음으로 편안한 모습을 보인다.",
+      choices: [
+        {"text": "나도 너랑 있으면 마음이 정말 편해지네", "affection_impact": 3},
+        {"text": "정말? 그러게 말해줄 줄 며랑실건... 다행이야", "affection_impact": 1},
+        {"text": "우리 이렇게 좋은 친구로 지내는 것도 나쁨지 않을까?", "affection_impact": 0}
+      ]
+    },
+    {
+      dialogue: "혹시... 오빠도 나처럼 설레고 있어? 🥺 아니면 나만 그런 건가",
+      narration: "윤아가 조심스럽게 눈치를 보며, 자신의 감정이 혼자만의 것인지 궁금해한다.",
+      choices: [
+        {"text": "사실... 나도 너 때문에 마음이 떨리고 있어", "affection_impact": 4},
+        {"text": "음... 솔직히 말하면 나도 잘 모르겠어. 이런 감정이 어려워", "affection_impact": -1},
+        {"text": "너는... 어떤 마음인지 나한테 말해줄래?", "affection_impact": 1}
+      ]
+    },
+    {
+      dialogue: "오빠와 함께 있으니까 시간이 너무 빨리 지나가는 것 같아 😌 이런 기분 처음이야",
+      narration: "윤아가 행복한 표정으로 시간이 멈췄으면 좋겠다는 듯한 눈빛을 보낸다.",
+      choices: [
+        {"text": "나도 정말 똑같아... 이 시간이 안 끝났으면 좋겠어", "affection_impact": 3},
+        {"text": "맞아, 이렇게 좋은 시간을 같이 보내고 있으니까", "affection_impact": 2},
+        {"text": "아... 그러게. 벌써 시간이 이렇게 많이 지났네", "affection_impact": 1}
       ]
     }
   ];
   
   const messageCount = req.body?.message_count || 0;
-  const response = fallbackResponses[messageCount % fallbackResponses.length];
+  const response = naturalDialogueResponses[messageCount % naturalDialogueResponses.length];
   
   return res.json({
     success: true,
     generated: response,
-    source: 'Fallback (Claude API unavailable)',
-    version: 'v2.0.0'
+    source: 'Natural Dialogue Style v2.1.0'
   });
 }
