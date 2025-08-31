@@ -239,19 +239,7 @@ class BaseModule {
 }
 
 // 📄 임시 모듈 클래스들 (각각 별도 파일로 분리 예정)
-// DataSchemaModule은 dataSchema.js에서 실제 구현됨
-class DataSchemaModule extends BaseModule {
-    constructor() { 
-        super('dataSchema'); 
-        this.schemas = new Map();
-        this.validators = new Map();
-        this.factories = new Map();
-    }
-    async onInitialize() { 
-        console.log('📊 데이터 스키마 준비됨 (임시 버전)');
-        console.log('ℹ️ 실제 구현은 dataSchema.js를 참조하세요');
-    }
-}
+// DataSchemaModule은 dataSchema.js에서 실제 구현됨 - 여기서는 제거됨
 
 class GameLogicModule extends BaseModule {
     constructor() { super('gameLogic'); }

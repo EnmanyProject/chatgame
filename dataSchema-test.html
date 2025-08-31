@@ -327,6 +327,13 @@
                     await window.gameArchitecture.startGame();
                 }
                 
+                // DataSchemaModule이 정의되어 있다면 실제 구현으로 교체
+                if (typeof DataSchemaModule !== 'undefined') {
+                    window.gameArchitecture.modules.set('dataSchema', new DataSchemaModule());
+                    window.gameArchitecture.modules.get('dataSchema').setArchitecture(window.gameArchitecture);
+                    await window.gameArchitecture.modules.get('dataSchema').initialize();
+                }
+                
                 dataSchemaModule = window.gameArchitecture.getModule('dataSchema');
                 
                 if (dataSchemaModule instanceof DataSchemaModule) {
@@ -570,6 +577,20 @@
         // 페이지 로드 시 자동 실행
         window.addEventListener('load', async () => {
             output('🌐 데이터 스키마 테스트 페이지 로드됨');
+            
+            // DataSchemaModule이 로드된 후 아키텍처 모듈 다시 등록
+            if (window.gameArchitecture && typeof DataSchemaModule !== 'undefined') {
+                try {
+                    // 기존 임시 모듈 교체
+                    window.gameArchitecture.modules.set('dataSchema', new DataSchemaModule());
+                    window.gameArchitecture.modules.get('dataSchema').setArchitecture(window.gameArchitecture);
+                    await window.gameArchitecture.modules.get('dataSchema').initialize();
+                    output('🔄 DataSchemaModule 실제 구현으로 교체됨', 'success');
+                } catch (error) {
+                    output(`⚠️ 모듈 교체 실패: ${error.message}`, 'warn');
+                }
+            }
+            
             await testSchemaModule();
         });
     </script>
