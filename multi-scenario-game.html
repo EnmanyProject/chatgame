@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎭 다중 시나리오 어드벤처 게임 v2.1.0 ⚡</title>
+    <title>🎭 다중 시나리오 어드벤처 게임 v2.2.0 ⚡</title>
     <style>
         * {
             margin: 0;
@@ -454,7 +454,7 @@
         <div id="scenarioSelection" class="scenario-selection">
             <h1 class="scenario-title">🎭 시나리오를 선택하세요</h1>
             <div id="scenarioButtons" class="scenario-buttons">
-                <div style="text-align: center; color: #666;">⚡ v2.1.0 로딩 중...</div>
+                <div style="text-align: center; color: #666;">⚡ v2.2.0 로딩 중...</div>
             </div>
         </div>
 
@@ -517,16 +517,30 @@
             canInput: true  // 입력 가능 여부
         };
 
-        // 스크롤 자동 이동 함수
+        // 스크롤 자동 이동 함수 (개선된 버전)
         function scrollToBottom() {
             const container = document.getElementById('messagesContainer');
+            
+            // 즉시 스크롤 + 지연된 스크롤 (2단계)
+            container.scrollTop = container.scrollHeight;
+            container.scrollTo({
+                top: container.scrollHeight,
+                behavior: 'smooth'
+            });
+            
+            // 추가 지연된 스크롤 (더 확실하게)
             setTimeout(() => {
                 container.scrollTop = container.scrollHeight;
                 container.scrollTo({
                     top: container.scrollHeight,
                     behavior: 'smooth'
                 });
-            }, 100);
+            }, 150);
+            
+            // 최종 확인 스크롤 (입력창 표시 후)
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+            }, 300);
         }
 
         let availableScenarios = [];
@@ -572,7 +586,7 @@
 
         // 페이지 로드 시 시나리오 로드
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('🚀 v2.1.0 성능 최적화 버전 시작!');
+            console.log('🚀 v2.2.0 자연스러운 대화체 버전 시작! (Cache Fixed)');
             
             try {
                 await loadScenarios();
@@ -1542,126 +1556,138 @@
                     `(${gameState.currentCharacter.name}가 호기심 어린 눈으로 바라보며 진지하게 물어본다)`, 
                     '😊');
                 
-                // 입력창 활성화
+                // 입력창 활성화 (개선된 버전)
                 setTimeout(() => {
+                    console.log('📝 입력창 활성화 시도...');
+                    
+                    // 상태 설정
                     gameState.waitingForInput = true;
-                    gameState.isSubjectiveMode = true; // 주관식 모드 플래그
-                    document.getElementById('inputContainer').style.display = 'block';
-                    document.getElementById('messageInput').focus();
-                    document.getElementById('messageInput').placeholder = `${gameState.currentCharacter.name}에게 진심으로 답변해주세요...`;
+                    gameState.isSubjectiveMode = true;
+                    gameState.isProcessing = false; // 입력 가능 상태로
+                    gameState.canInput = true;
+                    
+                    // 입력창 표시
+                    const inputContainer = document.getElementById('inputContainer');
+                    const messageInput = document.getElementById('messageInput');
+                    
+                    inputContainer.style.display = 'block';
+                    messageInput.placeholder = `${gameState.currentCharacter.name}에게 진심으로 답변해주세요...`;
+                    
+                    // 입력창 표시 후 완전한 스크롤 + 포커스
+                    setTimeout(() => {
+                        scrollToBottom(); // 전체 스크롤
+                        messageInput.focus(); // 포커스
+                        messageInput.value = ''; // 내용 초기화
+                        
+                        console.log('✅ 입력창 활성화 완료!');
+                        console.log('🎯 상태:', {
+                            waitingForInput: gameState.waitingForInput,
+                            isSubjectiveMode: gameState.isSubjectiveMode,
+                            canInput: gameState.canInput,
+                            isProcessing: gameState.isProcessing
+                        });
+                    }, 100);
+                    
                 }, 1500);
             }, 1000);
         }
 
-        // MBTI 기반 GPT 주관식 답변 평가 및 응답 생성
+        // Claude API 기반 주관식 답변 평가 및 응답 생성
         async function handleSubjectiveResponse(userMessage) {
             showTypingIndicator();
             
             try {
-                // GPT 설정 가져오기
-                const savedSettings = localStorage.getItem('gptSettings');
-                let gptConfig = {
-                    enabled: false,
-                    api_key: '',
-                    model: 'gpt-3.5-turbo',
-                    temperature: 0.7
-                };
+                console.log('💡 Claude API를 사용한 주관식 평가 시작...');
                 
-                if (savedSettings) {
-                    try {
-                        gptConfig = JSON.parse(savedSettings);
-                    } catch (e) {
-                        console.log('GPT 설정 파싱 실패');
-                    }
-                }
+                // Claude API를 통한 MBTI 기반 평가 및 응답 생성
+                const response = await fetch('/api/scenario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    timeout: 15000, // 15초 타임아웃
+                    body: JSON.stringify({
+                        action: 'generate',
+                        user_input: userMessage,
+                        character_id: gameState.currentCharacter.id,
+                        scenario_id: gameState.currentScenario.id,
+                        message_count: gameState.messageCount,
+                        choice_number: gameState.choiceNumber,
+                        affection: gameState.affection,
+                        conversation_history: gameState.previousChoices.slice(-5), // 최근 5개 대화
+                        user_choice: userMessage,
+                        is_subjective_mode: true
+                    })
+                });
 
-                if (gptConfig.enabled && gptConfig.api_key) {
-                    console.log('💡 GPT API를 사용한 주관식 평가 시작...');
-                    // GPT를 통한 MBTI 기반 평가 및 응답 생성
-                    const response = await fetch('/api/scenario', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        timeout: 10000, // 10초 타임아웃 추가
-                        body: JSON.stringify({
-                            action: 'evaluate_subjective_response',
-                            character_id: gameState.currentCharacter.id,
-                            scenario_id: gameState.currentScenario.id,
-                            user_message: userMessage,
-                            current_affection: gameState.affection,
-                            choice_number: gameState.choiceNumber,
-                            character_mbti: gameState.currentCharacter.mbti,
-                            gpt_config: gptConfig
-                        })
-                    });
-
-                    const data = await response.json();
+                const data = await response.json();
+                
+                if (data.success && data.generated) {
+                    hideTypingIndicator();
                     
-                    if (data.success) {
-                        hideTypingIndicator();
-                        
-                        // GPT 평가 결과 적용
-                        const oldAffection = gameState.affection;
-                        gameState.affection += data.affection_change || 0;
-                        gameState.affection = Math.max(0, Math.min(100, gameState.affection));
-                        
-                        // 하트 UI 업데이트
-                        updateAffectionHearts(gameState.affection, oldAffection);
-                        
-                        // GPT 생성 응답 표시
-                        const responseText = addEmojisBasedOnAffection(data.character_response, gameState.affection);
-                        displayCharacterMessage(responseText, data.narration || '', '');
-                        
-                        // 다음 단계 진행
-                        setTimeout(() => {
-                            if (gameState.choiceNumber < 36) {
-                                startChoiceSequence();
-                            } else {
-                                endGame();
-                            }
-                        }, 2000);
-                        return;
-                    }
+                    const generated = data.generated;
+                    console.log('✅ Claude API 생성 데이터:', generated);
+                    
+                    // 호감도 업데이트 (최대 +20점)
+                    const affectionChange = Math.min(20, Math.max(0, 
+                        Math.floor(userMessage.length / 10) + 
+                        (userMessage.includes('좋아') || userMessage.includes('사랑') ? 5 : 0) +
+                        (userMessage.length > 30 ? 5 : 0)
+                    ));
+                    
+                    const oldAffection = gameState.affection;
+                    gameState.affection += affectionChange;
+                    gameState.affection = Math.max(0, Math.min(100, gameState.affection));
+                    
+                    // 하트 UI 업데이트
+                    updateAffectionHearts(gameState.affection, oldAffection);
+                    
+                    // Claude 생성 응답 표시
+                    let responseText = generated.dialogue || '고마워요! 정말 좋은 말이에요 😊';
+                    responseText = addEmojisBasedOnAffection(responseText, gameState.affection);
+                    displayCharacterMessage(responseText, generated.narration || '', '');
+                    
+                    console.log(`💖 호감도 +${affectionChange} (총 ${gameState.affection}/100)`);
+                    
+                    // 다음 단계 진행
+                    setTimeout(() => {
+                        if (gameState.choiceNumber < 36) {
+                            startChoiceSequence();
+                        } else {
+                            endGame();
+                        }
+                    }, 2000);
+                    return;
+                } else {
+                    console.warn('⚠️ Claude API 실패 또는 데이터 없음:', data);
                 }
-                
-                // GPT 비활성화 시 기본 처리
-                console.log('⚙️ GPT API 비활성화됨, 기본 로컬 처리로 진행...');
-                hideTypingIndicator();
-                const basicBonus = calculateSubjectiveBonus(userMessage);
-                const oldAffection = gameState.affection;
-                gameState.affection += basicBonus;
-                gameState.affection = Math.max(0, Math.min(100, gameState.affection));
-                
-                updateAffectionHearts(gameState.affection, oldAffection);
-                
-                const responses = getSubjectiveResponses(basicBonus);
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                const dialogue = randomResponse.replace(`${gameState.currentCharacter.name}: `, '');
-                
-                displayCharacterMessage(dialogue, '', '');
-                
-                setTimeout(() => {
-                    if (gameState.choiceNumber < 36) {
-                        startChoiceSequence();
-                    } else {
-                        endGame();
-                    }
-                }, 2000);
                 
             } catch (error) {
-                hideTypingIndicator();
-                console.error('주관식 답변 처리 오류:', error);
-                
-                // 오류 시 기본 응답
-                displayCharacterMessage('음... 오빠가 말하고 싶은 걸 다 이해할 수는 없지만, 고마워요! 😊', '', '');
-                
-                setTimeout(() => {
-                    if (gameState.choiceNumber < 36) {
-                        startChoiceSequence();
-                    } else {
-                        endGame();
-                    }
-                }, 2000);
+                console.error('❌ Claude API 호출 실패:', error);
             }
+            
+            // Claude API 실패 시 기본 처리
+            console.log('⚙️ Claude API 실패, 기본 로컬 처리로 진행...');
+            hideTypingIndicator();
+            
+            const basicBonus = calculateSubjectiveBonus(userMessage);
+            const oldAffection = gameState.affection;
+            gameState.affection += basicBonus;
+            gameState.affection = Math.max(0, Math.min(100, gameState.affection));
+            
+            updateAffectionHearts(gameState.affection, oldAffection);
+            
+            const responses = getSubjectiveResponses(basicBonus);
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+            const dialogue = randomResponse.replace(`${gameState.currentCharacter.name}: `, '');
+            
+            displayCharacterMessage(dialogue, '', '');
+            
+            setTimeout(() => {
+                if (gameState.choiceNumber < 36) {
+                    startChoiceSequence();
+                } else {
+                    endGame();
+                }
+            }, 2000);
         }
 
         // 주관식 질문 횟수 계산
@@ -1675,12 +1701,23 @@
             return count;
         }
 
-        // 자유 메시지 전송 (주관식 답변 - MBTI 기반 GPT 평가)
+        // 자유 메시지 전송 (주관식 답변 - MBTI 기반 Claude API 평가) - 개선된 버전
         async function sendFreeMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
             
-            if (!message) return;
+            console.log('📨 사용자 메시지 전송 시도:', message.length > 0 ? `"${message.substring(0, 30)}..."` : '(empty)');
+            console.log('🔍 현재 상태:', {
+                waitingForInput: gameState.waitingForInput,
+                isSubjectiveMode: gameState.isSubjectiveMode,
+                canInput: gameState.canInput,
+                isProcessing: gameState.isProcessing
+            });
+            
+            if (!message) {
+                console.log('🚫 빈 메시지 - 전송 중단');
+                return;
+            }
             
             displayUserMessage(message);
             input.value = '';
@@ -1689,12 +1726,16 @@
             
             // 입력창 숨기기
             document.getElementById('inputContainer').style.display = 'none';
+            console.log('📝 입력창 숨김 및 메시지 추가 완료');
             
             if (gameState.isSubjectiveMode) {
-                // 주관식 모드: MBTI 기반 GPT 평가 및 응답 생성
+                console.log('🤔 주관식 모드로 Claude API 처리 시작...');
+                // 주관식 모드: MBTI 기반 Claude API 평가 및 응답 생성
                 await handleSubjectiveResponse(message);
                 gameState.isSubjectiveMode = false;
+                console.log('✅ 주관식 모드 완료, 플래그 초기화');
             } else {
+                console.log('💬 일반 자유 채팅 모드 처리...');
                 // 일반 자유 채팅 모드 (기존 로직)
                 const oldAffection = gameState.affection;
                 const subjectiveBonus = calculateSubjectiveBonus(message);
