@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 MBTI 메신저 게임 - GameLogic 통합 v3.0.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .chat-container {
+            width: min(100vw, 400px);
+            height: min(100vh, 800px);
+            max-width: 400px;
+            max-height: 800px;
+            background: #000;
+            border: 2px solid #333;
+            border-radius: 25px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 시나리오 선택 화면 */
+        .scenario-selection {
+            flex: 1;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .scenario-title {
+            font-size: 24px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #ff69b4;
+        }
+        .scenario-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 300px;
+        }
+        .scenario-button {
+            background: #333;
+            border: 2px solid #555;
+            color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .scenario-button:hover {
+            background: #444;
+            border-color: #ff69b4;
+            transform: translateY(-2px);
+        }
+        
+        /* 채팅 화면 */
+        .chat-header {
+            background: #111;
+            padding: 15px 20px;
+            border-bottom: 1px solid #333;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .contact-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .profile-pic {
+            position: relative;
+        }
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #ff69b4;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .contact-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        /* 새로운 통계 바 */
+        .enhanced-stats {
+            background: rgba(255, 105, 180, 0.1);
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-label {
+            display: block;
+            opacity: 0.7;
+        }
+        .stat-value {
+            font-weight: bold;
+            color: #ff69b4;
+        }
+        .progress-mini {
+            width: 40px;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            margin-top: 2px;
+        }
+        .progress-fill-mini {
+            height: 100%;
+            background: #ff69b4;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        
+        /* 메시지 영역 */
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #000;
+        }
+        .message {
+            margin-bottom: 15px;
+            animation: messageSlideIn 0.3s ease;
+        }
+        @keyframes messageSlideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .character-message {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 15px;
+            border-radius: 15px 15px 15px 5px;
+            border: 1px solid #333;
+            max-width: 85%;
+        }
+        .user-message {
+            background: #ff69b4;
+            color: #fff;
+            padding: 15px;
+            border-radius: 15px 15px 5px 15px;
+            margin-left: auto;
+            max-width: 85%;
+            text-align: right;
+        }
+        
+        .narration {
+            font-style: italic;
+            color: #888;
+            font-size: 13px;
+            margin-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 8px;
+        }
+        
+        /* 특별 이벤트 스타일 */
+        .special-event {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: #333;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
+            animation: specialEventGlow 1s ease infinite alternate;
+        }
+        @keyframes specialEventGlow {
+            from { box-shadow: 0 0 15px rgba(255, 107, 107, 0.5); }
+            to { box-shadow: 0 0 25px rgba(255, 107, 107, 0.8); }
+        }
+        
+        /* 선택지 영역 */
+        .choices {
+            padding: 20px;
+            background: #111;
+            border-top: 1px solid #333;
+            display: none;
+        }
+        .choice-btn {
+            width: 100%;
+            padding: 15px;
+            margin: 8px 0;
+            background: #222;
+            border: 2px solid #444;
+            color: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-size: 14px;
+        }
+        .choice-btn:hover:not(:disabled) {
+            background: #333;
+            border-color: #ff69b4;
+            transform: translateX(5px);
+        }
+        .choice-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* 자유입력 영역 */
+        .input-container {
+            padding: 20px;
+            background: #111;
+            border-top: 1px solid #333;
+            display: none;
+        }
+        .free-input {
+            width: 100%;
+            padding: 15px;
+            background: #222;
+            border: 2px solid #444;
+            color: #fff;
+            border-radius: 10px;
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+        }
+        .input-btn {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px 5px 0 0;
+            transition: all 0.3s ease;
+        }
+        .input-btn:hover:not(:disabled) {
+            background: #38a169;
+            transform: translateY(-1px);
+        }
+        .input-btn.cancel {
+            background: #e53e3e;
+        }
+        .input-btn.cancel:hover {
+            background: #c53030;
+        }
+        
+        /* 타이핑 인디케이터 */
+        .typing-indicator {
+            padding: 15px 20px;
+            color: #888;
+            font-style: italic;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+        .typing-dots {
+            display: flex;
+            gap: 3px;
+        }
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #ff69b4;
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        .typing-dot:nth-child(3) { animation-delay: 0s; }
+        
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* 디버그 패널 */
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.9);
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 11px;
+            display: none;
+            z-index: 9999;
+            border: 1px solid #333;
+            min-width: 200px;
+        }
+        .debug-section {
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #333;
+        }
+        .debug-title {
+            color: #ff69b4;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        /* 진행도 바 */
+        .progress-container {
+            background: #111;
+            padding: 10px 20px;
+            border-top: 1px solid #333;
+            display: none;
+        }
+        .progress-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff69b4, #667eea);
+            transition: width 0.5s ease;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <!-- 시나리오 선택 화면 -->
+        <div id="scenarioSelection" class="scenario-selection">
+            <div class="scenario-title">💕 로맨스 메신저 게임</div>
+            <div class="scenario-buttons">
+                <button class="scenario-button" onclick="startScenario('hangover_confession')">
+                    🍷 어제 밤의 기억<br>
+                    <small style="color: #888;">술 먹고 고백한 후 부끄러워하는 상황</small>
+                </button>
+                <button class="scenario-button" onclick="startScenario('study_together')">
+                    📚 함께 공부하기<br>
+                    <small style="color: #888;">도서관에서 같이 공부하는 상황</small>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 채팅 헤더 -->
+        <div id="chatHeader" class="chat-header">
+            <div class="contact-info">
+                <div class="profile-pic">
+                    <div class="avatar" id="characterAvatar">🎭</div>
+                </div>
+                <div>
+                    <div class="contact-name" id="characterName">윤아</div>
+                    <div style="font-size: 12px; color: #888;" id="characterStatus">INFP • 온라인</div>
+                </div>
+            </div>
+            <div style="font-size: 12px; color: #888;">
+                <span id="progressText">1/36</span>
+            </div>
+        </div>
+        
+        <!-- 향상된 통계 바 (GameLogic 통합) -->
+        <div id="enhancedStats" class="enhanced-stats" style="display: none;">
+            <div class="stat-item">
+                <span class="stat-label">호감도</span>
+                <span class="stat-value" id="affectionStat">75</span>
+                <div class="progress-mini">
+                    <div class="progress-fill-mini" id="affectionProgress" style="width: 75%;"></div>
+                </div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">친밀도</span>
+                <span class="stat-value" id="intimacyStat">20</span>
+                <div class="progress-mini">
+                    <div class="progress-fill-mini" id="intimacyProgress" style="width: 20%;"></div>
+                </div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">연속</span>
+                <span class="stat-value" id="streakStat">0</span>
+                <div class="progress-mini">
+                    <div class="progress-fill-mini" id="streakProgress" style="width: 0%;"></div>
+                </div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">단계</span>
+                <span class="stat-value" id="phaseStat">시작</span>
+            </div>
+        </div>
+        
+        <!-- 메시지 영역 -->
+        <div id="messagesContainer" class="messages" style="display: none;"></div>
+        
+        <!-- 타이핑 인디케이터 -->
+        <div id="typingIndicator" class="typing-indicator">
+            <span id="typingText">윤아님이 입력중</span>
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+        
+        <!-- 선택지 영역 -->
+        <div id="choicesContainer" class="choices"></div>
+        
+        <!-- 자유입력 영역 -->
+        <div id="inputContainer" class="input-container">
+            <div style="margin-bottom: 10px; color: #888; font-size: 14px;">
+                💬 자유롭게 마음을 표현해보세요 (4번째마다 등장)
+            </div>
+            <textarea id="freeInput" class="free-input" placeholder="윤아에게 하고 싶은 말을 자유롭게 입력해주세요..."></textarea>
+            <div style="margin-top: 10px;">
+                <button class="input-btn" onclick="handleFreeInput()">💌 전송</button>
+                <button class="input-btn cancel" onclick="cancelFreeInput()">❌ 취소</button>
+            </div>
+        </div>
+        
+        <!-- 진행도 바 -->
+        <div id="progressContainer" class="progress-container">
+            <div class="progress-label">게임 진행도</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 디버그 패널 (GameLogic 통합) -->
+    <div id="debugPanel" class="debug-panel">
+        <div class="debug-section">
+            <div class="debug-title">🎮 GameLogic v3.0.0</div>
+            <div>호감도: <span id="debugAffection">75</span>/100</div>
+            <div>친밀도: <span id="debugIntimacy">20</span>/100</div>
+            <div>진행도: <span id="debugProgress">1</span>/36</div>
+        </div>
+        <div class="debug-section">
+            <div class="debug-title">🎯 보너스 시스템</div>
+            <div>연속 선택: <span id="debugStreak">0</span>회</div>
+            <div>현재 단계: <span id="debugPhase">introduction</span></div>
+            <div>총 상호작용: <span id="debugInteractions">0</span>회</div>
+        </div>
+        <div class="debug-section">
+            <div class="debug-title">✨ 특별 이벤트</div>
+            <div id="debugEvents">없음</div>
+        </div>
+        <div style="margin-top: 10px; font-size: 10px; color: #666;">
+            Ctrl+Shift+D: 패널 토글<br>
+            Ctrl+Enter: 자유입력 전송
+        </div>
+    </div>
+
+    <script>
+        // 🎮 GameLogic 모듈 임베드 (modules/GameLogic.js 내용)
+        class GameLogic {
+            constructor() {
+                this.version = 'v3.0.0';
+                
+                this.affectionWeights = {
+                    choice: 1.0,
+                    freeInput: 1.5,
+                    timeBonus: 0.1,
+                    streakBonus: 0.2,
+                    phaseMultiplier: {
+                        introduction: 0.8,
+                        development: 1.0,
+                        deepening: 1.2,
+                        conclusion: 1.5
+                    }
+                };
+                
+                this.emotionKeywords = {
+                    positive: ['좋아', '사랑', '예쁘', '멋져', '완벽', '최고', '행복', '기뻐', '감동', '고마워', '훌륭', '대단'],
+                    romantic: ['설레', '두근', '사랑해', '좋아해', '예쁘다', '귀여워', '매력적', '운명', '소중해', '특별해'],
+                    caring: ['걱정', '챙겨', '보살펴', '도와줄게', '함께', '곁에', '지켜줄게', '응원', '힘내', '괜찮'],
+                    negative: ['싫어', '짜증', '화나', '별로', '귀찮', '피곤', '스트레스', '실망', '속상', '화가'],
+                    neutral: ['그래', '알겠어', '음', '그냥', '모르겠어', '상관없어', '괜찮아', '뭐', '아무래도']
+                };
+                
+                this.streakCount = 0;
+                this.lastChoiceTime = null;
+                this.totalInteractions = 0;
+                this.specialEventCooldown = new Set();
+                
+                console.log('🎮 GameLogic v3.0.0 초기화 완료');
+            }
+
+            processChoice(choice, gameState) {
+                const result = {
+                    success: true,
+                    affectionChange: 0,
+                    intimacyChange: 0,
+                    specialEvent: null,
+                    message: '',
+                    bonusDetails: {},
+                    gameState: { ...gameState }
+                };
+
+                try {
+                    const oldAffection = gameState.affection;
+                    let baseAffectionChange = choice.affection_impact || 0;
+                    
+                    const currentPhase = this.getCurrentPhase(gameState.choiceNumber || 0);
+                    const phaseMultiplier = this.affectionWeights.phaseMultiplier[currentPhase];
+                    const timeBonus = this.calculateTimeBonus();
+                    const streakBonus = this.calculateStreakBonus(baseAffectionChange);
+                    
+                    const adjustedBase = Math.round(baseAffectionChange * phaseMultiplier);
+                    const totalAffectionChange = Math.round(
+                        (adjustedBase * this.affectionWeights.choice) + 
+                        timeBonus + 
+                        streakBonus
+                    );
+                    
+                    let intimacyChange = 0;
+                    if (baseAffectionChange > 0) {
+                        const intimacyChance = Math.min(0.5, 0.2 + (gameState.intimacy / 200));
+                        intimacyChange = Math.random() < intimacyChance ? Math.floor(Math.random() * 2) + 1 : 0;
+                    }
+                    
+                    result.gameState.affection = Math.max(-100, Math.min(100, 
+                        gameState.affection + totalAffectionChange));
+                    result.gameState.intimacy = Math.max(0, Math.min(100, 
+                        gameState.intimacy + intimacyChange));
+                    result.gameState.choiceNumber = (gameState.choiceNumber || 0) + 1;
+                    
+                    if (!result.gameState.choiceHistory) result.gameState.choiceHistory = [];
+                    result.gameState.choiceHistory.push({
+                        choice: choice.text,
+                        baseImpact: choice.affection_impact,
+                        finalChange: totalAffectionChange,
+                        intimacyChange: intimacyChange,
+                        bonuses: { time: timeBonus, streak: streakBonus, phase: phaseMultiplier },
+                        phase: currentPhase,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    result.affectionChange = totalAffectionChange;
+                    result.intimacyChange = intimacyChange;
+                    result.bonusDetails = {
+                        base: adjustedBase,
+                        time: timeBonus,
+                        streak: streakBonus,
+                        phase: currentPhase,
+                        multiplier: phaseMultiplier
+                    };
+                    result.message = this.generateChoiceResultMessage(totalAffectionChange, intimacyChange);
+                    result.specialEvent = this.checkSpecialEvents(result.gameState);
+                    
+                    this.totalInteractions++;
+                    
+                    console.log(`[GameLogic] ${oldAffection} → ${result.gameState.affection} (${totalAffectionChange > 0 ? '+' : ''}${totalAffectionChange}) | 보너스: 시간${timeBonus}, 연속${streakBonus}`);
+                    
+                } catch (error) {
+                    console.error('[GameLogic] 선택지 처리 오류:', error);
+                    result.success = false;
+                    result.message = '선택 처리 중 오류가 발생했습니다.';
+                }
+                
+                return result;
+            }
+
+            analyzeFreeInput(input, gameState) {
+                const result = {
+                    success: true,
+                    affectionChange: 0,
+                    intimacyChange: 0,
+                    emotionType: 'neutral',
+                    confidence: 0,
+                    keywords: [],
+                    message: '',
+                    gameState: { ...gameState }
+                };
+
+                try {
+                    const cleanInput = input.trim().toLowerCase();
+                    const emotionAnalysis = this.analyzeEmotion(cleanInput);
+                    
+                    result.emotionType = emotionAnalysis.type;
+                    result.confidence = emotionAnalysis.confidence;
+                    result.keywords = emotionAnalysis.keywords;
+                    
+                    let affectionChange = this.calculateFreeInputAffection(emotionAnalysis);
+                    const currentPhase = this.getCurrentPhase(gameState.choiceNumber || 0);
+                    const phaseMultiplier = this.affectionWeights.phaseMultiplier[currentPhase];
+                    
+                    affectionChange = Math.round(affectionChange * this.affectionWeights.freeInput * phaseMultiplier);
+                    
+                    let intimacyChange = 0;
+                    if (emotionAnalysis.confidence > 0.6) {
+                        if (emotionAnalysis.type === 'romantic' || emotionAnalysis.type === 'caring') {
+                            intimacyChange = Math.floor(Math.random() * 4) + 2;
+                        } else if (emotionAnalysis.type === 'positive') {
+                            intimacyChange = Math.floor(Math.random() * 2) + 1;
+                        }
+                    }
+                    
+                    result.gameState.affection = Math.max(-100, Math.min(100, 
+                        gameState.affection + affectionChange));
+                    result.gameState.intimacy = Math.max(0, Math.min(100, 
+                        gameState.intimacy + intimacyChange));
+                    
+                    if (!result.gameState.freeInputHistory) result.gameState.freeInputHistory = [];
+                    result.gameState.freeInputHistory.push({
+                        input: input,
+                        emotionType: emotionAnalysis.type,
+                        confidence: emotionAnalysis.confidence,
+                        affectionChange: affectionChange,
+                        intimacyChange: intimacyChange,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    result.affectionChange = affectionChange;
+                    result.intimacyChange = intimacyChange;
+                    result.message = this.generateInputResultMessage(emotionAnalysis, affectionChange, intimacyChange);
+                    
+                    console.log(`[GameLogic] 자유입력: ${emotionAnalysis.type} (${(emotionAnalysis.confidence * 100).toFixed(1)}%) → 호감도 ${affectionChange > 0 ? '+' : ''}${affectionChange}, 친밀도 +${intimacyChange}`);
+                    
+                } catch (error) {
+                    console.error('[GameLogic] 자유입력 분석 오류:', error);
+                    result.success = false;
+                    result.message = '입력 분석 중 오류가 발생했습니다.';
+                }
+                
+                return result;
+            }
+
+            analyzeEmotion(text) {
+                const emotions = { positive: 0, romantic: 0, caring: 0, negative: 0, neutral: 0 };
+                const foundKeywords = [];
+                let totalScore = 0;
+                
+                for (const [emotionType, keywords] of Object.entries(this.emotionKeywords)) {
+                    for (const keyword of keywords) {
+                        const keywordCount = (text.match(new RegExp(keyword, 'g')) || []).length;
+                        if (keywordCount > 0) {
+                            emotions[emotionType] += keywordCount;
+                            totalScore += keywordCount;
+                            foundKeywords.push({ word: keyword, type: emotionType, count: keywordCount });
+                        }
+                    }
+                }
+                
+                const maxEmotion = Object.keys(emotions).reduce((a, b) => 
+                    emotions[a] > emotions[b] ? a : b
+                );
+                
+                const textLength = text.length;
+                const keywordDensity = totalScore / Math.max(textLength / 10, 1);
+                const confidence = Math.min(1.0, keywordDensity + (foundKeywords.length * 0.2));
+                
+                return { type: maxEmotion, confidence, keywords: foundKeywords, scores: emotions };
+            }
+
+            calculateFreeInputAffection(emotionAnalysis) {
+                const baseValues = { romantic: 12, caring: 8, positive: 5, neutral: 0, negative: -4 };
+                const baseValue = baseValues[emotionAnalysis.type] || 0;
+                const confidenceMultiplier = Math.max(0.3, emotionAnalysis.confidence);
+                const densityBonus = emotionAnalysis.keywordDensity > 0.5 ? 1.2 : 1.0;
+                return Math.round(baseValue * confidenceMultiplier * densityBonus);
+            }
+
+            calculateTimeBonus() {
+                if (!this.lastChoiceTime) {
+                    this.lastChoiceTime = Date.now();
+                    return 0;
+                }
+                
+                const timeDiff = Date.now() - this.lastChoiceTime;
+                this.lastChoiceTime = Date.now();
+                
+                if (timeDiff < 3000) return 2;
+                if (timeDiff < 5000) return 1;
+                if (timeDiff > 30000) return -1;
+                return 0;
+            }
+
+            calculateStreakBonus(affectionChange) {
+                if (affectionChange > 0) {
+                    this.streakCount += 1;
+                } else if (affectionChange < 0) {
+                    this.streakCount = 0;
+                }
+                
+                if (this.streakCount >= 5) return 3;
+                if (this.streakCount >= 3) return 2;
+                if (this.streakCount >= 2) return 1;
+                return 0;
+            }
+
+            checkSpecialEvents(gameState) {
+                if (!gameState.specialEvents) gameState.specialEvents = [];
+                
+                if (gameState.affection >= 90 && !this.specialEventCooldown.has('perfect_chemistry')) {
+                    this.specialEventCooldown.add('perfect_chemistry');
+                    gameState.specialEvents.push('perfect_chemistry');
+                    return {
+                        type: 'perfect_chemistry',
+                        message: '💖 완벽한 케미스트리! 마음이 완전히 통했어요!',
+                        bonus: { affection: 5, intimacy: 15 }
+                    };
+                } else if (gameState.affection >= 80 && !this.specialEventCooldown.has('high_affection')) {
+                    this.specialEventCooldown.add('high_affection');
+                    gameState.specialEvents.push('high_affection');
+                    return {
+                        type: 'high_affection',
+                        message: '💕 특별한 순간이 시작됩니다...',
+                        bonus: { affection: 3, intimacy: 8 }
+                    };
+                }
+                
+                if (gameState.intimacy >= 85 && !this.specialEventCooldown.has('deep_bond')) {
+                    this.specialEventCooldown.add('deep_bond');
+                    gameState.specialEvents.push('deep_bond');
+                    return {
+                        type: 'deep_bond',
+                        message: '🤗 깊은 유대감이 형성되었습니다!',
+                        bonus: { affection: 5, intimacy: 10 }
+                    };
+                }
+                
+                return null;
+            }
+
+            getCurrentPhase(choiceNumber) {
+                if (choiceNumber <= 9) return 'introduction';
+                if (choiceNumber <= 18) return 'development';
+                if (choiceNumber <= 27) return 'deepening';
+                return 'conclusion';
+            }
+
+            determineEnding(gameState) {
+                const { affection, intimacy } = gameState;
+                if (affection >= 90 && intimacy >= 85) return 'perfect_ending';
+                if (affection >= 80 && intimacy >= 70) return 'romantic_ending';
+                if (affection >= 70 && intimacy >= 50) return 'good_ending';
+                if (affection >= 50) return 'normal_ending';
+                if (affection >= 20) return 'friend_ending';
+                return 'bad_ending';
+            }
+
+            generateChoiceResultMessage(affectionChange, intimacyChange) {
+                if (affectionChange >= 8) return '💝 마음이 완전히 녹았어요!';
+                if (affectionChange >= 5) return '💗 마음이 많이 따뜻해졌어요!';
+                if (affectionChange >= 3) return '😊 정말 좋은 반응이에요!';
+                if (affectionChange >= 1) return '😌 호감도가 올랐어요.';
+                if (affectionChange === 0) return '😐 평범한 반응이에요.';
+                if (affectionChange >= -2) return '😅 조금 아쉬운 선택이었어요.';
+                return '😔 마음이 좀 멀어진 것 같아요...';
+            }
+
+            generateInputResultMessage(emotionAnalysis, affectionChange, intimacyChange) {
+                const messages = {
+                    romantic: ['💕 로맨틱한 말에 마음이 완전히 설레네요!', '💖 그런 말 들으니까 정말 행복해요!'],
+                    caring: ['🤗 따뜻한 마음이 정말 감동이에요!', '😊 오빠의 배려가 느껴져서 고마워요!'],
+                    positive: ['😊 긍정적인 에너지가 전해져요!', '✨ 밝은 마음이 좋아요!'],
+                    neutral: ['😌 차분한 대화가 편안해요.', '🙂 진솔한 마음이 느껴져요.'],
+                    negative: ['😔 조금 아쉬운 기분이에요...', '😕 무언가 서운한 느낌이 들어요.']
+                };
+                
+                const emotionMessages = messages[emotionAnalysis.type] || messages.neutral;
+                return emotionMessages[Math.floor(Math.random() * emotionMessages.length)];
+            }
+
+            validateInput(input) {
+                if (!input || typeof input !== 'string') return { valid: false, reason: '올바른 입력이 아닙니다.' };
+                const trimmedInput = input.trim();
+                if (trimmedInput.length === 0) return { valid: false, reason: '내용을 입력해주세요.' };
+                if (trimmedInput.length > 500) return { valid: false, reason: '입력이 너무 깁니다. (최대 500자)' };
+                if (trimmedInput.length < 2) return { valid: false, reason: '좀 더 자세히 말해주세요.' };
+                return { valid: true };
+            }
+
+            getDebugInfo(gameState) {
+                return {
+                    version: this.version,
+                    affection: gameState.affection || 0,
+                    intimacy: gameState.intimacy || 0,
+                    choiceNumber: gameState.choiceNumber || 0,
+                    streakCount: this.streakCount,
+                    currentPhase: this.getCurrentPhase(gameState.choiceNumber || 0),
+                    totalInteractions: this.totalInteractions,
+                    specialEvents: gameState.specialEvents || [],
+                    expectedEnding: this.determineEnding(gameState)
+                };
+            }
+        }
+
+        // 🎯 게임 상태 및 초기화
+        const gameLogic = new GameLogic();
+        let gameState = {
+            currentScenario: null,
+            currentCharacter: null,
+            affection: 75,
+            intimacy: 20,
+            choiceNumber: 0,
+            messageCount: 0,
+            choiceHistory: [],
+            freeInputHistory: [],
+            specialEvents: [],
+            isProcessing: false,
+            isFreeChatMode: false
+        };
+
+        // 시나리오 데이터 (기존 프로젝트 호환)
+        const scenarios = {
+            hangover_confession: {
+                id: "hangover_confession",
+                title: "어제 밤의 기억",
+                description: "술 먹고 고백한 후 부끄러워하는 상황",
+                character: { name: "윤아", mbti: "INFP", avatar: "🎭" },
+                dialogues: [
+                    {
+                        dialogue: "오빠... 어제는 정말 미안해 😳 취해서 그런 말까지 했는데...",
+                        narration: "윤아가 얼굴을 붉히며 손으로 얼굴을 가린다.",
+                        choices: [
+                            {text: "괜찮다고 다정하게 말해준다", affection_impact: 3},
+                            {text: "어떤 말을 했는지 궁금하다고 한다", affection_impact: 1},
+                            {text: "잘 기억 안 나네...", affection_impact: -1}
+                        ]
+                    },
+                    {
+                        dialogue: "그래도... 진심이었어 😊 오빠한테만 말할 수 있는 거야",
+                        narration: "윤아가 수줍게 미소지으며 고개를 끄덕인다.",
+                        choices: [
+                            {text: "나도 항상 너를 생각해왔어", affection_impact: 4},
+                            {text: "그런 마음 받아줄게", affection_impact: 2},
+                            {text: "고마워, 잘 생각해볼게", affection_impact: 0}
+                        ]
+                    },
+                    {
+                        dialogue: "사실... 오빠를 좋아한 지 1년이 넘었어 💗",
+                        narration: "윤아가 용기를 내어 자신의 마음을 털어놓는다.",
+                        choices: [
+                            {text: "왜 진작 말하지 않았어?", affection_impact: 2},
+                            {text: "나도 눈치채고 있었어", affection_impact: 3},
+                            {text: "그랬구나...", affection_impact: 0}
+                        ]
+                    },
+                    {
+                        dialogue: "이제야 후련해 😌 계속 숨기기만 했는데...",
+                        narration: "윤아의 표정이 밝아지며 안도의 한숨을 쉰다.",
+                        choices: [
+                            {text: "앞으로 더 가까워지자", affection_impact: 3},
+                            {text: "용기내줘서 고마워", affection_impact: 2},
+                            {text: "좋은 친구로 지내자", affection_impact: -1}
+                        ]
+                    }
+                ]
+            },
+            study_together: {
+                id: "study_together",
+                title: "함께 공부하기",
+                description: "도서관에서 같이 공부하는 상황",
+                character: { name: "윤아", mbti: "INFP", avatar: "📚" },
+                dialogues: [
+                    {
+                        dialogue: "오빠, 여기 앉아도 될까요? 😊",
+                        narration: "윤아가 책을 들고 조심스럽게 다가온다.",
+                        choices: [
+                            {text: "물론이지, 같이 공부하자", affection_impact: 2},
+                            {text: "네, 앉으세요", affection_impact: 1},
+                            {text: "다른 자리는 없나요?", affection_impact: -1}
+                        ]
+                    }
+                ]
+            }
+        };
+
+        // 🎮 게임 핵심 함수들 (GameLogic 통합)
+        function startScenario(scenarioId) {
+            const scenario = scenarios[scenarioId];
+            if (!scenario) {
+                console.error('시나리오를 찾을 수 없습니다:', scenarioId);
+                return;
+            }
+            
+            gameState.currentScenario = scenario;
+            gameState.currentCharacter = scenario.character;
+            gameState.choiceNumber = 0;
+            gameState.messageCount = 0;
+            
+            // UI 전환
+            document.getElementById('scenarioSelection').style.display = 'none';
+            document.getElementById('chatHeader').style.display = 'flex';
+            document.getElementById('enhancedStats').style.display = 'flex';
+            document.getElementById('messagesContainer').style.display = 'block';
+            document.getElementById('progressContainer').style.display = 'block';
+            
+            // 캐릭터 정보 업데이트
+            document.getElementById('characterName').textContent = scenario.character.name;
+            document.getElementById('characterAvatar').textContent = scenario.character.avatar;
+            
+            updateUI();
+            
+            // 첫 번째 대화 시작
+            setTimeout(() => {
+                startNextDialogue();
+            }, 1000);
+            
+            console.log(`🎬 시나리오 시작: ${scenario.title}`);
+        }
+
+        function startNextDialogue() {
+            if (gameState.choiceNumber >= 36) {
+                endGame();
+                return;
+            }
+            
+            const scenario = gameState.currentScenario;
+            const dialogueIndex = gameState.messageCount % scenario.dialogues.length;
+            const dialogue = scenario.dialogues[dialogueIndex];
+            
+            showTypingIndicator();
+            
+            setTimeout(() => {
+                hideTypingIndicator();
+                addCharacterMessage(dialogue.dialogue, dialogue.narration);
+                
+                // 4번째마다 자유입력 모드
+                if ((gameState.choiceNumber + 1) % 4 === 0) {
+                    showFreeInputMode();
+                } else {
+                    showChoices(dialogue.choices);
+                }
+                
+                gameState.messageCount++;
+            }, Math.random() * 1500 + 1000);
+        }
+
+        function handleChoice(choice) {
+            if (gameState.isProcessing) return;
+            
+            gameState.isProcessing = true;
+            disableAllButtons();
+            
+            // 사용자 선택 표시
+            addUserMessage(choice.text);
+            
+            // GameLogic 모듈로 선택 처리
+            const result = gameLogic.processChoice(choice, gameState);
+            
+            if (result.success) {
+                gameState = result.gameState;
+                
+                // 특별 이벤트 처리
+                if (result.specialEvent) {
+                    setTimeout(() => {
+                        showSpecialEvent(result.specialEvent);
+                        
+                        // 보너스 적용
+                        if (result.specialEvent.bonus) {
+                            if (result.specialEvent.bonus.affection) {
+                                gameState.affection = Math.min(100, gameState.affection + result.specialEvent.bonus.affection);
+                            }
+                            if (result.specialEvent.bonus.intimacy) {
+                                gameState.intimacy = Math.min(100, gameState.intimacy + result.specialEvent.bonus.intimacy);
+                            }
+                        }
+                        updateUI();
+                    }, 1500);
+                }
+                
+                updateUI();
+                updateDebugPanel();
+                
+                // 다음 대화로 진행
+                setTimeout(() => {
+                    startNextDialogue();
+                    gameState.isProcessing = false;
+                }, 2000);
+                
+            } else {
+                console.error('선택 처리 실패:', result.message);
+                gameState.isProcessing = false;
+                enableAllButtons();
+            }
+        }
+
+        function handleFreeInput() {
+            const input = document.getElementById('freeInput').value;
+            const validation = gameLogic.validateInput(input);
+            
+            if (!validation.valid) {
+                alert(validation.reason);
+                return;
+            }
+            
+            if (gameState.isProcessing) return;
+            gameState.isProcessing = true;
+            
+            // 사용자 입력 표시
+            addUserMessage(input);
+            
+            // GameLogic 모듈로 자유입력 분석
+            const result = gameLogic.analyzeFreeInput(input, gameState);
+            
+            if (result.success) {
+                gameState = result.gameState;
+                updateUI();
+                updateDebugPanel();
+                
+                // 분석 결과 표시
+                showTypingIndicator();
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    
+                    const analysisMessage = `${result.message}`;
+                    const detailMessage = `
+                        <div style="font-size: 11px; color: #666; margin-top: 8px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 5px;">
+                            🧠 감정분석: ${result.emotionType.toUpperCase()} (${(result.confidence * 100).toFixed(1)}%)
+                            ${result.affectionChange !== 0 ? ` | 호감도 ${result.affectionChange > 0 ? '+' : ''}${result.affectionChange}` : ''}
+                            ${result.intimacyChange !== 0 ? ` | 친밀도 +${result.intimacyChange}` : ''}
+                            ${result.keywords.length > 0 ? ` | 키워드: ${result.keywords.map(k => k.word).join(', ')}` : ''}
+                        </div>
+                    `;
+                    
+                    addCharacterMessage(analysisMessage + detailMessage);
+                    
+                    // 다음 대화로 진행
+                    setTimeout(() => {
+                        startNextDialogue();
+                        gameState.isProcessing = false;
+                        hideFreeInputMode();
+                    }, 2000);
+                }, 2000);
+                
+            } else {
+                console.error('자유입력 분석 실패:', result.message);
+                gameState.isProcessing = false;
+            }
+        }
+
+        // 🎨 UI 관리 함수들
+        function updateUI() {
+            // 호감도 업데이트 (음수 포함 계산)
+            const affectionPercent = Math.max(0, (gameState.affection + 100) / 2);
+            document.getElementById('affectionStat').textContent = gameState.affection;
+            document.getElementById('affectionProgress').style.width = `${affectionPercent}%`;
+            
+            // 친밀도 업데이트
+            document.getElementById('intimacyStat').textContent = gameState.intimacy;
+            document.getElementById('intimacyProgress').style.width = `${gameState.intimacy}%`;
+            
+            // 연속 보너스 업데이트
+            const streakPercent = Math.min(100, (gameLogic.streakCount / 5) * 100);
+            document.getElementById('streakStat').textContent = gameLogic.streakCount;
+            document.getElementById('streakProgress').style.width = `${streakPercent}%`;
+            
+            // 게임 단계 업데이트
+            const phaseNames = {
+                introduction: '시작',
+                development: '발전',
+                deepening: '심화',
+                conclusion: '결말'
+            };
+            document.getElementById('phaseStat').textContent = phaseNames[gameLogic.getCurrentPhase(gameState.choiceNumber)];
+            
+            // 진행도 업데이트
+            const progressPercent = (gameState.choiceNumber / 36) * 100;
+            document.getElementById('progressFill').style.width = `${progressPercent}%`;
+            document.getElementById('progressText').textContent = `${gameState.choiceNumber}/36`;
+        }
+
+        function updateDebugPanel() {
+            const debugInfo = gameLogic.getDebugInfo(gameState);
+            
+            document.getElementById('debugAffection').textContent = debugInfo.affection;
+            document.getElementById('debugIntimacy').textContent = debugInfo.intimacy;
+            document.getElementById('debugProgress').textContent = debugInfo.choiceNumber;
+            document.getElementById('debugStreak').textContent = debugInfo.streakCount;
+            document.getElementById('debugPhase').textContent = debugInfo.currentPhase;
+            document.getElementById('debugInteractions').textContent = debugInfo.totalInteractions;
+            
+            const eventsText = debugInfo.specialEvents.length > 0 ? 
+                debugInfo.specialEvents.join(', ') : '없음';
+            document.getElementById('debugEvents').textContent = eventsText;
+        }
+
+        function addCharacterMessage(dialogue, narration = '') {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            messageDiv.innerHTML = `
+                <div class="character-message">
+                    ${dialogue}
+                    ${narration ? `<div class="narration">${narration}</div>` : ''}
+                </div>
+            `;
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function addUserMessage(text) {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            messageDiv.innerHTML = `<div class="user-message">${text}</div>`;
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function showSpecialEvent(event) {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const eventDiv = document.createElement('div');
+            eventDiv.innerHTML = `
+                <div class="special-event">
+                    <div style="font-size: 16px; margin-bottom: 8px;">${event.message}</div>
+                    <div style="font-size: 12px;">
+                        ${event.bonus.affection ? `호감도 +${event.bonus.affection}` : ''}
+                        ${event.bonus.intimacy ? ` 친밀도 +${event.bonus.intimacy}` : ''}
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(eventDiv);
+            scrollToBottom();
+        }
+
+        function showChoices(choices) {
+            const container = document.getElementById('choicesContainer');
+            container.innerHTML = '';
+            container.style.display = 'block';
+            
+            choices.forEach((choice, index) => {
+                const button = document.createElement('button');
+                button.className = 'choice-btn';
+                button.onclick = () => handleChoice(choice);
+                
+                const emojis = ['💕', '😊', '🤔', '😔'];
+                const impactText = choice.affection_impact > 0 ? ` (+${choice.affection_impact})` : 
+                                  choice.affection_impact < 0 ? ` (${choice.affection_impact})` : '';
+                
+                button.innerHTML = `${emojis[index] || '💬'} ${choice.text}${impactText}`;
+                container.appendChild(button);
+            });
+        }
+
+        function showFreeInputMode() {
+            document.getElementById('choicesContainer').style.display = 'none';
+            document.getElementById('inputContainer').style.display = 'block';
+            document.getElementById('freeInput').value = '';
+            document.getElementById('freeInput').focus();
+            gameState.isFreeChatMode = true;
+        }
+
+        function hideFreeInputMode() {
+            document.getElementById('choicesContainer').style.display = 'block';
+            document.getElementById('inputContainer').style.display = 'none';
+            gameState.isFreeChatMode = false;
+        }
+
+        function cancelFreeInput() {
+            hideFreeInputMode();
+            // 다음 대화로 바로 진행
+            setTimeout(() => {
+                startNextDialogue();
+            }, 500);
+        }
+
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'flex';
+            scrollToBottom();
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        function scrollToBottom() {
+            const container = document.getElementById('messagesContainer');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function disableAllButtons() {
+            const buttons = document.querySelectorAll('.choice-btn, .input-btn');
+            buttons.forEach(btn => btn.disabled = true);
+        }
+
+        function enableAllButtons() {
+            const buttons = document.querySelectorAll('.choice-btn, .input-btn');
+            buttons.forEach(btn => btn.disabled = false);
+        }
+
+        function endGame() {
+            const ending = gameLogic.determineEnding(gameState);
+            const debugInfo = gameLogic.getDebugInfo(gameState);
+            
+            const endingMessages = {
+                perfect_ending: '💖 완벽한 엔딩! 진정한 사랑이 시작됩니다! ✨',
+                romantic_ending: '💕 로맨틱 엔딩! 아름다운 로맨스가 피어났어요!',
+                good_ending: '😊 좋은 엔딩! 소중한 관계가 되었네요!',
+                normal_ending: '🙂 평범한 엔딩. 좋은 추억이 되었어요.',
+                friend_ending: '😌 친구 엔딩. 소중한 우정이 생겼어요!',
+                bad_ending: '😔 아쉬운 엔딩... 다시 도전해보시겠어요?'
+            };
+            
+            showTypingIndicator();
+            setTimeout(() => {
+                hideTypingIndicator();
+                
+                const endingMessage = endingMessages[ending] || '게임이 종료되었습니다.';
+                const statsMessage = `
+                    <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                        <div style="font-weight: bold; margin-bottom: 10px;">📊 최종 결과</div>
+                        <div>최종 호감도: ${gameState.affection}/100</div>
+                        <div>최종 친밀도: ${gameState.intimacy}/100</div>
+                        <div>최대 연속보너스: ${gameLogic.streakCount}회</div>
+                        <div>총 상호작용: ${debugInfo.totalInteractions}회</div>
+                        <div>특별 이벤트: ${gameState.specialEvents.length}개</div>
+                    </div>
+                `;
+                
+                addCharacterMessage(endingMessage + statsMessage);
+                
+                // 재시작 버튼
+                setTimeout(() => {
+                    const container = document.getElementById('choicesContainer');
+                    container.innerHTML = `
+                        <button class="choice-btn" onclick="location.reload()" style="background: #48bb78; border-color: #48bb78;">
+                            🔄 새 게임 시작
+                        </button>
+                        <button class="choice-btn" onclick="showGameReport()" style="background: #667eea; border-color: #667eea;">
+                            📊 상세 리포트 보기
+                        </button>
+                    `;
+                    container.style.display = 'block';
+                }, 2000);
+            }, 1500);
+        }
+
+        function showGameReport() {
+            const report = generateGameReport();
+            addCharacterMessage(`
+                <div style="font-size: 14px;">
+                    <div style="font-weight: bold; margin-bottom: 10px;">📈 게임 리포트</div>
+                    ${report}
+                </div>
+            `);
+        }
+
+        function generateGameReport() {
+            const choiceHistory = gameState.choiceHistory || [];
+            const freeInputHistory = gameState.freeInputHistory || [];
+            
+            const totalChoices = choiceHistory.length;
+            const totalFreeInputs = freeInputHistory.length;
+            const averageAffectionChange = totalChoices > 0 ? 
+                (choiceHistory.reduce((sum, c) => sum + (c.finalChange || 0), 0) / totalChoices).toFixed(1) : 0;
+            
+            const emotionCounts = {};
+            freeInputHistory.forEach(input => {
+                emotionCounts[input.emotionType] = (emotionCounts[input.emotionType] || 0) + 1;
+            });
+            const mostUsedEmotion = Object.keys(emotionCounts).reduce((a, b) => 
+                emotionCounts[a] > emotionCounts[b] ? a : b, 'none');
+            
+            return `
+                <div style="line-height: 1.5;">
+                    <div>• 총 선택: ${totalChoices}회</div>
+                    <div>• 자유입력: ${totalFreeInputs}회</div>
+                    <div>• 평균 호감도 변화: ${averageAffectionChange}</div>
+                    <div>• 주요 감정 표현: ${mostUsedEmotion.toUpperCase()}</div>
+                    <div>• 최대 연속 보너스: ${gameLogic.streakCount}회</div>
+                    <div>• 달성 특별 이벤트: ${gameState.specialEvents.length}개</div>
+                </div>
+            `;
+        }
+
+        // 🛠️ 이벤트 리스너 및 초기화
+        document.addEventListener('keydown', function(e) {
+            // 디버그 패널 토글 (Ctrl+Shift+D)
+            if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+                const debugPanel = document.getElementById('debugPanel');
+                debugPanel.style.display = debugPanel.style.display === 'none' ? 'block' : 'none';
+            }
+            
+            // 자유입력 모드에서 Ctrl+Enter로 전송
+            if (e.key === 'Enter' && e.ctrlKey && gameState.isFreeChatMode) {
+                handleFreeInput();
+            }
+        });
+
+        // 초기화
+        updateUI();
+        updateDebugPanel();
+        
+        console.log(`
+🎮 GameLogic 통합 완료! v3.0.0
+
+✨ 새로운 기능:
+- ⏱️ 시간 보너스 (3초 이내 +2, 5초 이내 +1)
+- 🔄 연속 보너스 (2연속 +1, 3연속 +2, 5연속 +3)
+- 💬 감정 분석 자유입력 (로맨틱, 배려, 긍정, 중립, 부정)
+- 💝 친밀도 시스템 (호감도와 별개)
+- ✨ 특별 이벤트 (호감도 80+, 친밀도 85+)
+- 🎯 단계별 가중치 (초기→발전→심화→결말)
+
+🛠️ 단축키:
+- Ctrl+Shift+D: 디버그 패널 토글
+- Ctrl+Enter: 자유입력 전송
+
+🎯 시작: 시나리오를 선택하세요!
+        `);
+    </script>
+</body>
+</html>
