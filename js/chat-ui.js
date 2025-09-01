@@ -1,4 +1,4 @@
-// 채팅 UI 매니저
+// 채팅 UI 매니저 - 개선된 버전
 class ChatUI {
     constructor() {
         this.messagesContainer = null;
@@ -6,9 +6,12 @@ class ChatUI {
         this.choicesOverlay = null;
         this.currentTypingIndicator = null;
         this.settingsModal = null;
+        this.currentAffection = 0;
+        this.currentIntimacy = 0;
         
         this.initializeElements();
         this.bindEvents();
+        this.initializeStatDisplay();
     }
 
     // DOM 요소 초기화
@@ -18,14 +21,34 @@ class ChatUI {
         this.choicesOverlay = document.getElementById('choicesOverlay');
         this.settingsModal = document.getElementById('settingsModal');
         this.affectionElement = document.getElementById('affectionLevel');
+        this.intimacyElement = document.getElementById('intimacyLevel');
         
-        // 요소 확인 로그
-        console.log('UI Elements initialized:');
-        console.log('- messagesContainer:', !!this.messagesContainer);
-        console.log('- choicesContainer:', !!this.choicesContainer);
-        console.log('- choicesOverlay:', !!this.choicesOverlay);
-        console.log('- settingsModal:', !!this.settingsModal);
-        console.log('- affectionElement:', !!this.affectionElement);
+        console.log('UI Elements initialized');
+    }
+
+    // 스탯 표시 초기화
+    initializeStatDisplay() {
+        // 스탯 표시 영역 생성 (없으면)
+        if (!document.getElementById('statsDisplay')) {
+            const statsDiv = document.createElement('div');
+            statsDiv.id = 'statsDisplay';
+            statsDiv.className = 'stats-display';
+            statsDiv.innerHTML = `
+                <div class="stat-item">
+                    <span class="stat-label">💕</span>
+                    <span id="affectionValue" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">🤝</span>
+                    <span id="intimacyValue" class="stat-value">0</span>
+                </div>
+            `;
+            
+            const header = document.querySelector('.chat-header');
+            if (header) {
+                header.appendChild(statsDiv);
+            }
+        }
     }
 
     // 이벤트 바인딩
@@ -35,7 +58,6 @@ class ChatUI {
         if (settingsBtn) {
             settingsBtn.addEventListener('click', () => {
                 this.showSettings();
-                // 로컬 AI 시뮬레이션 - API 키 UI 불필요
             });
         }
 
@@ -54,34 +76,15 @@ class ChatUI {
             });
         }
 
-        // 설정 값 변경 이벤트
-        const typingSpeed = document.getElementById('typingSpeed');
-        if (typingSpeed) {
-            typingSpeed.addEventListener('input', (e) => {
-                if (window.chatEngine) {
-                    window.chatEngine.setTypingSpeed(parseInt(e.target.value));
-                }
-            });
-        }
-
-        const autoMode = document.getElementById('autoMode');
-        if (autoMode) {
-            autoMode.addEventListener('change', (e) => {
-                if (window.chatEngine) {
-                    window.chatEngine.setAutoMode(e.target.checked);
-                }
-            });
-        }
-
         // 키보드 이벤트
         document.addEventListener('keydown', (e) => {
             // ESC로 설정 모달 닫기
-            if (e.key === 'Escape' && !this.settingsModal.classList.contains('hidden')) {
+            if (e.key === 'Escape' && this.settingsModal && !this.settingsModal.classList.contains('hidden')) {
                 this.hideSettings();
             }
             
             // 숫자 키로 선택지 선택
-            if (e.key >= '1' && e.key <= '9' && !this.choicesOverlay.classList.contains('hidden')) {
+            if (e.key >= '1' && e.key <= '9' && this.choicesOverlay && !this.choicesOverlay.classList.contains('hidden')) {
                 const choiceIndex = parseInt(e.key) - 1;
                 const choices = this.choicesContainer.querySelectorAll('.choice-btn');
                 if (choices[choiceIndex]) {
@@ -91,11 +94,11 @@ class ChatUI {
         });
     }
 
-    // 지문 추가
+    // 지문 추가 (대화 사이에 괄호로)
     async addStageDirection(text) {
         const stageElement = document.createElement('div');
         stageElement.className = 'stage-direction fade-in';
-        stageElement.textContent = text;
+        stageElement.textContent = text.startsWith('(') ? text : `(${text})`;
         
         this.messagesContainer.appendChild(stageElement);
         this.scrollToBottom();
@@ -105,15 +108,69 @@ class ChatUI {
         });
     }
 
-    // 받은 메시지 추가
+    // 받은 메시지 추가 (지문 포함 가능)
     async addReceivedMessage(message) {
-        const messageElement = this.createMessageElement('received', message);
-        this.messagesContainer.appendChild(messageElement);
+        // 메시지에 지문이 포함되어 있는지 확인
+        const messageText = message.text;
+        const hasStageDirection = messageText.includes('(') && messageText.includes(')');
+        
+        if (hasStageDirection) {
+            // 지문과 대사 분리
+            const parts = this.parseMessageWithStageDirection(messageText);
+            
+            for (const part of parts) {
+                if (part.type === 'stage') {
+                    await this.addStageDirection(part.text);
+                } else {
+                    const messageElement = this.createMessageElement('received', {
+                        text: part.text,
+                        timestamp: message.timestamp
+                    });
+                    this.messagesContainer.appendChild(messageElement);
+                }
+            }
+        } else {
+            const messageElement = this.createMessageElement('received', message);
+            this.messagesContainer.appendChild(messageElement);
+        }
+        
         this.scrollToBottom();
         
         return new Promise(resolve => {
             setTimeout(resolve, 100);
         });
+    }
+
+    // 메시지에서 지문 분리
+    parseMessageWithStageDirection(text) {
+        const parts = [];
+        const regex = /(\([^)]+\))/g;
+        let lastIndex = 0;
+        let match;
+        
+        while ((match = regex.exec(text)) !== null) {
+            // 대사 부분
+            if (match.index > lastIndex) {
+                const dialogue = text.substring(lastIndex, match.index).trim();
+                if (dialogue) {
+                    parts.push({ type: 'dialogue', text: dialogue });
+                }
+            }
+            
+            // 지문 부분
+            parts.push({ type: 'stage', text: match[1] });
+            lastIndex = match.index + match[0].length;
+        }
+        
+        // 남은 대사 부분
+        if (lastIndex < text.length) {
+            const dialogue = text.substring(lastIndex).trim();
+            if (dialogue) {
+                parts.push({ type: 'dialogue', text: dialogue });
+            }
+        }
+        
+        return parts;
     }
 
     // 보낸 메시지 추가
@@ -192,9 +249,9 @@ class ChatUI {
         }
     }
 
-    // 선택지 표시
+    // 선택지 표시 (수치 증감 표시 제거)
     async showChoices(message) {
-        console.log('UI: showChoices called with message:', message.id, 'options:', message.options?.length);
+        console.log('UI: showChoices called');
         
         if (!message.options) {
             console.error('No options found in message:', message);
@@ -203,13 +260,19 @@ class ChatUI {
 
         // 선택지 컨테이너 초기화
         this.choicesContainer.innerHTML = '';
-        console.log('UI: Choices container cleared');
 
-        // 선택지 버튼 생성
+        // 선택지 버튼 생성 (대화체로 변환)
         message.options.forEach((option, index) => {
             const button = document.createElement('button');
             button.className = 'choice-btn';
-            button.innerHTML = `<span class="choice-number">${index + 1}</span> ${option.text}`;
+            
+            // 대화체로 변환
+            let displayText = option.text;
+            if (!displayText.includes('"') && !displayText.includes('...')) {
+                displayText = `"${displayText}"`;
+            }
+            
+            button.innerHTML = `<span class="choice-number">${index + 1}</span> ${displayText}`;
             
             button.addEventListener('click', () => {
                 if (window.chatEngine) {
@@ -221,7 +284,6 @@ class ChatUI {
         });
 
         // 선택지 오버레이 표시
-        console.log('UI: Showing choices overlay');
         this.choicesOverlay.classList.add('show');
 
         return new Promise(resolve => {
@@ -237,9 +299,9 @@ class ChatUI {
         }, 300);
     }
 
-    // 입력창 표시
+    // 입력창 표시 (개선된 버전)
     async showInput(message) {
-        console.log('UI: showInput called with message:', message.id);
+        console.log('UI: showInput called');
         
         // 선택지 컨테이너 초기화
         this.choicesContainer.innerHTML = '';
@@ -266,16 +328,24 @@ class ChatUI {
             const inputText = textInput.value.trim();
             if (inputText && window.chatEngine) {
                 window.chatEngine.handleInput(inputText, message);
+                textInput.value = ''; // 전송 후 입력창 비우기
             }
         };
         
-        // 이벤트 리스너
-        sendButton.addEventListener('click', handleSend);
+        // 이벤트 리스너 (전송 버튼과 엔터키 모두 작동)
+        sendButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleSend();
+        });
+        
         textInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
+                e.preventDefault();
                 handleSend();
             }
         });
+        
+        // 취소 버튼 제거 (요청사항)
         
         inputWrapper.appendChild(textInput);
         inputWrapper.appendChild(sendButton);
@@ -284,7 +354,6 @@ class ChatUI {
         this.choicesContainer.appendChild(inputContainer);
         
         // 입력창 표시
-        console.log('UI: Showing input overlay');
         this.choicesOverlay.classList.add('show');
         
         // 입력창에 포커스
@@ -305,23 +374,101 @@ class ChatUI {
         }, 300);
     }
 
-    // 호감도 업데이트
-    updateAffection(affection) {
-        if (this.affectionElement) {
-            this.affectionElement.textContent = affection;
+    // 호감도 업데이트 (애니메이션 포함)
+    updateAffection(newValue, animated = true) {
+        const targetElement = document.getElementById('affectionValue');
+        if (!targetElement) return;
+        
+        if (animated && this.currentAffection !== newValue) {
+            this.animateValue(targetElement, this.currentAffection, newValue, 1000);
+        } else {
+            targetElement.textContent = newValue;
+        }
+        
+        this.currentAffection = newValue;
+        
+        // 호감도에 따른 색상 변경
+        this.updateHeaderColor(newValue);
+    }
+
+    // 친밀도 업데이트 (애니메이션 포함)
+    updateIntimacy(newValue, animated = true) {
+        const targetElement = document.getElementById('intimacyValue');
+        if (!targetElement) return;
+        
+        if (animated && this.currentIntimacy !== newValue) {
+            this.animateValue(targetElement, this.currentIntimacy, newValue, 1000);
+        } else {
+            targetElement.textContent = newValue;
+        }
+        
+        this.currentIntimacy = newValue;
+    }
+
+    // 숫자 애니메이션 효과
+    animateValue(element, start, end, duration) {
+        const range = end - start;
+        const increment = range / (duration / 16); // 60fps
+        let current = start;
+        
+        // 깜박임 효과 추가
+        element.classList.add('stat-changing');
+        
+        const timer = setInterval(() => {
+            current += increment;
             
-            // 호감도에 따른 색상 변경
-            const header = document.querySelector('.contact-name');
-            if (header) {
-                if (affection >= 80) {
-                    header.style.color = '#ff69b4';
-                } else if (affection >= 60) {
-                    header.style.color = '#ff8fa3';
-                } else if (affection >= 40) {
-                    header.style.color = '#ffb3c1';
-                } else {
-                    header.style.color = '#fff';
-                }
+            if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+                current = end;
+                clearInterval(timer);
+                
+                // 깜박임 효과 제거
+                setTimeout(() => {
+                    element.classList.remove('stat-changing');
+                }, 500);
+            }
+            
+            element.textContent = Math.round(current);
+            
+            // 변화 방향에 따른 색상 효과
+            if (increment > 0) {
+                element.style.color = '#4ade80'; // 녹색
+            } else if (increment < 0) {
+                element.style.color = '#ff4444'; // 빨간색
+            }
+            
+            // 원래 색상으로 복귀
+            if (current === end) {
+                setTimeout(() => {
+                    element.style.color = '';
+                }, 500);
+            }
+        }, 16);
+    }
+
+    // 헤더 색상 업데이트
+    updateHeaderColor(affection) {
+        const header = document.querySelector('.contact-name');
+        if (header) {
+            if (affection >= 80) {
+                header.style.color = '#ff69b4';
+            } else if (affection >= 60) {
+                header.style.color = '#ff8fa3';
+            } else if (affection >= 40) {
+                header.style.color = '#ffb3c1';
+            } else {
+                header.style.color = '#fff';
+            }
+        }
+    }
+
+    // 스탯 변화 표시 (애니메이션 데이터 기반)
+    showStatChanges(animationData) {
+        if (animationData) {
+            if (animationData.affection) {
+                this.updateAffection(animationData.affection.to, true);
+            }
+            if (animationData.intimacy) {
+                this.updateIntimacy(animationData.intimacy.to, true);
             }
         }
     }
@@ -343,7 +490,6 @@ class ChatUI {
     // 메시지 초기화
     clearMessages() {
         if (this.messagesContainer) {
-            // 날짜 라벨은 유지하고 나머지만 제거
             const dayLabel = this.messagesContainer.querySelector('.message-day');
             this.messagesContainer.innerHTML = '';
             if (dayLabel) {
@@ -397,7 +543,6 @@ class ChatUI {
         this.messagesContainer.appendChild(errorDiv);
         this.scrollToBottom();
         
-        // 5초 후 자동 제거
         setTimeout(() => {
             if (errorDiv.parentNode) {
                 errorDiv.remove();
@@ -429,26 +574,11 @@ class ChatUI {
         this.messagesContainer.appendChild(notification);
         this.scrollToBottom();
         
-        // 3초 후 자동 제거
         setTimeout(() => {
             if (notification.parentNode) {
                 notification.remove();
             }
         }, 3000);
-    }
-
-    // 로컬 AI 시뮬레이션 - API 키 UI 불필요
-    addApiKeyUI() {
-        console.log('🤖 Local AI Simulation - No API Key UI needed');
-        // API 키 관련 UI 추가 기능 비활성화
-        return;
-    }
-
-    // API 키 이벤트 설정 - 비활성화
-    bindApiKeyEvents() {
-        console.log('🤖 Local AI Simulation - No API Key events needed');
-        // API 키 이벤트 설정 기능 비활성화
-        return;
     }
 }
 

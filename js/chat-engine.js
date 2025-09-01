@@ -154,7 +154,7 @@ class ChatEngine {
         }
     }
 
-    // 선택지 선택 처리
+    // 선택지 선택 처리 (개선된 버전)
     async handleChoice(choiceIndex, message) {
         if (!message.options || !message.options[choiceIndex]) return;
 
@@ -166,14 +166,42 @@ class ChatEngine {
             window.chatUI.hideChoices();
         }
 
-        // 호감도 업데이트
-        if (choice.affection_delta) {
-            this.affection += choice.affection_delta;
-            this.affection = Math.max(0, Math.min(100, this.affection));
+        // GameLogic 모듈 사용하여 호감도 처리
+        if (window.gameLogicInstance) {
+            const gameState = {
+                affection: this.affection,
+                intimacy: this.intimacy || 0,
+                choiceNumber: this.choiceCount || 0
+            };
             
-            // UI에 호감도 업데이트
-            if (window.chatUI) {
-                window.chatUI.updateAffection(this.affection);
+            const result = window.gameLogicInstance.processChoice({
+                text: choice.text,
+                affection_impact: choice.affection_delta || 0
+            }, gameState);
+            
+            // 결과 반영
+            this.affection = result.gameState.affection;
+            this.intimacy = result.gameState.intimacy;
+            this.choiceCount = result.gameState.choiceNumber;
+            
+            // UI에 애니메이션과 함께 업데이트
+            if (window.chatUI && result.animationData) {
+                window.chatUI.showStatChanges(result.animationData);
+            }
+            
+            // 특별 이벤트 처리
+            if (result.specialEvent) {
+                await window.chatUI.addStageDirection(result.specialEvent.message);
+            }
+        } else {
+            // GameLogic 없으면 기존 방식
+            if (choice.affection_delta) {
+                this.affection += choice.affection_delta;
+                this.affection = Math.max(0, Math.min(100, this.affection));
+                
+                if (window.chatUI) {
+                    window.chatUI.updateAffection(this.affection);
+                }
             }
         }
 
@@ -184,7 +212,7 @@ class ChatEngine {
         setTimeout(() => this.processNextMessage(), ChatConfig.TIMING.messageDelay);
     }
 
-    // 텍스트 입력 처리 (AI 연동)
+    // 텍스트 입력 처리 (GameLogic 연동)
     async handleInput(inputText, message) {
         console.log(`Handling input: "${inputText}" for message ${message.id}`);
         
@@ -194,9 +222,39 @@ class ChatEngine {
             window.chatUI.hideInput();
         }
 
-        // AI가 연결되어 있다면 항상 AI 응답 우선 사용
-        if (this.aiManager && this.aiManager.isAIConnected()) {
-            // AI 응답 생성 (호감도 기반)
+        // GameLogic으로 감정 분석 및 응답 생성
+        if (window.gameLogicInstance) {
+            const gameState = {
+                affection: this.affection,
+                intimacy: this.intimacy || 0,
+                choiceNumber: this.choiceCount || 0
+            };
+            
+            const result = await window.gameLogicInstance.analyzeFreeInput(inputText, gameState);
+            
+            // 결과 반영
+            this.affection = result.gameState.affection;
+            this.intimacy = result.gameState.intimacy;
+            
+            // 캐릭터 응답 표시
+            if (result.characterResponse) {
+                await window.chatUI.showTypingIndicator();
+                await this.delay(1500);
+                await window.chatUI.addReceivedMessage({
+                    text: result.characterResponse,
+                    timestamp: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+                });
+                window.chatUI.hideTypingIndicator();
+            }
+            
+            // UI에 애니메이션과 함께 업데이트
+            if (window.chatUI && result.animationData) {
+                window.chatUI.showStatChanges(result.animationData);
+            }
+            
+            console.log(`[GameLogic AI] 감정: ${result.emotionType} (${(result.confidence * 100).toFixed(0)}%), 호감도 변화: ${result.affectionChange}`);
+        } else if (this.aiManager && this.aiManager.isAIConnected()) {
+            // GameLogic 없으면 기존 AI 방식
             await this.generateAIResponseWithAffection(inputText, message);
         } else {
             // AI 미연결시 폴백: 호감도 기반 반응

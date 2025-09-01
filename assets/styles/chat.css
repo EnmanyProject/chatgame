@@ -977,6 +977,117 @@ body {
     display: none;
 }
 
+/* 스탯 표시 영역 스타일 */
+.stats-display {
+    position: absolute;
+    top: 50%;
+    right: 60px;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 15px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 5px 10px;
+    border-radius: 20px;
+    border: 1px solid #333;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.stat-label {
+    font-size: 14px;
+}
+
+.stat-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    min-width: 25px;
+    text-align: center;
+    transition: color 0.3s ease;
+}
+
+/* 스탯 변경 애니메이션 */
+.stat-changing {
+    animation: statPulse 0.5s ease-in-out infinite;
+}
+
+@keyframes statPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+}
+
+/* 선택지 대화체 스타일 개선 */
+.choice-btn {
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    border: 1px solid #444;
+    color: #fff;
+    padding: 15px 20px;
+    border-radius: 15px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.choice-btn:hover {
+    background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+    border-color: #666;
+    transform: translateX(5px);
+}
+
+.choice-btn:active {
+    transform: scale(0.98);
+}
+
+.choice-number {
+    background: #444;
+    color: #fff;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* 입력창 전송 버튼 개선 */
+.input-choice-send {
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    border: none;
+    color: #000;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.input-choice-send:hover {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    transform: scale(1.05);
+}
+
+.input-choice-send:active {
+    transform: scale(0.95);
+}
+
 /* 유틸리티 클래스 */
 .hidden {
     display: none !important;
