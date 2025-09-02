@@ -3,7 +3,33 @@
 ## 프로젝트 개요
 MBTI 기반 로맨스 채팅 게임 - 윤아(INFP) 캐릭터와의 대화형 게임
 
-## 최신 작업 (2025-08-30)
+## 최신 작업 (2025-09-02)
+
+### 1. scenario-admin.html CSS/JS 파싱 오류 해결
+- **문제**: CSS 스타일 태그 안에 JavaScript 코드가 혼재되어 HTML 파싱 실패
+- **증상**: 관리자 페이지 화면이 깨지고 기능이 작동하지 않음
+- **해결**: 
+  - CSS와 JavaScript 코드 완전 분리
+  - 2,226줄에서 272줄로 코드 대폭 정리
+  - 모달 기반 UI 구조로 재구성
+- **결과**: 정상적인 HTML 파싱 및 화면 렌더링 복구
+
+### 2. 누락된 관리 함수들 추가
+- **문제**: `editCharacter is not defined` JavaScript 오류 발생
+- **원인**: 새 파일 작성 시 수정 관련 함수들 누락
+- **추가한 함수들**:
+  - `editScenario()`: 시나리오 수정 모달 로드
+  - `editCharacter()`: 캐릭터 수정 모달 로드
+  - `updateScenario()`: 시나리오 수정사항 API 전송
+  - `updateCharacter()`: 캐릭터 수정사항 API 전송
+- **기능**: 완전한 CRUD 작업 지원
+
+### 3. 관리자 시스템 완전 복구
+- **배포**: Git 커밋/푸시를 통한 Vercel 자동 배포
+- **테스트**: https://chatgame-seven.vercel.app/scenario-admin.html 정상 동작 확인
+- **결과**: 시나리오/캐릭터 생성, 수정, 삭제 기능 모두 정상화
+
+## 이전 작업 (2025-08-30)
 
 ### 1. 새 컴퓨터 환경 복구 작업
 - **상황**: 다른 PC에서 개발 환경 재구축 필요
@@ -199,7 +225,8 @@ const responses = [
 - **버전 관리**: Git + GitHub
 
 ---
-*마지막 업데이트: 2025-09-02*
-*주요 작업: 시나리오 관리 시스템 완전 구현*
+*마지막 업데이트: 2025-09-02*  
+*최신 작업: scenario-admin.html CSS/JS 파싱 오류 완전 해결*
 *작업자: dosik + Claude Code*
 *모델: Claude Sonnet 4 (claude-sonnet-4-20250514)*
+*상태: 관리자 시스템 정상 동작 확인됨*
