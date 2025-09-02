@@ -11,6 +11,330 @@
             box-sizing: border-box;
         }
 
+        // === 새로운 기능: 캐릭터별 대화 생성 ===
+        
+        // 캐릭터 선택 모달 열기
+        function openCharacterSelectModal(scenarioId) {
+            const modal = document.getElementById('character-select-modal');
+            modal.dataset.scenarioId = scenarioId;
+            
+            // 캐릭터 옵션들 로드
+            loadCharacterOptions();
+            
+            modal.classList.add('active');
+        }
+        
+        // 캐릭터 옵션들 로드
+        function loadCharacterOptions() {
+            const container = document.getElementById('character-selection');
+            container.innerHTML = '';
+            
+            currentCharacters.forEach(character => {
+                if (character.active) {
+                    const option = document.createElement('div');
+                    option.className = 'character-option';
+                    option.style.cssText = `
+                        padding: 15px; background: #f8f9fa; border: 2px solid #ddd; 
+                        border-radius: 10px; cursor: pointer; transition: all 0.3s ease;
+                        display: flex; align-items: center; gap: 15px;
+                    `;
+                    
+                    const avatarHtml = character.avatar_url ? 
+                        `<img src="${character.avatar_url}" alt="${character.name}" 
+                              style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">` : 
+                        `<div style="width: 50px; height: 50px; border-radius: 50%; background: #3498db; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">${character.name[0]}</div>`;
+                    
+                    option.innerHTML = `
+                        ${avatarHtml}
+                        <div>
+                            <strong>${character.name} (${character.mbti})</strong>
+                            <br><small style="color: #666;">${character.personality_traits.primary.slice(0,2).join(', ')}</small>
+                        </div>
+                    `;
+                    
+                    option.addEventListener('click', function() {
+                        document.querySelectorAll('.character-option').forEach(o => {
+                            o.style.borderColor = '#ddd';
+                            o.style.background = '#f8f9fa';
+                        });
+                        
+                        this.style.borderColor = '#3498db';
+                        this.style.background = '#e3f2fd';
+                        
+                        option.dataset.selected = 'true';
+                        option.dataset.characterId = character.id;
+                        
+                        console.log('✅ 캐맭터 선택:', character.name, character.id);
+                    });
+                    
+                    container.appendChild(option);
+                }
+            });
+        }
+        
+        // 캐릭터별 대화 생성
+        async function generateCharacterDialogue() {
+            const modal = document.getElementById('character-select-modal');
+            const scenarioId = modal.dataset.scenarioId;
+            const context = document.getElementById('dialogue-context').value;
+            
+            // 선택된 캐망터 찾기
+            const selectedOption = document.querySelector('.character-option[data-selected="true"]');
+            if (!selectedOption) {
+                alert('캐맭터를 선택해주세요!');
+                return;
+            }
+            
+            const characterId = selectedOption.dataset.characterId;
+            const character = currentCharacters.find(c => c.id === characterId);
+            const scenario = currentScenarios.find(s => s.id === scenarioId);
+            
+            if (!character || !scenario) {
+                alert('캐릭터 또는 시나리오를 찾을 수 없습니다.');
+                return;
+            }
+            
+            // 로딩 표시
+            const generateBtn = event.target;
+            const originalText = generateBtn.textContent;
+            generateBtn.textContent = '생성 중...';
+            generateBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/scenario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generate_character_dialogue',
+                        scenario_id: scenarioId,
+                        character_id: characterId,
+                        context: context || '기본 상황',
+                        choice_number: Date.now() % 10 + 1
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeModal('character-select-modal');
+                    
+                    // 생성 결과 표시
+                    showGenerationResult(data, character, scenario);
+                    
+                    // 시나리오 대화 목록 새로고침
+                    if (typeof loadScenarios === 'function') {
+                        loadScenarios();
+                    }
+                } else {
+                    alert('대화 생성에 실패했습니다: ' + (data.error || '알 수 없는 오류'));
+                }
+                
+            } catch (error) {
+                console.error('대화 생성 오류:', error);
+                alert('대화 생성 중 오류가 발생했습니다: ' + error.message);
+            } finally {
+                generateBtn.textContent = originalText;
+                generateBtn.disabled = false;
+            }
+        }
+        
+        // 생성 결과 표시
+        function showGenerationResult(data, character, scenario) {
+            const generated = data.generated;
+            
+            const resultModal = document.createElement('div');
+            resultModal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.8); display: flex; align-items: center; 
+                justify-content: center; z-index: 10000;
+            `;
+            
+            const choicesHtml = generated.choices.map(choice => {
+                const impactClass = choice.affection_impact > 0 ? 'impact-positive' : 
+                                  choice.affection_impact < 0 ? 'impact-negative' : 'impact-neutral';
+                return `
+                    <div class="choice-item" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin: 5px 0;">
+                        <span>${choice.text}</span>
+                        <span class="affection-impact ${impactClass}" style="padding: 4px 8px; border-radius: 12px; font-size: 0.8em; font-weight: 600;">
+                            ${choice.affection_impact > 0 ? '+' : ''}${choice.affection_impact}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+            
+            resultModal.innerHTML = `
+                <div style="background: white; padding: 40px; border-radius: 15px; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                    <h3 style="color: #2c3e50; margin-bottom: 25px; text-align: center;">
+                        ✨ ${character.name} (${character.mbti}) - ${scenario.title}
+                    </h3>
+                    
+                    <div style="background: #e8f4f8; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h4 style="color: #2980b9; margin-bottom: 10px;">💬 대사</h4>
+                        <p style="font-style: italic; font-size: 1.1em;">"${generated.dialogue}"</p>
+                    </div>
+                    
+                    <div style="background: #fef9e7; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h4 style="color: #f39c12; margin-bottom: 10px;">💭 지문</h4>
+                        <p style="color: #8B4513;">${generated.narration}</p>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+                        <h4 style="color: #27ae60; margin-bottom: 15px;">🎯 선택지</h4>
+                        ${choicesHtml}
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <button onclick="this.closest('div').parentElement.remove()" 
+                                style="background: #3498db; color: white; padding: 12px 30px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-right: 15px;">
+                            ✅ 확인
+                        </button>
+                        <button onclick="copyDialogueResult(this)" 
+                                style="background: #95a5a6; color: white; padding: 12px 30px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                            📋 복사
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(resultModal);
+            
+            console.log(`✅ ${character.name} 대화 생성 완료:`, generated);
+        }
+        
+        // 대화 결과 복사
+        function copyDialogueResult(button) {
+            const modal = button.closest('div').parentElement;
+            const dialogue = modal.querySelector('div:nth-child(2) p').textContent.replace(/"/g, '');
+            const narration = modal.querySelector('div:nth-child(3) p').textContent;
+            
+            const result = `대사: ${dialogue}\n지문: ${narration}`;
+            
+            navigator.clipboard.writeText(result).then(() => {
+                button.textContent = '✅ 복사됨';
+                setTimeout(() => {
+                    button.textContent = '📋 복사';
+                }, 2000);
+            }).catch(() => {
+                alert('복사에 실패했습니다.');
+            });
+        }
+        
+        // === 새로운 기능: 캐릭터별 대화 리뷰 ===
+        
+        // 캐릭터 대화 리뷰 모달 열기
+        async function viewCharacterDialogues(characterId, characterName) {
+            const modal = document.getElementById('character-dialogues-modal');
+            const title = document.getElementById('character-dialogues-title');
+            const content = document.getElementById('character-dialogues-content');
+            
+            title.textContent = `${characterName}의 대화 리뷰`;
+            content.innerHTML = '<p style="text-align: center; color: #666; padding: 50px;">대화를 불러오는 중...</p>';
+            
+            modal.classList.add('active');
+            
+            try {
+                const response = await fetch(`/api/scenario?action=get&type=character_dialogues&id=${characterId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayCharacterDialogues(data.dialogues, characterName, characterId);
+                } else {
+                    content.innerHTML = '<p style="text-align: center; color: #e74c3c; padding: 50px;">대화 데이터를 불러올 수 없습니다.</p>';
+                }
+            } catch (error) {
+                console.error('캐릭터 대화 로드 실패:', error);
+                content.innerHTML = '<p style="text-align: center; color: #e74c3c; padding: 50px;">오류가 발생했습니다.</p>';
+            }
+        }
+        
+        // 캐릭터 대화 표시
+        function displayCharacterDialogues(dialogues, characterName, characterId) {
+            const container = document.getElementById('character-dialogues-content');
+            
+            if (dialogues.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 50px;">
+                        <h4 style="color: #666;">${characterName}의 대화가 아직 없습니다</h4>
+                        <p style="color: #999;">시나리오에서 "캐릭터별 대화생성" 버튼을 사용하여 대화를 생성해보세요.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <div style="margin-bottom: 20px; padding: 15px; background: #e3f2fd; border-radius: 10px; text-align: center;">
+                    <h4 style="margin: 0; color: #1976d2;">${characterName}의 대화 내역 (${dialogues.length}개)</h4>
+                </div>
+            `;
+            
+            dialogues.forEach((dialogue, index) => {
+                const content = dialogue.generated_content;
+                
+                html += `
+                    <div style="margin-bottom: 25px; padding: 20px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #3498db;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <strong style="color: #2c3e50;">시나리오: ${dialogue.scenario_title || dialogue.scenario_id}</strong>
+                            <div>
+                                <button onclick="editCharacterDialogue('${dialogue.id}')" 
+                                        style="background: #f39c12; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-right: 5px;">
+                                    ✏️ 수정
+                                </button>
+                                <small style="color: #666;">${new Date(dialogue.created_at).toLocaleDateString()}</small>
+                            </div>
+                        </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                            <strong style="color: #2980b9;">대사:</strong>
+                            <p style="margin: 5px 0 0 0; font-style: italic;">"${content.dialogue}"</p>
+                        </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                            <strong style="color: #f39c12;">지문:</strong>
+                            <p style="margin: 5px 0 0 0; color: #8B4513;">${content.narration}</p>
+                        </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 8px;">
+                            <strong style="color: #27ae60;">선택지:</strong>
+                            <ul style="margin: 5px 0 0 20px;">
+                                ${content.choices.map(choice => `
+                                    <li style="margin: 5px 0; color: #2c3e50;">
+                                        "${choice.text}" 
+                                        <span style="color: ${choice.affection_impact > 0 ? '#27ae60' : choice.affection_impact < 0 ? '#e74c3c' : '#95a5a6'}; font-weight: bold;">
+                                            (${choice.affection_impact > 0 ? '+' : ''}${choice.affection_impact})
+                                        </span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // 캐릭터 대화 수정
+        function editCharacterDialogue(dialogueId) {
+            alert('대화 수정 기능은 아직 개발 중입니다. 공실 API에서 edit_dialogue 액션을 사용할 예정입니다.');
+            console.log('수정할 대화 ID:', dialogueId);
+        }
+        
+        // 캐맭터 대화 내보내기
+        function exportCharacterDialogues() {
+            const content = document.getElementById('character-dialogues-content');
+            const dialogues = content.textContent;
+            
+            const blob = new Blob([dialogues], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'character-dialogues.txt';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            console.log('✅ 대화 내보내기 완료');
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -345,6 +669,50 @@
         <div class="header">
             <h1>🎭 시나리오 & 캐릭터 관리 시스템</h1>
             <p>다중 시나리오와 MBTI 기반 캐릭터를 관리하세요</p>
+        </div>
+
+    <!-- 캐릭터 선택 모달 (대화 생성용) -->
+    <div id="character-select-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>🎯 캐릭터별 대화 생성</h3>
+                <button class="close-btn" onclick="closeModal('character-select-modal')">&times;</button>
+            </div>
+            <div style="padding: 20px;">
+                <div class="form-group">
+                    <label>캐릭터 선택</label>
+                    <div id="character-selection" style="display: grid; gap: 15px; margin-top: 10px;">
+                        <!-- 캐맭터 옵션들이 여기에 동적으로 추가됨 -->
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>대화 설정</label>
+                    <textarea id="dialogue-context" class="form-control" rows="3" placeholder="생성하고 싶은 대화의 상황이나 분위기를 설명해주세요..."></textarea>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-success" onclick="generateCharacterDialogue()">🎆 대화 생성</button>
+                    <button class="btn btn-secondary" onclick="closeModal('character-select-modal')">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 캐릭터 대화 리뷰 모달 -->
+    <div id="character-dialogues-modal" class="modal">
+        <div class="modal-content" style="max-width: 900px; max-height: 90vh;">
+            <div class="modal-header">
+                <h3 id="character-dialogues-title">캐릭터 대화 리뷰</h3>
+                <button class="close-btn" onclick="closeModal('character-dialogues-modal')">&times;</button>
+            </div>
+            <div id="character-dialogues-content" style="padding: 20px; max-height: 70vh; overflow-y: auto;">
+                <p style="text-align: center; color: #666; padding: 50px;">로딩 중...</p>
+            </div>
+            <div style="padding: 20px; border-top: 1px solid #eee; text-align: center;">
+                <button class="btn btn-success" onclick="exportCharacterDialogues()">💾 대화 내보내기</button>
+                <button class="btn btn-secondary" onclick="closeModal('character-dialogues-modal')">닫기</button>
+            </div>
         </div>
 
         <div class="nav-tabs">
@@ -827,7 +1195,7 @@
                         </span>
                         <div>
                             <button class="btn btn-primary" onclick="viewScenarioDialogues('${scenario.id}', '${scenario.title}')">대화 보기</button>
-                            <button class="btn btn-success" onclick="openDialogueGenerationModal('${scenario.id}')">🎯 대화생성</button>
+                            <button class="btn btn-success" onclick="openCharacterSelectModal('${scenario.id}')">🎯 캐릭터별 대화생성</button>
                             <button class="btn btn-warning" onclick="editScenario('${scenario.id}')">수정</button>
                             <button class="btn btn-danger" onclick="deleteScenario('${scenario.id}')">삭제</button>
                         </div>
@@ -888,6 +1256,7 @@
                             ${character.active ? '활성' : '비활성'}
                         </span>
                         <div>
+                            <button class="btn btn-primary" onclick="viewCharacterDialogues('${character.id}', '${character.name}')">💬 대화 리뷰</button>
                             <button class="btn btn-warning" onclick="editCharacter('${character.id}')">수정</button>
                             <button class="btn btn-danger" onclick="deleteCharacter('${character.id}')">삭제</button>
                         </div>
@@ -2061,6 +2430,330 @@
                 loadGameDialogues();
                 alert('기본값으로 재설정되었습니다.');
             }
+        }
+
+        // === 새로운 기능: 캐릭터별 대화 생성 ===
+        
+        // 캐릭터 선택 모달 열기
+        function openCharacterSelectModal(scenarioId) {
+            const modal = document.getElementById('character-select-modal');
+            modal.dataset.scenarioId = scenarioId;
+            
+            // 캐릭터 옵션들 로드
+            loadCharacterOptions();
+            
+            modal.classList.add('active');
+        }
+        
+        // 캐릭터 옵션들 로드
+        function loadCharacterOptions() {
+            const container = document.getElementById('character-selection');
+            container.innerHTML = '';
+            
+            currentCharacters.forEach(character => {
+                if (character.active) {
+                    const option = document.createElement('div');
+                    option.className = 'character-option';
+                    option.style.cssText = `
+                        padding: 15px; background: #f8f9fa; border: 2px solid #ddd; 
+                        border-radius: 10px; cursor: pointer; transition: all 0.3s ease;
+                        display: flex; align-items: center; gap: 15px;
+                    `;
+                    
+                    const avatarHtml = character.avatar_url ? 
+                        `<img src="${character.avatar_url}" alt="${character.name}" 
+                              style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">` : 
+                        `<div style="width: 50px; height: 50px; border-radius: 50%; background: #3498db; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">${character.name[0]}</div>`;
+                    
+                    option.innerHTML = `
+                        ${avatarHtml}
+                        <div>
+                            <strong>${character.name} (${character.mbti})</strong>
+                            <br><small style="color: #666;">${character.personality_traits.primary.slice(0,2).join(', ')}</small>
+                        </div>
+                    `;
+                    
+                    option.addEventListener('click', function() {
+                        document.querySelectorAll('.character-option').forEach(o => {
+                            o.style.borderColor = '#ddd';
+                            o.style.background = '#f8f9fa';
+                        });
+                        
+                        this.style.borderColor = '#3498db';
+                        this.style.background = '#e3f2fd';
+                        
+                        option.dataset.selected = 'true';
+                        option.dataset.characterId = character.id;
+                        
+                        console.log('✅ 캐릭터 선택:', character.name, character.id);
+                    });
+                    
+                    container.appendChild(option);
+                }
+            });
+        }
+        
+        // 캐릭터별 대화 생성
+        async function generateCharacterDialogue() {
+            const modal = document.getElementById('character-select-modal');
+            const scenarioId = modal.dataset.scenarioId;
+            const context = document.getElementById('dialogue-context').value;
+            
+            // 선택된 캐릭터 찾기
+            const selectedOption = document.querySelector('.character-option[data-selected="true"]');
+            if (!selectedOption) {
+                alert('캐맭터를 선택해주세요!');
+                return;
+            }
+            
+            const characterId = selectedOption.dataset.characterId;
+            const character = currentCharacters.find(c => c.id === characterId);
+            const scenario = currentScenarios.find(s => s.id === scenarioId);
+            
+            if (!character || !scenario) {
+                alert('캐릭터 또는 시나리오를 찾을 수 없습니다.');
+                return;
+            }
+            
+            // 로딩 표시
+            const generateBtn = event.target;
+            const originalText = generateBtn.textContent;
+            generateBtn.textContent = '생성 중...';
+            generateBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/scenario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generate_character_dialogue',
+                        scenario_id: scenarioId,
+                        character_id: characterId,
+                        context: context || '기본 상황',
+                        choice_number: Date.now() % 10 + 1
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeModal('character-select-modal');
+                    
+                    // 생성 결과 표시
+                    showGenerationResult(data, character, scenario);
+                    
+                    // 시나리오 대화 목록 새로고침
+                    if (typeof loadScenarios === 'function') {
+                        loadScenarios();
+                    }
+                } else {
+                    alert('대화 생성에 실패했습니다: ' + (data.error || '알 수 없는 오류'));
+                }
+                
+            } catch (error) {
+                console.error('대화 생성 오류:', error);
+                alert('대화 생성 중 오류가 발생했습니다: ' + error.message);
+            } finally {
+                generateBtn.textContent = originalText;
+                generateBtn.disabled = false;
+            }
+        }
+        
+        // 생성 결과 표시
+        function showGenerationResult(data, character, scenario) {
+            const generated = data.generated;
+            
+            const resultModal = document.createElement('div');
+            resultModal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.8); display: flex; align-items: center; 
+                justify-content: center; z-index: 10000;
+            `;
+            
+            const choicesHtml = generated.choices.map(choice => {
+                const impactClass = choice.affection_impact > 0 ? 'impact-positive' : 
+                                  choice.affection_impact < 0 ? 'impact-negative' : 'impact-neutral';
+                return `
+                    <div class="choice-item" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin: 5px 0;">
+                        <span>${choice.text}</span>
+                        <span class="affection-impact ${impactClass}" style="padding: 4px 8px; border-radius: 12px; font-size: 0.8em; font-weight: 600;">
+                            ${choice.affection_impact > 0 ? '+' : ''}${choice.affection_impact}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+            
+            resultModal.innerHTML = `
+                <div style="background: white; padding: 40px; border-radius: 15px; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                    <h3 style="color: #2c3e50; margin-bottom: 25px; text-align: center;">
+                        ✨ ${character.name} (${character.mbti}) - ${scenario.title}
+                    </h3>
+                    
+                    <div style="background: #e8f4f8; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h4 style="color: #2980b9; margin-bottom: 10px;">💬 대사</h4>
+                        <p style="font-style: italic; font-size: 1.1em;">"${generated.dialogue}"</p>
+                    </div>
+                    
+                    <div style="background: #fef9e7; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h4 style="color: #f39c12; margin-bottom: 10px;">💭 지문</h4>
+                        <p style="color: #8B4513;">${generated.narration}</p>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+                        <h4 style="color: #27ae60; margin-bottom: 15px;">🎯 선택지</h4>
+                        ${choicesHtml}
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <button onclick="this.closest('div').parentElement.remove()" 
+                                style="background: #3498db; color: white; padding: 12px 30px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-right: 15px;">
+                            ✅ 확인
+                        </button>
+                        <button onclick="copyDialogueResult(this)" 
+                                style="background: #95a5a6; color: white; padding: 12px 30px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                            📋 복사
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(resultModal);
+            
+            console.log(`✅ ${character.name} 대화 생성 완료:`, generated);
+        }
+        
+        // 대화 결과 복사
+        function copyDialogueResult(button) {
+            const modal = button.closest('div').parentElement;
+            const dialogue = modal.querySelector('div:nth-child(2) p').textContent.replace(/"/g, '');
+            const narration = modal.querySelector('div:nth-child(3) p').textContent;
+            
+            const result = `대사: ${dialogue}\n지문: ${narration}`;
+            
+            navigator.clipboard.writeText(result).then(() => {
+                button.textContent = '✅ 복사됨';
+                setTimeout(() => {
+                    button.textContent = '📋 복사';
+                }, 2000);
+            }).catch(() => {
+                alert('복사에 실패했습니다.');
+            });
+        }
+        
+        // === 새로운 기능: 캐릭터별 대화 리뷰 ===
+        
+        // 캐릭터 대화 리뷰 모달 열기
+        async function viewCharacterDialogues(characterId, characterName) {
+            const modal = document.getElementById('character-dialogues-modal');
+            const title = document.getElementById('character-dialogues-title');
+            const content = document.getElementById('character-dialogues-content');
+            
+            title.textContent = `${characterName}의 대화 리뷰`;
+            content.innerHTML = '<p style="text-align: center; color: #666; padding: 50px;">대화를 불러오는 중...</p>';
+            
+            modal.classList.add('active');
+            
+            try {
+                const response = await fetch(`/api/scenario?action=get&type=character_dialogues&id=${characterId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayCharacterDialogues(data.dialogues, characterName, characterId);
+                } else {
+                    content.innerHTML = '<p style="text-align: center; color: #e74c3c; padding: 50px;">대화 데이터를 불러올 수 없습니다.</p>';
+                }
+            } catch (error) {
+                console.error('캐릭터 대화 로드 실패:', error);
+                content.innerHTML = '<p style="text-align: center; color: #e74c3c; padding: 50px;">오류가 발생했습니다.</p>';
+            }
+        }
+        
+        // 캐릭터 대화 표시
+        function displayCharacterDialogues(dialogues, characterName, characterId) {
+            const container = document.getElementById('character-dialogues-content');
+            
+            if (dialogues.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 50px;">
+                        <h4 style="color: #666;">${characterName}의 대화가 아직 없습니다</h4>
+                        <p style="color: #999;">시나리오에서 "캐릭터별 대화생성" 버튼을 사용하여 대화를 생성해보세요.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <div style="margin-bottom: 20px; padding: 15px; background: #e3f2fd; border-radius: 10px; text-align: center;">
+                    <h4 style="margin: 0; color: #1976d2;">${characterName}의 대화 내역 (${dialogues.length}개)</h4>
+                </div>
+            `;
+            
+            dialogues.forEach((dialogue, index) => {
+                const content = dialogue.generated_content;
+                
+                html += `
+                    <div style="margin-bottom: 25px; padding: 20px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #3498db;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <strong style="color: #2c3e50;">시나리오: ${dialogue.scenario_title || dialogue.scenario_id}</strong>
+                            <div>
+                                <button onclick="editCharacterDialogue('${dialogue.id}')" 
+                                        style="background: #f39c12; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-right: 5px;">
+                                    ✏️ 수정
+                                </button>
+                                <small style="color: #666;">${new Date(dialogue.created_at).toLocaleDateString()}</small>
+                            </div>
+                        </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                            <strong style="color: #2980b9;">대사:</strong>
+                            <p style="margin: 5px 0 0 0; font-style: italic;">"${content.dialogue}"</p>
+                        </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                            <strong style="color: #f39c12;">지문:</strong>
+                            <p style="margin: 5px 0 0 0; color: #8B4513;">${content.narration}</p>
+                        </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 8px;">
+                            <strong style="color: #27ae60;">선택지:</strong>
+                            <ul style="margin: 5px 0 0 20px;">
+                                ${content.choices.map(choice => `
+                                    <li style="margin: 5px 0; color: #2c3e50;">
+                                        "${choice.text}" 
+                                        <span style="color: ${choice.affection_impact > 0 ? '#27ae60' : choice.affection_impact < 0 ? '#e74c3c' : '#95a5a6'}; font-weight: bold;">
+                                            (${choice.affection_impact > 0 ? '+' : ''}${choice.affection_impact})
+                                        </span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // 캐릭터 대화 수정
+        function editCharacterDialogue(dialogueId) {
+            alert('대화 수정 기능은 아직 개발 중입니다. API에서 edit_dialogue 액션을 사용할 예정입니다.');
+            console.log('수정할 대화 ID:', dialogueId);
+        }
+        
+        // 캐릭터 대화 내보내기
+        function exportCharacterDialogues() {
+            const content = document.getElementById('character-dialogues-content');
+            const dialogues = content.textContent;
+            
+            const blob = new Blob([dialogues], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'character-dialogues.txt';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            console.log('✅ 대화 내보내기 완료');
         }
     </script>
 </body>
