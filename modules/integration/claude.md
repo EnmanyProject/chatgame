@@ -12,6 +12,7 @@
 - `api/test.js`: API 테스트 엔드포인트
 - `.env`: 환경변수 (Git 제외)
 - `vercel.json`: 배포 설정
+- `modules/integration/`: 새로운 모듈화된 통합 시스템 (예정)
 
 ## API 아키텍처
 
@@ -74,12 +75,59 @@ git push origin main
 - 메모리 기반 스토리지 구현
 - 동기식 처리로 전환
 
+## Phase 2-4 계획 (예정)
+
+### 실제 Claude API 통합
+```javascript
+// modules/integration/claudeAPI.js (예정)
+class ClaudeAPIIntegration {
+    async generateDialogue(character, context) {
+        // 실제 Claude API 호출
+    }
+    
+    validateAPIResponse(response) {
+        // 응답 검증 및 후처리
+    }
+}
+```
+
+### 데이터베이스 연동
+```javascript
+// modules/integration/database.js (예정)
+class DatabaseManager {
+    async persistGameState(state) {
+        // 게임 상태 DB 저장
+    }
+    
+    async loadCharacterData(id) {
+        // 캐릭터 데이터 DB 조회
+    }
+}
+```
+
+### 모니터링 & 로깅
+```javascript
+// modules/integration/monitoring.js (예정)
+class SystemMonitoring {
+    trackAPIUsage() {
+        // API 사용량 추적
+    }
+    
+    logErrors(error, context) {
+        // 에러 로깅 및 알림
+    }
+}
+```
+
 ## 다음 작업 계획
-- 실제 Claude API 통합
-- 데이터베이스 연동 검토
+- **Phase 2-4**: 최종 통합
+  - 실제 Claude API 통합
+  - 데이터베이스 연동 검토  
+  - 모니터링 시스템 구축
 - CDN 최적화
-- 모니터링 시스템 구축
+- 로드 밸런싱
+- 보안 강화
 
 ---
 *업데이트: 2025-09-02*
-*상태: 안정적 운영 중*
+*상태: 안정적 운영 중, 통합 준비*

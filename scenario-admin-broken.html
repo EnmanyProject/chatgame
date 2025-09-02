@@ -1,0 +1,2746 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 시나리오 & 캐릭터 관리 시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        // 캐릭터 옵션들 로드
+        function loadCharacterOptions() {
+            const container = document.getElementById('character-selection');
+            container.innerHTML = '';
+            
+            currentCharacters.forEach(character => {
+                if (character.active) {
+                    const option = document.createElement('div');
+                    option.className = 'character-option';
+                    option.style.cssText = `
+                        padding: 15px; background: #f8f9fa; border: 2px solid #ddd; 
+                        border-radius: 10px; cursor: pointer; transition: all 0.3s ease;
+                        display: flex; align-items: center; gap: 15px;
+                    `;
+                    
+                    const avatarHtml = character.avatar_url ? 
+                        `<img src="${character.avatar_url}" alt="${character.name}" 
+                              style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">` : 
+                        `<div style="width: 50px; height: 50px; border-radius: 50%; background: #3498db; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">${character.name[0]}</div>`;
+                    
+                    option.innerHTML = `
+                        ${avatarHtml}
+                        <div>
+                            <strong>${character.name} (${character.mbti})</strong>
+                            <br><small style="color: #666;">${character.personality_traits.primary.slice(0,2).join(', ')}</small>
+                        </div>
+                    `;
+                    
+                    option.addEventListener('click', function() {
+                        document.querySelectorAll('.character-option').forEach(o => {
+                            o.style.borderColor = '#ddd';
+                            o.style.background = '#f8f9fa';
+                        });
+                        
+                        this.style.borderColor = '#3498db';
+                        this.style.background = '#e3f2fd';
+                        
+                        option.dataset.selected = 'true';
+                        option.dataset.characterId = character.id;
+                        
+                        console.log('✅ 캐맭터 선택:', character.name, character.id);
+                    });
+                    
+                    container.appendChild(option);
+                }
+            });
+        }
+        
+        // 캐릭터별 대화 생성
+        async function generateCharacterDialogue() {
+            const modal = document.getElementById('character-select-modal');
+            const scenarioId = modal.dataset.scenarioId;
+            const context = document.getElementById('dialogue-context').value;
+            
+            // 선택된 캐망터 찾기
+            const selectedOption = document.querySelector('.character-option[data-selected="true"]');
+            if (!selectedOption) {
+                alert('캐맭터를 선택해주세요!');
+                return;
+            }
+            
+            const characterId = selectedOption.dataset.characterId;
+            const character = currentCharacters.find(c => c.id === characterId);
+            const scenario = currentScenarios.find(s => s.id === scenarioId);
+            
+            if (!character || !scenario) {
+                alert('캐릭터 또는 시나리오를 찾을 수 없습니다.');
+                return;
+            }
+            
+            // 로딩 표시
+            const generateBtn = event.target;
+            const originalText = generateBtn.textContent;
+            generateBtn.textContent = '생성 중...';
+            generateBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/scenario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generate_character_dialogue',
+                        scenario_id: scenarioId,
+                        character_id: characterId,
+                        context: context || '기본 상황',
+                        choice_number: Date.now() % 10 + 1
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeModal('character-select-modal');
+                    
+                    // 생성 결과 표시
+                    showGenerationResult(data, character, scenario);
+                    
+                    // 시나리오 대화 목록 새로고침
+                    if (typeof loadScenarios === 'function') {
+                        loadScenarios();
+                    }
+                } else {
+                    alert('대화 생성에 실패했습니다: ' + (data.error || '알 수 없는 오류'));
+                }
+                
+            } catch (error) {
+                console.error('대화 생성 오류:', error);
+                alert('대화 생성 중 오류가 발생했습니다: ' + error.message);
+            } finally {
+                generateBtn.textContent = originalText;
+                generateBtn.disabled = false;
+            }
+        }
+        
+        // 생성 결과 표시
+        function showGenerationResult(data, character, scenario) {
+            const generated = data.generated;
+            
+            const resultModal = document.createElement('div');
+            resultModal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.8); display: flex; align-items: center; 
+                justify-content: center; z-index: 10000;
+            `;
+            
+            const choicesHtml = generated.choices.map(choice => {
+                const impactClass = choice.affection_impact > 0 ? 'impact-positive' : 
+                                  choice.affection_impact < 0 ? 'impact-negative' : 'impact-neutral';
+                return `
+                    <div class="choice-item" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin: 5px 0;">
+                        <span>${choice.text}</span>
+                        <span class="affection-impact ${impactClass}" style="padding: 4px 8px; border-radius: 12px; font-size: 0.8em; font-weight: 600;">
+                            ${choice.affection_impact > 0 ? '+' : ''}${choice.affection_impact}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+            
+            resultModal.innerHTML = `
+                <div style="background: white; padding: 40px; border-radius: 15px; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                    <h3 style="color: #2c3e50; margin-bottom: 25px; text-align: center;">
+                        ✨ ${character.name} (${character.mbti}) - ${scenario.title}
+                    </h3>
+                    
+                    <div style="background: #e8f4f8; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h4 style="color: #2980b9; margin-bottom: 10px;">💬 대사</h4>
+                        <p style="font-style: italic; font-size: 1.1em;">"${generated.dialogue}"</p>
+                    </div>
+                    
+                    <div style="background: #fef9e7; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h4 style="color: #f39c12; margin-bottom: 10px;">💭 지문</h4>
+                        <p style="color: #8B4513;">${generated.narration}</p>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+                        <h4 style="color: #27ae60; margin-bottom: 15px;">🎯 선택지</h4>
+                        ${choicesHtml}
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <button onclick="this.closest('div').parentElement.remove()" 
+                                style="background: #3498db; color: white; padding: 12px 30px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-right: 15px;">
+                            ✅ 확인
+                        </button>
+                        <button onclick="copyDialogueResult(this)" 
+                                style="background: #95a5a6; color: white; padding: 12px 30px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                            📋 복사
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(resultModal);
+            
+            console.log(`✅ ${character.name} 대화 생성 완료:`, generated);
+        }
+        
+        // 대화 결과 복사
+        function copyDialogueResult(button) {
+            const modal = button.closest('div').parentElement;
+            const dialogue = modal.querySelector('div:nth-child(2) p').textContent.replace(/"/g, '');
+            const narration = modal.querySelector('div:nth-child(3) p').textContent;
+            
+            const result = `대사: ${dialogue}\n지문: ${narration}`;
+            
+            navigator.clipboard.writeText(result).then(() => {
+                button.textContent = '✅ 복사됨';
+                setTimeout(() => {
+                    button.textContent = '📋 복사';
+                }, 2000);
+            }).catch(() => {
+                alert('복사에 실패했습니다.');
+            });
+        }
+        
+        // === 새로운 기능: 캐릭터별 대화 리뷰 ===
+        
+        // 캐릭터 대화 리뷰 모달 열기
+        async function viewCharacterDialogues(characterId, characterName) {
+            const modal = document.getElementById('character-dialogues-modal');
+            const title = document.getElementById('character-dialogues-title');
+            const content = document.getElementById('character-dialogues-content');
+            
+            title.textContent = `${characterName}의 대화 리뷰`;
+            content.innerHTML = '<p style="text-align: center; color: #666; padding: 50px;">대화를 불러오는 중...</p>';
+            
+            modal.classList.add('active');
+            
+            try {
+                const response = await fetch(`/api/scenario?action=get&type=character_dialogues&id=${characterId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayCharacterDialogues(data.dialogues, characterName, characterId);
+                } else {
+                    content.innerHTML = '<p style="text-align: center; color: #e74c3c; padding: 50px;">대화 데이터를 불러올 수 없습니다.</p>';
+                }
+            } catch (error) {
+                console.error('캐릭터 대화 로드 실패:', error);
+                content.innerHTML = '<p style="text-align: center; color: #e74c3c; padding: 50px;">오류가 발생했습니다.</p>';
+            }
+        }
+        
+        // 캐릭터 대화 표시
+        function displayCharacterDialogues(dialogues, characterName, characterId) {
+            const container = document.getElementById('character-dialogues-content');
+            
+            if (dialogues.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 50px;">
+                        <h4 style="color: #666;">${characterName}의 대화가 아직 없습니다</h4>
+                        <p style="color: #999;">시나리오에서 "캐릭터별 대화생성" 버튼을 사용하여 대화를 생성해보세요.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <div style="margin-bottom: 20px; padding: 15px; background: #e3f2fd; border-radius: 10px; text-align: center;">
+                    <h4 style="margin: 0; color: #1976d2;">${characterName}의 대화 내역 (${dialogues.length}개)</h4>
+                </div>
+            `;
+            
+            dialogues.forEach((dialogue, index) => {
+                const content = dialogue.generated_content;
+                
+                html += `
+                    <div style="margin-bottom: 25px; padding: 20px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #3498db;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <strong style="color: #2c3e50;">시나리오: ${dialogue.scenario_title || dialogue.scenario_id}</strong>
+                            <div>
+                                <button onclick="editCharacterDialogue('${dialogue.id}')" 
+                                        style="background: #f39c12; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-right: 5px;">
+                                    ✏️ 수정
+                                </button>
+                                <small style="color: #666;">${new Date(dialogue.created_at).toLocaleDateString()}</small>
+                            </div>
+                        </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                            <strong style="color: #2980b9;">대사:</strong>
+                            <p style="margin: 5px 0 0 0; font-style: italic;">"${content.dialogue}"</p>
+                        </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                            <strong style="color: #f39c12;">지문:</strong>
+                            <p style="margin: 5px 0 0 0; color: #8B4513;">${content.narration}</p>
+                        </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 8px;">
+                            <strong style="color: #27ae60;">선택지:</strong>
+                            <ul style="margin: 5px 0 0 20px;">
+                                ${content.choices.map(choice => `
+                                    <li style="margin: 5px 0; color: #2c3e50;">
+                                        "${choice.text}" 
+                                        <span style="color: ${choice.affection_impact > 0 ? '#27ae60' : choice.affection_impact < 0 ? '#e74c3c' : '#95a5a6'}; font-weight: bold;">
+                                            (${choice.affection_impact > 0 ? '+' : ''}${choice.affection_impact})
+                                        </span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // 캐릭터 대화 수정
+        function editCharacterDialogue(dialogueId) {
+            alert('대화 수정 기능은 아직 개발 중입니다. 공실 API에서 edit_dialogue 액션을 사용할 예정입니다.');
+            console.log('수정할 대화 ID:', dialogueId);
+        }
+        
+        // 캐맭터 대화 내보내기
+        function exportCharacterDialogues() {
+            const content = document.getElementById('character-dialogues-content');
+            const dialogues = content.textContent;
+            
+            const blob = new Blob([dialogues], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'character-dialogues.txt';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            console.log('✅ 대화 내보내기 완료');
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .admin-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 20px;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .nav-tab:hover {
+            background: #2980b9;
+            color: white;
+        }
+
+        .content-section {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #27ae60;
+        }
+
+        .btn-success:hover {
+            background: #219a52;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+        }
+
+        .btn-warning:hover {
+            background: #d68910;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .generation-result {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #3498db;
+        }
+
+        .choices-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .choice-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .affection-impact {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .impact-positive {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .impact-neutral {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .impact-negative {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .mbti-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .mbti-option {
+            padding: 8px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mbti-option.selected {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="header">
+            <h1>🎭 시나리오 & 캐릭터 관리 시스템</h1>
+            <p>다중 시나리오와 MBTI 기반 캐릭터를 관리하세요</p>
+        </div>
+
+    <!-- 캐릭터 선택 모달 (대화 생성용) -->
+    <div id="character-select-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>🎯 캐릭터별 대화 생성</h3>
+                <button class="close-btn" onclick="closeModal('character-select-modal')">&times;</button>
+            </div>
+            <div style="padding: 20px;">
+                <div class="form-group">
+                    <label>캐릭터 선택</label>
+                    <div id="character-selection" style="display: grid; gap: 15px; margin-top: 10px;">
+                        <!-- 캐맭터 옵션들이 여기에 동적으로 추가됨 -->
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>대화 설정</label>
+                    <textarea id="dialogue-context" class="form-control" rows="3" placeholder="생성하고 싶은 대화의 상황이나 분위기를 설명해주세요..."></textarea>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-success" onclick="generateCharacterDialogue()">🎆 대화 생성</button>
+                    <button class="btn btn-secondary" onclick="closeModal('character-select-modal')">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 캐릭터 대화 리뷰 모달 -->
+    <div id="character-dialogues-modal" class="modal">
+        <div class="modal-content" style="max-width: 900px; max-height: 90vh;">
+            <div class="modal-header">
+                <h3 id="character-dialogues-title">캐릭터 대화 리뷰</h3>
+                <button class="close-btn" onclick="closeModal('character-dialogues-modal')">&times;</button>
+            </div>
+            <div id="character-dialogues-content" style="padding: 20px; max-height: 70vh; overflow-y: auto;">
+                <p style="text-align: center; color: #666; padding: 50px;">로딩 중...</p>
+            </div>
+            <div style="padding: 20px; border-top: 1px solid #eee; text-align: center;">
+                <button class="btn btn-success" onclick="exportCharacterDialogues()">💾 대화 내보내기</button>
+                <button class="btn btn-secondary" onclick="closeModal('character-dialogues-modal')">닫기</button>
+            </div>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('scenarios')">📚 시나리오 관리</button>
+            <button class="nav-tab" onclick="showSection('characters')">👥 캐릭터 관리</button>
+            <button class="nav-tab" onclick="showSection('dialogues')">🎭 실제 게임 대사 관리</button>
+            <button class="nav-tab" onclick="showSection('generator')">🎯 대사 생성기</button>
+            <button class="nav-tab" onclick="showSection('settings')">⚙️ 설정</button>
+        </div>
+
+        <!-- 시나리오 관리 섹션 -->
+        <div id="scenarios-section" class="content-section active">
+            <div class="section-header">
+                <h2>📚 시나리오 관리</h2>
+                <button class="btn btn-success" onclick="console.log('🔘 시나리오 추가 버튼 클릭'); openScenarioModal()">+ 새 시나리오 추가</button>
+            </div>
+            <div id="scenarios-grid" class="grid">
+                <!-- 시나리오 카드들이 여기에 표시됩니다 -->
+            </div>
+        </div>
+
+        <!-- 캐릭터 관리 섹션 -->
+        <div id="characters-section" class="content-section">
+            <div class="section-header">
+                <h2>👥 캐릭터 관리</h2>
+                <button class="btn btn-success" onclick="console.log('🔘 캐릭터 추가 버튼 클릭'); openCharacterModal()">+ 새 캐릭터 추가</button>
+            </div>
+            <div id="characters-grid" class="grid">
+                <!-- 캐릭터 카드들이 여기에 표시됩니다 -->
+            </div>
+        </div>
+
+        <!-- 실제 게임 대사 관리 섹션 -->
+        <div id="dialogues-section" class="content-section">
+            <div class="section-header">
+                <h2>🎭 실제 게임 대사 관리</h2>
+                <button class="btn btn-primary" onclick="loadGameDialogues()">📖 게임 대사 불러오기</button>
+                <button class="btn btn-success" onclick="saveDialogueChanges()">💾 변경사항 저장</button>
+                <button class="btn btn-warning" onclick="resetToDefault()">🔄 기본값으로 재설정</button>
+            </div>
+            <div id="dialogues-container" class="card" style="padding: 20px;">
+                <p style="text-align: center; color: #666;">"게임 대사 불러오기" 버튼을 눌러 실제 플레이되는 대사들을 확인하고 수정하세요.</p>
+            </div>
+        </div>
+
+        <!-- 대사 생성기 섹션 -->
+        <div id="generator-section" class="content-section">
+            <div class="section-header">
+                <h2>🎯 GPT 대사 생성기</h2>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <div class="card">
+                    <h3>생성 설정</h3>
+                    <div class="form-group">
+                        <label>캐릭터 선택</label>
+                        <select id="gen-character" class="form-control"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>시나리오 선택</label>
+                        <select id="gen-scenario" class="form-control"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>상황 설명</label>
+                        <textarea id="gen-situation" class="form-control" rows="3" placeholder="구체적인 상황을 설명해주세요..."></textarea>
+                    </div>
+                    <button class="btn btn-success" onclick="generateDialogue()">🎭 대사 생성하기</button>
+                </div>
+                <div class="card">
+                    <h3>생성 결과</h3>
+                    <div id="generation-output">
+                        <p style="text-align: center; color: #999;">설정을 완료하고 생성 버튼을 클릭해주세요</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 설정 섹션 -->
+        <div id="settings-section" class="content-section">
+            <div class="section-header">
+                <h2>⚙️ GPT 설정</h2>
+            </div>
+            <div class="card">
+                <div class="form-group">
+                    <label>OpenAI API Key <span id="api-key-status" style="font-size: 12px;"></span></label>
+                    <input type="password" id="gpt-api-key" class="form-control" placeholder="sk-...">
+                    <small class="form-text text-muted">한 번 입력하면 자동으로 저장되며, 다음 접속 시 자동으로 불러옵니다</small>
+                </div>
+                <div class="form-group">
+                    <label>모델</label>
+                    <select id="gpt-model" class="form-control">
+                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                        <option value="gpt-4">GPT-4</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Temperature (창의성)</label>
+                    <input type="range" id="gpt-temperature" min="0" max="1" step="0.1" value="0.8" class="form-control">
+                    <small>현재: <span id="temp-value">0.8</span></small>
+                </div>
+                <button class="btn btn-success" onclick="saveGPTSettings()">💾 설정 저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 시나리오 모달 -->
+    <div id="scenario-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>시나리오 추가/수정</h3>
+                <button class="close-btn" onclick="closeModal('scenario-modal')">&times;</button>
+            </div>
+            <form onsubmit="saveScenario(event)">
+                <div class="form-group">
+                    <label>시나리오 ID</label>
+                    <input type="text" id="scenario-id" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>제목</label>
+                    <input type="text" id="scenario-title" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>설명</label>
+                    <textarea id="scenario-description" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>배경 설정</label>
+                    <input type="text" id="scenario-setting" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>분위기</label>
+                    <input type="text" id="scenario-mood" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>활성 상태</label>
+                    <select id="scenario-active" class="form-control">
+                        <option value="true">활성</option>
+                        <option value="false">비활성</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-success">💾 저장</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 캐릭터 모달 -->
+    <div id="character-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>캐릭터 추가/수정</h3>
+                <button class="close-btn" onclick="closeModal('character-modal')">&times;</button>
+            </div>
+            <form onsubmit="saveCharacter(event)">
+                <div class="form-group">
+                    <label>캐릭터 ID</label>
+                    <input type="text" id="character-id" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>이름</label>
+                    <input type="text" id="character-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>나이</label>
+                    <input type="number" id="character-age" class="form-control" min="16" max="99">
+                </div>
+                <div class="form-group">
+                    <label>MBTI</label>
+                    <div class="mbti-selector">
+                        <div class="mbti-option" data-mbti="INFP">INFP</div>
+                        <div class="mbti-option" data-mbti="ENFJ">ENFJ</div>
+                        <div class="mbti-option" data-mbti="INTJ">INTJ</div>
+                        <div class="mbti-option" data-mbti="ESFP">ESFP</div>
+                        <div class="mbti-option" data-mbti="ISFJ">ISFJ</div>
+                        <div class="mbti-option" data-mbti="ENTP">ENTP</div>
+                        <div class="mbti-option" data-mbti="ISFP">ISFP</div>
+                        <div class="mbti-option" data-mbti="ENTJ">ENTJ</div>
+                        <div class="mbti-option" data-mbti="INFJ">INFJ</div>
+                        <div class="mbti-option" data-mbti="ENFP">ENFP</div>
+                        <div class="mbti-option" data-mbti="ISTJ">ISTJ</div>
+                        <div class="mbti-option" data-mbti="ESTP">ESTP</div>
+                        <div class="mbti-option" data-mbti="INTP">INTP</div>
+                        <div class="mbti-option" data-mbti="ESFJ">ESFJ</div>
+                        <div class="mbti-option" data-mbti="ISTP">ISTP</div>
+                        <div class="mbti-option" data-mbti="ESTJ">ESTJ</div>
+                    </div>
+                    <input type="hidden" id="character-mbti" required>
+                </div>
+                <div class="form-group">
+                    <label>관계 설정</label>
+                    <input type="text" id="character-relationship" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>배경 설정</label>
+                    <textarea id="character-background" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>프로필 사진 선택</label>
+                    
+                    <!-- 프로젝트 캐릭터 사진 선택 -->
+                    <div style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                        <h6 style="margin: 0 0 10px 0; color: #495057;">📁 프로젝트 캐릭터 사진</h6>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; margin-bottom: 10px;">
+                            <div style="position: relative; text-align: center;">
+                                <img src="photo/윤아.jpg" class="project-img" data-src="photo/윤아.jpg" alt="윤아 사진" 
+                                     style="width: 70px; height: 70px; object-fit: cover; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: all 0.3s;">
+                                <div style="font-size: 11px; margin-top: 5px; color: #666;">윤아</div>
+                            </div>
+                            <div style="position: relative; text-align: center;">
+                                <img src="photo/미나.png" class="project-img" data-src="photo/미나.png" alt="미나 사진"
+                                     style="width: 70px; height: 70px; object-fit: cover; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: all 0.3s;">
+                                <div style="font-size: 11px; margin-top: 5px; color: #666;">미나</div>
+                            </div>
+                            <div style="position: relative; text-align: center;">
+                                <img src="assets/images/yuna.svg" class="project-img" data-src="assets/images/yuna.svg" alt="윤아 기본"
+                                     style="width: 70px; height: 70px; object-fit: cover; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: all 0.3s;">
+                                <div style="font-size: 11px; margin-top: 5px; color: #666;">기본SVG</div>
+                            </div>
+                        </div>
+                        <small style="color: #6c757d;">💡 위의 이미지를 클릭하면 바로 선택됩니다</small>
+                    </div>
+                    
+                    <!-- 파일 업로드 -->
+                    <div style="margin-bottom: 15px;">
+                        <h6 style="margin: 0 0 10px 0; color: #495057;">📤 새 이미지 업로드</h6>
+                        <input type="file" id="character-avatar-file" class="form-control" accept="image/*">
+                        <small class="form-text text-muted">이미지 파일을 선택하세요 (JPG, PNG, GIF, WebP 지원, 최대 5MB)</small>
+                    </div>
+                    
+                    <!-- 미리보기 -->
+                    <div id="avatar-preview" style="margin-top: 15px; display: none; text-align: center; padding: 15px; background: #e9ecef; border-radius: 8px;">
+                        <img id="avatar-preview-image" style="max-width: 100px; max-height: 100px; border-radius: 8px; border: 2px solid #007bff;">
+                        <p id="avatar-file-info" style="font-size: 12px; color: #666; margin: 5px 0 0 0;"></p>
+                    </div>
+                    
+                    <input type="hidden" id="character-avatar-url" value="">
+                </div>
+                <button type="submit" class="btn btn-success">💾 저장</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 대화 보기 모달 -->
+    <div id="dialogues-modal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 id="dialogues-modal-title">시나리오 대화 내역</h3>
+                <button class="close-btn" onclick="closeModal('dialogues-modal')">&times;</button>
+            </div>
+            <div id="dialogues-content" style="max-height: 500px; overflow-y: auto;">
+                <p style="text-align: center; color: #666; padding: 50px;">로딩 중...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 대화 생성 설정 모달 -->
+    <div id="dialogue-generation-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>🎯 대화생성 설정</h3>
+                <button class="close-btn" onclick="closeModal('dialogue-generation-modal')">&times;</button>
+            </div>
+            <div style="padding: 20px;">
+                <form onsubmit="startDialogueGeneration(event)">
+                    <div class="form-group">
+                        <label>생성할 대화 수</label>
+                        <select id="dialogue-count" class="form-control">
+                            <option value="5">5개 (테스트용)</option>
+                            <option value="12">12개 (빠른 생성)</option>
+                            <option value="24">24개 (표준)</option>
+                            <option value="36" selected>36개 (전체 게임)</option>
+                        </select>
+                        <small class="form-text text-muted">많을수록 GPT API 비용이 증가합니다</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>주관식 질문 포함</label>
+                        <select id="include-subjective" class="form-control">
+                            <option value="true" selected>포함 (4번마다)</option>
+                            <option value="false">제외</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>생성 스타일</label>
+                        <select id="generation-style" class="form-control">
+                            <option value="romantic">로맨틱</option>
+                            <option value="friendly" selected>친근함</option>
+                            <option value="dramatic">드라마틱</option>
+                            <option value="casual">일상적</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>감정 변화 속도</label>
+                        <select id="emotion-pace" class="form-control">
+                            <option value="slow">느림 (점진적)</option>
+                            <option value="normal" selected>보통</option>
+                            <option value="fast">빠름 (역동적)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>예상 비용</label>
+                        <div id="cost-estimate" style="padding: 10px; background: #f8f9fa; border-radius: 5px; border-left: 4px solid #3498db;">
+                            <strong>약 $2-5</strong> (선택된 설정 기준)
+                        </div>
+                    </div>
+                    
+                    <div style="border: 1px solid #e74c3c; background: #fdf2f2; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                        <h4 style="color: #e74c3c; margin: 0 0 10px 0;">⚠️ 주의사항</h4>
+                        <ul style="color: #721c24; margin: 0; padding-left: 20px;">
+                            <li>생성 시간: 3-10분 소요</li>
+                            <li>중간에 중단하면 부분 생성됨</li>
+                            <li>안정적인 인터넷 연결 필요</li>
+                            <li>GPT API 키가 설정되어 있어야 함</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('dialogue-generation-modal')">취소</button>
+                        <button type="submit" class="btn btn-success">🚀 생성 시작</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentScenarios = [];
+        let currentCharacters = [];
+        let gptSettings = {
+            api_key: '',
+            model: 'gpt-3.5-turbo',
+            temperature: 0.8,
+            enabled: false
+        };
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 어드민 페이지 초기화 중...');
+            testAPIConnection();
+            loadScenarios();
+            loadCharacters();
+            loadGPTSettings();
+            setupEventListeners();
+        });
+
+        // API 연결 테스트
+        async function testAPIConnection() {
+            try {
+                console.log('📡 API 연결 테스트 중...');
+                const response = await fetch('/api/scenario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'test' })
+                });
+                
+                const data = await response.json();
+                console.log('✅ API 연결 성공:', data);
+                
+                // 사용자에게 상태 표시
+                const statusEl = document.createElement('div');
+                statusEl.innerHTML = `
+                    <div style="position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 10px 20px; border-radius: 8px; z-index: 10000; font-size: 14px;">
+                        ✅ API 연결 성공
+                    </div>
+                `;
+                document.body.appendChild(statusEl);
+                setTimeout(() => statusEl.remove(), 3000);
+                
+            } catch (error) {
+                console.error('❌ API 연결 실패:', error);
+                
+                // 사용자에게 오류 표시
+                const errorEl = document.createElement('div');
+                errorEl.innerHTML = `
+                    <div style="position: fixed; top: 20px; right: 20px; background: #dc3545; color: white; padding: 10px 20px; border-radius: 8px; z-index: 10000; font-size: 14px;">
+                        ❌ API 연결 실패: ${error.message}
+                    </div>
+                `;
+                document.body.appendChild(errorEl);
+                setTimeout(() => errorEl.remove(), 5000);
+            }
+        }
+
+        // 이벤트 리스너 설정
+        function setupEventListeners() {
+            // MBTI 선택기
+            document.querySelectorAll('.mbti-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.mbti-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    document.getElementById('character-mbti').value = this.dataset.mbti;
+                });
+            });
+
+            // Temperature 슬라이더
+            document.getElementById('gpt-temperature').addEventListener('input', function() {
+                document.getElementById('temp-value').textContent = this.value;
+            });
+            // 파일 업로드 핸들러
+            document.getElementById('character-avatar-file').addEventListener('change', handleAvatarUpload);
+            
+            // 프로젝트 이미지 선택 핸들러
+            document.querySelectorAll('.project-img').forEach(img => {
+                img.addEventListener('click', function() {
+                    // 모든 프로젝트 이미지 선택 해제
+                    document.querySelectorAll('.project-img').forEach(i => {
+                        i.style.border = '3px solid transparent';
+                    });
+                    
+                    // 클릭된 이미지 선택 표시
+                    this.style.border = '3px solid #007bff';
+                    
+                    // 이미지 URL 설정
+                    const imageSrc = this.getAttribute('data-src');
+                    document.getElementById('character-avatar-url').value = imageSrc;
+                    
+                    // 미리보기 표시
+                    document.getElementById('avatar-preview').style.display = 'block';
+                    document.getElementById('avatar-preview-image').src = imageSrc;
+                    document.getElementById('avatar-file-info').textContent = `프로젝트 이미지 선택됨: ${this.alt}`;
+                    
+                    console.log('✅ 프로젝트 이미지 선택:', imageSrc);
+                });
+            });
+        }
+
+        // 섹션 전환
+        function showSection(sectionName) {
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(sectionName + '-section').classList.add('active');
+
+            // 섹션별 데이터 로드
+            if (sectionName === 'generator') {
+                loadGeneratorData();
+            }
+        }
+
+        // 시나리오 로드
+        async function loadScenarios() {
+            try {
+                console.log('📚 시나리오 로딩 중...');
+                const response = await fetch('/api/scenario?action=list&type=scenarios');
+                console.log('시나리오 API 응답:', response.status, response.statusText);
+                
+                const data = await response.json();
+                console.log('시나리오 데이터:', data);
+                
+                if (data.success) {
+                    currentScenarios = data.scenarios;
+                    console.log('✅ 시나리오 로드 성공:', data.scenarios.length, '개');
+                    displayScenarios(data.scenarios);
+                } else {
+                    console.error('시나리오 로드 실패:', data.error);
+                }
+            } catch (error) {
+                console.error('❌ 시나리오 로드 에러:', error);
+            }
+        }
+
+        // 시나리오 표시
+        function displayScenarios(scenarios) {
+            const grid = document.getElementById('scenarios-grid');
+            grid.innerHTML = '';
+
+            scenarios.forEach(scenario => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <h3 style="cursor: pointer; color: #3498db;" onclick="viewScenarioDialogues('${scenario.id}', '${scenario.title}')">${scenario.title}</h3>
+                    <p><strong>설정:</strong> ${scenario.setting || 'N/A'}</p>
+                    <p><strong>분위기:</strong> ${scenario.mood || 'N/A'}</p>
+                    <p>${scenario.description}</p>
+                    <div class="card-meta">
+                        <span class="status-badge ${scenario.active ? 'status-active' : 'status-inactive'}">
+                            ${scenario.active ? '활성' : '비활성'}
+                        </span>
+                        <div>
+                            <button class="btn btn-primary" onclick="viewScenarioDialogues('${scenario.id}', '${scenario.title}')">대화 보기</button>
+                            <button class="btn btn-success" onclick="openCharacterSelectModal('${scenario.id}')">🎯 캐릭터별 대화생성</button>
+                            <button class="btn btn-warning" onclick="editScenario('${scenario.id}')">수정</button>
+                            <button class="btn btn-danger" onclick="deleteScenario('${scenario.id}')">삭제</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // 캐릭터 로드
+        async function loadCharacters() {
+            try {
+                console.log('👥 캐릭터 로딩 중...');
+                const response = await fetch('/api/scenario?action=list&type=characters');
+                console.log('캐릭터 API 응답:', response.status, response.statusText);
+                
+                const data = await response.json();
+                console.log('캐릭터 데이터:', data);
+                
+                if (data.success) {
+                    currentCharacters = data.characters;
+                    console.log('✅ 캐릭터 로드 성공:', data.characters.length, '개');
+                    displayCharacters(data.characters);
+                } else {
+                    console.error('캐릭터 로드 실패:', data.error);
+                }
+            } catch (error) {
+                console.error('❌ 캐릭터 로드 에러:', error);
+            }
+        }
+
+        // 캐릭터 표시
+        function displayCharacters(characters) {
+            const grid = document.getElementById('characters-grid');
+            grid.innerHTML = '';
+
+            characters.forEach(character => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                // 아바타 이미지 HTML 생성
+                const avatarHtml = character.avatar_url ? 
+                    `<div style="text-align: center; margin-bottom: 15px;">
+                        <img src="${character.avatar_url}" alt="${character.name}" 
+                             style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #3498db;"
+                             onerror="this.style.display='none'">
+                     </div>` : '';
+                
+                card.innerHTML = `
+                    ${avatarHtml}
+                    <h3>${character.name} (${character.age}세)</h3>
+                    <p><strong>MBTI:</strong> ${character.mbti}</p>
+                    <p><strong>관계:</strong> ${character.relationship}</p>
+                    <p><strong>성격:</strong> ${character.personality_traits.primary.join(', ')}</p>
+                    <p>${character.background}</p>
+                    <div class="card-meta">
+                        <span class="status-badge ${character.active ? 'status-active' : 'status-inactive'}">
+                            ${character.active ? '활성' : '비활성'}
+                        </span>
+                        <div>
+                            <button class="btn btn-primary" onclick="viewCharacterDialogues('${character.id}', '${character.name}')">💬 대화 리뷰</button>
+                            <button class="btn btn-warning" onclick="editCharacter('${character.id}')">수정</button>
+                            <button class="btn btn-danger" onclick="deleteCharacter('${character.id}')">삭제</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // 생성기 데이터 로드
+        function loadGeneratorData() {
+            const characterSelect = document.getElementById('gen-character');
+            const scenarioSelect = document.getElementById('gen-scenario');
+
+            characterSelect.innerHTML = '<option value="">캐릭터를 선택하세요</option>';
+            scenarioSelect.innerHTML = '<option value="">시나리오를 선택하세요</option>';
+
+            currentCharacters.forEach(character => {
+                if (character.active) {
+                    const option = document.createElement('option');
+                    option.value = character.id;
+                    option.textContent = `${character.name} (${character.mbti})`;
+                    characterSelect.appendChild(option);
+                }
+            });
+
+            currentScenarios.forEach(scenario => {
+                if (scenario.active) {
+                    const option = document.createElement('option');
+                    option.value = scenario.id;
+                    option.textContent = scenario.title;
+                    scenarioSelect.appendChild(option);
+                }
+            });
+        }
+
+        // 대사 생성
+        async function generateDialogue() {
+            const characterId = document.getElementById('gen-character').value;
+            const scenarioId = document.getElementById('gen-scenario').value;
+            const situation = document.getElementById('gen-situation').value;
+
+            if (!characterId || !scenarioId || !situation) {
+                alert('모든 필드를 입력해주세요.');
+                return;
+            }
+
+            const output = document.getElementById('generation-output');
+            output.innerHTML = '<div class="loading">GPT로 대사를 생성하는 중...</div>';
+
+            try {
+                const response = await fetch('/api/scenario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generate_character_dialogue',
+                        character_id: characterId,
+                        scenario_id: scenarioId,
+                        choice_number: 1
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayGenerationResult(data.generated, data.character, data.scenario);
+                } else {
+                    output.innerHTML = `<p style="color: red;">생성 실패: ${data.message || '알 수 없는 오류'}</p>`;
+                }
+            } catch (error) {
+                output.innerHTML = `<p style="color: red;">오류: ${error.message}</p>`;
+            }
+        }
+
+        // 생성 결과 표시
+        function displayGenerationResult(result, characterName, scenarioTitle) {
+            const output = document.getElementById('generation-output');
+            
+            const choicesHtml = result.choices.map(choice => {
+                const impactClass = choice.affection_impact > 0 ? 'impact-positive' : 
+                                  choice.affection_impact < 0 ? 'impact-negative' : 'impact-neutral';
+                return `
+                    <div class="choice-item">
+                        <span>${choice.text}</span>
+                        <span class="affection-impact ${impactClass}">
+                            ${choice.affection_impact > 0 ? '+' : ''}${choice.affection_impact}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+
+            output.innerHTML = `
+                <div class="generation-result">
+                    <h4>✨ ${characterName} - ${scenarioTitle}</h4>
+                    <p><strong>대사:</strong> "${result.dialogue}"</p>
+                    <p><strong>지문:</strong> ${result.narration}</p>
+                    <p><strong>감정:</strong> ${result.emotion}</p>
+                    <h5>선택지:</h5>
+                    <div class="choices-list">${choicesHtml}</div>
+                    <button class="btn btn-success" onclick="copyResult()" style="margin-top: 15px;">📋 결과 복사</button>
+                </div>
+            `;
+        }
+
+        // 결과 복사
+        function copyResult() {
+            const result = document.querySelector('.generation-result').textContent;
+            navigator.clipboard.writeText(result).then(() => {
+                alert('결과가 클립보드에 복사되었습니다!');
+            });
+        }
+
+        // 모달 관리
+        function openScenarioModal(scenarioId = null) {
+            console.log('🔧 시나리오 모달 열기:', scenarioId);
+            const modal = document.getElementById('scenario-modal');
+            if (!modal) {
+                console.error('❌ scenario-modal 요소를 찾을 수 없습니다');
+                return;
+            }
+            modal.classList.add('active');
+            
+            if (scenarioId) {
+                const scenario = currentScenarios.find(s => s.id === scenarioId);
+                if (scenario) {
+                    document.getElementById('scenario-id').value = scenario.id;
+                    document.getElementById('scenario-title').value = scenario.title;
+                    document.getElementById('scenario-description').value = scenario.description || '';
+                    document.getElementById('scenario-setting').value = scenario.setting || '';
+                    document.getElementById('scenario-mood').value = scenario.mood || '';
+                    document.getElementById('scenario-active').value = scenario.active.toString();
+                }
+            } else {
+                document.querySelector('#scenario-modal form').reset();
+            }
+        }
+
+        function openCharacterModal(characterId = null) {
+            console.log('🔧 캐릭터 모달 열기:', characterId);
+            const modal = document.getElementById('character-modal');
+            if (!modal) {
+                console.error('❌ character-modal 요소를 찾을 수 없습니다');
+                return;
+            }
+            modal.classList.add('active');
+            
+            if (characterId) {
+                const character = currentCharacters.find(c => c.id === characterId);
+                if (character) {
+                    document.getElementById('character-id').value = character.id;
+                    document.getElementById('character-name').value = character.name;
+                    document.getElementById('character-age').value = character.age;
+                    document.getElementById('character-mbti').value = character.mbti;
+                    document.getElementById('character-relationship').value = character.relationship;
+                    document.getElementById('character-background').value = character.background;
+                    document.getElementById('character-avatar-url').value = character.avatar_url || '';
+                    
+                    // 기존 아바타 이미지 미리보기 표시
+                    if (character.avatar_url) {
+                        document.getElementById('avatar-preview').style.display = 'block';
+                        document.getElementById('avatar-preview-image').src = character.avatar_url;
+                        document.getElementById('avatar-file-info').textContent = '기존 이미지 사용 중';
+                    } else {
+                        document.getElementById('avatar-preview').style.display = 'none';
+                    }
+                    
+                    // MBTI 선택 표시
+                    document.querySelectorAll('.mbti-option').forEach(o => o.classList.remove('selected'));
+                    document.querySelector(`[data-mbti="${character.mbti}"]`).classList.add('selected');
+                }
+            } else {
+                document.querySelector('#character-modal form').reset();
+                document.querySelectorAll('.mbti-option').forEach(o => o.classList.remove('selected'));
+                document.getElementById('avatar-preview').style.display = 'none';
+                document.getElementById('character-avatar-url').value = '';
+            }
+        }
+
+        function closeModal(modalId) {
+            console.log('🔧 모달 닫기:', modalId);
+            const modal = document.getElementById(modalId);
+            if (!modal) {
+                console.error('❌ 모달을 찾을 수 없습니다:', modalId);
+                return;
+            }
+            modal.classList.remove('active');
+        }
+        
+        // 전역 함수 체크 (디버깅용)
+        window.debugAdmin = function() {
+            console.log('🔍 어드민 페이지 상태:');
+            console.log('- currentScenarios:', currentScenarios.length, '개');
+            console.log('- currentCharacters:', currentCharacters.length, '개');
+            console.log('- openScenarioModal 함수:', typeof openScenarioModal);
+            console.log('- openCharacterModal 함수:', typeof openCharacterModal);
+            console.log('- scenario-modal 요소:', !!document.getElementById('scenario-modal'));
+            console.log('- character-modal 요소:', !!document.getElementById('character-modal'));
+        };
+
+        // 시나리오 저장
+        async function saveScenario(event) {
+            event.preventDefault();
+            
+            const scenarioId = document.getElementById('scenario-id').value;
+            const scenarioData = {
+                title: document.getElementById('scenario-title').value,
+                description: document.getElementById('scenario-description').value,
+                setting: document.getElementById('scenario-setting').value,
+                mood: document.getElementById('scenario-mood').value,
+                active: document.getElementById('scenario-active').value === 'true'
+            };
+
+            try {
+                // 기존 시나리오가 있는지 확인
+                const existingScenario = currentScenarios.find(s => s.id === scenarioId);
+                
+                let response;
+                if (existingScenario) {
+                    // 수정
+                    response = await fetch(`/api/scenario?type=scenario&id=${scenarioId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(scenarioData)
+                    });
+                } else {
+                    // 새로 생성
+                    response = await fetch('/api/scenario', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'create', id: scenarioId, ...scenarioData })
+                    });
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    closeModal('scenario-modal');
+                    loadScenarios();
+                    alert('시나리오가 저장되었습니다!');
+                } else {
+                    alert('저장 실패: ' + data.error);
+                }
+            } catch (error) {
+                alert('오류: ' + error.message);
+            }
+        }
+
+        // 캐릭터 저장
+        async function saveCharacter(event) {
+            event.preventDefault();
+            
+            const characterId = document.getElementById('character-id').value;
+            const characterData = {
+                name: document.getElementById('character-name').value,
+                age: parseInt(document.getElementById('character-age').value),
+                mbti: document.getElementById('character-mbti').value,
+                relationship: document.getElementById('character-relationship').value,
+                background: document.getElementById('character-background').value,
+                active: true,
+                personality_traits: {
+                    primary: ["MBTI 기반 자동 생성"],
+                    secondary: ["GPT로 생성됨"],
+                    speech_style: ["캐릭터 맞춤형"]
+                },
+                avatar_url: document.getElementById('character-avatar-url').value || '',
+                scenarios: []
+            };
+
+            try {
+                // 기존 캐릭터가 있는지 확인
+                const existingCharacter = currentCharacters.find(c => c.id === characterId);
+                
+                let response;
+                if (existingCharacter) {
+                    // 수정
+                    response = await fetch(`/api/scenario?type=character&id=${characterId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(characterData)
+                    });
+                } else {
+                    // 새로 생성
+                    response = await fetch('/api/scenario', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'create', type: 'character', id: characterId, ...characterData })
+                    });
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    closeModal('character-modal');
+                    loadCharacters();
+                    alert('캐릭터가 저장되었습니다!');
+                } else {
+                    alert('저장 실패: ' + data.error);
+                }
+            } catch (error) {
+                alert('오류: ' + error.message);
+            }
+        }
+
+        // 편집 기능
+        function editScenario(scenarioId) {
+            openScenarioModal(scenarioId);
+        }
+
+        function editCharacter(characterId) {
+            openCharacterModal(characterId);
+        }
+
+        // 삭제 기능
+        async function deleteScenario(scenarioId) {
+            if (confirm('정말로 이 시나리오를 삭제하시겠습니까?')) {
+                try {
+                    const response = await fetch(`/api/scenario?action=delete&type=scenario&id=${scenarioId}`, {
+                        method: 'DELETE'
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        loadScenarios();
+                        alert('시나리오가 삭제되었습니다.');
+                    } else {
+                        alert('삭제 실패: ' + data.error);
+                    }
+                } catch (error) {
+                    alert('오류: ' + error.message);
+                }
+            }
+        }
+
+        async function deleteCharacter(characterId) {
+            if (confirm('정말로 이 캐릭터를 삭제하시겠습니까?')) {
+                try {
+                    const response = await fetch(`/api/scenario?action=delete&type=character&id=${characterId}`, {
+                        method: 'DELETE'
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        loadCharacters();
+                        alert('캐릭터가 삭제되었습니다.');
+                    } else {
+                        alert('삭제 실패: ' + data.error);
+                    }
+                } catch (error) {
+                    alert('오류: ' + error.message);
+                }
+            }
+        }
+
+        // 대화생성 모달 열기
+        function openDialogueGenerationModal(scenarioId) {
+            const modal = document.getElementById('dialogue-generation-modal');
+            modal.dataset.scenarioId = scenarioId;
+            
+            // 비용 계산 이벤트 리스너 추가
+            document.getElementById('dialogue-count').addEventListener('change', updateCostEstimate);
+            document.getElementById('include-subjective').addEventListener('change', updateCostEstimate);
+            document.getElementById('generation-style').addEventListener('change', updateCostEstimate);
+            
+            updateCostEstimate();
+            modal.classList.add('active');
+        }
+        
+        // 비용 추정 업데이트
+        function updateCostEstimate() {
+            const count = parseInt(document.getElementById('dialogue-count').value);
+            const includeSubjective = document.getElementById('include-subjective').value === 'true';
+            const style = document.getElementById('generation-style').value;
+            
+            let baseCost = count * 0.1; // 기본 대화당 $0.1
+            if (includeSubjective) baseCost *= 1.5; // 주관식 포함 시 50% 증가
+            if (style === 'dramatic') baseCost *= 1.3; // 드라마틱 스타일은 30% 증가
+            
+            const minCost = Math.max(0.5, baseCost * 0.8).toFixed(1);
+            const maxCost = (baseCost * 1.5).toFixed(1);
+            
+            document.getElementById('cost-estimate').innerHTML = 
+                `<strong>약 $${minCost}-$${maxCost}</strong> (${count}개 대화 기준)`;
+        }
+        
+        // 대화생성 시작
+        async function startDialogueGeneration(event) {
+            event.preventDefault();
+            
+            const modal = document.getElementById('dialogue-generation-modal');
+            const scenarioId = modal.dataset.scenarioId;
+            
+            if (!gptSettings.api_key) {
+                alert('GPT API 키를 먼저 설정해주세요!');
+                return;
+            }
+            
+            const settings = {
+                count: parseInt(document.getElementById('dialogue-count').value),
+                includeSubjective: document.getElementById('include-subjective').value === 'true',
+                style: document.getElementById('generation-style').value,
+                emotionPace: document.getElementById('emotion-pace').value
+            };
+            
+            closeModal('dialogue-generation-modal');
+            await generateDialogueWithSettings(scenarioId, settings);
+        }
+
+        // 설정 기반 대화 생성
+        async function generateDialogueWithSettings(scenarioId, settings) {            
+            const scenario = currentScenarios.find(s => s.id === scenarioId);
+            const character = currentCharacters.find(c => c.active);
+            
+            if (!scenario || !character) {
+                alert('시나리오나 캐릭터를 찾을 수 없습니다.');
+                return;
+            }
+            
+            // 생성 진행 상황 표시를 위한 모달 생성
+            const progressModal = document.createElement('div');
+            progressModal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.8); display: flex; align-items: center; 
+                justify-content: center; z-index: 10000;
+            `;
+            progressModal.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 500px;">
+                    <h3 style="color: #3498db; margin-bottom: 20px;">🎯 ${settings.count}개 대화 생성 중...</h3>
+                    <div id="generation-progress" style="margin: 20px 0;">
+                        <div style="background: #f0f0f0; height: 20px; border-radius: 10px; overflow: hidden;">
+                            <div id="progress-bar" style="background: #3498db; height: 100%; width: 0%; transition: width 0.5s;"></div>
+                        </div>
+                        <p id="progress-text" style="margin: 10px 0; color: #666;">준비 중...</p>
+                        <div style="font-size: 12px; color: #999;">
+                            스타일: ${settings.style} | 감정변화: ${settings.emotionPace}
+                        </div>
+                    </div>
+                    <div style="color: #999; font-size: 14px;">
+                        ${settings.count}개 대화 생성 중...<br>
+                        브라우저를 닫지 마세요.
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(progressModal);
+            
+            try {
+                await generateCustomDialogue(scenario, character, settings, progressModal);
+            } catch (error) {
+                console.error('대화 생성 실패:', error);
+                alert('대화 생성 중 오류가 발생했습니다: ' + error.message);
+            } finally {
+                document.body.removeChild(progressModal);
+            }
+        }
+        
+        // 설정 기반 대화 생성 로직
+        async function generateCustomDialogue(scenario, character, settings, progressModal) {
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const totalSteps = settings.count;
+            
+            let generatedCount = 0;
+            let currentAffection = 0;
+            
+            for (let i = 1; i <= totalSteps; i++) {
+                try {
+                    progressText.textContent = `${i}번째 대화 생성 중... (${generatedCount}/${totalSteps})`;
+                    progressBar.style.width = ((i - 1) / totalSteps * 100) + '%';
+                    
+                    // 주관식 질문 포함 여부 확인
+                    const isSubjectiveRound = settings.includeSubjective && (i % 4 === 0);
+                    
+                    const response = await fetch('/api/scenario', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'generate_custom_dialogue',
+                            character_id: character.id,
+                            scenario_id: scenario.id,
+                            choice_number: i,
+                            current_affection: currentAffection,
+                            is_subjective: isSubjectiveRound,
+                            style: settings.style,
+                            emotion_pace: settings.emotionPace,
+                            total_count: totalSteps,
+                            gpt_config: gptSettings
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        generatedCount++;
+                        // 감정 변화 속도에 따른 호감도 업데이트
+                        let affectionChange = 0;
+                        switch (settings.emotionPace) {
+                            case 'slow': affectionChange = Math.floor(Math.random() * 3); break;
+                            case 'normal': affectionChange = Math.floor(Math.random() * 5) - 1; break;
+                            case 'fast': affectionChange = Math.floor(Math.random() * 7) - 2; break;
+                        }
+                        currentAffection += affectionChange;
+                        currentAffection = Math.max(0, Math.min(100, currentAffection));
+                    } else {
+                        console.error(`대화 ${i} 생성 실패:`, data.error);
+                        if (data.error && data.error.includes('token')) {
+                            if (!confirm(`GPT 토큰 한계에 도달했습니다. 현재까지 ${generatedCount}개가 생성되었습니다. 계속하시겠습니까?`)) {
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // API 레이트 리미트 방지를 위한 대기
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    
+                } catch (error) {
+                    console.error(`대화 ${i} 생성 중 오류:`, error);
+                    if (!confirm(`${i}번째 대화 생성 중 오류가 발생했습니다. 계속하시겠습니까?`)) {
+                        break;
+                    }
+                }
+            }
+            
+            progressBar.style.width = '100%';
+            progressText.textContent = `완료! ${generatedCount}개의 대화가 생성되었습니다.`;
+            
+            setTimeout(() => {
+                alert(`대화 생성 완료!\n\n생성된 대화: ${generatedCount}개 (${settings.style} 스타일)\n"대화 보기"를 클릭해서 확인하세요.`);
+            }, 1000);
+        }
+
+        // 시나리오 대화 보기
+        async function viewScenarioDialogues(scenarioId, scenarioTitle) {
+            document.getElementById('dialogues-modal-title').textContent = `${scenarioTitle} - 생성된 대화 내역`;
+            document.getElementById('dialogues-content').innerHTML = '<p style="text-align: center; color: #666; padding: 50px;">로딩 중...</p>';
+            
+            // 모달 열기
+            document.getElementById('dialogues-modal').classList.add('active');
+            
+            try {
+                const response = await fetch(`/api/scenario?action=get&type=dialogues&id=${scenarioId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayDialogues(data.dialogues);
+                } else {
+                    document.getElementById('dialogues-content').innerHTML = 
+                        '<p style="text-align: center; color: #e74c3c; padding: 50px;">대화 내역을 불러올 수 없습니다.</p>';
+                }
+            } catch (error) {
+                console.error('Failed to load dialogues:', error);
+                document.getElementById('dialogues-content').innerHTML = 
+                    '<p style="text-align: center; color: #e74c3c; padding: 50px;">오류가 발생했습니다.</p>';
+            }
+        }
+
+        // 대화 내역 표시 (게임과 동일한 형식)
+        function displayDialogues(dialogues) {
+            const container = document.getElementById('dialogues-content');
+            
+            if (dialogues.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666; padding: 50px;">아직 생성된 대화가 없습니다.</p>';
+                return;
+            }
+            
+            let html = `
+                <div style="background: #000; color: #fff; padding: 20px; border-radius: 10px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+                    <h4 style="color: #ff69b4; margin-bottom: 20px; text-align: center;">게임 내 실제 대화 형식</h4>
+                    <div class="mock-messages-container" style="max-height: 400px; overflow-y: auto; padding: 10px;">
+            `;
+            
+            dialogues.forEach((dialogue, index) => {
+                const content = dialogue.generated_content;
+                
+                // 지문 표시 (게임과 동일한 형식 + 편집 기능)
+                if (content.narration && content.narration.trim() !== '') {
+                    html += `
+                        <div style="margin-bottom: 15px; text-align: left;">
+                            <div style="background: rgba(255, 255, 255, 0.1); padding: 12px 16px; border-radius: 18px; display: inline-block; color: #aaa; font-style: italic; max-width: 80%; position: relative;">
+                                (<span class="editable-dialogue" data-dialogue-id="${dialogue.id}" data-field="narration">${content.narration}</span>)
+                                <button onclick="editDialogueContent('${dialogue.id}', 'narration')" 
+                                        style="position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; background: #4CAF50; color: white; border: none; cursor: pointer; font-size: 10px;">✏</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // 캐릭터 대사 표시 (게임과 동일한 형식 + 편집 기능)
+                if (content.dialogue && content.dialogue.trim() !== '') {
+                    let cleanDialogue = content.dialogue.replace(/^[""']|[""']$/g, '').trim();
+                    html += `
+                        <div style="margin-bottom: 15px; text-align: left; position: relative;">
+                            <div style="background: rgba(255, 105, 180, 0.2); padding: 12px 16px; border-radius: 18px; display: inline-block; max-width: 80%; border: 1px solid #ff69b4; position: relative;">
+                                <span class="editable-dialogue" data-dialogue-id="${dialogue.id}" data-field="dialogue">${cleanDialogue}</span> ${content.emotion || ''}
+                                <button onclick="editDialogueContent('${dialogue.id}', 'dialogue')" 
+                                        style="position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; background: #ff69b4; color: white; border: none; cursor: pointer; font-size: 10px;">✏</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // 선택지 표시 (게임과 동일한 형식)
+                html += `<div style="margin: 20px 0; padding: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">`;
+                html += `<div style="color: #ff69b4; font-weight: bold; margin-bottom: 10px;">선택지:</div>`;
+                content.choices.forEach((choice, choiceIndex) => {
+                    html += `
+                        <div style="background: #333; border: 2px solid #555; color: #fff; padding: 12px 16px; border-radius: 15px; margin: 8px 0; cursor: pointer; transition: all 0.3s ease; position: relative;" 
+                             onmouseover="this.style.borderColor='#ff69b4'" onmouseout="this.style.borderColor='#555'">
+                            <span class="editable-dialogue" data-dialogue-id="${dialogue.id}" data-field="choice_${choiceIndex}" data-choice-index="${choiceIndex}">${choice.text}</span>
+                            <span style="color: ${choice.affection_impact > 0 ? '#4CAF50' : choice.affection_impact < 0 ? '#f44336' : '#999'}; font-size: 12px;">
+                                (<span class="editable-dialogue" data-dialogue-id="${dialogue.id}" data-field="choice_impact_${choiceIndex}" data-choice-index="${choiceIndex}">${choice.affection_impact > 0 ? '+' : ''}${choice.affection_impact}</span>)
+                            </span>
+                            <button onclick="editDialogueContent('${dialogue.id}', 'choice_${choiceIndex}')" 
+                                    style="position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; background: #9b59b6; color: white; border: none; cursor: pointer; font-size: 10px;">✏</button>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                
+                // 구분선 추가
+                if (index < dialogues.length - 1) {
+                    html += `<div style="border-top: 1px solid #333; margin: 30px 0;"></div>`;
+                }
+            });
+            
+            html += `
+                    </div>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #3498db;">
+                    <small style="color: #666;">
+                        <strong>참고:</strong> 위 화면은 실제 게임에서 플레이어가 보게 될 모습과 동일합니다.<br>
+                        • 지문은 플레이어의 내적 상황 설명<br>
+                        • 대사는 캐릭터가 직접 말하는 내용<br>
+                        • 선택지를 클릭하면 해당 내용이 채팅으로 전송됨
+                    </small>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // 대화 내용 편집 기능
+        async function editDialogueContent(dialogueId, fieldType) {
+            const element = document.querySelector(`[data-dialogue-id="${dialogueId}"][data-field="${fieldType}"]`);
+            if (!element) return;
+            
+            const currentValue = element.textContent.trim();
+            let newValue;
+            
+            if (fieldType.startsWith('choice_impact_')) {
+                // 호감도 수치 편집
+                newValue = prompt('호감도 변화값을 입력하세요 (-100 ~ +100):', currentValue.replace('+', ''));
+                if (newValue === null) return;
+                
+                const numValue = parseInt(newValue);
+                if (isNaN(numValue) || numValue < -100 || numValue > 100) {
+                    alert('올바른 숫자를 입력해주세요 (-100 ~ 100)');
+                    return;
+                }
+                newValue = numValue;
+            } else {
+                // 텍스트 내용 편집
+                let promptText;
+                switch(fieldType) {
+                    case 'dialogue':
+                        promptText = '캐릭터 대사를 편집하세요:';
+                        break;
+                    case 'narration':
+                        promptText = '지문(내적 상황)을 편집하세요:';
+                        break;
+                    default:
+                        promptText = '선택지 텍스트를 편집하세요:';
+                }
+                
+                newValue = prompt(promptText, currentValue);
+                if (newValue === null || newValue.trim() === '') return;
+                newValue = newValue.trim();
+            }
+            
+            // 서버에 변경사항 저장
+            try {
+                const response = await fetch('/api/scenario', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'edit_dialogue',
+                        dialogue_id: dialogueId,
+                        field: fieldType,
+                        new_value: newValue
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // UI 업데이트
+                    if (fieldType.startsWith('choice_impact_')) {
+                        element.textContent = newValue > 0 ? `+${newValue}` : newValue.toString();
+                        // 색상 업데이트
+                        element.style.color = newValue > 0 ? '#4CAF50' : newValue < 0 ? '#f44336' : '#999';
+                    } else {
+                        element.textContent = newValue;
+                    }
+                    alert('변경사항이 저장되었습니다!');
+                } else {
+                    alert('저장 실패: ' + (data.error || '알 수 없는 오류'));
+                }
+            } catch (error) {
+                console.error('Edit dialogue error:', error);
+                alert('저장 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        // GPT 설정 관리
+        function loadGPTSettings() {
+            // 로컬 스토리지에서 설정 로드
+            const savedSettings = localStorage.getItem('gptSettings');
+            if (savedSettings) {
+                try {
+                    gptSettings = JSON.parse(savedSettings);
+                } catch (error) {
+                    console.log('저장된 GPT 설정을 불러올 수 없습니다.');
+                }
+            }
+            
+            // UI에 설정 적용
+            document.getElementById('gpt-api-key').value = gptSettings.api_key || '';
+            document.getElementById('gpt-model').value = gptSettings.model;
+            document.getElementById('gpt-temperature').value = gptSettings.temperature;
+            document.getElementById('temp-value').textContent = gptSettings.temperature;
+            
+            // API 키 상태 표시
+            const statusElement = document.getElementById('api-key-status');
+            if (gptSettings.api_key && gptSettings.api_key.length > 0) {
+                statusElement.textContent = '(저장됨 ✓)';
+                statusElement.style.color = '#27ae60';
+            } else {
+                statusElement.textContent = '(미설정)';
+                statusElement.style.color = '#e74c3c';
+            }
+        }
+
+        async function saveGPTSettings() {
+            const newSettings = {
+                api_key: document.getElementById('gpt-api-key').value,
+                model: document.getElementById('gpt-model').value,
+                temperature: parseFloat(document.getElementById('gpt-temperature').value),
+                enabled: document.getElementById('gpt-api-key').value.length > 0
+            };
+
+            try {
+                // 로컬 스토리지에 저장
+                localStorage.setItem('gptSettings', JSON.stringify(newSettings));
+                gptSettings = newSettings;
+                
+                // 서버에도 저장 시도 (실패해도 무시)
+                try {
+                    const response = await fetch('/api/scenario', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'save_settings',
+                            settings: newSettings
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        console.log('서버 설정 저장 완료');
+                    }
+                } catch (serverError) {
+                    console.log('서버 저장 실패, 로컬만 저장됨:', serverError);
+                }
+                
+                alert('GPT 설정이 저장되었습니다!');
+            } catch (error) {
+                console.error('Save settings error:', error);
+                alert('설정 저장에 실패했습니다: ' + error.message);
+            }
+        }
+
+        // 아바타 파일 업로드 핸들러
+        async function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                document.getElementById('avatar-preview').style.display = 'none';
+                document.getElementById('character-avatar-url').value = '';
+                return;
+            }
+
+            // 파일 크기 체크 (5MB 제한)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('파일 크기는 5MB를 초과할 수 없습니다.');
+                event.target.value = '';
+                return;
+            }
+
+            // 파일 타입 체크
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('JPG, PNG, GIF, WebP 파일만 업로드할 수 있습니다.');
+                event.target.value = '';
+                return;
+            }
+
+            try {
+                // 파일을 Base64로 변환
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        // 업로드 진행 표시
+                        document.getElementById('avatar-file-info').textContent = '업로드 중...';
+                        document.getElementById('avatar-preview').style.display = 'block';
+
+                        // 현재 캐릭터 ID 가져오기 (편집 시) 또는 새 캐릭터용 임시 ID 생성
+                        const characterId = document.getElementById('character-id').value || 'temp_' + Date.now();
+                        
+                        // 캐릭터별 파일명 생성
+                        const customFileName = `avatar_${characterId}_${Date.now()}`;
+
+                        // 서버에 업로드
+                        const response = await fetch('/api/upload', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                fileData: e.target.result,
+                                fileName: customFileName + '.' + file.name.split('.').pop(),
+                                fileType: file.type,
+                                characterId: characterId // 캐릭터 ID 포함
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // 성공시 미리보기 표시 및 URL 저장
+                            document.getElementById('avatar-preview-image').src = data.file.dataUrl;
+                            document.getElementById('avatar-file-info').textContent = 
+                                `${file.name} (${Math.round(file.size / 1024)}KB) - 캐릭터: ${characterId}`;
+                            document.getElementById('character-avatar-url').value = data.file.url;
+                        } else {
+                            alert('업로드 실패: ' + data.error);
+                            event.target.value = '';
+                            document.getElementById('avatar-preview').style.display = 'none';
+                        }
+                    } catch (error) {
+                        console.error('Upload error:', error);
+                        alert('업로드 중 오류가 발생했습니다: ' + error.message);
+                        event.target.value = '';
+                        document.getElementById('avatar-preview').style.display = 'none';
+                    }
+                };
+                
+                // 파일 읽기 시작
+                reader.readAsDataURL(file);
+                
+            } catch (error) {
+                console.error('File read error:', error);
+                alert('파일 읽기 중 오류가 발생했습니다: ' + error.message);
+                event.target.value = '';
+                document.getElementById('avatar-preview').style.display = 'none';
+            }
+        }
+
+        // === 실제 게임 대사 관리 함수들 ===
+        let currentGameDialogues = null;
+        let dialogueChanges = {};
+        
+        function loadGameDialogues() {
+            console.log('🎭 실제 게임 대사 불러오는 중...');
+            
+            // 실제 게임에서 사용되는 대사 구조 (chat_story.json 기반)
+            currentGameDialogues = {
+                opening: [
+                    {
+                        id: 'opening_1',
+                        dialogue: "시우 오빠!! 일어나셨어요??",
+                        narration: "(아침 9시, 휴대폰이 계속 울린다. 머리가 지끈거리는 가운데 확인해보니 후배 윤아에게서 온 메시지들이다.)",
+                        choices: [
+                            { text: "어제 뭔 일이 있었지?", affection_impact: 0 },
+                            { text: "아직 머리가 아파서...", affection_impact: -2 },
+                            { text: "윤아야, 고생했어", affection_impact: 3 }
+                        ]
+                    },
+                    {
+                        id: 'opening_2',
+                        dialogue: "어제 정말 고마웠어요 ㅠㅠ 시우 오빠가 집까지 데려다 주셔서...",
+                        narration: "(어제 뭔가 있었던 것 같은데... 기억이 잘 안 난다.)",
+                        choices: [
+                            { text: "집까지? 무슨 일이 있었는데", affection_impact: 1 },
+                            { text: "기억이 가물가물해서...", affection_impact: -1 },
+                            { text: "괜찮아, 당연한 거야", affection_impact: 2 }
+                        ]
+                    }
+                ],
+                middle: [
+                    {
+                        id: 'middle_1',
+                        dialogue: "혹시... 어제 제가 고백한 거 기억나세요??",
+                        narration: "(뭐?! 고백?? 이게 무슨 상황이지?)",
+                        choices: [
+                            { text: "고백? 정말로??", affection_impact: 2 },
+                            { text: "기억이 잘 안 나네...", affection_impact: -3 },
+                            { text: "천천히 말해줄래?", affection_impact: 4 }
+                        ]
+                    },
+                    {
+                        id: 'middle_2',
+                        dialogue: "어제 회식 끝나고 오빠랑 카페 갔잖아요? 거기서 제가... 울면서 고백했어요 ㅠㅠ",
+                        narration: "(아, 카페... 그런 일이 있었나?)",
+                        choices: [
+                            { text: "카페에서 뭔 일이 있었는데?", affection_impact: 2 },
+                            { text: "정말 기억이 안 나네", affection_impact: -1 },
+                            { text: "자세히 말해줄래?", affection_impact: 3 }
+                        ]
+                    },
+                    {
+                        id: 'middle_3',
+                        dialogue: "그랬더니 시우 오빠가 제 머리를 쓰다듬어 주시면서... '윤아야... 나도 너를...' 이라고 하시다가 말았어요!",
+                        narration: "(나도 너를...? 그 뒤에 뭐라고 하려던 거지??)",
+                        choices: [
+                            { text: "내가 뭐라고 했는데?", affection_impact: 2 },
+                            { text: "정말 그랬나?", affection_impact: 0 },
+                            { text: "계속 말해줘", affection_impact: 1 }
+                        ]
+                    }
+                ],
+                climax: [
+                    {
+                        id: 'climax_1',
+                        dialogue: "그 뒤에 뭐라고 하실 건지 너무너무 궁금했는데... 갑자기 비가 와서 우산 같이 쓰고 집까지 왔어요 🌧️",
+                        narration: "(비가 왔나? 우산을... 같이 썼다고?)",
+                        choices: [
+                            { text: "우산... 같이 썼구나", affection_impact: 2 },
+                            { text: "비가 언제 왔지?", affection_impact: 0 },
+                            { text: "로맨틱했겠네", affection_impact: 4 }
+                        ]
+                    },
+                    {
+                        id: 'climax_2',
+                        dialogue: "제 집 앞에서 시우 오빠가 그러셨어요... '내일 대답해줄게' 라고 하시면서... 볼에 뽀뽀도... 😳",
+                        narration: "(뽀뽀?? 내가 정말 그랬나?? 완전히 기억이...)",
+                        choices: [
+                            { text: "뽀뽀를... 했다고?", affection_impact: 1 },
+                            { text: "내가 정말 그랬나?", affection_impact: -1 },
+                            { text: "어떤 기분이었어?", affection_impact: 3 }
+                        ]
+                    }
+                ],
+                ending: [
+                    {
+                        id: 'ending_1',
+                        dialogue: "그래서... 오늘이 바로 그 내일이에요!! 💕💕 시우 오빠... 지금도 그 마음 그대로세요??",
+                        narration: "(이제 정말로 대답해야 할 시간이 왔다...)",
+                        choices: [
+                            { text: "나도 윤아를 좋아해", affection_impact: 10 },
+                            { text: "조금 더 생각해볼 시간을...", affection_impact: -3 },
+                            { text: "우선 친구로 지내자", affection_impact: -5 }
+                        ]
+                    },
+                    {
+                        id: 'ending_2',
+                        dialogue: "아! 그리고 지금 시우 오빠 집 앞에 와있어요 ㅎㅎ 해장국 재료 다 사가지고 왔거든요!",
+                        narration: "(집 앞에 있다고?? 해장국까지... 정말 세심한 아이구나.)",
+                        choices: [
+                            { text: "벌써 왔어?", affection_impact: 0 },
+                            { text: "해장국까지... 고마워", affection_impact: 3 },
+                            { text: "올라와도 돼", affection_impact: 2 }
+                        ]
+                    },
+                    {
+                        id: 'ending_3',
+                        dialogue: "야호!! 바로 올라갈게요!! 🙌 문 열어주세요~ 해장국 끓여드릴게요!! 그리고... 어제의 답변도 들려주세요 💕",
+                        narration: "(윤아와의 특별한 하루가 시작된다...)",
+                        choices: [
+                            { text: "문 열어줄게, 올라와", affection_impact: 3 },
+                            { text: "조금만 기다려", affection_impact: 1 },
+                            { text: "정말 고마워, 윤아야", affection_impact: 4 }
+                        ]
+                    }
+                ]
+            };
+            
+            displayGameDialogues();
+        }
+
+        function displayGameDialogues() {
+            if (!currentGameDialogues) {
+                console.error('게임 대사 데이터가 없습니다.');
+                return;
+            }
+
+            const container = document.getElementById('dialogues-container');
+            let html = '<div class="game-dialogues-list">';
+
+            Object.entries(currentGameDialogues).forEach(([stage, dialogues]) => {
+                const stageNames = {
+                    'opening': '🌅 초기 대화 (어제 밤의 기억)',
+                    'middle': '💬 중간 대화 (고백의 진실)', 
+                    'climax': '💕 클라이맥스 (비와 뽀뽀)',
+                    'ending': '🌟 종료 대화 (오늘이 그 내일)'
+                };
+                
+                html += `
+                    <div class="stage-section" style="margin-bottom: 40px; padding: 25px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h3 style="color: #2c3e50; margin-bottom: 20px; font-size: 1.5em;">${stageNames[stage] || stage}</h3>
+                        <div class="dialogues-grid" style="display: grid; gap: 20px;">
+                `;
+
+                dialogues.forEach((dialogue, index) => {
+                    const dialogueId = dialogue.id;
+                    const hasChanges = dialogueChanges[dialogueId] ? ' (수정됨)' : '';
+                    
+                    html += `
+                        <div class="dialogue-card" style="padding: 20px; background: white; border-radius: 12px; border-left: 5px solid #3498db; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <strong style="color: #2c3e50; font-size: 1.1em;">대사 #${index + 1}${hasChanges}</strong>
+                                <button onclick="editGameDialogue('${dialogueId}')" style="background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;">✏️ 수정</button>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px; padding: 12px; background: #e8f4f8; border-radius: 8px;">
+                                <strong style="color: #2980b9;">윤아의 대화:</strong>
+                                <p style="margin: 5px 0 0 0; font-style: italic;">"${dialogue.dialogue}"</p>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px; padding: 12px; background: #fef9e7; border-radius: 8px;">
+                                <strong style="color: #f39c12;">플레이어 심리:</strong>
+                                <p style="margin: 5px 0 0 0; color: #8B4513; font-style: italic;">${dialogue.narration}</p>
+                            </div>
+                            
+                            <div style="padding: 12px; background: #f8f9fa; border-radius: 8px;">
+                                <strong style="color: #27ae60;">플레이어 선택지:</strong>
+                                <ul style="margin: 8px 0 0 20px; color: #2c3e50;">
+                                    ${dialogue.choices.map((choice, choiceIndex) => `
+                                        <li style="margin: 5px 0;">
+                                            "${choice.text}" 
+                                            <span style="color: #e67e22; font-weight: bold;">(+${choice.affection_impact} 호감도)</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div></div>';
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function editGameDialogue(dialogueId) {
+            // 현재 대사 찾기
+            let targetDialogue = null;
+            let targetStage = null;
+            
+            Object.entries(currentGameDialogues).forEach(([stage, dialogues]) => {
+                dialogues.forEach(dialogue => {
+                    if (dialogue.id === dialogueId) {
+                        targetDialogue = dialogue;
+                        targetStage = stage;
+                    }
+                });
+            });
+
+            if (!targetDialogue) {
+                alert('대사를 찾을 수 없습니다.');
+                return;
+            }
+
+            // 수정 모달 생성
+            const modalHTML = `
+                <div id="edit-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 30px; border-radius: 15px; width: 80%; max-width: 800px; max-height: 80%; overflow-y: auto;">
+                        <h3>🎭 대사 수정: ${dialogueId}</h3>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: bold; margin-bottom: 8px;">윤아의 대화:</label>
+                            <textarea id="edit-dialogue" style="width: 100%; height: 80px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">${targetDialogue.dialogue}</textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: bold; margin-bottom: 8px;">플레이어 심리 (지문):</label>
+                            <textarea id="edit-narration" style="width: 100%; height: 60px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">${targetDialogue.narration}</textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 25px;">
+                            <label style="display: block; font-weight: bold; margin-bottom: 12px;">플레이어 선택지:</label>
+                            <div id="choices-container">
+                                ${targetDialogue.choices.map((choice, index) => `
+                                    <div style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                        <label style="display: block; margin-bottom: 5px;">선택지 ${index + 1}:</label>
+                                        <input type="text" id="choice-${index}-text" value="${choice.text}" style="width: 70%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-right: 10px;">
+                                        <label style="margin-left: 10px; margin-right: 5px;">호감도:</label>
+                                        <input type="number" id="choice-${index}-impact" value="${choice.affection_impact}" style="width: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: center;">
+                            <button onclick="saveDialogueEdit('${dialogueId}')" style="background: #27ae60; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin-right: 15px; cursor: pointer; font-weight: bold;">💾 저장</button>
+                            <button onclick="closeEditModal()" style="background: #95a5a6; color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">❌ 취소</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        function saveDialogueEdit(dialogueId) {
+            const dialogue = document.getElementById('edit-dialogue').value;
+            const narration = document.getElementById('edit-narration').value;
+            
+            // 현재 대사 찾아서 업데이트
+            Object.entries(currentGameDialogues).forEach(([stage, dialogues]) => {
+                dialogues.forEach(dialogueObj => {
+                    if (dialogueObj.id === dialogueId) {
+                        dialogueObj.dialogue = dialogue;
+                        dialogueObj.narration = narration;
+                        
+                        // 선택지 업데이트
+                        dialogueObj.choices.forEach((choice, index) => {
+                            const textInput = document.getElementById(`choice-${index}-text`);
+                            const impactInput = document.getElementById(`choice-${index}-impact`);
+                            
+                            if (textInput && impactInput) {
+                                choice.text = textInput.value;
+                                choice.affection_impact = parseInt(impactInput.value) || 0;
+                            }
+                        });
+                        
+                        // 변경사항 기록
+                        dialogueChanges[dialogueId] = true;
+                    }
+                });
+            });
+
+            closeEditModal();
+            displayGameDialogues();
+            
+            console.log('✅ 대사 수정 완료:', dialogueId);
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('edit-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function saveDialogueChanges() {
+            if (Object.keys(dialogueChanges).length === 0) {
+                alert('변경된 대사가 없습니다.');
+                return;
+            }
+
+            // 실제로는 여기서 multi-scenario-game.html 파일을 업데이트하거나 서버에 저장해야 합니다
+            console.log('💾 저장할 변경사항:', currentGameDialogues);
+            alert(`${Object.keys(dialogueChanges).length}개의 대사 변경사항이 메모리에 저장되었습니다.\n\n실제 게임에 반영하려면 개발자가 multi-scenario-game.html 파일을 업데이트해야 합니다.`);
+        }
+
+        function resetToDefault() {
+            if (confirm('모든 변경사항을 취소하고 기본값으로 되돌리시겠습니까?')) {
+                dialogueChanges = {};
+                loadGameDialogues();
+                alert('기본값으로 재설정되었습니다.');
+            }
+        }
+
+        // === 새로운 기능: 캐릭터별 대화 생성 ===
+        
+        // 캐릭터 선택 모달 열기
+        function openCharacterSelectModal(scenarioId) {
+            const modal = document.getElementById('character-select-modal');
+            modal.dataset.scenarioId = scenarioId;
+            
+            // 캐릭터 옵션들 로드
+            loadCharacterOptions();
+            
+            modal.classList.add('active');
+        }
+        
+        // 캐릭터 옵션들 로드
+        function loadCharacterOptions() {
+            const container = document.getElementById('character-selection');
+            container.innerHTML = '';
+            
+            currentCharacters.forEach(character => {
+                if (character.active) {
+                    const option = document.createElement('div');
+                    option.className = 'character-option';
+                    option.style.cssText = `
+                        padding: 15px; background: #f8f9fa; border: 2px solid #ddd; 
+                        border-radius: 10px; cursor: pointer; transition: all 0.3s ease;
+                        display: flex; align-items: center; gap: 15px;
+                    `;
+                    
+                    const avatarHtml = character.avatar_url ? 
+                        `<img src="${character.avatar_url}" alt="${character.name}" 
+                              style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">` : 
+                        `<div style="width: 50px; height: 50px; border-radius: 50%; background: #3498db; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">${character.name[0]}</div>`;
+                    
+                    option.innerHTML = `
+                        ${avatarHtml}
+                        <div>
+                            <strong>${character.name} (${character.mbti})</strong>
+                            <br><small style="color: #666;">${character.personality_traits.primary.slice(0,2).join(', ')}</small>
+                        </div>
+                    `;
+                    
+                    option.addEventListener('click', function() {
+                        document.querySelectorAll('.character-option').forEach(o => {
+                            o.style.borderColor = '#ddd';
+                            o.style.background = '#f8f9fa';
+                        });
+                        
+                        this.style.borderColor = '#3498db';
+                        this.style.background = '#e3f2fd';
+                        
+                        option.dataset.selected = 'true';
+                        option.dataset.characterId = character.id;
+                        
+                        console.log('✅ 캐릭터 선택:', character.name, character.id);
+                    });
+                    
+                    container.appendChild(option);
+                }
+            });
+        }
+        
+        // 캐릭터별 대화 생성
+        async function generateCharacterDialogue() {
+            const modal = document.getElementById('character-select-modal');
+            const scenarioId = modal.dataset.scenarioId;
+            const context = document.getElementById('dialogue-context').value;
+            
+            // 선택된 캐릭터 찾기
+            const selectedOption = document.querySelector('.character-option[data-selected="true"]');
+            if (!selectedOption) {
+                alert('캐맭터를 선택해주세요!');
+                return;
+            }
+            
+            const characterId = selectedOption.dataset.characterId;
+            const character = currentCharacters.find(c => c.id === characterId);
+            const scenario = currentScenarios.find(s => s.id === scenarioId);
+            
+            if (!character || !scenario) {
+                alert('캐릭터 또는 시나리오를 찾을 수 없습니다.');
+                return;
+            }
+            
+            // 로딩 표시
+            const generateBtn = event.target;
+            const originalText = generateBtn.textContent;
+            generateBtn.textContent = '생성 중...';
+            generateBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/scenario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generate_character_dialogue',
+                        scenario_id: scenarioId,
+                        character_id: characterId,
+                        context: context || '기본 상황',
+                        choice_number: Date.now() % 10 + 1
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeModal('character-select-modal');
+                    
+                    // 생성 결과 표시
+                    showGenerationResult(data, character, scenario);
+                    
+                    // 시나리오 대화 목록 새로고침
+                    if (typeof loadScenarios === 'function') {
+                        loadScenarios();
+                    }
+                } else {
+                    alert('대화 생성에 실패했습니다: ' + (data.error || '알 수 없는 오류'));
+                }
+                
+            } catch (error) {
+                console.error('대화 생성 오류:', error);
+                alert('대화 생성 중 오류가 발생했습니다: ' + error.message);
+            } finally {
+                generateBtn.textContent = originalText;
+                generateBtn.disabled = false;
+            }
+        }
+        
+        // 생성 결과 표시
+        function showGenerationResult(data, character, scenario) {
+            const generated = data.generated;
+            
+            const resultModal = document.createElement('div');
+            resultModal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.8); display: flex; align-items: center; 
+                justify-content: center; z-index: 10000;
+            `;
+            
+            const choicesHtml = generated.choices.map(choice => {
+                const impactClass = choice.affection_impact > 0 ? 'impact-positive' : 
+                                  choice.affection_impact < 0 ? 'impact-negative' : 'impact-neutral';
+                return `
+                    <div class="choice-item" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin: 5px 0;">
+                        <span>${choice.text}</span>
+                        <span class="affection-impact ${impactClass}" style="padding: 4px 8px; border-radius: 12px; font-size: 0.8em; font-weight: 600;">
+                            ${choice.affection_impact > 0 ? '+' : ''}${choice.affection_impact}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+            
+            resultModal.innerHTML = `
+                <div style="background: white; padding: 40px; border-radius: 15px; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                    <h3 style="color: #2c3e50; margin-bottom: 25px; text-align: center;">
+                        ✨ ${character.name} (${character.mbti}) - ${scenario.title}
+                    </h3>
+                    
+                    <div style="background: #e8f4f8; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h4 style="color: #2980b9; margin-bottom: 10px;">💬 대사</h4>
+                        <p style="font-style: italic; font-size: 1.1em;">"${generated.dialogue}"</p>
+                    </div>
+                    
+                    <div style="background: #fef9e7; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h4 style="color: #f39c12; margin-bottom: 10px;">💭 지문</h4>
+                        <p style="color: #8B4513;">${generated.narration}</p>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+                        <h4 style="color: #27ae60; margin-bottom: 15px;">🎯 선택지</h4>
+                        ${choicesHtml}
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <button onclick="this.closest('div').parentElement.remove()" 
+                                style="background: #3498db; color: white; padding: 12px 30px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-right: 15px;">
+                            ✅ 확인
+                        </button>
+                        <button onclick="copyDialogueResult(this)" 
+                                style="background: #95a5a6; color: white; padding: 12px 30px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                            📋 복사
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(resultModal);
+            
+            console.log(`✅ ${character.name} 대화 생성 완료:`, generated);
+        }
+        
+        // 대화 결과 복사
+        function copyDialogueResult(button) {
+            const modal = button.closest('div').parentElement;
+            const dialogue = modal.querySelector('div:nth-child(2) p').textContent.replace(/"/g, '');
+            const narration = modal.querySelector('div:nth-child(3) p').textContent;
+            
+            const result = `대사: ${dialogue}\n지문: ${narration}`;
+            
+            navigator.clipboard.writeText(result).then(() => {
+                button.textContent = '✅ 복사됨';
+                setTimeout(() => {
+                    button.textContent = '📋 복사';
+                }, 2000);
+            }).catch(() => {
+                alert('복사에 실패했습니다.');
+            });
+        }
+        
+        // === 새로운 기능: 캐릭터별 대화 리뷰 ===
+        
+        // 캐릭터 대화 리뷰 모달 열기
+        async function viewCharacterDialogues(characterId, characterName) {
+            const modal = document.getElementById('character-dialogues-modal');
+            const title = document.getElementById('character-dialogues-title');
+            const content = document.getElementById('character-dialogues-content');
+            
+            title.textContent = `${characterName}의 대화 리뷰`;
+            content.innerHTML = '<p style="text-align: center; color: #666; padding: 50px;">대화를 불러오는 중...</p>';
+            
+            modal.classList.add('active');
+            
+            try {
+                const response = await fetch(`/api/scenario?action=get&type=character_dialogues&id=${characterId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayCharacterDialogues(data.dialogues, characterName, characterId);
+                } else {
+                    content.innerHTML = '<p style="text-align: center; color: #e74c3c; padding: 50px;">대화 데이터를 불러올 수 없습니다.</p>';
+                }
+            } catch (error) {
+                console.error('캐릭터 대화 로드 실패:', error);
+                content.innerHTML = '<p style="text-align: center; color: #e74c3c; padding: 50px;">오류가 발생했습니다.</p>';
+            }
+        }
+        
+        // 캐릭터 대화 표시
+        function displayCharacterDialogues(dialogues, characterName, characterId) {
+            const container = document.getElementById('character-dialogues-content');
+            
+            if (dialogues.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 50px;">
+                        <h4 style="color: #666;">${characterName}의 대화가 아직 없습니다</h4>
+                        <p style="color: #999;">시나리오에서 "캐릭터별 대화생성" 버튼을 사용하여 대화를 생성해보세요.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <div style="margin-bottom: 20px; padding: 15px; background: #e3f2fd; border-radius: 10px; text-align: center;">
+                    <h4 style="margin: 0; color: #1976d2;">${characterName}의 대화 내역 (${dialogues.length}개)</h4>
+                </div>
+            `;
+            
+            dialogues.forEach((dialogue, index) => {
+                const content = dialogue.generated_content;
+                
+                html += `
+                    <div style="margin-bottom: 25px; padding: 20px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #3498db;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <strong style="color: #2c3e50;">시나리오: ${dialogue.scenario_title || dialogue.scenario_id}</strong>
+                            <div>
+                                <button onclick="editCharacterDialogue('${dialogue.id}')" 
+                                        style="background: #f39c12; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-right: 5px;">
+                                    ✏️ 수정
+                                </button>
+                                <small style="color: #666;">${new Date(dialogue.created_at).toLocaleDateString()}</small>
+                            </div>
+                        </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                            <strong style="color: #2980b9;">대사:</strong>
+                            <p style="margin: 5px 0 0 0; font-style: italic;">"${content.dialogue}"</p>
+                        </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                            <strong style="color: #f39c12;">지문:</strong>
+                            <p style="margin: 5px 0 0 0; color: #8B4513;">${content.narration}</p>
+                        </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 8px;">
+                            <strong style="color: #27ae60;">선택지:</strong>
+                            <ul style="margin: 5px 0 0 20px;">
+                                ${content.choices.map(choice => `
+                                    <li style="margin: 5px 0; color: #2c3e50;">
+                                        "${choice.text}" 
+                                        <span style="color: ${choice.affection_impact > 0 ? '#27ae60' : choice.affection_impact < 0 ? '#e74c3c' : '#95a5a6'}; font-weight: bold;">
+                                            (${choice.affection_impact > 0 ? '+' : ''}${choice.affection_impact})
+                                        </span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // 캐릭터 대화 수정
+        function editCharacterDialogue(dialogueId) {
+            alert('대화 수정 기능은 아직 개발 중입니다. API에서 edit_dialogue 액션을 사용할 예정입니다.');
+            console.log('수정할 대화 ID:', dialogueId);
+        }
+        
+        // 캐릭터 대화 내보내기
+        function exportCharacterDialogues() {
+            const content = document.getElementById('character-dialogues-content');
+            const dialogues = content.textContent;
+            
+            const blob = new Blob([dialogues], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'character-dialogues.txt';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            console.log('✅ 대화 내보내기 완료');
+        }
+    </script>
+</body>
+</html>

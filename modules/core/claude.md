@@ -2,15 +2,15 @@
 
 ## 담당 범위
 - 기본 아키텍처 설계 (`architecture.js`)
-- 데이터 스키마 관리
+- 데이터 스키마 관리 (`schema.js`)
 - 공통 유틸리티 함수
 - 게임 상태 관리
 - 메모리 최적화
 
 ## 주요 파일
 - `architecture.js`: 메인 아키텍처 모듈 (149줄) - 루트 레벨
-- `modules/core/architecture.js`: 새로운 코어 아키텍처 모듈 (v2.1.0) 
-- `modules/core/schema.js`: 데이터 스키마 정의 모듈 (v2.1.0)
+- `modules/core/architecture.js`: 새로운 코어 아키텍처 모듈 (v2.1.0) - 302줄
+- `modules/core/schema.js`: 데이터 스키마 정의 모듈 (v2.1.0) - 476줄
 - DataSchemaModule: 스키마 검증 클래스 (레거시)
 
 ## 핵심 기능
@@ -129,4 +129,4 @@ if (!validation.valid) {
 
 ---
 *업데이트: 2025-09-02*
-*상태: GameArchitecture v2.1.0 구현 완료*
+*상태: GameArchitecture v2.1.0 + DataSchema v2.1.0 구현 완료*

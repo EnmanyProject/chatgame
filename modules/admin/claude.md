@@ -9,6 +9,7 @@
 
 ## 주요 파일
 - `scenario-admin.html`: 관리자 메인 페이지 (947줄)
+- `modules/admin/`: 새로운 모듈화된 관리자 시스템 (예정)
 
 ## 최근 주요 수정 (2025-09-02)
 
@@ -61,11 +62,59 @@ function updateCharacter(characterId) // 캐릭터 업데이트 API
 - 모든 CRUD 기능 정상 작동
 - 배포 완료: https://chatgame-seven.vercel.app/scenario-admin.html
 
+## Phase 2-3 계획 (예정)
+
+### 모듈화된 관리자 시스템
+```javascript
+// modules/admin/dataManager.js (예정)
+class DataManager {
+    async createScenario(data) {
+        // 시나리오 생성 with 스키마 검증
+    }
+    
+    async updateCharacter(id, updates) {
+        // 캐릭터 업데이트 with 무결성 체크
+    }
+}
+```
+
+### 시스템 모니터링
+```javascript
+// modules/admin/systemMonitor.js (예정)
+class SystemMonitor {
+    getSystemHealth() {
+        // 전체 시스템 상태 확인
+    }
+    
+    generateReport() {
+        // 사용량 및 성능 리포트
+    }
+}
+```
+
+### 백업/복원 시스템
+```javascript
+// modules/admin/backupSystem.js (예정)
+class BackupSystem {
+    createBackup() {
+        // 전체 데이터 백업
+    }
+    
+    restoreFromBackup(backupData) {
+        // 백업 데이터로 복원
+    }
+}
+```
+
 ## 다음 작업 계획
+- **Phase 2-3**: 관리자 모듈 구현
+  - 모듈화된 CRUD 시스템
+  - 시스템 상태 모니터링
+  - 백업/복원 기능
 - 대량 데이터 처리 최적화
 - 실시간 미리보기 기능
-- 백업/복원 기능 추가
+- 사용자 권한 관리
 
 ---
 *업데이트: 2025-09-02*
-*상태: 완전 복구 완료*
+*상태: 완전 복구 완료, 모듈화 준비 중*
