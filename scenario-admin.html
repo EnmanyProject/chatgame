@@ -800,6 +800,148 @@
             loadScenarios();
             loadCharacters();
         });
+
+        // 시나리오 수정 함수
+        function editScenario(scenarioId) {
+            fetch(`/api/scenario?action=get&id=${scenarioId}`)
+                .then(response => response.json())
+                .then(scenario => {
+                    if (scenario) {
+                        document.getElementById('scenarioTitle').value = scenario.title;
+                        document.getElementById('scenarioDescription').value = scenario.description;
+                        document.getElementById('scenarioSynopsis').value = scenario.synopsis;
+                        document.getElementById('scenarioModal').style.display = 'block';
+                        
+                        // 수정 모드로 설정
+                        const saveButton = document.querySelector('#scenarioModal .btn-primary');
+                        saveButton.textContent = '수정';
+                        saveButton.onclick = () => updateScenario(scenarioId);
+                    }
+                })
+                .catch(error => {
+                    console.error('시나리오 로드 실패:', error);
+                    alert('시나리오를 불러오는데 실패했습니다.');
+                });
+        }
+
+        // 캐릭터 수정 함수
+        function editCharacter(characterId) {
+            fetch(`/api/scenario?action=get&type=character&id=${characterId}`)
+                .then(response => response.json())
+                .then(character => {
+                    if (character) {
+                        document.getElementById('characterName').value = character.name;
+                        document.getElementById('characterAge').value = character.age;
+                        document.getElementById('characterMbti').value = character.mbti;
+                        document.getElementById('characterPersonality').value = character.personality;
+                        document.getElementById('characterBackground').value = character.background;
+                        document.getElementById('characterImage').value = character.image;
+                        document.getElementById('characterModal').style.display = 'block';
+                        
+                        // 수정 모드로 설정
+                        const saveButton = document.querySelector('#characterModal .btn-primary');
+                        saveButton.textContent = '수정';
+                        saveButton.onclick = () => updateCharacter(characterId);
+                    }
+                })
+                .catch(error => {
+                    console.error('캐릭터 로드 실패:', error);
+                    alert('캐릭터를 불러오는데 실패했습니다.');
+                });
+        }
+
+        // 시나리오 업데이트 함수
+        function updateScenario(scenarioId) {
+            const title = document.getElementById('scenarioTitle').value;
+            const description = document.getElementById('scenarioDescription').value;
+            const synopsis = document.getElementById('scenarioSynopsis').value;
+
+            if (!title || !description || !synopsis) {
+                alert('모든 필드를 입력해주세요.');
+                return;
+            }
+
+            fetch('/api/scenario', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'update',
+                    id: scenarioId,
+                    title,
+                    description,
+                    synopsis
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('시나리오가 성공적으로 수정되었습니다!');
+                    document.getElementById('scenarioModal').style.display = 'none';
+                    loadScenarios();
+                    
+                    // 버튼 텍스트 리셋
+                    const saveButton = document.querySelector('#scenarioModal .btn-primary');
+                    saveButton.textContent = '저장';
+                    saveButton.onclick = saveScenario;
+                } else {
+                    alert('시나리오 수정 실패: ' + (result.error || '알 수 없는 오류'));
+                }
+            })
+            .catch(error => {
+                console.error('시나리오 수정 실패:', error);
+                alert('시나리오 수정 중 오류가 발생했습니다.');
+            });
+        }
+
+        // 캐릭터 업데이트 함수
+        function updateCharacter(characterId) {
+            const name = document.getElementById('characterName').value;
+            const age = document.getElementById('characterAge').value;
+            const mbti = document.getElementById('characterMbti').value;
+            const personality = document.getElementById('characterPersonality').value;
+            const background = document.getElementById('characterBackground').value;
+            const image = document.getElementById('characterImage').value;
+
+            if (!name || !age || !mbti || !personality || !background) {
+                alert('필수 필드를 모두 입력해주세요.');
+                return;
+            }
+
+            fetch('/api/scenario', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'update',
+                    type: 'character',
+                    id: characterId,
+                    name,
+                    age: parseInt(age),
+                    mbti,
+                    personality,
+                    background,
+                    image
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('캐릭터가 성공적으로 수정되었습니다!');
+                    document.getElementById('characterModal').style.display = 'none';
+                    loadCharacters();
+                    
+                    // 버튼 텍스트 리셋
+                    const saveButton = document.querySelector('#characterModal .btn-primary');
+                    saveButton.textContent = '저장';
+                    saveButton.onclick = saveCharacter;
+                } else {
+                    alert('캐릭터 수정 실패: ' + (result.error || '알 수 없는 오류'));
+                }
+            })
+            .catch(error => {
+                console.error('캐릭터 수정 실패:', error);
+                alert('캐릭터 수정 중 오류가 발생했습니다.');
+            });
+        }
     </script>
 </body>
 </html>
