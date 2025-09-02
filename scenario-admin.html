@@ -942,6 +942,26 @@
                 alert('캐릭터 수정 중 오류가 발생했습니다.');
             });
         }
+
+        // 새 캐릭터 추가 함수
+        function addNewCharacter() {
+            // 캐릭터 모달 필드 초기화
+            document.getElementById('characterName').value = '';
+            document.getElementById('characterAge').value = '';
+            document.getElementById('characterMbti').value = 'INFP';
+            document.getElementById('characterPersonality').value = '';
+            document.getElementById('characterBackground').value = '';
+            document.getElementById('characterImage').value = '';
+            
+            // 저장 버튼을 기본 저장 모드로 설정
+            const saveButton = document.querySelector('#characterModal .btn-primary');
+            saveButton.textContent = '저장';
+            saveButton.onclick = saveCharacter;
+            
+            // 모달 표시
+            document.getElementById('characterModal').style.display = 'block';
+        }
+
     </script>
 </body>
 </html>
