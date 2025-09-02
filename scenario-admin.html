@@ -1312,11 +1312,10 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        action: 'generate',
+                        action: 'generate_character_dialogue',
                         character_id: characterId,
                         scenario_id: scenarioId,
-                        situation: situation,
-                        gpt_config: gptSettings
+                        choice_number: 1
                     })
                 });
 
@@ -1487,7 +1486,7 @@
                     response = await fetch('/api/scenario', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'create', type: 'scenario', id: scenarioId, ...scenarioData })
+                        body: JSON.stringify({ action: 'create', id: scenarioId, ...scenarioData })
                     });
                 }
 
