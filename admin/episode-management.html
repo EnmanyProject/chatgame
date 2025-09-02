@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>에피소드 관리 시스템 - 36퀘스트</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .scenario-selector {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .scenario-selector select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .difficulty-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .difficulty-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .difficulty-tab:hover {
+            border-color: #f5576c;
+            background: #fff5f6;
+        }
+
+        .difficulty-tab.active {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            border-color: transparent;
+        }
+
+        .difficulty-tab .count {
+            display: block;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .episodes-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .episode-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .episode-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .episode-card.empty {
+            border: 2px dashed #e0e0e0;
+            background: #fafafa;
+        }
+
+        .episode-card.empty:hover {
+            border-color: #f5576c;
+            background: white;
+        }
+
+        .episode-card .episode-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #f5576c;
+            margin-bottom: 5px;
+        }
+
+        .episode-card .character-name {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .episode-card .affection-req {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .episode-card.completed {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            color: white;
+        }
+
+        .episode-card.completed .character-name,
+        .episode-card.completed .affection-req {
+            color: white;
+            opacity: 0.9;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #f5576c;
+            border: 2px solid #f5576c;
+        }
+
+        .btn-secondary:hover {
+            background: #f5576c;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            padding: 25px;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #f5576c;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .dialogue-preview {
+            background: #f8f9ff;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .dialogue-preview h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .dialogue-text {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .narration-text {
+            color: #999;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        .choices-list {
+            list-style: none;
+        }
+
+        .choice-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .choice-item .impact {
+            background: #f5576c;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .modal-footer {
+            background: #f5f5f5;
+            padding: 20px 30px;
+            border-radius: 0 0 15px 15px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        .close {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .close:hover {
+            opacity: 1;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #999;
+            font-size: 12px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .stat-card .value {
+            color: #f5576c;
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .episodes-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 에피소드 관리 시스템 - 36퀘스트</h1>
+            <p>각 시나리오별로 36개의 에피소드를 관리합니다. AI가 캐릭터별 대화를 자동 생성합니다.</p>
+        </div>
+
+        <div class="scenario-selector">
+            <label for="scenarioSelect">시나리오 선택:</label>
+            <select id="scenarioSelect" onchange="loadEpisodes()">
+                <option value="">시나리오를 선택하세요</option>
+            </select>
+        </div>
+
+        <div id="scenarioInfo" style="display: none;">
+            <div class="stats-row">
+                <div class="stat-card">
+                    <h3>전체 에피소드</h3>
+                    <div class="value" id="totalEpisodes">0/36</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3>Easy (1-9)</h3>
+                    <div class="value" id="easyCount">0/9</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Medium (10-18)</h3>
+                    <div class="value" id="mediumCount">0/9</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Hard (19-27)</h3>
+                    <div class="value" id="hardCount">0/9</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Expert (28-36)</h3>
+                    <div class="value" id="expertCount">0/9</div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="openCreateModal()">
+                    ✨ 새 에피소드 생성
+                </button>
+                <button class="btn btn-secondary" onclick="generateBulkEpisodes()">
+                    🚀 일괄 생성 (AI)
+                </button>
+                <button class="btn btn-secondary" onclick="loadEpisodes()">
+                    🔄 새로고침
+                </button>
+                <button class="btn btn-secondary" onclick="window.location.href='scenario-management.html'">
+                    📋 시나리오 관리
+                </button>
+            </div>
+
+            <div class="difficulty-tabs">
+                <div class="difficulty-tab active" onclick="filterByDifficulty('all')">
+                    전체
+                    <span class="count" id="allCount">0</span>
+                </div>
+                <div class="difficulty-tab" onclick="filterByDifficulty('easy')">
+                    Easy (1-9)
+                    <span class="count" id="easyTabCount">0</span>
+                </div>
+                <div class="difficulty-tab" onclick="filterByDifficulty('medium')">
+                    Medium (10-18)
+                    <span class="count" id="mediumTabCount">0</span>
+                </div>
+                <div class="difficulty-tab" onclick="filterByDifficulty('hard')">
+                    Hard (19-27)
+                    <span class="count" id="hardTabCount">0</span>
+                </div>
+                <div class="difficulty-tab" onclick="filterByDifficulty('expert')">
+                    Expert (28-36)
+                    <span class="count" id="expertTabCount">0</span>
+                </div>
+            </div>
+
+            <div id="episodesGrid" class="episodes-grid">
+                <!-- 36개의 에피소드 카드가 여기에 표시됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 에피소드 생성/수정 모달 -->
+    <div id="episodeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2 id="modalTitle">새 에피소드 생성</h2>
+            </div>
+            <div class="modal-body">
+                <form id="episodeForm">
+                    <input type="hidden" id="episodeId" />
+                    <input type="hidden" id="scenarioId" />
+                    
+                    <div class="form-group">
+                        <label for="episodeNumber">에피소드 번호 (1-36) *</label>
+                        <input type="number" id="episodeNumber" min="1" max="36" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="characterSelect">캐릭터 선택 *</label>
+                        <select id="characterSelect" required>
+                            <option value="">캐릭터를 선택하세요</option>
+                            <option value="yuna_infp">윤아 (INFP) - 감성적, 내향적</option>
+                            <option value="mina_enfp">미나 (ENFP) - 외향적, 열정적</option>
+                            <option value="seoyeon_intj">서연 (INTJ) - 논리적, 독립적</option>
+                            <option value="jihye_esfj">지혜 (ESFJ) - 사교적, 배려심</option>
+                            <option value="hyejin_istp">혜진 (ISTP) - 실용적, 적응적</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="difficulty">난이도 *</label>
+                        <select id="difficulty" required>
+                            <option value="easy">Easy (1-9)</option>
+                            <option value="medium">Medium (10-18)</option>
+                            <option value="hard">Hard (19-27)</option>
+                            <option value="expert">Expert (28-36)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="userPrompt">상황 프롬프트 *</label>
+                        <textarea id="userPrompt" required placeholder="예: 우연히 도서관에서 만난 상황, 긴장감과 설렘이 교차하는 순간"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>AI 대화 생성</label>
+                        <button type="button" class="btn btn-secondary" onclick="generateDialogue()">
+                            🤖 AI 대화 생성
+                        </button>
+                    </div>
+
+                    <div id="dialoguePreview" class="dialogue-preview" style="display: none;">
+                        <h4>생성된 대화 미리보기</h4>
+                        <div class="dialogue-text" id="previewDialogue"></div>
+                        <div class="narration-text" id="previewNarration"></div>
+                        <ul class="choices-list" id="previewChoices"></ul>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customDialogue">커스텀 대화 (선택사항)</label>
+                        <textarea id="customDialogue" placeholder="AI가 생성한 대화를 수정하거나 직접 작성할 수 있습니다"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customNarration">커스텀 나레이션 (선택사항)</label>
+                        <textarea id="customNarration" placeholder="상황 설명이나 캐릭터의 행동을 묘사합니다"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">취소</button>
+                <button type="button" class="btn btn-primary" onclick="saveEpisode()">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let scenarios = {};
+        let episodes = {};
+        let currentScenarioId = null;
+        let currentDifficultyFilter = 'all';
+        let currentMode = 'create';
+        let generatedDialogue = null;
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 에피소드 관리 시스템 초기화');
+            
+            // URL 파라미터에서 scenario_id 확인
+            const urlParams = new URLSearchParams(window.location.search);
+            const scenarioId = urlParams.get('scenario_id');
+            
+            loadScenarios(scenarioId);
+        });
+
+        // 시나리오 목록 로드
+        async function loadScenarios(selectedScenarioId) {
+            try {
+                const response = await fetch('/api/scenario-manager?action=list');
+                const data = await response.json();
+
+                if (data.success) {
+                    scenarios = data.scenarios || {};
+                    populateScenarioSelect(selectedScenarioId);
+                }
+            } catch (error) {
+                console.error('시나리오 로드 오류:', error);
+            }
+        }
+
+        // 시나리오 선택 드롭다운 채우기
+        function populateScenarioSelect(selectedId) {
+            const select = document.getElementById('scenarioSelect');
+            select.innerHTML = '<option value="">시나리오를 선택하세요</option>';
+
+            Object.values(scenarios).forEach(scenario => {
+                const option = document.createElement('option');
+                option.value = scenario.id;
+                option.textContent = scenario.title;
+                select.appendChild(option);
+            });
+
+            if (selectedId) {
+                select.value = selectedId;
+                loadEpisodes();
+            }
+        }
+
+        // 에피소드 목록 로드
+        async function loadEpisodes() {
+            const scenarioId = document.getElementById('scenarioSelect').value;
+            if (!scenarioId) {
+                document.getElementById('scenarioInfo').style.display = 'none';
+                return;
+            }
+
+            currentScenarioId = scenarioId;
+            document.getElementById('scenarioInfo').style.display = 'block';
+
+            try {
+                const response = await fetch(`/api/episode-manager?action=list&scenario_id=${scenarioId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    episodes = {};
+                    data.episodes.forEach(ep => {
+                        episodes[ep.episode_number] = ep;
+                    });
+                    displayEpisodes();
+                    updateStats();
+                }
+            } catch (error) {
+                console.error('에피소드 로드 오류:', error);
+                episodes = {};
+                displayEpisodes();
+                updateStats();
+            }
+        }
+
+        // 에피소드 그리드 표시
+        function displayEpisodes() {
+            const grid = document.getElementById('episodesGrid');
+            grid.innerHTML = '';
+
+            for (let i = 1; i <= 36; i++) {
+                const episode = episodes[i];
+                const difficulty = getDifficultyByNumber(i);
+                
+                if (currentDifficultyFilter !== 'all' && difficulty !== currentDifficultyFilter) {
+                    continue;
+                }
+
+                const card = createEpisodeCard(i, episode, difficulty);
+                grid.innerHTML += card;
+            }
+        }
+
+        // 에피소드 카드 생성
+        function createEpisodeCard(number, episode, difficulty) {
+            if (episode) {
+                const characterName = getCharacterName(episode.character_id);
+                return `
+                    <div class="episode-card completed" onclick="editEpisode(${number})">
+                        <div class="episode-number">#${number}</div>
+                        <div class="character-name">${characterName}</div>
+                        <div class="affection-req">호감도 ${episode.required_affection}+</div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="episode-card empty" onclick="createEpisode(${number})">
+                        <div class="episode-number">#${number}</div>
+                        <div style="color: #999; font-size: 12px;">비어있음</div>
+                        <div style="color: #ccc; font-size: 11px;">${difficulty.toUpperCase()}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // 난이도별 에피소드 번호 확인
+        function getDifficultyByNumber(number) {
+            if (number <= 9) return 'easy';
+            if (number <= 18) return 'medium';
+            if (number <= 27) return 'hard';
+            return 'expert';
+        }
+
+        // 캐릭터 이름 가져오기
+        function getCharacterName(characterId) {
+            const names = {
+                'yuna_infp': '윤아',
+                'mina_enfp': '미나',
+                'seoyeon_intj': '서연',
+                'jihye_esfj': '지혜',
+                'hyejin_istp': '혜진'
+            };
+            return names[characterId] || '알 수 없음';
+        }
+
+        // 통계 업데이트
+        function updateStats() {
+            const episodeArray = Object.values(episodes);
+            const total = episodeArray.length;
+            
+            document.getElementById('totalEpisodes').textContent = `${total}/36`;
+            document.getElementById('progressBar').style.width = `${(total/36)*100}%`;
+            
+            // 난이도별 카운트
+            let counts = { easy: 0, medium: 0, hard: 0, expert: 0 };
+            episodeArray.forEach(ep => {
+                const difficulty = getDifficultyByNumber(ep.episode_number);
+                counts[difficulty]++;
+            });
+            
+            document.getElementById('easyCount').textContent = `${counts.easy}/9`;
+            document.getElementById('mediumCount').textContent = `${counts.medium}/9`;
+            document.getElementById('hardCount').textContent = `${counts.hard}/9`;
+            document.getElementById('expertCount').textContent = `${counts.expert}/9`;
+            
+            // 탭 카운트 업데이트
+            document.getElementById('allCount').textContent = total;
+            document.getElementById('easyTabCount').textContent = counts.easy;
+            document.getElementById('mediumTabCount').textContent = counts.medium;
+            document.getElementById('hardTabCount').textContent = counts.hard;
+            document.getElementById('expertTabCount').textContent = counts.expert;
+        }
+
+        // 난이도별 필터링
+        function filterByDifficulty(difficulty) {
+            currentDifficultyFilter = difficulty;
+            
+            // 탭 활성화 상태 변경
+            document.querySelectorAll('.difficulty-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.closest('.difficulty-tab').classList.add('active');
+            
+            displayEpisodes();
+        }
+
+        // 새 에피소드 생성 모달 열기
+        function openCreateModal() {
+            if (!currentScenarioId) {
+                alert('먼저 시나리오를 선택해주세요.');
+                return;
+            }
+            
+            currentMode = 'create';
+            document.getElementById('modalTitle').textContent = '새 에피소드 생성';
+            document.getElementById('episodeForm').reset();
+            document.getElementById('scenarioId').value = currentScenarioId;
+            document.getElementById('dialoguePreview').style.display = 'none';
+            generatedDialogue = null;
+            
+            document.getElementById('episodeModal').style.display = 'block';
+        }
+
+        // 특정 번호로 에피소드 생성
+        function createEpisode(number) {
+            openCreateModal();
+            document.getElementById('episodeNumber').value = number;
+            
+            // 난이도 자동 설정
+            const difficulty = getDifficultyByNumber(number);
+            document.getElementById('difficulty').value = difficulty;
+        }
+
+        // 에피소드 수정
+        function editEpisode(number) {
+            const episode = episodes[number];
+            if (!episode) return;
+            
+            currentMode = 'edit';
+            document.getElementById('modalTitle').textContent = '에피소드 수정';
+            document.getElementById('episodeId').value = episode.id;
+            document.getElementById('scenarioId').value = episode.scenario_id;
+            document.getElementById('episodeNumber').value = episode.episode_number;
+            document.getElementById('characterSelect').value = episode.character_id;
+            document.getElementById('difficulty').value = episode.difficulty;
+            document.getElementById('userPrompt').value = episode.user_input_prompt;
+            
+            // AI 생성 대화 표시
+            if (episode.ai_generated_dialogue) {
+                generatedDialogue = episode.ai_generated_dialogue;
+                displayDialoguePreview(generatedDialogue);
+            }
+            
+            if (episode.custom_dialogue) {
+                const custom = JSON.parse(episode.custom_dialogue);
+                document.getElementById('customDialogue').value = custom.dialogue || '';
+                document.getElementById('customNarration').value = custom.narration || '';
+            }
+            
+            document.getElementById('episodeModal').style.display = 'block';
+        }
+
+        // AI 대화 생성
+        async function generateDialogue() {
+            const characterId = document.getElementById('characterSelect').value;
+            const userPrompt = document.getElementById('userPrompt').value;
+            const difficulty = document.getElementById('difficulty').value;
+            
+            if (!characterId || !userPrompt) {
+                alert('캐릭터와 상황 프롬프트를 입력해주세요.');
+                return;
+            }
+            
+            const characterName = getCharacterName(characterId);
+            const previewDiv = document.getElementById('dialoguePreview');
+            previewDiv.style.display = 'block';
+            
+            document.getElementById('previewDialogue').innerHTML = '<div class="loading"></div> AI가 대화를 생성 중입니다...';
+            document.getElementById('previewNarration').textContent = '';
+            document.getElementById('previewChoices').innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/episode-manager', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'regenerate_dialogue',
+                        episode_id: document.getElementById('episodeId').value || 'temp',
+                        character_id: characterId,
+                        character_name: characterName,
+                        user_input_prompt: userPrompt,
+                        difficulty: difficulty
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.episode) {
+                    generatedDialogue = data.episode.ai_generated_dialogue;
+                    displayDialoguePreview(generatedDialogue);
+                }
+            } catch (error) {
+                console.error('대화 생성 오류:', error);
+                document.getElementById('previewDialogue').textContent = '⚠️ 대화 생성에 실패했습니다.';
+            }
+        }
+
+        // 대화 미리보기 표시
+        function displayDialoguePreview(dialogue) {
+            if (!dialogue) return;
+            
+            document.getElementById('dialoguePreview').style.display = 'block';
+            document.getElementById('previewDialogue').textContent = dialogue.dialogue;
+            document.getElementById('previewNarration').textContent = dialogue.narration;
+            
+            const choicesList = document.getElementById('previewChoices');
+            choicesList.innerHTML = '';
+            
+            dialogue.choices.forEach(choice => {
+                const li = document.createElement('li');
+                li.className = 'choice-item';
+                li.innerHTML = `
+                    <span>${choice.text}</span>
+                    <span class="impact">호감도 ${choice.affection_impact > 0 ? '+' : ''}${choice.affection_impact}</span>
+                `;
+                choicesList.appendChild(li);
+            });
+        }
+
+        // 에피소드 저장
+        async function saveEpisode() {
+            const episodeNumber = parseInt(document.getElementById('episodeNumber').value);
+            const characterId = document.getElementById('characterSelect').value;
+            const difficulty = document.getElementById('difficulty').value;
+            const userPrompt = document.getElementById('userPrompt').value;
+            
+            if (!episodeNumber || !characterId || !userPrompt) {
+                alert('모든 필수 항목을 입력해주세요.');
+                return;
+            }
+            
+            const characterName = getCharacterName(characterId);
+            
+            const episodeData = {
+                scenario_id: currentScenarioId,
+                episode_number: episodeNumber,
+                character_id: characterId,
+                character_name: characterName,
+                difficulty: difficulty,
+                user_input_prompt: userPrompt
+            };
+            
+            if (currentMode === 'create') {
+                episodeData.action = 'create';
+            } else {
+                episodeData.action = 'update';
+                episodeData.id = document.getElementById('episodeId').value;
+            }
+            
+            // 커스텀 대화가 있으면 추가
+            const customDialogue = document.getElementById('customDialogue').value;
+            const customNarration = document.getElementById('customNarration').value;
+            if (customDialogue || customNarration) {
+                episodeData.custom_dialogue = JSON.stringify({
+                    dialogue: customDialogue,
+                    narration: customNarration
+                });
+            }
+            
+            try {
+                const response = await fetch('/api/episode-manager', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(episodeData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(currentMode === 'create' ? '에피소드가 생성되었습니다!' : '에피소드가 수정되었습니다!');
+                    closeModal();
+                    loadEpisodes();
+                } else {
+                    throw new Error(data.message || '저장 실패');
+                }
+            } catch (error) {
+                console.error('에피소드 저장 오류:', error);
+                alert('에피소드 저장에 실패했습니다: ' + error.message);
+            }
+        }
+
+        // 일괄 생성
+        async function generateBulkEpisodes() {
+            if (!currentScenarioId) {
+                alert('먼저 시나리오를 선택해주세요.');
+                return;
+            }
+            
+            const characterId = prompt('일괄 생성할 캐릭터 ID를 입력하세요:\nyuna_infp, mina_enfp, seoyeon_intj, jihye_esfj, hyejin_istp');
+            if (!characterId) return;
+            
+            const startNum = parseInt(prompt('시작 에피소드 번호 (1-36):'));
+            const endNum = parseInt(prompt('종료 에피소드 번호 (1-36):'));
+            
+            if (!startNum || !endNum || startNum < 1 || endNum > 36 || startNum > endNum) {
+                alert('올바른 범위를 입력해주세요.');
+                return;
+            }
+            
+            if (confirm(`${startNum}번부터 ${endNum}번까지 ${endNum - startNum + 1}개의 에피소드를 생성하시겠습니까?`)) {
+                alert('일괄 생성 기능은 개발 중입니다. 개별적으로 생성해주세요.');
+            }
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('episodeModal').style.display = 'none';
+            document.getElementById('episodeForm').reset();
+            document.getElementById('dialoguePreview').style.display = 'none';
+            generatedDialogue = null;
+        }
+
+        // ESC 키로 모달 닫기
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                closeModal();
+            }
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

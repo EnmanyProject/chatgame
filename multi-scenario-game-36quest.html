@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 36퀘스트 MBTI 로맨스 게임 v3.0.0 🌟</title>
+    <link rel="stylesheet" href="css/quest-ui.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .chat-container {
+            width: min(100vw, 400px);
+            height: min(100vh, 800px);
+            max-width: 400px;
+            max-height: 800px;
+            background: #000;
+            border: 2px solid #333;
+            border-radius: 25px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 시나리오 선택 화면 */
+        .scenario-selection {
+            flex: 1;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .scenario-title {
+            font-size: 24px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #ff69b4;
+        }
+        .scenario-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 300px;
+        }
+        .scenario-button {
+            background: #333;
+            border: 2px solid #555;
+            color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .scenario-button:hover {
+            background: #444;
+            border-color: #ff69b4;
+            transform: translateY(-2px);
+        }
+        
+        /* 채팅 화면 */
+        .chat-header {
+            background: #111;
+            padding: 15px 20px;
+            border-bottom: 1px solid #333;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .contact-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .profile-pic {
+            position: relative;
+        }
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #ff69b4;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .avatar:hover {
+            transform: scale(1.05);
+            border-color: #ff1493;
+        }
+        .contact-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+        }
+        .contact-status {
+            font-size: 14px;
+            color: #888;
+            margin-top: 2px;
+        }
+        .game-controls {
+            display: flex;
+            gap: 10px;
+        }
+        .control-button {
+            background: #333;
+            border: 1px solid #555;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .control-button:hover {
+            background: #444;
+            border-color: #ff69b4;
+        }
+        .control-button.active {
+            background: #ff69b4;
+            border-color: #ff1493;
+        }
+        
+        /* 메시지 영역 */
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #000;
+            display: none;
+        }
+        .messages-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .messages-area::-webkit-scrollbar-track {
+            background: #111;
+        }
+        .messages-area::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 3px;
+        }
+        .message {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+            opacity: 0;
+            animation: messageSlide 0.3s ease-out;
+        }
+        .message.received {
+            align-items: flex-start;
+        }
+        .message.sent {
+            align-items: flex-end;
+        }
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .message.received .message-bubble {
+            background: #333;
+            color: #fff;
+            border-bottom-left-radius: 4px;
+        }
+        .message.received.narration .message-bubble {
+            background: #222;
+            color: #888;
+            font-style: italic;
+            border-bottom-left-radius: 4px;
+        }
+        .message.sent .message-bubble {
+            background: #ff69b4;
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+        
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 선택지 */
+        .choices-container {
+            padding: 15px 20px;
+            border-top: 1px solid #333;
+            background: #111;
+            transform: translateY(100%);
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            display: none;
+        }
+        .choices-container.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .choices-container.hide {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        .choice-button {
+            width: 100%;
+            background: #333;
+            border: 2px solid #555;
+            color: #fff;
+            padding: 15px 20px;
+            margin: 8px 0;
+            border-radius: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: choiceSlideIn 0.4s ease-out forwards;
+        }
+        .choice-button:nth-child(1) { animation-delay: 0.1s; }
+        .choice-button:nth-child(2) { animation-delay: 0.2s; }
+        .choice-button:nth-child(3) { animation-delay: 0.3s; }
+        .choice-button:nth-child(4) { animation-delay: 0.4s; }
+        
+        @keyframes choiceSlideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .choice-button:hover {
+            background: #444;
+            border-color: #ff69b4;
+            transform: translateY(-2px);
+        }
+        .choice-button:active {
+            transform: translateY(0px);
+        }
+        .choice-button.selected {
+            background: #ff69b4;
+            border-color: #ff1493;
+        }
+        
+        /* 입력창 */
+        .input-container {
+            padding: 15px 20px;
+            border-top: 1px solid #333;
+            background: #111;
+            display: none;
+        }
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .input-field {
+            flex: 1;
+            background: #222;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 16px;
+            resize: none;
+            max-height: 120px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            border-color: #ff69b4;
+            box-shadow: 0 0 0 2px rgba(255, 105, 180, 0.2);
+        }
+        .send-button {
+            width: 40px;
+            height: 40px;
+            background: #ff69b4;
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .send-button:hover {
+            background: #ff1493;
+            transform: scale(1.05);
+        }
+        .send-button:active {
+            transform: scale(0.95);
+        }
+        
+        /* 호감도 표시 */
+        .affection-bar {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: none;
+        }
+        .affection-progress {
+            width: 100px;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .affection-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff69b4, #ff1493);
+            width: 50%;
+            transition: width 0.5s ease;
+            border-radius: 3px;
+        }
+        
+        /* 로딩 상태 */
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #888;
+            font-style: italic;
+        }
+        .loading-dots {
+            display: inline-flex;
+            gap: 2px;
+        }
+        .loading-dot {
+            width: 4px;
+            height: 4px;
+            background: #ff69b4;
+            border-radius: 50%;
+            animation: loadingPulse 1.4s ease-in-out infinite both;
+        }
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes loadingPulse {
+            0%, 80%, 100% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* 에러 상태 */
+        .error-message {
+            color: #ff4757;
+            background: rgba(255, 71, 87, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 20px;
+            border-left: 4px solid #ff4757;
+            font-size: 14px;
+        }
+        
+        /* 반응형 */
+        @media (max-width: 480px) {
+            .chat-container {
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+                border: none;
+            }
+        }
+        
+        /* 유틸리티 */
+        .hidden { display: none !important; }
+        .show { display: flex !important; }
+        .block { display: block !important; }
+        
+        /* 퀘스트 버튼 추가 스타일 */
+        .quest-button {
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            box-shadow: 0 5px 20px rgba(255,105,180,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .quest-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(255,105,180,0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- 퀘스트 선택 모달 -->
+    <div id="questSelectionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🎮 퀘스트 선택</h2>
+                <span class="close" onclick="questManager.closeQuestModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="questCategories" class="quest-categories">
+                    <!-- 퀘스트 카테고리들이 동적으로 로드됩니다 -->
+                </div>
+                <div id="questList" class="quest-list">
+                    <!-- 선택된 카테고리의 퀘스트들이 표시됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 캐릭터 선택 모달 -->
+    <div id="characterSelectionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>👥 캐릭터 선택</h2>
+                <span class="close" onclick="questManager.closeCharacterModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="characterList" class="character-list">
+                    <!-- 캐릭터들이 동적으로 로드됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="chat-container">
+        <!-- 시나리오 선택 화면 -->
+        <div class="scenario-selection" id="scenario-selection">
+            <div class="scenario-title">🎮 36퀘스트 MBTI 로맨스 게임</div>
+            <button class="quest-button" onclick="questManager.openQuestSelection()">🌟 36퀘스트 시작하기</button>
+            <div id="progressStatus"></div>
+            <div class="scenario-buttons" id="scenario-buttons" style="display:none;">
+                <!-- 동적으로 로드됨 -->
+            </div>
+        </div>
+
+        <!-- 채팅 헤더 -->
+        <div class="chat-header" id="chat-header">
+            <div class="contact-info">
+                <div class="profile-pic">
+                    <img src="/photo/윤아.jpg" alt="윤아" class="avatar" id="avatar">
+                </div>
+                <div class="contact-details">
+                    <div class="contact-name" id="contact-name">윤아</div>
+                    <div class="contact-status" id="contact-status">온라인</div>
+                </div>
+            </div>
+            <div class="game-controls">
+                <button class="control-button" id="free-chat-toggle">자유채팅</button>
+                <button class="control-button" id="save-button">저장</button>
+                <button class="control-button" id="menu-button">메뉴</button>
+            </div>
+        </div>
+
+        <!-- 호감도 바 -->
+        <div class="affection-bar" id="affection-bar">
+            <span>💕</span>
+            <div class="affection-progress">
+                <div class="affection-fill" id="affection-fill"></div>
+            </div>
+            <span id="affection-value">50</span>
+        </div>
+
+        <!-- 메시지 영역 -->
+        <div class="messages-area" id="messages-area">
+            <!-- 메시지들이 여기에 동적으로 추가됨 -->
+        </div>
+
+        <!-- 선택지 컨테이너 -->
+        <div class="choices-container" id="choices-container">
+            <!-- 선택지들이 여기에 동적으로 추가됨 -->
+        </div>
+
+        <!-- 입력창 -->
+        <div class="input-container" id="input-container">
+            <div class="input-wrapper">
+                <textarea class="input-field" id="message-input" placeholder="메시지를 입력하세요..." rows="1"></textarea>
+                <button class="send-button" id="send-button">
+                    <span>➤</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 독립형 게임 엔진 - 모듈 의존성 없는 버전
+        class PremiumGameEngine {
+            constructor() {
+                this.initialized = false;
+                this.gameState = {
+                    currentScenario: null,
+                    currentCharacter: null,
+                    choiceNumber: 0,
+                    affection: 50,
+                    messageCount: 0,
+                    isFreeChatMode: false,
+                    canInput: true,
+                    isProcessing: false,
+                    startedAt: Date.now()
+                };
+                this.scenarios = [];
+                this.characters = [];
+                this.currentScenarioId = null;
+                this.currentCharacterId = null;
+            }
+
+            async initialize() {
+                console.log('🎮 PremiumGameEngine 초기화...');
+                
+                // 기본 데이터 설정
+                this.scenarios = [
+                    {
+                        id: 'hangover_confession',
+                        title: '어제 밤의 기억',
+                        description: '술에 취해 고백한 후의 어색한 상황',
+                        character_id: 'yuna_infp'
+                    }
+                ];
+
+                this.characters = [
+                    {
+                        id: 'yuna_infp',
+                        name: '윤아',
+                        age: 20,
+                        mbti: 'INFP',
+                        personality: '감성적이고 이상주의적인 예술 전공생',
+                        avatar: '/photo/윤아.jpg'
+                    }
+                ];
+
+                this.initialized = true;
+                console.log('✅ PremiumGameEngine 초기화 완료');
+                return true;
+            }
+
+            async startGame(scenarioId, characterId) {
+                console.log(`🎮 게임 시작: ${scenarioId} - ${characterId}`);
+                
+                this.currentScenarioId = scenarioId;
+                this.currentCharacterId = characterId;
+                this.gameState.currentScenario = scenarioId;
+                this.gameState.currentCharacter = characterId;
+                
+                const scenario = this.scenarios.find(s => s.id === scenarioId);
+                const character = this.characters.find(c => c.id === characterId);
+                
+                return {
+                    success: true,
+                    scenario,
+                    character
+                };
+            }
+
+            async processChoice(choiceData) {
+                console.log('🎯 선택지 처리:', choiceData);
+                
+                this.gameState.canInput = false;
+                this.gameState.isProcessing = true;
+                
+                const oldAffection = this.gameState.affection;
+                this.gameState.affection = Math.max(0, Math.min(100, 
+                    this.gameState.affection + (choiceData.affectionImpact || 0)
+                ));
+                
+                this.gameState.choiceNumber++;
+                this.gameState.messageCount++;
+                
+                setTimeout(() => {
+                    this.gameState.canInput = true;
+                    this.gameState.isProcessing = false;
+                }, 1000);
+                
+                return {
+                    success: true,
+                    newAffection: this.gameState.affection,
+                    affectionChange: this.gameState.affection - oldAffection
+                };
+            }
+
+            async sendMessage(message) {
+                console.log('💬 메시지 전송:', message);
+                
+                this.gameState.messageCount++;
+                
+                const responses = [
+                    '네, 알겠어요 😊',
+                    '오빠... 그런 말씀 하시면... 💕',
+                    '정말요? 믿어도 될까요? 😳',
+                    '부끄러워요... 🫣',
+                    '고마워요, 오빠 😊'
+                ];
+                
+                const response = responses[Math.floor(Math.random() * responses.length)];
+                
+                return {
+                    success: true,
+                    response: response,
+                    affectionChange: Math.random() > 0.7 ? 1 : 0,
+                    newAffection: this.gameState.affection + (Math.random() > 0.7 ? 1 : 0)
+                };
+            }
+
+            toggleFreeChatMode(enabled) {
+                this.gameState.isFreeChatMode = enabled;
+                console.log(`💬 자유 채팅 모드: ${enabled ? '활성화' : '비활성화'}`);
+                return enabled;
+            }
+
+            saveGame() {
+                try {
+                    const saveData = {
+                        gameState: { ...this.gameState },
+                        currentScenarioId: this.currentScenarioId,
+                        currentCharacterId: this.currentCharacterId,
+                        savedAt: Date.now(),
+                        version: '2.2.0-premium'
+                    };
+                    
+                    localStorage.setItem('chatgame_save_premium', JSON.stringify(saveData));
+                    console.log('💾 게임 저장 완료');
+                    return { success: true };
+                } catch (error) {
+                    console.error('❌ 게임 저장 실패:', error);
+                    return { success: false, error: error.message };
+                }
+            }
+
+            loadGame() {
+                try {
+                    const savedData = localStorage.getItem('chatgame_save_premium');
+                    if (!savedData) {
+                        throw new Error('저장 데이터를 찾을 수 없습니다');
+                    }
+                    
+                    const saveData = JSON.parse(savedData);
+                    this.gameState = { ...saveData.gameState };
+                    this.currentScenarioId = saveData.currentScenarioId;
+                    this.currentCharacterId = saveData.currentCharacterId;
+                    
+                    console.log('📁 게임 불러오기 완료');
+                    return { success: true };
+                } catch (error) {
+                    console.error('❌ 게임 불러오기 실패:', error);
+                    return { success: false, error: error.message };
+                }
+            }
+        }
+
+        // 게임 엔진 및 UI 컨트롤러
+        const gameEngine = new PremiumGameEngine();
+        const ui = {
+            scenarioSelection: document.getElementById('scenario-selection'),
+            scenarioButtons: document.getElementById('scenario-buttons'),
+            chatHeader: document.getElementById('chat-header'),
+            messagesArea: document.getElementById('messages-area'),
+            choicesContainer: document.getElementById('choices-container'),
+            inputContainer: document.getElementById('input-container'),
+            messageInput: document.getElementById('message-input'),
+            sendButton: document.getElementById('send-button'),
+            affectionBar: document.getElementById('affection-bar'),
+            affectionFill: document.getElementById('affection-fill'),
+            affectionValue: document.getElementById('affection-value'),
+            contactName: document.getElementById('contact-name'),
+            contactStatus: document.getElementById('contact-status'),
+            avatar: document.getElementById('avatar'),
+            freeChatToggle: document.getElementById('free-chat-toggle'),
+            saveButton: document.getElementById('save-button'),
+            menuButton: document.getElementById('menu-button')
+        };
+
+        // 게임 초기화
+        async function initializeGame() {
+            try {
+                console.log('🎮 프리미엄 게임 초기화 중...');
+                
+                await gameEngine.initialize();
+                loadScenarios();
+                setupEventListeners();
+                
+                console.log('✅ 게임 초기화 완료');
+                showSystemMessage('🎉 프리미엄 메신저 게임이 준비되었습니다!');
+                
+            } catch (error) {
+                console.error('❌ 게임 초기화 실패:', error);
+                showError('게임 초기화에 실패했습니다: ' + error.message);
+            }
+        }
+
+        // 시나리오 로드
+        function loadScenarios() {
+            ui.scenarioButtons.innerHTML = '';
+            
+            gameEngine.scenarios.forEach(scenario => {
+                const button = document.createElement('button');
+                button.className = 'scenario-button';
+                button.textContent = scenario.title;
+                button.addEventListener('click', () => selectScenario(scenario.id));
+                ui.scenarioButtons.appendChild(button);
+            });
+        }
+
+        // 시나리오 선택
+        async function selectScenario(scenarioId, characterId = null) {
+            try {
+                const scenario = gameEngine.scenarios.find(s => s.id === scenarioId);
+                const charId = characterId || scenario.character_id;
+                const result = await gameEngine.startGame(scenarioId, charId);
+                
+                if (result.success) {
+                    ui.scenarioSelection.classList.add('hidden');
+                    ui.chatHeader.classList.add('show');
+                    ui.messagesArea.classList.add('show');
+                    ui.choicesContainer.classList.add('show');
+                    ui.affectionBar.classList.add('show');
+                    
+                    ui.contactName.textContent = result.character.name;
+                    ui.contactStatus.textContent = 'INFP • 20살 • 예술전공';
+                    
+                    showSystemMessage(`${result.character.name}과의 대화를 시작합니다...`);
+                    
+                    setTimeout(() => {
+                        generateDialogue();
+                    }, 1000);
+                }
+                
+            } catch (error) {
+                console.error('❌ 시나리오 선택 실패:', error);
+                showError('시나리오 시작에 실패했습니다.');
+            }
+        }
+
+        // 대화 생성
+        async function generateDialogue() {
+            try {
+                showTypingIndicator();
+                
+                // API 시도
+                try {
+                    const response = await fetch('/api/scenario', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'generate_character_dialogue',
+                            scenario_id: gameEngine.currentScenarioId,
+                            character_id: gameEngine.currentCharacterId,
+                            game_state: gameEngine.gameState
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.generated) {
+                            hideTypingIndicator();
+                            displayDialogue(data.generated);
+                            return;
+                        }
+                    }
+                } catch (apiError) {
+                    console.log('API 호출 실패, 기본 대화 사용:', apiError);
+                }
+                
+                // 기본 대화
+                const defaultDialogues = [
+                    {
+                        dialogue: "오빠... 어제 밤 일이... 정말 미안해요 😳",
+                        narration: "윤아가 얼굴을 빨갛게 물들이며 고개를 숙인다.",
+                        choices: [
+                            { text: "괜찮다고 다정하게 말한다", affection_impact: 2 },
+                            { text: "무슨 일인지 물어본다", affection_impact: 0 },
+                            { text: "진심이었는지 확인한다", affection_impact: 1 }
+                        ]
+                    },
+                    {
+                        dialogue: "사실... 제가 오빠를 좋아한다고 고백한 거... 정말 진심이었어요 💕",
+                        narration: "윤아가 용기를 내어 진실을 털어놓는다.",
+                        choices: [
+                            { text: "나도 너를 좋아한다고 고백한다", affection_impact: 5 },
+                            { text: "고마운 마음을 표현한다", affection_impact: 2 },
+                            { text: "좀 더 생각해보자고 한다", affection_impact: -1 }
+                        ]
+                    }
+                ];
+                
+                hideTypingIndicator();
+                const dialogue = defaultDialogues[gameEngine.gameState.choiceNumber % defaultDialogues.length];
+                displayDialogue(dialogue);
+                
+            } catch (error) {
+                console.error('❌ 대화 생성 실패:', error);
+                hideTypingIndicator();
+                showError('대화 생성에 실패했습니다.');
+            }
+        }
+
+        // 대화 표시
+        function displayDialogue(dialogueData) {
+            showMessage(dialogueData.dialogue, 'received');
+            
+            if (dialogueData.narration) {
+                showMessage(dialogueData.narration, 'received', 'narration');
+            }
+            
+            if (dialogueData.choices && dialogueData.choices.length > 0) {
+                setTimeout(() => {
+                    showChoices(dialogueData.choices);
+                }, 500);
+            }
+        }
+
+        // 메시지 표시
+        function showMessage(text, type, subtype = '') {
+            const message = document.createElement('div');
+            message.className = `message ${type} ${subtype}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = text;
+            
+            message.appendChild(bubble);
+            ui.messagesArea.appendChild(message);
+            
+            // 애니메이션을 위한 지연
+            setTimeout(() => {
+                message.style.opacity = '1';
+            }, 10);
+            
+            scrollToBottom();
+        }
+
+        // 시스템 메시지 표시
+        function showSystemMessage(text) {
+            showMessage(text, 'received', 'narration');
+        }
+
+        // 에러 메시지 표시
+        function showError(text) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = text;
+            ui.messagesArea.appendChild(errorDiv);
+            scrollToBottom();
+        }
+
+        // 타이핑 인디케이터
+        function showTypingIndicator() {
+            const typing = document.createElement('div');
+            typing.className = 'message received';
+            typing.id = 'typing-indicator';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.innerHTML = `
+                <div class="loading">
+                    윤아가 입력중
+                    <div class="loading-dots">
+                        <div class="loading-dot"></div>
+                        <div class="loading-dot"></div>
+                        <div class="loading-dot"></div>
+                    </div>
+                </div>
+            `;
+            
+            typing.appendChild(bubble);
+            ui.messagesArea.appendChild(typing);
+            
+            setTimeout(() => {
+                typing.style.opacity = '1';
+            }, 10);
+            
+            scrollToBottom();
+        }
+
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        // 선택지 표시
+        function showChoices(choices) {
+            ui.choicesContainer.innerHTML = '';
+            
+            choices.forEach((choice, index) => {
+                const button = document.createElement('button');
+                button.className = 'choice-button';
+                button.textContent = choice.text;
+                button.addEventListener('click', () => selectChoice(index, choice));
+                ui.choicesContainer.appendChild(button);
+            });
+            
+            ui.choicesContainer.classList.add('show');
+        }
+
+        // 선택지 선택 처리
+        async function selectChoice(choiceIndex, choiceData) {
+            try {
+                // 선택지 비활성화
+                const buttons = ui.choicesContainer.querySelectorAll('.choice-button');
+                buttons.forEach((btn, index) => {
+                    if (index === choiceIndex) {
+                        btn.classList.add('selected');
+                    }
+                    btn.disabled = true;
+                });
+                
+                // 사용자 선택 표시
+                showMessage(choiceData.text, 'sent');
+                
+                // 선택지 숨김
+                setTimeout(() => {
+                    ui.choicesContainer.classList.remove('show');
+                }, 500);
+                
+                // 선택지 처리
+                const result = await gameEngine.processChoice({
+                    choiceIndex,
+                    choiceText: choiceData.text,
+                    affectionImpact: choiceData.affection_impact
+                });
+                
+                if (result.success) {
+                    updateAffection(result.newAffection);
+                    
+                    // 다음 대화 생성
+                    setTimeout(() => {
+                        generateDialogue();
+                    }, 1500);
+                }
+                
+            } catch (error) {
+                console.error('❌ 선택지 처리 실패:', error);
+                showError('선택지 처리에 실패했습니다.');
+            }
+        }
+
+        // 자유 메시지 전송
+        async function sendFreeMessage() {
+            const message = ui.messageInput.value.trim();
+            if (!message) return;
+            
+            try {
+                showMessage(message, 'sent');
+                ui.messageInput.value = '';
+                
+                showTypingIndicator();
+                
+                const result = await gameEngine.sendMessage(message);
+                
+                hideTypingIndicator();
+                
+                if (result.success && result.response) {
+                    showMessage(result.response, 'received');
+                    
+                    if (result.affectionChange) {
+                        updateAffection(result.newAffection);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('❌ 메시지 전송 실패:', error);
+                hideTypingIndicator();
+                showError('메시지 전송에 실패했습니다.');
+            }
+        }
+
+        // 호감도 업데이트
+        function updateAffection(newValue) {
+            ui.affectionFill.style.width = `${newValue}%`;
+            ui.affectionValue.textContent = newValue;
+            
+            // 호감도 변화 효과
+            ui.affectionBar.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                ui.affectionBar.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        // 스크롤 하단으로
+        function scrollToBottom() {
+            ui.messagesArea.scrollTop = ui.messagesArea.scrollHeight;
+        }
+
+        // 이벤트 리스너 설정
+        function setupEventListeners() {
+            // 자유 채팅 토글
+            ui.freeChatToggle.addEventListener('click', () => {
+                const isFreeChatMode = !gameEngine.gameState.isFreeChatMode;
+                gameEngine.toggleFreeChatMode(isFreeChatMode);
+                
+                if (isFreeChatMode) {
+                    ui.choicesContainer.classList.remove('show');
+                    ui.inputContainer.classList.add('show');
+                    ui.freeChatToggle.textContent = '선택지';
+                    ui.freeChatToggle.classList.add('active');
+                } else {
+                    ui.inputContainer.classList.remove('show');
+                    ui.freeChatToggle.textContent = '자유채팅';
+                    ui.freeChatToggle.classList.remove('active');
+                }
+                
+                showSystemMessage(`${isFreeChatMode ? '자유 채팅' : '선택지'} 모드로 전환되었습니다.`);
+            });
+
+            // 메시지 전송
+            ui.sendButton.addEventListener('click', sendFreeMessage);
+            
+            ui.messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendFreeMessage();
+                }
+            });
+
+            // 저장
+            ui.saveButton.addEventListener('click', () => {
+                const result = gameEngine.saveGame();
+                if (result.success) {
+                    showSystemMessage('💾 게임이 저장되었습니다.');
+                } else {
+                    showError('게임 저장에 실패했습니다.');
+                }
+            });
+
+            // 메뉴 (추후 확장)
+            ui.menuButton.addEventListener('click', () => {
+                showSystemMessage('메뉴 기능은 곧 추가됩니다.');
+            });
+        }
+
+        // 퀘스트 시스템과 연동하기 위한 전역 함수
+        window.startGame = function(questId, characterId) {
+            // 퀘스트 ID를 시나리오 ID로 변환 (임시)
+            const scenarioId = 'hangover_confession'; // 기본 시나리오
+            
+            // 캐릭터별 시나리오 선택
+            selectScenario(scenarioId, characterId);
+            
+            // 게임 상태에 퀘스트 정보 저장
+            if (window.gameState) {
+                window.gameState.currentQuestId = questId;
+                window.gameState.currentCharacterId = characterId;
+            }
+        };
+        
+        // 게임 초기화 실행
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeGame();
+            
+            // 진행 상태 표시
+            const progressDiv = document.getElementById('progressStatus');
+            if (progressDiv && window.questManager) {
+                progressDiv.appendChild(window.questManager.showProgressStatus());
+            }
+        });
+    </script>
+    <script src="js/quest-manager.js"></script>
+</body>
+</html>

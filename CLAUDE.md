@@ -28,9 +28,135 @@ Read 파일명 -limit 50
 - ❌ 반복적인 동일 파일 읽기
 
 ## 프로젝트 개요
-MBTI 기반 로맨스 채팅 게임 - 윤아(INFP) 캐릭터와의 대화형 게임
+MBTI 기반 로맨스 채팅 게임 - 시나리오-에피소드 분리형 36퀘스트 시스템
 
-## 최신 작업 (2025-09-02)
+## 최신 작업 (2025-01-02 - 시나리오/에피소드 통합 관리 시스템)
+
+### 🎯 통합 관리 시스템 구축
+- **작업 내용**: 시나리오, 에피소드, 캐릭터 관리를 하나의 인터페이스로 통합
+- **파일**: `scenario-admin.html` (1,819줄로 최적화)
+- **특징**:
+  - 탭 기반 네비게이션 (시나리오/에피소드/캐릭터)
+  - 실시간 통계 대시보드
+  - 36퀘스트 에피소드 관리 (난이도별 필터링)
+  - AI 컨텍스트/대화 자동 생성
+  - 반응형 디자인
+
+### 🚀 시나리오-에피소드 분리형 시스템 구현
+- **개념**: 시나리오(배경 스토리) ↔ 에피소드(실제 대화 콘텐츠) 분리
+- **구조**:
+  ```
+  시나리오 (배경/컨텍스트)
+  └── 에피소드 1-36 (대화/선택지)
+       ├── Easy (1-9): 기본 호감도 0
+       ├── Medium (10-18): 기본 호감도 10  
+       ├── Hard (19-27): 기본 호감도 20
+       └── Expert (28-36): 기본 호감도 30
+  ```
+
+#### 📁 새로 생성된 파일들
+1. **API 시스템**
+   - `api/scenario-manager.js`: 시나리오 관리 API (Claude 3.5 통합)
+   - `api/episode-manager.js`: 에피소드 관리 API (MBTI 캐릭터별 대화 생성)
+
+2. **데이터베이스**
+   - `data/scenarios/scenario-database.json`: 시나리오 DB
+   - `data/episodes/episode-database.json`: 에피소드 DB
+
+3. **관리 인터페이스** 
+   - `admin/scenario-management.html`: 시나리오 관리 UI (통합됨)
+   - `admin/episode-management.html`: 에피소드 관리 UI (통합됨)
+   - `scenario-admin.html`: 통합 관리 시스템 (최종)
+
+4. **문서**
+   - `SCENARIO_EPISODE_GUIDE.md`: 시스템 사용 가이드
+
+#### 🤖 AI 기능
+- **Claude 3.5 Sonnet API 통합**
+  - 시나리오: 소설풍 컨텍스트 자동 생성
+  - 에피소드: MBTI 성격별 맞춤 대화 생성
+  - Fallback: API 실패 시 템플릿 기반 대체
+
+#### 👥 MBTI 캐릭터 특성
+```javascript
+{
+  'yuna_infp': { 
+    personality: '감성적, 내향적, 이상주의적',
+    speech_style: '부드럽고 따뜻한 말투, 이모티콘 사용'
+  },
+  'mina_enfp': {
+    personality: '외향적, 열정적, 창의적',
+    speech_style: '밝고 에너지 넘치는 말투'
+  },
+  'seoyeon_intj': {
+    personality: '논리적, 독립적, 완벽주의',
+    speech_style: '간결하고 정확한 말투'
+  },
+  'jihye_esfj': {
+    personality: '사교적, 배려심 많은',
+    speech_style: '따뜻하고 배려깊은 말투'
+  },
+  'hyejin_istp': {
+    personality: '실용적, 독립적',
+    speech_style: '간결하고 실용적인 말투'
+  }
+}
+```
+
+## 이전 작업 (2025-09-02 저녁)
+
+### 🐛 scenario-admin.html 캐릭터 추가 버그 수정
+- **문제**: 새 캐릭터 추가 버튼 클릭 시 `Cannot set properties of null` 오류
+- **원인**: 캐릭터 추가/수정용 모달이 HTML에 존재하지 않음
+- **해결**:
+  - 캐릭터 모달 HTML 구조 추가
+  - 모달 관련 CSS 스타일 추가
+  - `saveCharacter()` 함수 구현
+  - 캐릭터 CRUD 기능 완전 복구
+- **결과**: 캐릭터 추가/수정/삭제 기능 정상 작동
+
+## 이전 작업 (2025-09-02 오후)
+
+### 🎮 36퀘스트 MBTI 로맨스 게임 v3.0.0 - 대규모 확장 완료
+- **새 브랜치**: `feature/36-quest-expansion` 생성
+- **주요 성과**: 1개 시나리오/캐릭터 → 36개 퀘스트 + 5개 MBTI 캐릭터로 확장
+
+#### 📁 새로 생성된 파일들
+1. **퀘스트 시스템**
+   - `data/quests/quest-database.json`: 36개 퀘스트 데이터베이스
+   - `data/characters-extended/mbti-characters.json`: 5개 MBTI 캐릭터 데이터
+   - `js/quest-manager.js`: 퀘스트 관리 시스템 JavaScript
+   - `css/quest-ui.css`: 퀘스트 UI 스타일시트
+
+2. **API 확장**
+   - `api/quest-manager.js`: 퀘스트 관리 API (신규)
+   - `api/scenario.js`: 멀티 캐릭터 지원 추가 (v2.3.0)
+
+3. **게임 인터페이스**
+   - `multi-scenario-game-36quest.html`: 36퀘스트 통합 게임
+   - `test-36quest.html`: 시스템 테스트 페이지
+
+#### 🎯 36퀘스트 카테고리 구조
+- **일상 로맨스** (Easy, 9개): 평범한 일상 속 설렘
+- **깊은 감정** (Medium, 9개): 서로를 깊이 이해하는 순간들
+- **갈등과 화해** (Hard, 9개): 오해를 극복하며 성장
+- **궁극의 유대** (Expert, 9개): 진정한 사랑의 완성
+
+#### 👥 5개 MBTI 캐릭터
+1. **윤아 (INFP)**: 감성적 예술 전공 후배
+2. **미나 (ENFP)**: 밝고 활발한 학생회장
+3. **서연 (INTJ)**: 논리적인 대학원생 선배
+4. **지혜 (ESFJ)**: 따뜻한 동갑 친구
+5. **혜진 (ISTP)**: 쿨한 공학과 선배
+
+#### ✨ 주요 기능
+- 퀘스트 진행도 추적 및 저장
+- 캐릭터별 전용 대화 생성
+- 퀘스트 해금 시스템
+- 호감도 누적 관리
+- 로컬 스토리지 기반 세이브
+
+## 이전 작업 (2025-09-02 오전)
 
 ### 1. scenario-admin.html CSS/JS 파싱 오류 해결
 - **문제**: CSS 스타일 태그 안에 JavaScript 코드가 혼재되어 HTML 파싱 실패

@@ -1,0 +1,31 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "created_date": "2025-01-02",
+    "total_scenarios": 0,
+    "ai_context_engine": "claude-3.5-sonnet"
+  },
+  "scenarios": {
+    "scenario_hangover": {
+      "id": "scenario_hangover", 
+      "title": "어제 밤의 기억",
+      "description": "술에 취해 고백한 다음날 아침의 어색하고 설레는 상황",
+      "background_setting": "대학교 근처 카페, 다음날 오전, 메신저 대화",
+      "mood": "부끄러움, 설렘, 긴장감, 로맨틱한 분위기",
+      "active_status": true,
+      "created_date": "2025-01-02",
+      "ai_generated_context": "",
+      "custom_context": "",
+      "available_characters": ["yuna_infp", "mina_enfp"],
+      "episode_count": 0,
+      "tags": ["confession", "romance", "awkward", "morning_after"]
+    }
+  },
+  "scenario_templates": {
+    "romance_template": {
+      "mood_options": ["설렘", "부끄러움", "긴장감", "달콤함", "애절함"],
+      "setting_options": ["카페", "학교", "집", "공원", "도서관", "거리"],
+      "time_options": ["아침", "점심", "저녁", "밤", "새벽"]
+    }
+  }
+}
