@@ -10,6 +10,7 @@
 ## 주요 파일
 - `multi-scenario-game.html`: 메인 게임 페이지
 - `modules/GameLogic.js`: 게임 로직 모듈
+- `modules/game/`: 새로운 모듈화된 게임 시스템 (예정)
 
 ## 핵심 기능
 ### 캐릭터 시스템
@@ -45,10 +46,59 @@
 - JavaScript TypeError 수정
 - API 응답 검증 로직 추가
 
+## Phase 2-2 계획 (다음 구현 예정)
+
+### 선택지 로직 모듈
+```javascript
+// modules/game/choiceLogic.js (예정)
+class ChoiceLogic {
+    calculateAffectionChange(choice, characterState) {
+        // 호감도 변화 계산
+    }
+    
+    determineBranching(choices, currentState) {
+        // 스토리 분기 결정
+    }
+}
+```
+
+### 직접 입력 시스템
+```javascript
+// modules/game/freeChat.js (예정)  
+class FreeChatMode {
+    analyzeUserInput(message) {
+        // 사용자 입력 감정 분석
+    }
+    
+    generateResponse(input, character, context) {
+        // 자유 대화 응답 생성
+    }
+}
+```
+
+### 에피소드 흐름 관리
+```javascript
+// modules/game/episodeFlow.js (예정)
+class EpisodeFlow {
+    initializeEpisode(episodeId, character) {
+        // 36개 에피소드 초기화
+    }
+    
+    checkProgressConditions(currentState) {
+        // 진행 조건 확인
+    }
+}
+```
+
 ## 다음 작업 계획
+- **Phase 2-2**: 게임 로직 모듈 구현
+  - 선택지 & 호감도 계산 로직
+  - 직접 입력 & 자유 채팅 모드  
+  - 에피소드(36퀘스트) 흐름 관리
 - 다른 MBTI 캐릭터 추가
 - 시나리오 확장
 - 대화 메모리 시스템
 
 ---
 *업데이트: 2025-09-02*
+*상태: Phase 2-1 완료, Phase 2-2 준비 중*
