@@ -1,0 +1,69 @@
+{
+  "characters": {
+    "yuna_infp": {
+      "id": "yuna_infp",
+      "name": "윤아",
+      "mbti": "INFP",
+      "age": 20,
+      "personality": ["감성적", "이상주의적", "창의적", "내향적"],
+      "relationship": "1년간 짝사랑하는 후배",
+      "background": "예술 전공 대학생, 감수성 풍부",
+      "speech_style": "부드럽고 따뜻한 말투, 이모티콘 자주 사용",
+      "photo": "photo/윤아.jpg",
+      "status": "active",
+      "available_quests": "all"
+    },
+    "mina_enfp": {
+      "id": "mina_enfp", 
+      "name": "미나",
+      "mbti": "ENFP",
+      "age": 22,
+      "personality": ["외향적", "열정적", "창의적", "자유로운"],
+      "relationship": "활발한 선배, 친근한 사이",
+      "background": "학생회장, 다양한 활동 참여",
+      "speech_style": "밝고 에너지넘치는 말투, 격려 많이 함",
+      "photo": "photo/미나.png", 
+      "status": "planned",
+      "available_quests": "daily_romance,deep_emotions"
+    },
+    "seoyeon_intj": {
+      "id": "seoyeon_intj",
+      "name": "서연", 
+      "mbti": "INTJ",
+      "age": 24,
+      "personality": ["논리적", "독립적", "완벽주의", "전략적"],
+      "relationship": "연구실 선배, 차가운 듯 따뜻한",
+      "background": "대학원생, 연구에 몰두하는 지적인 선배",
+      "speech_style": "간결하고 정확한 말투, 가끔 따뜻한 면 보임",
+      "photo": "photo/서연.jpg",
+      "status": "planned", 
+      "available_quests": "deep_emotions,conflict_resolution"
+    },
+    "jihye_esfj": {
+      "id": "jihye_esfj",
+      "name": "지혜",
+      "mbti": "ESFJ", 
+      "age": 21,
+      "personality": ["사교적", "배려심많은", "책임감강한", "감정적"],
+      "relationship": "동갑 친구, 항상 챙겨주는",
+      "background": "교육학과, 봉사활동 좋아하는 따뜻한 친구",
+      "speech_style": "따뜻하고 배려깊은 말투, 걱정하는 표현 많음",
+      "photo": "photo/지혜.jpg",
+      "status": "planned",
+      "available_quests": "daily_romance,ultimate_connection"  
+    },
+    "hyejin_istp": {
+      "id": "hyejin_istp",
+      "name": "혜진",
+      "mbti": "ISTP",
+      "age": 23,
+      "personality": ["실용적", "독립적", "논리적", "적응적"],
+      "relationship": "쿨한 선배, 은은한 매력", 
+      "background": "공학과, 실무 능력 뛰어난 현실적 선배",
+      "speech_style": "간결하고 실용적인 말투, 필요한 말만",
+      "photo": "photo/혜진.jpg",
+      "status": "planned",
+      "available_quests": "conflict_resolution,ultimate_connection"
+    }
+  }
+}

@@ -1,0 +1,436 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "total_quests": 36,
+    "categories": 4,
+    "quests_per_category": 9
+  },
+  "categories": {
+    "daily_romance": {
+      "id": "daily_romance",
+      "name": "일상 로맨스",
+      "description": "평범한 일상 속 설렘과 로맨스",
+      "difficulty": "easy",
+      "quest_ids": ["quest_001", "quest_002", "quest_003", "quest_004", "quest_005", "quest_006", "quest_007", "quest_008", "quest_009"]
+    },
+    "deep_emotions": {
+      "id": "deep_emotions", 
+      "name": "깊은 감정",
+      "description": "서로의 마음을 깊이 이해하는 순간들",
+      "difficulty": "medium",
+      "quest_ids": ["quest_010", "quest_011", "quest_012", "quest_013", "quest_014", "quest_015", "quest_016", "quest_017", "quest_018"]
+    },
+    "conflict_resolution": {
+      "id": "conflict_resolution",
+      "name": "갈등과 화해", 
+      "description": "오해와 갈등을 극복하며 더 가까워지기",
+      "difficulty": "hard",
+      "quest_ids": ["quest_019", "quest_020", "quest_021", "quest_022", "quest_023", "quest_024", "quest_025", "quest_026", "quest_027"]
+    },
+    "ultimate_connection": {
+      "id": "ultimate_connection",
+      "name": "궁극의 유대",
+      "description": "진정한 사랑과 깊은 연결의 순간들",
+      "difficulty": "expert", 
+      "quest_ids": ["quest_028", "quest_029", "quest_030", "quest_031", "quest_032", "quest_033", "quest_034", "quest_035", "quest_036"]
+    }
+  },
+  "quests": {
+    "quest_001": {
+      "id": "quest_001",
+      "title": "첫 번째 메시지",
+      "description": "어제 밤 고백 후 첫 연락",
+      "category": "daily_romance",
+      "difficulty": "easy",
+      "required_affection": 0,
+      "scenario_id": "hangover_confession",
+      "available_characters": ["yuna_infp"],
+      "unlocked": true
+    },
+    "quest_002": {
+      "id": "quest_002",
+      "title": "카페에서의 만남",
+      "description": "조용한 카페에서 둘만의 시간",
+      "category": "daily_romance",
+      "difficulty": "easy",
+      "required_affection": 10,
+      "scenario_id": "cafe_meeting",
+      "available_characters": ["yuna_infp", "mina_enfp"],
+      "unlocked": false
+    },
+    "quest_003": {
+      "id": "quest_003",
+      "title": "우산 속 둘",
+      "description": "갑작스런 비, 하나의 우산",
+      "category": "daily_romance",
+      "difficulty": "easy",
+      "required_affection": 15,
+      "scenario_id": "rain_umbrella",
+      "available_characters": ["all"],
+      "unlocked": false
+    },
+    "quest_004": {
+      "id": "quest_004",
+      "title": "도서관 공부",
+      "description": "시험기간, 함께하는 도서관",
+      "category": "daily_romance",
+      "difficulty": "easy",
+      "required_affection": 20,
+      "scenario_id": "library_study",
+      "available_characters": ["seoyeon_intj", "yuna_infp"],
+      "unlocked": false
+    },
+    "quest_005": {
+      "id": "quest_005",
+      "title": "점심 데이트",
+      "description": "캠퍼스 근처 맛집 탐방",
+      "category": "daily_romance",
+      "difficulty": "easy",
+      "required_affection": 25,
+      "scenario_id": "lunch_date",
+      "available_characters": ["jihye_esfj", "mina_enfp"],
+      "unlocked": false
+    },
+    "quest_006": {
+      "id": "quest_006",
+      "title": "늦은 밤 산책",
+      "description": "캠퍼스를 거닐며 나누는 대화",
+      "category": "daily_romance",
+      "difficulty": "easy",
+      "required_affection": 30,
+      "scenario_id": "night_walk",
+      "available_characters": ["all"],
+      "unlocked": false
+    },
+    "quest_007": {
+      "id": "quest_007",
+      "title": "영화관 데이트",
+      "description": "로맨틱 영화와 팝콘",
+      "category": "daily_romance",
+      "difficulty": "easy",
+      "required_affection": 35,
+      "scenario_id": "movie_date",
+      "available_characters": ["yuna_infp", "jihye_esfj"],
+      "unlocked": false
+    },
+    "quest_008": {
+      "id": "quest_008",
+      "title": "축제의 밤",
+      "description": "대학 축제, 불꽃놀이",
+      "category": "daily_romance",
+      "difficulty": "easy",
+      "required_affection": 40,
+      "scenario_id": "festival_night",
+      "available_characters": ["mina_enfp", "hyejin_istp"],
+      "unlocked": false
+    },
+    "quest_009": {
+      "id": "quest_009",
+      "title": "생일 서프라이즈",
+      "description": "특별한 날의 깜짝 선물",
+      "category": "daily_romance",
+      "difficulty": "easy",
+      "required_affection": 45,
+      "scenario_id": "birthday_surprise",
+      "available_characters": ["all"],
+      "unlocked": false
+    },
+    "quest_010": {
+      "id": "quest_010",
+      "title": "진심의 고백",
+      "description": "마음을 열고 진짜 감정을 나누다",
+      "category": "deep_emotions",
+      "difficulty": "medium",
+      "required_affection": 50,
+      "scenario_id": "true_confession",
+      "available_characters": ["yuna_infp", "seoyeon_intj"],
+      "unlocked": false
+    },
+    "quest_011": {
+      "id": "quest_011",
+      "title": "첫 번째 눈물",
+      "description": "서로를 위해 흘린 눈물",
+      "category": "deep_emotions",
+      "difficulty": "medium",
+      "required_affection": 55,
+      "scenario_id": "first_tears",
+      "available_characters": ["yuna_infp", "jihye_esfj"],
+      "unlocked": false
+    },
+    "quest_012": {
+      "id": "quest_012",
+      "title": "가족 이야기",
+      "description": "서로의 가족에 대해 알아가기",
+      "category": "deep_emotions",
+      "difficulty": "medium",
+      "required_affection": 60,
+      "scenario_id": "family_talk",
+      "available_characters": ["all"],
+      "unlocked": false
+    },
+    "quest_013": {
+      "id": "quest_013",
+      "title": "미래의 꿈",
+      "description": "함께 그리는 미래 설계",
+      "category": "deep_emotions",
+      "difficulty": "medium",
+      "required_affection": 65,
+      "scenario_id": "future_dreams",
+      "available_characters": ["seoyeon_intj", "mina_enfp"],
+      "unlocked": false
+    },
+    "quest_014": {
+      "id": "quest_014",
+      "title": "상처와 치유",
+      "description": "과거의 아픔을 나누고 위로하기",
+      "category": "deep_emotions",
+      "difficulty": "medium",
+      "required_affection": 70,
+      "scenario_id": "healing_wounds",
+      "available_characters": ["yuna_infp", "hyejin_istp"],
+      "unlocked": false
+    },
+    "quest_015": {
+      "id": "quest_015",
+      "title": "믿음의 시험",
+      "description": "서로에 대한 신뢰 확인",
+      "category": "deep_emotions",
+      "difficulty": "medium",
+      "required_affection": 75,
+      "scenario_id": "trust_test",
+      "available_characters": ["all"],
+      "unlocked": false
+    },
+    "quest_016": {
+      "id": "quest_016",
+      "title": "첫 번째 선물",
+      "description": "마음을 담은 특별한 선물",
+      "category": "deep_emotions",
+      "difficulty": "medium",
+      "required_affection": 80,
+      "scenario_id": "first_gift",
+      "available_characters": ["jihye_esfj", "yuna_infp"],
+      "unlocked": false
+    },
+    "quest_017": {
+      "id": "quest_017",
+      "title": "약속의 의미",
+      "description": "서로에게 하는 진심어린 약속",
+      "category": "deep_emotions",
+      "difficulty": "medium",
+      "required_affection": 85,
+      "scenario_id": "promise_meaning",
+      "available_characters": ["seoyeon_intj", "mina_enfp"],
+      "unlocked": false
+    },
+    "quest_018": {
+      "id": "quest_018",
+      "title": "첫 번째 포옹",
+      "description": "따뜻한 위로의 포옹",
+      "category": "deep_emotions",
+      "difficulty": "medium",
+      "required_affection": 90,
+      "scenario_id": "first_hug",
+      "available_characters": ["all"],
+      "unlocked": false
+    },
+    "quest_019": {
+      "id": "quest_019",
+      "title": "오해의 시작",
+      "description": "작은 오해가 만든 큰 갈등",
+      "category": "conflict_resolution",
+      "difficulty": "hard",
+      "required_affection": 95,
+      "scenario_id": "misunderstanding_start",
+      "available_characters": ["all"],
+      "unlocked": false
+    },
+    "quest_020": {
+      "id": "quest_020",
+      "title": "질투의 감정",
+      "description": "처음 느끼는 질투심",
+      "category": "conflict_resolution",
+      "difficulty": "hard",
+      "required_affection": 100,
+      "scenario_id": "jealousy_emotion",
+      "available_characters": ["yuna_infp", "mina_enfp"],
+      "unlocked": false
+    },
+    "quest_021": {
+      "id": "quest_021",
+      "title": "거리두기",
+      "description": "서로를 위한 일시적 거리",
+      "category": "conflict_resolution",
+      "difficulty": "hard",
+      "required_affection": 105,
+      "scenario_id": "temporary_distance",
+      "available_characters": ["seoyeon_intj", "hyejin_istp"],
+      "unlocked": false
+    },
+    "quest_022": {
+      "id": "quest_022",
+      "title": "화해의 손길",
+      "description": "먼저 내민 화해의 손",
+      "category": "conflict_resolution",
+      "difficulty": "hard",
+      "required_affection": 110,
+      "scenario_id": "reconciliation_hand",
+      "available_characters": ["all"],
+      "unlocked": false
+    },
+    "quest_023": {
+      "id": "quest_023",
+      "title": "진실의 순간",
+      "description": "모든 것을 털어놓는 시간",
+      "category": "conflict_resolution",
+      "difficulty": "hard",
+      "required_affection": 115,
+      "scenario_id": "truth_moment",
+      "available_characters": ["yuna_infp", "seoyeon_intj"],
+      "unlocked": false
+    },
+    "quest_024": {
+      "id": "quest_024",
+      "title": "용서와 이해",
+      "description": "서로를 완전히 이해하기",
+      "category": "conflict_resolution",
+      "difficulty": "hard",
+      "required_affection": 120,
+      "scenario_id": "forgiveness_understanding",
+      "available_characters": ["jihye_esfj", "mina_enfp"],
+      "unlocked": false
+    },
+    "quest_025": {
+      "id": "quest_025",
+      "title": "새로운 시작",
+      "description": "갈등 후 더 강해진 관계",
+      "category": "conflict_resolution",
+      "difficulty": "hard",
+      "required_affection": 125,
+      "scenario_id": "new_beginning",
+      "available_characters": ["all"],
+      "unlocked": false
+    },
+    "quest_026": {
+      "id": "quest_026",
+      "title": "성장의 증거",
+      "description": "함께 성장한 우리",
+      "category": "conflict_resolution",
+      "difficulty": "hard",
+      "required_affection": 130,
+      "scenario_id": "growth_evidence",
+      "available_characters": ["hyejin_istp", "seoyeon_intj"],
+      "unlocked": false
+    },
+    "quest_027": {
+      "id": "quest_027",
+      "title": "약속의 반지",
+      "description": "영원을 약속하는 작은 반지",
+      "category": "conflict_resolution",
+      "difficulty": "hard",
+      "required_affection": 135,
+      "scenario_id": "promise_ring",
+      "available_characters": ["yuna_infp", "jihye_esfj"],
+      "unlocked": false
+    },
+    "quest_028": {
+      "id": "quest_028",
+      "title": "운명의 만남",
+      "description": "우리가 만난 진짜 이유",
+      "category": "ultimate_connection",
+      "difficulty": "expert",
+      "required_affection": 140,
+      "scenario_id": "destiny_meeting",
+      "available_characters": ["all"],
+      "unlocked": false
+    },
+    "quest_029": {
+      "id": "quest_029",
+      "title": "영혼의 대화",
+      "description": "말없이도 통하는 마음",
+      "category": "ultimate_connection",
+      "difficulty": "expert",
+      "required_affection": 145,
+      "scenario_id": "soul_conversation",
+      "available_characters": ["yuna_infp", "seoyeon_intj"],
+      "unlocked": false
+    },
+    "quest_030": {
+      "id": "quest_030",
+      "title": "첫 번째 여행",
+      "description": "둘만의 특별한 여행",
+      "category": "ultimate_connection",
+      "difficulty": "expert",
+      "required_affection": 150,
+      "scenario_id": "first_trip",
+      "available_characters": ["mina_enfp", "jihye_esfj"],
+      "unlocked": false
+    },
+    "quest_031": {
+      "id": "quest_031",
+      "title": "별빛 아래서",
+      "description": "별을 보며 나눈 영원의 약속",
+      "category": "ultimate_connection",
+      "difficulty": "expert",
+      "required_affection": 155,
+      "scenario_id": "under_starlight",
+      "available_characters": ["all"],
+      "unlocked": false
+    },
+    "quest_032": {
+      "id": "quest_032",
+      "title": "첫 번째 키스",
+      "description": "잊을 수 없는 첫 키스",
+      "category": "ultimate_connection",
+      "difficulty": "expert",
+      "required_affection": 160,
+      "scenario_id": "first_kiss",
+      "available_characters": ["yuna_infp", "mina_enfp"],
+      "unlocked": false
+    },
+    "quest_033": {
+      "id": "quest_033",
+      "title": "가족의 축복",
+      "description": "서로의 가족을 만나다",
+      "category": "ultimate_connection",
+      "difficulty": "expert",
+      "required_affection": 165,
+      "scenario_id": "family_blessing",
+      "available_characters": ["jihye_esfj", "seoyeon_intj"],
+      "unlocked": false
+    },
+    "quest_034": {
+      "id": "quest_034",
+      "title": "졸업과 미래",
+      "description": "함께할 미래를 약속하며",
+      "category": "ultimate_connection",
+      "difficulty": "expert",
+      "required_affection": 170,
+      "scenario_id": "graduation_future",
+      "available_characters": ["all"],
+      "unlocked": false
+    },
+    "quest_035": {
+      "id": "quest_035",
+      "title": "프로포즈",
+      "description": "평생을 함께하자는 약속",
+      "category": "ultimate_connection",
+      "difficulty": "expert",
+      "required_affection": 175,
+      "scenario_id": "proposal",
+      "available_characters": ["yuna_infp", "hyejin_istp"],
+      "unlocked": false
+    },
+    "quest_036": {
+      "id": "quest_036",
+      "title": "영원한 사랑",
+      "description": "진정한 사랑의 완성",
+      "category": "ultimate_connection",
+      "difficulty": "expert",
+      "required_affection": 180,
+      "scenario_id": "eternal_love",
+      "available_characters": ["all"],
+      "unlocked": false
+    }
+  }
+}
