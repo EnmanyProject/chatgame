@@ -1,8 +1,11 @@
-// 실제 Claude API 통합 버전 - v2.0.0
+// 실제 Claude API 통합 버전 - v2.1.0
+import fs from 'fs';
+import path from 'path';
+
 export default async function handler(req, res) {
   // CORS 설정
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   
   if (req.method === 'OPTIONS') {
@@ -10,6 +13,11 @@ export default async function handler(req, res) {
   }
 
   const action = req.query.action || req.body?.action;
+  
+  console.log(`🔥 API 호출: ${req.method} - action: ${action}`, {
+    query: req.query,
+    body: req.body
+  });
   
   // 테스트 엔드포인트
   if (action === 'test' || !action) {
@@ -23,28 +31,44 @@ export default async function handler(req, res) {
 
   // 시나리오 목록
   if (action === 'list' && req.query.type === 'scenarios') {
-    return res.json({
-      success: true,
-      scenarios: [{
-        id: "hangover_confession",
-        title: "어제 밤의 기억",
-        description: "어제 술먹고 고백한 후 부끄러워하는 상황",
-        active: true
-      }]
-    });
+    try {
+      const dataPath = path.join(process.cwd(), 'data', 'scenarios.json');
+      const fileContent = fs.readFileSync(dataPath, 'utf8');
+      const scenarioData = JSON.parse(fileContent);
+      
+      return res.json({
+        success: true,
+        scenarios: scenarioData.scenarios || []
+      });
+    } catch (error) {
+      console.error('❌ 시나리오 목록 로드 실패:', error);
+      return res.json({
+        success: false,
+        error: '시나리오 데이터를 불러올 수 없습니다.',
+        scenarios: []
+      });
+    }
   }
 
   // 캐릭터 목록
   if (action === 'list' && req.query.type === 'characters') {
-    return res.json({
-      success: true,
-      characters: [{
-        id: "yuna_infp",
-        name: "윤아",
-        mbti: "INFP",
-        active: true
-      }]
-    });
+    try {
+      const dataPath = path.join(process.cwd(), 'data', 'characters.json');
+      const fileContent = fs.readFileSync(dataPath, 'utf8');
+      const characterData = JSON.parse(fileContent);
+      
+      return res.json({
+        success: true,
+        characters: characterData.characters || []
+      });
+    } catch (error) {
+      console.error('❌ 캐릭터 목록 로드 실패:', error);
+      return res.json({
+        success: false,
+        error: '캐릭터 데이터를 불러올 수 없습니다.',
+        characters: []
+      });
+    }
   }
 
   // 실제 Claude API 대화 생성
@@ -72,7 +96,38 @@ export default async function handler(req, res) {
     }
   }
 
-  return res.json({ success: false, message: 'Unknown action' });
+  // 시나리오 생성
+  if (action === 'create' && req.body?.type === 'scenario') {
+    return await createScenario(req, res);
+  }
+
+  // 시나리오 수정
+  if (req.method === 'PUT' && req.query.type === 'scenario') {
+    return await updateScenario(req, res);
+  }
+
+  // 시나리오 삭제
+  if (action === 'delete' && req.query.type === 'scenario') {
+    return await deleteScenario(req, res);
+  }
+
+  // 대화 조회
+  if (action === 'get' && req.query.type === 'dialogues') {
+    return await getDialogues(req, res);
+  }
+
+  // 대화 생성 (개선된 버전)
+  if (action === 'generate_dialogue') {
+    return await generateAndSaveDialogue(req, res);
+  }
+
+  return res.json({ 
+    success: false, 
+    message: 'Unknown action',
+    received_action: action,
+    method: req.method,
+    query: req.query
+  });
 }
 
 // 실제 Claude API 호출 함수
@@ -177,6 +232,329 @@ async function callClaudeAPI(requestData) {
     console.error('Claude API call failed:', error);
     return null;
   }
+}
+
+// === 시나리오 CRUD 함수들 ===
+
+// 시나리오 생성
+async function createScenario(req, res) {
+  try {
+    const { id, title, description, setting, mood, active } = req.body;
+    
+    if (!id || !title) {
+      return res.json({
+        success: false,
+        error: 'ID와 제목은 필수입니다.'
+      });
+    }
+
+    const dataPath = path.join(process.cwd(), 'data', 'scenarios.json');
+    let scenarioData = { scenarios: [] };
+    
+    // 기존 데이터 로드
+    try {
+      const fileContent = fs.readFileSync(dataPath, 'utf8');
+      scenarioData = JSON.parse(fileContent);
+    } catch (error) {
+      console.log('새로운 시나리오 파일 생성');
+    }
+
+    // 중복 ID 체크
+    const existingScenario = scenarioData.scenarios.find(s => s.id === id);
+    if (existingScenario) {
+      return res.json({
+        success: false,
+        error: `ID '${id}'는 이미 사용 중입니다.`
+      });
+    }
+
+    // 새 시나리오 추가
+    const newScenario = {
+      id,
+      title,
+      description: description || '',
+      setting: setting || '',
+      mood: mood || '',
+      created_at: new Date().toISOString(),
+      active: active !== undefined ? active : true
+    };
+    
+    scenarioData.scenarios.push(newScenario);
+    
+    // 파일 저장
+    fs.writeFileSync(dataPath, JSON.stringify(scenarioData, null, 2));
+    
+    console.log('✅ 새 시나리오 생성:', newScenario.title);
+    
+    return res.json({
+      success: true,
+      message: '시나리오가 성공적으로 생성되었습니다.',
+      scenario: newScenario
+    });
+    
+  } catch (error) {
+    console.error('❌ 시나리오 생성 실패:', error);
+    return res.json({
+      success: false,
+      error: '시나리오 생성 중 오류가 발생했습니다.'
+    });
+  }
+}
+
+// 시나리오 수정
+async function updateScenario(req, res) {
+  try {
+    const scenarioId = req.query.id;
+    const updateData = req.body;
+    
+    if (!scenarioId) {
+      return res.json({
+        success: false,
+        error: '시나리오 ID가 필요합니다.'
+      });
+    }
+
+    const dataPath = path.join(process.cwd(), 'data', 'scenarios.json');
+    const fileContent = fs.readFileSync(dataPath, 'utf8');
+    const scenarioData = JSON.parse(fileContent);
+    
+    const scenarioIndex = scenarioData.scenarios.findIndex(s => s.id === scenarioId);
+    if (scenarioIndex === -1) {
+      return res.json({
+        success: false,
+        error: '해당 시나리오를 찾을 수 없습니다.'
+      });
+    }
+    
+    // 시나리오 업데이트
+    scenarioData.scenarios[scenarioIndex] = {
+      ...scenarioData.scenarios[scenarioIndex],
+      ...updateData,
+      updated_at: new Date().toISOString()
+    };
+    
+    fs.writeFileSync(dataPath, JSON.stringify(scenarioData, null, 2));
+    
+    console.log('✅ 시나리오 수정 완료:', scenarioId);
+    
+    return res.json({
+      success: true,
+      message: '시나리오가 성공적으로 수정되었습니다.',
+      scenario: scenarioData.scenarios[scenarioIndex]
+    });
+    
+  } catch (error) {
+    console.error('❌ 시나리오 수정 실패:', error);
+    return res.json({
+      success: false,
+      error: '시나리오 수정 중 오류가 발생했습니다.'
+    });
+  }
+}
+
+// 시나리오 삭제
+async function deleteScenario(req, res) {
+  try {
+    const scenarioId = req.query.id;
+    
+    if (!scenarioId) {
+      return res.json({
+        success: false,
+        error: '시나리오 ID가 필요합니다.'
+      });
+    }
+
+    const dataPath = path.join(process.cwd(), 'data', 'scenarios.json');
+    const fileContent = fs.readFileSync(dataPath, 'utf8');
+    const scenarioData = JSON.parse(fileContent);
+    
+    const scenarioIndex = scenarioData.scenarios.findIndex(s => s.id === scenarioId);
+    if (scenarioIndex === -1) {
+      return res.json({
+        success: false,
+        error: '해당 시나리오를 찾을 수 없습니다.'
+      });
+    }
+    
+    const deletedScenario = scenarioData.scenarios[scenarioIndex];
+    scenarioData.scenarios.splice(scenarioIndex, 1);
+    
+    fs.writeFileSync(dataPath, JSON.stringify(scenarioData, null, 2));
+    
+    // 관련 대화 데이터도 삭제 (옵션)
+    try {
+      const dialoguePath = path.join(process.cwd(), 'data', 'dialogues.json');
+      const dialogueContent = fs.readFileSync(dialoguePath, 'utf8');
+      const dialogueData = JSON.parse(dialogueContent);
+      
+      if (dialogueData[scenarioId]) {
+        delete dialogueData[scenarioId];
+        fs.writeFileSync(dialoguePath, JSON.stringify(dialogueData, null, 2));
+        console.log('🗑️ 관련 대화 데이터도 삭제됨');
+      }
+    } catch (dialogueError) {
+      console.log('대화 데이터 삭제 실패 (무시)');
+    }
+    
+    console.log('✅ 시나리오 삭제 완료:', scenarioId);
+    
+    return res.json({
+      success: true,
+      message: '시나리오가 성공적으로 삭제되었습니다.',
+      deleted_scenario: deletedScenario
+    });
+    
+  } catch (error) {
+    console.error('❌ 시나리오 삭제 실패:', error);
+    return res.json({
+      success: false,
+      error: '시나리오 삭제 중 오류가 발생했습니다.'
+    });
+  }
+}
+
+// 대화 조회
+async function getDialogues(req, res) {
+  try {
+    const scenarioId = req.query.id;
+    
+    if (!scenarioId) {
+      return res.json({
+        success: false,
+        error: '시나리오 ID가 필요합니다.'
+      });
+    }
+
+    const dataPath = path.join(process.cwd(), 'data', 'dialogues.json');
+    let dialogueData = {};
+    
+    try {
+      const fileContent = fs.readFileSync(dataPath, 'utf8');
+      dialogueData = JSON.parse(fileContent);
+    } catch (error) {
+      console.log('대화 데이터 파일이 비어있거나 없음');
+    }
+    
+    const dialogues = dialogueData[scenarioId] || [];
+    
+    console.log(`💬 대화 조회: ${scenarioId} - ${dialogues.length}개 발견`);
+    
+    return res.json({
+      success: true,
+      dialogues: dialogues,
+      scenario_id: scenarioId,
+      count: dialogues.length
+    });
+    
+  } catch (error) {
+    console.error('❌ 대화 조회 실패:', error);
+    return res.json({
+      success: false,
+      error: '대화 데이터를 불러올 수 없습니다.',
+      dialogues: []
+    });
+  }
+}
+
+// 대화 생성 및 저장
+async function generateAndSaveDialogue(req, res) {
+  try {
+    const { scenario_id, character_id, choice_number = 1 } = req.body;
+    
+    if (!scenario_id || !character_id) {
+      return res.json({
+        success: false,
+        error: '시나리오 ID와 캐릭터 ID가 필요합니다.'
+      });
+    }
+
+    // 대화 생성 (Fallback 사용)
+    const generatedDialogue = generateDialogueFromTemplates(choice_number);
+    
+    // 대화 ID 생성
+    const dialogueId = `${scenario_id}_${choice_number}_${Date.now()}`;
+    
+    const dialogueEntry = {
+      id: dialogueId,
+      scenario_id: scenario_id,
+      character_id: character_id,
+      choice_number: choice_number,
+      generated_content: generatedDialogue,
+      created_at: new Date().toISOString(),
+      source: 'Template-based Generator v2.1.0'
+    };
+    
+    // dialogues.json에 저장
+    const dataPath = path.join(process.cwd(), 'data', 'dialogues.json');
+    let dialogueData = {};
+    
+    try {
+      const fileContent = fs.readFileSync(dataPath, 'utf8');
+      dialogueData = JSON.parse(fileContent);
+    } catch (error) {
+      console.log('대화 데이터 파일 새로 생성');
+    }
+    
+    if (!dialogueData[scenario_id]) {
+      dialogueData[scenario_id] = [];
+    }
+    
+    dialogueData[scenario_id].push(dialogueEntry);
+    
+    fs.writeFileSync(dataPath, JSON.stringify(dialogueData, null, 2));
+    
+    console.log(`✅ 대화 생성 및 저장: ${dialogueId}`);
+    
+    return res.json({
+      success: true,
+      message: '대화가 성공적으로 생성되고 저장되었습니다.',
+      dialogue: dialogueEntry,
+      generated: generatedDialogue
+    });
+    
+  } catch (error) {
+    console.error('❌ 대화 생성/저장 실패:', error);
+    return res.json({
+      success: false,
+      error: '대화 생성 중 오류가 발생했습니다.'
+    });
+  }
+}
+
+// 템플릿 기반 대화 생성 함수
+function generateDialogueFromTemplates(choiceNumber) {
+  const templates = [
+    {
+      dialogue: "시우 오빠… 어제는 정말 미안해 😳 취해서 그런 말까지 했는데…",
+      narration: "윤아가 얼굴을 붉히며 손으로 얼굴을 가린다. 진심이었지만 용기가 나지 않는 것 같다.",
+      choices: [
+        {"text": "차근차근 대답해주기", "affection_impact": 2},
+        {"text": "어떤 이야기였는지 물어보기", "affection_impact": 0},
+        {"text": "진심이었는지 조심스럽게 묻기", "affection_impact": 1}
+      ]
+    },
+    {
+      dialogue: "사실은… 술 핀계였어 😔 평소에 말 못했던 진심이었는데, 이렇게 어색해질까봐 무서워",
+      narration: "윤아의 목소리가 떨리며, 눈물이 살짝 맺힌다. 1년 동안 숨겨왔던 마음을 털어놓고 있다.",
+      choices: [
+        {"text": "나도 너를 계속 생각하고 있었어", "affection_impact": 3},
+        {"text": "말해줘서 정말 고마워. 힘들었을 텐데", "affection_impact": 2},
+        {"text": "우리 둘이 천천히 생각해보자", "affection_impact": -1}
+      ]
+    },
+    {
+      dialogue: "오빠가 싫어할까봐 걱정했는데… 이렇게 말해주니까 마음이 좀 놓여 😌 고마워",
+      narration: "윤아가 안도의 표정을 지으며 작은 미소를 짓는다. 차분해진 분위기가 따뜻하게 느껴진다.",
+      choices: [
+        {"text": "앞으로도 이렇게 마음 털어놓고 지내자", "affection_impact": 2},
+        {"text": "밀어두지 말고 나한테 뮤든 얘기해", "affection_impact": 1},
+        {"text": "그럼 우리 커피 한잔 마시면서 얘기할까?", "affection_impact": 2}
+      ]
+    }
+  ];
+  
+  const selectedTemplate = templates[choiceNumber % templates.length];
+  return selectedTemplate;
 }
 
 // Fallback 응답 시스템 (자연스러운 대화체 선택지)

@@ -38,15 +38,24 @@ MBTI 기반 로맨스 채팅 게임 - 윤아(INFP) 캐릭터와의 대화형 게
 - **목표**: v2.0.0 (Claude 3.5 Sonnet 완전 통합 버전)
 - **구조**: 체계적인 버전 관리 및 배포 프로세스
 
-## 현재 시스템 구조
+## 현재 시스템 구조 (2025-09-02 업데이트)
 
 ### 핵심 파일들
 - `multi-scenario-game.html`: 메인 게임 인터페이스
-- `api/scenario.js`: Claude 3.5 Sonnet 스타일 대화 생성 API
-- `api/test.js`: API 테스트 엔드포인트
-- `scenario-admin.html`: 관리자 인터페이스
+- `api/scenario.js`: **v2.1.0** - 완전 CRUD 지원 API (새로 개선)
+- `scenario-admin.html`: 관리자 인터페이스 (시나리오 생성/수정 및 대화 관리)
+- `data/scenarios.json`: 시나리오 데이터
+- `data/dialogues.json`: 대화 데이터 (시나리오별 관리)
+- `data/characters.json`: 캐릭터 데이터
 - `.env`: 환경변수 설정 (Git에서 제외)
 - `.gitignore`: 보안 파일 제외 설정
+
+### 새로 추가된 API 기능들 (v2.1.0)
+- **POST** `/api/scenario` (action=create, type=scenario) - 시나리오 생성
+- **PUT** `/api/scenario?type=scenario&id={scenarioId}` - 시나리오 수정  
+- **DELETE** `/api/scenario?action=delete&type=scenario&id={scenarioId}` - 시나리오 삭제
+- **GET** `/api/scenario?action=get&type=dialogues&id={scenarioId}` - 대화 조회
+- **POST** `/api/scenario` (action=generate_dialogue) - 대화 생성 및 저장
 
 ### 게임 상태 관리
 ```javascript
@@ -154,12 +163,25 @@ const responses = [
 3. "윤아 (INFP)" 캐릭터 선택
 4. 선택지별 감정 변화 체험
 
-## 다음 작업 고려사항
-- **실제 Claude API 통합**: 현재 하드코딩된 응답을 실제 API로 교체
-- **캐릭터 확장**: 다른 MBTI 유형 캐릭터 추가
-- **시나리오 다양화**: 다양한 상황별 시나리오 확장
-- **대화 메모리**: 이전 대화 내용을 기억하는 시스템
-- **성능 최적화**: 로딩 속도 및 반응성 개선
+## 최신 작업 내역 (2025-09-02)
+
+### 해결된 문제들
+- ✅ **시나리오 생성 문제**: API에 시나리오 CRUD 기능 완전 구현
+- ✅ **대화 생성 및 저장**: 대화 데이터가 `data/dialogues.json`에 제대로 저장되도록 구현
+- ✅ **대화 보기 기능**: 실제 데이터를 읽어와서 표시하도록 개선
+- ✅ **API 로깅 및 에러 처리**: 디버깅을 위한 상세한 로깅 추가
+
+### 기술적 개선사항
+- **파일 시스템 통합**: Node.js `fs` 모듈을 사용한 직접 데이터 조작
+- **데이터 구조 표준화**: 시나리오별 대화 관리 체계 구축
+- **템플릿 기반 대화 생성**: GPT API 없이도 자연스러운 대화 생성 가능
+- **CORS 및 HTTP 메서드 지원**: PUT, DELETE 메서드 추가 지원
+
+## 다음 단계 개선 계획
+- **캐릭터 관리 시스템**: 캐릭터 생성/수정 기능 개선
+- **대화 편집 기능**: 생성된 대화를 직접 수정할 수 있는 기능
+- **실제 Claude API 통합**: 현재 템플릿 기반 시스템에서 실제 AI API로 교체
+- **백업 및 복구 시스템**: 데이터 안전성 강화
 
 ## 주의사항
 - 모든 메시지 표시 후 `scrollToBottom()` 호출 필수
@@ -177,6 +199,7 @@ const responses = [
 - **버전 관리**: Git + GitHub
 
 ---
-*마지막 업데이트: 2025-08-30*
+*마지막 업데이트: 2025-09-02*
+*주요 작업: 시나리오 관리 시스템 완전 구현*
 *작업자: dosik + Claude Code*
 *모델: Claude Sonnet 4 (claude-sonnet-4-20250514)*
