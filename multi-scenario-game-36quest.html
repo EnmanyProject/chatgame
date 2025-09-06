@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎮 36퀘스트 MBTI 로맨스 게임 v3.0.0 🌟</title>
-    <link rel="stylesheet" href="css/quest-ui.css">
+    <link rel="stylesheet" href="css/quest-ui.css?v=20250907">
     <style>
         * {
             margin: 0;
@@ -145,6 +145,10 @@
             background: #000;
             display: none;
         }
+        .messages-area.show {
+            display: flex;
+            flex-direction: column;
+        }
         .messages-area::-webkit-scrollbar {
             width: 6px;
         }
@@ -157,7 +161,7 @@
         }
         .message {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             margin-bottom: 15px;
             opacity: 0;
             animation: messageSlide 0.3s ease-out;
