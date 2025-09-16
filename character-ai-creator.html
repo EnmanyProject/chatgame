@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 세계관 최강 캐릭터 생성 AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+            min-height: 600px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ffa726);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .progress-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: rgba(255,255,255,0.8);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .content {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .step-name {
+            margin-left: 15px;
+            font-size: 1.4em;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .question-container {
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 25px;
+            white-space: pre-line;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .option-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .option-card.selected {
+            border-color: #ff6b6b;
+            background: linear-gradient(135deg, #ff6b6b, #ffa726);
+            color: white;
+            transform: translateY(-5px);
+        }
+
+        .option-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .option-text {
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-family: inherit;
+            margin: 15px 0;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .slider-container {
+            margin: 20px 0;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        .buttons-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .character-result {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .character-name {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .character-section {
+            margin: 20px 0;
+        }
+
+        .character-section h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .character-traits {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .trait-tag {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #ffe6e6;
+            border: 2px solid #ff6b6b;
+            color: #d63384;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .buttons-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎭 캐릭터 생성 AI</h1>
+            <p>세계관 최강의 대화형 캐릭터 생성 시스템</p>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+
+        <div class="content" id="content">
+            <div class="step-indicator">
+                <div class="step-number" id="stepNumber">1</div>
+                <div class="step-name" id="stepName">시작하기</div>
+            </div>
+
+            <div class="question-container" id="questionContainer">
+                <div class="question-text" id="questionText">
+                    🎭 캐릭터 생성 AI를 시작합니다...
+                </div>
+            </div>
+
+            <div id="optionsContainer"></div>
+
+            <div class="buttons-container">
+                <button class="btn btn-secondary" id="backBtn" onclick="goBack()" style="display: none;">
+                    ← 이전 단계
+                </button>
+                <button class="btn btn-primary" id="nextBtn" onclick="goNext()" disabled>
+                    다음 단계 →
+                </button>
+            </div>
+
+            <div id="characterResult" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // 게임 상태
+        let currentStep = 0;
+        let answers = {};
+        let currentQuestion = null;
+        let isProcessing = false;
+
+        // UI 요소들
+        const ui = {
+            stepNumber: document.getElementById('stepNumber'),
+            stepName: document.getElementById('stepName'),
+            questionText: document.getElementById('questionText'),
+            optionsContainer: document.getElementById('optionsContainer'),
+            progressBar: document.getElementById('progressBar'),
+            nextBtn: document.getElementById('nextBtn'),
+            backBtn: document.getElementById('backBtn'),
+            characterResult: document.getElementById('characterResult')
+        };
+
+        // 초기화
+        async function initCharacterCreator() {
+            console.log('🎭 캐릭터 생성 AI 초기화...');
+            try {
+                const response = await fetch('/api/character-ai-generator?action=start_conversation');
+                const data = await response.json();
+
+                if (data.success) {
+                    currentQuestion = data;
+                    displayQuestion(data);
+                    updateProgress(data.progress || 0);
+                } else {
+                    showError('초기화에 실패했습니다. 다시 시도해주세요.');
+                }
+            } catch (error) {
+                console.error('❌ 초기화 오류:', error);
+                showError('연결에 문제가 발생했습니다.');
+            }
+        }
+
+        // 질문 표시
+        function displayQuestion(questionData) {
+            console.log('📝 질문 표시:', questionData);
+            
+            ui.stepNumber.textContent = questionData.step || currentStep + 1;
+            ui.stepName.textContent = questionData.stepName || '진행중';
+            ui.questionText.textContent = questionData.question?.text || questionData.question;
+            
+            displayOptions(questionData);
+            
+            // 버튼 상태 업데이트
+            ui.nextBtn.disabled = true;
+            ui.backBtn.style.display = currentStep > 0 ? 'block' : 'none';
+        }
+
+        // 선택지 표시
+        function displayOptions(questionData) {
+            const container = ui.optionsContainer;
+            container.innerHTML = '';
+
+            if (!questionData.options || questionData.options.length === 0) {
+                // 텍스트 입력
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'text-input';
+                input.placeholder = '답변을 입력해주세요...';
+                input.addEventListener('input', (e) => {
+                    ui.nextBtn.disabled = !e.target.value.trim();
+                    answers[`step_${currentStep + 1}`] = e.target.value.trim();
+                });
+                container.appendChild(input);
+                return;
+            }
+
+            // 선택지 표시
+            const grid = document.createElement('div');
+            grid.className = 'options-grid';
+
+            questionData.options.forEach(option => {
+                const card = document.createElement('div');
+                card.className = 'option-card';
+                card.innerHTML = `
+                    <span class="option-icon">${option.icon || '🎭'}</span>
+                    <div class="option-text">${option.text}</div>
+                `;
+                
+                card.addEventListener('click', () => selectOption(card, option));
+                grid.appendChild(card);
+            });
+
+            container.appendChild(grid);
+        }
+
+        // 선택지 선택
+        function selectOption(cardElement, option) {
+            // 이전 선택 제거
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // 현재 선택 표시
+            cardElement.classList.add('selected');
+            
+            // 답변 저장
+            answers[`step_${currentStep + 1}`] = option;
+            
+            // 다음 버튼 활성화
+            ui.nextBtn.disabled = false;
+            
+            console.log('✅ 선택됨:', option);
+        }
+
+        // 다음 단계
+        async function goNext() {
+            if (isProcessing || ui.nextBtn.disabled) return;
+            
+            isProcessing = true;
+            ui.nextBtn.innerHTML = '<span class="loading"></span> 처리중...';
+            ui.nextBtn.disabled = true;
+
+            try {
+                if (currentStep >= 7) {
+                    // 마지막 단계 - 캐릭터 생성
+                    await generateFinalCharacter();
+                } else {
+                    // 다음 질문 요청
+                    currentStep++;
+                    const response = await fetch('/api/character-ai-generator', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'next_question',
+                            currentStep: currentStep,
+                            answers: answers
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        currentQuestion = data;
+                        displayQuestion(data);
+                        updateProgress(data.progress || 0);
+                    } else {
+                        throw new Error(data.message || '질문 생성 실패');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ 다음 단계 오류:', error);
+                showError('문제가 발생했습니다. 다시 시도해주세요.');
+            } finally {
+                isProcessing = false;
+                ui.nextBtn.innerHTML = '다음 단계 →';
+            }
+        }
+
+        // 이전 단계
+        function goBack() {
+            if (currentStep > 0) {
+                currentStep--;
+                // 이전 질문 데이터 복원 로직 필요
+                showError('이전 단계 기능은 곧 구현됩니다.');
+            }
+        }
+
+        // 최종 캐릭터 생성
+        async function generateFinalCharacter() {
+            try {
+                ui.questionText.textContent = '🎨 완벽한 캐릭터를 생성하고 있습니다...';
+                ui.optionsContainer.innerHTML = '<div style="text-align: center; margin: 40px 0;"><div class="loading"></div><p style="margin-top: 20px;">AI가 당신의 캐릭터를 만들고 있습니다...</p></div>';
+                
+                const response = await fetch('/api/character-ai-generator', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generate_character',
+                        answers: answers
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayCharacterResult(data.character);
+                    updateProgress(100);
+                    showSuccess('완벽한 캐릭터가 생성되었습니다! 🎉');
+                } else {
+                    throw new Error(data.message || '캐릭터 생성 실패');
+                }
+            } catch (error) {
+                console.error('❌ 캐릭터 생성 오류:', error);
+                showError('캐릭터 생성에 실패했습니다. 다시 시도해주세요.');
+            }
+        }
+
+        // 캐릭터 결과 표시
+        function displayCharacterResult(character) {
+            console.log('🎭 생성된 캐릭터:', character);
+            
+            const resultHTML = `
+                <div class="character-result">
+                    <h2 class="character-name">✨ ${character.name || '신비로운 캐릭터'}</h2>
+                    
+                    <div class="character-section">
+                        <h3>🧠 기본 정보</h3>
+                        <p><strong>나이:</strong> ${character.age || '미정'}</p>
+                        <p><strong>성별:</strong> ${character.gender || '미정'}</p>
+                        <p><strong>MBTI:</strong> ${character.mbti || '미정'}</p>
+                    </div>
+
+                    ${character.personality_traits ? `
+                    <div class="character-section">
+                        <h3>🎭 성격 특성</h3>
+                        <div class="character-traits">
+                            ${character.personality_traits.map(trait => `<span class="trait-tag">${trait}</span>`).join('')}
+                        </div>
+                    </div>` : ''}
+
+                    ${character.appearance ? `
+                    <div class="character-section">
+                        <h3>👤 외모</h3>
+                        <p><strong>헤어:</strong> ${character.appearance.hair || '미정'}</p>
+                        <p><strong>눈:</strong> ${character.appearance.eyes || '미정'}</p>
+                        <p><strong>스타일:</strong> ${character.appearance.style || '미정'}</p>
+                    </div>` : ''}
+
+                    ${character.background ? `
+                    <div class="character-section">
+                        <h3>📚 배경</h3>
+                        <p><strong>직업:</strong> ${character.background.occupation || '미정'}</p>
+                        <p><strong>가족:</strong> ${character.background.family || '미정'}</p>
+                    </div>` : ''}
+
+                    <div class="character-section">
+                        <h3>📝 생성 정보</h3>
+                        <p><strong>생성일:</strong> ${character.created_date}</p>
+                        <p><strong>ID:</strong> ${character.id}</p>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <button class="btn btn-primary" onclick="startOver()">새 캐릭터 만들기</button>
+                    <button class="btn btn-secondary" onclick="goToGame()">게임에서 사용하기</button>
+                </div>
+            `;
+            
+            ui.optionsContainer.innerHTML = resultHTML;
+            ui.nextBtn.style.display = 'none';
+            ui.backBtn.style.display = 'none';
+            
+            ui.stepName.textContent = '완료!';
+            ui.questionText.textContent = '🎉 완벽한 캐릭터가 생성되었습니다!';
+        }
+
+        // 유틸리티 함수들
+        function updateProgress(progress) {
+            ui.progressBar.style.width = `${progress}%`;
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            ui.optionsContainer.insertBefore(errorDiv, ui.optionsContainer.firstChild);
+            
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = message;
+            ui.optionsContainer.insertBefore(successDiv, ui.optionsContainer.firstChild);
+        }
+
+        function startOver() {
+            location.reload();
+        }
+
+        function goToGame() {
+            window.location.href = '/multi-scenario-game-36quest.html';
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', initCharacterCreator);
+    </script>
+</body>
+</html>
