@@ -700,6 +700,17 @@
                             ">
                                 🎮 테스트 시나리오 생성
                             </button>
+                            <button onclick="setupOpenAISettings()" style="
+                                background: #9b59b6;
+                                color: white;
+                                border: none;
+                                padding: 10px 20px;
+                                border-radius: 5px;
+                                margin: 10px;
+                                cursor: pointer;
+                            ">
+                                🤖 AI 평가 설정
+                            </button>
                             <a href="/scenario-admin.html" target="_blank" style="
                                 display: inline-block;
                                 background: #3498db;
@@ -1698,11 +1709,12 @@
             try {
                 console.log('💡 Claude API를 사용한 주관식 평가 시작...');
                 
-                // LocalStorage 기반 주관식 응답 생성
-                const responseData = generateSubjectiveResponse(
+                // OpenAI API 기반 고도화된 주관식 응답 생성
+                const responseData = await generateAdvancedSubjectiveResponse(
                     userMessage,
                     gameState.currentCharacter,
-                    gameState.affection
+                    gameState.affection,
+                    gameState.previousChoices
                 );
                 
                 const data = { success: true, generated: responseData };
@@ -1713,26 +1725,75 @@
                     const generated = data.generated;
                     console.log('✅ Claude API 생성 데이터:', generated);
                     
-                    // 호감도 업데이트 (최대 +20점)
-                    const affectionChange = Math.min(20, Math.max(0, 
-                        Math.floor(userMessage.length / 10) + 
-                        (userMessage.includes('좋아') || userMessage.includes('사랑') ? 5 : 0) +
-                        (userMessage.length > 30 ? 5 : 0)
-                    ));
-                    
+                    // 🧠 고도화된 호감도 업데이트 (AI 평가 기반)
+                    const affectionChange = generated.affection_change || 0;
                     const oldAffection = gameState.affection;
+                    
                     gameState.affection += affectionChange;
                     gameState.affection = Math.max(0, Math.min(100, gameState.affection));
+                    
+                    // AI 평가 결과 로깅
+                    if (generated.evaluation) {
+                        console.log('🧠 AI 평가 결과:', {
+                            affection_change: affectionChange,
+                            emotional_impact: generated.evaluation.emotional_impact,
+                            mbti_compatibility: generated.evaluation.mbti_compatibility
+                        });
+                    }
+                    
+                    if (generated.relationship_analysis) {
+                        console.log('💕 관계 분석:', generated.relationship_analysis);
+                    }
                     
                     // 하트 UI 업데이트
                     updateAffectionHearts(gameState.affection, oldAffection);
                     
-                    // Claude 생성 응답 표시
+                    // AI 생성 응답 표시
                     let responseText = generated.dialogue || '고마워요! 정말 좋은 말이에요 😊';
                     responseText = addEmojisBasedOnAffection(responseText, gameState.affection);
                     displayCharacterMessage(responseText, generated.narration || '', '');
                     
-                    console.log(`💖 호감도 +${affectionChange} (총 ${gameState.affection}/100)`);
+                    // 🧠 AI 평가 피드백 표시
+                    const changeText = affectionChange > 0 ? `+${affectionChange}` : `${affectionChange}`;
+                    const changeColor = affectionChange > 0 ? '#27ae60' : affectionChange < 0 ? '#e74c3c' : '#95a5a6';
+                    
+                    console.log(`💖 호감도 ${changeText} (총 ${gameState.affection}/100)`);
+                    
+                    // AI 평가 결과를 UI에 표시 (선택적)
+                    if (generated.evaluation && (affectionChange !== 0 || generated.evaluation.emotional_impact)) {
+                        setTimeout(() => {
+                            const evaluationDiv = document.createElement('div');
+                            evaluationDiv.style.cssText = `
+                                background: rgba(0, 0, 0, 0.8);
+                                color: white;
+                                padding: 8px 12px;
+                                border-radius: 8px;
+                                font-size: 12px;
+                                margin: 5px 0;
+                                border-left: 3px solid ${changeColor};
+                            `;
+                            evaluationDiv.innerHTML = `
+                                <div style="font-weight: bold; margin-bottom: 3px;">
+                                    🧠 ${gameState.currentCharacter.name}의 마음: 
+                                    <span style="color: ${changeColor};">${changeText}점</span>
+                                </div>
+                                <div style="opacity: 0.9; font-size: 11px;">
+                                    ${generated.evaluation.emotional_impact || 'AI가 감정 반응을 분석했습니다.'}
+                                </div>
+                            `;
+                            
+                            const messagesContainer = document.getElementById('messagesContainer');
+                            messagesContainer.appendChild(evaluationDiv);
+                            scrollToBottom();
+                            
+                            // 3초 후 자동 제거
+                            setTimeout(() => {
+                                if (evaluationDiv.parentNode) {
+                                    evaluationDiv.remove();
+                                }
+                            }, 4000);
+                        }, 1500);
+                    }
                     
                     // 다음 단계 진행
                     setTimeout(() => {
@@ -2139,6 +2200,353 @@
                 narration: `${character.name}이(가) 당신의 말에 진심으로 감동하는 것 같다.`,
                 affection_change: Math.floor(Math.random() * 3) + 1
             };
+        }
+
+        // MBTI 기반 캐릭터 특성 데이터베이스
+        const mbtiCharacteristics = {
+            INFP: {
+                name: "중재자",
+                core_traits: ["감성적", "이상주의적", "내향적", "직관적"],
+                communication_style: "부드럽고 따뜻한 말투, 감정 표현이 풍부",
+                relationship_patterns: {
+                    early_stage: "신중하고 조심스러움, 깊은 대화를 선호",
+                    developing: "진솔한 감정 공유, 상대방의 진심을 중시",
+                    intimate: "깊은 유대감, 감정적 연결을 가장 소중히 여김"
+                },
+                preferred_topics: ["예술", "감정", "꿈과 이상", "내면의 생각"],
+                response_triggers: {
+                    positive: ["진심어린 공감", "창의적 표현", "감정적 지지", "깊이있는 이해"],
+                    negative: ["비판적 태도", "표면적 대화", "강압적 접근", "감정 무시"],
+                    neutral: ["일반적인 안부", "사실적 정보", "단순한 질문"]
+                },
+                emotional_expression: "섬세하고 복합적, 때로는 간접적 표현을 선호"
+            },
+            ENFP: {
+                name: "활동가",
+                core_traits: ["열정적", "외향적", "직관적", "감정적"],
+                communication_style: "밝고 에너지 넘치는 말투, 다양한 표현 사용",
+                relationship_patterns: {
+                    early_stage: "적극적이고 호기심 많음, 다양한 주제로 대화",
+                    developing: "창의적 활동 제안, 함께하는 시간을 중시",
+                    intimate: "모험과 새로운 경험 공유, 서로의 성장 지지"
+                },
+                preferred_topics: ["새로운 아이디어", "모험", "사람들", "미래 계획"],
+                response_triggers: {
+                    positive: ["창의적 제안", "모험적 아이디어", "열정적 반응", "자발적 참여"],
+                    negative: ["지나친 루틴", "소극적 태도", "비관적 사고", "제약적 상황"],
+                    neutral: ["계획적 제안", "실용적 조언", "현실적 접근"]
+                },
+                emotional_expression: "직접적이고 생동감 있음, 몸짓과 표현이 풍부"
+            },
+            INTJ: {
+                name: "건축가",
+                core_traits: ["논리적", "독립적", "직관적", "완벽주의적"],
+                communication_style: "간결하고 정확한 말투, 논리적 구조를 중시",
+                relationship_patterns: {
+                    early_stage: "신중하고 관찰적, 상대방을 분석하며 접근",
+                    developing: "지적 대화 선호, 깊이 있는 주제 탐구",
+                    intimate: "효율적 소통, 상호 발전을 위한 건설적 관계"
+                },
+                preferred_topics: ["미래 계획", "시스템", "학습", "개선 방안"],
+                response_triggers: {
+                    positive: ["논리적 사고", "체계적 접근", "개선 의지", "독립성 인정"],
+                    negative: ["비논리적 행동", "감정적 결정", "비효율적 방식", "간섭"],
+                    neutral: ["정보 제공", "현상 분석", "계획 수립"]
+                },
+                emotional_expression: "절제되고 신중함, 깊이 있는 관계에서만 감정 표현"
+            },
+            ESFJ: {
+                name: "집정관",
+                core_traits: ["사교적", "배려깊은", "현실적", "조화로운"],
+                communication_style: "따뜻하고 배려깊은 말투, 상대방 기분을 세심하게 고려",
+                relationship_patterns: {
+                    early_stage: "친근하고 관심 표현, 상대방의 필요를 파악",
+                    developing: "함께 활동하며 관계 발전, 서로를 돕는 것을 중시",
+                    intimate: "안정적이고 지지적인 관계, 상대방의 행복을 우선"
+                },
+                preferred_topics: ["사람들", "일상", "도움", "관계"],
+                response_triggers: {
+                    positive: ["감사 표현", "협력적 태도", "배려심", "안정성 추구"],
+                    negative: ["이기적 행동", "갈등 상황", "무관심", "불안정성"],
+                    neutral: ["일상 공유", "계획 세우기", "실용적 조언"]
+                },
+                emotional_expression: "따뜻하고 표현적, 상대방의 감정에 민감하게 반응"
+            },
+            ISTP: {
+                name: "만능재주꾼",
+                core_traits: ["실용적", "독립적", "현실적", "유연한"],
+                communication_style: "간결하고 실용적인 말투, 필요할 때만 말함",
+                relationship_patterns: {
+                    early_stage: "관찰적이고 여유로움, 압박 없는 자연스러운 접근 선호",
+                    developing: "함께 활동하며 관계 형성, 경험 공유를 중시",
+                    intimate: "자유롭고 편안한 관계, 서로의 공간 존중"
+                },
+                preferred_topics: ["실용적 기술", "경험", "취미", "현재 상황"],
+                response_triggers: {
+                    positive: ["실용적 제안", "자유로운 분위기", "기술적 관심", "유연성"],
+                    negative: ["강요", "지나친 감정표현", "복잡한 계획", "제약"],
+                    neutral: ["정보 교환", "경험 공유", "현실적 조언"]
+                },
+                emotional_expression: "절제적이고 자연스러움, 행동으로 감정 표현"
+            }
+        };
+
+        // 관계 발전 단계 분석 함수
+        function analyzeRelationshipStage(affection, conversationHistory) {
+            let stage = 'early_stage';
+            let intimacyLevel = 'low';
+            
+            if (affection >= 80) {
+                stage = 'intimate';
+                intimacyLevel = 'high';
+            } else if (affection >= 50) {
+                stage = 'developing';
+                intimacyLevel = 'medium';
+            }
+            
+            // 대화 히스토리 기반 추가 분석
+            const conversationDepth = conversationHistory.length;
+            const emotionalKeywords = conversationHistory.filter(choice => 
+                choice.includes('좋아') || choice.includes('사랑') || choice.includes('마음') || choice.includes('감정')
+            ).length;
+            
+            return {
+                stage,
+                intimacyLevel,
+                conversationDepth,
+                emotionalConnection: emotionalKeywords / Math.max(conversationDepth, 1),
+                compatibilityScore: Math.min(100, affection + (emotionalKeywords * 5))
+            };
+        }
+
+        // OpenAI API 호출 함수
+        async function callOpenAI(prompt, systemPrompt = "") {
+            try {
+                // OpenAI API 설정 확인
+                const apiSettings = JSON.parse(localStorage.getItem('openai_settings') || '{}');
+                
+                if (!apiSettings.api_key) {
+                    console.warn('⚠️ OpenAI API 키가 설정되지 않았습니다.');
+                    return null;
+                }
+                
+                console.log('🤖 OpenAI API 호출 시작...');
+                
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiSettings.api_key}`
+                    },
+                    body: JSON.stringify({
+                        model: apiSettings.model || 'gpt-3.5-turbo',
+                        messages: [
+                            ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
+                            { role: 'user', content: prompt }
+                        ],
+                        temperature: apiSettings.temperature || 0.8,
+                        max_tokens: 800
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`OpenAI API Error: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('✅ OpenAI API 응답 받음');
+                
+                return data.choices[0].message.content;
+                
+            } catch (error) {
+                console.error('❌ OpenAI API 호출 실패:', error);
+                return null;
+            }
+        }
+
+        // 고도화된 주관식 응답 생성 함수
+        async function generateAdvancedSubjectiveResponse(userMessage, character, affection, conversationHistory = []) {
+            try {
+                console.log('🧠 고도화된 주관식 평가 시작...', {
+                    character: character.name,
+                    mbti: character.mbti,
+                    affection,
+                    messageLength: userMessage.length
+                });
+                
+                // 캐릭터 MBTI 특성 로드
+                const mbtiTraits = mbtiCharacteristics[character.mbti] || mbtiCharacteristics.INFP;
+                
+                // 관계 발전 단계 분석
+                const relationshipAnalysis = analyzeRelationshipStage(affection, conversationHistory);
+                
+                // 현재 상황 컨텍스트
+                const currentContext = {
+                    scenario: gameState.currentScenario?.title || '일반적인 상황',
+                    choiceNumber: gameState.choiceNumber,
+                    messageCount: gameState.messageCount
+                };
+                
+                // 고도화된 프롬프트 생성
+                const systemPrompt = `당신은 ${character.name}(${character.mbti})라는 캐릭터입니다.
+
+캐릭터 특성:
+- MBTI: ${character.mbti} (${mbtiTraits.name})
+- 성격: ${character.personality}
+- 말투: ${character.speech_style}
+- 핵심 특성: ${mbtiTraits.core_traits.join(', ')}
+- 소통 방식: ${mbtiTraits.communication_style}
+
+현재 관계 상태:
+- 호감도: ${affection}/100
+- 관계 단계: ${relationshipAnalysis.stage}
+- 친밀도: ${relationshipAnalysis.intimacyLevel}
+- 감정적 연결: ${Math.round(relationshipAnalysis.emotionalConnection * 100)}%
+- 상황: ${currentContext.scenario}
+
+${character.mbti} 특성에 맞는 반응 패턴:
+- 선호 반응: ${mbtiTraits.response_triggers.positive.join(', ')}
+- 부정적 반응: ${mbtiTraits.response_triggers.negative.join(', ')}
+- 감정 표현: ${mbtiTraits.emotional_expression}
+
+현재 관계 단계(${relationshipAnalysis.stage})에 맞는 행동:
+${mbtiTraits.relationship_patterns[relationshipAnalysis.stage]}`;
+
+                const evaluationPrompt = `사용자가 다음과 같이 말했습니다: "${userMessage}"
+
+이 메시지를 분석하고 ${character.name}(${character.mbti})의 관점에서 다음을 생성해주세요:
+
+1. 메시지에 대한 감정적 반응과 평가 (호감도 변화량 -10~+15 범위)
+2. 캐릭터의 개성이 드러나는 자연스러운 응답
+3. 현재 관계 단계와 MBTI 특성에 맞는 반응
+
+반드시 다음 JSON 형식으로 응답해주세요:
+{
+  "evaluation": {
+    "affection_change": 숫자 (-10~15),
+    "emotional_impact": "메시지가 캐릭터에게 미친 감정적 영향 분석",
+    "mbti_compatibility": "MBTI 관점에서의 적합성 평가"
+  },
+  "response": {
+    "dialogue": "캐릭터의 직접적인 대답",
+    "narration": "캐릭터의 행동이나 감정 상태 묘사",
+    "internal_thought": "캐릭터의 내적 생각 (선택적)"
+  },
+  "relationship_change": {
+    "new_stage_hint": "관계 발전 징조 또는 변화 암시",
+    "future_expectation": "앞으로의 관계 발전 방향"
+  }
+}`;
+
+                // OpenAI API 호출
+                let apiResponse = await callOpenAI(evaluationPrompt, systemPrompt);
+                
+                if (apiResponse) {
+                    try {
+                        // JSON 응답 파싱
+                        const cleanedResponse = apiResponse.replace(/```json|```/g, '').trim();
+                        const parsedResponse = JSON.parse(cleanedResponse);
+                        
+                        console.log('✅ OpenAI 고도화 평가 완료:', parsedResponse);
+                        
+                        return {
+                            dialogue: parsedResponse.response.dialogue,
+                            narration: parsedResponse.response.narration,
+                            affection_change: parsedResponse.evaluation.affection_change,
+                            evaluation: parsedResponse.evaluation,
+                            relationship_analysis: relationshipAnalysis,
+                            mbti_analysis: {
+                                character_type: mbtiTraits.name,
+                                compatibility: parsedResponse.evaluation.mbti_compatibility
+                            }
+                        };
+                        
+                    } catch (parseError) {
+                        console.error('❌ OpenAI 응답 파싱 실패:', parseError);
+                        console.log('원본 응답:', apiResponse);
+                    }
+                }
+                
+                // API 실패 시 fallback
+                console.log('⚠️ OpenAI API 실패, 고도화된 로컬 응답 생성');
+                return generateEnhancedLocalResponse(userMessage, character, affection, mbtiTraits, relationshipAnalysis);
+                
+            } catch (error) {
+                console.error('❌ 고도화된 주관식 평가 실패:', error);
+                return generateEnhancedLocalResponse(userMessage, character, affection);
+            }
+        }
+
+        // 고도화된 로컬 응답 생성 (Fallback)
+        function generateEnhancedLocalResponse(userMessage, character, affection, mbtiTraits = null, relationshipAnalysis = null) {
+            const traits = mbtiTraits || mbtiCharacteristics[character.mbti] || mbtiCharacteristics.INFP;
+            const analysis = relationshipAnalysis || analyzeRelationshipStage(affection, []);
+            
+            // 메시지 분석
+            const messageLength = userMessage.length;
+            const emotionalWords = ['좋아', '사랑', '마음', '감동', '기쁘', '행복', '설레', '소중'].filter(word => 
+                userMessage.includes(word)
+            ).length;
+            
+            let affectionChange = Math.floor(messageLength / 15) + (emotionalWords * 2);
+            affectionChange = Math.min(10, Math.max(-2, affectionChange));
+            
+            // MBTI별 특화 응답
+            const responses = {
+                INFP: [
+                    "마음이 정말 따뜻해져요... 😊💕",
+                    "이런 말씀을 해주시니 감동이에요 😭✨",
+                    "오빠의 진심이 느껴져요... 고마워요 💝"
+                ],
+                ENFP: [
+                    "와! 정말 멋진 생각이에요! ✨🎉",
+                    "이런 이야기를 들으니 더 신나요! 😄💫",
+                    "우리 정말 잘 통하는 것 같아요! 🌟💕"
+                ],
+                INTJ: [
+                    "흥미로운 관점이네요. 생각해볼게요.",
+                    "논리적이고 체계적인 접근 방식이군요.",
+                    "그런 방식으로 생각해보니 납득이 됩니다."
+                ],
+                ESFJ: [
+                    "정말 배려깊은 마음이 느껴져요 😊",
+                    "이렇게 생각해주셔서 고맙습니다! 💕",
+                    "함께 있으니 정말 편안해요 🌸"
+                ],
+                ISTP: [
+                    "실용적인 접근이네요. 괜찮은 것 같아요.",
+                    "그런 방식도 있겠군요. 참고하겠습니다.",
+                    "자연스럽고 좋은 아이디어네요."
+                ]
+            };
+            
+            const characterResponses = responses[character.mbti] || responses.INFP;
+            const randomResponse = characterResponses[Math.floor(Math.random() * characterResponses.length)];
+            
+            return {
+                dialogue: randomResponse,
+                narration: `${character.name}이(가) ${analysis.stage === 'intimate' ? '깊은 애정을 담아' : '진심으로'} 반응한다.`,
+                affection_change: affectionChange,
+                evaluation: {
+                    emotional_impact: `${traits.name} 특성에 맞는 ${affectionChange > 0 ? '긍정적' : '중립적'} 반응`,
+                    mbti_compatibility: `${character.mbti} 특성과 ${affectionChange > 5 ? '매우 잘' : '적당히'} 맞음`
+                }
+            };
+        }
+
+        // OpenAI API 설정 관리 함수
+        function setupOpenAISettings() {
+            const apiKey = prompt("OpenAI API 키를 입력하세요:");
+            if (apiKey) {
+                const settings = {
+                    api_key: apiKey,
+                    model: 'gpt-3.5-turbo',
+                    temperature: 0.8
+                };
+                localStorage.setItem('openai_settings', JSON.stringify(settings));
+                alert('✅ OpenAI API 설정이 저장되었습니다!');
+                console.log('🔑 OpenAI API 설정 완료');
+            }
         }
 
         // 테스트 시나리오 생성 함수
