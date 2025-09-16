@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎭 다중 시나리오 어드벤처 게임 v2.2.0 ⚡</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎭</text></svg>"">
     <style>
         * {
             margin: 0;
@@ -1054,38 +1055,37 @@
                 );
                 
                 const data = { success: true, generated: localData };
+                
+                if (data.success && data.generated) {
+                    const generated = data.generated;
+                    console.log('✅ 로컬 대화 생성 성공:', generated);
                     
-                    if (data.success && data.generated) {
-                        const generated = data.generated;
-                        console.log('✅ GPT 생성 데이터:', generated);
+                    // generated 객체 검증
+                    if (generated.dialogue && generated.choices) {
+                        showTypingIndicator();
                         
-                        // generated 객체 검증
-                        if (generated.dialogue && generated.choices) {
-                            showTypingIndicator();
+                        setTimeout(() => {
+                            hideTypingIndicator();
+                            displayCharacterMessage(generated.dialogue, generated.narration || '');
+                            scrollToBottom(); // 스크롤 자동 이동 추가
                             
                             setTimeout(() => {
-                                hideTypingIndicator();
-                                displayCharacterMessage(generated.dialogue, generated.narration || '');
-                                scrollToBottom(); // 스크롤 자동 이동 추가
+                                displayChoices(generated.choices.map(choice => ({
+                                    text: choice.text,
+                                    affection_impact: choice.affection_impact || 0
+                                })));
                                 
-                                setTimeout(() => {
-                                    displayChoices(generated.choices.map(choice => ({
-                                        text: choice.text,
-                                        affection_impact: choice.affection_impact || 0
-                                    })));
-                                    
-                                    // 처리 완료 후 상태 복원
-                                    gameState.isProcessing = false;
-                                    gameState.canInput = true;
-                                }, 1000);
-                            }, 1500);
-                            return;
-                        } else {
-                            console.warn('⚠️ GPT 응답에 필수 데이터 누락:', generated);
-                        }
+                                // 처리 완료 후 상태 복원
+                                gameState.isProcessing = false;
+                                gameState.canInput = true;
+                            }, 1000);
+                        }, 1500);
+                        return;
                     } else {
-                        console.warn('⚠️ GPT API 실패 또는 데이터 없음:', data);
+                        console.warn('⚠️ 로컬 대화 데이터에 필수 정보 누락:', generated);
                     }
+                } else {
+                    console.warn('⚠️ 로컬 대화 생성 실패:', data);
                 }
                 
                 // 3순위: GPT 실패 또는 미설정 시 기본 대화
