@@ -2502,6 +2502,12 @@
                 active: true
             };
 
+            // 저장 버튼 비활성화 및 상태 표시
+            const saveButton = document.querySelector('#characterModal .btn-primary');
+            const originalText = saveButton.textContent;
+            saveButton.disabled = true;
+            saveButton.textContent = '💾 저장 중...';
+            
             // API에 캐릭터 저장
             saveCharacterToAPI(characters[characterId]).then((success) => {
                 if (success) {
@@ -2509,12 +2515,17 @@
                     closeModal('characterModal');
                     
                     // 캐릭터 목록 새로고침 (API에서 다시 로드)
+                    console.log('🔄 캐릭터 목록 새로고침 시작...');
                     setTimeout(() => {
                         loadCharacters();
                     }, 500);
                 } else {
-                    alert('❌ 캐릭터 저장 중 오류가 발생했습니다. 다시 시도해주세요.');
+                    alert('❌ 캐릭터 저장 중 오류가 발생했습니다. 콘솔을 확인하고 다시 시도해주세요.');
                 }
+            }).finally(() => {
+                // 저장 버튼 복원
+                saveButton.disabled = false;
+                saveButton.textContent = originalText;
             });
         }
 
