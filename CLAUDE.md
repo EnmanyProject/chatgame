@@ -5,7 +5,123 @@
 ## 프로젝트 개요
 MBTI 기반 로맨스 채팅 게임 - 시나리오-에피소드 분리형 36퀘스트 시스템
 
-## 최신 작업 (2025-01-02 - 시나리오/에피소드 통합 관리 시스템)
+## 🔥 최신 작업 (2025-09-16 - 중요한 문제들 해결 및 AI 사진 분석 기능 추가)
+
+### 🚨 해결된 중요한 문제들
+1. **탭 연결 오류 수정**: 캐릭터/시나리오 탭이 반대로 연결되던 문제 해결
+2. **리스트 업데이트 문제**: 캐릭터/시나리오 생성 후 목록에 표시되지 않는 문제 분석 중
+3. **더미 데이터 완전 삭제**: 기존 더미 데이터를 모두 제거하여 새로운 데이터 생성 테스트 가능
+
+### ✨ 새로 추가된 주요 기능
+
+#### 1. 🤖 AI 사진 분석 시스템
+- **OpenAI Vision API 통합** (gpt-4o 모델 사용)
+- **기능**: 캐릭터 사진 업로드 → AI가 외모, 성격, MBTI 유형 분석
+- **자동 적용**: 분석 결과를 캐릭터 생성 폼에 원클릭으로 적용
+- **Fallback**: API 오류 시 기본 분석 제공
+
+#### 2. 🗑️ 데이터 관리 시스템
+- **완전 초기화**: 모든 더미 데이터 삭제 기능 (2단계 확인)
+- **데이터베이스 재설정**: AI 캐릭터/시나리오 DB 초기화
+- **안전 장치**: 실수 방지를 위한 이중 확인 시스템
+
+#### 3. 🔍 종합적인 디버깅 시스템
+- **상세한 로깅**: 모든 API 호출과 데이터 흐름 추적
+- **실시간 모니터링**: 캐릭터/시나리오 생성/로드 과정 완전 추적
+- **원시 데이터 표시**: JSON.stringify로 실제 데이터 확인
+- **캐시 방지**: 타임스탬프로 브라우저 캐시 문제 해결
+
+### 🔧 현재 상태
+- **배포 환경**: https://chatgame-seven.vercel.app/scenario-admin.html
+- **Git 브랜치**: main
+- **최신 커밋**: e906a8f (Fix critical issues and add comprehensive debugging)
+
+### 🧪 테스트 필요사항
+1. **F12 콘솔**을 열고 캐릭터/시나리오 생성 테스트
+2. **디버깅 로그** 확인하여 저장/로드 과정 분석
+3. **사진 분석 기능** 테스트 (5MB 이하 이미지)
+4. **탭 전환** 정상 작동 확인
+
+### 📊 토큰 사용량 모니터링
+> **참고**: Claude Code 자체에는 토큰 사용량 표시 기능이 없습니다. 
+> 다른 도구들에서 보이는 것은 별도 플러그인이나 커스텀 구현입니다.
+
+### 📁 주요 파일 구조
+```
+chatgame/
+├── scenario-admin.html          # 통합 관리 시스템 (메인)
+├── api/
+│   ├── character-ai-generator.js  # 캐릭터 AI 생성 API
+│   └── scenario-manager.js        # 시나리오 관리 API
+├── data/
+│   ├── characters.json            # 캐릭터 DB (초기화됨)
+│   └── scenarios/
+│       └── scenario-database.json  # 시나리오 DB (초기화됨)
+└── CLAUDE.md                   # 이 파일 (작업 노트)
+```
+
+### 🔄 다른 컴퓨터에서 이어가기
+
+#### 1. 저장소 클론 및 동기화
+```bash
+git clone https://github.com/EnmanyProject/chatgame.git
+cd chatgame
+git pull origin main  # 최신 상태로 업데이트
+```
+
+#### 2. 환경 변수 설정 (필수)
+- **Vercel 대시보드**에서 설정 필요:
+  - `OPENAI_API_KEY`: OpenAI API 키 (사진 분석 기능용)
+  - 설정 경로: Vercel 대시보드 → 프로젝트 → Settings → Environment Variables
+
+#### 3. 주요 정보
+- **배포 URL**: https://chatgame-seven.vercel.app/scenario-admin.html
+- **주요 브랜치**: main (모든 작업은 main에서)
+- **자동 배포**: Git push 시 자동으로 Vercel에 배포 (1-2분 소요)
+
+#### 4. 개발 워크플로우
+```bash
+# 파일 수정 후
+git add -A
+git commit -m "수정 내용 설명"
+git push origin main  # 자동 배포 시작
+```
+
+### 🔍 문제 해결 체크리스트
+- [x] 탭 연결 오류 수정 
+- [x] 더미 데이터 삭제
+- [x] 사진 분석 기능 추가
+- [x] 상세한 디버깅 로그 추가
+- [ ] **리스트 업데이트 문제 해결** (진행 중)
+
+### 🚀 다음 단계 작업
+1. 콘솔 로그로 리스트 업데이트 문제 근본 원인 파악
+2. 캐릭터/시나리오 생성 후 즉시 목록 표시 기능 완성
+3. 전체 시스템 최종 테스트 및 안정화
+
+### 🔌 API 엔드포인트 정보
+
+#### 캐릭터 관리 API (`/api/character-ai-generator`)
+- `GET ?action=list_characters`: 캐릭터 목록 조회
+- `POST action=save_character`: 캐릭터 저장
+- `POST action=delete_character`: 캐릭터 삭제
+- `POST action=reset_all_characters`: 모든 캐릭터 초기화
+- `POST action=analyze_character_image`: 사진 분석 (OpenAI Vision API)
+
+#### 시나리오 관리 API (`/api/scenario-manager`)
+- `GET ?action=list`: 시나리오 목록 조회
+- `POST action=create`: 시나리오 생성
+- `POST action=update`: 시나리오 수정
+- `POST action=regenerate_context`: AI 컨텍스트 재생성
+
+### 📝 알려진 문제들
+- **리스트 업데이트**: 생성 후 목록에 즉시 표시되지 않는 문제 (디버깅 로그 추가됨)
+- **토큰 비용**: Claude Code에는 비용 표시 기능이 없음
+
+---
+
+## 이전 작업 이력 (2025-01-02 ~ 2025-09-02)
+> 아래 이력은 참고용이므로 필요 시에만 확인하세요.
 
 ### 🎯 통합 관리 시스템 구축
 - **작업 내용**: 시나리오, 에피소드, 캐릭터 관리를 하나의 인터페이스로 통합
