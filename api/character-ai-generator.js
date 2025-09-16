@@ -74,6 +74,59 @@ export default async function handler(req, res) {
       });
     }
 
+    // 캐릭터 저장
+    if (action === 'save_character') {
+      const { character } = req.body;
+      
+      if (!character || !character.name || !character.mbti) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Character name and MBTI are required' 
+        });
+      }
+
+      const success = await saveCharacterToDatabase(character);
+      
+      if (success) {
+        return res.json({
+          success: true,
+          character: character,
+          message: 'Character saved successfully'
+        });
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to save character'
+        });
+      }
+    }
+
+    // 캐릭터 삭제
+    if (action === 'delete_character') {
+      const { character_id } = req.body;
+      
+      if (!character_id) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Character ID is required' 
+        });
+      }
+
+      const success = await deleteCharacterFromDatabase(character_id);
+      
+      if (success) {
+        return res.json({
+          success: true,
+          message: 'Character deleted successfully'
+        });
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to delete character'
+        });
+      }
+    }
+
     return res.status(400).json({ success: false, message: 'Unknown action' });
 
   } catch (error) {
@@ -374,6 +427,29 @@ async function saveCharacterToDatabase(character) {
     return true;
   } catch (error) {
     console.error('❌ AI 캐릭터 저장 실패:', error);
+    return false;
+  }
+}
+
+async function deleteCharacterFromDatabase(characterId) {
+  try {
+    const db = await loadCharacterDatabase();
+    
+    if (db.characters[characterId]) {
+      delete db.characters[characterId];
+      db.metadata.total_characters = Object.keys(db.characters).length;
+      
+      const dbPath = path.join(process.cwd(), 'data', 'characters-ai.json');
+      fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+      
+      console.log('✅ AI 캐릭터 삭제 완료:', characterId);
+      return true;
+    } else {
+      console.log('⚠️ 삭제할 캐릭터를 찾을 수 없음:', characterId);
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ AI 캐릭터 삭제 실패:', error);
     return false;
   }
 }

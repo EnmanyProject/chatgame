@@ -2319,7 +2319,39 @@
 
         // === 캐릭터 관리 함수들 ===
         async function loadCharacters() {
-            // 기본 캐릭터 데이터
+            try {
+                console.log('📥 캐릭터 데이터 로드 시작...');
+                
+                // character-ai-generator API에서 캐릭터 목록 가져오기
+                const response = await fetch('/api/character-ai-generator?action=list_characters');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ API 응답 성공:', data);
+                    
+                    if (data.success && data.characters && Object.keys(data.characters).length > 0) {
+                        characters = data.characters;
+                        console.log('📊 API에서 로드된 캐릭터 수:', Object.keys(characters).length);
+                    } else {
+                        console.log('⚠️ API 캐릭터 데이터가 비어있음, 기본 데이터 사용');
+                        loadDefaultCharacters();
+                    }
+                } else {
+                    console.error('❌ API 응답 실패:', response.status);
+                    loadDefaultCharacters();
+                }
+            } catch (error) {
+                console.error('❌ 캐릭터 로드 오류:', error);
+                loadDefaultCharacters();
+            }
+
+            displayCharacters();
+            updateCharacterStats();
+        }
+
+        // 기본 캐릭터 데이터 로드 (fallback)
+        function loadDefaultCharacters() {
+            console.log('📋 기본 캐릭터 데이터 로드');
             characters = {
                 'yuna_infp': {
                     id: 'yuna_infp',
@@ -2362,9 +2394,6 @@
                     description: '조용하지만 유능한 문제 해결사'
                 }
             };
-            
-            displayCharacters();
-            updateCharacterStats();
         }
 
         function displayCharacters() {
@@ -2473,10 +2502,48 @@
                 active: true
             };
 
-            alert(currentMode === 'create' ? '💖 새로운 캐릭터가 생성되었습니다!' : '✨ 캐릭터가 수정되었습니다!');
-            closeModal('characterModal');
-            displayCharacters();
-            updateCharacterStats();
+            // API에 캐릭터 저장
+            saveCharacterToAPI(characters[characterId]).then((success) => {
+                if (success) {
+                    alert(currentMode === 'create' ? '💖 새로운 캐릭터가 생성되었습니다!' : '✨ 캐릭터가 수정되었습니다!');
+                    closeModal('characterModal');
+                    
+                    // 캐릭터 목록 새로고침 (API에서 다시 로드)
+                    setTimeout(() => {
+                        loadCharacters();
+                    }, 500);
+                } else {
+                    alert('❌ 캐릭터 저장 중 오류가 발생했습니다. 다시 시도해주세요.');
+                }
+            });
+        }
+
+        // API에 캐릭터 저장하는 함수
+        async function saveCharacterToAPI(character) {
+            try {
+                console.log('💾 API로 캐릭터 저장 시작:', character.name);
+                
+                const response = await fetch('/api/character-ai-generator', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'save_character',
+                        character: character
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('✅ 캐릭터 저장 성공:', result);
+                    return result.success;
+                } else {
+                    console.error('❌ API 저장 실패:', response.status);
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ 캐릭터 저장 오류:', error);
+                return false;
+            }
         }
 
         // 새로운 캐릭터 데이터 수집 함수
@@ -2727,15 +2794,42 @@
             return translations[style] || style;
         }
 
-        function deleteCharacter(characterId) {
+        async function deleteCharacter(characterId) {
             if (!confirm('정말로 이 캐릭터를 삭제하시겠습니까?')) {
                 return;
             }
 
-            delete characters[characterId];
-            displayCharacters();
-            updateCharacterStats();
-            alert('캐릭터가 삭제되었습니다.');
+            try {
+                console.log('🗑️ 캐릭터 삭제 시작:', characterId);
+                
+                const response = await fetch('/api/character-ai-generator', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'delete_character',
+                        character_id: characterId
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('✅ 캐릭터가 삭제되었습니다.');
+                        
+                        // 캐릭터 목록 새로고침 (API에서 다시 로드)
+                        setTimeout(() => {
+                            loadCharacters();
+                        }, 500);
+                    } else {
+                        alert('❌ 캐릭터 삭제에 실패했습니다: ' + result.message);
+                    }
+                } else {
+                    alert('❌ 서버 오류로 인해 삭제에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('❌ 캐릭터 삭제 오류:', error);
+                alert('❌ 캐릭터 삭제 중 오류가 발생했습니다.');
+            }
         }
 
         // === 공통 함수들 ===
