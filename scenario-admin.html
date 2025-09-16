@@ -994,6 +994,119 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+
+        /* Episode Preview Modal Styles */
+        .preview-section {
+            margin-bottom: 25px;
+        }
+
+        .preview-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .metadata-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .metadata-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .metadata-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .dialogue-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .character-message {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+
+        .narration {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 8px;
+            font-style: italic;
+            color: #1976d2;
+            border-left: 4px solid #1976d2;
+        }
+
+        .choices-container {
+            display: grid;
+            gap: 10px;
+        }
+
+        .choice-preview {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .choice-preview:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .choice-text {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .choice-impact {
+            margin-left: 15px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .impact-positive {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .impact-negative {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .impact-neutral {
+            background: #f5f5f5;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -1694,6 +1807,49 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('characterModal')">취소</button>
                 <button type="button" class="btn btn-primary" onclick="saveCharacter()">💖 캐릭터 저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Episode Preview Modal -->
+    <div id="episodePreviewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal('episodePreviewModal')">&times;</span>
+                <h2 id="episodePreviewTitle">📖 에피소드 미리보기</h2>
+            </div>
+            <div class="modal-body">
+                <div id="episodePreviewContent">
+                    <div class="preview-section">
+                        <h3>📋 에피소드 정보</h3>
+                        <div id="episodeMetadata" class="metadata-grid">
+                            <!-- Episode metadata will be inserted here -->
+                        </div>
+                    </div>
+                    
+                    <div class="preview-section">
+                        <h3>💬 대화 내용</h3>
+                        <div id="dialogueDisplay" class="dialogue-container">
+                            <div id="characterMessage" class="character-message">
+                                <!-- Character message will be inserted here -->
+                            </div>
+                            <div id="narrationDisplay" class="narration">
+                                <!-- Narration will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="preview-section">
+                        <h3>🔘 선택지</h3>
+                        <div id="choicesDisplay" class="choices-container">
+                            <!-- Choices will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('episodePreviewModal')">닫기</button>
+                <button type="button" class="btn btn-primary" onclick="editEpisodeFromPreview()">수정하기</button>
             </div>
         </div>
     </div>
@@ -2684,10 +2840,10 @@
             if (episode) {
                 const characterName = getCharacterName(episode.character_id);
                 return `
-                    <div class="episode-card completed" onclick="editEpisode(${number})">
+                    <div class="episode-card completed" onclick="previewEpisode(${number})">
                         <div class="episode-number">#${number}</div>
                         <div style="font-size: 0.9em; color: white;">${characterName}</div>
-                        <div style="font-size: 0.8em; opacity: 0.9;">호감도 ${episode.required_affection}+</div>
+                        <div style="font-size: 0.8em; opacity: 0.9;">${difficulty.toUpperCase()}</div>
                     </div>
                 `;
             } else {
@@ -2791,6 +2947,120 @@
             // 난이도 자동 설정
             const difficulty = getDifficultyByNumber(number);
             document.getElementById('difficulty').value = difficulty;
+        }
+
+        // Episode Preview Functions
+        let currentPreviewEpisodeNumber = null;
+
+        function previewEpisode(number) {
+            const episode = episodes[number];
+            if (!episode) {
+                alert('에피소드 데이터를 찾을 수 없습니다.');
+                return;
+            }
+
+            currentPreviewEpisodeNumber = number;
+            console.log('📖 에피소드 미리보기:', number, episode);
+
+            // Update modal title
+            document.getElementById('episodePreviewTitle').textContent = `📖 에피소드 #${number} 미리보기`;
+
+            // Display episode metadata
+            displayEpisodeMetadata(episode, number);
+
+            // Display dialogue content
+            displayDialogueContent(episode);
+
+            // Show modal
+            document.getElementById('episodePreviewModal').style.display = 'block';
+        }
+
+        function displayEpisodeMetadata(episode, number) {
+            const metadata = document.getElementById('episodeMetadata');
+            const difficulty = getDifficultyByNumber(number);
+            const characterName = getCharacterName(episode.character_id);
+
+            metadata.innerHTML = `
+                <div class="metadata-item">
+                    <div class="metadata-label">에피소드 번호</div>
+                    <div class="metadata-value">#${number}</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">난이도</div>
+                    <div class="metadata-value">${difficulty.toUpperCase()}</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">캐릭터</div>
+                    <div class="metadata-value">${characterName} (${episode.character_id})</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">시나리오</div>
+                    <div class="metadata-value">${episode.scenario_id}</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">생성일</div>
+                    <div class="metadata-value">${episode.created_at ? new Date(episode.created_at).toLocaleString() : '알 수 없음'}</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">상황 프롬프트</div>
+                    <div class="metadata-value">${episode.user_input_prompt || '없음'}</div>
+                </div>
+            `;
+        }
+
+        function displayDialogueContent(episode) {
+            const characterMessage = document.getElementById('characterMessage');
+            const narrationDisplay = document.getElementById('narrationDisplay');
+            const choicesDisplay = document.getElementById('choicesDisplay');
+
+            // Get dialogue data - check both possible fields
+            const dialogueData = episode.generated_dialogue || episode.ai_generated_dialogue;
+            
+            console.log('💬 대화 데이터:', dialogueData);
+
+            if (dialogueData) {
+                // Display character message
+                characterMessage.innerHTML = dialogueData.dialogue || dialogueData.character_message || '대화 내용이 없습니다.';
+                
+                // Display narration
+                if (dialogueData.narration || dialogueData.context) {
+                    narrationDisplay.innerHTML = dialogueData.narration || dialogueData.context;
+                    narrationDisplay.style.display = 'block';
+                } else {
+                    narrationDisplay.style.display = 'none';
+                }
+
+                // Display choices
+                if (dialogueData.choices && Array.isArray(dialogueData.choices)) {
+                    let choicesHtml = '';
+                    dialogueData.choices.forEach((choice, index) => {
+                        const impact = choice.affection_impact || 0;
+                        const impactClass = impact > 0 ? 'impact-positive' : impact < 0 ? 'impact-negative' : 'impact-neutral';
+                        const impactText = impact > 0 ? `+${impact}` : impact < 0 ? `${impact}` : '0';
+                        
+                        choicesHtml += `
+                            <div class="choice-preview">
+                                <div class="choice-text">${choice.text}</div>
+                                <div class="choice-impact ${impactClass}">호감도 ${impactText}</div>
+                            </div>
+                        `;
+                    });
+                    choicesDisplay.innerHTML = choicesHtml;
+                } else {
+                    choicesDisplay.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">선택지가 없습니다.</div>';
+                }
+            } else {
+                characterMessage.innerHTML = '대화 데이터를 찾을 수 없습니다.';
+                narrationDisplay.style.display = 'none';
+                choicesDisplay.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">대화 데이터가 없습니다.</div>';
+            }
+        }
+
+        function editEpisodeFromPreview() {
+            if (currentPreviewEpisodeNumber !== null) {
+                closeModal('episodePreviewModal');
+                editEpisode(currentPreviewEpisodeNumber);
+            }
         }
 
         function editEpisode(number) {
