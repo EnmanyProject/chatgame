@@ -1862,19 +1862,32 @@
             console.log('🔄 에피소드 시나리오 선택기 로딩 시작...');
             
             try {
-                // window.scenarios와 LocalStorage 모두 확인
-                let scenariosData = window.scenarios || {};
+                // 모든 소스에서 시나리오 데이터 통합 로딩
+                let scenariosData = {};
                 
-                // window.scenarios가 비어있으면 LocalStorage에서 로딩
-                if (Object.keys(scenariosData).length === 0) {
-                    console.log('🔄 window.scenarios 비어있음, LocalStorage에서 로딩...');
-                    const localScenarios = localStorage.getItem('scenarios');
-                    if (localScenarios) {
-                        scenariosData = JSON.parse(localScenarios);
-                        window.scenarios = scenariosData; // window.scenarios에도 설정
-                        console.log('✅ LocalStorage에서 시나리오 로딩:', Object.keys(scenariosData).length, '개');
-                    }
+                // 1. 전역 변수 scenarios 확인
+                if (window.scenarios && Object.keys(window.scenarios).length > 0) {
+                    scenariosData = { ...window.scenarios };
+                    console.log('✅ window.scenarios에서 로딩:', Object.keys(scenariosData).length, '개');
                 }
+                
+                // 2. 전역 scenarios 변수 확인
+                if (typeof scenarios !== 'undefined' && Object.keys(scenarios).length > 0) {
+                    scenariosData = { ...scenariosData, ...scenarios };
+                    console.log('✅ 전역 scenarios에서 추가 로딩:', Object.keys(scenariosData).length, '개');
+                }
+                
+                // 3. LocalStorage에서 로딩
+                const localScenarios = localStorage.getItem('scenarios');
+                if (localScenarios) {
+                    const parsedLocal = JSON.parse(localScenarios);
+                    scenariosData = { ...scenariosData, ...parsedLocal };
+                    console.log('✅ LocalStorage에서 추가 로딩:', Object.keys(scenariosData).length, '개');
+                }
+                
+                // 모든 변수 동기화
+                scenarios = scenariosData;
+                window.scenarios = scenariosData;
                 
                 const scenarioKeys = Object.keys(scenariosData);
                 console.log('📊 최종 로드된 시나리오:', scenarioKeys.length, '개');
@@ -2603,27 +2616,45 @@
         }
 
         async function loadEpisodes() {
-            const scenarioId = document.getElementById('episodeScenarioSelect').value;
+            const scenarioId = document.getElementById('episodeScenarioSelect').value || currentScenarioId;
             if (!scenarioId) {
                 document.getElementById('episodeInfo').style.display = 'none';
+                console.log('⚠️ 시나리오 ID가 없어서 에피소드 로딩을 건너뜁니다.');
                 return;
             }
 
             currentScenarioId = scenarioId;
             document.getElementById('episodeInfo').style.display = 'block';
+            console.log('📚 에피소드 로딩 시작 - 시나리오:', scenarioId);
 
             try {
-                const response = await fetch(`/api/episode-manager?action=list&scenario_id=${scenarioId}`);
-                const data = await response.json();
-
-                if (data.success) {
-                    episodes = {};
-                    data.episodes.forEach(ep => {
-                        episodes[ep.episode_number] = ep;
+                // LocalStorage에서 에피소드 로딩
+                const localEpisodes = localStorage.getItem('episodes');
+                let episodesData = {};
+                
+                if (localEpisodes) {
+                    const allEpisodes = JSON.parse(localEpisodes);
+                    console.log('📊 전체 에피소드 수:', Object.keys(allEpisodes).length);
+                    
+                    // 선택된 시나리오의 에피소드만 필터링
+                    Object.keys(allEpisodes).forEach(key => {
+                        const episode = allEpisodes[key];
+                        if (episode.scenario_id === scenarioId) {
+                            episodesData[episode.episode_number] = episode;
+                        }
                     });
-                    displayEpisodes();
-                    updateEpisodeStats();
+                    
+                    console.log(`✅ 시나리오 ${scenarioId}의 에피소드:`, Object.keys(episodesData).length, '개');
                 }
+                
+                // 전역 변수 업데이트
+                episodes = episodesData;
+                window.episodes = episodesData;
+                
+                // UI 업데이트
+                displayEpisodes();
+                updateEpisodeStats();
+                
             } catch (error) {
                 console.error('에피소드 로드 오류:', error);
                 episodes = {};
@@ -2949,24 +2980,146 @@
         }
 
         async function generateBulkEpisodes() {
-            if (!currentScenarioId) {
-                alert('먼저 시나리오를 선택해주세요.');
+            console.log('🚀 에피소드 일괄 생성 시작...');
+            
+            // 1. 시나리오 선택
+            const availableScenarios = Object.keys(scenarios);
+            if (availableScenarios.length === 0) {
+                alert('생성된 시나리오가 없습니다. 먼저 시나리오를 생성해주세요.');
                 return;
             }
             
-            const characterId = prompt('일괄 생성할 캐릭터 ID를 입력하세요:\nyuna_infp, mina_enfp, seoyeon_intj, jihye_esfj, hyejin_istp');
-            if (!characterId) return;
+            let scenarioOptions = '사용 가능한 시나리오:\n';
+            availableScenarios.forEach((id, index) => {
+                scenarioOptions += `${index + 1}. ${scenarios[id].title} (ID: ${id})\n`;
+            });
             
+            const scenarioChoice = prompt(`${scenarioOptions}\n시나리오 번호를 선택하세요 (1-${availableScenarios.length}):`);
+            if (!scenarioChoice) return;
+            
+            const selectedScenarioIndex = parseInt(scenarioChoice) - 1;
+            if (selectedScenarioIndex < 0 || selectedScenarioIndex >= availableScenarios.length) {
+                alert('올바른 시나리오 번호를 선택해주세요.');
+                return;
+            }
+            
+            const selectedScenarioId = availableScenarios[selectedScenarioIndex];
+            const selectedScenario = scenarios[selectedScenarioId];
+            console.log('✅ 선택된 시나리오:', selectedScenario.title);
+            
+            // 2. 캐릭터 선택  
+            const availableCharacters = Object.keys(characters);
+            if (availableCharacters.length === 0) {
+                alert('생성된 캐릭터가 없습니다. 먼저 캐릭터를 생성해주세요.');
+                return;
+            }
+            
+            let characterOptions = '사용 가능한 캐릭터:\n';
+            availableCharacters.forEach((id, index) => {
+                const char = characters[id];
+                characterOptions += `${index + 1}. ${char.name} (${char.mbti}) - ID: ${id}\n`;
+            });
+            
+            const characterChoice = prompt(`${characterOptions}\n캐릭터 번호를 선택하세요 (1-${availableCharacters.length}):`);
+            if (!characterChoice) return;
+            
+            const selectedCharacterIndex = parseInt(characterChoice) - 1;
+            if (selectedCharacterIndex < 0 || selectedCharacterIndex >= availableCharacters.length) {
+                alert('올바른 캐릭터 번호를 선택해주세요.');
+                return;
+            }
+            
+            const selectedCharacterId = availableCharacters[selectedCharacterIndex];
+            const selectedCharacter = characters[selectedCharacterId];
+            console.log('✅ 선택된 캐릭터:', selectedCharacter.name);
+            
+            // 3. 에피소드 범위 선택
             const startNum = parseInt(prompt('시작 에피소드 번호 (1-36):'));
             const endNum = parseInt(prompt('종료 에피소드 번호 (1-36):'));
             
             if (!startNum || !endNum || startNum < 1 || endNum > 36 || startNum > endNum) {
-                alert('올바른 범위를 입력해주세요.');
+                alert('올바른 범위를 입력해주세요. (1-36, 시작번호 ≤ 종료번호)');
                 return;
             }
             
-            if (confirm(`${startNum}번부터 ${endNum}번까지 ${endNum - startNum + 1}개의 에피소드를 생성하시겠습니까?`)) {
-                alert('일괄 생성 기능은 개발 중입니다. 개별적으로 생성해주세요.');
+            const episodeCount = endNum - startNum + 1;
+            
+            // 4. 확인 및 생성
+            if (confirm(`📋 일괄 생성 설정:\n\n시나리오: ${selectedScenario.title}\n캐릭터: ${selectedCharacter.name} (${selectedCharacter.mbti})\n범위: ${startNum}번 ~ ${endNum}번 (총 ${episodeCount}개)\n\n생성하시겠습니까?`)) {
+                
+                console.log('🔄 에피소드 일괄 생성 진행...');
+                let successCount = 0;
+                let failCount = 0;
+                
+                for (let episodeNum = startNum; episodeNum <= endNum; episodeNum++) {
+                    try {
+                        // 각 에피소드별 상황 프롬프트 자동 생성
+                        const situationPrompts = [
+                            "우연히 마주친 상황에서 서로를 의식하며",
+                            "함께 과제를 하면서 가까워지는 순간",
+                            "비 내리는 날 같은 우산을 쓰게 되어",
+                            "축제에서 함께 즐거운 시간을 보내며",
+                            "조용한 도서관에서 눈이 마주쳐",
+                            "카페에서 우연히 만나 대화하며",
+                            "방과후 교실에서 둘만 남게 되어",
+                            "산책하며 진솔한 대화를 나누는",
+                            "학교 옥상에서 바라본 하늘처럼 청량한",
+                            "추운 겨울 따뜻한 마음을 나누는"
+                        ];
+                        
+                        const promptIndex = (episodeNum - 1) % situationPrompts.length;
+                        const userPrompt = situationPrompts[promptIndex];
+                        
+                        // 난이도 설정 (1-9: Easy, 10-18: Medium, 19-27: Hard, 28-36: Expert)
+                        let difficulty = 'Easy';
+                        if (episodeNum >= 10 && episodeNum <= 18) difficulty = 'Medium';
+                        else if (episodeNum >= 19 && episodeNum <= 27) difficulty = 'Hard';
+                        else if (episodeNum >= 28 && episodeNum <= 36) difficulty = 'Expert';
+                        
+                        // 로컬 대화 생성
+                        const generatedDialogue = generateLocalDialogue(selectedCharacterId, selectedCharacter.name, userPrompt, difficulty);
+                        
+                        // 에피소드 데이터 생성
+                        const episodeData = {
+                            episode_number: episodeNum,
+                            scenario_id: selectedScenarioId,
+                            character_id: selectedCharacterId,
+                            character_name: selectedCharacter.name,
+                            user_input_prompt: userPrompt,
+                            difficulty: difficulty,
+                            ai_generated_dialogue: generatedDialogue,
+                            generated_dialogue: generatedDialogue,
+                            created_at: new Date().toISOString()
+                        };
+                        
+                        // LocalStorage에 저장
+                        const existingEpisodes = localStorage.getItem('episodes');
+                        const episodesData = existingEpisodes ? JSON.parse(existingEpisodes) : {};
+                        
+                        const episodeKey = `${selectedScenarioId}_${episodeNum}`;
+                        episodesData[episodeKey] = episodeData;
+                        
+                        localStorage.setItem('episodes', JSON.stringify(episodesData));
+                        
+                        // 전역 변수에도 저장
+                        if (!episodes) episodes = {};
+                        episodes[episodeKey] = episodeData;
+                        
+                        successCount++;
+                        console.log(`✅ 에피소드 ${episodeNum}번 생성 완료`);
+                        
+                    } catch (error) {
+                        console.error(`❌ 에피소드 ${episodeNum}번 생성 실패:`, error);
+                        failCount++;
+                    }
+                }
+                
+                // 결과 표시
+                alert(`🎉 일괄 생성 완료!\n\n✅ 성공: ${successCount}개\n❌ 실패: ${failCount}개\n\n에피소드 목록을 새로고침합니다.`);
+                
+                // UI 업데이트
+                currentScenarioId = selectedScenarioId;
+                loadEpisodes();
             }
         }
 
@@ -3334,12 +3487,21 @@
                 safeSetValue('charSpeechStyle', analysis.speech_style);
             }
             
-            // 설명 적용
+            // 설명 적용 (안전한 방식)
             if (analysis.appearance || analysis.background_suggestion) {
                 let description = '';
                 if (analysis.appearance) description += `외모: ${analysis.appearance}. `;
                 if (analysis.background_suggestion) description += `배경: ${analysis.background_suggestion}.`;
-                document.getElementById('charDescription').value = description;
+                safeSetValue('charDescription', description);
+            }
+            
+            // 기타 필드들도 안전하게 적용
+            if (analysis.name_suggestion) {
+                safeSetValue('charName', analysis.name_suggestion);
+            }
+            
+            if (analysis.age_suggestion) {
+                safeSetValue('charAge', analysis.age_suggestion);
             }
             
             alert('🎉 분석 결과가 폼에 적용되었습니다!');
