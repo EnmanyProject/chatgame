@@ -688,11 +688,18 @@
         }
 
         .char-category {
-            margin-bottom: 25px;
-            padding: 20px;
+            margin-bottom: 20px;
+            padding: 25px;
             border: 2px solid #e1e5e9;
-            border-radius: 15px;
+            border-radius: 20px;
             background: linear-gradient(135deg, #fdf7f9 0%, #fef9fc 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .char-category:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
         }
 
         .char-category h3 {
@@ -723,8 +730,8 @@
         /* MBTI 선택 버튼 */
         .mbti-options {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
             margin-bottom: 15px;
         }
 
@@ -928,7 +935,7 @@
             }
             
             .mbti-options {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(3, 1fr);
             }
             
             .trait-options {
@@ -1105,11 +1112,8 @@
             </div>
 
             <div class="action-buttons">
-                <button class="btn btn-primary" onclick="openCharacterModal('create')">
-                    ✨ 새 캐릭터 추가
-                </button>
-                <button class="btn btn-success" onclick="openAICharacterCreator()" style="background: linear-gradient(135deg, #ff6b6b, #ffa726);">
-                    🎭 AI 캐릭터 생성
+                <button class="btn btn-primary" onclick="openCharacterModal('create')" style="background: linear-gradient(135deg, #e91e63, #9c27b0); font-size: 16px; padding: 15px 25px;">
+                    🎭✨ AI 캐릭터 생성기
                 </button>
                 <button class="btn btn-secondary" onclick="loadCharacters()">
                     🔄 새로고침
@@ -1354,15 +1358,16 @@
         <div class="modal-content ai-character-generator">
             <div class="modal-header">
                 <span class="close" onclick="closeModal('characterModal')">&times;</span>
-                <h2 id="characterModalTitle">🎭 AI 캐릭터 생성기 - 여성 캐릭터 중심</h2>
+                <h2 id="characterModalTitle">🎭✨ 세계관 최강 AI 캐릭터 생성기</h2>
+                <p style="text-align: center; color: #666; margin-top: 5px;">스크롤하며 원하는 요소들을 선택하세요 💖</p>
             </div>
             <div class="modal-body">
                 <form id="characterForm">
                     <input type="hidden" id="characterId" />
                     
-                    <!-- 1. 기본 정보 -->
+                    <!-- 기본 정보 -->
                     <div class="char-category">
-                        <h3>💖 1. 기본 정보</h3>
+                        <h3>💖 기본 정보</h3>
                         <div class="category-grid">
                             <div class="form-group">
                                 <label>캐릭터 이름</label>
@@ -1393,19 +1398,29 @@
                         </div>
                     </div>
 
-                    <!-- 2. 성격 설정 (MBTI 기반) -->
+                    <!-- 성격 설정 (MBTI 기반) -->
                     <div class="char-category">
-                        <h3>🧠 2. 성격 설정</h3>
+                        <h3>🧠 성격 설정</h3>
                         <div class="mbti-selector">
                             <div class="mbti-group">
-                                <label>MBTI 유형</label>
+                                <label>MBTI 유형 (16가지 전체)</label>
                                 <div class="mbti-options">
                                     <button type="button" class="mbti-btn" data-mbti="INFP">INFP<br><small>감성적 중재자</small></button>
                                     <button type="button" class="mbti-btn" data-mbti="ENFP">ENFP<br><small>활발한 활동가</small></button>
+                                    <button type="button" class="mbti-btn" data-mbti="INFJ">INFJ<br><small>옹호자</small></button>
+                                    <button type="button" class="mbti-btn" data-mbti="ENFJ">ENFJ<br><small>정의로운 사회운동가</small></button>
                                     <button type="button" class="mbti-btn" data-mbti="INTJ">INTJ<br><small>완벽한 전략가</small></button>
-                                    <button type="button" class="mbti-btn" data-mbti="ESFJ">ESFJ<br><small>따뜻한 사교가</small></button>
+                                    <button type="button" class="mbti-btn" data-mbti="ENTJ">ENTJ<br><small>대담한 통솔자</small></button>
+                                    <button type="button" class="mbti-btn" data-mbti="INTP">INTP<br><small>논리적 사색가</small></button>
+                                    <button type="button" class="mbti-btn" data-mbti="ENTP">ENTP<br><small>뜨거운 토론가</small></button>
+                                    <button type="button" class="mbti-btn" data-mbti="ISFP">ISFP<br><small>모험가</small></button>
+                                    <button type="button" class="mbti-btn" data-mbti="ESFP">ESFP<br><small>자유로운 영혼</small></button>
+                                    <button type="button" class="mbti-btn" data-mbti="ISTP">ISTP<br><small>만능 재주꾼</small></button>
+                                    <button type="button" class="mbti-btn" data-mbti="ESTP">ESTP<br><small>모험을 즐기는 사업가</small></button>
                                     <button type="button" class="mbti-btn" data-mbti="ISFJ">ISFJ<br><small>조용한 보호자</small></button>
-                                    <button type="button" class="mbti-btn" data-mbti="ENFJ">ENFJ<br><small>카리스마 리더</small></button>
+                                    <button type="button" class="mbti-btn" data-mbti="ESFJ">ESFJ<br><small>따뜻한 사교가</small></button>
+                                    <button type="button" class="mbti-btn" data-mbti="ISTJ">ISTJ<br><small>엄격한 관리자</small></button>
+                                    <button type="button" class="mbti-btn" data-mbti="ESTJ">ESTJ<br><small>엄격한 관리자</small></button>
                                 </div>
                                 <input type="hidden" id="charMbti" />
                             </div>
@@ -1425,9 +1440,9 @@
                         </div>
                     </div>
 
-                    <!-- 3. 배경 설정 -->
+                    <!-- 배경 설정 -->
                     <div class="char-category">
-                        <h3>🎓 3. 배경 설정</h3>
+                        <h3>🎓 배경 설정</h3>
                         <div class="category-grid">
                             <div class="form-group">
                                 <label>전공/직업</label>
@@ -1463,9 +1478,9 @@
                         </div>
                     </div>
 
-                    <!-- 4. 관계 설정 -->
+                    <!-- 관계 설정 -->
                     <div class="char-category">
-                        <h3>💝 4. 관계 설정</h3>
+                        <h3>💝 관계 설정</h3>
                         <div class="relationship-options">
                             <button type="button" class="relationship-btn" data-rel="secret_crush">💕 몰래 좋아하는 후배</button>
                             <button type="button" class="relationship-btn" data-rel="childhood_friend">🎪 어릴 때부터 친한 친구</button>
@@ -1477,9 +1492,9 @@
                         <input type="hidden" id="charRelationship" />
                     </div>
 
-                    <!-- 5. 외모 설정 -->
+                    <!-- 외모 설정 -->
                     <div class="char-category">
-                        <h3>✨ 5. 외모 설정</h3>
+                        <h3>✨ 외모 설정</h3>
                         <div class="appearance-grid">
                             <div class="form-group">
                                 <label>헤어 스타일</label>
@@ -1520,9 +1535,9 @@
                         </div>
                     </div>
 
-                    <!-- 6. 내면/습관 -->
+                    <!-- 내면/습관 -->
                     <div class="char-category">
-                        <h3>💫 6. 내면 & 취미</h3>
+                        <h3>💫 내면 & 취미</h3>
                         <div class="hobby-interests">
                             <div class="form-group">
                                 <label>취미 활동 (최대 3개 선택)</label>
@@ -1550,9 +1565,9 @@
                         </div>
                     </div>
 
-                    <!-- 7. 말투/대화 스타일 -->
+                    <!-- 말투/대화 스타일 -->
                     <div class="char-category">
-                        <h3>💬 7. 말투 & 대화 스타일</h3>
+                        <h3>💬 말투 & 대화 스타일</h3>
                         <div class="speech-style-grid">
                             <div class="speech-options">
                                 <button type="button" class="speech-btn" data-speech="soft_warm">🌸 부드럽고 따뜻한</button>
@@ -1570,9 +1585,9 @@
                         </div>
                     </div>
 
-                    <!-- 8. 장르/시나리오 설정 -->
+                    <!-- 장르/시나리오 설정 -->
                     <div class="char-category">
-                        <h3>📖 8. 장르 & 시나리오 타입</h3>
+                        <h3>📖 장르 & 시나리오 타입</h3>
                         <div class="genre-grid">
                             <div class="form-group">
                                 <label>로맨스 장르</label>
@@ -1934,26 +1949,6 @@
             return templates[mood] || templates['로맨틱'];
         }
 
-        // === AI 캐릭터 생성 기능 ===
-        function openAICharacterCreator() {
-            // 새 창에서 AI 캐릭터 생성기 열기
-            const newWindow = window.open('/character-ai-creator.html', '_blank', 'width=900,height=700,scrollbars=yes,resizable=yes');
-            
-            if (newWindow) {
-                // 새 창이 닫힐 때 캐릭터 목록 새로고침
-                const checkClosed = setInterval(() => {
-                    if (newWindow.closed) {
-                        clearInterval(checkClosed);
-                        setTimeout(() => {
-                            loadCharacters(); // 캐릭터 목록 새로고침
-                            updateAllStats(); // 통계 업데이트
-                        }, 1000);
-                    }
-                }, 1000);
-            } else {
-                alert('팝업 차단기가 활성화되어 있습니다. 팝업을 허용해주세요.');
-            }
-        }
 
         // === 예시 자동 입력 기능 ===
         function fillExample(fieldId, element) {
@@ -2399,8 +2394,23 @@
 
         function openCharacterModal(mode) {
             currentMode = mode;
-            document.getElementById('characterModalTitle').textContent = '새 캐릭터 추가';
+            // 제목은 이미 HTML에서 설정되어 있으므로 변경하지 않음
             document.getElementById('characterForm').reset();
+            
+            // 모든 선택 버튼들 초기화
+            document.querySelectorAll('.mbti-btn.selected, .trait-btn.selected, .relationship-btn.selected, .hobby-btn.selected, .speech-btn.selected').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // 숨겨진 필드들 초기화
+            document.getElementById('charMbti').value = '';
+            document.getElementById('charRelationship').value = '';
+            document.getElementById('charSpeechStyle').value = '';
+            
+            // AI 생성 영역 초기화
+            document.getElementById('aiGenerationStatus').innerHTML = '';
+            document.getElementById('characterPreview').style.display = 'none';
+            
             document.getElementById('characterModal').style.display = 'block';
         }
 
