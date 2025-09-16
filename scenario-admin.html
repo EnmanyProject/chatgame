@@ -2842,8 +2842,8 @@
             try {
                 console.log('🤖 로컬 대화 생성 시작...');
                 
-                // 로컬 대화 생성 (API 대신)
-                generatedDialogue = generateLocalDialogue(characterId, characterName, userPrompt, difficulty);
+                // 채팅 훈련 API를 사용한 대화 생성
+                generatedDialogue = await generateLocalDialogue(characterId, characterName, userPrompt, difficulty);
                 
                 // 짧은 지연으로 로딩 효과 제공
                 setTimeout(() => {
@@ -3076,8 +3076,8 @@
                         else if (episodeNum >= 19 && episodeNum <= 27) difficulty = 'Hard';
                         else if (episodeNum >= 28 && episodeNum <= 36) difficulty = 'Expert';
                         
-                        // 로컬 대화 생성
-                        const generatedDialogue = generateLocalDialogue(selectedCharacterId, selectedCharacter.name, userPrompt, difficulty);
+                        // 채팅 훈련 API를 사용한 대화 생성
+                        const generatedDialogue = await generateLocalDialogue(selectedCharacterId, selectedCharacter.name, userPrompt, difficulty);
                         
                         // 에피소드 데이터 생성
                         const episodeData = {
@@ -3808,86 +3808,102 @@
             saveButton.textContent = originalText;
         }
 
-        // 로컬 대화 생성 함수
-        function generateLocalDialogue(characterId, characterName, userPrompt, difficulty) {
-            console.log(`🎭 ${characterName}의 ${difficulty} 난이도 대화 생성:`, userPrompt);
+        // 채팅 훈련 API를 사용한 대화 생성 함수 (개선된 버전)
+        async function generateLocalDialogue(characterId, characterName, userPrompt, difficulty) {
+            console.log(`🎯 ${characterName}의 ${difficulty} 난이도 채팅 훈련 대화 생성:`, userPrompt);
 
-            // MBTI별 캐릭터 특성 정의
-            const mbtiStyles = {
-                'INFP': {
-                    style: '부드럽고 감성적인',
-                    endings: ['...', '~ 💕', '그런 것 같아요'],
-                    personality: '내성적이고 이상주의적인'
+            try {
+                // 채팅 훈련 API 호출
+                const response = await fetch('/api/episode-test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'generate',
+                        character_id: characterId,
+                        user_prompt: userPrompt,
+                        difficulty: difficulty
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ 채팅 훈련 API 응답 받음:', data);
+                    
+                    if (data.success && data.data) {
+                        // API 응답을 게임 형식에 맞게 변환
+                        return {
+                            dialogue: data.data.character_message,
+                            narration: data.data.context,
+                            choices: data.data.choices,
+                            difficulty: difficulty,
+                            generated_at: new Date().toISOString(),
+                            source: 'chat_training_api'
+                        };
+                    }
+                }
+                
+                // API 실패 시 fallback 사용
+                console.warn('⚠️ 채팅 훈련 API 실패, fallback 사용');
+                
+            } catch (error) {
+                console.error('❌ 채팅 훈련 API 호출 오류:', error);
+            }
+
+            // Fallback: 캐릭터별 개성 있는 대화형 응답
+            const characterResponses = {
+                'yuna_infp': {
+                    message: "음... 그런 얘기구나 😊\n사실 나도 비슷하게 생각하고 있었어",
+                    choices: [
+                        { text: "정말? 어떤 생각이었는지 궁금해", affection_impact: 3, strategy: "진심 어린 관심" },
+                        { text: "우리 생각이 비슷하네", affection_impact: 2, strategy: "공감대 형성" },
+                        { text: "그래? 나중에 더 자세히 얘기해줘", affection_impact: 1, strategy: "안전한 거리" }
+                    ]
                 },
-                'ENFP': {
-                    style: '밝고 활발한',
-                    endings: ['!', '!! ✨', '~!!'],
-                    personality: '외향적이고 열정적인'
+                'mina_enfp': {
+                    message: "와! 진짜 그렇게 생각해? 😆\n우리 완전 잘 맞는 것 같아!",
+                    choices: [
+                        { text: "너랑 대화하면 항상 즐거워", affection_impact: 3, strategy: "감정 공유" },
+                        { text: "미나는 정말 에너지가 넘치네", affection_impact: 2, strategy: "성격 인정" },
+                        { text: "그래, 우리 잘 맞는 것 같아", affection_impact: 1, strategy: "동조" }
+                    ]
                 },
-                'INTJ': {
-                    style: '논리적이고 간결한',
-                    endings: ['.', '네.', '입니다.'],
-                    personality: '독립적이고 계획적인'
+                'seoyeon_intj': {
+                    message: "흥미로운 관점이네요.\n논리적으로 타당한 부분이 있습니다.",
+                    choices: [
+                        { text: "서연의 의견도 듣고 싶어", affection_impact: 3, strategy: "지적 존중" },
+                        { text: "논리적으로 생각해줘서 고마워", affection_impact: 2, strategy: "능력 인정" },
+                        { text: "그래, 함께 생각해보자", affection_impact: 1, strategy: "협력 제안" }
+                    ]
                 },
-                'ESFJ': {
-                    style: '따뜻하고 배려깊은',
-                    endings: ['요~', '네! 😊', '할게요'],
-                    personality: '사교적이고 협조적인'
+                'jihye_esfj': {
+                    message: "정말? 괜찮아? 😟\n혹시 불편한 건 없어? 도와줄 수 있는 게 있다면 말해줘!",
+                    choices: [
+                        { text: "걱정해줘서 정말 고마워", affection_impact: 3, strategy: "감사 표현" },
+                        { text: "지혜 덕분에 힘이 나", affection_impact: 2, strategy: "의존성 표현" },
+                        { text: "괜찮아, 신경 써줘서 고마워", affection_impact: 1, strategy: "안전한 거리" }
+                    ]
                 },
-                'ISTP': {
-                    style: '간결하고 실용적인',
-                    endings: ['.', '...', '그런데'],
-                    personality: '현실적이고 독립적인'
+                'hyejin_istp': {
+                    message: "그렇구나. 나쁘지 않네 👍",
+                    choices: [
+                        { text: "혜진의 솔직한 반응이 좋아", affection_impact: 3, strategy: "성격 인정" },
+                        { text: "더 자세히 얘기해줄래?", affection_impact: 1, strategy: "대화 유도" },
+                        { text: "그래, 나도 그렇게 생각해", affection_impact: 2, strategy: "동조와 공감" }
+                    ]
                 }
             };
 
-            // 캐릭터 MBTI 추출 (캐릭터 ID에서)
-            const mbti = characterId.split('_')[1]?.toUpperCase() || 'INFP';
-            const characterStyle = mbtiStyles[mbti] || mbtiStyles['INFP'];
-
-            // 난이도별 선택지 호감도 영향
-            const difficultySettings = {
-                'Easy': { baseAffection: 0, choiceRange: [0, 1, 2] },
-                'Medium': { baseAffection: 10, choiceRange: [-1, 1, 2] },
-                'Hard': { baseAffection: 20, choiceRange: [-2, 0, 3] },
-                'Expert': { baseAffection: 30, choiceRange: [-3, 1, 4] }
-            };
-
-            const settings = difficultySettings[difficulty] || difficultySettings['Easy'];
-            const ending = characterStyle.endings[Math.floor(Math.random() * characterStyle.endings.length)];
-
-            // 로맨틱한 상황별 대화 템플릿
-            const dialogueTemplates = [
-                `${characterName}이 ${userPrompt}하는 상황에서 조금 부끄러워하며 말한다${ending}`,
-                `${characterStyle.personality} ${characterName}이 ${userPrompt}에 대해 솔직한 마음을 전한다${ending}`,
-                `${characterName}이 ${userPrompt}하면서 따뜻한 미소를 지으며 대답한다${ending}`,
-                `${characterStyle.style} ${characterName}이 ${userPrompt}에 대한 진심을 표현한다${ending}`
-            ];
-
-            const dialogue = dialogueTemplates[Math.floor(Math.random() * dialogueTemplates.length)];
+            const characterData = characterResponses[characterId] || characterResponses['yuna_infp'];
             
-            const narration = `${characterName}의 표정이 부드러워지며, ${characterStyle.personality.toLowerCase()} 성격이 느껴진다. 두 사람 사이의 분위기가 ${difficulty === 'Easy' ? '편안하게' : difficulty === 'Expert' ? '긴장감 있게' : '자연스럽게'} 흘러간다.`;
-
             return {
-                dialogue: dialogue,
-                narration: narration,
-                choices: [
-                    {
-                        text: "공감하며 따뜻하게 반응한다",
-                        affection_impact: settings.choiceRange[2]
-                    },
-                    {
-                        text: "상황에 대해 더 자세히 물어본다", 
-                        affection_impact: settings.choiceRange[1]
-                    },
-                    {
-                        text: "조심스럽게 다른 주제로 넘어간다",
-                        affection_impact: settings.choiceRange[0]
-                    }
-                ],
+                dialogue: characterData.message,
+                narration: `${characterName}이 자연스럽게 반응하며 대화가 이어진다.`,
+                choices: characterData.choices,
                 difficulty: difficulty,
                 generated_at: new Date().toISOString(),
-                source: 'local_generation'
+                source: 'fallback_chat_training'
             };
         }
 
