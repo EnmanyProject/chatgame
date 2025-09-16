@@ -1108,19 +1108,16 @@
             </div>
 
             <div class="action-buttons">
-                <button class="btn btn-primary" onclick="openCharacterModal('create')" style="background: linear-gradient(135deg, #e91e63, #9c27b0); font-size: 16px; padding: 15px 25px;">
-                    🎭✨ AI 캐릭터 생성기
+                <button class="btn btn-primary" onclick="openScenarioModal('create')" style="background: linear-gradient(135deg, #667eea, #764ba2); font-size: 16px; padding: 15px 25px;">
+                    ✨ 새 시나리오 만들기
                 </button>
-                <button class="btn btn-secondary" onclick="loadCharacters()">
+                <button class="btn btn-secondary" onclick="loadScenarios()">
                     🔄 새로고침
-                </button>
-                <button class="btn btn-warning" onclick="resetAllCharacters()" style="background: #ff9800; color: white;">
-                    🗑️ 모든 더미 데이터 삭제
                 </button>
             </div>
 
-            <div id="charactersContainer" class="characters-grid">
-                <!-- 캐릭터 카드들이 여기에 동적으로 추가됩니다 -->
+            <div id="scenariosContainer" class="scenarios-grid">
+                <!-- 시나리오 카드들이 여기에 동적으로 추가됩니다 -->
             </div>
         </div>
     </div>
@@ -1822,19 +1819,36 @@
         }
 
         function updateScenarioStats() {
+            console.log('📊 시나리오 통계 업데이트 시작...');
+            
             const scenarioArray = Object.values(scenarios);
-            document.getElementById('totalScenarios').textContent = scenarioArray.length;
-            document.getElementById('activeScenarios').textContent = 
-                scenarioArray.filter(s => s.active_status).length;
-            document.getElementById('scenarioCount').textContent = scenarioArray.length;
+            console.log('📊 시나리오 배열:', scenarioArray.length, '개');
             
+            // 안전한 요소 업데이트 (요소가 없으면 무시)
+            const safeUpdateElement = (id, value) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = value;
+                    console.log(`✅ ${id}: ${value}`);
+                } else {
+                    console.warn(`⚠️ 요소를 찾을 수 없음: ${id}`);
+                }
+            };
+            
+            // 시나리오 통계 업데이트
+            safeUpdateElement('totalScenarios', scenarioArray.length);
+            safeUpdateElement('activeScenarios', scenarioArray.filter(s => s.active_status).length);
+            safeUpdateElement('scenarioCount', scenarioArray.length);
+            
+            // AI 생성 시나리오 개수
+            const aiGeneratedCount = scenarioArray.filter(s => s.ai_generated_context && s.ai_generated_context.length > 0).length;
+            safeUpdateElement('aiGeneratedScenarios', aiGeneratedCount);
+            
+            // 대화/에피소드 수 (시나리오 섹션에는 totalDialogues 사용)
             const totalEpisodes = scenarioArray.reduce((sum, s) => sum + (s.episode_count || 0), 0);
-            document.getElementById('totalEpisodesInScenarios').textContent = totalEpisodes;
+            safeUpdateElement('totalDialogues', totalEpisodes);
             
-            const avgCompletion = scenarioArray.length > 0 
-                ? Math.round(totalEpisodes / (scenarioArray.length * 36) * 100)
-                : 0;
-            document.getElementById('avgCompletion').textContent = avgCompletion + '%';
+            console.log('✅ 시나리오 통계 업데이트 완료');
         }
 
         function openScenarioModal(mode, scenarioId = null) {
@@ -2677,10 +2691,38 @@
         }
 
         function updateCharacterStats() {
+            console.log('📊 캐릭터 통계 업데이트 시작...');
+            
             const characterArray = Object.values(characters);
-            document.getElementById('totalCharacters').textContent = characterArray.length;
-            document.getElementById('activeCharacters').textContent = characterArray.length;
-            document.getElementById('characterCount').textContent = characterArray.length;
+            console.log('📊 캐릭터 배열:', characterArray.length, '개');
+            
+            // 안전한 요소 업데이트 (요소가 없으면 무시)
+            const safeUpdateElement = (id, value) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = value;
+                    console.log(`✅ ${id}: ${value}`);
+                } else {
+                    console.warn(`⚠️ 요소를 찾을 수 없음: ${id}`);
+                }
+            };
+            
+            // 캐릭터 통계 업데이트
+            safeUpdateElement('totalCharacters', characterArray.length);
+            safeUpdateElement('activeCharacters', characterArray.filter(c => c.active !== false).length);
+            safeUpdateElement('characterCount', characterArray.length);
+            
+            // AI 생성 캐릭터 개수
+            const aiGeneratedCharacters = characterArray.filter(c => c.source === 'ai_generator' || c.created_by === 'ai').length;
+            safeUpdateElement('aiGeneratedCharacters', aiGeneratedCharacters);
+            
+            // 평균 호감도 (예시용)
+            const avgAffection = characterArray.length > 0 
+                ? Math.round(characterArray.reduce((sum, c) => sum + (c.initial_affection || 0), 0) / characterArray.length)
+                : 0;
+            safeUpdateElement('avgCharacterAffection', avgAffection);
+            
+            console.log('✅ 캐릭터 통계 업데이트 완룼');
         }
 
         function openCharacterModal(mode) {
