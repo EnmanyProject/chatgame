@@ -395,17 +395,54 @@
         .character-card {
             background: white;
             border-radius: 15px;
-            padding: 25px;
+            padding: 20px;
             text-align: center;
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
             border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .character-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             border-color: #667eea;
+        }
+
+        .character-image {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .character-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .character-image .no-image {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            border-radius: 50%;
+        }
+
+        .character-info {
+            text-align: center;
+            width: 100%;
         }
 
         .character-card .mbti {
@@ -416,17 +453,20 @@
             border-radius: 20px;
             font-weight: bold;
             margin-bottom: 10px;
+            font-size: 0.85em;
         }
 
         .character-card h3 {
             color: #2c3e50;
             margin-bottom: 10px;
+            font-size: 1.1em;
         }
 
         .character-card .traits {
             color: #7f8c8d;
             font-size: 0.9em;
             margin-bottom: 15px;
+            line-height: 1.4;
         }
 
         /* 모달 */
@@ -3339,13 +3379,21 @@
             
             container.innerHTML = characterArray.map(character => `
                 <div class="character-card">
-                    <div class="mbti">${character.mbti}</div>
-                    <h3>${character.name}</h3>
-                    <p class="traits">${character.personality_traits || character.personality || '특성 정보 없음'}</p>
-                    <p style="font-size: 0.9em; color: #95a5a6; margin-bottom: 15px;">${character.speech_style || '말투 정보 없음'}</p>
-                    <div class="actions">
-                        <button class="btn btn-success" onclick="editCharacter('${character.id}')">수정</button>
-                        <button class="btn btn-danger" onclick="deleteCharacter('${character.id}')">삭제</button>
+                    <div class="character-image">
+                        ${character.image ? 
+                            `<img src="${character.image}" alt="${character.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 100 100\\"><rect width=\\"100\\" height=\\"100\\" fill=\\"%23f0f0f0\\"/><text x=\\"50\\" y=\\"50\\" text-anchor=\\"middle\\" dy=\\".3em\\" fill=\\"%23999\\">${character.name.charAt(0)}</text></svg>'"/>` :
+                            `<div class="no-image">${character.name.charAt(0)}</div>`
+                        }
+                    </div>
+                    <div class="character-info">
+                        <div class="mbti">${character.mbti}</div>
+                        <h3>${character.name}</h3>
+                        <p class="traits">${character.personality_traits || character.personality || '특성 정보 없음'}</p>
+                        <p style="font-size: 0.9em; color: #95a5a6; margin-bottom: 15px;">${character.speech_style || '말투 정보 없음'}</p>
+                        <div class="actions">
+                            <button class="btn btn-success" onclick="editCharacter('${character.id}')">수정</button>
+                            <button class="btn btn-danger" onclick="deleteCharacter('${character.id}')">삭제</button>
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -4083,35 +4131,41 @@ GitHub Token:`);
             }
 
             try {
-                console.log('🗑️ 캐릭터 삭제 시작:', characterId);
+                console.log('🗑️ 캐릭터 삭제 시작 (LocalStorage):', characterId);
                 
-                const response = await fetch('/api/character-ai-generator', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'delete_character',
-                        character_id: characterId
-                    })
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    if (result.success) {
-                        alert('✅ 캐릭터가 삭제되었습니다.');
-                        
-                        // 캐릭터 목록 새로고침 (API에서 다시 로드)
-                        setTimeout(() => {
-                            loadCharacters();
-                        }, 500);
-                    } else {
-                        alert('❌ 캐릭터 삭제에 실패했습니다: ' + result.message);
+                // LocalStorage에서 캐릭터 삭제
+                const existingChars = localStorage.getItem('characters');
+                const charactersData = existingChars ? JSON.parse(existingChars) : {};
+                
+                if (charactersData[characterId]) {
+                    // 캐릭터 삭제
+                    delete charactersData[characterId];
+                    
+                    // LocalStorage에 저장
+                    localStorage.setItem('characters', JSON.stringify(charactersData));
+                    
+                    // 전역 변수에서도 삭제
+                    if (characters[characterId]) {
+                        delete characters[characterId];
                     }
+                    if (window.characters && window.characters[characterId]) {
+                        delete window.characters[characterId];
+                    }
+                    
+                    console.log('✅ LocalStorage에서 캐릭터 삭제 완료');
+                    alert('✅ 캐릭터가 삭제되었습니다.');
+                    
+                    // UI 즉시 업데이트
+                    displayCharacters();
+                    updateCharacterStats();
+                    
                 } else {
-                    alert('❌ 서버 오류로 인해 삭제에 실패했습니다.');
+                    alert('❌ 삭제할 캐릭터를 찾을 수 없습니다.');
                 }
+                
             } catch (error) {
                 console.error('❌ 캐릭터 삭제 오류:', error);
-                alert('❌ 캐릭터 삭제 중 오류가 발생했습니다.');
+                alert('❌ 캐릭터 삭제 중 오류가 발생했습니다: ' + error.message);
             }
         }
 
