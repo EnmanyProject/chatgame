@@ -1677,11 +1677,55 @@
             initializeEventListeners();
         });
 
-        // 모든 데이터 로드
+        // 모든 데이터 로드 (LocalStorage 우선)
         async function loadAllData() {
-            await loadScenarios();
-            await loadCharacters();
-            updateAllStats();
+            console.log('📊 통합 데이터 로드 시작...');
+            
+            try {
+                // 1단계: LocalStorage에서 로드 시도
+                console.log('🔄 1단계: LocalStorage에서 데이터 로드 시도...');
+                const localChars = localStorage.getItem('characters');
+                const localScenarios = localStorage.getItem('scenarios');
+                
+                if (localChars) {
+                    const parsedChars = JSON.parse(localChars);
+                    if (Object.keys(parsedChars).length > 0) {
+                        console.log('✅ LocalStorage에서 캐릭터 로드 성공:', Object.keys(parsedChars).length, '개');
+                        window.characters = parsedChars;
+                        window.scenarios = localScenarios ? JSON.parse(localScenarios) : {};
+                        displayCharacters();
+                        displayScenarios();
+                        updateAllStats();
+                        return true;
+                    }
+                }
+                
+                // 2단계: 기존 API에서 로드 시도  
+                console.log('🔄 2단계: 기존 API에서 데이터 로드 시도...');
+                await loadScenarios();
+                await loadCharacters();
+                updateAllStats();
+                
+                if (window.characters && Object.keys(window.characters).length > 0) {
+                    console.log('✅ 기존 API에서 데이터 로드 성공');
+                    return true;
+                }
+                
+                // 모든 방법 실패
+                console.log('⚠️ 모든 데이터 소스에서 로드 실패 - 빈 상태로 시작');
+                window.characters = {};
+                window.scenarios = {};
+                updateAllStats();
+                return false;
+                
+            } catch (error) {
+                console.error('❌ 데이터 로드 중 오류:', error);
+                // 기본값으로 설정
+                window.characters = window.characters || {};
+                window.scenarios = window.scenarios || {};
+                updateAllStats();
+                return false;
+            }
         }
 
         // 이벤트 리스너 초기화
@@ -3113,39 +3157,37 @@
             updateCharacterStats();
             console.log('✅ 즉시 UI 업데이트 완료');
             
-            // 🚀 GitHub API 우선 저장 (혁신적 해결책!)
-            console.log('🐙 GitHub API로 영구 저장 시도...');
-            const gitHubResult = await saveCharacterToGitHub(characters[characterId]);
-            
-            if (gitHubResult.success) {
-                console.log('✅ GitHub API 저장 성공! 커밋:', gitHubResult.commit_hash);
+            // 💾 LocalStorage 직접 저장 (확실한 방법!)
+            console.log('💾 LocalStorage에 직접 저장 시도...');
+            try {
+                // 현재 저장된 캐릭터들을 가져옴
+                const existingChars = localStorage.getItem('characters');
+                const charactersData = existingChars ? JSON.parse(existingChars) : {};
                 
-                // 성공 메시지에 GitHub 정보 포함
+                // 새 캐릭터 추가/수정
+                charactersData[characterId] = characters[characterId];
+                
+                // LocalStorage에 저장
+                localStorage.setItem('characters', JSON.stringify(charactersData));
+                console.log('✅ LocalStorage 저장 성공! 총', Object.keys(charactersData).length, '개 캐릭터');
+                
+                // 저장 성공 메시지
                 const successMessage = currentMode === 'create' ? 
-                    `💖🐙 새로운 캐릭터가 GitHub에 영구 저장되었습니다!\n커밋: ${gitHubResult.commit_hash?.substring(0,7)}\n\n✅ 캐릭터 목록에서 확인하세요!` :
-                    `✨🐙 캐릭터가 GitHub에 수정 저장되었습니다!\n커밋: ${gitHubResult.commit_hash?.substring(0,7)}`;
-                    
+                    `💖 새로운 캐릭터 '${name}'가 생성되었습니다!\n✅ 캐릭터 목록에서 확인하세요!` :
+                    `✨캐릭터 '${name}'가 수정되었습니다!`;
+                
                 alert(successMessage);
                 closeModal('characterModal');
                 
-                // GitHub 저장 후 추가 동기화
-                console.log('🔄 GitHub 저장 후 최종 동기화...');
-                await loadCharacters();
+                // UI 최종 업데이트
+                console.log('🔄 저장 후 최종 UI 동기화...');
+                await loadAllData(); // 새로운 통합 로딩 함수 사용
                 
-            } else {
-                console.warn('⚠️ GitHub 저장 실패, 폴백 결과:', gitHubResult);
+                console.log('✅ 캐릭터 저장 프로세스 완료!');
                 
-                if (gitHubResult.source === 'localStorage') {
-                    alert('💾 캐릭터가 로컬에 저장되었습니다!\n(GitHub 연결 실패, 로컬에서 확인 가능)\n\n✅ 캐릭터 목록에서 확인하세요!');
-                    closeModal('characterModal');
-                    
-                    // 로컬스토리지 저장 후에도 동기화
-                    console.log('🔄 로컬 저장 후 최종 동기화...');
-                    await loadCharacters();
-                } else {
-                    console.error('❌ 모든 저장 방법 실패:', gitHubResult);
-                    alert('❌ 저장에 실패했습니다.\n\n디버깅 정보:\n- GitHub API: 실패\n- 로컬스토리지: 실패\n\n브라우저 설정을 확인해주세요.');
-                }
+            } catch (storageError) {
+                console.error('❌ LocalStorage 저장 실패:', storageError);
+                alert('저장 중 오류가 발생했습니다: ' + storageError.message);
             }
             
             // 저장 버튼 복원
