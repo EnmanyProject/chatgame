@@ -1024,6 +1024,17 @@
                 <select id="episodeScenarioSelect" onchange="loadEpisodes()">
                     <option value="">시나리오를 선택하세요</option>
                 </select>
+                <button type="button" class="btn btn-secondary" onclick="refreshEpisodeScenarioList()" style="margin-left: 10px;">
+                    🔄 시나리오 목록 새로고침
+                </button>
+            </div>
+            
+            <!-- 시나리오 목록 표시 -->
+            <div id="availableScenariosList" class="scenarios-list" style="margin-bottom: 20px;">
+                <h4>📋 사용 가능한 시나리오 목록</h4>
+                <div id="scenariosList">
+                    <p class="loading-text">시나리오 목록을 로딩 중...</p>
+                </div>
             </div>
 
             <div id="episodeInfo" style="display: none;">
@@ -1679,8 +1690,14 @@
                     const parsedChars = JSON.parse(localChars);
                     if (Object.keys(parsedChars).length > 0) {
                         console.log('✅ LocalStorage에서 캐릭터 로드 성공:', Object.keys(parsedChars).length, '개');
+                        // 전역 변수와 window 속성 모두에 설정
+                        characters = parsedChars;
                         window.characters = parsedChars;
-                        window.scenarios = localScenarios ? JSON.parse(localScenarios) : {};
+                        
+                        const parsedScenarios = localScenarios ? JSON.parse(localScenarios) : {};
+                        scenarios = parsedScenarios;
+                        window.scenarios = parsedScenarios;
+                        
                         displayCharacters();
                         displayScenarios();
                         updateAllStats();
@@ -1912,6 +1929,106 @@
                 console.error('❌ 캐릭터 목록 업데이트 실패:', error);
                 characterSelect.innerHTML = '<option value="">오류가 발생했습니다</option>';
             }
+        }
+        
+        // 에피소드 섹션의 시나리오 목록 새로고침
+        function refreshEpisodeScenarioList() {
+            console.log('🔄 에피소드 시나리오 목록 새로고침...');
+            
+            // 두 곳 모두 업데이트
+            loadEpisodeScenarioSelector(); // 모달용
+            displayAvailableScenarios(); // 에피소드 섹션용
+            
+            // 에피소드 섹션의 시나리오 선택 드롭다운도 업데이트
+            const episodeSelect = document.getElementById('episodeScenarioSelect');
+            if (episodeSelect) {
+                loadEpisodeScenarioSelector().then(() => {
+                    // 모달용 선택기의 내용을 에피소드 섹션으로 복사
+                    const modalSelect = document.getElementById('episodeScenarioSelect');
+                    if (modalSelect) {
+                        episodeSelect.innerHTML = modalSelect.innerHTML;
+                    }
+                });
+            }
+        }
+        
+        // 에피소드 섹션에 시나리오 목록 표시
+        function displayAvailableScenarios() {
+            console.log('📋 에피소드 섹션에 시나리오 목록 표시...');
+            
+            try {
+                // 시나리오 데이터 로딩
+                let scenariosData = window.scenarios || {};
+                
+                // LocalStorage에서도 확인
+                if (Object.keys(scenariosData).length === 0) {
+                    const localScenarios = localStorage.getItem('scenarios');
+                    if (localScenarios) {
+                        scenariosData = JSON.parse(localScenarios);
+                        window.scenarios = scenariosData;
+                    }
+                }
+                
+                const scenarioKeys = Object.keys(scenariosData);
+                const scenariosListDiv = document.getElementById('scenariosList');
+                
+                if (scenarioKeys.length === 0) {
+                    scenariosListDiv.innerHTML = `
+                        <div class="empty-state">
+                            <p>❌ 생성된 시나리오가 없습니다.</p>
+                            <p><small>먼저 시나리오 탭에서 시나리오를 생성해주세요.</small></p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = `<div class="scenarios-grid">`;
+                scenarioKeys.forEach(scenarioId => {
+                    const scenario = scenariosData[scenarioId];
+                    if (scenario) {
+                        html += `
+                            <div class="scenario-item" onclick="selectScenarioForEpisode('${scenarioId}')">
+                                <h5>${scenario.title || '제목 없음'}</h5>
+                                <p>${(scenario.description || '').substring(0, 100)}${scenario.description && scenario.description.length > 100 ? '...' : ''}</p>
+                                <div class="scenario-meta">
+                                    <span class="episode-count">${scenario.episode_count || 0}/36 에피소드</span>
+                                    <span class="character-count">${scenario.available_characters ? scenario.available_characters.length : 0} 캐릭터</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                html += `</div>`;
+                
+                scenariosListDiv.innerHTML = html;
+                console.log('✅ 시나리오 목록 표시 완료:', scenarioKeys.length, '개');
+                
+            } catch (error) {
+                console.error('❌ 시나리오 목록 표시 실패:', error);
+                document.getElementById('scenariosList').innerHTML = `
+                    <div class="error-state">
+                        <p>❌ 시나리오 목록 로딩 중 오류가 발생했습니다.</p>
+                        <p><small>콘솔을 확인하거나 페이지를 새로고침해보세요.</small></p>
+                    </div>
+                `;
+            }
+        }
+        
+        // 시나리오 선택 (에피소드 섹션에서)
+        function selectScenarioForEpisode(scenarioId) {
+            console.log('🎯 시나리오 선택됨:', scenarioId);
+            
+            const episodeSelect = document.getElementById('episodeScenarioSelect');
+            if (episodeSelect) {
+                episodeSelect.value = scenarioId;
+                loadEpisodes(); // 에피소드 로딩
+            }
+            
+            // 선택된 시나리오 하이라이트
+            document.querySelectorAll('.scenario-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            event.target.closest('.scenario-item').classList.add('selected');
         }
 
         // 탭 전환 (전역 함수)
@@ -3224,8 +3341,8 @@
                 <div class="character-card">
                     <div class="mbti">${character.mbti}</div>
                     <h3>${character.name}</h3>
-                    <p class="traits">${character.personality}</p>
-                    <p style="font-size: 0.9em; color: #95a5a6; margin-bottom: 15px;">${character.speech_style}</p>
+                    <p class="traits">${character.personality_traits || character.personality || '특성 정보 없음'}</p>
+                    <p style="font-size: 0.9em; color: #95a5a6; margin-bottom: 15px;">${character.speech_style || '말투 정보 없음'}</p>
                     <div class="actions">
                         <button class="btn btn-success" onclick="editCharacter('${character.id}')">수정</button>
                         <button class="btn btn-danger" onclick="deleteCharacter('${character.id}')">삭제</button>
@@ -4033,12 +4150,7 @@ GitHub Token:`);
         window.deleteScenario = deleteScenario;
         window.onScenarioChange = onScenarioChange;
         
-        // 페이지 로드 시 초기화
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎭 ChatGame 관리자 시스템 초기화...');
-            loadCharacters();
-            loadScenarios();
-        });
+        // 중복 초기화 제거됨 - loadAllData()에서 통합 처리
     </script>
 </body>
 </html>
