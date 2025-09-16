@@ -1001,16 +1001,19 @@
             </div>
 
             <div class="action-buttons">
-                <button class="btn btn-primary" onclick="openScenarioModal('create')">
-                    ✨ 새 시나리오 만들기
+                <button class="btn btn-primary" onclick="openCharacterModal('create')" style="background: linear-gradient(135deg, #e91e63, #9c27b0); font-size: 16px; padding: 15px 25px;">
+                    🎭✨ AI 캐릭터 생성기
                 </button>
-                <button class="btn btn-secondary" onclick="loadScenarios()">
+                <button class="btn btn-secondary" onclick="loadCharacters()">
                     🔄 새로고침
+                </button>
+                <button class="btn btn-warning" onclick="resetAllCharacters()" style="background: #ff9800; color: white;">
+                    🗑️ 모든 더미 데이터 삭제
                 </button>
             </div>
 
-            <div id="scenariosContainer" class="scenarios-grid">
-                <!-- 시나리오 카드들이 여기에 동적으로 추가됩니다 -->
+            <div id="charactersContainer" class="characters-grid">
+                <!-- 캐릭터 카드들이 여기에 동적으로 추가됩니다 -->
             </div>
         </div>
 
