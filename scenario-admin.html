@@ -1229,27 +1229,11 @@
 
                     <div class="form-group">
                         <label>사용 가능한 캐릭터 선택</label>
-                        <div class="character-selector" id="characterSelector">
-                            <div class="character-option" data-id="yuna_infp">
-                                윤아 (INFP)<br>
-                                <small>감성적, 내향적</small>
-                            </div>
-                            <div class="character-option" data-id="mina_enfp">
-                                미나 (ENFP)<br>
-                                <small>외향적, 열정적</small>
-                            </div>
-                            <div class="character-option" data-id="seoyeon_intj">
-                                서연 (INTJ)<br>
-                                <small>논리적, 독립적</small>
-                            </div>
-                            <div class="character-option" data-id="jihye_esfj">
-                                지혜 (ESFJ)<br>
-                                <small>사교적, 배려심</small>
-                            </div>
-                            <div class="character-option" data-id="hyejin_istp">
-                                혜진 (ISTP)<br>
-                                <small>실용적, 적응적</small>
-                            </div>
+                        <div id="characterLoadingMsg" style="padding: 20px; text-align: center; color: #666;">
+                            캐릭터 목록을 로딩 중입니다...
+                        </div>
+                        <div class="character-selector" id="characterSelector" style="display: none;">
+                            <!-- 동적으로 로드됩니다 -->
                         </div>
                     </div>
 
@@ -1730,20 +1714,8 @@
 
         // 이벤트 리스너 초기화
         function initializeEventListeners() {
-            // 캐릭터 선택기 초기화
-            const options = document.querySelectorAll('.character-option');
-            options.forEach(option => {
-                option.addEventListener('click', function() {
-                    const characterId = this.dataset.id;
-                    if (selectedCharacters.has(characterId)) {
-                        selectedCharacters.delete(characterId);
-                        this.classList.remove('selected');
-                    } else {
-                        selectedCharacters.add(characterId);
-                        this.classList.add('selected');
-                    }
-                });
-            });
+            // 캐릭터 선택기는 동적 로딩으로 초기화됨
+            loadCharacterSelector();
 
             // 새로운 AI 캐릭터 생성 시스템 이벤트 리스너들
             initializeCharacterGeneratorEvents();
@@ -1762,6 +1734,65 @@
                 if (event.target.className === 'modal') {
                     event.target.style.display = 'none';
                 }
+            }
+        }
+        
+        // 캐릭터 선택기 동적 로딩
+        async function loadCharacterSelector() {
+            console.log('🔄 캐릭터 선택기 로딩 시작...');
+            
+            try {
+                const charactersData = window.characters || {};
+                const characterKeys = Object.keys(charactersData);
+                
+                console.log('📊 로드된 캐릭터:', characterKeys.length, '개');
+                
+                const selector = document.getElementById('characterSelector');
+                const loadingMsg = document.getElementById('characterLoadingMsg');
+                
+                if (characterKeys.length === 0) {
+                    loadingMsg.innerHTML = '❌ 생성된 캐릭터가 없습니다.<br><small>먼저 캐릭터 탭에서 캐릭터를 생성해주세요.</small>';
+                    selector.style.display = 'none';
+                    return;
+                }
+                
+                // 캐릭터 선택 옵션 생성
+                let html = '';
+                characterKeys.forEach(charId => {
+                    const char = charactersData[charId];
+                    html += `
+                        <div class="character-option" data-id="${charId}">
+                            ${char.name} (${char.mbti})<br>
+                            <small>${char.personality_traits?.primary?.slice(0, 2).join(', ') || '생성된 캐릭터'}</small>
+                        </div>
+                    `;
+                });
+                
+                selector.innerHTML = html;
+                selector.style.display = 'grid';
+                loadingMsg.style.display = 'none';
+                
+                // 이벤트 리스너 추가
+                selector.querySelectorAll('.character-option').forEach(option => {
+                    option.addEventListener('click', function() {
+                        const characterId = this.dataset.id;
+                        if (selectedCharacters.has(characterId)) {
+                            selectedCharacters.delete(characterId);
+                            this.classList.remove('selected');
+                        } else {
+                            selectedCharacters.add(characterId);
+                            this.classList.add('selected');
+                        }
+                        console.log('✅ 선택된 캐릭터들:', Array.from(selectedCharacters));
+                    });
+                });
+                
+                console.log('✅ 캐릭터 선택기 로딩 완료');
+                
+            } catch (error) {
+                console.error('❌ 캐릭터 선택기 로딩 실패:', error);
+                document.getElementById('characterLoadingMsg').innerHTML = 
+                    '❌ 캐릭터 로딩 실패<br><small>페이지를 새로고침하거나 캐릭터를 다시 생성해보세요.</small>';
             }
         }
 
@@ -1953,8 +1984,12 @@
         function displayScenarios() {
             console.log('🎨 === 시나리오 표시 함수 시작 ===');
             const container = document.getElementById('scenariosContainer');
-            const scenarioArray = Object.values(scenarios);
+            
+            // window.scenarios 또는 전역 scenarios 사용 (호환성)
+            const scenariosData = window.scenarios || scenarios || {};
+            const scenarioArray = Object.values(scenariosData);
             console.log('📊 표시할 시나리오 수:', scenarioArray.length);
+            console.log('📊 시나리오 데이터 소스:', window.scenarios ? 'window.scenarios' : 'scenarios');
             if (scenarioArray.length > 0) {
                 console.log('📋 시나리오 목록:', scenarioArray.map(s => `${s.title} (${s.id || s.scenario_id})`));
             } else {
@@ -1997,8 +2032,11 @@
         function updateScenarioStats() {
             console.log('📊 시나리오 통계 업데이트 시작...');
             
-            const scenarioArray = Object.values(scenarios);
+            // window.scenarios 또는 전역 scenarios 사용 (호환성)
+            const scenariosData = window.scenarios || scenarios || {};
+            const scenarioArray = Object.values(scenariosData);
             console.log('📊 시나리오 배열:', scenarioArray.length, '개');
+            console.log('📊 시나리오 데이터 소스:', window.scenarios ? 'window.scenarios' : 'scenarios');
             
             // 안전한 요소 업데이트 (요소가 없으면 무시)
             const safeUpdateElement = (id, value) => {
@@ -2036,7 +2074,8 @@
                 document.getElementById('scenarioForm').reset();
                 document.getElementById('aiContext').innerHTML = 'AI가 생성한 소설풍 시나리오 컨텍스트가 여기에 표시됩니다';
                 selectedCharacters.clear();
-                document.querySelectorAll('.character-option').forEach(opt => opt.classList.remove('selected'));
+                // 캐릭터 선택기를 다시 로딩하여 최신 캐릭터 목록 표시
+                loadCharacterSelector();
             } else if (mode === 'edit' && scenarioId) {
                 editScenario(scenarioId);
                 return;
@@ -2123,31 +2162,40 @@
                 updateScenarioStats();
                 console.log('✅ 즉시 UI 업데이트 완료');
 
-                const response = await fetch('/api/scenario-manager', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(scenarioData)
-                });
-
-                const data = await response.json();
-                
-                if (data.success) {
-                    console.log('✅ 서버 응답 성공:', data);
-                    alert(currentMode === 'create' ? 
-                        '✅ 시나리오가 생성되었습니다!\n\n시나리오 목록에서 확인하세요!' : 
-                        '✅ 시나리오가 수정되었습니다!');
+                // 💾 LocalStorage 직접 저장 (확실한 방법!)
+                console.log('💾 LocalStorage에 직접 저장 시도...');
+                try {
+                    // 현재 저장된 시나리오들을 가져옴
+                    const existingScenarios = localStorage.getItem('scenarios');
+                    const scenariosData = existingScenarios ? JSON.parse(existingScenarios) : {};
+                    
+                    // 새 시나리오 추가/수정
+                    scenariosData[scenarioId] = globalScenarios[scenarioId];
+                    
+                    // LocalStorage에 저장
+                    localStorage.setItem('scenarios', JSON.stringify(scenariosData));
+                    console.log('✅ LocalStorage 저장 성공! 총', Object.keys(scenariosData).length, '개 시나리오');
+                    
+                    // 저장 성공 메시지
+                    const successMessage = currentMode === 'create' ? 
+                        `💖 새로운 시나리오 '${title}'가 생성되었습니다!\n✅ 시나리오 목록에서 확인하세요!` :
+                        `✨시나리오 '${title}'가 수정되었습니다!`;
+                    
+                    alert(successMessage);
                     closeModal('scenarioModal');
                     
-                    // 서버 저장 후 추가 동기화
-                    console.log('🔄 서버 저장 후 최종 동기화...');
-                    setTimeout(() => {
-                        loadScenarios();
-                    }, 500);
-                } else {
-                    console.error('❌ 서버 오류:', data);
-                    // 서버 저장이 실패해도 로컬 UI는 이미 업데이트됨
-                    alert('⚠️ 서버 저장에 실패했지만 로컬에서 확인 가능합니다!\n\n시나리오 목록에서 확인하세요!');
-                    closeModal('scenarioModal');
+                    // UI 최종 업데이트
+                    console.log('🔄 저장 후 최종 UI 동기화...');
+                    await loadAllData(); // 새로운 통합 로딩 함수 사용
+                    
+                    // 캐릭터 선택기도 갱신 (새로 생성된 캐릭터 반영)
+                    await loadCharacterSelector();
+                    
+                    console.log('✅ 시나리오 저장 프로세스 완료!');
+                    
+                } catch (storageError) {
+                    console.error('❌ LocalStorage 저장 실패:', storageError);
+                    alert('저장 중 오류가 발생했습니다: ' + storageError.message);
                 }
             } catch (error) {
                 console.error('시나리오 저장 오류:', error);
