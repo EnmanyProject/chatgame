@@ -2653,15 +2653,56 @@
         let uploadedImageBase64 = null;
         let currentAnalysisResult = null;
 
+        // 이미지 압축 함수
+        function compressImage(dataUrl, quality, callback) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = function() {
+                // 최대 크기 제한 (가로/세로 800px)
+                const maxSize = 800;
+                let { width, height } = img;
+                
+                if (width > height) {
+                    if (width > maxSize) {
+                        height = (height * maxSize) / width;
+                        width = maxSize;
+                    }
+                } else {
+                    if (height > maxSize) {
+                        width = (width * maxSize) / height;
+                        height = maxSize;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                // 이미지 그리기
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // 압축된 데이터 URL 반환
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                callback(compressedDataUrl);
+            };
+            
+            img.src = dataUrl;
+        }
+
         function handleImageUpload() {
             const fileInput = document.getElementById('characterImageUpload');
             const file = fileInput.files[0];
             
             if (!file) return;
             
-            // 파일 크기 검사 (5MB 제한)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('이미지 크기가 5MB를 초과합니다. 더 작은 파일을 선택해주세요.');
+            // 파일 크기 검사 (2MB 제한 - Vercel 업로드 제한 고려)
+            const maxSize = 2 * 1024 * 1024; // 2MB
+            if (file.size > maxSize) {
+                const sizeInMB = (file.size / (1024 * 1024)).toFixed(1);
+                alert(`이미지 파일이 너무 큽니다!\n현재 크기: ${sizeInMB}MB\n최대 허용: 2.0MB\n\n더 작은 이미지를 선택하거나 이미지를 압축해주세요.`);
+                // 파일 입력 초기화
+                fileInput.value = '';
                 return;
             }
             
@@ -2673,20 +2714,26 @@
             
             console.log('📷 이미지 업로드 시작:', file.name);
             
+            // 이미지 압축 및 처리
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    // Base64 데이터 저장 (데이터 URI 헤더 제거)
-                    uploadedImageBase64 = e.target.result.split(',')[1];
-                    
-                    // 미리보기 표시
-                    document.getElementById('previewImg').src = e.target.result;
-                    document.getElementById('imagePreview').style.display = 'block';
-                    
-                    // 분석 버튼 활성화
-                    document.getElementById('analyzeImageBtn').disabled = false;
-                    
-                    console.log('✅ 이미지 업로드 완료');
+                    // 이미지 압축 처리
+                    compressImage(e.target.result, 0.8, (compressedDataUrl) => {
+                        // Base64 데이터 저장 (데이터 URI 헤더 제거)
+                        uploadedImageBase64 = compressedDataUrl.split(',')[1];
+                        
+                        // 미리보기 표시
+                        document.getElementById('previewImg').src = compressedDataUrl;
+                        document.getElementById('imagePreview').style.display = 'block';
+                        
+                        // 분석 버튼 활성화
+                        document.getElementById('analyzeImageBtn').disabled = false;
+                        
+                        // 압축된 크기 표시
+                        const compressedSize = (compressedDataUrl.length * 0.75 / 1024).toFixed(1);
+                        console.log(`✅ 이미지 업로드 완료 (압축 후 크기: ${compressedSize}KB)`);
+                    });
                 } catch (error) {
                     console.error('❌ 이미지 처리 오류:', error);
                     alert('이미지 처리 중 오류가 발생했습니다.');
