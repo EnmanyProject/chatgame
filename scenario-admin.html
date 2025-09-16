@@ -2839,20 +2839,27 @@
             }
             
             const analysis = currentAnalysisResult;
+            console.log('🔧 분석 결과 적용 시작:', analysis);
+            
+            // 안전한 요소 업데이트 함수
+            const safeSetValue = (elementId, value) => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.value = value;
+                    console.log(`✅ ${elementId} 값 적용:`, value);
+                } else {
+                    console.warn(`⚠️ 요소를 찾을 수 없음: ${elementId}`);
+                }
+            };
             
             // MBTI 적용
             if (analysis.mbti_suggestion && analysis.mbti_suggestion.length === 4) {
-                document.getElementById('charMbti').value = analysis.mbti_suggestion;
+                safeSetValue('charMbti', analysis.mbti_suggestion);
             }
             
-            // 성격 적용
-            if (analysis.personality_prediction) {
-                document.getElementById('charPersonality').value = analysis.personality_prediction;
-            }
-            
-            // 말투 적용
+            // 말투 적용 (charSpeechStyle이 실제로 존재하는지 확인)
             if (analysis.speech_style) {
-                document.getElementById('charSpeechStyle').value = analysis.speech_style;
+                safeSetValue('charSpeechStyle', analysis.speech_style);
             }
             
             // 설명 적용
@@ -3001,11 +3008,18 @@
         }
 
         async function saveCharacter() {
+            console.log('💾 === 캐릭터 저장 시작 ===');
+            
             const name = document.getElementById('charName').value;
             const mbti = document.getElementById('charMbti').value;
             
+            console.log('📝 입력값 확인:');
+            console.log('  - 이름:', name || '(비어있음)');
+            console.log('  - MBTI:', mbti || '(비어있음)');
+            
             if (!name || !mbti) {
-                alert('이름과 MBTI는 필수 입력 항목입니다.');
+                console.error('❌ 필수 입력값 누락');
+                alert(`이름과 MBTI는 필수 입력 항목입니다.\n\n현재 입력값:\n이름: ${name || '미입력'}\nMBTI: ${mbti || '미입력'}`);
                 return;
             }
 
@@ -3439,7 +3453,9 @@ GitHub Token:`);
                 if (e.target.classList.contains('mbti-btn')) {
                     document.querySelectorAll('.mbti-btn').forEach(btn => btn.classList.remove('selected'));
                     e.target.classList.add('selected');
-                    document.getElementById('charMbti').value = e.target.dataset.mbti;
+                    const selectedMbti = e.target.dataset.mbti;
+                    document.getElementById('charMbti').value = selectedMbti;
+                    console.log('✅ MBTI 선택됨:', selectedMbti);
                 }
 
                 // 성격 특성 버튼 클릭 이벤트 (최대 3개 선택)
