@@ -965,7 +965,11 @@
 
         <!-- 탭 네비게이션 -->
         <div class="nav-tabs">
-            <button class="nav-tab active" onclick="switchTab('scenarios')">
+            <button class="nav-tab active" onclick="switchTab('characters')">
+                👥 캐릭터 관리
+                <span class="badge" id="characterCount">0</span>
+            </button>
+            <button class="nav-tab" onclick="switchTab('scenarios')">
                 📚 시나리오 관리
                 <span class="badge" id="scenarioCount">0</span>
             </button>
@@ -973,14 +977,10 @@
                 📝 에피소드 관리
                 <span class="badge" id="episodeCount">0</span>
             </button>
-            <button class="nav-tab" onclick="switchTab('characters')">
-                👥 캐릭터 관리
-                <span class="badge" id="characterCount">5</span>
-            </button>
         </div>
 
-        <!-- 시나리오 관리 섹션 -->
-        <div id="scenarios-section" class="content-section active">
+        <!-- 캐릭터 관리 섹션 -->
+        <div id="characters-section" class="content-section active">
             <div class="stats-row">
                 <div class="stat-card">
                     <h3>전체 시나리오</h3>
@@ -1086,8 +1086,8 @@
             </div>
         </div>
 
-        <!-- 캐릭터 관리 섹션 -->
-        <div id="characters-section" class="content-section">
+        <!-- 시나리오 관리 섹션 -->
+        <div id="scenarios-section" class="content-section">
             <div class="stats-row">
                 <div class="stat-card">
                     <h3>전체 캐릭터</h3>
@@ -2319,82 +2319,64 @@
 
         // === 캐릭터 관리 함수들 ===
         async function loadCharacters() {
+            console.log('📥 캐릭터 데이터 로드 시작...');
+            
             try {
-                console.log('📥 캐릭터 데이터 로드 시작...');
+                // AI-Generator API 먼저 시도
+                console.log('🤖 AI 캐릭터 생성기 API 호출...');
+                const aiResponse = await fetch('/api/character-ai-generator?action=list_characters');
                 
-                // character-ai-generator API에서 캐릭터 목록 가져오기
-                const response = await fetch('/api/character-ai-generator?action=list_characters');
+                if (aiResponse.ok) {
+                    const aiData = await aiResponse.json();
+                    console.log('🤖 AI API 응답:', aiData);
+                    
+                    if (aiData.success && aiData.characters && Object.keys(aiData.characters).length > 0) {
+                        characters = aiData.characters;
+                        console.log('✅ AI API에서 로드된 캐릭터 수:', Object.keys(characters).length);
+                        displayCharacters();
+                        updateCharacterStats();
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.log('⚠️ AI API 오류:', error.message);
+            }
+            
+            try {
+                // 기본 characters.json 시도
+                console.log('📁 기본 characters.json 파일 로드...');
+                const response = await fetch('/data/characters.json');
                 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('✅ API 응답 성공:', data);
+                    console.log('📊 기본 파일 응답:', data);
                     
-                    if (data.success && data.characters && Object.keys(data.characters).length > 0) {
-                        characters = data.characters;
-                        console.log('📊 API에서 로드된 캐릭터 수:', Object.keys(characters).length);
-                    } else {
-                        console.log('⚠️ API 캐릭터 데이터가 비어있음, 기본 데이터 사용');
-                        loadDefaultCharacters();
+                    if (data.characters && Array.isArray(data.characters)) {
+                        // Array 형태를 Object 형태로 변환
+                        characters = {};
+                        data.characters.forEach(char => {
+                            characters[char.id] = char;
+                        });
+                        console.log('✅ 기본 파일에서 로드된 캐릭터 수:', Object.keys(characters).length);
+                        displayCharacters();
+                        updateCharacterStats();
+                        return;
                     }
-                } else {
-                    console.error('❌ API 응답 실패:', response.status);
-                    loadDefaultCharacters();
                 }
             } catch (error) {
-                console.error('❌ 캐릭터 로드 오류:', error);
-                loadDefaultCharacters();
+                console.log('⚠️ 기본 파일 로드 실패:', error.message);
             }
-
+            
+            // 모든 방법이 실패하면 빈 데이터로 초기화
+            console.log('⚠️ 모든 캐릭터 로드 방법 실패, 빈 데이터로 초기화');
+            characters = {};
             displayCharacters();
             updateCharacterStats();
         }
 
         // 기본 캐릭터 데이터 로드 (fallback)
-        function loadDefaultCharacters() {
-            console.log('📋 기본 캐릭터 데이터 로드');
-            characters = {
-                'yuna_infp': {
-                    id: 'yuna_infp',
-                    name: '윤아',
-                    mbti: 'INFP',
-                    personality: '감성적, 내향적, 이상주의적, 창의적',
-                    speech_style: '부드럽고 따뜻한 말투, 이모티콘 자주 사용',
-                    description: '꿈과 이상을 추구하는 감성적인 캐릭터'
-                },
-                'mina_enfp': {
-                    id: 'mina_enfp',
-                    name: '미나',
-                    mbti: 'ENFP',
-                    personality: '외향적, 열정적, 창의적, 자유로운',
-                    speech_style: '밝고 에너지 넘치는 말투, 격려 표현',
-                    description: '열정적이고 긍정적인 에너지를 가진 캐릭터'
-                },
-                'seoyeon_intj': {
-                    id: 'seoyeon_intj',
-                    name: '서연',
-                    mbti: 'INTJ',
-                    personality: '논리적, 독립적, 완벽주의, 전략적',
-                    speech_style: '간결하고 정확한 말투, 가끔 따뜻함',
-                    description: '냉철하지만 내면은 따뜻한 전략가'
-                },
-                'jihye_esfj': {
-                    id: 'jihye_esfj',
-                    name: '지혜',
-                    mbti: 'ESFJ',
-                    personality: '사교적, 배려심 많은, 책임감 강한, 감정적',
-                    speech_style: '따뜻하고 배려깊은 말투, 걱정하는 표현',
-                    description: '다른 사람을 돌보는 것을 좋아하는 따뜻한 캐릭터'
-                },
-                'hyejin_istp': {
-                    id: 'hyejin_istp',
-                    name: '혜진',
-                    mbti: 'ISTP',
-                    personality: '실용적, 독립적, 논리적, 적응적',
-                    speech_style: '간결하고 실용적인 말투, 필요한 말만',
-                    description: '조용하지만 유능한 문제 해결사'
-                }
-            };
-        }
+        // 사용하지 않을 예정이므로 주석 처리
+        // function loadDefaultCharacters() { ... }
 
         function displayCharacters() {
             const container = document.getElementById('charactersContainer');
