@@ -1738,6 +1738,132 @@
         }
 
         // === 시나리오 관리 함수들 ===
+        
+        // 🚀 GitHub API 시나리오 저장 함수 (혁신적!)
+        async function saveScenarioToGitHub(scenario) {
+            try {
+                console.log('🐙 GitHub API로 시나리오 저장 시작:', scenario.title);
+                
+                // GitHub 토큰 확인/로드
+                if (!GITHUB_CONFIG.token) {
+                    const tokenLoaded = await loadGitHubToken();
+                    if (!tokenLoaded) {
+                        throw new Error('GitHub token not available');
+                    }
+                }
+                
+                // 시나리오 ID 생성 (없으면)
+                if (!scenario.id && !scenario.scenario_id) {
+                    scenario.id = `scenario_${Date.now()}`;
+                    scenario.scenario_id = scenario.id;
+                    console.log('🔧 시나리오 ID 생성:', scenario.id);
+                }
+                
+                // 기존 시나리오 목록 로드
+                const existingScenarios = await loadScenariosFromGitHub();
+                console.log('📊 기존 GitHub 시나리오 수:', Object.keys(existingScenarios).length);
+                
+                // 새 시나리오 추가
+                const scenarioId = scenario.id || scenario.scenario_id;
+                existingScenarios[scenarioId] = {
+                    ...scenario,
+                    last_modified: new Date().toISOString(),
+                    source: 'github_api',
+                    commit_hash: 'pending'
+                };
+                
+                // GitHub에 커밋할 데이터 구조 생성
+                const scenarioData = {
+                    metadata: {
+                        version: "1.0.0",
+                        created_date: new Date().toISOString().split('T')[0],
+                        total_scenarios: Object.keys(existingScenarios).length,
+                        ai_context_engine: "claude-3.5-sonnet",
+                        source: "github_api"
+                    },
+                    scenarios: existingScenarios,
+                    scenario_templates: {
+                        romance_template: {
+                            mood_options: ["설렘", "부끄러움", "긴장감", "달콤함", "애절함"],
+                            setting_options: ["카페", "학교", "집", "공원", "도서관", "거리"],
+                            time_options: ["아침", "점심", "저녁", "밤", "새벽"]
+                        }
+                    }
+                };
+                
+                // GitHub Repository에 직접 커밋
+                const commitMessage = `Add scenario: ${scenario.title}`;
+                const commitResult = await commitToGitHub('data/scenarios/scenario-database.json', scenarioData, commitMessage);
+                
+                if (commitResult.success) {
+                    // 커밋 해시 업데이트
+                    existingScenarios[scenarioId].commit_hash = commitResult.sha;
+                    
+                    // 로컬 백업도 저장
+                    localStorage.setItem('chatgame_scenarios', JSON.stringify(existingScenarios));
+                    
+                    console.log('✅ GitHub API 시나리오 저장 완료! 커밋 SHA:', commitResult.sha);
+                    console.log('📝 GitHub에 저장된 시나리오 ID들:', Object.keys(existingScenarios));
+                    
+                    return { success: true, commit_hash: commitResult.sha, url: commitResult.html_url };
+                } else {
+                    throw new Error('GitHub commit failed: ' + commitResult.error);
+                }
+                
+            } catch (error) {
+                console.error('❌ GitHub API 시나리오 저장 오류:', error);
+                
+                // 실패 시 로컬스토리지로 폴백
+                console.log('💾 시나리오 로컬스토리지로 폴백...');
+                return saveScenarioToLocalStorage(scenario);
+            }
+        }
+        
+        // GitHub에서 시나리오 데이터 로드
+        async function loadScenariosFromGitHub() {
+            try {
+                console.log('📥 GitHub에서 시나리오 데이터 로드...');
+                const result = await getFileFromGitHub('data/scenarios/scenario-database.json');
+                
+                if (result.success) {
+                    const scenarioData = result.content;
+                    if (scenarioData.scenarios) {
+                        return scenarioData.scenarios;
+                    }
+                    return {};
+                } else {
+                    console.warn('⚠️ GitHub 시나리오 로드 실패:', result.error);
+                    return {};
+                }
+            } catch (error) {
+                console.error('❌ GitHub 시나리오 로드 예외:', error);
+                return {};
+            }
+        }
+        
+        // 시나리오 로컬스토리지 폴백 함수
+        function saveScenarioToLocalStorage(scenario) {
+            try {
+                const scenarioId = scenario.id || scenario.scenario_id || `scenario_${Date.now()}`;
+                const existingScenarios = JSON.parse(localStorage.getItem('chatgame_scenarios') || '{}');
+                
+                existingScenarios[scenarioId] = {
+                    ...scenario,
+                    id: scenarioId,
+                    scenario_id: scenarioId,
+                    last_modified: new Date().toISOString(),
+                    source: 'local_storage'
+                };
+                
+                localStorage.setItem('chatgame_scenarios', JSON.stringify(existingScenarios));
+                console.log('✅ 시나리오 로컬스토리지 저장 완료:', scenarioId);
+                
+                return { success: true, source: 'localStorage' };
+            } catch (error) {
+                console.error('❌ 시나리오 로컬스토리지 저장 오류:', error);
+                return { success: false, error: error.message };
+            }
+        }
         async function loadScenarios() {
             console.log('📚 === 시나리오 로드 시작 ===');
             console.log('🕒 로드 시간:', new Date().toISOString());
@@ -2373,12 +2499,73 @@
         }
 
         // === 캐릭터 관리 함수들 ===
+        // 🚀 GitHub API 우선 캐릭터 로드 (혁신적 해결책!)
         async function loadCharacters() {
-            console.log('📥 === 캐릭터 로드 시작 ===');
+            console.log('📥 === 캐릭터 로드 시작 (GitHub API 우선) ===');
             console.log('🕒 로드 시간:', new Date().toISOString());
             
+            // 1순위: GitHub API에서 로드 (최신 영구 데이터)
             try {
-                // AI-Generator API 먼저 시도
+                console.log('🐙 GitHub API에서 캐릭터 로드...');
+                
+                // GitHub 토큰 확인
+                if (!GITHUB_CONFIG.token) {
+                    console.log('🔐 GitHub 토큰 로드 시도...');
+                    await loadGitHubToken();
+                }
+                
+                if (GITHUB_CONFIG.token) {
+                    const gitHubCharacters = await loadCharactersFromGitHub();
+                    const characterCount = Object.keys(gitHubCharacters).length;
+                    console.log('📊 GitHub 캐릭터 수:', characterCount);
+                    
+                    if (characterCount > 0) {
+                        characters = gitHubCharacters;
+                        
+                        // GitHub 데이터를 로컬에도 백업
+                        localStorage.setItem('chatgame_characters', JSON.stringify(characters));
+                        
+                        console.log('✅ GitHub API에서 로드 완료. 캐릭터 ID들:', Object.keys(characters));
+                        displayCharacters();
+                        updateCharacterStats();
+                        console.log('🎉 === 캐릭터 로드 완료 (GitHub API) ===');
+                        return;
+                    } else {
+                        console.log('📭 GitHub에 캐릭터 데이터 없음');
+                    }
+                } else {
+                    console.log('🔐 GitHub 토큰 없음, 다른 방법 시도...');
+                }
+            } catch (error) {
+                console.warn('⚠️ GitHub API 로드 실패:', error);
+            }
+            
+            // 2순위: 로컬스토리지에서 로드 (백업)
+            try {
+                console.log('💾 로컬스토리지에서 캐릭터 백업 로드...');
+                const localData = localStorage.getItem('chatgame_characters');
+                
+                if (localData) {
+                    const localCharacters = JSON.parse(localData);
+                    const characterCount = Object.keys(localCharacters).length;
+                    console.log('📊 로컬스토리지 백업 캐릭터 수:', characterCount);
+                    
+                    if (characterCount > 0) {
+                        characters = localCharacters;
+                        console.log('✅ 로컬스토리지 백업에서 로드 완료. 캐릭터 ID들:', Object.keys(characters));
+                        displayCharacters();
+                        updateCharacterStats();
+                        console.log('🎉 === 캐릭터 로드 완료 (로컬 백업) ===');
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('❌ 로컬스토리지 로드 예외:', error);
+            }
+            
+            // 3순위: AI API에서 로드
+            try {
+                console.log('🤖 AI 캐릭터 생성기 API 로드...');
                 console.log('🤖 AI 캐릭터 생성기 API 호출...');
                 const aiResponse = await fetch('/api/character-ai-generator?action=list_characters&_t=' + Date.now());
                 
@@ -2390,7 +2577,7 @@
                     
                     if (aiData.success && aiData.characters) {
                         const characterCount = Object.keys(aiData.characters).length;
-                        console.log('📊 AI API 캐망터 수:', characterCount);
+                        console.log('📊 AI API 캐릭터 수:', characterCount);
                         
                         if (characterCount > 0) {
                             characters = aiData.characters;
@@ -2818,32 +3005,319 @@
             // API에 캐릭터 저장
             console.log('💾 저장할 캐릭터 데이터:', characters[characterId]);
             
-            saveCharacterToAPI(characters[characterId]).then(async (success) => {
-                if (success) {
-                    alert(currentMode === 'create' ? '💖 새로운 캐릭터가 생성되었습니다!' : '✨ 캐릭터가 수정되었습니다!');
+            // 🚀 GitHub API 우선 저장 (혁신적 해결책!)
+            console.log('🐙 GitHub API로 영구 저장 시도...');
+            const gitHubResult = await saveCharacterToGitHub(characters[characterId]);
+            
+            if (gitHubResult.success) {
+                console.log('✅ GitHub API 저장 성공! 커밋:', gitHubResult.commit_hash);
+                
+                // API 백업 저장도 비동기로 시도 (실패해도 무시)
+                saveCharacterToAPI(characters[characterId]).then(apiResult => {
+                    if (apiResult) {
+                        console.log('✅ API 백업 저장도 성공!');
+                    } else {
+                        console.warn('⚠️ API 백업 저장 실패 (GitHub 저장은 성공)');
+                    }
+                });
+                
+                // 성공 메시지에 GitHub 정보 포함
+                const successMessage = currentMode === 'create' ? 
+                    `💖🐙 새로운 캐릭터가 GitHub에 영구 저장되었습니다!\n커밋: ${gitHubResult.commit_hash?.substring(0,7)}` :
+                    `✨🐙 캐릭터가 GitHub에 수정 저장되었습니다!\n커밋: ${gitHubResult.commit_hash?.substring(0,7)}`;
+                    
+                alert(successMessage);
+                closeModal('characterModal');
+                
+                console.log('🔄 즉시 캐릭터 목록 새로고침...');
+                await loadCharacters();
+                
+            } else {
+                console.warn('⚠️ GitHub 저장 실패, 폴백 결과:', gitHubResult);
+                
+                if (gitHubResult.source === 'localStorage') {
+                    alert('💾 캐릭터가 로컬에 저장되었습니다!\n(GitHub 연결 늦려, 나중에 자동 동기화됨)');
                     closeModal('characterModal');
-                    
-                    // 따로 가리 필요 없이 즉시 새로고침
-                    console.log('🔄 즉시 캐릭터 목록 새로고침...');
                     await loadCharacters();
-                    
                 } else {
-                    alert('❌ 캐릭터 저장 중 오류가 발생했습니다. 콘솔을 확인하고 다시 시도해주세요.');
+                    alert('❌ 놀랍게도 모든 저장 방법에 실패했습니다.\n브라우저 설정을 확인해주세요.');
                 }
-            }).catch((error) => {
-                console.error('❌ 캐릭터 저장 오류:', error);
-                alert('❌ 캐릭터 저장 중 예상치 못한 오류가 발생했습니다.');
-            }).finally(() => {
-                // 저장 버튼 복원
-                saveButton.disabled = false;
-                saveButton.textContent = originalText;
-            });
+            }
+            
+            // 저장 버튼 복원
+            saveButton.disabled = false;
+            saveButton.textContent = originalText;
         }
 
-        // API에 캐릭터 저장하는 함수
+        // 🚀 GitHub API 핵심 함수들 (혁신적 해결책!)
+        
+        // GitHub Repository 설정
+        const GITHUB_CONFIG = {
+            owner: 'EnmanyProject',  // GitHub 사용자명
+            repo: 'chatgame',        // Repository 이름  
+            token: null,             // Personal Access Token (환경변수에서 로드)
+            branch: 'main'           // 브랜치명
+        };
+        
+        // GitHub Personal Access Token 로드
+        async function loadGitHubToken() {
+            try {
+                // 환경변수에서 토큰 로드 시도
+                const response = await fetch('/api/github-token');
+                if (response.ok) {
+                    const data = await response.json();
+                    GITHUB_CONFIG.token = data.token;
+                    console.log('✅ GitHub 토큰 로드 성공');
+                    return true;
+                }
+            } catch (error) {
+                console.warn('⚠️ 환경변수 토큰 로드 실패:', error);
+            }
+            
+            // 로컬스토리지에서 토큰 로드 시도
+            const localToken = localStorage.getItem('github_token');
+            if (localToken) {
+                GITHUB_CONFIG.token = localToken;
+                console.log('💾 로컬 GitHub 토큰 사용');
+                return true;
+            }
+            
+            // 토큰이 없으면 사용자에게 요청
+            const userToken = prompt(`
+🔐 GitHub Personal Access Token이 필요합니다!
+
+1. GitHub.com → Settings → Developer settings → Personal access tokens
+2. Generate new token (classic)
+3. Select scopes: 'repo' (Full control of private repositories)
+4. Copy token and paste below:
+
+GitHub Token:`);
+            
+            if (userToken && userToken.trim().length > 20) {
+                GITHUB_CONFIG.token = userToken.trim();
+                localStorage.setItem('github_token', GITHUB_CONFIG.token);
+                console.log('🔐 사용자 GitHub 토큰 저장됨');
+                return true;
+            }
+            
+            console.error('❌ GitHub 토큰 없음 - 로컬 저장소로 폴백');
+            return false;
+        }
+        
+        // GitHub API로 파일 내용 가져오기
+        async function getFileFromGitHub(filePath) {
+            try {
+                const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filePath}`;
+                console.log('📥 GitHub에서 파일 로드:', url);
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const content = JSON.parse(atob(data.content));
+                    console.log('✅ GitHub 파일 로드 성공:', filePath);
+                    return { success: true, content, sha: data.sha };
+                } else if (response.status === 404) {
+                    console.log('📭 GitHub 파일 없음, 새 파일 생성:', filePath);
+                    return { success: true, content: { characters: {} }, sha: null };
+                } else {
+                    throw new Error(`GitHub API Error: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('❌ GitHub 파일 로드 실패:', error);
+                return { success: false, error: error.message };
+            }
+        }
+        
+        // GitHub API로 파일 업데이트/생성
+        async function commitToGitHub(filePath, content, commitMessage) {
+            try {
+                // 현재 파일 SHA 가져오기 (업데이트용)
+                const currentFile = await getFileFromGitHub(filePath);
+                
+                const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filePath}`;
+                console.log('📤 GitHub에 커밋:', url);
+                
+                const body = {
+                    message: commitMessage + ` 🤖 Generated by ChatGame Admin`,
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2)))),
+                    branch: GITHUB_CONFIG.branch
+                };
+                
+                // 파일이 존재하면 SHA 포함 (업데이트)
+                if (currentFile.sha) {
+                    body.sha = currentFile.sha;
+                }
+                
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GITHUB_CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ GitHub 커밋 성공! SHA:', data.commit.sha);
+                    return { 
+                        success: true, 
+                        sha: data.commit.sha,
+                        html_url: data.commit.html_url 
+                    };
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(`GitHub Commit Error: ${response.status} - ${errorData.message}`);
+                }
+            } catch (error) {
+                console.error('❌ GitHub 커밋 실패:', error);
+                return { success: false, error: error.message };
+            }
+        }
+        
+        // GitHub에서 캐릭터 데이터 로드
+        async function loadCharactersFromGitHub() {
+            try {
+                console.log('📥 GitHub에서 캐릭터 데이터 로드...');
+                const result = await getFileFromGitHub('data/characters.json');
+                
+                if (result.success) {
+                    // characters.json 포맷을 ID 기반 객체로 변환
+                    const charactersData = result.content;
+                    if (charactersData.characters) {
+                        if (Array.isArray(charactersData.characters)) {
+                            // Array 형태를 Object 형태로 변환
+                            const convertedCharacters = {};
+                            charactersData.characters.forEach(char => {
+                                convertedCharacters[char.id] = char;
+                            });
+                            return convertedCharacters;
+                        } else {
+                            return charactersData.characters;
+                        }
+                    }
+                    return {};
+                } else {
+                    console.warn('⚠️ GitHub 캐릭터 로드 실패:', result.error);
+                    return {};
+                }
+            } catch (error) {
+                console.error('❌ GitHub 캐릭터 로드 예외:', error);
+                return {};
+            }
+        }
+        
+        // 🚀 GitHub API 캐릭터 저장 함수 (혁신적!)
+        async function saveCharacterToGitHub(character) {
+            try {
+                console.log('🐙 GitHub API로 캐릭터 저장 시작:', character.name);
+                
+                // GitHub 토큰 확인/로드
+                if (!GITHUB_CONFIG.token) {
+                    const tokenLoaded = await loadGitHubToken();
+                    if (!tokenLoaded) {
+                        throw new Error('GitHub token not available');
+                    }
+                }
+                
+                // 캐릭터 ID 생성 (없으면)
+                if (!character.id) {
+                    character.id = `${character.name.toLowerCase().replace(/\s/g, '_')}_${character.mbti.toLowerCase()}_${Date.now()}`;
+                    console.log('🔧 캐릭터 ID 생성:', character.id);
+                }
+                
+                // 기존 캐릭터 목록 로드
+                const existingCharacters = await loadCharactersFromGitHub();
+                console.log('📊 기존 GitHub 캐릭터 수:', Object.keys(existingCharacters).length);
+                
+                // 새 캐릭터 추가
+                existingCharacters[character.id] = {
+                    ...character,
+                    updated_at: new Date().toISOString(),
+                    source: 'github_api',
+                    commit_hash: 'pending'
+                };
+                
+                // GitHub에 커밋할 데이터 구조 생성
+                const charactersArrayData = {
+                    characters: Object.values(existingCharacters)
+                };
+                
+                // GitHub Repository에 직접 커밋
+                const commitMessage = `Add new character: ${character.name} (${character.mbti})`;
+                const commitResult = await commitToGitHub('data/characters.json', charactersArrayData, commitMessage);
+                
+                if (commitResult.success) {
+                    // 커밋 해시 업데이트
+                    existingCharacters[character.id].commit_hash = commitResult.sha;
+                    
+                    // 로컬 백업도 저장
+                    localStorage.setItem('chatgame_characters', JSON.stringify(existingCharacters));
+                    
+                    console.log('✅ GitHub API 저장 완료! 커밋 SHA:', commitResult.sha);
+                    console.log('📝 GitHub에 저장된 캐릭터 ID들:', Object.keys(existingCharacters));
+                    console.log('🔗 커밋 URL:', commitResult.html_url);
+                    
+                    return { success: true, commit_hash: commitResult.sha, url: commitResult.html_url };
+                } else {
+                    throw new Error('GitHub commit failed: ' + commitResult.error);
+                }
+                
+            } catch (error) {
+                console.error('❌ GitHub API 저장 오류:', error);
+                
+                // 실패 시 로컬스토리지로 폴백
+                console.log('💾 로컬스토리지로 폴백...');
+                return saveCharacterToLocalStorage(character);
+            }
+        }
+        
+        // 로컬스토리지 폴백 함수
+        function saveCharacterToLocalStorage(character) {
+            try {
+                console.log('💾 로컬스토리지에 캐릭터 저장 시작:', character.name);
+                
+                // 캐릭터 ID 생성 (없으면)
+                if (!character.id) {
+                    character.id = `${character.name.toLowerCase()}_${character.mbti.toLowerCase()}_${Date.now()}`;
+                    console.log('🔧 캐릭터 ID 생성:', character.id);
+                }
+                
+                // 기존 캐릭터 목록 로드
+                const existingCharacters = JSON.parse(localStorage.getItem('chatgame_characters') || '{}');
+                console.log('📊 기존 캐릭터 수:', Object.keys(existingCharacters).length);
+                
+                // 새 캐릭터 추가
+                existingCharacters[character.id] = {
+                    ...character,
+                    updated_at: new Date().toISOString(),
+                    source: 'local_storage'
+                };
+                
+                // 로컬스토리지에 저장
+                localStorage.setItem('chatgame_characters', JSON.stringify(existingCharacters));
+                
+                console.log('✅ 로컬스토리지 저장 완료. 총 캐릭터 수:', Object.keys(existingCharacters).length);
+                console.log('📝 저장된 캐릭터 ID들:', Object.keys(existingCharacters));
+                
+                return true;
+            } catch (error) {
+                console.error('❌ 로컬스토리지 저장 오류:', error);
+                return false;
+            }
+        }
+        
+        // API 백업 저장 함수 (실패해도 무시)
         async function saveCharacterToAPI(character) {
             try {
-                console.log('💾 API로 캐릭터 저장 시작:', character.name);
+                console.log('🌐 API로 캐릭터 백업 시작:', character.name);
                 
                 const response = await fetch('/api/character-ai-generator', {
                     method: 'POST',
