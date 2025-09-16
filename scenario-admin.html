@@ -1273,6 +1273,14 @@
                     <input type="hidden" id="episodeScenarioId" />
                     
                     <div class="form-group">
+                        <label for="episodeScenarioSelect">시나리오 선택 *</label>
+                        <select id="episodeScenarioSelect" required onchange="onScenarioChange()">
+                            <option value="">시나리오를 선택하세요</option>
+                        </select>
+                        <small class="form-text">에피소드를 생성할 시나리오를 선택해주세요.</small>
+                    </div>
+
+                    <div class="form-group">
                         <label for="episodeNumber">에피소드 번호 (1-36) *</label>
                         <input type="number" id="episodeNumber" min="1" max="36" required />
                     </div>
@@ -1280,13 +1288,9 @@
                     <div class="form-group">
                         <label for="characterSelect">캐릭터 선택 *</label>
                         <select id="characterSelect" required>
-                            <option value="">캐릭터를 선택하세요</option>
-                            <option value="yuna_infp">윤아 (INFP) - 감성적, 내향적</option>
-                            <option value="mina_enfp">미나 (ENFP) - 외향적, 열정적</option>
-                            <option value="seoyeon_intj">서연 (INTJ) - 논리적, 독립적</option>
-                            <option value="jihye_esfj">지혜 (ESFJ) - 사교적, 배려심</option>
-                            <option value="hyejin_istp">혜진 (ISTP) - 실용적, 적응적</option>
+                            <option value="">먼저 시나리오를 선택하세요</option>
                         </select>
+                        <small class="form-text">선택한 시나리오에서 사용 가능한 캐릭터만 표시됩니다.</small>
                     </div>
 
                     <div class="form-group">
@@ -1793,6 +1797,92 @@
                 console.error('❌ 캐릭터 선택기 로딩 실패:', error);
                 document.getElementById('characterLoadingMsg').innerHTML = 
                     '❌ 캐릭터 로딩 실패<br><small>페이지를 새로고침하거나 캐릭터를 다시 생성해보세요.</small>';
+            }
+        }
+        
+        // 에피소드 시나리오 선택기 로딩
+        async function loadEpisodeScenarioSelector() {
+            console.log('🔄 에피소드 시나리오 선택기 로딩 시작...');
+            
+            try {
+                const scenariosData = window.scenarios || {};
+                const scenarioKeys = Object.keys(scenariosData);
+                
+                console.log('📊 로드된 시나리오:', scenarioKeys.length, '개');
+                
+                const selector = document.getElementById('episodeScenarioSelect');
+                
+                // 기본 옵션 유지
+                let html = '<option value="">시나리오를 선택하세요</option>';
+                
+                if (scenarioKeys.length === 0) {
+                    html += '<option value="" disabled>생성된 시나리오가 없습니다</option>';
+                } else {
+                    scenarioKeys.forEach(scenarioId => {
+                        const scenario = scenariosData[scenarioId];
+                        html += `<option value="${scenarioId}">${scenario.title}</option>`;
+                    });
+                }
+                
+                selector.innerHTML = html;
+                console.log('✅ 에피소드 시나리오 선택기 로딩 완료');
+                
+            } catch (error) {
+                console.error('❌ 에피소드 시나리오 선택기 로딩 실패:', error);
+            }
+        }
+        
+        // 시나리오 변경 시 캐릭터 목록 업데이트
+        function onScenarioChange() {
+            const scenarioId = document.getElementById('episodeScenarioSelect').value;
+            console.log('🔄 선택된 시나리오:', scenarioId);
+            
+            const characterSelect = document.getElementById('characterSelect');
+            
+            if (!scenarioId) {
+                characterSelect.innerHTML = '<option value="">먼저 시나리오를 선택하세요</option>';
+                return;
+            }
+            
+            try {
+                const scenariosData = window.scenarios || {};
+                const scenario = scenariosData[scenarioId];
+                
+                if (!scenario) {
+                    characterSelect.innerHTML = '<option value="">시나리오를 찾을 수 없습니다</option>';
+                    return;
+                }
+                
+                console.log('📊 시나리오 사용가능 캐릭터:', scenario.available_characters);
+                
+                let html = '<option value="">캐릭터를 선택하세요</option>';
+                
+                if (scenario.available_characters && scenario.available_characters.length > 0) {
+                    const charactersData = window.characters || {};
+                    
+                    scenario.available_characters.forEach(charId => {
+                        const character = charactersData[charId];
+                        if (character) {
+                            html += `<option value="${charId}">${character.name} (${character.mbti})</option>`;
+                        } else {
+                            // 캐릭터 정보가 없는 경우 ID만 표시
+                            html += `<option value="${charId}">${charId}</option>`;
+                        }
+                    });
+                } else {
+                    html += '<option value="" disabled>이 시나리오에 사용가능한 캐릭터가 없습니다</option>';
+                }
+                
+                characterSelect.innerHTML = html;
+                
+                // 숨겨진 필드에도 시나리오 ID 설정
+                document.getElementById('episodeScenarioId').value = scenarioId;
+                
+                console.log('✅ 캐릭터 목록 업데이트 완료');
+                
+            } catch (error) {
+                console.error('❌ 캐릭터 목록 업데이트 실패:', error);
+                characterSelect.innerHTML = '<option value="">오류가 발생했습니다</option>';
             }
         }
 
@@ -2421,17 +2511,26 @@
         }
 
         function openEpisodeModal(mode) {
-            if (!currentScenarioId) {
-                alert('먼저 시나리오를 선택해주세요.');
-                return;
-            }
-            
             currentMode = mode;
             document.getElementById('episodeModalTitle').textContent = '새 에피소드 생성';
             document.getElementById('episodeForm').reset();
-            document.getElementById('episodeScenarioId').value = currentScenarioId;
             document.getElementById('dialoguePreview').style.display = 'none';
             generatedDialogue = null;
+            
+            // 시나리오 선택기 동적 로딩
+            loadEpisodeScenarioSelector();
+            
+            // 기존 시나리오 ID가 있으면 선택 상태로 설정
+            if (currentScenarioId) {
+                // 선택기가 로딩된 후 설정하기 위해 약간 지연
+                setTimeout(() => {
+                    const scenarioSelect = document.getElementById('episodeScenarioSelect');
+                    if (scenarioSelect.querySelector(`option[value="${currentScenarioId}"]`)) {
+                        scenarioSelect.value = currentScenarioId;
+                        onScenarioChange(); // 캐릭터 목록도 자동 업데이트
+                    }
+                }, 100);
+            }
             
             document.getElementById('episodeModal').style.display = 'block';
         }
@@ -2539,25 +2638,31 @@
         }
 
         async function saveEpisode() {
+            const scenarioId = document.getElementById('episodeScenarioSelect').value;
             const episodeNumber = parseInt(document.getElementById('episodeNumber').value);
             const characterId = document.getElementById('characterSelect').value;
             const difficulty = document.getElementById('difficulty').value;
             const userPrompt = document.getElementById('userPrompt').value;
             
-            if (!episodeNumber || !characterId || !userPrompt) {
-                alert('모든 필수 항목을 입력해주세요.');
+            if (!scenarioId || !episodeNumber || !characterId || !userPrompt) {
+                alert('모든 필수 항목을 입력해주세요.\n\n- 시나리오 선택\n- 에피소드 번호\n- 캐릭터 선택\n- 상황 프롬프트');
                 return;
             }
             
-            const characterName = getCharacterName(characterId);
+            // 캐릭터 이름 가져오기
+            const charactersData = window.characters || {};
+            const character = charactersData[characterId];
+            const characterName = character ? character.name : characterId;
             
             const episodeData = {
-                scenario_id: currentScenarioId,
+                scenario_id: scenarioId,
                 episode_number: episodeNumber,
                 character_id: characterId,
                 character_name: characterName,
                 difficulty: difficulty,
-                user_input_prompt: userPrompt
+                user_input_prompt: userPrompt,
+                created_at: new Date().toISOString(),
+                id: currentMode === 'create' ? `episode_${scenarioId}_${episodeNumber}_${Date.now()}` : document.getElementById('episodeId').value
             };
             
             if (currentMode === 'create') {
@@ -2571,31 +2676,65 @@
             const customDialogue = document.getElementById('customDialogue').value;
             const customNarration = document.getElementById('customNarration').value;
             if (customDialogue || customNarration) {
-                episodeData.custom_dialogue = JSON.stringify({
+                episodeData.custom_dialogue = {
                     dialogue: customDialogue,
                     narration: customNarration
-                });
+                };
+            }
+            
+            // 생성된 대화가 있으면 추가
+            if (generatedDialogue) {
+                episodeData.generated_dialogue = generatedDialogue;
             }
             
             try {
-                const response = await fetch('/api/episode-manager', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(episodeData)
-                });
+                console.log('💾 === 에피소드 저장 시작 ===');
+                console.log('📊 에피소드 데이터:', episodeData);
                 
-                const data = await response.json();
+                // 💾 LocalStorage 직접 저장 (확실한 방법!)
+                console.log('💾 LocalStorage에 에피소드 저장 시도...');
                 
-                if (data.success) {
-                    alert(currentMode === 'create' ? '에피소드가 생성되었습니다!' : '에피소드가 수정되었습니다!');
-                    closeModal('episodeModal');
-                    loadEpisodes();
-                } else {
-                    throw new Error(data.message || '저장 실패');
+                // 현재 저장된 에피소드들을 가져옴
+                const existingEpisodes = localStorage.getItem('episodes');
+                const episodesData = existingEpisodes ? JSON.parse(existingEpisodes) : {};
+                
+                // 새 에피소드 추가/수정
+                episodesData[episodeData.id] = episodeData;
+                
+                // LocalStorage에 저장
+                localStorage.setItem('episodes', JSON.stringify(episodesData));
+                console.log('✅ LocalStorage 에피소드 저장 성공! 총', Object.keys(episodesData).length, '개 에피소드');
+                
+                // 시나리오의 에피소드 카운트도 업데이트
+                const scenariosData = window.scenarios || {};
+                if (scenariosData[scenarioId]) {
+                    const scenarioEpisodes = Object.values(episodesData).filter(ep => ep.scenario_id === scenarioId);
+                    scenariosData[scenarioId].episode_count = scenarioEpisodes.length;
+                    window.scenarios = scenariosData;
+                    
+                    // 시나리오도 LocalStorage에 저장
+                    localStorage.setItem('scenarios', JSON.stringify(scenariosData));
+                    console.log('✅ 시나리오 에피소드 카운트 업데이트:', scenariosData[scenarioId].episode_count);
                 }
+                
+                // 저장 성공 메시지
+                const successMessage = currentMode === 'create' ? 
+                    `💖 새로운 에피소드 ${episodeNumber}번이 생성되었습니다!\n시나리오: ${scenariosData[scenarioId]?.title || scenarioId}\n캐릭터: ${characterName}` :
+                    `✨에피소드 ${episodeNumber}번이 수정되었습니다!`;
+                
+                alert(successMessage);
+                closeModal('episodeModal');
+                
+                // UI 최종 업데이트
+                console.log('🔄 저장 후 최종 UI 동기화...');
+                updateScenarioStats();
+                // loadEpisodes(); // 에피소드 목록도 새로고침 (필요시)
+                
+                console.log('✅ 에피소드 저장 프로세스 완료!');
+                
             } catch (error) {
-                console.error('에피소드 저장 오류:', error);
-                alert('에피소드 저장에 실패했습니다: ' + error.message);
+                console.error('❌ 에피소드 저장 실패:', error);
+                alert('에피소드 저장 중 오류가 발생했습니다: ' + error.message);
             }
         }
 
@@ -3857,6 +3996,7 @@ GitHub Token:`);
         window.editScenario = editScenario;
         window.deleteCharacter = deleteCharacter;
         window.deleteScenario = deleteScenario;
+        window.onScenarioChange = onScenarioChange;
         
         // 페이지 로드 시 초기화
         document.addEventListener('DOMContentLoaded', function() {
