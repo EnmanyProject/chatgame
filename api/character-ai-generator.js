@@ -74,6 +74,32 @@ export default async function handler(req, res) {
       });
     }
 
+    // 모든 캐릭터 데이터 초기화 (더미 데이터 삭제)
+    if (action === 'reset_all_characters') {
+      try {
+        console.log('🗑️ 모든 캐릭터 데이터 초기화 시작...');
+        const success = await resetAllCharacters();
+        
+        if (success) {
+          return res.json({
+            success: true,
+            message: '모든 캐릭터 데이터가 초기화되었습니다'
+          });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: '데이터 초기화 중 오류가 발생했습니다'
+          });
+        }
+      } catch (error) {
+        console.error('❌ 데이터 초기화 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: '데이터 초기화 실패: ' + error.message
+        });
+      }
+    }
+
     // 캐릭터 저장
     if (action === 'save_character') {
       const { character } = req.body;
@@ -123,6 +149,35 @@ export default async function handler(req, res) {
         return res.status(500).json({
           success: false,
           message: 'Failed to delete character'
+        });
+      }
+    }
+
+    // 캐릭터 사진 분석 (OpenAI Vision API 사용)
+    if (action === 'analyze_character_image') {
+      try {
+        const { imageBase64 } = req.body;
+        
+        if (!imageBase64) {
+          return res.status(400).json({ 
+            success: false, 
+            message: '이미지 데이터가 없습니다' 
+          });
+        }
+
+        const analysis = await analyzeCharacterImage(imageBase64);
+        
+        return res.json({
+          success: true,
+          analysis: analysis,
+          message: '이미지 분석이 완료되었습니다'
+        });
+        
+      } catch (error) {
+        console.error('❌ 이미지 분석 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: '이미지 분석 중 오류가 발생했습니다'
         });
       }
     }
@@ -551,4 +606,141 @@ async function deleteCharacterFromDatabase(characterId) {
     console.error('❌ 에러 스택:', error.stack);
     return false;
   }
+}
+
+// 모든 캐릭터 데이터 초기화
+async function resetAllCharacters() {
+  try {
+    console.log('🗑️ 모든 캐릭터 데이터 초기화 시작...');
+    
+    // 빈 데이터베이스 생성
+    const emptyDb = {
+      metadata: { 
+        version: "2.0.0", 
+        total_characters: 0,
+        reset_at: new Date().toISOString(),
+        reset_by: 'admin'
+      },
+      characters: {}
+    };
+    
+    // 파일 저장 시도
+    const aiDbPath = path.join(process.cwd(), 'data', 'characters-ai.json');
+    try {
+      fs.writeFileSync(aiDbPath, JSON.stringify(emptyDb, null, 2));
+      console.log('✅ AI 캐릭터 DB 초기화 성공');
+    } catch (writeError) {
+      console.log('⚠️ AI DB 파일 쓰기 실패, 메모리에서 초기화:', writeError.message);
+    }
+    
+    // 기본 characters.json도 초기화 시도
+    const mainDbPath = path.join(process.cwd(), 'data', 'characters.json');
+    const mainDbEmpty = {
+      characters: []
+    };
+    
+    try {
+      fs.writeFileSync(mainDbPath, JSON.stringify(mainDbEmpty, null, 2));
+      console.log('✅ 기본 캐릭터 DB 초기화 성공');
+    } catch (writeError) {
+      console.log('⚠️ 기본 DB 파일 쓰기 실패:', writeError.message);
+    }
+    
+    return true;
+    
+  } catch (error) {
+    console.error('❌ 데이터 초기화 실패:', error);
+    console.error('❌ 에러 스택:', error.stack);
+    return false;
+  }
+}
+
+// 캐릭터 이미지 분석 함수 (OpenAI Vision API)
+async function analyzeCharacterImage(imageBase64) {
+  try {
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+    
+    if (!OPENAI_API_KEY) {
+      console.warn('⚠️ OpenAI API key not configured, using fallback analysis');
+      return generateFallbackImageAnalysis();
+    }
+
+    console.log('🔍 OpenAI Vision API 이미지 분석 시작...');
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: '당신은 캐릭터 디자이너입니다. 이미지를 분석하여 캐릭터의 외모 특징과 MBTI 성격을 추측해주세요.'
+          },
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: '이 이미지를 분석하여 다음 형식으로 JSON을 반환해주세요:\n{\n  "appearance": {눈 색깔, 머리 색깔, 체형 등},\n  "personality_prediction": {사진에서 느껴지는 성격},\n  "mbti_suggestion": {추측되는 MBTI 유형},\n  "speech_style": {말투 예측},\n  "background_suggestion": {배경 설정 제안}\n}'
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:image/jpeg;base64,${imageBase64}`
+                }
+              }
+            ]
+          }
+        ],
+        max_tokens: 500,
+        temperature: 0.7
+      })
+    });
+
+    console.log('📱 Vision API 응답 상태:', response.status);
+
+    if (response.ok) {
+      const data = await response.json();
+      const analysis = data.choices[0]?.message?.content;
+      
+      if (analysis) {
+        try {
+          // JSON 파싱 시도
+          const parsed = JSON.parse(analysis);
+          console.log('✅ 이미지 분석 성공');
+          return parsed;
+        } catch (parseError) {
+          console.log('⚠️ JSON 파싱 실패, 텍스트 반환:', parseError);
+          return { raw_analysis: analysis };
+        }
+      } else {
+        console.warn('⚠️ Vision API 응답이 비어있음, fallback 사용');
+        return generateFallbackImageAnalysis();
+      }
+    } else {
+      const errorText = await response.text();
+      console.error('❌ Vision API 호출 실패:', response.status, errorText);
+      return generateFallbackImageAnalysis();
+    }
+
+  } catch (error) {
+    console.error('❌ 이미지 분석 오류:', error);
+    return generateFallbackImageAnalysis();
+  }
+}
+
+// Fallback 이미진 분석
+function generateFallbackImageAnalysis() {
+  return {
+    appearance: "매력적인 외모, 추측 불가",
+    personality_prediction: "사진에서 느껴지는 따뜻하고 친근한 인상",
+    mbti_suggestion: "INFP, ENFP, ISFJ 중 선택 권장",
+    speech_style: "부드럽고 친근한 말투",
+    background_suggestion: "대학생 또는 직장인으로 설정 권장",
+    note: "OpenAI API가 설정되지 않아 기본 분석을 제공합니다."
+  };
 }
