@@ -14,6 +14,15 @@ export default async function handler(req, res) {
   const action = req.query.action || req.body?.action;
 
   try {
+    // API 테스트
+    if (action === 'test') {
+      return res.json({
+        success: true,
+        message: 'Episode Manager API 테스트 성공',
+        timestamp: new Date().toISOString()
+      });
+    }
+
     // 특정 시나리오의 에피소드 목록 조회
     if (action === 'list' && req.query.scenario_id) {
       const episodes = await getEpisodesForScenario(req.query.scenario_id);
