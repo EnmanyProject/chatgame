@@ -126,23 +126,236 @@ async function createNewEpisode(data) {
   return newEpisode;
 }
 
-// AI 대화 생성 함수 (캐릭터별 특성 반영)
+// 🎯 채팅 기술 훈련을 위한 AI 대화 생성 함수
 async function generateEpisodeDialogue(data) {
   const { scenario_context, character_id, character_name, user_input_prompt, difficulty } = data;
   
   try {
-    const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
     
-    if (!CLAUDE_API_KEY) {
-      return generateFallbackDialogue(character_id, user_input_prompt);
+    if (!OPENAI_API_KEY) {
+      return generateChatTrainingFallback(character_id, user_input_prompt, difficulty);
     }
 
-    // 캐릭터별 성격 특성 로드
-    const characterTraits = getCharacterTraits(character_id);
-    
-    const prompt = `다음 조건에 맞는 대화와 선택지를 JSON 형식으로 생성해주세요:
+    // 🎯 채팅 기술 훈련용 특화 프롬프트 생성
+    const chatTrainingPrompt = generateChatTrainingPrompt({
+      scenario_context,
+      character_id, 
+      character_name,
+      user_input_prompt,
+      difficulty
+    });
 
-시나리오 컨텍스트:
+    console.log('🎯 채팅 기술 훈련 대화 생성 시작...');
+    
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4',
+        messages: [
+          {
+            role: 'system',
+            content: `당신은 남성들의 채팅 기술 향상을 위한 전문 훈련 시스템의 AI입니다.
+
+핵심 목표:
+1. 남성이 여성과의 대화에서 호감을 얻을 수 있는 메시지 패턴 교육
+2. MBTI 특성에 맞는 맞춤형 어프로치 훈련
+3. 단계별 레포 구축 전략 제시
+4. 실제 채팅 상황에서 활용 가능한 실용적 선택지 제공
+
+당신이 생성할 대화는:
+- 여성의 마음을 움직이는 효과적인 메시지 패턴을 보여줘야 함
+- 남성 사용자가 "이런 식으로 말하면 되는구나"를 학습할 수 있어야 함
+- 각 선택지마다 왜 효과적인지 심리적 근거를 포함해야 함
+- 진부하지 않고 자연스러우면서도 매력적인 대화 흐름을 만들어야 함`
+          },
+          {
+            role: 'user',
+            content: chatTrainingPrompt
+          }
+        ],
+        temperature: 0.8,
+        max_tokens: 1000
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const generatedContent = data.choices[0]?.message?.content;
+      
+      if (generatedContent) {
+        console.log('✅ 채팅 훈련 대화 생성 성공');
+        return parseChatTrainingResponse(generatedContent, character_id);
+      }
+    }
+
+    console.warn('⚠️ OpenAI API 실패, fallback 사용');
+    return generateChatTrainingFallback(character_id, user_input_prompt, difficulty);
+
+  } catch (error) {
+    console.error('❌ 채팅 훈련 대화 생성 실패:', error);
+    return generateChatTrainingFallback(character_id, user_input_prompt, difficulty);
+  }
+}
+
+// 🎯 채팅 훈련용 프롬프트 생성
+function generateChatTrainingPrompt({scenario_context, character_id, character_name, user_input_prompt, difficulty}) {
+  const difficultyGuides = {
+    'Easy': {
+      focus: '기본적인 대화 매너와 관심 표현',
+      techniques: ['적극적 경청', '공감 표현', '칭찬', '관심사 파악'],
+      goals: '자연스럽고 편안한 분위기 조성'
+    },
+    'Medium': {
+      focus: '감정적 연결과 개성 어필',
+      techniques: ['유머 활용', '개인적 경험 공유', '감정 공감', '미묘한 플레이팅'],
+      goals: '호감을 넘어서는 특별함 어필'
+    },
+    'Hard': {
+      focus: '깊은 매력 어필과 심리적 우위',
+      techniques: ['심리적 거리 조절', '미스터리 요소', '감정 기복 활용', '선별적 관심'],
+      goals: '강한 끌림과 궁금증 유발'
+    },
+    'Expert': {
+      focus: '고급 심리 전략과 관계 주도권',
+      techniques: ['프레임 컨트롤', '감정적 롤러코스터', '희소성 원리', '투자 유도'],
+      goals: '완전한 매력 포로 만들기'
+    }
+  };
+
+  const guide = difficultyGuides[difficulty] || difficultyGuides['Easy'];
+  
+  return `
+다음 조건에 맞는 채팅 훈련용 대화를 생성해주세요:
+
+📱 상황 설정:
+- 시나리오: ${scenario_context}
+- 캐릭터: ${character_name} (${character_id})
+- 상황 요청: ${user_input_prompt}
+- 난이도: ${difficulty}
+
+🎯 훈련 목표 (${difficulty} 레벨):
+- 초점: ${guide.focus}
+- 활용 기법: ${guide.techniques.join(', ')}
+- 목표: ${guide.goals}
+
+📋 생성 요구사항:
+1. 여성 캐릭터의 메시지 (자연스럽고 상황에 맞는)
+2. 남성을 위한 3가지 선택지 (각각 다른 전략 사용)
+3. 각 선택지의 심리적 효과 설명
+4. 실제 채팅에서 사용 가능한 현실적인 표현
+
+💡 선택지 유형 예시:
+- A형: 직접적이고 진실한 접근 (정공법)
+- B형: 유머나 재치를 활용한 접근 (매력 어필)
+- C형: 신중하고 배려깊은 접근 (안전한 선택)
+
+반드시 다음 JSON 형식으로 응답해주세요:
+{
+  "character_message": "캐릭터의 메시지",
+  "narration": "상황 설명이나 캐릭터의 감정 상태",
+  "choices": [
+    {
+      "text": "선택지 1 (정공법)",
+      "strategy": "사용된 전략 설명",
+      "effect": "예상되는 심리적 효과",
+      "affection_impact": 호감도변화(-3~5),
+      "learning_point": "이 선택지에서 배울 수 있는 채팅 기법"
+    },
+    {
+      "text": "선택지 2 (매력 어필)",
+      "strategy": "사용된 전략 설명", 
+      "effect": "예상되는 심리적 효과",
+      "affection_impact": 호감도변화(-3~5),
+      "learning_point": "이 선택지에서 배울 수 있는 채팅 기법"
+    },
+    {
+      "text": "선택지 3 (안전한 선택)",
+      "strategy": "사용된 전략 설명",
+      "effect": "예상되는 심리적 효과", 
+      "affection_impact": 호감도변화(-3~5),
+      "learning_point": "이 선택지에서 배울 수 있는 채팅 기법"
+    }
+  ],
+  "training_tip": "이 상황에서의 핵심 채팅 기술 조언"
+}`;
+}
+
+// 🎯 AI 응답 파싱 (채팅 훈련 특화)
+function parseChatTrainingResponse(content, character_id) {
+  try {
+    // JSON 추출 시도
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      
+      return {
+        dialogue: parsed.character_message,
+        narration: parsed.narration,
+        choices: parsed.choices.map(choice => ({
+          text: choice.text,
+          affection_impact: choice.affection_impact || 0,
+          strategy: choice.strategy,
+          effect: choice.effect,
+          learning_point: choice.learning_point
+        })),
+        training_tip: parsed.training_tip
+      };
+    }
+  } catch (error) {
+    console.error('❌ AI 응답 파싱 실패:', error);
+  }
+  
+  // 파싱 실패 시 fallback
+  return generateChatTrainingFallback(character_id, '기본 상황', 'Easy');
+}
+
+// 🎯 채팅 훈련 특화 Fallback 
+function generateChatTrainingFallback(character_id, user_input, difficulty) {
+  const trainingTemplates = {
+    'Easy': {
+      dialogue: "오늘 날씨가 정말 좋네요! 이런 날에는 뭘 하면 좋을까요? 😊",
+      narration: "캐릭터가 밝은 표정으로 대화를 이어가려 한다.",
+      choices: [
+        {
+          text: "같은 생각이에요. 함께 산책하면 어떨까요?",
+          affection_impact: 3,
+          strategy: "공감 + 자연스러운 제안",
+          effect: "편안함과 함께하고 싶은 마음 유발",
+          learning_point: "공감으로 시작해서 자연스럽게 함께 할 수 있는 활동 제안하기"
+        },
+        {
+          text: "저는 이런 날에 카페에서 책 읽는 걸 좋아해요. 당신은 어떤가요?",
+          affection_impact: 2,
+          strategy: "개인 취향 공유 + 상대방 관심사 확인",
+          effect: "나에 대한 궁금증과 공통 관심사 찾기",
+          learning_point: "자신의 매력적인 면을 자연스럽게 어필하면서 상대방에게 관심 표현"
+        },
+        {
+          text: "정말 그렇네요. 좋은 하루 되세요!",
+          affection_impact: 0,
+          strategy: "무난한 동의 + 마무리",
+          effect: "특별한 인상 없이 대화 종료",
+          learning_point: "안전하지만 관계 발전에는 도움이 되지 않는 선택"
+        }
+      ],
+      training_tip: "초기 대화에서는 공감과 관심 표현으로 편안한 분위기를 만드는 것이 중요합니다."
+    }
+  };
+
+  const template = trainingTemplates[difficulty] || trainingTemplates['Easy'];
+  
+  return {
+    dialogue: template.dialogue,
+    narration: template.narration,
+    choices: template.choices,
+    training_tip: template.training_tip
+  };
+}
 ${scenario_context}
 
 캐릭터 정보:
