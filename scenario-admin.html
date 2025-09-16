@@ -679,6 +679,274 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* AI 캐릭터 생성기 전용 스타일 */
+        .ai-character-generator .modal-content {
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .char-category {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #fdf7f9 0%, #fef9fc 100%);
+        }
+
+        .char-category h3 {
+            color: #d63384;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        .appearance-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .genre-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* MBTI 선택 버튼 */
+        .mbti-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .mbti-btn {
+            padding: 15px 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .mbti-btn:hover {
+            border-color: #d63384;
+            background: #fdf2f8;
+        }
+
+        .mbti-btn.selected {
+            border-color: #d63384;
+            background: #d63384;
+            color: white;
+        }
+
+        .mbti-btn small {
+            display: block;
+            font-size: 11px;
+            font-weight: normal;
+            opacity: 0.8;
+        }
+
+        /* 성격 특성 버튼 */
+        .trait-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .trait-btn {
+            padding: 10px 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            font-size: 13px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .trait-btn:hover {
+            border-color: #fd7e14;
+            background: #fff3cd;
+        }
+
+        .trait-btn.selected {
+            border-color: #fd7e14;
+            background: #fd7e14;
+            color: white;
+        }
+
+        /* 관계 설정 버튼 */
+        .relationship-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .relationship-btn {
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .relationship-btn:hover {
+            border-color: #e83e8c;
+            background: #f8d7da;
+        }
+
+        .relationship-btn.selected {
+            border-color: #e83e8c;
+            background: #e83e8c;
+            color: white;
+        }
+
+        /* 취미 선택 버튼 */
+        .hobby-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .hobby-btn {
+            padding: 10px 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 15px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .hobby-btn:hover {
+            border-color: #20c997;
+            background: #d1ecf1;
+        }
+
+        .hobby-btn.selected {
+            border-color: #20c997;
+            background: #20c997;
+            color: white;
+        }
+
+        /* 말투 스타일 버튼 */
+        .speech-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .speech-btn {
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+
+        .speech-btn:hover {
+            border-color: #6f42c1;
+            background: #f8f9fa;
+        }
+
+        .speech-btn.selected {
+            border-color: #6f42c1;
+            background: #6f42c1;
+            color: white;
+        }
+
+        /* AI 생성 영역 */
+        .ai-generation {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px dashed #6c757d;
+        }
+
+        .ai-controls {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .btn-ai {
+            background: linear-gradient(45deg, #6f42c1, #e83e8c);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-ai:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(111, 66, 193, 0.3);
+        }
+
+        .generation-status {
+            margin-top: 10px;
+            font-style: italic;
+            color: #6c757d;
+        }
+
+        .generated-preview {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #dee2e6;
+        }
+
+        /* 반응형 조정 */
+        @media (max-width: 768px) {
+            .ai-character-generator .modal-content {
+                max-width: 95%;
+                margin: 2% auto;
+            }
+            
+            .category-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .mbti-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .trait-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .relationship-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .hobby-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .speech-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
@@ -1081,56 +1349,273 @@
         </div>
     </div>
 
-    <!-- 캐릭터 모달 -->
+    <!-- 캐릭터 모달 - AI 통합형 생성 시스템 -->
     <div id="characterModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content ai-character-generator">
             <div class="modal-header">
                 <span class="close" onclick="closeModal('characterModal')">&times;</span>
-                <h2 id="characterModalTitle">새 캐릭터 추가</h2>
+                <h2 id="characterModalTitle">🎭 AI 캐릭터 생성기 - 여성 캐릭터 중심</h2>
             </div>
             <div class="modal-body">
                 <form id="characterForm">
                     <input type="hidden" id="characterId" />
                     
-                    <div class="form-group">
-                        <label for="charName">캐릭터 이름 *</label>
-                        <input type="text" id="charName" required placeholder="예: 수진" />
+                    <!-- 1. 기본 정보 -->
+                    <div class="char-category">
+                        <h3>💖 1. 기본 정보</h3>
+                        <div class="category-grid">
+                            <div class="form-group">
+                                <label>캐릭터 이름</label>
+                                <input type="text" id="charName" placeholder="예: 윤아, 수진, 혜원" />
+                            </div>
+                            <div class="form-group">
+                                <label>나이</label>
+                                <select id="charAge">
+                                    <option value="19">19세 (대학 신입생)</option>
+                                    <option value="20" selected>20세 (대학생)</option>
+                                    <option value="21">21세 (대학생)</option>
+                                    <option value="22">22세 (대학 선배)</option>
+                                    <option value="23">23세 (대학원생)</option>
+                                    <option value="24">24세 (대학원생)</option>
+                                    <option value="25">25세 (사회 초년생)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>캐릭터 타입</label>
+                                <select id="charType">
+                                    <option value="romance_junior">🌸 로맨스 후배</option>
+                                    <option value="romance_peer">💕 로맨스 동갑</option>
+                                    <option value="romance_senior">💖 로맨스 선배</option>
+                                    <option value="childhood_friend">🎪 소꿉친구</option>
+                                    <option value="mysterious_girl">🌙 미스터리 여성</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="charMbti">MBTI 유형 *</label>
-                        <select id="charMbti" required>
-                            <option value="">선택하세요</option>
-                            <option value="INFP">INFP - 열정적인 중재자</option>
-                            <option value="ENFP">ENFP - 재기발랄한 활동가</option>
-                            <option value="INTJ">INTJ - 용의주도한 전략가</option>
-                            <option value="ESFJ">ESFJ - 사교적인 외교관</option>
-                            <option value="ISTP">ISTP - 만능 재주꾼</option>
-                            <option value="ENFJ">ENFJ - 정의로운 사회운동가</option>
-                            <option value="INTP">INTP - 논리적인 사색가</option>
-                            <option value="ESTP">ESTP - 모험을 즐기는 사업가</option>
-                        </select>
+                    <!-- 2. 성격 설정 (MBTI 기반) -->
+                    <div class="char-category">
+                        <h3>🧠 2. 성격 설정</h3>
+                        <div class="mbti-selector">
+                            <div class="mbti-group">
+                                <label>MBTI 유형</label>
+                                <div class="mbti-options">
+                                    <button type="button" class="mbti-btn" data-mbti="INFP">INFP<br><small>감성적 중재자</small></button>
+                                    <button type="button" class="mbti-btn" data-mbti="ENFP">ENFP<br><small>활발한 활동가</small></button>
+                                    <button type="button" class="mbti-btn" data-mbti="INTJ">INTJ<br><small>완벽한 전략가</small></button>
+                                    <button type="button" class="mbti-btn" data-mbti="ESFJ">ESFJ<br><small>따뜻한 사교가</small></button>
+                                    <button type="button" class="mbti-btn" data-mbti="ISFJ">ISFJ<br><small>조용한 보호자</small></button>
+                                    <button type="button" class="mbti-btn" data-mbti="ENFJ">ENFJ<br><small>카리스마 리더</small></button>
+                                </div>
+                                <input type="hidden" id="charMbti" />
+                            </div>
+                            <div class="personality-traits">
+                                <label>성격 특성 (최대 3개 선택)</label>
+                                <div class="trait-options">
+                                    <button type="button" class="trait-btn" data-trait="감성적">😊 감성적</button>
+                                    <button type="button" class="trait-btn" data-trait="활발한">✨ 활발한</button>
+                                    <button type="button" class="trait-btn" data-trait="내향적">🌸 내향적</button>
+                                    <button type="button" class="trait-btn" data-trait="이상주의적">🌙 이상주의적</button>
+                                    <button type="button" class="trait-btn" data-trait="창의적">🎨 창의적</button>
+                                    <button type="button" class="trait-btn" data-trait="배려심 많은">💕 배려심 많은</button>
+                                    <button type="button" class="trait-btn" data-trait="차분한">🍃 차분한</button>
+                                    <button type="button" class="trait-btn" data-trait="열정적">🔥 열정적</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="charPersonality">성격 특성 *</label>
-                        <input type="text" id="charPersonality" required placeholder="예: 감성적, 내향적, 이상주의적, 창의적" />
+                    <!-- 3. 배경 설정 -->
+                    <div class="char-category">
+                        <h3>🎓 3. 배경 설정</h3>
+                        <div class="category-grid">
+                            <div class="form-group">
+                                <label>전공/직업</label>
+                                <select id="charMajor">
+                                    <option value="art">🎨 예술대학 (미술, 디자인)</option>
+                                    <option value="literature">📚 문과대학 (문학, 어학)</option>
+                                    <option value="music">🎵 음악대학</option>
+                                    <option value="psychology">🧠 심리학과</option>
+                                    <option value="education">👩‍🏫 사범대학</option>
+                                    <option value="nursing">👩‍⚕️ 간호학과</option>
+                                    <option value="business">💼 경영학과</option>
+                                    <option value="media">📺 언론정보학과</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>가족 관계</label>
+                                <select id="charFamily">
+                                    <option value="only_child">외동딸</option>
+                                    <option value="older_sister">언니가 있는 막내</option>
+                                    <option value="younger_sibling">동생이 있는 첫째</option>
+                                    <option value="middle_child">중간 자녀</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>출신 지역</label>
+                                <select id="charHometown">
+                                    <option value="seoul">서울 출신</option>
+                                    <option value="busan">부산 출신</option>
+                                    <option value="gyeonggi">경기도 출신</option>
+                                    <option value="countryside">지방 출신</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="charSpeechStyle">말투 스타일 *</label>
-                        <input type="text" id="charSpeechStyle" required placeholder="예: 부드럽고 따뜻한 말투, 이모티콘 자주 사용" />
+                    <!-- 4. 관계 설정 -->
+                    <div class="char-category">
+                        <h3>💝 4. 관계 설정</h3>
+                        <div class="relationship-options">
+                            <button type="button" class="relationship-btn" data-rel="secret_crush">💕 몰래 좋아하는 후배</button>
+                            <button type="button" class="relationship-btn" data-rel="childhood_friend">🎪 어릴 때부터 친한 친구</button>
+                            <button type="button" class="relationship-btn" data-rel="senior_friend">💖 다정한 선배</button>
+                            <button type="button" class="relationship-btn" data-rel="classmate">👫 같은 과 동기</button>
+                            <button type="button" class="relationship-btn" data-rel="club_mate">🎯 동아리 선후배</button>
+                            <button type="button" class="relationship-btn" data-rel="neighbor">🏠 옆집 이웃</button>
+                        </div>
+                        <input type="hidden" id="charRelationship" />
                     </div>
 
-                    <div class="form-group">
-                        <label for="charDescription">캐릭터 설명</label>
-                        <textarea id="charDescription" placeholder="캐릭터의 배경 스토리나 특징을 자세히 설명하세요"></textarea>
+                    <!-- 5. 외모 설정 -->
+                    <div class="char-category">
+                        <h3>✨ 5. 외모 설정</h3>
+                        <div class="appearance-grid">
+                            <div class="form-group">
+                                <label>헤어 스타일</label>
+                                <select id="charHair">
+                                    <option value="long_straight">🌸 긴 생머리</option>
+                                    <option value="shoulder_wave">🌊 어깨길이 웨이브</option>
+                                    <option value="short_bob">💇‍♀️ 단발 보브컷</option>
+                                    <option value="ponytail">🎀 포니테일</option>
+                                    <option value="twin_tail">🎪 트윈테일</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>눈 모양</label>
+                                <select id="charEyes">
+                                    <option value="round_cute">😊 동그랗고 귀여운</option>
+                                    <option value="almond_elegant">😌 아몬드형 우아한</option>
+                                    <option value="cat_like">😸 고양이 같은</option>
+                                    <option value="double_eyelid">👁️ 또렷한 쌍꺼풀</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>키/체형</label>
+                                <select id="charBody">
+                                    <option value="petite">🌸 작고 귀여운 (155-160cm)</option>
+                                    <option value="average">💕 평균적인 (160-165cm)</option>
+                                    <option value="tall">✨ 키 큰 (165-170cm)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>패션 스타일</label>
+                                <select id="charStyle">
+                                    <option value="cute_casual">🌸 큐트 캐주얼</option>
+                                    <option value="feminine_lovely">💖 페미닌 러블리</option>
+                                    <option value="natural_simple">🍃 내추럴 심플</option>
+                                    <option value="elegant_chic">✨ 엘레간트 시크</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. 내면/습관 -->
+                    <div class="char-category">
+                        <h3>💫 6. 내면 & 취미</h3>
+                        <div class="hobby-interests">
+                            <div class="form-group">
+                                <label>취미 활동 (최대 3개 선택)</label>
+                                <div class="hobby-options">
+                                    <button type="button" class="hobby-btn" data-hobby="reading">📚 독서</button>
+                                    <button type="button" class="hobby-btn" data-hobby="drawing">🎨 그림 그리기</button>
+                                    <button type="button" class="hobby-btn" data-hobby="music">🎵 음악 감상</button>
+                                    <button type="button" class="hobby-btn" data-hobby="photography">📷 사진 촬영</button>
+                                    <button type="button" class="hobby-btn" data-hobby="cooking">🍳 요리</button>
+                                    <button type="button" class="hobby-btn" data-hobby="exercise">🏃‍♀️ 운동</button>
+                                    <button type="button" class="hobby-btn" data-hobby="travel">✈️ 여행</button>
+                                    <button type="button" class="hobby-btn" data-hobby="movies">🎬 영화 감상</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>가치관</label>
+                                <select id="charValues">
+                                    <option value="love_family">가족과 사랑을 중시</option>
+                                    <option value="personal_growth">개인적 성장을 추구</option>
+                                    <option value="helping_others">타인을 돕는 것을 좋아함</option>
+                                    <option value="creative_expression">창의적 표현을 중시</option>
+                                    <option value="stability_security">안정과 보안을 중시</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. 말투/대화 스타일 -->
+                    <div class="char-category">
+                        <h3>💬 7. 말투 & 대화 스타일</h3>
+                        <div class="speech-style-grid">
+                            <div class="speech-options">
+                                <button type="button" class="speech-btn" data-speech="soft_warm">🌸 부드럽고 따뜻한</button>
+                                <button type="button" class="speech-btn" data-speech="bright_cheerful">✨ 밝고 경쾌한</button>
+                                <button type="button" class="speech-btn" data-speech="gentle_caring">💕 다정하고 배려깊은</button>
+                                <button type="button" class="speech-btn" data-speech="shy_cute">😊 수줍고 귀여운</button>
+                                <button type="button" class="speech-btn" data-speech="mature_elegant">👑 성숙하고 우아한</button>
+                                <button type="button" class="speech-btn" data-speech="playful_fun">🎪 장난스럽고 재미있는</button>
+                            </div>
+                            <div class="form-group">
+                                <label>특별한 말버릇/습관</label>
+                                <input type="text" id="charSpeechHabit" placeholder="예: 이모티콘 자주 사용, ~해요 말투, 웃을 때 손으로 입 가리기" />
+                            </div>
+                            <input type="hidden" id="charSpeechStyle" />
+                        </div>
+                    </div>
+
+                    <!-- 8. 장르/시나리오 설정 -->
+                    <div class="char-category">
+                        <h3>📖 8. 장르 & 시나리오 타입</h3>
+                        <div class="genre-grid">
+                            <div class="form-group">
+                                <label>로맨스 장르</label>
+                                <select id="charGenre">
+                                    <option value="school_romance">🏫 학원 로맨스</option>
+                                    <option value="daily_romance">☀️ 일상 로맨스</option>
+                                    <option value="sweet_romance">🍯 달콤한 로맨스</option>
+                                    <option value="emotional_romance">💔 감성 로맨스</option>
+                                    <option value="healing_romance">🌿 힐링 로맨스</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>주요 시나리오 상황</label>
+                                <select id="charMainSituation">
+                                    <option value="confession_aftermath">고백 후 어색한 상황</option>
+                                    <option value="study_together">함께 공부하는 상황</option>
+                                    <option value="festival_date">축제 데이트 상황</option>
+                                    <option value="rainy_day">비 오는 날 상황</option>
+                                    <option value="cafe_meeting">카페에서 만나는 상황</option>
+                                    <option value="library_encounter">도서관에서 우연한 만남</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI 생성 영역 -->
+                    <div class="char-category ai-generation">
+                        <h3>🤖 AI 자동 생성 영역</h3>
+                        <div class="ai-controls">
+                            <button type="button" class="btn btn-ai" onclick="generateAICharacter()">
+                                ✨ AI로 캐릭터 완성하기
+                            </button>
+                            <div id="aiGenerationStatus" class="generation-status"></div>
+                        </div>
+                        <div class="generated-preview" id="characterPreview" style="display: none;">
+                            <!-- AI 생성 결과 미리보기 -->
+                        </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('characterModal')">취소</button>
-                <button type="button" class="btn btn-primary" onclick="saveCharacter()">저장</button>
+                <button type="button" class="btn btn-primary" onclick="saveCharacter()">💖 캐릭터 저장</button>
             </div>
         </div>
     </div>
@@ -1176,6 +1661,9 @@
                     }
                 });
             });
+
+            // 새로운 AI 캐릭터 생성 시스템 이벤트 리스너들
+            initializeCharacterGeneratorEvents();
 
             // ESC 키로 모달 닫기
             document.addEventListener('keydown', function(event) {
@@ -1935,32 +2423,298 @@
         function saveCharacter() {
             const name = document.getElementById('charName').value;
             const mbti = document.getElementById('charMbti').value;
-            const personality = document.getElementById('charPersonality').value;
-            const speechStyle = document.getElementById('charSpeechStyle').value;
-            const description = document.getElementById('charDescription').value;
-
-            if (!name || !mbti || !personality || !speechStyle) {
-                alert('모든 필수 항목을 입력해주세요.');
+            
+            if (!name || !mbti) {
+                alert('이름과 MBTI는 필수 입력 항목입니다.');
                 return;
             }
 
+            // 새로운 AI 캐릭터 생성 시스템에서 데이터 수집
+            const characterData = collectCharacterData();
+            
             const characterId = currentMode === 'create' 
                 ? `${name.toLowerCase()}_${mbti.toLowerCase()}`
                 : document.getElementById('characterId').value;
 
             characters[characterId] = {
                 id: characterId,
-                name,
-                mbti,
-                personality,
-                speech_style: speechStyle,
-                description
+                name: characterData.name,
+                age: characterData.age,
+                mbti: characterData.mbti,
+                character_type: characterData.character_type,
+                personality_traits: characterData.personality_traits,
+                major: characterData.major,
+                family: characterData.family,
+                hometown: characterData.hometown,
+                relationship: characterData.relationship,
+                appearance: {
+                    hair: characterData.hair,
+                    eyes: characterData.eyes,
+                    body: characterData.body,
+                    style: characterData.style
+                },
+                hobbies: characterData.hobbies,
+                values: characterData.values,
+                speech_style: characterData.speech_style,
+                speech_habit: characterData.speech_habit,
+                genre: characterData.genre,
+                main_situation: characterData.main_situation,
+                created_at: new Date().toISOString(),
+                active: true
             };
 
-            alert(currentMode === 'create' ? '캐릭터가 추가되었습니다!' : '캐릭터가 수정되었습니다!');
+            alert(currentMode === 'create' ? '💖 새로운 캐릭터가 생성되었습니다!' : '✨ 캐릭터가 수정되었습니다!');
             closeModal('characterModal');
             displayCharacters();
             updateCharacterStats();
+        }
+
+        // 새로운 캐릭터 데이터 수집 함수
+        function collectCharacterData() {
+            return {
+                name: document.getElementById('charName').value || '미지의 소녀',
+                age: document.getElementById('charAge').value || '20',
+                mbti: document.getElementById('charMbti').value,
+                character_type: document.getElementById('charType').value || 'romance_junior',
+                personality_traits: getSelectedTraits(),
+                major: document.getElementById('charMajor').value || 'art',
+                family: document.getElementById('charFamily').value || 'only_child',
+                hometown: document.getElementById('charHometown').value || 'seoul',
+                relationship: document.getElementById('charRelationship').value,
+                hair: document.getElementById('charHair').value || 'long_straight',
+                eyes: document.getElementById('charEyes').value || 'round_cute',
+                body: document.getElementById('charBody').value || 'petite',
+                style: document.getElementById('charStyle').value || 'cute_casual',
+                hobbies: getSelectedHobbies(),
+                values: document.getElementById('charValues').value || 'love_family',
+                speech_style: document.getElementById('charSpeechStyle').value,
+                speech_habit: document.getElementById('charSpeechHabit').value || '',
+                genre: document.getElementById('charGenre').value || 'school_romance',
+                main_situation: document.getElementById('charMainSituation').value || 'confession_aftermath'
+            };
+        }
+
+        // 선택된 성격 특성들 가져오기
+        function getSelectedTraits() {
+            const selectedTraits = [];
+            document.querySelectorAll('.trait-btn.selected').forEach(btn => {
+                selectedTraits.push(btn.dataset.trait);
+            });
+            return selectedTraits.slice(0, 3); // 최대 3개만
+        }
+
+        // 선택된 취미들 가져오기
+        function getSelectedHobbies() {
+            const selectedHobbies = [];
+            document.querySelectorAll('.hobby-btn.selected').forEach(btn => {
+                selectedHobbies.push(btn.dataset.hobby);
+            });
+            return selectedHobbies.slice(0, 3); // 최대 3개만
+        }
+
+        // === AI 캐릭터 생성기 이벤트 리스너 초기화 ===
+        function initializeCharacterGeneratorEvents() {
+            // MBTI 버튼 클릭 이벤트
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('mbti-btn')) {
+                    document.querySelectorAll('.mbti-btn').forEach(btn => btn.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                    document.getElementById('charMbti').value = e.target.dataset.mbti;
+                }
+
+                // 성격 특성 버튼 클릭 이벤트 (최대 3개 선택)
+                if (e.target.classList.contains('trait-btn')) {
+                    const selectedTraits = document.querySelectorAll('.trait-btn.selected').length;
+                    
+                    if (e.target.classList.contains('selected')) {
+                        e.target.classList.remove('selected');
+                    } else if (selectedTraits < 3) {
+                        e.target.classList.add('selected');
+                    } else {
+                        alert('성격 특성은 최대 3개까지만 선택 가능합니다.');
+                    }
+                }
+
+                // 관계 설정 버튼 클릭 이벤트
+                if (e.target.classList.contains('relationship-btn')) {
+                    document.querySelectorAll('.relationship-btn').forEach(btn => btn.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                    document.getElementById('charRelationship').value = e.target.dataset.rel;
+                }
+
+                // 취미 버튼 클릭 이벤트 (최대 3개 선택)
+                if (e.target.classList.contains('hobby-btn')) {
+                    const selectedHobbies = document.querySelectorAll('.hobby-btn.selected').length;
+                    
+                    if (e.target.classList.contains('selected')) {
+                        e.target.classList.remove('selected');
+                    } else if (selectedHobbies < 3) {
+                        e.target.classList.add('selected');
+                    } else {
+                        alert('취미는 최대 3개까지만 선택 가능합니다.');
+                    }
+                }
+
+                // 말투 스타일 버튼 클릭 이벤트
+                if (e.target.classList.contains('speech-btn')) {
+                    document.querySelectorAll('.speech-btn').forEach(btn => btn.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                    document.getElementById('charSpeechStyle').value = e.target.dataset.speech;
+                }
+            });
+        }
+
+        // === AI 캐릭터 자동 생성 함수 ===
+        async function generateAICharacter() {
+            const statusDiv = document.getElementById('aiGenerationStatus');
+            const previewDiv = document.getElementById('characterPreview');
+            
+            statusDiv.innerHTML = '🤖 AI가 캐릭터를 생성하고 있습니다...';
+            
+            try {
+                // 현재 선택된 데이터 수집
+                const currentData = collectCharacterData();
+                
+                // AI API 호출 (character-ai-generator.js 사용)
+                const response = await fetch('/api/character-ai-generator', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generate_character',
+                        answers: currentData
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        statusDiv.innerHTML = '✨ AI 생성 완료!';
+                        displayAIGeneratedCharacter(result.character);
+                        previewDiv.style.display = 'block';
+                    } else {
+                        throw new Error(result.message || 'AI 생성 실패');
+                    }
+                } else {
+                    throw new Error(`API 오류: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('AI 캐릭터 생성 오류:', error);
+                statusDiv.innerHTML = '⚠️ AI 생성 중 오류가 발생했습니다. 수동으로 완성해주세요.';
+                
+                // Fallback: 기본 여성 캐릭터 템플릿 제공
+                generateFallbackFemaleCharacter();
+            }
+        }
+
+        // AI 생성 결과 표시
+        function displayAIGeneratedCharacter(character) {
+            const previewDiv = document.getElementById('characterPreview');
+            previewDiv.innerHTML = `
+                <h4>🎭 AI 생성 결과 미리보기</h4>
+                <div class="character-preview-content">
+                    <p><strong>이름:</strong> ${character.name}</p>
+                    <p><strong>나이:</strong> ${character.age}세</p>
+                    <p><strong>MBTI:</strong> ${character.mbti}</p>
+                    <p><strong>성격:</strong> ${character.personality_traits ? character.personality_traits.join(', ') : '감성적, 내향적, 이상주의적'}</p>
+                    <p><strong>외모:</strong> ${character.appearance ? 
+                        `${character.appearance.hair}, ${character.appearance.eyes}, ${character.appearance.style}` : 
+                        '긴 생머리, 동그랗고 귀여운 눈, 큐트 캐주얼'}</p>
+                    <p><strong>관계:</strong> ${translateRelationship(character.relationship || 'secret_crush')}</p>
+                    <p><strong>말투:</strong> ${translateSpeechStyle(character.speech_style || 'soft_warm')}</p>
+                    <button class="btn btn-primary" onclick="applyAIGeneratedData('${JSON.stringify(character).replace(/'/g, "\\'")}')">
+                        💖 이 캐릭터 적용하기
+                    </button>
+                </div>
+            `;
+        }
+
+        // AI 생성 데이터를 폼에 적용
+        function applyAIGeneratedData(characterData) {
+            try {
+                const character = JSON.parse(characterData);
+                
+                // 기본 정보 적용
+                if (character.name) document.getElementById('charName').value = character.name;
+                if (character.age) document.getElementById('charAge').value = character.age;
+                if (character.mbti) {
+                    document.getElementById('charMbti').value = character.mbti;
+                    // MBTI 버튼도 시각적으로 선택
+                    document.querySelectorAll('.mbti-btn').forEach(btn => {
+                        btn.classList.toggle('selected', btn.dataset.mbti === character.mbti);
+                    });
+                }
+                
+                // 외모 정보 적용
+                if (character.appearance) {
+                    if (character.appearance.hair) document.getElementById('charHair').value = character.appearance.hair;
+                    if (character.appearance.eyes) document.getElementById('charEyes').value = character.appearance.eyes;
+                    if (character.appearance.style) document.getElementById('charStyle').value = character.appearance.style;
+                }
+                
+                alert('💖 AI 생성 캐릭터가 폼에 적용되었습니다! 저장 버튼을 눌러주세요.');
+                
+            } catch (error) {
+                console.error('AI 데이터 적용 오류:', error);
+                alert('데이터 적용 중 오류가 발생했습니다.');
+            }
+        }
+
+        // Fallback 여성 캐릭터 생성
+        function generateFallbackFemaleCharacter() {
+            const femaleTemplates = [
+                {
+                    name: '윤서', age: '20', mbti: 'INFP', 
+                    traits: ['감성적', '내향적', '이상주의적'],
+                    major: 'art', relationship: 'secret_crush',
+                    hair: 'long_straight', eyes: 'round_cute', style: 'cute_casual',
+                    speech_style: 'soft_warm', genre: 'school_romance'
+                },
+                {
+                    name: '하은', age: '21', mbti: 'ENFP',
+                    traits: ['활발한', '열정적', '창의적'], 
+                    major: 'music', relationship: 'childhood_friend',
+                    hair: 'shoulder_wave', eyes: 'almond_elegant', style: 'feminine_lovely',
+                    speech_style: 'bright_cheerful', genre: 'daily_romance'
+                },
+                {
+                    name: '소희', age: '19', mbti: 'ISFJ',
+                    traits: ['차분한', '배려심 많은', '내향적'],
+                    major: 'education', relationship: 'senior_friend', 
+                    hair: 'short_bob', eyes: 'double_eyelid', style: 'natural_simple',
+                    speech_style: 'gentle_caring', genre: 'healing_romance'
+                }
+            ];
+            
+            const template = femaleTemplates[Math.floor(Math.random() * femaleTemplates.length)];
+            displayAIGeneratedCharacter(template);
+            document.getElementById('characterPreview').style.display = 'block';
+            document.getElementById('aiGenerationStatus').innerHTML = '🌸 여성 캐릭터 템플릿이 제공되었습니다.';
+        }
+
+        // 관계 번역 함수
+        function translateRelationship(rel) {
+            const translations = {
+                'secret_crush': '몰래 좋아하는 후배',
+                'childhood_friend': '어릴 때부터 친한 친구', 
+                'senior_friend': '다정한 선배',
+                'classmate': '같은 과 동기',
+                'club_mate': '동아리 선후배',
+                'neighbor': '옆집 이웃'
+            };
+            return translations[rel] || rel;
+        }
+
+        // 말투 번역 함수
+        function translateSpeechStyle(style) {
+            const translations = {
+                'soft_warm': '부드럽고 따뜻한',
+                'bright_cheerful': '밝고 경쾌한',
+                'gentle_caring': '다정하고 배려깊은',
+                'shy_cute': '수줍고 귀여운',
+                'mature_elegant': '성숙하고 우아한',
+                'playful_fun': '장난스럽고 재미있는'
+            };
+            return translations[style] || style;
         }
 
         function deleteCharacter(characterId) {
