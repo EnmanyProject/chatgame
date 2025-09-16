@@ -70,7 +70,18 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Scenario Manager API Error:', error);
-    return res.status(500).json({ success: false, message: 'Internal server error' });
+    console.error('Error stack:', error.stack);
+    console.error('Request method:', req.method);
+    console.error('Request action:', action);
+    console.error('Environment variables:', {
+      CLAUDE_API_KEY: process.env.CLAUDE_API_KEY ? '***설정됨***' : '❌ 미설정'
+    });
+    
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 }
 
@@ -114,8 +125,12 @@ async function generateAIContext(scenarioData) {
     const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
     
     if (!CLAUDE_API_KEY) {
+      console.warn('❌ Claude API key not configured');
+      console.warn('환경변수 CLAUDE_API_KEY를 Vercel 대시보드에서 설정해주세요');
       return generateFallbackContext(scenarioData);
     }
+
+    console.log('🤖 Claude API 호출 시작...');
 
     const prompt = `다음 정보를 바탕으로 로맨스 게임의 시나리오 컨텍스트를 소설풍으로 작성해주세요:
 
@@ -146,10 +161,22 @@ async function generateAIContext(scenarioData) {
       })
     });
 
+    console.log('📡 API 응답 상태:', response.status);
+
     if (response.ok) {
       const data = await response.json();
-      return data.content[0]?.text || generateFallbackContext(scenarioData);
+      const generatedText = data.content[0]?.text;
+      
+      if (generatedText) {
+        console.log('✅ AI 컨텍스트 생성 성공');
+        return generatedText;
+      } else {
+        console.warn('⚠️ AI 응답이 비어있음, fallback 사용');
+        return generateFallbackContext(scenarioData);
+      }
     } else {
+      const errorText = await response.text();
+      console.error('❌ API 호출 실패:', response.status, errorText);
       return generateFallbackContext(scenarioData);
     }
 
