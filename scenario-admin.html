@@ -2493,13 +2493,39 @@
             }
 
             try {
-                delete scenarios[scenarioId];
+                console.log('🗑️ 시나리오 삭제 시작 (LocalStorage):', scenarioId);
+                
+                // LocalStorage에서 시나리오 삭제
+                const existingScenarios = localStorage.getItem('scenarios');
+                const scenariosData = existingScenarios ? JSON.parse(existingScenarios) : {};
+                
+                if (scenariosData[scenarioId]) {
+                    // 시나리오 삭제
+                    delete scenariosData[scenarioId];
+                    
+                    // LocalStorage에 저장
+                    localStorage.setItem('scenarios', JSON.stringify(scenariosData));
+                    console.log('✅ LocalStorage에서 시나리오 삭제 완료');
+                }
+                
+                // 전역 변수에서도 삭제
+                if (scenarios[scenarioId]) {
+                    delete scenarios[scenarioId];
+                }
+                if (window.scenarios && window.scenarios[scenarioId]) {
+                    delete window.scenarios[scenarioId];
+                }
+                
+                // UI 즉시 업데이트
                 displayScenarios();
                 updateScenarioStats();
-                alert('시나리오가 삭제되었습니다.');
+                
+                alert('✅ 시나리오가 삭제되었습니다.');
+                console.log('✅ 시나리오 삭제 프로세스 완료');
+                
             } catch (error) {
-                console.error('시나리오 삭제 오류:', error);
-                alert('시나리오 삭제에 실패했습니다.');
+                console.error('❌ 시나리오 삭제 오류:', error);
+                alert('❌ 시나리오 삭제에 실패했습니다: ' + error.message);
             }
         }
 
@@ -2783,25 +2809,17 @@
             document.getElementById('previewChoices').innerHTML = '';
             
             try {
-                const response = await fetch('/api/episode-manager', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'regenerate_dialogue',
-                        episode_id: document.getElementById('episodeId').value || 'temp',
-                        character_id: characterId,
-                        character_name: characterName,
-                        user_input_prompt: userPrompt,
-                        difficulty: difficulty
-                    })
-                });
+                console.log('🤖 로컬 대화 생성 시작...');
                 
-                const data = await response.json();
+                // 로컬 대화 생성 (API 대신)
+                generatedDialogue = generateLocalDialogue(characterId, characterName, userPrompt, difficulty);
                 
-                if (data.success && data.episode) {
-                    generatedDialogue = data.episode.ai_generated_dialogue;
+                // 짧은 지연으로 로딩 효과 제공
+                setTimeout(() => {
                     displayDialoguePreview(generatedDialogue);
-                }
+                    console.log('✅ 로컬 대화 생성 완료');
+                }, 1000);
+                
             } catch (error) {
                 console.error('대화 생성 오류:', error);
                 document.getElementById('previewDialogue').textContent = '⚠️ 대화 생성에 실패했습니다.';
@@ -3458,18 +3476,64 @@
 
         function editCharacter(characterId) {
             const character = characters[characterId];
-            if (!character) return;
+            if (!character) {
+                console.error('캐릭터를 찾을 수 없습니다:', characterId);
+                return;
+            }
 
+            console.log('✏️ 캐릭터 편집 시작:', character.name);
             currentMode = 'edit';
-            document.getElementById('characterModalTitle').textContent = '캐릭터 수정';
-            document.getElementById('characterId').value = characterId;
-            document.getElementById('charName').value = character.name;
-            document.getElementById('charMbti').value = character.mbti;
-            document.getElementById('charPersonality').value = character.personality;
-            document.getElementById('charSpeechStyle').value = character.speech_style;
-            document.getElementById('charDescription').value = character.description || '';
+            
+            // 안전한 요소 설정 함수
+            const safeSetValue = (elementId, value) => {
+                const element = document.getElementById(elementId);
+                if (element && value !== undefined && value !== null) {
+                    element.value = value;
+                    console.log(`✅ ${elementId} 값 설정:`, value);
+                } else if (!element) {
+                    console.warn(`⚠️ 요소를 찾을 수 없음: ${elementId}`);
+                } else {
+                    console.log(`⚠️ ${elementId}에 설정할 값이 없음`);
+                }
+            };
 
+            // 모달 제목 설정
+            safeSetValue('characterModalTitle', ''); // textContent로 따로 설정
+            document.getElementById('characterModalTitle').textContent = '캐릭터 수정';
+            
+            // 기본 필드들 설정
+            safeSetValue('characterId', characterId);
+            safeSetValue('charName', character.name);
+            safeSetValue('charMbti', character.mbti);
+            safeSetValue('charAge', character.age);
+            safeSetValue('charType', character.character_type);
+            safeSetValue('charMajor', character.major);
+            safeSetValue('charFamily', character.family);
+            safeSetValue('charHometown', character.hometown);
+            safeSetValue('charRelationship', character.relationship);
+            safeSetValue('charHair', character.appearance?.hair);
+            safeSetValue('charEyes', character.appearance?.eyes);
+            safeSetValue('charBody', character.appearance?.body);
+            safeSetValue('charStyle', character.appearance?.style);
+            safeSetValue('charValues', character.values);
+            safeSetValue('charSpeechStyle', character.speech_style);
+            safeSetValue('charSpeechHabit', character.speech_habit);
+            safeSetValue('charGenre', character.genre);
+            safeSetValue('charMainSituation', character.main_situation);
+
+            // 이미지가 있으면 미리보기 설정
+            if (character.image) {
+                const previewImg = document.getElementById('previewImg');
+                const imagePreview = document.getElementById('imagePreview');
+                if (previewImg && imagePreview) {
+                    previewImg.src = character.image;
+                    imagePreview.style.display = 'block';
+                }
+            }
+
+            // 모달 표시
             document.getElementById('characterModal').style.display = 'block';
+            console.log('✅ 캐릭터 편집 모달 표시 완료');
         }
 
         async function saveCharacter() {
@@ -3580,6 +3644,89 @@
             // 저장 버튼 복원
             saveButton.disabled = false;
             saveButton.textContent = originalText;
+        }
+
+        // 로컬 대화 생성 함수
+        function generateLocalDialogue(characterId, characterName, userPrompt, difficulty) {
+            console.log(`🎭 ${characterName}의 ${difficulty} 난이도 대화 생성:`, userPrompt);
+
+            // MBTI별 캐릭터 특성 정의
+            const mbtiStyles = {
+                'INFP': {
+                    style: '부드럽고 감성적인',
+                    endings: ['...', '~ 💕', '그런 것 같아요'],
+                    personality: '내성적이고 이상주의적인'
+                },
+                'ENFP': {
+                    style: '밝고 활발한',
+                    endings: ['!', '!! ✨', '~!!'],
+                    personality: '외향적이고 열정적인'
+                },
+                'INTJ': {
+                    style: '논리적이고 간결한',
+                    endings: ['.', '네.', '입니다.'],
+                    personality: '독립적이고 계획적인'
+                },
+                'ESFJ': {
+                    style: '따뜻하고 배려깊은',
+                    endings: ['요~', '네! 😊', '할게요'],
+                    personality: '사교적이고 협조적인'
+                },
+                'ISTP': {
+                    style: '간결하고 실용적인',
+                    endings: ['.', '...', '그런데'],
+                    personality: '현실적이고 독립적인'
+                }
+            };
+
+            // 캐릭터 MBTI 추출 (캐릭터 ID에서)
+            const mbti = characterId.split('_')[1]?.toUpperCase() || 'INFP';
+            const characterStyle = mbtiStyles[mbti] || mbtiStyles['INFP'];
+
+            // 난이도별 선택지 호감도 영향
+            const difficultySettings = {
+                'Easy': { baseAffection: 0, choiceRange: [0, 1, 2] },
+                'Medium': { baseAffection: 10, choiceRange: [-1, 1, 2] },
+                'Hard': { baseAffection: 20, choiceRange: [-2, 0, 3] },
+                'Expert': { baseAffection: 30, choiceRange: [-3, 1, 4] }
+            };
+
+            const settings = difficultySettings[difficulty] || difficultySettings['Easy'];
+            const ending = characterStyle.endings[Math.floor(Math.random() * characterStyle.endings.length)];
+
+            // 로맨틱한 상황별 대화 템플릿
+            const dialogueTemplates = [
+                `${characterName}이 ${userPrompt}하는 상황에서 조금 부끄러워하며 말한다${ending}`,
+                `${characterStyle.personality} ${characterName}이 ${userPrompt}에 대해 솔직한 마음을 전한다${ending}`,
+                `${characterName}이 ${userPrompt}하면서 따뜻한 미소를 지으며 대답한다${ending}`,
+                `${characterStyle.style} ${characterName}이 ${userPrompt}에 대한 진심을 표현한다${ending}`
+            ];
+
+            const dialogue = dialogueTemplates[Math.floor(Math.random() * dialogueTemplates.length)];
+            
+            const narration = `${characterName}의 표정이 부드러워지며, ${characterStyle.personality.toLowerCase()} 성격이 느껴진다. 두 사람 사이의 분위기가 ${difficulty === 'Easy' ? '편안하게' : difficulty === 'Expert' ? '긴장감 있게' : '자연스럽게'} 흘러간다.`;
+
+            return {
+                dialogue: dialogue,
+                narration: narration,
+                choices: [
+                    {
+                        text: "공감하며 따뜻하게 반응한다",
+                        affection_impact: settings.choiceRange[2]
+                    },
+                    {
+                        text: "상황에 대해 더 자세히 물어본다", 
+                        affection_impact: settings.choiceRange[1]
+                    },
+                    {
+                        text: "조심스럽게 다른 주제로 넘어간다",
+                        affection_impact: settings.choiceRange[0]
+                    }
+                ],
+                difficulty: difficulty,
+                generated_at: new Date().toISOString(),
+                source: 'local_generation'
+            };
         }
 
         // 🚀 GitHub API 핵심 함수들 (혁신적 해결책!)
@@ -3887,6 +4034,7 @@ GitHub Token:`);
                 family: document.getElementById('charFamily').value || 'only_child',
                 hometown: document.getElementById('charHometown').value || 'seoul',
                 relationship: document.getElementById('charRelationship').value,
+                image: uploadedImageBase64 ? `data:image/jpeg;base64,${uploadedImageBase64}` : null,
                 hair: document.getElementById('charHair').value || 'long_straight',
                 eyes: document.getElementById('charEyes').value || 'round_cute',
                 body: document.getElementById('charBody').value || 'petite',
