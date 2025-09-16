@@ -74,7 +74,7 @@ export default async function handler(req, res) {
     console.error('Request method:', req.method);
     console.error('Request action:', action);
     console.error('Environment variables:', {
-      CLAUDE_API_KEY: process.env.CLAUDE_API_KEY ? '***설정됨***' : '❌ 미설정'
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY ? '***설정됨***' : '❌ 미설정'
     });
     
     return res.status(500).json({ 
@@ -118,21 +118,20 @@ async function createNewScenario(data) {
   return newScenario;
 }
 
-// AI 컨텍스트 생성 함수
+// AI 컨텍스트 생성 함수 (OpenAI API 사용)
 async function generateAIContext(scenarioData) {
   try {
-    // Claude API 호출을 통한 소설풍 시놉시스 생성
-    const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
     
-    if (!CLAUDE_API_KEY) {
-      console.warn('❌ Claude API key not configured');
-      console.warn('환경변수 CLAUDE_API_KEY를 Vercel 대시보드에서 설정해주세요');
+    if (!OPENAI_API_KEY) {
+      console.warn('❌ OpenAI API key not configured');
+      console.warn('환경변수 OPENAI_API_KEY를 Vercel 대시보드에서 설정해주세요');
       return generateFallbackContext(scenarioData);
     }
 
-    console.log('🤖 Claude API 호출 시작...');
+    console.log('🤖 OpenAI API 호출 시작...');
 
-    const prompt = `다음 정보를 바탕으로 로맨스 게임의 시나리오 컨텍스트를 소설풍으로 작성해주세요:
+    const prompt = `다음 정보를 바탕으로 MBTI 로맨스 게임의 시나리오 컨텍스트를 소설풍으로 작성해주세요:
 
 제목: ${scenarioData.title}
 설명: ${scenarioData.description} 
@@ -144,20 +143,31 @@ async function generateAIContext(scenarioData) {
 2. 등장인물의 감정과 상황을 생생하게 묘사
 3. 로맨틱하고 몰입감 있는 문체
 4. 한국 문화에 맞는 자연스러운 표현
+5. MBTI 성격유형을 고려한 캐릭터 설정
 
-시나리오 컨텍스트:`;
+시나리오 컨텍스트를 작성해주세요:`;
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': CLAUDE_API_KEY,
-        'anthropic-version': '2023-06-01'
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: '당신은 한국의 로맨스 소설 작가입니다. 감성적이고 몰입감 있는 시나리오를 작성하는 전문가입니다.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
         max_tokens: 500,
-        messages: [{ role: 'user', content: prompt }]
+        temperature: 0.8,
+        top_p: 0.9
       })
     });
 
@@ -165,11 +175,11 @@ async function generateAIContext(scenarioData) {
 
     if (response.ok) {
       const data = await response.json();
-      const generatedText = data.content[0]?.text;
+      const generatedText = data.choices[0]?.message?.content;
       
       if (generatedText) {
         console.log('✅ AI 컨텍스트 생성 성공');
-        return generatedText;
+        return generatedText.trim();
       } else {
         console.warn('⚠️ AI 응답이 비어있음, fallback 사용');
         return generateFallbackContext(scenarioData);
@@ -181,7 +191,11 @@ async function generateAIContext(scenarioData) {
     }
 
   } catch (error) {
-    console.error('AI Context Generation Error:', error);
+    console.error('❌ AI Context Generation Error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack
+    });
     return generateFallbackContext(scenarioData);
   }
 }

@@ -1,9 +1,9 @@
 # 🚀 상용화 배포 가이드
 
-## 1. Anthropic API 키 설정
+## 1. OpenAI API 키 설정
 
 ### 1.1 API 키 발급
-1. [Anthropic Console](https://console.anthropic.com) 방문
+1. [OpenAI Platform](https://platform.openai.com) 방문
 2. 회원가입 또는 로그인
 3. API Keys 섹션에서 새 키 생성
 4. 키를 안전한 곳에 저장
@@ -13,7 +13,7 @@
 2. 프로젝트 선택 → Settings → Environment Variables
 3. 다음 변수 추가:
    ```
-   CLAUDE_API_KEY=sk-ant-api03-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    NODE_ENV=production
    ```
 
@@ -25,7 +25,7 @@
 cp .env.example .env
 
 # .env 파일 편집
-CLAUDE_API_KEY=your_actual_api_key_here
+OPENAI_API_KEY=your_actual_api_key_here
 NODE_ENV=development
 ```
 
@@ -47,7 +47,7 @@ vercel dev
 
 ## 4. 상용화 체크리스트
 
-- [x] ✅ Claude API 키 설정
+- [x] ✅ OpenAI API 키 설정
 - [x] ✅ 환경변수 구성  
 - [x] ✅ 오류 처리 시스템
 - [x] ✅ 로깅 시스템
@@ -55,15 +55,21 @@ vercel dev
 - [ ] 🔄 API 사용량 대시보드
 - [ ] 🔄 백업 시스템
 
-## 5. 비용 관리
+## 5. 비용 관리 (OpenAI GPT-4o-mini)
 
 ### API 사용량 예측
-- 시나리오 1개 생성: ~500 토큰 (약 $0.01)
-- 월 1000개 시나리오: ~$10
-- 안전 마진 포함: 월 $25-50 예산 권장
+- 시나리오 1개 생성: ~500 토큰 (약 $0.0003)
+- 월 1000개 시나리오: ~$0.30
+- 월 10,000개 시나리오: ~$3.00
+- **매우 경제적**: Claude 대비 약 95% 비용 절감
+
+### 모델 특징
+- **GPT-4o-mini**: 빠른 속도, 저렴한 비용
+- **한국어 품질**: 우수한 한국어 이해 및 생성
+- **로맨스 장르**: 감성적 표현에 특화
 
 ### 모니터링 도구
-- Anthropic Console에서 사용량 추적
+- OpenAI Platform에서 사용량 추적
 - Vercel Analytics로 트래픽 모니터링
 
 ## 6. 보안
