@@ -1,38 +1,3 @@
 {
-  "characters": [
-    {
-      "id": "yuna_infp",
-      "name": "윤아",
-      "age": 20,
-      "mbti": "INFP",
-      "personality_traits": {
-        "primary": ["감성적", "이상주의적", "창의적", "내향적"],
-        "secondary": ["공감능력 뛰어남", "완벽주의 성향", "감정 표현 풍부"],
-        "speech_style": ["부드럽고 따뜻한 말투", "감정적 표현 많음", "이모티콘 자주 사용"]
-      },
-      "relationship": "시우 오빠를 1년 넘게 좋아하는 후배",
-      "background": "예술을 전공하는 대학생, 감수성이 풍부함",
-      "avatar_url": "",
-      "scenarios": ["hangover_confession", "study_together"],
-      "created_at": "2025-08-27T10:00:00.000Z",
-      "active": true
-    },
-    {
-      "id": "mina_enfp",
-      "name": "미나",
-      "age": 22,
-      "mbti": "ENFP", 
-      "personality_traits": {
-        "primary": ["외향적", "감정적", "융통성", "인식형"],
-        "secondary": ["활발하고 열정적", "상상력 풍부", "사람들과의 관계 중시"],
-        "speech_style": ["친근하고 따뜻함", "격려하는 표현", "상대방 기분 배려"]
-      },
-      "relationship": "같은 과 선배, 친근한 관계",
-      "background": "학생회 활동을 하는 적극적인 선배",
-      "avatar_url": "",
-      "scenarios": ["study_together"],
-      "created_at": "2025-08-27T10:00:00.000Z",
-      "active": true
-    }
-  ]
+  "characters": []
 }
