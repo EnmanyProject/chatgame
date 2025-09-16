@@ -680,7 +680,7 @@
                     }
                 }
                 
-                // LocalStorage에 데이터가 없으면 안내 메시지
+                // LocalStorage에 데이터가 없으면 테스트 시나리오 생성 제안
                 console.warn('⚠️ LocalStorage에 시나리오 데이터 없음');
                 
                 if (scenarioContainer) {
@@ -688,6 +688,17 @@
                         <div style="color: #e74c3c; text-align: center; padding: 20px;">
                             <h3>🎭 시나리오 없음</h3>
                             <p>게임을 시작하려면 먼저 시나리오를 생성해주세요!</p>
+                            <button onclick="createTestScenario()" style="
+                                background: #f39c12;
+                                color: white;
+                                border: none;
+                                padding: 10px 20px;
+                                border-radius: 5px;
+                                margin: 10px;
+                                cursor: pointer;
+                            ">
+                                🎮 테스트 시나리오 생성
+                            </button>
                             <a href="/scenario-admin.html" target="_blank" style="
                                 display: inline-block;
                                 background: #3498db;
@@ -2128,6 +2139,66 @@
                 narration: `${character.name}이(가) 당신의 말에 진심으로 감동하는 것 같다.`,
                 affection_change: Math.floor(Math.random() * 3) + 1
             };
+        }
+
+        // 테스트 시나리오 생성 함수
+        function createTestScenario() {
+            console.log('🎮 테스트 시나리오 생성 시작...');
+            
+            const testScenario = {
+                id: 'test_scenario_1',
+                scenario_id: 'test_scenario_1',
+                title: '카페에서의 만남',
+                description: '우연히 마주친 카페에서의 설레는 만남',
+                background_setting: '조용한 카페',
+                mood: '설렘, 부끄러움',
+                active: true,
+                created_date: new Date().toISOString().split('T')[0],
+                last_modified: new Date().toISOString().split('T')[0],
+                ai_generated_context: '조용한 카페에서 우연히 마주친 두 사람. 창밖으로 스며드는 따스한 햇살 사이로 설렘과 부끄러움이 교차하는 특별한 순간이 시작된다.',
+                custom_context: '',
+                available_characters: ['yuna_infp'],
+                episode_count: 0,
+                tags: ['카페', '만남', '설렘']
+            };
+
+            const testCharacter = {
+                id: 'yuna_infp',
+                name: '윤아',
+                mbti: 'INFP',
+                age: 22,
+                background: '미술 전공 대학생',
+                personality: '감성적이고 내향적인 성격. 예술을 사랑하며 섬세한 감정을 가지고 있다.',
+                speech_style: '부드럽고 따뜻한 말투, 종종 수줍어하며 이모티콘을 자주 사용한다.',
+                active: true,
+                created_date: new Date().toISOString().split('T')[0],
+                avatar_url: '',
+                tags: ['INFP', '미술', '감성적']
+            };
+
+            // LocalStorage에 시나리오와 캐릭터 저장
+            try {
+                // 시나리오 저장
+                const existingScenarios = JSON.parse(localStorage.getItem('scenarios') || '{}');
+                existingScenarios[testScenario.id] = testScenario;
+                localStorage.setItem('scenarios', JSON.stringify(existingScenarios));
+                console.log('✅ 테스트 시나리오 저장 완료');
+
+                // 캐릭터 저장
+                const existingCharacters = JSON.parse(localStorage.getItem('characters') || '{}');
+                existingCharacters[testCharacter.id] = testCharacter;
+                localStorage.setItem('characters', JSON.stringify(existingCharacters));
+                console.log('✅ 테스트 캐릭터 저장 완료');
+
+                // 시나리오 다시 로딩
+                loadScenarios();
+                
+                alert('🎮 테스트 시나리오가 생성되었습니다!\n"카페에서의 만남" 시나리오를 선택해보세요.');
+                
+            } catch (error) {
+                console.error('❌ 테스트 시나리오 생성 실패:', error);
+                alert('테스트 시나리오 생성에 실패했습니다: ' + error.message);
+            }
         }
     </script>
 </body>
