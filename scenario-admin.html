@@ -1721,7 +1721,7 @@
             }
         }
 
-        // 탭 전환
+        // 탭 전환 (전역 함수)
         function switchTab(tabName) {
             // 모든 탭과 섹션 비활성화
             document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
@@ -2953,7 +2953,7 @@
             document.getElementById('characterModal').style.display = 'block';
         }
 
-        function saveCharacter() {
+        async function saveCharacter() {
             const name = document.getElementById('charName').value;
             const mbti = document.getElementById('charMbti').value;
             
@@ -3648,6 +3648,26 @@ GitHub Token:`);
             updateScenarioStats();
             updateCharacterStats();
         }
+
+        // 🔧 전역 함수 바인딩 (onclick 이벤트 접근성 보장)
+        window.switchTab = switchTab;
+        window.openCharacterModal = openCharacterModal;
+        window.loadCharacters = loadCharacters;
+        window.loadScenarios = loadScenarios;
+        window.openScenarioModal = openScenarioModal;
+        window.saveCharacter = saveCharacter;
+        window.saveScenario = saveScenario;
+        window.editCharacter = editCharacter;
+        window.editScenario = editScenario;
+        window.deleteCharacter = deleteCharacter;
+        window.deleteScenario = deleteScenario;
+        
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎭 ChatGame 관리자 시스템 초기화...');
+            loadCharacters();
+            loadScenarios();
+        });
     </script>
 </body>
 </html>
