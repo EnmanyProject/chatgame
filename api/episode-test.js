@@ -30,16 +30,41 @@ export default async function handler(req, res) {
       });
     }
 
-    // 간단한 대화 생성 테스트
+    // 채팅 훈련용 대화 생성
     if (action === 'generate') {
-      console.log('🎯 간단한 대화 생성 테스트...');
+      console.log('🎯 채팅 훈련 대화 생성 시작...');
       
       const { character_id, user_prompt, difficulty } = req.body;
       
-      // 간단한 fallback 응답
+      // 캐릭터별 개성 있는 응답 생성
+      const characterResponses = {
+        'yuna_infp': {
+          message: "음... 그런 얘기구나 😊\n사실 나도 비슷하게 생각하고 있었어",
+          personality: "감성적이고 내향적인 INFP"
+        },
+        'mina_enfp': {
+          message: "와! 진짜 그렇게 생각해? 😆\n우리 완전 잘 맞는 것 같아!",
+          personality: "외향적이고 열정적인 ENFP"
+        },
+        'seoyeon_intj': {
+          message: "흥미로운 관점이네요.\n논리적으로 타당한 부분이 있습니다.",
+          personality: "논리적이고 독립적인 INTJ"
+        },
+        'jihye_esfj': {
+          message: "정말? 괜찮아? 😟\n혹시 불편한 건 없어? 도와줄 수 있는 게 있다면 말해줘!",
+          personality: "사교적이고 배려심 많은 ESFJ"
+        },
+        'hyejin_istp': {
+          message: "그렇구나. 나쁘지 않네 👍",
+          personality: "실용적이고 독립적인 ISTP"
+        }
+      };
+
+      const character = characterResponses[character_id] || characterResponses['yuna_infp'];
+      
       const testResponse = {
-        character_message: "안녕! 오늘 날씨 정말 좋다 ☀️\n산책하기 딱 좋은 것 같은데 어떻게 생각해?",
-        context: "일상적인 대화 상황",
+        character_message: character.message,
+        context: `${character.personality} 성격이 반영된 대화`,
         choices: [
           {
             text: "맞아! 나도 그 생각했어. 같이 갈래?",
