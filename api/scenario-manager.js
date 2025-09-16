@@ -23,7 +23,11 @@ export default async function handler(req, res) {
   try {
     // 시나리오 목록 조회
     if (action === 'list') {
+      console.log('📋 시나리오 목록 조회 시작...');
       const scenarios = await loadScenarioDatabase();
+      console.log('📊 로드된 시나리오 수:', Object.keys(scenarios.scenarios).length);
+      console.log('📝 시나리오 ID 목록:', Object.keys(scenarios.scenarios));
+      
       return res.json({
         success: true,
         scenarios: scenarios.scenarios,
@@ -122,7 +126,14 @@ async function createNewScenario(data) {
   };
 
   // 데이터베이스에 저장 (실제로는 파일 시스템 사용)
-  await saveScenarioToDatabase(newScenario);
+  console.log('💾 시나리오 저장 시작:', newScenario.id);
+  const saveResult = await saveScenarioToDatabase(newScenario);
+  console.log('💾 저장 결과:', saveResult);
+  
+  // 저장 후 검증
+  const updatedDb = await loadScenarioDatabase();
+  console.log('🔍 저장 검증 - 전체 시나리오 수:', Object.keys(updatedDb.scenarios).length);
+  console.log('🔍 저장된 시나리오 존재 확인:', !!updatedDb.scenarios[newScenario.id]);
   
   return newScenario;
 }
@@ -230,15 +241,27 @@ async function loadScenarioDatabase() {
 async function saveScenarioToDatabase(scenario) {
   try {
     const dbPath = path.join(process.cwd(), 'data', 'scenarios', 'scenario-database.json');
+    console.log('📂 DB 파일 경로:', dbPath);
+    
     const db = await loadScenarioDatabase();
+    console.log('📊 저장 전 시나리오 수:', Object.keys(db.scenarios).length);
     
     db.scenarios[scenario.id] = scenario;
     db.metadata.total_scenarios = Object.keys(db.scenarios).length;
     
+    console.log('📊 저장 후 시나리오 수:', Object.keys(db.scenarios).length);
+    console.log('💾 파일 쓰기 시작...');
+    
     fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+    console.log('✅ 파일 쓰기 완료');
+    
     return true;
   } catch (error) {
-    console.error('Failed to save scenario:', error);
+    console.error('❌ 시나리오 저장 실패:', error);
+    console.error('오류 세부사항:', {
+      message: error.message,
+      stack: error.stack
+    });
     return false;
   }
 }
