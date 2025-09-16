@@ -13,6 +13,13 @@ export default async function handler(req, res) {
 
   const action = req.query.action || req.body?.action;
 
+  console.log('📥 Scenario Manager 요청:', {
+    method: req.method,
+    action,
+    body: req.body,
+    query: req.query
+  });
+
   try {
     // 시나리오 목록 조회
     if (action === 'list') {
@@ -99,12 +106,14 @@ async function createNewScenario(data) {
   
   const newScenario = {
     id: scenario_id,
+    scenario_id: scenario_id, // API 호환성을 위해 둘 다 설정
     title,
     description,
     background_setting,
     mood,
     active_status: true,
     created_date: new Date().toISOString().split('T')[0],
+    last_modified: new Date().toISOString().split('T')[0],
     ai_generated_context: aiContext,
     custom_context: "",
     available_characters: available_characters || [],

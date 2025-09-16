@@ -174,6 +174,52 @@
             color: white;
         }
 
+        /* 예시 시스템 스타일 */
+        .examples-container {
+            margin-top: 8px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        .examples-label {
+            font-size: 12px;
+            color: #6c757d;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .examples-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .example-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 12px;
+            font-size: 11px;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            line-height: 1.2;
+        }
+        .example-tag:hover {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+            transform: translateY(-1px);
+        }
+        .example-tag.selected {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+            transform: scale(0.95);
+        }
+
         .btn-success {
             background: #27ae60;
             color: white;
@@ -814,22 +860,93 @@
                     
                     <div class="form-group">
                         <label for="scenarioTitle">시나리오 제목 *</label>
-                        <input type="text" id="scenarioTitle" required placeholder="예: 어제 밤의 기억" />
+                        <input type="text" id="scenarioTitle" required placeholder="클릭해서 예시 선택" />
+                        <div class="examples-container">
+                            <span class="examples-label">예시:</span>
+                            <div class="examples-grid">
+                                <span class="example-tag" onclick="fillExample('scenarioTitle', this)">어제 밤의 기억</span>
+                                <span class="example-tag" onclick="fillExample('scenarioTitle', this)">운명의 만남</span>
+                                <span class="example-tag" onclick="fillExample('scenarioTitle', this)">도서관의 속삭임</span>
+                                <span class="example-tag" onclick="fillExample('scenarioTitle', this)">카페의 특별한 손님</span>
+                                <span class="example-tag" onclick="fillExample('scenarioTitle', this)">첫 눈이 내린 날</span>
+                                <span class="example-tag" onclick="fillExample('scenarioTitle', this)">벚꽃이 흩날리던 순간</span>
+                                <span class="example-tag" onclick="fillExample('scenarioTitle', this)">우연한 재회</span>
+                                <span class="example-tag" onclick="fillExample('scenarioTitle', this)">달빛 아래의 고백</span>
+                                <span class="example-tag" onclick="fillExample('scenarioTitle', this)">지금 이 순간</span>
+                                <span class="example-tag" onclick="fillExample('scenarioTitle', this)">너에게 닿기를</span>
+                                <span class="example-tag" onclick="fillExample('scenarioTitle', this)">마지막 여름날</span>
+                                <span class="example-tag" onclick="fillExample('scenarioTitle', this)">비 오는 날의 우산</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label for="scenarioDescription">시나리오 설명 *</label>
-                        <textarea id="scenarioDescription" required placeholder="시나리오의 기본 설정과 상황을 설명하세요"></textarea>
+                        <textarea id="scenarioDescription" required placeholder="클릭해서 예시 선택"></textarea>
+                        <div class="examples-container">
+                            <span class="examples-label">예시:</span>
+                            <div class="examples-grid">
+                                <span class="example-tag" onclick="fillExample('scenarioDescription', this)">취한 상태에서 진심을 고백한 후, 다음 날 어색해진 두 사람의 이야기</span>
+                                <span class="example-tag" onclick="fillExample('scenarioDescription', this)">매일 같은 시간, 같은 카페에서 마주치는 두 사람이 서로에게 관심을 갖게 되는 상황</span>
+                                <span class="example-tag" onclick="fillExample('scenarioDescription', this)">도서관에서 우연히 같은 책을 읽고 있던 두 사람이 조금씩 가까워지는 과정</span>
+                                <span class="example-tag" onclick="fillExample('scenarioDescription', this)">동아리 MT에서 처음 만난 선후배가 특별한 감정을 느끼게 되는 이야기</span>
+                                <span class="example-tag" onclick="fillExample('scenarioDescription', this)">비 오는 날 우산을 함께 쓰게 된 두 사람의 설레는 만남</span>
+                                <span class="example-tag" onclick="fillExample('scenarioDescription', this)">과제를 함께 하면서 서로를 알아가는 팀원들의 로맨스</span>
+                                <span class="example-tag" onclick="fillExample('scenarioDescription', this)">졸업을 앞두고 마지막으로 전하고 싶었던 마음을 고백하는 상황</span>
+                                <span class="example-tag" onclick="fillExample('scenarioDescription', this)">새 학기 첫날 우연히 마주친 두 사람의 첫인상과 그 이후의 이야기</span>
+                                <span class="example-tag" onclick="fillExample('scenarioDescription', this)">축제 준비를 하면서 자연스럽게 가까워지는 학생회 멤버들의 이야기</span>
+                                <span class="example-tag" onclick="fillExample('scenarioDescription', this)">스터디 그룹에서 만난 두 사람이 학업을 통해 마음을 나누게 되는 과정</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label for="backgroundSetting">배경 설정 *</label>
-                        <input type="text" id="backgroundSetting" required placeholder="예: 대학교 캠퍼스, 카페, 도서관" />
+                        <input type="text" id="backgroundSetting" required placeholder="클릭해서 예시 선택" />
+                        <div class="examples-container">
+                            <span class="examples-label">예시:</span>
+                            <div class="examples-grid">
+                                <span class="example-tag" onclick="fillExample('backgroundSetting', this)">대학교 캠퍼스</span>
+                                <span class="example-tag" onclick="fillExample('backgroundSetting', this)">조용한 카페</span>
+                                <span class="example-tag" onclick="fillExample('backgroundSetting', this)">중앙 도서관</span>
+                                <span class="example-tag" onclick="fillExample('backgroundSetting', this)">벚꽃이 만발한 공원</span>
+                                <span class="example-tag" onclick="fillExample('backgroundSetting', this)">기숙사 라운지</span>
+                                <span class="example-tag" onclick="fillExample('backgroundSetting', this)">학교 축제 현장</span>
+                                <span class="example-tag" onclick="fillExample('backgroundSetting', this)">강의실</span>
+                                <span class="example-tag" onclick="fillExample('backgroundSetting', this)">대학가 술집</span>
+                                <span class="example-tag" onclick="fillExample('backgroundSetting', this)">캠퍼스 뒤뜰</span>
+                                <span class="example-tag" onclick="fillExample('backgroundSetting', this)">학생식당</span>
+                                <span class="example-tag" onclick="fillExample('backgroundSetting', this)">동아리실</span>
+                                <span class="example-tag" onclick="fillExample('backgroundSetting', this)">야간 캠퍼스</span>
+                                <span class="example-tag" onclick="fillExample('backgroundSetting', this)">계단 교실</span>
+                                <span class="example-tag" onclick="fillExample('backgroundSetting', this)">음악실</span>
+                                <span class="example-tag" onclick="fillExample('backgroundSetting', this)">옥상 정원</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label for="mood">분위기/무드 *</label>
-                        <input type="text" id="mood" required placeholder="예: 설렘, 긴장감, 로맨틱, 달콤함" />
+                        <input type="text" id="mood" required placeholder="클릭해서 예시 선택" />
+                        <div class="examples-container">
+                            <span class="examples-label">예시:</span>
+                            <div class="examples-grid">
+                                <span class="example-tag" onclick="fillExample('mood', this)">로맨틱</span>
+                                <span class="example-tag" onclick="fillExample('mood', this)">설렘</span>
+                                <span class="example-tag" onclick="fillExample('mood', this)">달콤함</span>
+                                <span class="example-tag" onclick="fillExample('mood', this)">긴장감</span>
+                                <span class="example-tag" onclick="fillExample('mood', this)">드라마틱</span>
+                                <span class="example-tag" onclick="fillExample('mood', this)">코믹</span>
+                                <span class="example-tag" onclick="fillExample('mood', this)">현실적</span>
+                                <span class="example-tag" onclick="fillExample('mood', this)">따뜻함</span>
+                                <span class="example-tag" onclick="fillExample('mood', this)">신비로움</span>
+                                <span class="example-tag" onclick="fillExample('mood', this)">청춘</span>
+                                <span class="example-tag" onclick="fillExample('mood', this)">순수함</span>
+                                <span class="example-tag" onclick="fillExample('mood', this)">감성적</span>
+                                <span class="example-tag" onclick="fillExample('mood', this)">몽환적</span>
+                                <span class="example-tag" onclick="fillExample('mood', this)">아련함</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -1297,6 +1414,27 @@
             };
             
             return templates[mood] || templates['로맨틱'];
+        }
+
+        // === 예시 자동 입력 기능 ===
+        function fillExample(fieldId, element) {
+            const field = document.getElementById(fieldId);
+            const text = element.textContent;
+            
+            if (field.tagName === 'TEXTAREA') {
+                field.value = text;
+                field.style.height = 'auto';
+                field.style.height = field.scrollHeight + 'px';
+            } else {
+                field.value = text;
+            }
+            
+            // 시각적 피드백
+            element.classList.add('selected');
+            setTimeout(() => element.classList.remove('selected'), 300);
+            
+            // 입력 이벤트 트리거
+            field.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
         // === 에피소드 관리 함수들 ===
