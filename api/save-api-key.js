@@ -1,4 +1,6 @@
-// API 키 저장 API
+// API 키 저장 API - 향상된 세션 관리
+let globalApiKey = null; // 전역 변수로 API 키 저장
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -27,17 +29,66 @@ export default async function handler(req, res) {
 
     console.log('🔑 API 키 저장 요청 받음');
 
-    // 실제로는 Vercel 환경변수에 직접 저장할 수 없으므로
-    // 임시적으로 런타임 환경변수에 저장
+    // 전역 변수와 환경변수 모두에 저장
+    globalApiKey = apiKey;
     process.env.OPENAI_API_KEY = apiKey;
     
-    console.log('✅ API 키 런타임 저장 완료');
+    console.log('✅ API 키 전역 저장 완료');
 
-    return res.json({
-      success: true,
-      message: 'API 키가 성공적으로 저장되었습니다.',
-      note: '현재 세션에서만 유효합니다. 영구 저장을 위해서는 Vercel 대시보드에서 환경변수를 수동 설정해주세요.'
-    });
+    // 즉시 연결 테스트 수행
+    try {
+      const testResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: '간단한 연결 테스트입니다.'
+            },
+            {
+              role: 'user',
+              content: '테스트'
+            }
+          ],
+          max_tokens: 5,
+          temperature: 0.1
+        })
+      });
+
+      if (testResponse.ok) {
+        const testData = await testResponse.json();
+        console.log('✅ API 키 검증 성공');
+        
+        return res.json({
+          success: true,
+          message: 'API 키가 성공적으로 저장되고 검증되었습니다.',
+          validated: true,
+          model: 'gpt-4o-mini',
+          note: '현재 세션에서 유효합니다.'
+        });
+      } else {
+        console.warn('⚠️ API 키 저장되었으나 검증 실패');
+        return res.status(400).json({
+          success: false,
+          message: 'API 키 형식은 올바르지만 OpenAI에서 인증에 실패했습니다. 키가 유효한지 확인해주세요.',
+          validated: false
+        });
+      }
+      
+    } catch (testError) {
+      console.warn('⚠️ API 키 검증 중 오류:', testError.message);
+      return res.json({
+        success: true,
+        message: 'API 키가 저장되었지만 검증 중 오류가 발생했습니다.',
+        validated: false,
+        error: testError.message
+      });
+    }
 
   } catch (error) {
     console.error('API 키 저장 오류:', error);
@@ -47,4 +98,9 @@ export default async function handler(req, res) {
       error: error.message
     });
   }
+}
+
+// 전역 API 키 접근 함수 (다른 API에서 사용)
+export function getGlobalApiKey() {
+  return globalApiKey || process.env.OPENAI_API_KEY;
 }

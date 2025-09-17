@@ -1,4 +1,6 @@
-// OpenAI 연결 테스트 API
+// OpenAI 연결 테스트 API - 전역 API 키 지원
+import { getGlobalApiKey } from './save-api-key.js';
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -16,12 +18,15 @@ export default async function handler(req, res) {
   }
 
   try {
-    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+    // 전역 API 키 또는 환경변수에서 API 키 가져오기
+    const OPENAI_API_KEY = getGlobalApiKey();
+    
+    console.log('🔍 API 키 확인:', OPENAI_API_KEY ? `${OPENAI_API_KEY.substring(0, 4)}...` : '없음');
     
     if (!OPENAI_API_KEY) {
       return res.status(400).json({
         success: false,
-        message: 'OpenAI API 키가 설정되지 않았습니다.'
+        message: 'OpenAI API 키가 설정되지 않았습니다. 먼저 API 키를 저장해주세요.'
       });
     }
 

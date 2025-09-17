@@ -1,6 +1,7 @@
 // AI 캐릭터 생성 API - 세계관 최강 버전
 import fs from 'fs';
 import path from 'path';
+import { getGlobalApiKey } from './save-api-key.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -216,9 +217,10 @@ function generateBasicOptions() {
 }
 
 async function generateNextQuestion(currentStep, answers) {
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+  const OPENAI_API_KEY = getGlobalApiKey();
   
   if (!OPENAI_API_KEY) {
+    console.log('⚠️ API 키 없음, fallback 사용');
     return generateFallbackQuestion(currentStep, answers);
   }
 
@@ -270,7 +272,7 @@ async function generateNextQuestion(currentStep, answers) {
 }
 
 async function generateCompleteCharacter(answers) {
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+  const OPENAI_API_KEY = getGlobalApiKey();
   
   const character = {
     id: 'char_' + Date.now(),
@@ -280,6 +282,7 @@ async function generateCompleteCharacter(answers) {
   };
 
   if (!OPENAI_API_KEY) {
+    console.log('⚠️ API 키 없음, fallback 캐릭터 생성');
     return generateFallbackCharacter(character);
   }
 
@@ -658,7 +661,7 @@ async function resetAllCharacters() {
 // 캐릭터 이미지 분석 함수 (OpenAI Vision API)
 async function analyzeCharacterImage(imageBase64) {
   try {
-    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+    const OPENAI_API_KEY = getGlobalApiKey();
     
     if (!OPENAI_API_KEY) {
       console.warn('⚠️ OpenAI API key not configured, using fallback analysis');
