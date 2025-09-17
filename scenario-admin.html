@@ -1107,6 +1107,119 @@
             background: #f5f5f5;
             color: #666;
         }
+
+        /* API Settings Styles */
+        .api-settings-container {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .api-key-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .api-key-input-group input {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+
+        .api-key-input-group button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .api-key-input-group button:hover {
+            background: #5a67d8;
+        }
+
+        .form-help {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .test-results {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .test-results.success {
+            border-left-color: #28a745;
+            background: #f8fff9;
+        }
+
+        .test-results.error {
+            border-left-color: #dc3545;
+            background: #fff8f8;
+        }
+
+        .api-info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .api-info h4 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .api-info ol, .api-info ul {
+            padding-left: 20px;
+        }
+
+        .api-info li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .api-info a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .api-info a:hover {
+            text-decoration: underline;
+        }
+
+        .api-usage-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .api-usage-info h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .status-connected {
+            color: #28a745;
+        }
+
+        .status-disconnected {
+            color: #dc3545;
+        }
+
+        .status-testing {
+            color: #ffc107;
+        }
     </style>
 </head>
 <body>
@@ -1129,6 +1242,10 @@
             <button class="nav-tab" onclick="switchTab('episodes')">
                 📝 에피소드 관리
                 <span class="badge" id="episodeCount">0</span>
+            </button>
+            <button class="nav-tab" onclick="switchTab('settings')">
+                ⚙️ API 설정
+                <span class="badge" id="apiStatus">❌</span>
             </button>
         </div>
 
@@ -1249,6 +1366,71 @@
 
                 <div id="episodesGrid" class="episodes-grid">
                     <!-- 36개의 에피소드 카드가 여기에 표시됩니다 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- API 설정 섹션 -->
+        <div id="settings-section" class="content-section">
+            <div class="stats-row">
+                <div class="stat-card">
+                    <h3>OpenAI API 상태</h3>
+                    <div class="value" id="openaiStatus">❌ 미연결</div>
+                </div>
+                <div class="stat-card">
+                    <h3>API 사용량</h3>
+                    <div class="value" id="apiUsage">확인 중...</div>
+                </div>
+                <div class="stat-card">
+                    <h3>마지막 테스트</h3>
+                    <div class="value" id="lastTest">없음</div>
+                </div>
+            </div>
+
+            <div class="api-settings-container">
+                <div class="form-group">
+                    <label for="openaiApiKey">🔑 OpenAI API 키:</label>
+                    <div class="api-key-input-group">
+                        <input type="password" id="openaiApiKey" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                        <button type="button" id="toggleApiKey" onclick="toggleApiKeyVisibility()">👁️</button>
+                    </div>
+                    <small class="form-help">API 키는 안전하게 암호화되어 저장됩니다</small>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="saveApiKey()">
+                        💾 API 키 저장
+                    </button>
+                    <button class="btn btn-secondary" onclick="testApiConnection()">
+                        🧪 연결 테스트
+                    </button>
+                    <button class="btn btn-warning" onclick="clearApiKey()">
+                        🗑️ API 키 삭제
+                    </button>
+                </div>
+
+                <div id="apiTestResults" class="test-results" style="display: none;">
+                    <!-- 테스트 결과가 여기에 표시됩니다 -->
+                </div>
+
+                <div class="api-info">
+                    <h4>📋 API 키 설정 방법:</h4>
+                    <ol>
+                        <li><a href="https://platform.openai.com/" target="_blank">OpenAI 플랫폼</a>에서 계정을 만들고 로그인</li>
+                        <li>API 키 섹션에서 새 API 키 생성</li>
+                        <li>생성된 키를 위 입력창에 붙여넣기</li>
+                        <li>"API 키 저장" 버튼 클릭</li>
+                        <li>"연결 테스트" 버튼으로 정상 작동 확인</li>
+                    </ol>
+                    
+                    <div class="api-usage-info">
+                        <h4>💰 사용 요금:</h4>
+                        <ul>
+                            <li><strong>GPT-4o-mini</strong>: 캐릭터 생성, 질문 생성 (저렴)</li>
+                            <li><strong>GPT-4o Vision</strong>: 이미지 분석 (중간 가격)</li>
+                            <li>대부분의 작업은 몇 센트에서 몇 달러 수준</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2253,6 +2435,187 @@
             // 에피소드 탭 선택 시 시나리오 목록 업데이트
             if (tabName === 'episodes') {
                 populateEpisodeScenarioSelect();
+            }
+            
+            // API 설정 탭 선택 시 상태 확인
+            if (tabName === 'settings') {
+                checkApiStatus();
+            }
+        }
+
+        // === API 관리 함수들 ===
+        
+        // API 키 표시/숨김 토글
+        function toggleApiKeyVisibility() {
+            const input = document.getElementById('openaiApiKey');
+            const button = document.getElementById('toggleApiKey');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                button.textContent = '👁️';
+            }
+        }
+
+        // API 키 저장
+        async function saveApiKey() {
+            const apiKey = document.getElementById('openaiApiKey').value.trim();
+            
+            if (!apiKey) {
+                alert('API 키를 입력해주세요.');
+                return;
+            }
+            
+            if (!apiKey.startsWith('sk-')) {
+                alert('유효한 OpenAI API 키 형식이 아닙니다. (sk-로 시작해야 함)');
+                return;
+            }
+
+            try {
+                console.log('💾 API 키 저장 시도...');
+                
+                // API 키를 Vercel 환경변수에 저장하는 API 호출
+                const response = await fetch('/api/save-api-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        apiKey: apiKey
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    alert('✅ API 키가 성공적으로 저장되었습니다!');
+                    
+                    // 저장 후 상태 업데이트
+                    checkApiStatus();
+                    
+                    // 입력 필드 초기화 (보안)
+                    document.getElementById('openaiApiKey').value = '';
+                } else {
+                    const error = await response.json();
+                    alert('❌ API 키 저장 실패: ' + (error.message || '알 수 없는 오류'));
+                }
+                
+            } catch (error) {
+                console.error('API 키 저장 오류:', error);
+                alert('❌ API 키 저장 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        // API 연결 테스트
+        async function testApiConnection() {
+            const testResults = document.getElementById('apiTestResults');
+            testResults.style.display = 'block';
+            testResults.className = 'test-results';
+            testResults.innerHTML = '<div class="loading">🧪 API 연결 테스트 중...</div>';
+            
+            // 상태 업데이트
+            document.getElementById('openaiStatus').textContent = '🔄 테스트 중...';
+            document.getElementById('openaiStatus').className = 'status-testing';
+
+            try {
+                // 캐릭터 생성 API를 통해 연결 테스트
+                const response = await fetch('/api/test-openai-connection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    testResults.className = 'test-results success';
+                    testResults.innerHTML = `
+                        <h4>✅ 연결 테스트 성공!</h4>
+                        <p><strong>모델:</strong> ${data.model || 'GPT-4o-mini'}</p>
+                        <p><strong>응답 시간:</strong> ${data.responseTime || '확인 중'}ms</p>
+                        <p><strong>토큰 사용량:</strong> ${data.tokensUsed || '확인 중'} tokens</p>
+                        <p><strong>테스트 시간:</strong> ${new Date().toLocaleString()}</p>
+                    `;
+                    
+                    document.getElementById('openaiStatus').textContent = '✅ 연결됨';
+                    document.getElementById('openaiStatus').className = 'status-connected';
+                    document.getElementById('lastTest').textContent = new Date().toLocaleString();
+                    document.getElementById('apiStatus').textContent = '✅';
+                } else {
+                    throw new Error(data.message || '테스트 실패');
+                }
+                
+            } catch (error) {
+                console.error('API 테스트 오류:', error);
+                
+                testResults.className = 'test-results error';
+                testResults.innerHTML = `
+                    <h4>❌ 연결 테스트 실패</h4>
+                    <p><strong>오류:</strong> ${error.message}</p>
+                    <p><strong>해결 방법:</strong></p>
+                    <ul>
+                        <li>API 키가 올바른지 확인</li>
+                        <li>OpenAI 계정에 충분한 크레딧이 있는지 확인</li>
+                        <li>API 키 권한 설정 확인</li>
+                    </ul>
+                `;
+                
+                document.getElementById('openaiStatus').textContent = '❌ 연결 실패';
+                document.getElementById('openaiStatus').className = 'status-disconnected';
+                document.getElementById('apiStatus').textContent = '❌';
+            }
+        }
+
+        // API 상태 확인
+        async function checkApiStatus() {
+            try {
+                const response = await fetch('/api/test-env');
+                const data = await response.json();
+                
+                if (data.environment.OPENAI_API_KEY === '✅ 설정됨') {
+                    document.getElementById('openaiStatus').textContent = '✅ API 키 설정됨';
+                    document.getElementById('openaiStatus').className = 'status-connected';
+                    document.getElementById('apiStatus').textContent = '✅';
+                } else {
+                    document.getElementById('openaiStatus').textContent = '❌ API 키 미설정';
+                    document.getElementById('openaiStatus').className = 'status-disconnected';
+                    document.getElementById('apiStatus').textContent = '❌';
+                }
+                
+            } catch (error) {
+                console.error('API 상태 확인 오류:', error);
+                document.getElementById('openaiStatus').textContent = '❓ 상태 불명';
+                document.getElementById('apiStatus').textContent = '❓';
+            }
+        }
+
+        // API 키 삭제
+        async function clearApiKey() {
+            if (!confirm('정말로 API 키를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/clear-api-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    alert('✅ API 키가 삭제되었습니다.');
+                    checkApiStatus();
+                    document.getElementById('apiTestResults').style.display = 'none';
+                } else {
+                    alert('❌ API 키 삭제 실패');
+                }
+                
+            } catch (error) {
+                console.error('API 키 삭제 오류:', error);
+                alert('❌ API 키 삭제 중 오류가 발생했습니다.');
             }
         }
 
