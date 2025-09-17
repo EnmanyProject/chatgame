@@ -2489,6 +2489,10 @@
 
                 if (response.ok) {
                     const data = await response.json();
+                    
+                    // 브라우저 세션에도 API 키 저장 (보안을 위해 sessionStorage 사용)
+                    sessionStorage.setItem('openai_api_key', apiKey);
+                    
                     alert('✅ API 키가 성공적으로 저장되었습니다!');
                     
                     // 저장 후 상태 업데이트
@@ -2519,12 +2523,19 @@
             document.getElementById('openaiStatus').className = 'status-testing';
 
             try {
+                // 세션에서 API 키 가져오기
+                const sessionApiKey = sessionStorage.getItem('openai_api_key');
+                
                 // 캐릭터 생성 API를 통해 연결 테스트
                 const response = await fetch('/api/test-openai-connection', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
-                    }
+                        'Content-Type': 'application/json',
+                        'X-OpenAI-Key': sessionApiKey || '' // 헤더로 API 키 전달
+                    },
+                    body: JSON.stringify({
+                        useSessionKey: true
+                    })
                 });
 
                 const data = await response.json();
@@ -2606,6 +2617,9 @@
                 });
 
                 if (response.ok) {
+                    // 세션 스토리지에서도 삭제
+                    sessionStorage.removeItem('openai_api_key');
+                    
                     alert('✅ API 키가 삭제되었습니다.');
                     checkApiStatus();
                     document.getElementById('apiTestResults').style.display = 'none';

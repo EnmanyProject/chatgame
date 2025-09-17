@@ -1,6 +1,12 @@
 // API 키 저장 API - 향상된 세션 관리
 let globalApiKey = null; // 전역 변수로 API 키 저장
 
+// 메모리 저장소 (Vercel 서버리스 환경에서 공유)
+const apiKeyStore = {
+  key: null,
+  timestamp: null
+};
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -29,9 +35,11 @@ export default async function handler(req, res) {
 
     console.log('🔑 API 키 저장 요청 받음');
 
-    // 전역 변수와 환경변수 모두에 저장
+    // 전역 변수, 환경변수, 메모리 저장소에 모두 저장
     globalApiKey = apiKey;
     process.env.OPENAI_API_KEY = apiKey;
+    apiKeyStore.key = apiKey;
+    apiKeyStore.timestamp = new Date().toISOString();
     
     console.log('✅ API 키 전역 저장 완료');
 
@@ -102,5 +110,17 @@ export default async function handler(req, res) {
 
 // 전역 API 키 접근 함수 (다른 API에서 사용)
 export function getGlobalApiKey() {
-  return globalApiKey || process.env.OPENAI_API_KEY;
+  // 우선 순위: 메모리 저장소 → 전역 변수 → 환경변수
+  return apiKeyStore.key || globalApiKey || process.env.OPENAI_API_KEY;
+}
+
+// API 키 저장소 상태 확인 함수
+export function getApiKeyStatus() {
+  return {
+    hasStoreKey: !!apiKeyStore.key,
+    hasGlobalKey: !!globalApiKey,
+    hasEnvKey: !!process.env.OPENAI_API_KEY,
+    timestamp: apiKeyStore.timestamp,
+    preview: apiKeyStore.key ? `${apiKeyStore.key.substring(0, 4)}...` : 'None'
+  };
 }

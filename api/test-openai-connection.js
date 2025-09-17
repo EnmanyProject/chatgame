@@ -18,15 +18,28 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 전역 API 키 또는 환경변수에서 API 키 가져오기
-    const OPENAI_API_KEY = getGlobalApiKey();
+    // 헤더에서 API 키 확인 (우선 순위 1)
+    const headerApiKey = req.headers['x-openai-key'];
     
-    console.log('🔍 API 키 확인:', OPENAI_API_KEY ? `${OPENAI_API_KEY.substring(0, 4)}...` : '없음');
+    // 전역 API 키 또는 환경변수에서 API 키 가져오기 (우선 순위 2)
+    const globalApiKey = getGlobalApiKey();
+    
+    const OPENAI_API_KEY = headerApiKey || globalApiKey;
+    
+    console.log('🔍 API 키 확인:', {
+      fromHeader: headerApiKey ? `${headerApiKey.substring(0, 4)}...` : '없음',
+      fromGlobal: globalApiKey ? `${globalApiKey.substring(0, 4)}...` : '없음',
+      final: OPENAI_API_KEY ? `${OPENAI_API_KEY.substring(0, 4)}...` : '없음'
+    });
     
     if (!OPENAI_API_KEY) {
       return res.status(400).json({
         success: false,
-        message: 'OpenAI API 키가 설정되지 않았습니다. 먼저 API 키를 저장해주세요.'
+        message: 'OpenAI API 키가 설정되지 않았습니다. 먼저 API 키를 저장해주세요.',
+        debug: {
+          hasHeaderKey: !!headerApiKey,
+          hasGlobalKey: !!globalApiKey
+        }
       });
     }
 

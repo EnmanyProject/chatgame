@@ -1,5 +1,5 @@
 // 환경변수 테스트 API - 전역 API 키 지원
-import { getGlobalApiKey } from './save-api-key.js';
+import { getGlobalApiKey, getApiKeyStatus } from './save-api-key.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
   // 전역 API 키 확인
   const globalApiKey = getGlobalApiKey();
-  const envApiKey = process.env.OPENAI_API_KEY;
+  const apiKeyStatus = getApiKeyStatus();
 
   const envStatus = {
     OPENAI_API_KEY: globalApiKey ? '✅ 설정됨' : '❌ 미설정',
@@ -21,8 +21,11 @@ export default async function handler(req, res) {
     keyPreview: globalApiKey ? 
       `${globalApiKey.substring(0, 4)}...` : 
       'No key',
-    keySource: globalApiKey === envApiKey ? 'environment' : 
-               globalApiKey ? 'global_variable' : 'none'
+    // 상세한 상태 정보
+    apiKeyDetails: {
+      ...apiKeyStatus,
+      finalKey: globalApiKey ? `${globalApiKey.substring(0, 4)}...` : 'None'
+    }
   };
 
   console.log('🔍 환경변수 상태 확인:', envStatus);
