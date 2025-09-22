@@ -26,6 +26,25 @@
       "id": "scenario_도서관의_속삭임_1758551391179",
       "action": "create",
       "updated_at": "2025-09-22T14:29:51.507Z"
+    },
+    "scenario_카페의_특별한_손님_1758555132919": {
+      "title": "카페의 특별한 손님",
+      "description": "과제를 함께 하면서 서로를 알아가는 팀원들의 로맨스",
+      "background_setting": "벚꽃이 만발한 공원",
+      "mood": "현실적",
+      "available_characters": [
+        "유나__infj_1758555108894"
+      ],
+      "created_date": "2025-09-22",
+      "episode_count": 0,
+      "tags": [
+        "현실적"
+      ],
+      "source": "github_api",
+      "active": true,
+      "id": "scenario_카페의_특별한_손님_1758555132919",
+      "action": "create",
+      "updated_at": "2025-09-22T15:32:13.830Z"
     }
   },
   "scenario_templates": {
