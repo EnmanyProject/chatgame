@@ -4086,111 +4086,7 @@
             console.log('✅ 캐릭터 편집 모달 표시 완료');
         }
 
-        async function saveCharacter() {
-            console.log('💾 === 캐릭터 저장 시작 ===');
-            
-            const name = document.getElementById('charName').value;
-            const mbti = document.getElementById('charMbti').value;
-            
-            console.log('📝 입력값 확인:');
-            console.log('  - 이름:', name || '(비어있음)');
-            console.log('  - MBTI:', mbti || '(비어있음)');
-            
-            if (!name || !mbti) {
-                console.error('❌ 필수 입력값 누락');
-                alert(`이름과 MBTI는 필수 입력 항목입니다.\n\n현재 입력값:\n이름: ${name || '미입력'}\nMBTI: ${mbti || '미입력'}`);
-                return;
-            }
-
-            // 새로운 AI 캐릭터 생성 시스템에서 데이터 수집
-            const characterData = collectCharacterData();
-            
-            const characterId = currentMode === 'create' 
-                ? `${name.toLowerCase()}_${mbti.toLowerCase()}`
-                : document.getElementById('characterId').value;
-
-            characters[characterId] = {
-                id: characterId,
-                name: characterData.name,
-                age: characterData.age,
-                mbti: characterData.mbti,
-                character_type: characterData.character_type,
-                personality_traits: characterData.personality_traits,
-                major: characterData.major,
-                family: characterData.family,
-                hometown: characterData.hometown,
-                relationship: characterData.relationship,
-                appearance: {
-                    hair: characterData.hair,
-                    eyes: characterData.eyes,
-                    body: characterData.body,
-                    style: characterData.style
-                },
-                hobbies: characterData.hobbies,
-                values: characterData.values,
-                speech_style: characterData.speech_style,
-                speech_habit: characterData.speech_habit,
-                genre: characterData.genre,
-                main_situation: characterData.main_situation,
-                created_at: new Date().toISOString(),
-                active: true
-            };
-
-            // 저장 버튼 비활성화 및 상태 표시
-            const saveButton = document.querySelector('#characterModal .btn-primary');
-            const originalText = saveButton.textContent;
-            saveButton.disabled = true;
-            saveButton.textContent = '💾 저장 중...';
-            
-            // API에 캐릭터 저장
-            console.log('💾 저장할 캐릭터 데이터:', characters[characterId]);
-            
-            // 🚀 즉시 UI 업데이트 (사용자 경험 개선)
-            console.log('⚡ 즉시 로컬 캐릭터 목록 업데이트...');
-            
-            // 로컬 캐릭터 객체에 즉시 추가 (UI 반응성 개선)
-            const globalCharacters = window.characters || {};
-            globalCharacters[characterId] = characters[characterId];
-            window.characters = globalCharacters;
-            
-            // 즉시 화면 업데이트
-            displayCharacters();
-            updateCharacterStats();
-            console.log('✅ 즉시 UI 업데이트 완료');
-            
-            // 💾 LocalStorage 직접 저장 (확실한 방법!)
-            console.log('💾 LocalStorage에 직접 저장 시도...');
-            try {
-                // 현재 저장된 캐릭터들을 가져옴
-                const existingChars = localStorage.getItem('characters');
-                const charactersData = existingChars ? JSON.parse(existingChars) : {};
-                
-                // 새 캐릭터 추가/수정
-                charactersData[characterId] = characters[characterId];
-                
-                // LocalStorage에 저장
-                localStorage.setItem('characters', JSON.stringify(charactersData));
-                console.log('✅ LocalStorage 저장 성공! 총', Object.keys(charactersData).length, '개 캐릭터');
-                
-                // 저장 성공 메시지
-                const successMessage = currentMode === 'create' ? 
-                    `💖 새로운 캐릭터 '${name}'가 생성되었습니다!\n✅ 캐릭터 목록에서 확인하세요!` :
-                    `✨캐릭터 '${name}'가 수정되었습니다!`;
-                
-                alert(successMessage);
-                closeModal('characterModal');
-                
-                console.log('✅ 캐릭터 저장 프로세스 완료!');
-                
-            } catch (storageError) {
-                console.error('❌ LocalStorage 저장 실패:', storageError);
-                alert('저장 중 오류가 발생했습니다: ' + storageError.message);
-            }
-            
-            // 저장 버튼 복원
-            saveButton.disabled = false;
-            saveButton.textContent = originalText;
-        }
+        // ⚠️ 기존 saveCharacter 함수 제거됨 - 새로운 온라인 전용 함수로 교체
 
         // 채팅 훈련 API를 사용한 대화 생성 함수 (개선된 버전)
         async function generateLocalDialogue(characterId, characterName, userPrompt, difficulty) {
@@ -5124,6 +5020,103 @@ GitHub Token:`);
             } catch (error) {
                 console.error('❌ 캐릭터 온라인 로드 실패:', error);
                 alert('캐릭터 데이터를 불러오는 중 오류가 발생했습니다:\n' + error.message);
+            }
+        };
+
+        // 캐릭터 저장 함수도 온라인 클라이언트로 교체
+        window.saveCharacter = async function() {
+            console.log('💾 === 온라인 캐릭터 저장 시작 ===');
+
+            const name = document.getElementById('charName').value;
+            const mbti = document.getElementById('charMbti').value;
+
+            console.log('📝 입력값 확인:');
+            console.log('  - 이름:', name || '(비어있음)');
+            console.log('  - MBTI:', mbti || '(비어있음)');
+
+            if (!name || !mbti) {
+                console.error('❌ 필수 입력값 누락');
+                alert(`이름과 MBTI는 필수 입력 항목입니다.\n\n현재 입력값:\n이름: ${name || '미입력'}\nMBTI: ${mbti || '미입력'}`);
+                return;
+            }
+
+            try {
+                // 캐릭터 데이터 수집
+                const characterData = collectCharacterData();
+                const characterId = currentMode === 'create'
+                    ? `${name.toLowerCase()}_${mbti.toLowerCase()}_${Date.now()}`
+                    : document.getElementById('characterId').value;
+
+                const finalCharacterData = {
+                    id: characterId,
+                    name: characterData.name,
+                    age: characterData.age,
+                    mbti: characterData.mbti,
+                    character_type: characterData.character_type,
+                    personality_traits: characterData.personality_traits,
+                    major: characterData.major,
+                    family: characterData.family,
+                    hometown: characterData.hometown,
+                    relationship: characterData.relationship,
+                    appearance: {
+                        hair: characterData.hair,
+                        eyes: characterData.eyes,
+                        body: characterData.body,
+                        style: characterData.style
+                    },
+                    hobbies: characterData.hobbies,
+                    values: characterData.values,
+                    speech_style: characterData.speech_style,
+                    speech_habit: characterData.speech_habit,
+                    genre: characterData.genre,
+                    main_situation: characterData.main_situation,
+                    created_at: new Date().toISOString(),
+                    active: true
+                };
+
+                // 저장 버튼 상태 변경
+                const saveButton = document.querySelector('#characterModal .btn-primary');
+                const originalText = saveButton.textContent;
+                saveButton.disabled = true;
+                saveButton.textContent = '🌐 온라인 저장 중...';
+
+                console.log('💾 온라인에 저장할 캐릭터 데이터:', finalCharacterData);
+
+                // 온라인 데이터 클라이언트를 통해 저장
+                const result = await window.onlineDataClient.saveCharacter(finalCharacterData);
+
+                if (result.success) {
+                    // 성공 시 로컬 캐시 업데이트
+                    const characters = window.characters || {};
+                    characters[result.id] = result.data;
+                    window.characters = characters;
+
+                    // UI 즉시 업데이트
+                    displayCharacters();
+                    updateCharacterStats();
+
+                    const successMessage = currentMode === 'create' ?
+                        `💖 새로운 캐릭터 '${name}'가 온라인에 저장되었습니다!\n✅ GitHub에서 영구 보관됩니다!` :
+                        `✨ 캐릭터 '${name}'가 수정되어 온라인에 저장되었습니다!`;
+
+                    alert(successMessage);
+                    closeModal('characterModal');
+
+                    console.log('✅ 온라인 캐릭터 저장 완료!');
+                } else {
+                    throw new Error(result.error || '온라인 저장 실패');
+                }
+
+            } catch (error) {
+                console.error('❌ 온라인 캐릭터 저장 실패:', error);
+                alert('온라인 저장 중 오류가 발생했습니다:\n' + error.message + '\n\n인터넷 연결과 GitHub Token을 확인해주세요.');
+            } finally {
+                // 버튼 상태 복원
+                const saveButton = document.querySelector('#characterModal .btn-primary');
+                if (saveButton) {
+                    saveButton.disabled = false;
+                    saveButton.textContent = '💖 캐릭터 저장';
+                }
             }
         };
 
