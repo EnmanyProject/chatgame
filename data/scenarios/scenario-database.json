@@ -4,30 +4,10 @@
     "created_date": "2025-09-16",
     "total_scenarios": 0,
     "ai_context_engine": "claude-3.5-sonnet",
-    "reset_at": "2025-09-22T13:30:28.115Z",
+    "reset_at": "2025-09-22T15:35:28.575Z",
     "reset_reason": "Clean scenarios data reset"
   },
-  "scenarios": {
-    "scenario_도서관의_속삭임_1758551391179": {
-      "title": "도서관의 속삭임",
-      "description": "도서관에서 우연히 같은 책을 읽고 있던 두 사람이 조금씩 가까워지는 과정",
-      "background_setting": "중앙 도서관",
-      "mood": "코믹",
-      "available_characters": [
-        "미화_infp_1758551362040"
-      ],
-      "created_date": "2025-09-22",
-      "episode_count": 0,
-      "tags": [
-        "코믹"
-      ],
-      "source": "github_api",
-      "active": true,
-      "id": "scenario_도서관의_속삭임_1758551391179",
-      "action": "create",
-      "updated_at": "2025-09-22T14:29:51.507Z"
-    }
-  },
+  "scenarios": {},
   "scenario_templates": {
     "romance_template": {
       "mood_options": [
