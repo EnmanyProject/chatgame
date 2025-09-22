@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 캐릭터 저장 디버깅</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f6fa;
+        }
+        .debug-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .error { color: #e74c3c; font-weight: bold; }
+        .success { color: #27ae60; font-weight: bold; }
+        .warning { color: #f39c12; font-weight: bold; }
+        .info { color: #3498db; font-weight: bold; }
+
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover { background: #2980b9; }
+        .btn.danger { background: #e74c3c; }
+        .btn.success { background: #27ae60; }
+
+        .log-output {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .status-ok { background: #27ae60; }
+        .status-error { background: #e74c3c; }
+        .status-unknown { background: #95a5a6; }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>🔍 캐릭터 저장 디버깅 도구</h1>
+        <p>시나리오 어드민에서 캐릭터 저장이 안 되는 문제를 단계별로 진단합니다.</p>
+    </div>
+
+    <!-- 1단계: 스크립트 로드 확인 -->
+    <div class="debug-container">
+        <h2>📦 1단계: 필수 스크립트 로드 확인</h2>
+        <button class="btn" onclick="checkScriptLoading()">스크립트 로드 상태 확인</button>
+        <div id="scriptStatus"></div>
+    </div>
+
+    <!-- 2단계: GitHub Token 확인 -->
+    <div class="debug-container">
+        <h2>🔐 2단계: GitHub Token 설정</h2>
+        <input type="password" id="githubToken" placeholder="GitHub Personal Access Token 입력">
+        <button class="btn" onclick="setGitHubToken()">토큰 설정</button>
+        <button class="btn" onclick="testGitHubConnection()">연결 테스트</button>
+        <div id="tokenStatus"></div>
+    </div>
+
+    <!-- 3단계: 온라인 클라이언트 테스트 -->
+    <div class="debug-container">
+        <h2>🌐 3단계: 온라인 데이터 클라이언트 테스트</h2>
+        <button class="btn" onclick="testOnlineClient()">클라이언트 로드 테스트</button>
+        <button class="btn" onclick="testCharacterLoad()">캐릭터 로드 테스트</button>
+        <div id="clientStatus"></div>
+    </div>
+
+    <!-- 4단계: 캐릭터 저장 테스트 -->
+    <div class="debug-container">
+        <h2>👤 4단계: 캐릭터 저장 테스트</h2>
+        <input type="text" id="testCharName" placeholder="테스트 캐릭터 이름" value="디버그테스트">
+        <select id="testCharMbti">
+            <option value="">MBTI 선택</option>
+            <option value="INFP">INFP</option>
+            <option value="ENFP">ENFP</option>
+            <option value="INTJ">INTJ</option>
+            <option value="ESFJ">ESFJ</option>
+            <option value="ISTP">ISTP</option>
+        </select>
+        <br>
+        <button class="btn success" onclick="testCharacterSave()">테스트 캐릭터 저장</button>
+        <button class="btn danger" onclick="cleanupTestData()">테스트 데이터 정리</button>
+        <div id="saveStatus"></div>
+    </div>
+
+    <!-- 5단계: 더미 데이터 관리 -->
+    <div class="debug-container">
+        <h2>🗑️ 5단계: 더미 데이터 관리</h2>
+        <button class="btn" onclick="checkDummyData()">더미 데이터 확인</button>
+        <button class="btn danger" onclick="clearAllDummyData()">모든 더미 데이터 삭제</button>
+        <div id="dummyStatus"></div>
+    </div>
+
+    <!-- 로그 출력 -->
+    <div class="debug-container">
+        <h2>📋 디버그 로그</h2>
+        <button class="btn" onclick="clearLog()">로그 지우기</button>
+        <div id="debugLog" class="log-output">디버깅 로그가 여기에 표시됩니다...\n</div>
+    </div>
+
+    <!-- 온라인 데이터 클라이언트 로드 -->
+    <script src="js/online-data-client.js"></script>
+
+    <script>
+        let debugLog = document.getElementById('debugLog');
+        let githubToken = '';
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const colorMap = {
+                'error': '#e74c3c',
+                'success': '#27ae60',
+                'warning': '#f39c12',
+                'info': '#3498db'
+            };
+
+            const color = colorMap[type] || '#ecf0f1';
+            debugLog.innerHTML += `<span style="color: ${color}">[${timestamp}] ${message}</span>\n`;
+            debugLog.scrollTop = debugLog.scrollHeight;
+        }
+
+        function clearLog() {
+            debugLog.innerHTML = '디버그 로그 초기화됨...\n';
+        }
+
+        // 1단계: 스크립트 로드 확인
+        function checkScriptLoading() {
+            log('📦 스크립트 로드 상태 확인 중...', 'info');
+
+            const checks = [
+                {
+                    name: 'window.onlineDataClient',
+                    exists: typeof window.onlineDataClient !== 'undefined',
+                    description: '온라인 데이터 클라이언트'
+                },
+                {
+                    name: 'window.fetch',
+                    exists: typeof window.fetch !== 'undefined',
+                    description: 'Fetch API'
+                },
+                {
+                    name: 'localStorage',
+                    exists: typeof localStorage !== 'undefined',
+                    description: 'LocalStorage'
+                }
+            ];
+
+            let html = '<h3>스크립트 로드 상태:</h3>';
+            checks.forEach(check => {
+                const status = check.exists ?
+                    '<span class="status-indicator status-ok"></span>✅' :
+                    '<span class="status-indicator status-error"></span>❌';
+                html += `<p>${status} ${check.name}: ${check.description}</p>`;
+
+                log(`${check.exists ? '✅' : '❌'} ${check.name}: ${check.exists ? '로드됨' : '로드 실패'}`,
+                    check.exists ? 'success' : 'error');
+            });
+
+            document.getElementById('scriptStatus').innerHTML = html;
+
+            if (!window.onlineDataClient) {
+                log('❌ 온라인 데이터 클라이언트가 로드되지 않았습니다!', 'error');
+                log('원인: js/online-data-client.js 파일 로드 실패', 'error');
+            } else {
+                log('✅ 온라인 데이터 클라이언트 로드 확인', 'success');
+            }
+        }
+
+        // 2단계: GitHub Token 설정 및 테스트
+        function setGitHubToken() {
+            githubToken = document.getElementById('githubToken').value.trim();
+
+            if (!githubToken) {
+                log('❌ GitHub Token이 입력되지 않았습니다', 'error');
+                document.getElementById('tokenStatus').innerHTML =
+                    '<p class="error">GitHub Token을 입력해주세요</p>';
+                return;
+            }
+
+            if (githubToken.length < 20) {
+                log('⚠️ GitHub Token이 너무 짧습니다 (20자 이상이어야 함)', 'warning');
+                document.getElementById('tokenStatus').innerHTML =
+                    '<p class="warning">유효하지 않은 토큰 길이입니다</p>';
+                return;
+            }
+
+            // 온라인 클라이언트에 토큰 설정
+            if (window.onlineDataClient) {
+                window.onlineDataClient.githubToken = githubToken;
+                log('✅ 온라인 클라이언트에 GitHub Token 설정 완료', 'success');
+            }
+
+            document.getElementById('tokenStatus').innerHTML =
+                `<p class="success">토큰 설정 완료 (${githubToken.substring(0, 8)}...)</p>`;
+            log(`✅ GitHub Token 설정: ${githubToken.substring(0, 8)}...`, 'success');
+        }
+
+        async function testGitHubConnection() {
+            if (!githubToken) {
+                log('❌ GitHub Token이 설정되지 않았습니다', 'error');
+                return;
+            }
+
+            log('🔐 GitHub API 연결 테스트 중...', 'info');
+
+            try {
+                const response = await fetch('/api/test-github-connection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-github-token': githubToken
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    log('✅ GitHub 연결 성공!', 'success');
+                    log(`사용자: ${result.user.name} (@${result.user.login})`, 'info');
+                    log(`저장소: ${result.repository.full_name}`, 'info');
+
+                    document.getElementById('tokenStatus').innerHTML +=
+                        `<p class="success">GitHub 연결 성공! 사용자: ${result.user.login}</p>`;
+                } else {
+                    log('❌ GitHub 연결 실패', 'error');
+                    log(`오류: ${result.error}`, 'error');
+
+                    document.getElementById('tokenStatus').innerHTML +=
+                        `<p class="error">연결 실패: ${result.error}</p>`;
+                }
+            } catch (error) {
+                log('❌ GitHub 연결 테스트 오류', 'error');
+                log(`오류: ${error.message}`, 'error');
+            }
+        }
+
+        // 3단계: 온라인 클라이언트 테스트
+        function testOnlineClient() {
+            log('🌐 온라인 데이터 클라이언트 테스트 중...', 'info');
+
+            if (!window.onlineDataClient) {
+                log('❌ 온라인 데이터 클라이언트가 없습니다', 'error');
+                document.getElementById('clientStatus').innerHTML =
+                    '<p class="error">온라인 데이터 클라이언트 로드 실패</p>';
+                return;
+            }
+
+            const client = window.onlineDataClient;
+            let html = '<h3>클라이언트 상태:</h3>';
+
+            const checks = [
+                { name: 'baseUrl', value: client.baseUrl, expected: '/api/github-data-manager' },
+                { name: 'githubToken', value: client.githubToken ? `${client.githubToken.substring(0, 8)}...` : 'null' },
+                { name: 'cache', value: client.cache ? 'Map 객체 존재' : 'null' },
+                { name: 'requestQueue', value: `배열 (길이: ${client.requestQueue?.length || 0})` }
+            ];
+
+            checks.forEach(check => {
+                html += `<p>• ${check.name}: ${check.value}</p>`;
+                log(`📊 ${check.name}: ${check.value}`, 'info');
+            });
+
+            document.getElementById('clientStatus').innerHTML = html;
+            log('✅ 온라인 클라이언트 상태 확인 완료', 'success');
+        }
+
+        async function testCharacterLoad() {
+            if (!window.onlineDataClient) {
+                log('❌ 온라인 데이터 클라이언트가 없습니다', 'error');
+                return;
+            }
+
+            if (!githubToken) {
+                log('❌ GitHub Token이 설정되지 않았습니다', 'error');
+                return;
+            }
+
+            log('📥 캐릭터 로드 테스트 중...', 'info');
+
+            try {
+                const characters = await window.onlineDataClient.loadCharacters();
+                const count = Object.keys(characters).length;
+
+                log(`✅ 캐릭터 로드 성공! 총 ${count}개`, 'success');
+
+                if (count > 0) {
+                    const characterNames = Object.values(characters).map(c => c.name || c.id).join(', ');
+                    log(`캐릭터 목록: ${characterNames}`, 'info');
+                }
+
+                document.getElementById('clientStatus').innerHTML +=
+                    `<p class="success">캐릭터 로드 성공: ${count}개</p>`;
+
+            } catch (error) {
+                log('❌ 캐릭터 로드 실패', 'error');
+                log(`오류: ${error.message}`, 'error');
+
+                document.getElementById('clientStatus').innerHTML +=
+                    `<p class="error">캐릭터 로드 실패: ${error.message}</p>`;
+            }
+        }
+
+        // 4단계: 캐릭터 저장 테스트
+        async function testCharacterSave() {
+            const name = document.getElementById('testCharName').value.trim();
+            const mbti = document.getElementById('testCharMbti').value;
+
+            if (!name || !mbti) {
+                log('❌ 이름과 MBTI를 입력해주세요', 'error');
+                document.getElementById('saveStatus').innerHTML =
+                    '<p class="error">이름과 MBTI를 입력해주세요</p>';
+                return;
+            }
+
+            if (!window.onlineDataClient) {
+                log('❌ 온라인 데이터 클라이언트가 없습니다', 'error');
+                return;
+            }
+
+            if (!githubToken) {
+                log('❌ GitHub Token이 설정되지 않았습니다', 'error');
+                return;
+            }
+
+            log(`💾 테스트 캐릭터 저장 중: ${name} (${mbti})`, 'info');
+
+            const testCharacter = {
+                id: `debug_${name.toLowerCase()}_${mbti.toLowerCase()}_${Date.now()}`,
+                name: name,
+                age: '22',
+                gender: 'female',
+                mbti: mbti,
+                personality_traits: ['친근한', '테스트용'],
+                major: 'test',
+                relationship: 'friend',
+                speech_style: '디버그 전용 말투',
+                speech_habit: '테스트입니다',
+                created_at: new Date().toISOString(),
+                test_data: true,
+                debug_marker: 'CREATED_BY_DEBUG_TOOL'
+            };
+
+            try {
+                const result = await window.onlineDataClient.saveCharacter(testCharacter);
+
+                if (result.success) {
+                    log('✅ 테스트 캐릭터 저장 성공!', 'success');
+                    log(`저장된 ID: ${result.id}`, 'info');
+
+                    document.getElementById('saveStatus').innerHTML =
+                        `<p class="success">캐릭터 저장 성공! ID: ${result.id}</p>`;
+                } else {
+                    log('❌ 테스트 캐릭터 저장 실패', 'error');
+                    log(`오류: ${result.error}`, 'error');
+
+                    document.getElementById('saveStatus').innerHTML =
+                        `<p class="error">저장 실패: ${result.error}</p>`;
+                }
+            } catch (error) {
+                log('❌ 캐릭터 저장 중 오류', 'error');
+                log(`오류: ${error.message}`, 'error');
+
+                document.getElementById('saveStatus').innerHTML =
+                    `<p class="error">저장 오류: ${error.message}</p>`;
+            }
+        }
+
+        // 5단계: 더미 데이터 관리
+        async function checkDummyData() {
+            log('🔍 더미 데이터 확인 중...', 'info');
+
+            // LocalStorage 확인
+            const localChars = localStorage.getItem('chatgame_characters');
+            const localScenarios = localStorage.getItem('scenarios');
+
+            let html = '<h3>로컬 데이터 상태:</h3>';
+            html += `<p>• chatgame_characters: ${localChars ? 'EXISTS' : 'EMPTY'}</p>`;
+            html += `<p>• scenarios: ${localScenarios ? 'EXISTS' : 'EMPTY'}</p>`;
+
+            // 온라인 데이터 확인
+            if (window.onlineDataClient && githubToken) {
+                try {
+                    const characters = await window.onlineDataClient.loadCharacters();
+                    const count = Object.keys(characters).length;
+                    html += `<p>• 온라인 캐릭터: ${count}개</p>`;
+                    log(`📊 온라인 캐릭터: ${count}개`, 'info');
+                } catch (error) {
+                    html += `<p>• 온라인 캐릭터: 로드 실패</p>`;
+                    log('❌ 온라인 캐릭터 로드 실패', 'error');
+                }
+            }
+
+            document.getElementById('dummyStatus').innerHTML = html;
+        }
+
+        async function clearAllDummyData() {
+            if (!confirm('정말로 모든 더미 데이터를 삭제하시겠습니까?')) {
+                return;
+            }
+
+            log('🗑️ 모든 더미 데이터 삭제 중...', 'warning');
+
+            // LocalStorage 정리
+            localStorage.removeItem('chatgame_characters');
+            localStorage.removeItem('scenarios');
+            localStorage.removeItem('episodes');
+            log('✅ LocalStorage 더미 데이터 삭제 완료', 'success');
+
+            // 온라인 클라이언트 캐시 정리
+            if (window.onlineDataClient && window.onlineDataClient.clearCache) {
+                window.onlineDataClient.clearCache();
+                log('✅ 온라인 클라이언트 캐시 정리 완료', 'success');
+            }
+
+            document.getElementById('dummyStatus').innerHTML =
+                '<p class="success">모든 더미 데이터가 삭제되었습니다</p>';
+        }
+
+        async function cleanupTestData() {
+            if (!window.onlineDataClient || !githubToken) {
+                log('❌ 정리에 필요한 도구가 없습니다', 'error');
+                return;
+            }
+
+            log('🧹 테스트 데이터 정리 중...', 'info');
+
+            try {
+                const characters = await window.onlineDataClient.loadCharacters();
+                const testChars = Object.values(characters).filter(c => c.debug_marker || c.test_data);
+
+                log(`🔍 ${testChars.length}개의 테스트 캐릭터 발견`, 'info');
+
+                for (const char of testChars) {
+                    try {
+                        await window.onlineDataClient.deleteCharacter(char.id);
+                        log(`✅ 테스트 캐릭터 삭제: ${char.name}`, 'success');
+                    } catch (error) {
+                        log(`❌ 삭제 실패: ${char.name} - ${error.message}`, 'error');
+                    }
+                }
+
+                document.getElementById('saveStatus').innerHTML +=
+                    `<p class="info">테스트 데이터 정리 완료</p>`;
+
+            } catch (error) {
+                log('❌ 테스트 데이터 정리 중 오류', 'error');
+                log(`오류: ${error.message}`, 'error');
+            }
+        }
+
+        // 페이지 로드 시 자동 체크
+        window.onload = function() {
+            log('🚀 디버깅 도구 로드 완료', 'success');
+            setTimeout(checkScriptLoading, 1000); // 1초 후 자동 체크
+        };
+    </script>
+</body>
+</html>

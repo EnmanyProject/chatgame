@@ -45,6 +45,8 @@ export default async function handler(req, res) {
                 return await handleDelete(req, res, githubToken, type);
             case 'list':
                 return await handleList(req, res, githubToken, type);
+            case 'reset':
+                return await handleReset(req, res, githubToken, type);
             default:
                 return res.status(400).json({ error: '지원하지 않는 액션입니다' });
         }
@@ -295,4 +297,42 @@ async function commitToGitHub(token, filePath, content, message) {
     const result = await response.json();
     console.log(`✅ GitHub 커밋 성공: ${result.commit.sha}`);
     return result;
+}
+
+// 데이터 완전 초기화 (POST)
+async function handleReset(req, res, githubToken, type) {
+    console.log(`🗑️ ${type} 데이터 완전 초기화 시작`);
+
+    try {
+        const endpoint = GITHUB_CONFIG.endpoints[type];
+        if (!endpoint) {
+            return res.status(400).json({ error: `지원하지 않는 데이터 타입: ${type}` });
+        }
+
+        // 현재 파일 데이터 로드
+        const currentFileData = await getGitHubFile(githubToken, endpoint);
+
+        // 완전 초기화: 빈 객체로 설정
+        currentFileData[type] = {};
+        currentFileData.metadata = currentFileData.metadata || {};
+        currentFileData.metadata.reset_at = new Date().toISOString();
+        currentFileData.metadata.reset_reason = `Clean ${type} data reset`;
+
+        // GitHub에 커밋
+        await commitToGitHub(githubToken, endpoint, currentFileData, `Reset all ${type} data - Clean slate`);
+
+        console.log(`✅ ${type} 데이터 완전 초기화 완료`);
+        return res.json({
+            success: true,
+            message: `${type} 데이터가 완전히 초기화되었습니다`,
+            reset_at: currentFileData.metadata.reset_at
+        });
+
+    } catch (error) {
+        console.error(`❌ ${type} 데이터 초기화 실패:`, error);
+        return res.status(500).json({
+            error: `${type} 데이터 초기화 실패`,
+            message: error.message
+        });
+    }
 }

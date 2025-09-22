@@ -349,6 +349,85 @@ GitHub Token:`);
         console.log('🧹 메모리 캐시 클리어됨');
     }
 
+    // === 데이터 초기화 ===
+    async resetCharacters() {
+        console.log('🗑️ 캐릭터 데이터 완전 초기화...');
+
+        try {
+            const response = await fetch(`${this.baseUrl}?action=reset&type=characters`, {
+                method: 'POST',
+                headers: this.getHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                // 캐시 초기화
+                this.cache.set('characters', {});
+                console.log('✅ 캐릭터 데이터 완전 초기화 완료');
+                return result;
+            } else {
+                throw new Error(result.error || '캐릭터 초기화 실패');
+            }
+
+        } catch (error) {
+            console.error('❌ 캐릭터 초기화 실패:', error);
+            throw error;
+        }
+    }
+
+    async resetScenarios() {
+        console.log('🗑️ 시나리오 데이터 완전 초기화...');
+
+        try {
+            const response = await fetch(`${this.baseUrl}?action=reset&type=scenarios`, {
+                method: 'POST',
+                headers: this.getHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                // 캐시 초기화
+                this.cache.set('scenarios', {});
+                console.log('✅ 시나리오 데이터 완전 초기화 완료');
+                return result;
+            } else {
+                throw new Error(result.error || '시나리오 초기화 실패');
+            }
+
+        } catch (error) {
+            console.error('❌ 시나리오 초기화 실패:', error);
+            throw error;
+        }
+    }
+
+    async resetAllData() {
+        console.log('🗑️ 모든 데이터 완전 초기화...');
+
+        try {
+            await Promise.all([
+                this.resetCharacters(),
+                this.resetScenarios()
+            ]);
+
+            console.log('✅ 모든 데이터 완전 초기화 완료');
+            return { success: true, message: '모든 데이터가 완전히 초기화되었습니다' };
+
+        } catch (error) {
+            console.error('❌ 데이터 초기화 실패:', error);
+            throw error;
+        }
+    }
+
     // 전체 데이터 동기화
     async syncAllData() {
         console.log('🔄 전체 데이터 온라인 동기화 시작...');
