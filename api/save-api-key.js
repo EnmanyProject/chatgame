@@ -1,7 +1,7 @@
-// API 키 저장 API - 향상된 세션 관리
-let globalApiKey = null; // 전역 변수로 API 키 저장
+// API 키 저장 API - Secure Storage 연동
+import { getGlobalApiKey, storeUserApiKey, testApiKey } from './secure-api-storage.js';
 
-// 메모리 저장소 (Vercel 서버리스 환경에서 공유)
+// 메모리 저장소 (임시 캐시용)
 const apiKeyStore = {
   key: null,
   timestamp: null
@@ -35,71 +35,40 @@ export default async function handler(req, res) {
 
     console.log('🔑 API 키 저장 요청 받음:', `${apiKey.substring(0, 4)}...`);
 
-    // 전역 변수, 환경변수, 메모리 저장소에 모두 저장
-    globalApiKey = apiKey;
-    process.env.OPENAI_API_KEY = apiKey;
+    // 🔐 Secure Storage에 저장 (기본 사용자 'default')
+    const storeResult = await storeUserApiKey('default', apiKey);
+
+    // 임시 캐시에도 저장
     apiKeyStore.key = apiKey;
     apiKeyStore.timestamp = new Date().toISOString();
 
-    console.log('✅ API 키 전역 저장 완료');
+    console.log('✅ API 키 안전 저장 완료:', storeResult.keyPreview);
     console.log('🔍 저장 확인:', {
-      globalApiKey: globalApiKey ? `${globalApiKey.substring(0, 4)}...` : 'None',
+      secureStorage: storeResult.keyPreview,
       envKey: process.env.OPENAI_API_KEY ? `${process.env.OPENAI_API_KEY.substring(0, 4)}...` : 'None',
-      storeKey: apiKeyStore.key ? `${apiKeyStore.key.substring(0, 4)}...` : 'None'
+      cacheKey: apiKeyStore.key ? `${apiKeyStore.key.substring(0, 4)}...` : 'None'
     });
 
     // 즉시 연결 테스트 수행
-    try {
-      const testResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: '간단한 연결 테스트입니다.'
-            },
-            {
-              role: 'user',
-              content: '테스트'
-            }
-          ],
-          max_tokens: 5,
-          temperature: 0.1
-        })
-      });
+    const testResult = await testApiKey(apiKey);
 
-      if (testResponse.ok) {
-        const testData = await testResponse.json();
-        console.log('✅ API 키 검증 성공');
-        
-        return res.json({
-          success: true,
-          message: 'API 키가 성공적으로 저장되고 검증되었습니다.',
-          validated: true,
-          model: 'gpt-4o-mini',
-          note: '현재 세션에서 유효합니다.'
-        });
-      } else {
-        console.warn('⚠️ API 키 저장되었으나 검증 실패');
-        return res.status(400).json({
-          success: false,
-          message: 'API 키 형식은 올바르지만 OpenAI에서 인증에 실패했습니다. 키가 유효한지 확인해주세요.',
-          validated: false
-        });
-      }
-      
-    } catch (testError) {
-      console.warn('⚠️ API 키 검증 중 오류:', testError.message);
+    if (testResult.valid) {
+      console.log('✅ API 키 검증 성공');
+
       return res.json({
         success: true,
-        message: 'API 키가 저장되었지만 검증 중 오류가 발생했습니다.',
+        message: 'API 키가 성공적으로 저장되고 검증되었습니다. (GitHub에 암호화되어 안전하게 저장됨)',
+        validated: true,
+        keyPreview: storeResult.keyPreview,
+        storage: 'secure-encrypted'
+      });
+    } else {
+      console.warn('⚠️ API 키 저장되었으나 검증 실패:', testResult.error || `HTTP ${testResult.status}`);
+      return res.status(400).json({
+        success: false,
+        message: 'API 키 형식은 올바르지만 OpenAI에서 인증에 실패했습니다. 키가 유효한지 확인해주세요.',
         validated: false,
-        error: testError.message
+        error: testResult.error || `HTTP ${testResult.status}: ${testResult.statusText}`
       });
     }
 
@@ -113,14 +82,45 @@ export default async function handler(req, res) {
   }
 }
 
-// 전역 API 키 접근 함수 (다른 API에서 사용)
-export function getGlobalApiKey() {
-  // 우선 순위: 메모리 저장소 → 전역 변수 → 환경변수
-  const result = apiKeyStore.key || globalApiKey || process.env.OPENAI_API_KEY;
+// 전역 API 키 접근 함수 (다른 API에서 사용) - Secure Storage 연동
+export async function getGlobalApiKeySync() {
+  // 우선 순위: 캐시 → Secure Storage → 환경변수
+  if (apiKeyStore.key) {
+    console.log('🔍 캐시에서 API 키 반환:', `${apiKeyStore.key.substring(0, 4)}...`);
+    return apiKeyStore.key;
+  }
 
-  console.log('🔍 getGlobalApiKey 호출:', {
-    storeKey: apiKeyStore.key ? `${apiKeyStore.key.substring(0, 4)}...` : 'None',
-    globalKey: globalApiKey ? `${globalApiKey.substring(0, 4)}...` : 'None',
+  try {
+    const secureKey = await getGlobalApiKey();
+    if (secureKey) {
+      // 캐시에 저장
+      apiKeyStore.key = secureKey;
+      apiKeyStore.timestamp = new Date().toISOString();
+
+      console.log('🔍 Secure Storage에서 API 키 반환:', `${secureKey.substring(0, 4)}...`);
+      return secureKey;
+    }
+  } catch (error) {
+    console.error('❌ Secure Storage API 키 조회 오류:', error);
+  }
+
+  const envKey = process.env.OPENAI_API_KEY;
+  if (envKey) {
+    console.log('🔍 환경변수에서 API 키 반환:', `${envKey.substring(0, 4)}...`);
+    return envKey;
+  }
+
+  console.log('❌ 사용 가능한 API 키 없음');
+  return null;
+}
+
+// 동기식 호환성을 위한 래퍼 (기존 코드와의 호환성)
+export function getGlobalApiKey() {
+  // 캐시 우선 반환
+  const result = apiKeyStore.key || process.env.OPENAI_API_KEY;
+
+  console.log('🔍 getGlobalApiKey (동기) 호출:', {
+    cacheKey: apiKeyStore.key ? `${apiKeyStore.key.substring(0, 4)}...` : 'None',
     envKey: process.env.OPENAI_API_KEY ? `${process.env.OPENAI_API_KEY.substring(0, 4)}...` : 'None',
     result: result ? `${result.substring(0, 4)}...` : 'None'
   });
@@ -130,10 +130,10 @@ export function getGlobalApiKey() {
 // API 키 저장소 상태 확인 함수
 export function getApiKeyStatus() {
   return {
-    hasStoreKey: !!apiKeyStore.key,
-    hasGlobalKey: !!globalApiKey,
+    hasCacheKey: !!apiKeyStore.key,
     hasEnvKey: !!process.env.OPENAI_API_KEY,
     timestamp: apiKeyStore.timestamp,
-    preview: apiKeyStore.key ? `${apiKeyStore.key.substring(0, 4)}...` : 'None'
+    preview: apiKeyStore.key ? `${apiKeyStore.key.substring(0, 4)}...` : 'None',
+    storage: 'secure-encrypted-github'
   };
 }

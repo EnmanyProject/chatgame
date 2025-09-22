@@ -3526,34 +3526,86 @@
             }
         }
 
-        // API 키 삭제
+        // API 키 삭제 (로그인 기반 + Secure Storage)
         async function clearApiKey() {
-            if (!confirm('정말로 API 키를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+            if (!confirm('정말로 API 키를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.\n\n(GitHub 암호화 저장소에서 완전히 삭제됩니다)')) {
                 return;
             }
 
             try {
-                const response = await fetch('/api/clear-api-key', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+                console.log('🗑️ API 키 안전 삭제 시도...');
 
-                if (response.ok) {
-                    // 세션 스토리지에서도 삭제
-                    sessionStorage.removeItem('openai_api_key');
-                    
-                    alert('✅ API 키가 삭제되었습니다.');
-                    checkApiStatus();
-                    document.getElementById('apiTestResults').style.display = 'none';
+                // 로그인된 사용자의 세션 기반 삭제
+                if (currentSessionId) {
+                    const response = await fetch('/api/admin-auth?action=delete-api-key', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            sessionId: currentSessionId
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('✅ 로그인 기반 API 키 삭제 성공:', data.message);
+                        showNotification('✅ API 키가 안전하게 삭제되었습니다!\n(GitHub 암호화 저장소에서 완전 제거됨)', 'success');
+                    } else {
+                        const error = await response.json();
+                        console.warn('⚠️ 로그인 기반 삭제 실패, 일반 삭제 시도:', error.message);
+
+                        // 일반 삭제 API 시도
+                        await fallbackDeleteApiKey();
+                        return;
+                    }
                 } else {
-                    alert('❌ API 키 삭제 실패');
+                    // 로그인되지 않은 경우 일반 삭제
+                    await fallbackDeleteApiKey();
+                    return;
                 }
-                
+
+                // 브라우저 세션에서도 삭제
+                sessionStorage.removeItem('openai_api_key');
+
+                // 사용자 정보 업데이트
+                if (currentUser) {
+                    currentUser.hasApiKey = false;
+                    updateUserInfo(currentUser);
+                }
+
+                // API 상태 업데이트
+                setTimeout(() => {
+                    console.log('🔄 API 키 삭제 후 상태 확인...');
+                    checkApiStatus();
+                }, 1000);
+
+                document.getElementById('apiTestResults').style.display = 'none';
+
             } catch (error) {
-                console.error('API 키 삭제 오류:', error);
-                alert('❌ API 키 삭제 중 오류가 발생했습니다.');
+                console.error('❌ API 키 삭제 오류:', error);
+                showNotification('❌ API 키 삭제 중 오류가 발생했습니다: ' + error.message, 'error');
+            }
+        }
+
+        // 일반 API 키 삭제 (fallback)
+        async function fallbackDeleteApiKey() {
+            console.log('🔄 일반 API 키 삭제 시도...');
+
+            const response = await fetch('/api/clear-api-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ 일반 API 키 삭제 성공:', data.message);
+                showNotification('✅ API 키가 삭제되었습니다!\n' + (data.note || ''), 'success');
+            } else {
+                const error = await response.json();
+                throw new Error(error.message || '일반 삭제도 실패했습니다');
             }
         }
 

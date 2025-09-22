@@ -1,11 +1,11 @@
-// 어드민 인증 API - 로그인 기반 API 키 관리
+// 어드민 인증 API - 로그인 기반 API 키 관리 with Secure Storage
 import crypto from 'crypto';
+import { storeUserApiKey, getUserApiKey, removeUserApiKey, testApiKey } from './secure-api-storage.js';
 
 // 간단한 사용자 저장소 (실제로는 데이터베이스나 안전한 저장소 사용)
 const adminUsers = {
   'admin': {
     password: 'chatgame2025', // 실제로는 해시된 비밀번호
-    apiKey: null,
     lastLogin: null,
     sessions: new Set()
   }
@@ -37,6 +37,8 @@ export default async function handler(req, res) {
         return await handleSaveApiKey(req, res);
       case 'get-api-key':
         return await handleGetApiKey(req, res);
+      case 'delete-api-key':
+        return await handleDeleteApiKey(req, res);
       default:
         return res.status(400).json({
           success: false,
@@ -83,8 +85,7 @@ async function handleLogin(req, res) {
   const sessionData = {
     username,
     loginTime: new Date().toISOString(),
-    lastActivity: new Date().toISOString(),
-    apiKey: user.apiKey
+    lastActivity: new Date().toISOString()
   };
 
   activeSessions.set(sessionId, sessionData);
@@ -99,7 +100,7 @@ async function handleLogin(req, res) {
     sessionId,
     user: {
       username,
-      hasApiKey: !!user.apiKey,
+      hasApiKey: false, // Will be loaded separately from secure storage
       lastLogin: user.lastLogin
     }
   });
@@ -203,57 +204,45 @@ async function handleSaveApiKey(req, res) {
     });
   }
 
-  // API 키 저장
-  const user = adminUsers[session.username];
-  user.apiKey = apiKey;
-  session.apiKey = apiKey;
-
-  // save-api-key.js의 메모리 저장소도 업데이트
-  process.env.OPENAI_API_KEY = apiKey;
-
-  console.log('🔑 API 키 저장 완료:', {
-    username: session.username,
-    keyPreview: apiKey.substring(0, 4) + '...',
-    envSet: !!process.env.OPENAI_API_KEY
-  });
-
-  // OpenAI API 유효성 검증
+  // 🔐 Secure API 키 저장 (GitHub + 암호화)
   try {
-    const testResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: '테스트' }],
-        max_tokens: 5
-      })
+    const storeResult = await storeUserApiKey(session.username, apiKey);
+
+    // 세션에도 저장 (빠른 접근용)
+    session.apiKey = apiKey;
+
+    console.log('🔑 API 키 안전 저장 완료:', {
+      username: session.username,
+      keyPreview: storeResult.keyPreview,
+      envSet: !!process.env.OPENAI_API_KEY
     });
 
-    if (testResponse.ok) {
-      console.log('✅ API 키 저장 및 검증 완료:', session.username, apiKey.substring(0, 4) + '...');
+    // OpenAI API 유효성 검증
+    const testResult = await testApiKey(apiKey);
+
+    if (testResult.valid) {
+      console.log('✅ API 키 저장 및 검증 완료:', session.username, storeResult.keyPreview);
 
       return res.json({
         success: true,
-        message: 'API 키가 성공적으로 저장되고 검증되었습니다.',
-        validated: true
+        message: 'API 키가 성공적으로 저장되고 검증되었습니다. (GitHub에 암호화되어 안전하게 저장됨)',
+        validated: true,
+        keyPreview: storeResult.keyPreview
       });
     } else {
       return res.status(400).json({
         success: false,
         message: 'API 키는 저장되었지만 OpenAI 인증에 실패했습니다.',
-        validated: false
+        validated: false,
+        error: `HTTP ${testResult.status}: ${testResult.statusText || testResult.error}`
       });
     }
-  } catch (error) {
-    console.warn('⚠️ API 키 검증 실패:', error.message);
-    return res.json({
-      success: true,
-      message: 'API 키가 저장되었지만 검증 중 오류가 발생했습니다.',
-      validated: false,
-      error: error.message
+  } catch (storeError) {
+    console.error('❌ 안전 저장 실패:', storeError);
+    return res.status(500).json({
+      success: false,
+      message: '안전한 API 키 저장에 실패했습니다: ' + storeError.message,
+      validated: false
     });
   }
 }
@@ -277,29 +266,117 @@ async function handleGetApiKey(req, res) {
     });
   }
 
-  return res.json({
-    success: true,
-    hasApiKey: !!session.apiKey,
-    apiKey: session.apiKey || null,
-    keyPreview: session.apiKey ? `${session.apiKey.substring(0, 4)}...` : null
-  });
+  // 🔍 GitHub에서 사용자 API 키 조회
+  try {
+    const userKeyData = await getUserApiKey(session.username);
+
+    if (userKeyData) {
+      // 세션에도 로드 (빠른 접근용)
+      session.apiKey = userKeyData.apiKey;
+
+      return res.json({
+        success: true,
+        hasApiKey: true,
+        apiKey: userKeyData.apiKey,
+        keyPreview: userKeyData.keyPreview,
+        lastUpdated: userKeyData.lastUpdated
+      });
+    } else {
+      return res.json({
+        success: true,
+        hasApiKey: false,
+        apiKey: null,
+        keyPreview: null
+      });
+    }
+  } catch (error) {
+    console.error('❌ API 키 조회 오류:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'API 키 조회 중 오류가 발생했습니다.',
+      error: error.message
+    });
+  }
 }
 
-// 활성 API 키 가져오기 (다른 API에서 사용)
-export function getActiveApiKey() {
-  // 가장 최근에 활동한 세션의 API 키 반환
+// API 키 삭제 처리 (새로운 핸들러)
+async function handleDeleteApiKey(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, message: 'POST 요청만 허용됩니다.' });
+  }
+
+  const { sessionId } = req.body;
+
+  if (!sessionId) {
+    return res.status(400).json({
+      success: false,
+      message: '세션 ID가 필요합니다.'
+    });
+  }
+
+  const session = activeSessions.get(sessionId);
+  if (!session) {
+    return res.status(401).json({
+      success: false,
+      message: '인증되지 않은 요청입니다.'
+    });
+  }
+
+  try {
+    // 🗑️ Secure Storage에서 삭제
+    const deleteResult = await removeUserApiKey(session.username);
+
+    if (deleteResult.success) {
+      // 세션에서도 제거
+      session.apiKey = null;
+
+      console.log('🗑️ API 키 안전 삭제 완료:', session.username);
+
+      return res.json({
+        success: true,
+        message: 'API 키가 안전하게 삭제되었습니다.'
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: deleteResult.message
+      });
+    }
+  } catch (error) {
+    console.error('❌ API 키 삭제 오류:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'API 키 삭제 중 오류가 발생했습니다.',
+      error: error.message
+    });
+  }
+}
+
+// 활성 API 키 가져오기 (다른 API에서 사용) - Secure Storage 연동
+export async function getActiveApiKey() {
+  // 가장 최근에 활동한 세션의 사용자 API 키 반환
   let latestSession = null;
   let latestTime = 0;
 
   for (const session of activeSessions.values()) {
     const activityTime = new Date(session.lastActivity).getTime();
-    if (activityTime > latestTime && session.apiKey) {
+    if (activityTime > latestTime) {
       latestTime = activityTime;
       latestSession = session;
     }
   }
 
-  return latestSession?.apiKey || null;
+  if (latestSession) {
+    try {
+      const userKeyData = await getUserApiKey(latestSession.username);
+      return userKeyData?.apiKey || null;
+    } catch (error) {
+      console.error('❌ 활성 API 키 조회 오류:', error);
+      return null;
+    }
+  }
+
+  return null;
 }
 
 // 세션 정리 (1시간 비활성 세션 제거)
