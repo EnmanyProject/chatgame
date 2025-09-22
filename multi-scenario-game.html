@@ -502,7 +502,13 @@
         </div>
     </div>
 
+    <!-- OnlineDataClient 추가 -->
+    <script src="js/online-data-client.js"></script>
+
     <script>
+        // 온라인 데이터 클라이언트 초기화
+        let onlineDataClient;
+
         // 게임 상태 관리
         let gameState = {
             currentScenario: null,
@@ -638,30 +644,34 @@
 
         // 시나리오 로드
         async function loadScenarios() {
-            console.log('🔄 시나리오 로딩 시작 (LocalStorage 기반)...');
-            
+            console.log('🌐 시나리오 로딩 시작 (온라인 GitHub 기반)...');
+
             // 로딩 인디케이터 표시
             const scenarioContainer = document.getElementById('scenarioButtons');
             if (scenarioContainer) {
-                scenarioContainer.innerHTML = '<div style="text-align: center; color: #666;">🔄 시나리오 로딩 중...</div>';
+                scenarioContainer.innerHTML = '<div style="text-align: center; color: #666;">🔄 온라인에서 시나리오 로딩 중...</div>';
             }
-            
+
             try {
-                // LocalStorage에서 시나리오 데이터 로딩
-                console.log('💾 LocalStorage에서 시나리오 로딩 시도...');
-                const localScenarios = localStorage.getItem('scenarios');
-                console.log('🔍 LocalStorage scenarios 원본 데이터:', localScenarios);
-                
-                if (localScenarios) {
-                    const scenariosData = JSON.parse(localScenarios);
-                    console.log('🔍 파싱된 시나리오 데이터:', scenariosData);
-                    
+                // 온라인 데이터 클라이언트가 없으면 초기화
+                if (!onlineDataClient) {
+                    onlineDataClient = new OnlineDataClient();
+                    // 초기화 시간 확보
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+
+                // 온라인에서 시나리오 데이터 로딩
+                console.log('🌐 온라인에서 시나리오 로딩 시도...');
+                const scenariosData = await onlineDataClient.loadScenarios();
+                console.log('🔍 온라인 시나리오 데이터:', scenariosData);
+
+                if (scenariosData && Object.keys(scenariosData).length > 0) {
                     const scenarioArray = Object.values(scenariosData).filter(s => s && s.active !== false);
                     console.log('🔍 필터링된 시나리오 배열:', scenarioArray);
-                    
+
                     console.log('📊 로드된 시나리오 수:', scenarioArray.length);
                     console.log('📋 시나리오 목록:', scenarioArray.map(s => `${s.id || s.scenario_id}: ${s.title}`));
-                    
+
                     if (scenarioArray.length > 0) {
                         // 시나리오 데이터 구조 표준화
                         availableScenarios = scenarioArray.map(scenario => ({
@@ -674,23 +684,23 @@
                             available_characters: scenario.available_characters || [],
                             active: true
                         }));
-                        
-                        console.log('✅ LocalStorage 시나리오 로딩 성공:', availableScenarios.length + '개');
+
+                        console.log('✅ 온라인 시나리오 로딩 성공:', availableScenarios.length + '개');
                         displayScenarioButtons(availableScenarios);
                         return;
                     }
                 }
-                
-                // LocalStorage에 데이터가 없으면 테스트 시나리오 생성 제안
-                console.warn('⚠️ LocalStorage에 시나리오 데이터 없음');
-                
+
+                // 온라인에 데이터가 없으면 관리자 페이지로 안내
+                console.warn('⚠️ 온라인에 시나리오 데이터 없음');
+
                 if (scenarioContainer) {
                     scenarioContainer.innerHTML = `
                         <div style="color: #e74c3c; text-align: center; padding: 20px;">
                             <h3>🎭 시나리오 없음</h3>
                             <p>게임을 시작하려면 먼저 시나리오를 생성해주세요!</p>
-                            <button onclick="createTestScenario()" style="
-                                background: #f39c12;
+                            <button onclick="window.open('scenario-admin.html', '_blank')" style="
+                                background: #3498db;
                                 color: white;
                                 border: none;
                                 padding: 10px 20px;
@@ -698,10 +708,10 @@
                                 margin: 10px;
                                 cursor: pointer;
                             ">
-                                🎮 테스트 시나리오 생성
+                                🎮 시나리오 관리자로 이동
                             </button>
-                            <button onclick="setupOpenAISettings()" style="
-                                background: #9b59b6;
+                            <button onclick="location.reload()" style="
+                                background: #2ecc71;
                                 color: white;
                                 border: none;
                                 padding: 10px 20px;
@@ -841,20 +851,19 @@
             
             console.log('📚 시나리오 선택됨:', gameState.currentScenario.title);
 
-            // 캐릭터 로드 (LocalStorage 기반)
+            // 캐릭터 로드 (온라인 GitHub 기반)
             try {
-                console.log('🔄 캐릭터 로딩 중 (LocalStorage)...');
-                
-                // LocalStorage에서 캐릭터 데이터 로딩
-                const localCharacters = localStorage.getItem('characters');
-                
-                if (localCharacters) {
-                    const charactersData = JSON.parse(localCharacters);
+                console.log('🌐 캐릭터 로딩 중 (온라인)...');
+
+                // 온라인에서 캐릭터 데이터 로딩
+                const charactersData = await onlineDataClient.loadCharacters();
+
+                if (charactersData && Object.keys(charactersData).length > 0) {
                     const characterArray = Object.values(charactersData).filter(c => c && c.active !== false);
-                    
+
                     console.log('📊 로드된 캐릭터 수:', characterArray.length);
                     console.log('👥 캐릭터 목록:', characterArray.map(c => `${c.id}: ${c.name} (${c.mbti})`));
-                    
+
                     if (characterArray.length > 0) {
                         // 캐릭터 데이터 구조 표준화
                         availableCharacters = characterArray.map(character => ({
@@ -868,9 +877,9 @@
                             image: character.image || null,
                             active: true
                         }));
-                        
-                        console.log('✅ LocalStorage 캐릭터 로딩 성공:', availableCharacters.length + '개');
-                        
+
+                        console.log('✅ 온라인 캐릭터 로딩 성공:', availableCharacters.length + '개');
+
                         // 첫 번째 활성 캐릭터 자동 선택
                         gameState.currentCharacter = availableCharacters[0];
                         console.log('👤 선택된 캐릭터:', gameState.currentCharacter.name, '(' + gameState.currentCharacter.mbti + ')');
@@ -878,8 +887,8 @@
                         return;
                     }
                 }
-                
-                throw new Error('LocalStorage에 캐릭터 데이터가 없습니다');
+
+                throw new Error('온라인에 캐릭터 데이터가 없습니다');
             } catch (error) {
                 console.error('❌ 캐릭터 로딩 실패:', error);
                 
