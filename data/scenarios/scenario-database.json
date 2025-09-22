@@ -8,24 +8,24 @@
     "reset_reason": "Clean scenarios data reset"
   },
   "scenarios": {
-    "scenario_첫_눈이_내린_날_1758550446175": {
-      "title": "첫 눈이 내린 날",
-      "description": "비 오는 날 우산을 함께 쓰게 된 두 사람의 설레는 만남",
-      "background_setting": "벚꽃이 만발한 공원",
-      "mood": "따뜻함",
+    "scenario_도서관의_속삭임_1758551391179": {
+      "title": "도서관의 속삭임",
+      "description": "도서관에서 우연히 같은 책을 읽고 있던 두 사람이 조금씩 가까워지는 과정",
+      "background_setting": "중앙 도서관",
+      "mood": "코믹",
       "available_characters": [
-        "미화__infj_1758550387707"
+        "미화_infp_1758551362040"
       ],
       "created_date": "2025-09-22",
       "episode_count": 0,
       "tags": [
-        "따뜻함"
+        "코믹"
       ],
       "source": "github_api",
       "active": true,
-      "id": "scenario_첫_눈이_내린_날_1758550446175",
+      "id": "scenario_도서관의_속삭임_1758551391179",
       "action": "create",
-      "updated_at": "2025-09-22T14:14:08.197Z"
+      "updated_at": "2025-09-22T14:29:51.507Z"
     }
   },
   "scenario_templates": {

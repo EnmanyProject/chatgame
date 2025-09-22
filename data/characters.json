@@ -1,10 +1,10 @@
 {
   "characters": {
-    "수진_infj_1758548350647": {
-      "id": "수진_infj_1758548350647",
-      "name": "수진",
-      "age": "20",
-      "mbti": "INFJ",
+    "미화_infp_1758551362040": {
+      "id": "미화_infp_1758551362040",
+      "name": "미화",
+      "age": "25",
+      "mbti": "INFP",
       "gender": "female",
       "personality_traits": [
         "친근한",
@@ -29,112 +29,10 @@
       "speech_style": "친근한 말투",
       "speech_habit": "자주 미소짓기",
       "genre": "school_romance",
-      "created_at": "2025-09-22T13:39:10.647Z",
+      "created_at": "2025-09-22T14:29:22.040Z",
       "source": "github_api",
       "active": true,
-      "updated_at": "2025-09-22T13:39:10.930Z"
-    },
-    "미화__infj_1758548492510": {
-      "id": "미화__infj_1758548492510",
-      "name": "미화 ",
-      "age": "23",
-      "mbti": "INFJ",
-      "gender": "female",
-      "personality_traits": [
-        "친근한",
-        "매력적인",
-        "스마트한"
-      ],
-      "major": "general",
-      "family": "average",
-      "hometown": "seoul",
-      "relationship": "friend",
-      "appearance": {
-        "hair": "긴 생머리",
-        "eyes": "둥근 눈",
-        "style": "캐주얼"
-      },
-      "hobbies": [
-        "독서",
-        "음악감상",
-        "산책"
-      ],
-      "values": "family_oriented",
-      "speech_style": "친근한 말투",
-      "speech_habit": "자주 미소짓기",
-      "genre": "school_romance",
-      "created_at": "2025-09-22T13:41:32.510Z",
-      "source": "github_api",
-      "active": true,
-      "updated_at": "2025-09-22T13:41:32.807Z"
-    },
-    "지지_enfp_1758548539803": {
-      "id": "지지_enfp_1758548539803",
-      "name": "지지",
-      "age": "20",
-      "mbti": "ENFP",
-      "gender": "female",
-      "personality_traits": [
-        "친근한",
-        "매력적인",
-        "스마트한"
-      ],
-      "major": "general",
-      "family": "average",
-      "hometown": "seoul",
-      "relationship": "friend",
-      "appearance": {
-        "hair": "긴 생머리",
-        "eyes": "둥근 눈",
-        "style": "캐주얼"
-      },
-      "hobbies": [
-        "독서",
-        "음악감상",
-        "산책"
-      ],
-      "values": "family_oriented",
-      "speech_style": "친근한 말투",
-      "speech_habit": "자주 미소짓기",
-      "genre": "school_romance",
-      "created_at": "2025-09-22T13:42:19.803Z",
-      "source": "github_api",
-      "active": true,
-      "updated_at": "2025-09-22T13:42:20.418Z"
-    },
-    "미화__infj_1758550387707": {
-      "id": "미화__infj_1758550387707",
-      "name": "미화 ",
-      "age": "24",
-      "mbti": "INFJ",
-      "gender": "female",
-      "personality_traits": [
-        "친근한",
-        "매력적인",
-        "스마트한"
-      ],
-      "major": "general",
-      "family": "average",
-      "hometown": "seoul",
-      "relationship": "friend",
-      "appearance": {
-        "hair": "긴 생머리",
-        "eyes": "둥근 눈",
-        "style": "캐주얼"
-      },
-      "hobbies": [
-        "독서",
-        "음악감상",
-        "산책"
-      ],
-      "values": "family_oriented",
-      "speech_style": "친근한 말투",
-      "speech_habit": "자주 미소짓기",
-      "genre": "school_romance",
-      "created_at": "2025-09-22T14:13:07.707Z",
-      "source": "github_api",
-      "active": true,
-      "updated_at": "2025-09-22T14:13:08.644Z"
+      "updated_at": "2025-09-22T14:29:22.963Z"
     }
   },
   "metadata": {
