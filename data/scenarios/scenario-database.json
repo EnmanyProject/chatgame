@@ -7,12 +7,51 @@
     "reset_at": "2025-09-16T00:00:00Z",
     "reset_reason": "Clean start for new data generation"
   },
-  "scenarios": {},
+  "scenarios": {
+    "scenario_도서관의_속삭임_1758192463455": {
+      "id": "scenario_도서관의_속삭임_1758192463455",
+      "title": "도서관의 속삭임",
+      "description": "취한 상태에서 진심을 고백한 후, 다음 날 어색해진 두 사람의 이야기",
+      "background_setting": "벚꽃이 만발한 공원",
+      "mood": "따뜻함",
+      "available_characters": [
+        "유나 _enfj"
+      ],
+      "scenario_id": "scenario_도서관의_속삭임_1758192463455",
+      "action": "create",
+      "created_date": "2025-09-18",
+      "episode_count": 0,
+      "tags": [
+        "따뜻함"
+      ],
+      "updated_at": "2025-09-22T13:10:42.594Z",
+      "source": "github_api"
+    }
+  },
   "scenario_templates": {
     "romance_template": {
-      "mood_options": ["설렘", "부끄러움", "긴장감", "달콤함", "애절함"],
-      "setting_options": ["카페", "학교", "집", "공원", "도서관", "거리"],
-      "time_options": ["아침", "점심", "저녁", "밤", "새벽"]
+      "mood_options": [
+        "설렘",
+        "부끄러움",
+        "긴장감",
+        "달콤함",
+        "애절함"
+      ],
+      "setting_options": [
+        "카페",
+        "학교",
+        "집",
+        "공원",
+        "도서관",
+        "거리"
+      ],
+      "time_options": [
+        "아침",
+        "점심",
+        "저녁",
+        "밤",
+        "새벽"
+      ]
     }
   }
 }
