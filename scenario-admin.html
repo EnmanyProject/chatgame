@@ -4673,115 +4673,118 @@ GitHub Token:`);
         }
 
         // AI 생성 데이터를 폼에 적용
-        function applyAIGeneratedData() {
+        async function applyAIGeneratedData() {
             if (!generatedCharacter) {
                 alert('⚠️ 먼저 AI로 캐릭터를 생성해주세요.');
                 return;
             }
-            
+
             try {
                 const character = generatedCharacter;
-                console.log('🎭 AI 캐릭터 폼 적용:', character);
-                
+                console.log('🎭 AI 캐릭터 폼 적용 시작:', character);
+
+                // 안전한 요소 설정 함수
+                function safeSetValue(id, value) {
+                    const element = document.getElementById(id);
+                    if (element && value) {
+                        element.value = value;
+                        console.log(`✅ ${id} 설정 완료:`, value);
+                        return true;
+                    } else if (!element) {
+                        console.warn(`⚠️ 요소를 찾을 수 없음: ${id}`);
+                    }
+                    return false;
+                }
+
                 // 기본 정보 적용
-                if (character.name) {
-                    document.getElementById('charName').value = character.name;
-                }
-                if (character.age) {
-                    document.getElementById('charAge').value = character.age;
-                }
+                safeSetValue('charName', character.name);
+                safeSetValue('charAge', character.age || '22');
+                safeSetValue('charMbti', character.mbti);
+
+                // MBTI 버튼도 시각적으로 선택
                 if (character.mbti) {
-                    document.getElementById('charMbti').value = character.mbti;
-                    // MBTI 버튼도 시각적으로 선택
                     document.querySelectorAll('.mbti-btn').forEach(btn => {
-                        btn.classList.toggle('selected', btn.dataset.mbti === character.mbti);
+                        if (btn.dataset && btn.dataset.mbti) {
+                            btn.classList.toggle('selected', btn.dataset.mbti === character.mbti);
+                        }
                     });
                 }
-                
-                // 성격 특성 적용
-                if (character.personality_traits && Array.isArray(character.personality_traits)) {
-                    // 기존 선택 초기화
-                    document.querySelectorAll('.trait-btn.selected').forEach(btn => {
-                        btn.classList.remove('selected');
-                    });
-                    // 새 특성 선택
-                    character.personality_traits.forEach(trait => {
-                        const btn = document.querySelector(`[data-trait="${trait}"]`);
-                        if (btn) btn.classList.add('selected');
-                    });
-                }
-                
-                // 취미 적용
-                if (character.personality && character.personality.hobbies && Array.isArray(character.personality.hobbies)) {
-                    // 기존 선택 초기화
-                    document.querySelectorAll('.hobby-btn.selected').forEach(btn => {
-                        btn.classList.remove('selected');
-                    });
-                    // 새 취미 선택
-                    character.personality.hobbies.forEach(hobby => {
-                        const btn = document.querySelector(`[data-hobby="${hobby}"]`);
-                        if (btn) btn.classList.add('selected');
-                    });
-                }
-                
-                // 배경 정보 적용
-                if (character.major) {
-                    document.getElementById('charMajor').value = character.major;
-                }
-                if (character.relationship) {
-                    document.getElementById('charRelationship').value = character.relationship;
-                }
-                if (character.background) {
-                    if (character.background.family) {
-                        document.getElementById('charFamily').value = character.background.family;
-                    }
-                    if (character.background.hometown) {
-                        document.getElementById('charHometown').value = character.background.hometown;
+
+                // 안전한 버튼 선택 함수
+                function safeSelectButtons(selector, items, dataAttr) {
+                    try {
+                        // 기존 선택 초기화
+                        document.querySelectorAll(`${selector}.selected`).forEach(btn => {
+                            btn.classList.remove('selected');
+                        });
+
+                        // 새 항목 선택
+                        if (items && Array.isArray(items)) {
+                            items.forEach(item => {
+                                const btn = document.querySelector(`[${dataAttr}="${item}"]`);
+                                if (btn) {
+                                    btn.classList.add('selected');
+                                    console.log(`✅ ${selector} 선택됨:`, item);
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        console.warn(`⚠️ ${selector} 선택 중 오류:`, error);
                     }
                 }
-                
-                // 외모 정보 적용
-                if (character.appearance) {
-                    if (character.appearance.hair) {
-                        document.getElementById('charHair').value = character.appearance.hair;
-                    }
-                    if (character.appearance.eyes) {
-                        document.getElementById('charEyes').value = character.appearance.eyes;
-                    }
-                    if (character.appearance.style) {
-                        document.getElementById('charStyle').value = character.appearance.style;
-                    }
-                }
-                
-                // 말투 정보 적용
-                if (character.speech_style) {
-                    document.getElementById('charSpeechStyle').value = character.speech_style;
-                }
-                if (character.speech_habit) {
-                    document.getElementById('charSpeechHabit').value = character.speech_habit;
-                }
-                
-                // 기타 정보 적용
-                if (character.personality && character.personality.values) {
-                    document.getElementById('charValues').value = character.personality.values;
-                }
-                if (character.story_context && character.story_context.genre) {
-                    document.getElementById('charGenre').value = character.story_context.genre;
-                }
-                if (character.story_context && character.story_context.main_situation) {
-                    document.getElementById('charMainSituation').value = character.story_context.main_situation;
-                }
-                
-                // 성공 메시지
-                alert('💖 AI 생성 캐릭터가 폼에 완벽하게 적용되었습니다!\n\n이제 "저장" 버튼을 눌러서 캐릭터를 완성해주세요.');
-                
+
+                // 성격 특성과 취미 안전하게 적용
+                safeSelectButtons('.trait-btn', character.personality_traits, 'data-trait');
+                safeSelectButtons('.hobby-btn', character.personality?.hobbies, 'data-hobby');
+
+                console.log('🎉 AI 캐릭터 기본 정보 적용 완료!');
+
+                // 추가 폼 요소들도 안전하게 적용
+                safeSetValue('charMajor', character.major);
+                safeSetValue('charRelationship', character.relationship);
+                safeSetValue('charFamily', character.background?.family);
+                safeSetValue('charHometown', character.background?.hometown);
+                safeSetValue('charHair', character.appearance?.hair);
+                safeSetValue('charEyes', character.appearance?.eyes);
+                safeSetValue('charStyle', character.appearance?.style);
+                safeSetValue('charSpeechStyle', character.speech_style);
+                safeSetValue('charSpeechHabit', character.speech_habit);
+                safeSetValue('charValues', character.personality?.values);
+                safeSetValue('charGenre', character.story_context?.genre);
+                safeSetValue('charMainSituation', character.story_context?.main_situation);
+
+                console.log('✅ 모든 폼 요소 적용 완료!');
+
                 // AI 생성 영역 숨기기
-                document.getElementById('characterPreview').style.display = 'none';
-                document.getElementById('aiGenerationStatus').innerHTML = '✅ 캐릭터가 폼에 적용되었습니다!';
-                
+                const previewElement = document.getElementById('characterPreview');
+                const statusElement = document.getElementById('aiGenerationStatus');
+
+                if (previewElement) previewElement.style.display = 'none';
+                if (statusElement) statusElement.innerHTML = '✅ 캐릭터가 폼에 적용되었습니다!';
+
+                // 성공 메시지와 자동 저장 여부 확인
+                const autoSave = confirm('💖 AI 생성 캐릭터가 폼에 적용되었습니다!\n\n바로 저장하시겠습니까?\n\n• 확인: 바로 저장\n• 취소: 수정 후 저장');
+
+                if (autoSave) {
+                    console.log('🚀 자동 저장 시작...');
+                    await window.saveCharacter();
+                } else {
+                    alert('✅ 캐릭터 정보가 폼에 적용되었습니다.\n수정이 필요하면 폼을 편집한 후 "저장" 버튼을 눌러주세요.');
+                }
+
             } catch (error) {
                 console.error('❌ AI 데이터 적용 오류:', error);
-                alert('데이터 적용 중 오류가 발생했습니다. 다시 시도해주세요.');
+                console.error('오류 상세:', error.stack);
+
+                // 구체적인 오류 메시지 제공
+                let errorMessage = '데이터 적용 중 오류가 발생했습니다:\n\n';
+                errorMessage += `오류: ${error.message}\n\n`;
+                errorMessage += '해결책:\n';
+                errorMessage += '1. 페이지를 새로고침해보세요\n';
+                errorMessage += '2. AI 캐릭터를 다시 생성해보세요\n';
+                errorMessage += '3. 수동으로 정보를 입력해보세요';
+
+                alert(errorMessage);
             }
         }
 
