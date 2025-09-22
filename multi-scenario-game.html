@@ -2304,7 +2304,7 @@
         function analyzeRelationshipStage(affection, conversationHistory) {
             let stage = 'early_stage';
             let intimacyLevel = 'low';
-            
+
             if (affection >= 80) {
                 stage = 'intimate';
                 intimacyLevel = 'high';
@@ -2312,13 +2312,30 @@
                 stage = 'developing';
                 intimacyLevel = 'medium';
             }
-            
+
             // 대화 히스토리 기반 추가 분석
-            const conversationDepth = conversationHistory.length;
-            const emotionalKeywords = conversationHistory.filter(choice => 
-                choice.includes('좋아') || choice.includes('사랑') || choice.includes('마음') || choice.includes('감정')
-            ).length;
-            
+            const conversationDepth = conversationHistory ? conversationHistory.length : 0;
+            let emotionalKeywords = 0;
+
+            // 안전한 감정 키워드 분석
+            if (Array.isArray(conversationHistory)) {
+                emotionalKeywords = conversationHistory.filter(choice => {
+                    // choice가 숫자(인덱스)인 경우 감정 키워드 없음으로 처리
+                    if (typeof choice === 'number') {
+                        return false;
+                    }
+
+                    // choice가 문자열인지 확인하고, 객체인 경우 text 속성 사용
+                    const text = typeof choice === 'string' ? choice :
+                               (choice && choice.text) ? choice.text :
+                               (choice && choice.message) ? choice.message : '';
+
+                    return text && typeof text === 'string' &&
+                           (text.includes('좋아') || text.includes('사랑') ||
+                            text.includes('마음') || text.includes('감정'));
+                }).length;
+            }
+
             return {
                 stage,
                 intimacyLevel,
