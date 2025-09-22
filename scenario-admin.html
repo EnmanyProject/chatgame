@@ -2042,7 +2042,9 @@
         // 페이지 초기화
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 통합 관리 시스템 초기화');
-            loadAllData();
+
+            // 온라인 시스템으로 전환: 별도 초기화 대기
+            console.log('⏰ 온라인 클라이언트 초기화 대기 중...');
             initializeEventListeners();
         });
 
@@ -4993,6 +4995,19 @@ GitHub Token:`);
         window.onlineDataClient = new OnlineDataClient();
         console.log('✅ 온라인 데이터 클라이언트 초기화 완료');
 
+        // 초기화 완료 후 자동으로 데이터 로드
+        setTimeout(async () => {
+            try {
+                console.log('🚀 온라인 시스템 자동 데이터 로드 시작...');
+                await window.loadCharacters();
+                await window.loadScenarios();
+                console.log('✅ 온라인 시스템 자동 데이터 로드 완료');
+            } catch (error) {
+                console.error('❌ 자동 데이터 로드 실패:', error);
+                console.log('💡 페이지를 새로고침하거나 수동으로 데이터를 로드해주세요');
+            }
+        }, 1000); // 1초 대기 후 로드 (토큰 초기화 시간 확보)
+
         // LocalStorage 사용 중단 경고
         if (localStorage.getItem('chatgame_characters') || localStorage.getItem('scenarios')) {
             console.warn('⚠️ 기존 LocalStorage 데이터 발견 - 온라인 동기화 필요');
@@ -5087,18 +5102,75 @@ GitHub Token:`);
             console.log('💾 백업 파일 다운로드 시작');
         }
 
+        // 캐릭터 삭제 함수도 온라인 클라이언트로 교체
+        window.deleteCharacter = async function(characterId) {
+            if (!confirm('정말로 이 캐릭터를 삭제하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                console.log('🗑️ 온라인에서 캐릭터 삭제:', characterId);
+
+                // 온라인 데이터 클라이언트 확인
+                if (!window.onlineDataClient) {
+                    console.error('❌ 온라인 데이터 클라이언트가 로드되지 않았습니다');
+                    alert('⚠️ 온라인 시스템 로드 오류\n\n페이지를 새로고침 후 다시 시도해주세요.');
+                    return;
+                }
+
+                // 온라인 데이터 클라이언트를 통해 삭제
+                const result = await window.onlineDataClient.deleteCharacter(characterId);
+
+                if (result && result.success) {
+                    console.log('🎉 삭제 성공! 전체 캐릭터 목록 새로고침...');
+
+                    // 성공 시 전체 캐릭터 목록을 다시 로드하여 최신 상태 유지
+                    await window.loadCharacters();
+
+                    alert('✅ 캐릭터가 성공적으로 삭제되었습니다!');
+                    console.log('✅ 캐릭터 삭제 및 목록 새로고침 완료');
+                } else {
+                    throw new Error(result?.error || '온라인 삭제 실패 - 결과 없음');
+                }
+
+            } catch (error) {
+                console.error('❌ 온라인 캐릭터 삭제 실패:', error);
+
+                let errorMessage = '온라인 삭제 중 오류가 발생했습니다:\n' + error.message;
+
+                if (error.message.includes('GitHub Token')) {
+                    errorMessage += '\n\n🔐 해결책: GitHub Token을 설정해주세요';
+                }
+
+                alert(errorMessage);
+            }
+        };
+
         // 전역 함수 교체: 온라인 데이터 클라이언트 사용
         window.loadCharacters = async function() {
             console.log('🌐 온라인에서 캐릭터 로드...');
             try {
                 const charactersData = await window.onlineDataClient.loadCharacters();
-                window.characters = charactersData;
+                console.log('📊 로드된 캐릭터 데이터:', charactersData);
+
+                // 전역 characters 변수와 window.characters 모두 업데이트
+                characters = charactersData || {};
+                window.characters = characters;
+
+                console.log('📋 전역 변수 확인:', Object.keys(characters).length, '개 캐릭터');
+
                 displayCharacters();
                 updateCharacterStats();
                 console.log('✅ 캐릭터 온라인 로드 완료');
             } catch (error) {
                 console.error('❌ 캐릭터 온라인 로드 실패:', error);
                 alert('캐릭터 데이터를 불러오는 중 오류가 발생했습니다:\n' + error.message);
+
+                // 오류 발생 시 빈 데이터로 초기화
+                characters = {};
+                window.characters = characters;
+                displayCharacters();
+                updateCharacterStats();
             }
         };
 
@@ -5171,18 +5243,12 @@ GitHub Token:`);
                 const result = await window.onlineDataClient.saveCharacter(finalCharacterData);
 
                 if (result && result.success) {
-                    // 성공 시 로컬 캐시 업데이트
-                    const characters = window.characters || {};
-                    characters[result.id] = result.data;
-                    window.characters = characters;
+                    console.log('🎉 저장 성공! 전체 캐릭터 목록 새로고침...');
 
-                    // UI 즉시 업데이트 (함수가 존재하는 경우만)
-                    if (typeof displayCharacters === 'function') {
-                        displayCharacters();
-                    }
-                    if (typeof updateCharacterStats === 'function') {
-                        updateCharacterStats();
-                    }
+                    // 성공 시 전체 캐릭터 목록을 다시 로드하여 최신 상태 유지
+                    await window.loadCharacters();
+
+                    console.log('✅ 캐릭터 목록 새로고침 완료');
 
                     const successMessage = `💖 새로운 캐릭터 '${name}'가 GitHub에 저장되었습니다!\n✅ 온라인에서 영구 보관됩니다!`;
 
