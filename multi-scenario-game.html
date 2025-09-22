@@ -521,7 +521,14 @@
             isFreeChatMode: false,
             isSubjectiveMode: false,  // 주관식 모드 플래그 추가
             isProcessing: false,  // 처리 중 플래그 (중복 입력 방지)
-            canInput: true  // 입력 가능 여부
+            canInput: true,  // 입력 가능 여부
+
+            // 대화 반복 방지 시스템
+            conversationHistory: [],  // 전체 대화 기록
+            usedDialogues: new Set(),  // 사용된 대화 패턴 추적
+            recentPatterns: [],  // 최근 대화 패턴 (최대 10개)
+            topicHistory: [],  // 주제 히스토리 (최대 20개)
+            emotionHistory: []  // 감정 변화 히스토리
         };
 
         // 스크롤 자동 이동 함수 (개선된 버전)
@@ -926,13 +933,16 @@
         function startGame() {
             // 시나리오 선택 화면 숨기기
             document.getElementById('scenarioSelection').style.display = 'none';
-            
+
             // 게임 UI 표시
             document.getElementById('chatHeader').style.display = 'flex';
             document.getElementById('messagesContainer').style.display = 'block';
             document.getElementById('choicesContainer').style.display = 'block';
             document.getElementById('progressContainer').style.display = 'block';
             document.getElementById('restartBtn').style.display = 'block';
+
+            // 🔄 대화 반복 방지 시스템 초기화
+            initializeAntiRepetitionSystem();
 
             // 캐릭터 정보 설정
             document.getElementById('characterName').textContent = gameState.currentCharacter.name;
@@ -1090,7 +1100,14 @@
                             },
                             choiceNumber: gameState.choiceNumber,
                             affection: gameState.affection,
-                            previousChoices: gameState.previousChoices
+                            previousChoices: gameState.previousChoices,
+                            // 🔄 대화 반복 방지 시스템 데이터 추가
+                            antiRepetition: {
+                                conversationHistory: gameState.conversationHistory.slice(-5), // 최근 5개 대화만
+                                usedTopics: gameState.topicHistory.slice(-10),
+                                recentEmotions: gameState.emotionHistory.slice(-3).map(h => h.emotion),
+                                antiRepetitionPrompt: generateAntiRepetitionPrompt(gameState.currentCharacter, gameState.currentScenario)
+                            }
                         })
                     });
 
@@ -1121,22 +1138,52 @@
                 if (data.success && data.generated) {
                     const generated = data.generated;
                     console.log('✅ 대화 생성 성공 (온라인 우선):', generated);
-                    
+
                     // generated 객체 검증
                     if (generated.dialogue && generated.choices) {
+                        // 🔄 대화 반복 방지 시스템: 반복 검사 수행
+                        const repetitionCheck = checkForRepetition(generated.dialogue, generated.narration || '');
+
+                        if (repetitionCheck.hasIssues) {
+                            console.warn('⚠️ 대화 반복 문제 감지:', repetitionCheck.issues);
+                            console.log('💡 권장사항:', repetitionCheck.recommendation);
+
+                            // 높은 심각도 문제가 있는 경우 로컬 대화로 대체
+                            const highSeverityIssues = repetitionCheck.issues.filter(issue => issue.severity === 'high');
+                            if (highSeverityIssues.length > 0) {
+                                console.log('🔄 반복 문제로 인해 로컬 대화로 대체 생성...');
+                                const alternativeData = generateLocalDialogue(
+                                    gameState.currentScenario,
+                                    gameState.currentCharacter,
+                                    gameState.choiceNumber,
+                                    gameState.affection
+                                );
+                                // 로컬 대화도 반복 검사
+                                const altCheck = checkForRepetition(alternativeData.dialogue, alternativeData.narration || '');
+                                if (!altCheck.hasIssues || altCheck.issues.every(issue => issue.severity !== 'high')) {
+                                    console.log('✅ 대체 대화 생성 성공');
+                                    generated.dialogue = alternativeData.dialogue;
+                                    generated.narration = alternativeData.narration;
+                                    generated.choices = alternativeData.choices;
+                                }
+                            }
+                        } else {
+                            console.log('✅ 반복 검사 통과 - 대화가 새롭고 다양합니다');
+                        }
+
                         showTypingIndicator();
-                        
+
                         setTimeout(() => {
                             hideTypingIndicator();
                             displayCharacterMessage(generated.dialogue, generated.narration || '');
                             scrollToBottom(); // 스크롤 자동 이동 추가
-                            
+
                             setTimeout(() => {
                                 displayChoices(generated.choices.map(choice => ({
                                     text: choice.text,
                                     affection_impact: choice.affection_impact || 0
                                 })));
-                                
+
                                 // 처리 완료 후 상태 복원
                                 gameState.isProcessing = false;
                                 gameState.canInput = true;
@@ -1541,7 +1588,7 @@
         // 캐릭터 메시지 표시 (대사와 지문 분리)
         function displayCharacterMessage(dialogue, narration = '', emotion = '') {
             const container = document.getElementById('messagesContainer');
-            
+
             // 지문이 있는 경우 먼저 표시
             if (narration && narration.trim() !== '') {
                 const narrationDiv = document.createElement('div');
@@ -1553,23 +1600,31 @@
                 `;
                 container.appendChild(narrationDiv);
             }
-            
+
             // 대사 표시 (인용부호 제거)
             if (dialogue && dialogue.trim() !== '') {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = 'message received';
-                
+
                 // 인용부호 제거
                 let cleanDialogue = dialogue.replace(/^[""']|[""']$/g, '').trim();
-                
+
                 messageDiv.innerHTML = `
                     <div class="message-bubble">
                         ${cleanDialogue} ${emotion}
                     </div>
                 `;
                 container.appendChild(messageDiv);
+
+                // 🔄 대화 반복 방지 시스템: 대화 패턴 기록
+                recordConversationPattern(cleanDialogue, narration || '');
+                console.log('🔄 대화 패턴 기록됨:', {
+                    dialogue: cleanDialogue.substring(0, 30) + '...',
+                    historyCOunt: gameState.conversationHistory.length,
+                    usedPatterns: gameState.usedDialogues.size
+                });
             }
-            
+
             scrollToBottom();
         }
 
@@ -1765,7 +1820,14 @@
                     userMessage,
                     gameState.currentCharacter,
                     gameState.affection,
-                    gameState.previousChoices
+                    gameState.previousChoices,
+                    // 🔄 대화 반복 방지 데이터 전달
+                    {
+                        conversationHistory: gameState.conversationHistory.slice(-5),
+                        usedTopics: gameState.topicHistory.slice(-10),
+                        recentEmotions: gameState.emotionHistory.slice(-3).map(h => h.emotion),
+                        antiRepetitionPrompt: generateAntiRepetitionPrompt(gameState.currentCharacter, gameState.currentScenario)
+                    }
                 );
                 
                 const data = { success: true, generated: responseData };
@@ -1802,6 +1864,15 @@
                     // AI 생성 응답 표시
                     let responseText = generated.dialogue || '고마워요! 정말 좋은 말이에요 😊';
                     responseText = addEmojisBasedOnAffection(responseText, gameState.affection);
+
+                    // 🔄 대화 반복 방지 시스템: 주관식 응답 반복 검사
+                    const repetitionCheck = checkForRepetition(responseText, generated.narration || '');
+                    if (repetitionCheck.hasIssues) {
+                        console.warn('⚠️ 주관식 응답 반복 문제 감지:', repetitionCheck.issues);
+                        // 사용자 입력 기록 (반복 방지용)
+                        recordConversationPattern('', '', userMessage);
+                    }
+
                     displayCharacterMessage(responseText, generated.narration || '', '');
                     
                     // 🧠 AI 평가 피드백 표시
@@ -2253,94 +2324,613 @@
             };
         }
 
-        // MBTI 기반 캐릭터 특성 데이터베이스
+        // MBTI 기반 고도화된 캐릭터 특성 데이터베이스 (대폭 확장)
         const mbtiCharacteristics = {
             INFP: {
-                name: "중재자",
-                core_traits: ["감성적", "이상주의적", "내향적", "직관적"],
-                communication_style: "부드럽고 따뜻한 말투, 감정 표현이 풍부",
+                name: "중재자 (열정적인 중재자)",
+                core_traits: ["감성적", "이상주의적", "내향적", "직관적", "자유로운", "창의적"],
+                communication_style: "부드럽고 따뜻한 말투, 감정 표현이 풍부하며 은유적 표현 선호",
                 relationship_patterns: {
-                    early_stage: "신중하고 조심스러움, 깊은 대화를 선호",
-                    developing: "진솔한 감정 공유, 상대방의 진심을 중시",
-                    intimate: "깊은 유대감, 감정적 연결을 가장 소중히 여김"
+                    early_stage: "신중하고 조심스러움, 깊은 대화를 선호하며 진정성을 중시",
+                    developing: "진솔한 감정 공유, 상대방의 진심을 중시하며 정신적 연결 추구",
+                    intimate: "깊은 유대감, 감정적 연결을 가장 소중히 여기며 영혼의 짝궁 느낌 추구"
                 },
-                preferred_topics: ["예술", "감정", "꿈과 이상", "내면의 생각"],
+                preferred_topics: ["예술", "감정", "꿈과 이상", "내면의 생각", "자아실현", "의미 있는 삶"],
                 response_triggers: {
-                    positive: ["진심어린 공감", "창의적 표현", "감정적 지지", "깊이있는 이해"],
-                    negative: ["비판적 태도", "표면적 대화", "강압적 접근", "감정 무시"],
-                    neutral: ["일반적인 안부", "사실적 정보", "단순한 질문"]
+                    positive: ["진심어린 감정표현", "깊이있는 대화", "창의적 아이디어", "공감과 이해", "개성 인정"],
+                    negative: ["피상적 대화", "강요나 압박", "비판적 시선", "물질적 가치", "틀에 박힌 사고"]
                 },
-                emotional_expression: "섬세하고 복합적, 때로는 간접적 표현을 선호"
+                emotional_expression: "미묘하고 섬세한 감정 표현, 때로는 우회적이고 은유적",
+                love_languages: ["진심어린 대화", "함께하는 시간", "작은 배려의 행동"],
+                stress_responses: ["혼자만의 시간 필요", "감정적 철수", "자기 반성"],
+                decision_making: "가치관과 감정 중심, 시간을 두고 신중하게",
+                conflict_style: "직접적 갈등 회피, 조화로운 해결책 모색",
+                growth_areas: ["자신감 부족", "완벽주의", "비판에 대한 민감성"]
             },
             ENFP: {
-                name: "활동가",
-                core_traits: ["열정적", "외향적", "직관적", "감정적"],
-                communication_style: "밝고 에너지 넘치는 말투, 다양한 표현 사용",
+                name: "활동가 (재기발랄한 활동가)",
+                core_traits: ["외향적", "직관적", "감정적", "인식적", "열정적", "사교적"],
+                communication_style: "활기차고 표현력이 풍부하며 상대방을 격려하는 말투",
                 relationship_patterns: {
-                    early_stage: "적극적이고 호기심 많음, 다양한 주제로 대화",
-                    developing: "창의적 활동 제안, 함께하는 시간을 중시",
-                    intimate: "모험과 새로운 경험 공유, 서로의 성장 지지"
+                    early_stage: "적극적이고 개방적, 다양한 활동과 경험을 통해 친밀감 형성",
+                    developing: "깊은 감정 교류와 함께 새로운 도전을 즐기며 관계 발전",
+                    intimate: "서로의 성장을 지지하며 함께 꿈을 이루어가는 파트너십"
                 },
-                preferred_topics: ["새로운 아이디어", "모험", "사람들", "미래 계획"],
+                preferred_topics: ["새로운 경험", "사람 이야기", "미래 계획", "창의적 아이디어", "사회적 이슈"],
                 response_triggers: {
-                    positive: ["창의적 제안", "모험적 아이디어", "열정적 반응", "자발적 참여"],
-                    negative: ["지나친 루틴", "소극적 태도", "비관적 사고", "제약적 상황"],
-                    neutral: ["계획적 제안", "실용적 조언", "현실적 접근"]
+                    positive: ["새로운 아이디어", "열정적 에너지", "사람들과의 연결", "가능성 탐구", "자유로운 표현"],
+                    negative: ["지나친 규칙", "반복적 일상", "비관적 시각", "제한적 사고", "감정적 거리"]
                 },
-                emotional_expression: "직접적이고 생동감 있음, 몸짓과 표현이 풍부"
+                emotional_expression: "풍부하고 생동감 있는 감정 표현, 몸짓과 표정이 풍부",
+                love_languages: ["격려의 말", "함께하는 모험", "놀라운 서프라이즈"],
+                stress_responses: ["과도한 활동", "감정적 폭발", "산만함"],
+                decision_making: "직감과 가능성 중심, 빠른 판단",
+                conflict_style: "개방적 소통, 창의적 해결책 모색",
+                growth_areas: ["집중력 부족", "약속 관리", "감정 기복"]
             },
             INTJ: {
-                name: "건축가",
-                core_traits: ["논리적", "독립적", "직관적", "완벽주의적"],
-                communication_style: "간결하고 정확한 말투, 논리적 구조를 중시",
+                name: "건축가 (용의주도한 전략가)",
+                core_traits: ["내향적", "직관적", "사고적", "판단적", "독립적", "체계적"],
+                communication_style: "간결하고 논리적이며 본질적인 내용에 집중하는 말투",
                 relationship_patterns: {
-                    early_stage: "신중하고 관찰적, 상대방을 분석하며 접근",
-                    developing: "지적 대화 선호, 깊이 있는 주제 탐구",
-                    intimate: "효율적 소통, 상호 발전을 위한 건설적 관계"
+                    early_stage: "신중하고 선별적, 지적 호환성과 깊이를 중시",
+                    developing: "점진적 신뢰 구축, 장기적 관점에서 관계의 가능성 평가",
+                    intimate: "깊은 정신적 연결과 상호 성장을 추구하는 파트너십"
                 },
-                preferred_topics: ["미래 계획", "시스템", "학습", "개선 방안"],
+                preferred_topics: ["미래 계획", "체계적 사고", "지식과 학습", "효율성", "장기 목표"],
                 response_triggers: {
-                    positive: ["논리적 사고", "체계적 접근", "개선 의지", "독립성 인정"],
-                    negative: ["비논리적 행동", "감정적 결정", "비효율적 방식", "간섭"],
-                    neutral: ["정보 제공", "현상 분석", "계획 수립"]
+                    positive: ["논리적 사고", "미래 비전", "독립성 인정", "지적 자극", "효율적 소통"],
+                    negative: ["감정적 드라마", "비논리적 행동", "과도한 사교", "계획 없는 행동", "표면적 대화"]
                 },
-                emotional_expression: "절제되고 신중함, 깊이 있는 관계에서만 감정 표현"
+                emotional_expression: "절제되고 깊이 있는 감정 표현, 행동으로 감정 전달",
+                love_languages: ["깊이 있는 대화", "개인 시간 존중", "실용적 도움"],
+                stress_responses: ["혼자 문제 해결", "감정적 차단", "완벽주의 강화"],
+                decision_making: "논리와 장기적 결과 중심, 체계적 분석",
+                conflict_style: "논리적 해결책 모색, 감정보다 사실 중심",
+                growth_areas: ["감정 표현", "융통성", "타인의 감정 이해"]
             },
             ESFJ: {
-                name: "집정관",
-                core_traits: ["사교적", "배려깊은", "현실적", "조화로운"],
-                communication_style: "따뜻하고 배려깊은 말투, 상대방 기분을 세심하게 고려",
+                name: "집정관 (사교적인 외교관)",
+                core_traits: ["외향적", "감각적", "감정적", "판단적", "배려심", "책임감"],
+                communication_style: "따뜻하고 배려깊으며 상대방의 기분을 살피는 말투",
                 relationship_patterns: {
-                    early_stage: "친근하고 관심 표현, 상대방의 필요를 파악",
-                    developing: "함께 활동하며 관계 발전, 서로를 돕는 것을 중시",
-                    intimate: "안정적이고 지지적인 관계, 상대방의 행복을 우선"
+                    early_stage: "적극적 배려와 관심 표현, 상대방의 필요를 파악하고 충족",
+                    developing: "안정적이고 조화로운 관계 구축, 전통적 가치 중시",
+                    intimate: "헌신적이고 지지적인 파트너십, 가족과 공동체 중심"
                 },
-                preferred_topics: ["사람들", "일상", "도움", "관계"],
+                preferred_topics: ["사람들의 안녕", "일상 생활", "전통과 문화", "가족 이야기", "배려와 봉사"],
                 response_triggers: {
-                    positive: ["감사 표현", "협력적 태도", "배려심", "안정성 추구"],
-                    negative: ["이기적 행동", "갈등 상황", "무관심", "불안정성"],
-                    neutral: ["일상 공유", "계획 세우기", "실용적 조언"]
+                    positive: ["감사 표현", "배려 인정", "조화로운 분위기", "전통적 가치", "공동체 의식"],
+                    negative: ["갈등 상황", "비판적 피드백", "이기적 행동", "무관심", "전통 무시"]
                 },
-                emotional_expression: "따뜻하고 표현적, 상대방의 감정에 민감하게 반응"
+                emotional_expression: "적극적이고 따뜻한 감정 표현, 상대방을 위한 행동",
+                love_languages: ["도움의 행위", "인정의 말", "스킨십"],
+                stress_responses: ["과도한 타인 돌봄", "자기 희생", "감정적 과부하"],
+                decision_making: "타인의 감정과 조화 중심, 전통적 가치 고려",
+                conflict_style: "조화 추구, 타협과 협력 중시",
+                growth_areas: ["자기 주장", "경계 설정", "과도한 걱정"]
             },
             ISTP: {
-                name: "만능재주꾼",
-                core_traits: ["실용적", "독립적", "현실적", "유연한"],
-                communication_style: "간결하고 실용적인 말투, 필요할 때만 말함",
+                name: "장인 (만능 재주꾼)",
+                core_traits: ["내향적", "감각적", "사고적", "인식적", "실용적", "독립적"],
+                communication_style: "간결하고 실용적이며 필요한 말만 하는 말투",
                 relationship_patterns: {
-                    early_stage: "관찰적이고 여유로움, 압박 없는 자연스러운 접근 선호",
-                    developing: "함께 활동하며 관계 형성, 경험 공유를 중시",
-                    intimate: "자유롭고 편안한 관계, 서로의 공간 존중"
+                    early_stage: "자연스럽고 부담없는 관계, 행동으로 관심 표현",
+                    developing: "실용적 도움과 함께하는 활동을 통한 친밀감 형성",
+                    intimate: "상호 독립성을 존중하면서도 필요할 때 지지하는 관계"
                 },
-                preferred_topics: ["실용적 기술", "경험", "취미", "현재 상황"],
+                preferred_topics: ["실용적 기술", "현재 경험", "도구와 기계", "문제 해결", "자유로운 활동"],
                 response_triggers: {
-                    positive: ["실용적 제안", "자유로운 분위기", "기술적 관심", "유연성"],
-                    negative: ["강요", "지나친 감정표현", "복잡한 계획", "제약"],
-                    neutral: ["정보 교환", "경험 공유", "현실적 조언"]
+                    positive: ["실용적 가치", "자유로운 선택", "기술적 관심", "독립성 인정", "현실적 접근"],
+                    negative: ["감정적 압박", "장기 약속", "복잡한 규칙", "이론적 논의", "과도한 계획"]
                 },
-                emotional_expression: "절제적이고 자연스러움, 행동으로 감정 표현"
+                emotional_expression: "절제되고 행동 중심의 감정 표현, 말보다는 행동",
+                love_languages: ["함께하는 활동", "실용적 도움", "개인 공간 존중"],
+                stress_responses: ["혼자만의 시간", "활동적 해소", "감정적 회피"],
+                decision_making: "논리와 실용성 중심, 유연한 대응",
+                conflict_style: "직접적이고 해결책 중심, 감정보다 문제 해결",
+                growth_areas: ["감정 표현", "장기 계획", "타인의 감정 고려"]
             }
         };
+
+        // MBTI별 고도화된 메시지 분석 함수
+        function analyzeMessageForMBTI(userMessage, mbtiType, affection, relationshipStage) {
+            const traits = mbtiCharacteristics[mbtiType] || mbtiCharacteristics.INFP;
+            const analysis = {
+                compatibility_score: 0,
+                trigger_matches: {
+                    positive: [],
+                    negative: [],
+                    neutral: []
+                },
+                affection_impact: 0,
+                response_style: '',
+                emotional_resonance: 0
+            };
+
+            // 메시지 내용 분석
+            const messageWords = userMessage.toLowerCase().split(/\s+/);
+            const messageTones = detectMessageTone(userMessage);
+
+            // 긍정적 트리거 검사
+            traits.response_triggers.positive.forEach(trigger => {
+                const triggerWords = trigger.toLowerCase().split(/\s+/);
+                const matches = triggerWords.filter(word =>
+                    messageWords.some(msgWord => msgWord.includes(word) || word.includes(msgWord))
+                ).length;
+
+                if (matches > 0) {
+                    analysis.trigger_matches.positive.push({
+                        trigger: trigger,
+                        strength: matches / triggerWords.length,
+                        impact: matches * 2
+                    });
+                    analysis.compatibility_score += matches * 2;
+                }
+            });
+
+            // 부정적 트리거 검사
+            traits.response_triggers.negative.forEach(trigger => {
+                const triggerWords = trigger.toLowerCase().split(/\s+/);
+                const matches = triggerWords.filter(word =>
+                    messageWords.some(msgWord => msgWord.includes(word) || word.includes(msgWord))
+                ).length;
+
+                if (matches > 0) {
+                    analysis.trigger_matches.negative.push({
+                        trigger: trigger,
+                        strength: matches / triggerWords.length,
+                        impact: -(matches * 3)
+                    });
+                    analysis.compatibility_score -= matches * 3;
+                }
+            });
+
+            // 관계 단계별 가중치 적용
+            const stageMultiplier = relationshipStage === 'intimate' ? 1.5 :
+                                   relationshipStage === 'developing' ? 1.2 : 1.0;
+
+            // 최종 호감도 변화 계산
+            let baseImpact = Math.floor(analysis.compatibility_score * stageMultiplier);
+
+            // 메시지 길이와 감정적 깊이 고려
+            const lengthBonus = Math.min(5, Math.floor(userMessage.length / 20));
+            const emotionalDepth = detectEmotionalDepth(userMessage);
+
+            analysis.affection_impact = Math.max(-8, Math.min(12, baseImpact + lengthBonus + emotionalDepth));
+            analysis.emotional_resonance = (analysis.compatibility_score + emotionalDepth) / 10;
+
+            // MBTI별 특화된 응답 스타일 결정
+            analysis.response_style = determineResponseStyle(traits, analysis.trigger_matches, affection);
+
+            return analysis;
+        }
+
+        // 메시지 톤 감지
+        function detectMessageTone(message) {
+            const tones = {
+                emotional: ['사랑', '좋아', '마음', '감동', '행복', '슬프', '기쁘'],
+                logical: ['생각', '이유', '왜냐하면', '논리', '합리', '분석'],
+                creative: ['상상', '창의', '아이디어', '예술', '꿈', '영감'],
+                practical: ['실용', '도움', '해결', '방법', '효과', '결과'],
+                social: ['함께', '우리', '사람들', '관계', '소통', '연결']
+            };
+
+            const detected = [];
+            for (const [tone, keywords] of Object.entries(tones)) {
+                const matches = keywords.filter(keyword => message.includes(keyword)).length;
+                if (matches > 0) {
+                    detected.push({ tone, strength: matches });
+                }
+            }
+
+            return detected.sort((a, b) => b.strength - a.strength);
+        }
+
+        // 감정적 깊이 분석
+        function detectEmotionalDepth(message) {
+            const deepEmotions = ['진심', '정말로', '솔직히', '깊이', '마음속', '느낌', '감정'];
+            const surfaceEmotions = ['좋네', '괜찮', '나쁘지 않', '그냥', '뭔가'];
+
+            let depth = 0;
+            deepEmotions.forEach(emotion => {
+                if (message.includes(emotion)) depth += 2;
+            });
+            surfaceEmotions.forEach(emotion => {
+                if (message.includes(emotion)) depth -= 1;
+            });
+
+            // 문장 길이와 복잡성도 고려
+            if (message.length > 50) depth += 1;
+            if (message.includes('...') || message.includes('😊') || message.includes('❤️')) depth += 1;
+
+            return Math.max(0, Math.min(5, depth));
+        }
+
+        // MBTI별 응답 스타일 결정
+        function determineResponseStyle(traits, triggerMatches, affection) {
+            const positiveCount = triggerMatches.positive.length;
+            const negativeCount = triggerMatches.negative.length;
+
+            if (negativeCount > positiveCount) {
+                return traits.stress_responses[0] || "조심스러운 반응";
+            } else if (positiveCount > 0) {
+                return traits.emotional_expression;
+            } else {
+                return traits.communication_style;
+            }
+        }
+
+        // ========== 대화 반복 방지 시스템 ==========
+
+        // 대화 패턴 분석 및 기록
+        function recordConversationPattern(dialogue, narration, userInput = null) {
+            const pattern = {
+                timestamp: Date.now(),
+                dialogue: dialogue,
+                narration: narration,
+                userInput: userInput,
+                dialoguePattern: generateDialoguePattern(dialogue),
+                topic: extractTopic(dialogue),
+                emotion: extractEmotion(dialogue, narration),
+                length: dialogue.length,
+                keywords: extractKeywords(dialogue)
+            };
+
+            // 대화 히스토리에 추가
+            gameState.conversationHistory.push(pattern);
+
+            // 사용된 대화 패턴 추가
+            gameState.usedDialogues.add(pattern.dialoguePattern);
+
+            // 최근 패턴 업데이트 (최대 10개)
+            gameState.recentPatterns.push(pattern.dialoguePattern);
+            if (gameState.recentPatterns.length > 10) {
+                gameState.recentPatterns.shift();
+            }
+
+            // 주제 히스토리 업데이트 (최대 20개)
+            if (pattern.topic && !gameState.topicHistory.includes(pattern.topic)) {
+                gameState.topicHistory.push(pattern.topic);
+                if (gameState.topicHistory.length > 20) {
+                    gameState.topicHistory.shift();
+                }
+            }
+
+            // 감정 히스토리 업데이트
+            gameState.emotionHistory.push({
+                emotion: pattern.emotion,
+                timestamp: pattern.timestamp,
+                affection: gameState.affection
+            });
+            if (gameState.emotionHistory.length > 15) {
+                gameState.emotionHistory.shift();
+            }
+
+            console.log('🔄 대화 패턴 기록:', pattern);
+        }
+
+        // 대화 패턴 생성 (유사성 검사용)
+        function generateDialoguePattern(dialogue) {
+            // 대화의 구조적 패턴을 추출
+            const normalized = dialogue.toLowerCase()
+                .replace(/[.,!?]/g, '')  // 구두점 제거
+                .replace(/\s+/g, ' ')    // 공백 정규화
+                .trim();
+
+            // 주요 키워드 추출 및 패턴화
+            const words = normalized.split(' ');
+            const pattern = words
+                .filter(word => word.length > 1)  // 1글자 단어 제외
+                .slice(0, 8)  // 최대 8개 단어
+                .join('_');
+
+            return pattern;
+        }
+
+        // 주제 추출
+        function extractTopic(dialogue) {
+            const topics = {
+                '음식': ['먹', '맛있', '배고', '요리', '카페', '레스토랑', '커피'],
+                '감정': ['좋아', '사랑', '마음', '기분', '감정', '느낌', '설레'],
+                '일상': ['오늘', '어제', '내일', '일', '학교', '공부', '수업'],
+                '취미': ['영화', '음악', '책', '게임', '운동', '여행', '드라마'],
+                '관계': ['친구', '가족', '연인', '사람', '만남', '데이트'],
+                '미래': ['계획', '꿈', '목표', '미래', '희망', '바람']
+            };
+
+            for (const [topic, keywords] of Object.entries(topics)) {
+                if (keywords.some(keyword => dialogue.includes(keyword))) {
+                    return topic;
+                }
+            }
+
+            return '일반';
+        }
+
+        // 감정 추출
+        function extractEmotion(dialogue, narration) {
+            const emotions = {
+                '기쁨': ['기쁘', '행복', '즐거', '웃', '미소', '신나', '좋아'],
+                '사랑': ['사랑', '좋아', '설레', '마음', '애정', '호감'],
+                '슬픔': ['슬프', '눈물', '우울', '힘들', '아픈', '외로'],
+                '당황': ['당황', '놀라', '어떻게', '갑자기', '깜짝'],
+                '부끄러움': ['부끄러', '창피', '얼굴', '빨갛', '민망'],
+                '화남': ['화', '짜증', '분노', '열받', '기분나쁘'],
+                '평온': ['평온', '차분', '고요', '편안', '안정']
+            };
+
+            const text = dialogue + ' ' + narration;
+            for (const [emotion, keywords] of Object.entries(emotions)) {
+                if (keywords.some(keyword => text.includes(keyword))) {
+                    return emotion;
+                }
+            }
+
+            return '중립';
+        }
+
+        // 키워드 추출
+        function extractKeywords(dialogue) {
+            const words = dialogue.split(/\s+/)
+                .map(word => word.replace(/[^\w가-힣]/g, ''))
+                .filter(word => word.length > 1)
+                .slice(0, 5);  // 최대 5개 키워드
+
+            return words;
+        }
+
+        // 반복 검사 및 대안 생성
+        function checkForRepetition(newDialogue, newNarration) {
+            const newPattern = generateDialoguePattern(newDialogue);
+            const newTopic = extractTopic(newDialogue);
+            const newEmotion = extractEmotion(newDialogue, newNarration);
+
+            const issues = [];
+
+            // 1. 직접적인 패턴 반복 검사
+            if (gameState.usedDialogues.has(newPattern)) {
+                issues.push({
+                    type: 'exact_repetition',
+                    severity: 'high',
+                    message: '동일한 대화 패턴이 이미 사용되었습니다.'
+                });
+            }
+
+            // 2. 최근 패턴과의 유사성 검사
+            const recentSimilarity = gameState.recentPatterns.filter(pattern =>
+                calculatePatternSimilarity(pattern, newPattern) > 0.7
+            ).length;
+
+            if (recentSimilarity > 0) {
+                issues.push({
+                    type: 'recent_similarity',
+                    severity: 'medium',
+                    message: `최근 대화와 ${Math.round(recentSimilarity * 70)}% 유사합니다.`
+                });
+            }
+
+            // 3. 주제 반복 검사
+            const recentTopicCount = gameState.topicHistory.slice(-5).filter(topic => topic === newTopic).length;
+            if (recentTopicCount >= 3) {
+                issues.push({
+                    type: 'topic_repetition',
+                    severity: 'medium',
+                    message: `'${newTopic}' 주제가 최근에 너무 많이 반복되었습니다.`
+                });
+            }
+
+            // 4. 감정 변화 부족 검사
+            const recentEmotions = gameState.emotionHistory.slice(-3).map(h => h.emotion);
+            if (recentEmotions.length >= 3 && recentEmotions.every(e => e === newEmotion)) {
+                issues.push({
+                    type: 'emotion_stagnation',
+                    severity: 'low',
+                    message: `감정 변화가 부족합니다. (${newEmotion} 반복)`
+                });
+            }
+
+            return {
+                hasIssues: issues.length > 0,
+                issues: issues,
+                recommendation: generateVariationRecommendation(issues, newTopic, newEmotion)
+            };
+        }
+
+        // 패턴 유사성 계산
+        function calculatePatternSimilarity(pattern1, pattern2) {
+            const words1 = pattern1.split('_');
+            const words2 = pattern2.split('_');
+
+            const commonWords = words1.filter(word => words2.includes(word)).length;
+            const totalWords = Math.max(words1.length, words2.length);
+
+            return totalWords > 0 ? commonWords / totalWords : 0;
+        }
+
+        // 변화 권장사항 생성
+        function generateVariationRecommendation(issues, topic, emotion) {
+            const recommendations = [];
+
+            if (issues.some(i => i.type === 'exact_repetition')) {
+                recommendations.push('완전히 다른 접근 방식으로 대화를 재생성하세요.');
+            }
+
+            if (issues.some(i => i.type === 'topic_repetition')) {
+                const alternativeTopics = ['감정', '일상', '취미', '미래', '관계', '음식']
+                    .filter(t => !gameState.topicHistory.slice(-5).includes(t));
+                if (alternativeTopics.length > 0) {
+                    recommendations.push(`다른 주제로 전환해보세요: ${alternativeTopics.slice(0, 2).join(', ')}`);
+                }
+            }
+
+            if (issues.some(i => i.type === 'emotion_stagnation')) {
+                const alternativeEmotions = ['기쁨', '사랑', '부끄러움', '당황', '평온']
+                    .filter(e => e !== emotion);
+                recommendations.push(`감정 변화를 주세요: ${alternativeEmotions[0] || '다양한 감정'}`);
+            }
+
+            return recommendations.length > 0 ? recommendations : ['현재 대화는 적절합니다.'];
+        }
+
+        // 대화 다양성 강화 프롬프트 생성
+        function generateAntiRepetitionPrompt(character, scenario) {
+            const recentTopics = gameState.topicHistory.slice(-5);
+            const recentEmotions = gameState.emotionHistory.slice(-3).map(h => h.emotion);
+            const unusedTopics = ['감정', '일상', '취미', '미래', '관계', '음식']
+                .filter(topic => !recentTopics.includes(topic));
+
+            return `
+🔄 대화 반복 방지 지침:
+
+최근 사용된 주제: ${recentTopics.join(', ') || '없음'}
+최근 감정 패턴: ${recentEmotions.join(' → ') || '없음'}
+추천 새 주제: ${unusedTopics.slice(0, 2).join(', ') || '자유롭게'}
+
+특별 요청:
+1. 이전 대화와 다른 새로운 접근 방식 사용
+2. 신선하고 예상치 못한 요소 포함
+3. ${character.mbti} 특성의 새로운 면모 보여주기
+4. 대화에 창의성과 다양성 부여
+
+반복 금지:
+- 최근 3턴 이내의 주제나 표현 재사용 금지
+- 동일한 감정이나 톤의 연속 사용 금지
+- 뻔한 반응이나 예측 가능한 대화 피하기
+`;
+        }
+
+        // 🔄 대화 반복 방지 시스템 초기화
+        function initializeAntiRepetitionSystem() {
+            // 시스템 초기화
+            gameState.conversationHistory = [];
+            gameState.usedDialogues = new Set();
+            gameState.recentPatterns = [];
+            gameState.topicHistory = [];
+            gameState.emotionHistory = [];
+
+            console.log('🔄 대화 반복 방지 시스템 초기화 완료');
+
+            // 성능 모니터링 시작
+            startAntiRepetitionMonitoring();
+        }
+
+        // 🔄 대화 반복 방지 시스템 성능 모니터링
+        function startAntiRepetitionMonitoring() {
+            // 5분마다 시스템 상태 체크
+            setInterval(() => {
+                const stats = {
+                    conversationCount: gameState.conversationHistory.length,
+                    uniquePatterns: gameState.usedDialogues.size,
+                    topicDiversity: gameState.topicHistory.length,
+                    emotionChanges: gameState.emotionHistory.length,
+                    memoryUsage: calculateMemoryUsage()
+                };
+
+                console.log('📊 반복 방지 시스템 통계:', stats);
+
+                // 메모리 정리 (50개 이상 대화 기록 시)
+                if (gameState.conversationHistory.length > 50) {
+                    cleanupAntiRepetitionMemory();
+                }
+            }, 300000); // 5분마다
+        }
+
+        // 메모리 사용량 계산
+        function calculateMemoryUsage() {
+            const historySize = JSON.stringify(gameState.conversationHistory).length;
+            const patternsSize = JSON.stringify([...gameState.usedDialogues]).length;
+            const topicsSize = JSON.stringify(gameState.topicHistory).length;
+            const emotionsSize = JSON.stringify(gameState.emotionHistory).length;
+
+            return {
+                total: historySize + patternsSize + topicsSize + emotionsSize,
+                history: historySize,
+                patterns: patternsSize,
+                topics: topicsSize,
+                emotions: emotionsSize
+            };
+        }
+
+        // 메모리 정리
+        function cleanupAntiRepetitionMemory() {
+            console.log('🧹 반복 방지 시스템 메모리 정리 시작...');
+
+            // 대화 히스토리 최신 30개만 유지
+            if (gameState.conversationHistory.length > 30) {
+                gameState.conversationHistory = gameState.conversationHistory.slice(-30);
+            }
+
+            // 최근 패턴 최신 10개만 유지
+            if (gameState.recentPatterns.length > 10) {
+                gameState.recentPatterns = gameState.recentPatterns.slice(-10);
+            }
+
+            // 주제 히스토리 최신 20개만 유지
+            if (gameState.topicHistory.length > 20) {
+                gameState.topicHistory = gameState.topicHistory.slice(-20);
+            }
+
+            // 감정 히스토리 최신 15개만 유지
+            if (gameState.emotionHistory.length > 15) {
+                gameState.emotionHistory = gameState.emotionHistory.slice(-15);
+            }
+
+            // 사용된 패턴 정리 (최근 50개만 유지)
+            const recentPatterns = Array.from(gameState.usedDialogues).slice(-50);
+            gameState.usedDialogues = new Set(recentPatterns);
+
+            console.log('🧹 메모리 정리 완료');
+        }
+
+        // 반복 방지 시스템 상태 확인
+        function getAntiRepetitionStatus() {
+            return {
+                isActive: gameState.conversationHistory.length > 0,
+                totalConversations: gameState.conversationHistory.length,
+                uniquePatterns: gameState.usedDialogues.size,
+                diversityScore: calculateDiversityScore(),
+                recentIssues: getRecentRepetitionIssues(),
+                systemHealth: checkSystemHealth()
+            };
+        }
+
+        // 다양성 점수 계산
+        function calculateDiversityScore() {
+            if (gameState.conversationHistory.length === 0) return 100;
+
+            const uniqueTopics = new Set(gameState.topicHistory).size;
+            const uniqueEmotions = new Set(gameState.emotionHistory.map(h => h.emotion)).size;
+            const patternDiversity = gameState.usedDialogues.size / Math.max(gameState.conversationHistory.length, 1);
+
+            return Math.round(((uniqueTopics / 6) * 30 + (uniqueEmotions / 7) * 30 + patternDiversity * 40));
+        }
+
+        // 최근 반복 문제 조회
+        function getRecentRepetitionIssues() {
+            return gameState.conversationHistory.slice(-5).map(conv => {
+                const check = checkForRepetition(conv.dialogue, conv.narration);
+                return {
+                    timestamp: conv.timestamp,
+                    hasIssues: check.hasIssues,
+                    issueCount: check.issues.length,
+                    severity: check.issues.length > 0 ? check.issues[0].severity : 'none'
+                };
+            });
+        }
+
+        // 시스템 상태 체크
+        function checkSystemHealth() {
+            const memoryUsage = calculateMemoryUsage();
+            const diversityScore = calculateDiversityScore();
+
+            let health = 'excellent';
+            if (memoryUsage.total > 100000) health = 'warning';
+            if (memoryUsage.total > 200000) health = 'critical';
+            if (diversityScore < 50) health = 'poor_diversity';
+
+            return health;
+        }
 
         // 관계 발전 단계 분석 함수
         function analyzeRelationshipStage(affection, conversationHistory) {
@@ -2436,7 +3026,7 @@
         }
 
         // 고도화된 주관식 응답 생성 함수
-        async function generateAdvancedSubjectiveResponse(userMessage, character, affection, conversationHistory = []) {
+        async function generateAdvancedSubjectiveResponse(userMessage, character, affection, conversationHistory = [], antiRepetitionData = null) {
             try {
                 console.log('🧠 고도화된 주관식 평가 시작...', {
                     character: character.name,
@@ -2447,9 +3037,19 @@
                 
                 // 캐릭터 MBTI 특성 로드
                 const mbtiTraits = mbtiCharacteristics[character.mbti] || mbtiCharacteristics.INFP;
-                
+
                 // 관계 발전 단계 분석
                 const relationshipAnalysis = analyzeRelationshipStage(affection, conversationHistory);
+
+                // MBTI 맞춤 메시지 분석 (새로 추가)
+                const mbtiAnalysis = analyzeMessageForMBTI(
+                    userMessage,
+                    character.mbti,
+                    affection,
+                    relationshipAnalysis.stage
+                );
+
+                console.log('🎯 MBTI 맞춤 분석 결과:', mbtiAnalysis);
                 
                 // 현재 상황 컨텍스트
                 const currentContext = {
@@ -2514,34 +3114,80 @@ ${mbtiTraits.relationship_patterns[relationshipAnalysis.stage]}`;
                 
                 if (apiResponse) {
                     console.log('✅ 채팅 훈련 API 응답 완료:', apiResponse);
-                    
-                    // 호감도 변화 계산 (간단한 버전)
-                    const affectionChange = Math.floor(Math.random() * 5) + 1; // 1-5점 랜덤
-                    
+
+                    // MBTI 맞춤 호감도 변화 계산 (고도화)
+                    const affectionChange = mbtiAnalysis.affection_impact;
+
+                    // MBTI 기반 상세 평가
+                    const evaluation = {
+                        message_quality: mbtiAnalysis.compatibility_score > 5 ? "매우 좋음" :
+                                        mbtiAnalysis.compatibility_score > 0 ? "좋음" : "보통",
+                        emotional_impact: mbtiAnalysis.emotional_resonance > 0.5 ? "강한 긍정적 영향" :
+                                         mbtiAnalysis.emotional_resonance > 0 ? "긍정적 영향" : "중립적",
+                        conversation_flow: mbtiAnalysis.trigger_matches.negative.length > 0 ?
+                                          "주의 필요" : "자연스러움",
+                        mbti_insights: generateMBTIInsights(mbtiAnalysis, character.mbti)
+                    };
+
                     return {
                         dialogue: apiResponse,
-                        narration: `${character.name || '캐릭터'}가 ${character.personality || '자연스럽게'} 반응한다.`,
+                        narration: generateMBTINarration(character, mbtiAnalysis, mbtiTraits),
                         affection_change: affectionChange,
-                        evaluation: {
-                            message_quality: "좋음",
-                            emotional_impact: "긍정적",
-                            conversation_flow: "자연스러움"
-                        },
+                        evaluation: evaluation,
                         relationship_analysis: relationshipAnalysis,
                         mbti_analysis: {
                             character_type: mbtiTraits.name,
-                            compatibility: "높음"
+                            compatibility: mbtiAnalysis.compatibility_score > 5 ? "매우 높음" :
+                                          mbtiAnalysis.compatibility_score > 0 ? "높음" : "보통",
+                            triggered_traits: mbtiAnalysis.trigger_matches.positive.map(t => t.trigger),
+                            response_style: mbtiAnalysis.response_style,
+                            emotional_resonance: Math.round(mbtiAnalysis.emotional_resonance * 100) + "%"
                         }
                     };
                 }
                 
                 // API 실패 시 fallback
                 console.log('⚠️ OpenAI API 실패, 고도화된 로컬 응답 생성');
-                return generateEnhancedLocalResponse(userMessage, character, affection, mbtiTraits, relationshipAnalysis);
+                return generateEnhancedLocalResponse(userMessage, character, affection, mbtiTraits, relationshipAnalysis, mbtiAnalysis);
                 
             } catch (error) {
                 console.error('❌ 고도화된 주관식 평가 실패:', error);
                 return generateEnhancedLocalResponse(userMessage, character, affection);
+            }
+        }
+
+        // MBTI 인사이트 생성 함수
+        function generateMBTIInsights(mbtiAnalysis, mbtiType) {
+            const insights = [];
+
+            if (mbtiAnalysis.trigger_matches.positive.length > 0) {
+                insights.push(`${mbtiType} 특성과 잘 맞는 메시지입니다.`);
+                insights.push(`특히 "${mbtiAnalysis.trigger_matches.positive[0].trigger}" 부분이 효과적이었습니다.`);
+            }
+
+            if (mbtiAnalysis.trigger_matches.negative.length > 0) {
+                insights.push(`${mbtiType} 성격에는 "${mbtiAnalysis.trigger_matches.negative[0].trigger}" 같은 접근은 주의가 필요합니다.`);
+            }
+
+            if (mbtiAnalysis.emotional_resonance > 0.7) {
+                insights.push("감정적 공감대가 매우 높게 형성되었습니다.");
+            } else if (mbtiAnalysis.emotional_resonance < 0.3) {
+                insights.push("더 깊이 있는 감정 표현이 도움이 될 것 같습니다.");
+            }
+
+            return insights.length > 0 ? insights : ["자연스러운 대화였습니다."];
+        }
+
+        // MBTI 맞춤 내레이션 생성 함수
+        function generateMBTINarration(character, mbtiAnalysis, mbtiTraits) {
+            const baseName = character.name || '캐릭터';
+
+            if (mbtiAnalysis.compatibility_score > 5) {
+                return `${baseName}의 눈이 반짝이며 ${mbtiTraits.emotional_expression}한 반응을 보인다.`;
+            } else if (mbtiAnalysis.compatibility_score < 0) {
+                return `${baseName}가 ${mbtiTraits.stress_responses[0] || '조심스러운'} 표정을 짓는다.`;
+            } else {
+                return `${baseName}가 ${mbtiTraits.communication_style}하게 반응한다.`;
             }
         }
 

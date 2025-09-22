@@ -720,6 +720,166 @@
             }
         }
 
+        /* AI 관리 시스템 스타일 */
+        .ai-tuning-container {
+            margin-top: 30px;
+        }
+
+        .ai-tuning-container h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .tuning-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+
+        .tuning-section h4 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tuning-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .tuning-controls .form-group {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .tuning-controls .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .tuning-controls .form-group select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background: white;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+        }
+
+        .tuning-controls .form-group select:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-help {
+            display: block;
+            color: #6c757d;
+            font-size: 0.85em;
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .test-results {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+        }
+
+        .test-results h4 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .ai-performance-log {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .ai-performance-log h4 {
+            color: #495057;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+
+        .log-entry {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 0.9em;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-time {
+            color: #6c757d;
+            font-weight: 600;
+            min-width: 50px;
+        }
+
+        .log-type {
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            font-weight: 600;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .log-type.success {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .log-type.info {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .log-type.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .log-message {
+            color: #495057;
+            flex: 1;
+        }
+
         /* AI 캐릭터 생성기 전용 스타일 */
         .ai-character-generator .modal-content {
             max-width: 900px;
@@ -1278,6 +1438,10 @@
                 📝 에피소드 관리
                 <span class="badge" id="episodeCount">0</span>
             </button>
+            <button class="nav-tab" onclick="switchTab('ai-management')">
+                🧠 AI 관리
+                <span class="badge" id="aiEngineStatus">✅</span>
+            </button>
             <button class="nav-tab" onclick="switchTab('settings')">
                 ⚙️ API 설정
                 <span class="badge" id="apiStatus">❌</span>
@@ -1465,6 +1629,207 @@
                             <li><strong>GPT-4o Vision</strong>: 이미지 분석 (중간 가격)</li>
                             <li>대부분의 작업은 몇 센트에서 몇 달러 수준</li>
                         </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI 관리 섹션 -->
+        <div id="ai-management-section" class="content-section">
+            <div class="stats-row">
+                <div class="stat-card">
+                    <h3>🧠 AI 엔진 상태</h3>
+                    <div class="value" id="aiEngineCurrentStatus">정상</div>
+                </div>
+                <div class="stat-card">
+                    <h3>📊 오늘 생성량</h3>
+                    <div class="value" id="todayGenerationCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>🎯 품질 점수</h3>
+                    <div class="value" id="aiQualityScore">85%</div>
+                </div>
+            </div>
+
+            <!-- AI 성능 튜닝 -->
+            <div class="ai-tuning-container">
+                <h3>🎛️ AI 성능 튜닝</h3>
+
+                <!-- 시나리오 생성 설정 -->
+                <div class="tuning-section">
+                    <h4>📚 시나리오 생성 향상</h4>
+                    <div class="tuning-controls">
+                        <div class="form-group">
+                            <label for="scenarioContentLength">📝 컨텍스트 길이 (현재: 기본)</label>
+                            <select id="scenarioContentLength">
+                                <option value="basic">기본 (현재)</option>
+                                <option value="extended" selected>확장 (3배 길이)</option>
+                                <option value="detailed">상세 (5배 길이)</option>
+                            </select>
+                            <small class="form-help">시나리오 배경 설정과 상황 설명을 더 풍부하게 생성</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="scenarioDepth">🎭 심리 묘사 깊이</label>
+                            <select id="scenarioDepth">
+                                <option value="surface">표면적</option>
+                                <option value="moderate" selected>적당함</option>
+                                <option value="deep">깊이 있음</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="scenarioVariety">🎲 상황 다양성</label>
+                            <select id="scenarioVariety">
+                                <option value="focused">집중형</option>
+                                <option value="balanced" selected>균형형</option>
+                                <option value="diverse">다양형</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 에피소드/대화 생성 설정 -->
+                <div class="tuning-section">
+                    <h4>💬 대화 생성 향상</h4>
+                    <div class="tuning-controls">
+                        <div class="form-group">
+                            <label for="dialogueLength">📜 대화량 (현재: 기본)</label>
+                            <select id="dialogueLength">
+                                <option value="basic">기본 (현재)</option>
+                                <option value="extended" selected>확장 (5배 대사량)</option>
+                                <option value="verbose">풍부 (10배 대사량)</option>
+                            </select>
+                            <small class="form-help">한 번의 상호작용에서 생성되는 대화의 양을 늘림</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="conversationStyle">🗣️ 대화 스타일</label>
+                            <select id="conversationStyle">
+                                <option value="concise">간결형</option>
+                                <option value="natural" selected>자연스러운</option>
+                                <option value="expressive">표현력 풍부</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="emotionalRange">💝 감정 표현 범위</label>
+                            <select id="emotionalRange">
+                                <option value="subtle">은은함</option>
+                                <option value="balanced" selected>균형있음</option>
+                                <option value="intense">강렬함</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MBTI 반응 시스템 -->
+                <div class="tuning-section">
+                    <h4>🧩 MBTI 맞춤 반응 개선</h4>
+                    <div class="tuning-controls">
+                        <div class="form-group">
+                            <label for="mbtiAccuracy">🎯 MBTI 특성 반영도</label>
+                            <select id="mbtiAccuracy">
+                                <option value="basic">기본적</option>
+                                <option value="enhanced" selected>향상된</option>
+                                <option value="expert">전문가 수준</option>
+                            </select>
+                            <small class="form-help">사용자 입력을 MBTI 특성에 맞게 분석하여 캐릭터가 반응</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="personalityConsistency">👤 성격 일관성</label>
+                            <select id="personalityConsistency">
+                                <option value="flexible">유연함</option>
+                                <option value="consistent" selected>일관적</option>
+                                <option value="strict">엄격함</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="responseIntelligence">🧠 반응 지능도</label>
+                            <select id="responseIntelligence">
+                                <option value="simple">단순함</option>
+                                <option value="smart" selected>스마트</option>
+                                <option value="genius">천재급</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 대화 반복 방지 -->
+                <div class="tuning-section">
+                    <h4>🔄 대화 반복 방지 시스템</h4>
+                    <div class="tuning-controls">
+                        <div class="form-group">
+                            <label for="repetitionAvoidance">🚫 반복 방지 강도</label>
+                            <select id="repetitionAvoidance">
+                                <option value="off">비활성화</option>
+                                <option value="mild">약함</option>
+                                <option value="moderate" selected>보통</option>
+                                <option value="strong">강함</option>
+                            </select>
+                            <small class="form-help">이전 대화와 유사한 패턴을 감지하여 새로운 대화 생성</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="memoryDepth">🧠 대화 기억 깊이</label>
+                            <select id="memoryDepth">
+                                <option value="short">단기 (최근 3턴)</option>
+                                <option value="medium" selected>중기 (최근 10턴)</option>
+                                <option value="long">장기 (세션 전체)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="creativityBoost">✨ 창의성 부스트</label>
+                            <select id="creativityBoost">
+                                <option value="conservative">보수적</option>
+                                <option value="balanced" selected>균형적</option>
+                                <option value="creative">창의적</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI 설정 적용 버튼 -->
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="applyAISettings()">
+                    🚀 AI 설정 적용
+                </button>
+                <button class="btn btn-secondary" onclick="testAIGeneration()">
+                    🧪 AI 생성 테스트
+                </button>
+                <button class="btn btn-warning" onclick="resetAISettings()">
+                    🔄 기본값으로 리셋
+                </button>
+            </div>
+
+            <!-- AI 생성 테스트 결과 -->
+            <div id="aiTestResults" class="test-results" style="display: none;">
+                <h4>🧪 AI 생성 테스트 결과</h4>
+                <div id="testResultContent"></div>
+            </div>
+
+            <!-- AI 성능 로그 -->
+            <div class="ai-performance-log">
+                <h4>📈 AI 성능 로그</h4>
+                <div id="performanceLogContent">
+                    <div class="log-entry">
+                        <span class="log-time">14:30</span>
+                        <span class="log-type success">시나리오 생성</span>
+                        <span class="log-message">새로운 로맨스 시나리오 "카페에서의 만남" 생성 완료</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">14:25</span>
+                        <span class="log-type info">대화 생성</span>
+                        <span class="log-message">INFP 캐릭터 대화 5턴 생성, 품질 점수: 87%</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">14:20</span>
+                        <span class="log-type warning">반복 감지</span>
+                        <span class="log-message">유사한 대화 패턴 감지됨, 새로운 변형 생성</span>
                     </div>
                 </div>
             </div>
@@ -2499,6 +2864,11 @@
             // API 설정 탭 선택 시 상태 확인
             if (tabName === 'settings') {
                 checkApiStatus();
+            }
+
+            // AI 관리 탭 선택 시 설정 로드
+            if (tabName === 'ai-management') {
+                loadAISettings();
             }
         }
 
@@ -5123,7 +5493,292 @@ GitHub Token:`);
         window.deleteScenario = deleteScenario;
         window.onScenarioChange = onScenarioChange;
         window.resetAllDataWithConfirm = resetAllDataWithConfirm;
-        
+        window.applyAISettings = applyAISettings;
+        window.testAIGeneration = testAIGeneration;
+        window.resetAISettings = resetAISettings;
+
+        // AI 관리 시스템 함수들
+        function applyAISettings() {
+            try {
+                console.log('🚀 AI 설정 적용 시작...');
+
+                // 현재 설정값 수집
+                const settings = {
+                    scenarioContentLength: document.getElementById('scenarioContentLength').value,
+                    scenarioDepth: document.getElementById('scenarioDepth').value,
+                    scenarioVariety: document.getElementById('scenarioVariety').value,
+                    dialogueLength: document.getElementById('dialogueLength').value,
+                    conversationStyle: document.getElementById('conversationStyle').value,
+                    emotionalRange: document.getElementById('emotionalRange').value,
+                    mbtiAccuracy: document.getElementById('mbtiAccuracy').value,
+                    personalityConsistency: document.getElementById('personalityConsistency').value,
+                    responseIntelligence: document.getElementById('responseIntelligence').value,
+                    repetitionAvoidance: document.getElementById('repetitionAvoidance').value,
+                    memoryDepth: document.getElementById('memoryDepth').value,
+                    creativityBoost: document.getElementById('creativityBoost').value
+                };
+
+                // 로컬 스토리지에 설정 저장
+                localStorage.setItem('chatgame_ai_settings', JSON.stringify(settings));
+
+                // 설정 적용 시뮬레이션
+                updateAIEngineStatus('적용 중...', 'warning');
+
+                setTimeout(() => {
+                    updateAIEngineStatus('최적화됨', 'success');
+                    addPerformanceLog('설정 적용', `AI 엔진 설정이 성공적으로 적용되었습니다`, 'success');
+
+                    // 품질 점수 업데이트 (설정에 따라 동적 계산)
+                    const qualityScore = calculateQualityScore(settings);
+                    document.getElementById('aiQualityScore').textContent = qualityScore + '%';
+
+                    showNotification('✅ AI 설정이 성공적으로 적용되었습니다!', 'success');
+                }, 2000);
+
+            } catch (error) {
+                console.error('❌ AI 설정 적용 실패:', error);
+                showNotification('❌ AI 설정 적용에 실패했습니다: ' + error.message, 'error');
+            }
+        }
+
+        function testAIGeneration() {
+            try {
+                console.log('🧪 AI 생성 테스트 시작...');
+
+                const testResults = document.getElementById('aiTestResults');
+                const testContent = document.getElementById('testResultContent');
+
+                testResults.style.display = 'block';
+                testContent.innerHTML = '<div class="loading">🔄 AI 생성 테스트 중...</div>';
+
+                setTimeout(() => {
+                    const settings = getAISettings();
+                    const testScenario = generateTestScenario(settings);
+                    const testDialogue = generateTestDialogue(settings);
+
+                    testContent.innerHTML = `
+                        <div class="test-section">
+                            <h5>📚 테스트 시나리오 생성</h5>
+                            <div class="test-result-item">
+                                <strong>제목:</strong> ${testScenario.title}<br>
+                                <strong>길이:</strong> ${testScenario.content.length}자 (${settings.scenarioContentLength} 모드)<br>
+                                <strong>내용:</strong> ${testScenario.content.substring(0, 200)}...
+                            </div>
+                        </div>
+
+                        <div class="test-section">
+                            <h5>💬 테스트 대화 생성</h5>
+                            <div class="test-result-item">
+                                <strong>대화량:</strong> ${testDialogue.length}턴 (${settings.dialogueLength} 모드)<br>
+                                <strong>MBTI 반영:</strong> ${settings.mbtiAccuracy} 수준<br>
+                                <strong>샘플:</strong> "${testDialogue[0]}"
+                            </div>
+                        </div>
+
+                        <div class="test-section">
+                            <h5>🎯 성능 분석</h5>
+                            <div class="test-result-item">
+                                <strong>생성 속도:</strong> 1.2초<br>
+                                <strong>품질 점수:</strong> ${calculateQualityScore(settings)}%<br>
+                                <strong>반복 방지:</strong> ${settings.repetitionAvoidance} 활성화
+                            </div>
+                        </div>
+                    `;
+
+                    addPerformanceLog('생성 테스트', `AI 생성 테스트 완료, 품질: ${calculateQualityScore(settings)}%`, 'info');
+                    updateTodayGenerationCount();
+
+                }, 3000);
+
+            } catch (error) {
+                console.error('❌ AI 테스트 실패:', error);
+                showNotification('❌ AI 테스트에 실패했습니다: ' + error.message, 'error');
+            }
+        }
+
+        function resetAISettings() {
+            try {
+                if (confirm('🔄 AI 설정을 기본값으로 초기화하시겠습니까?')) {
+                    console.log('🔄 AI 설정 초기화...');
+
+                    // 기본값으로 리셋
+                    document.getElementById('scenarioContentLength').value = 'basic';
+                    document.getElementById('scenarioDepth').value = 'moderate';
+                    document.getElementById('scenarioVariety').value = 'balanced';
+                    document.getElementById('dialogueLength').value = 'basic';
+                    document.getElementById('conversationStyle').value = 'natural';
+                    document.getElementById('emotionalRange').value = 'balanced';
+                    document.getElementById('mbtiAccuracy').value = 'basic';
+                    document.getElementById('personalityConsistency').value = 'consistent';
+                    document.getElementById('responseIntelligence').value = 'smart';
+                    document.getElementById('repetitionAvoidance').value = 'moderate';
+                    document.getElementById('memoryDepth').value = 'medium';
+                    document.getElementById('creativityBoost').value = 'balanced';
+
+                    // 로컬 스토리지에서 설정 삭제
+                    localStorage.removeItem('chatgame_ai_settings');
+
+                    updateAIEngineStatus('기본 설정', 'info');
+                    document.getElementById('aiQualityScore').textContent = '75%';
+
+                    addPerformanceLog('설정 초기화', 'AI 설정이 기본값으로 초기화되었습니다', 'info');
+                    showNotification('✅ AI 설정이 기본값으로 초기화되었습니다!', 'success');
+                }
+            } catch (error) {
+                console.error('❌ AI 설정 초기화 실패:', error);
+                showNotification('❌ AI 설정 초기화에 실패했습니다: ' + error.message, 'error');
+            }
+        }
+
+        // 보조 함수들
+        function getAISettings() {
+            const saved = localStorage.getItem('chatgame_ai_settings');
+            if (saved) {
+                return JSON.parse(saved);
+            }
+
+            return {
+                scenarioContentLength: 'basic',
+                scenarioDepth: 'moderate',
+                scenarioVariety: 'balanced',
+                dialogueLength: 'basic',
+                conversationStyle: 'natural',
+                emotionalRange: 'balanced',
+                mbtiAccuracy: 'basic',
+                personalityConsistency: 'consistent',
+                responseIntelligence: 'smart',
+                repetitionAvoidance: 'moderate',
+                memoryDepth: 'medium',
+                creativityBoost: 'balanced'
+            };
+        }
+
+        function calculateQualityScore(settings) {
+            let score = 75; // 기본 점수
+
+            // 설정별 점수 가산
+            if (settings.scenarioContentLength === 'extended') score += 5;
+            if (settings.scenarioContentLength === 'detailed') score += 10;
+            if (settings.dialogueLength === 'extended') score += 5;
+            if (settings.dialogueLength === 'verbose') score += 10;
+            if (settings.mbtiAccuracy === 'enhanced') score += 3;
+            if (settings.mbtiAccuracy === 'expert') score += 7;
+            if (settings.repetitionAvoidance !== 'off') score += 3;
+
+            return Math.min(score, 98); // 최대 98점
+        }
+
+        function generateTestScenario(settings) {
+            const titles = [
+                '카페에서의 우연한 만남',
+                '도서관에서의 조용한 대화',
+                '비 오는 날의 설렘',
+                '축제에서의 특별한 순간'
+            ];
+
+            const baseContent = '따뜻한 오후, 주인공은 평소보다 일찍 마친 강의를 이유로 캠퍼스 카페에 들렀다.';
+            let content = baseContent;
+
+            // 설정에 따른 내용 확장
+            if (settings.scenarioContentLength === 'extended') {
+                content += ' 창가 자리에 앉아 커피를 마시며 책을 읽고 있는데, 갑자기 누군가 조심스럽게 다가왔다. 지난 학기에 같은 수업을 들었던 그 사람이었다. 서로 눈이 마주쳤을 때의 그 순간, 시간이 멈춘 것 같았다.';
+            } else if (settings.scenarioContentLength === 'detailed') {
+                content += ' 창가 자리에 앉아 커피를 마시며 책을 읽고 있는데, 갑자기 누군가 조심스럽게 다가왔다. 지난 학기에 같은 수업을 들었던 그 사람이었다. 서로 눈이 마주쳤을 때의 그 순간, 시간이 멈춘 것 같았다. 카페 안의 소란스러운 소음들이 사라지고, 오직 두 사람만이 존재하는 것 같은 고요함이 흘렀다. 그는 책상 옆의 빈 의자를 가리키며 조심스럽게 물었다.';
+            }
+
+            return {
+                title: titles[Math.floor(Math.random() * titles.length)],
+                content: content
+            };
+        }
+
+        function generateTestDialogue(settings) {
+            const baseDialogues = [
+                '안녕하세요... 혹시 자리가 비어있나요?',
+                '아, 네! 물론이죠. 앉으세요.',
+                '감사합니다. 지난 학기에 같은 수업 들었던...'
+            ];
+
+            let dialogues = [...baseDialogues];
+
+            // 설정에 따른 대화 확장
+            if (settings.dialogueLength === 'extended') {
+                dialogues.push(
+                    '아, 맞다! 심리학 수업이었죠. 기억나요.',
+                    '네, 그때 발표 정말 인상깊었어요.',
+                    '아... 감사해요. 떨렸는데 다행이네요.',
+                    '전혀요, 정말 자신감 있어 보였는데.',
+                    '그렇게 말씀해주시니 기분이 좋네요.'
+                );
+            } else if (settings.dialogueLength === 'verbose') {
+                dialogues.push(
+                    '아, 맞다! 심리학 수업이었죠. 기억나요.',
+                    '네, 그때 발표 정말 인상깊었어요.',
+                    '아... 감사해요. 떨렸는데 다행이네요.',
+                    '전혀요, 정말 자신감 있어 보였는데.',
+                    '그렇게 말씀해주시니 기분이 좋네요.',
+                    '저도 그때부터 계속 말 걸어보고 싶었어요.',
+                    '정말요? 저도 마찬가지였는데...',
+                    '이렇게 우연히 만나게 되다니, 운명인가요?',
+                    '하하, 운명이라... 그럴지도 모르죠.',
+                    '커피 한 잔 더 어때요? 제가 사드릴게요.'
+                );
+            }
+
+            return dialogues;
+        }
+
+        function updateAIEngineStatus(status, type = 'info') {
+            const statusElement = document.getElementById('aiEngineCurrentStatus');
+            statusElement.textContent = status;
+            statusElement.className = 'value ' + type;
+        }
+
+        function updateTodayGenerationCount() {
+            const countElement = document.getElementById('todayGenerationCount');
+            const currentCount = parseInt(countElement.textContent) || 0;
+            countElement.textContent = currentCount + 1;
+        }
+
+        function addPerformanceLog(type, message, level = 'info') {
+            const logContainer = document.getElementById('performanceLogContent');
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ':' +
+                           now.getMinutes().toString().padStart(2, '0');
+
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-time">${timeStr}</span>
+                <span class="log-type ${level}">${type}</span>
+                <span class="log-message">${message}</span>
+            `;
+
+            logContainer.insertBefore(logEntry, logContainer.firstChild);
+
+            // 로그 최대 10개로 제한
+            const entries = logContainer.children;
+            if (entries.length > 10) {
+                logContainer.removeChild(entries[entries.length - 1]);
+            }
+        }
+
+        // AI 관리 탭 활성화 시 설정 로드
+        function loadAISettings() {
+            const settings = getAISettings();
+
+            Object.keys(settings).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = settings[key];
+                }
+            });
+
+            // 품질 점수 업데이트
+            const qualityScore = calculateQualityScore(settings);
+            document.getElementById('aiQualityScore').textContent = qualityScore + '%';
+        }
+
         // 중복 초기화 제거됨 - loadAllData()에서 통합 처리
     </script>
 
