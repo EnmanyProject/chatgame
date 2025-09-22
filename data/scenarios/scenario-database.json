@@ -7,7 +7,27 @@
     "reset_at": "2025-09-22T13:30:28.115Z",
     "reset_reason": "Clean scenarios data reset"
   },
-  "scenarios": {},
+  "scenarios": {
+    "scenario_첫_눈이_내린_날_1758550446175": {
+      "title": "첫 눈이 내린 날",
+      "description": "비 오는 날 우산을 함께 쓰게 된 두 사람의 설레는 만남",
+      "background_setting": "벚꽃이 만발한 공원",
+      "mood": "따뜻함",
+      "available_characters": [
+        "미화__infj_1758550387707"
+      ],
+      "created_date": "2025-09-22",
+      "episode_count": 0,
+      "tags": [
+        "따뜻함"
+      ],
+      "source": "github_api",
+      "active": true,
+      "id": "scenario_첫_눈이_내린_날_1758550446175",
+      "action": "create",
+      "updated_at": "2025-09-22T14:14:08.197Z"
+    }
+  },
   "scenario_templates": {
     "romance_template": {
       "mood_options": [
