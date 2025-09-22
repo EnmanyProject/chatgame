@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 통합 관리 시스템 - MBTI 로맨스 게임</title>
+    <title>🌐 온라인 관리 시스템 - 채팅 기술 훈련</title>
     <style>
         * {
             margin: 0;
@@ -1698,30 +1698,6 @@
                 <form id="characterForm">
                     <input type="hidden" id="characterId" />
                     
-                    <!-- 사진 분석 섭션 -->
-                    <div class="char-category">
-                        <h3>📷 사진 분석</h3>
-                        <p style="text-align: center; color: #666; margin-bottom: 15px;">캐릭터 사진을 업로드하면 AI가 외모와 성격을 분석해드립니다</p>
-                        <div style="text-align: center; margin-bottom: 20px;">
-                            <input type="file" id="characterImageUpload" accept="image/*" style="display: none;" onchange="handleImageUpload()">
-                            <button type="button" class="btn btn-primary" onclick="document.getElementById('characterImageUpload').click()" style="background: #4CAF50;">
-                                📷 사진 업로드
-                            </button>
-                            <button type="button" class="btn btn-secondary" onclick="analyzeCharacterImage()" id="analyzeImageBtn" disabled>
-                                🤖 이미지 분석
-                            </button>
-                        </div>
-                        <div id="imagePreview" style="display: none; text-align: center; margin-bottom: 15px;">
-                            <img id="previewImg" style="max-width: 200px; max-height: 200px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-                        </div>
-                        <div id="analysisResult" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                            <h4 style="color: #28a745; margin-bottom: 10px;">🔍 AI 분석 결과</h4>
-                            <div id="analysisContent"></div>
-                            <button type="button" class="btn btn-success" onclick="applyAnalysisToForm()" id="applyAnalysisBtn" style="margin-top: 10px;">
-                                ✨ 분석 결과 적용
-                            </button>
-                        </div>
-                    </div>
                     
                     <!-- 기본 정보 -->
                     <div class="char-category">
@@ -3921,238 +3897,11 @@
         // 사용하지 않을 예정이므로 주석 처리
         // function loadDefaultCharacters() { ... }
 
-        // === 사진 분석 기능 ===
-        let uploadedImageBase64 = null;
-        let currentAnalysisResult = null;
 
-        // 이미지 압축 함수
-        function compressImage(dataUrl, quality, callback) {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const img = new Image();
-            
-            img.onload = function() {
-                // 최대 크기 제한 (가로/세로 800px)
-                const maxSize = 800;
-                let { width, height } = img;
-                
-                if (width > height) {
-                    if (width > maxSize) {
-                        height = (height * maxSize) / width;
-                        width = maxSize;
-                    }
-                } else {
-                    if (height > maxSize) {
-                        width = (width * maxSize) / height;
-                        height = maxSize;
-                    }
-                }
-                
-                canvas.width = width;
-                canvas.height = height;
-                
-                // 이미지 그리기
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                // 압축된 데이터 URL 반환
-                const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-                callback(compressedDataUrl);
-            };
-            
-            img.src = dataUrl;
-        }
 
-        function handleImageUpload() {
-            const fileInput = document.getElementById('characterImageUpload');
-            const file = fileInput.files[0];
-            
-            if (!file) return;
-            
-            // 파일 크기 검사 (2MB 제한 - Vercel 업로드 제한 고려)
-            const maxSize = 2 * 1024 * 1024; // 2MB
-            if (file.size > maxSize) {
-                const sizeInMB = (file.size / (1024 * 1024)).toFixed(1);
-                alert(`이미지 파일이 너무 큽니다!\n현재 크기: ${sizeInMB}MB\n최대 허용: 2.0MB\n\n더 작은 이미지를 선택하거나 이미지를 압축해주세요.`);
-                // 파일 입력 초기화
-                fileInput.value = '';
-                return;
-            }
-            
-            // 이미지 파일인지 검사
-            if (!file.type.startsWith('image/')) {
-                alert('이미지 파일만 업로드 가능합니다.');
-                return;
-            }
-            
-            console.log('📷 이미지 업로드 시작:', file.name);
-            
-            // 이미지 압축 및 처리
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    // 이미지 압축 처리
-                    compressImage(e.target.result, 0.8, (compressedDataUrl) => {
-                        // Base64 데이터 저장 (데이터 URI 헤더 제거)
-                        uploadedImageBase64 = compressedDataUrl.split(',')[1];
-                        
-                        // 미리보기 표시
-                        document.getElementById('previewImg').src = compressedDataUrl;
-                        document.getElementById('imagePreview').style.display = 'block';
-                        
-                        // 분석 버튼 활성화
-                        document.getElementById('analyzeImageBtn').disabled = false;
-                        
-                        // 압축된 크기 표시
-                        const compressedSize = (compressedDataUrl.length * 0.75 / 1024).toFixed(1);
-                        console.log(`✅ 이미지 업로드 완료 (압축 후 크기: ${compressedSize}KB)`);
-                    });
-                } catch (error) {
-                    console.error('❌ 이미지 처리 오류:', error);
-                    alert('이미지 처리 중 오류가 발생했습니다.');
-                }
-            };
-            
-            reader.onerror = function() {
-                console.error('❌ 이미지 읽기 실패');
-                alert('이미지 읽기에 실패했습니다.');
-            };
-            
-            reader.readAsDataURL(file);
-        }
 
-        async function analyzeCharacterImage() {
-            if (!uploadedImageBase64) {
-                alert('먼저 이미지를 업로드해주세요.');
-                return;
-            }
-            
-            const analyzeBtn = document.getElementById('analyzeImageBtn');
-            const originalText = analyzeBtn.textContent;
-            analyzeBtn.disabled = true;
-            analyzeBtn.textContent = '🤖 분석 중...';
-            
-            try {
-                console.log('🔍 이미지 분석 시작...');
-                
-                const response = await fetch('/api/character-ai-generator', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'analyze_character_image',
-                        imageBase64: uploadedImageBase64
-                    })
-                });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    if (result.success) {
-                        currentAnalysisResult = result.analysis;
-                        displayAnalysisResult(result.analysis);
-                        console.log('✅ 이미지 분석 완료:', result.analysis);
-                    } else {
-                        throw new Error(result.message || '분석 실패');
-                    }
-                } else {
-                    throw new Error('서버 오류: ' + response.status);
-                }
-                
-            } catch (error) {
-                console.error('❌ 이미지 분석 오류:', error);
-                alert('이미지 분석 중 오류가 발생했습니다: ' + error.message);
-            } finally {
-                analyzeBtn.disabled = false;
-                analyzeBtn.textContent = originalText;
-            }
-        }
 
-        function displayAnalysisResult(analysis) {
-            const container = document.getElementById('analysisContent');
-            
-            let html = '<div style="font-size: 14px; line-height: 1.6;">';
-            
-            if (analysis.appearance) {
-                html += `<div style="margin-bottom: 10px;"><strong>👀 외모:</strong> ${analysis.appearance}</div>`;
-            }
-            
-            if (analysis.personality_prediction) {
-                html += `<div style="margin-bottom: 10px;"><strong>😊 성격 예측:</strong> ${analysis.personality_prediction}</div>`;
-            }
-            
-            if (analysis.mbti_suggestion) {
-                html += `<div style="margin-bottom: 10px;"><strong>🎯 MBTI 추천:</strong> ${analysis.mbti_suggestion}</div>`;
-            }
-            
-            if (analysis.speech_style) {
-                html += `<div style="margin-bottom: 10px;"><strong>💬 말투:</strong> ${analysis.speech_style}</div>`;
-            }
-            
-            if (analysis.background_suggestion) {
-                html += `<div style="margin-bottom: 10px;"><strong>🏠 배경:</strong> ${analysis.background_suggestion}</div>`;
-            }
-            
-            if (analysis.note) {
-                html += `<div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px; color: #856404;"><small>📝 ${analysis.note}</small></div>`;
-            }
-            
-            if (analysis.raw_analysis) {
-                html += `<div style="margin-top: 15px; padding: 10px; background: #e9ecef; border-radius: 5px;"><small>🤖 원시 분석:</small><br><pre style="white-space: pre-wrap; font-size: 12px;">${analysis.raw_analysis}</pre></div>`;
-            }
-            
-            html += '</div>';
-            
-            container.innerHTML = html;
-            document.getElementById('analysisResult').style.display = 'block';
-        }
 
-        function applyAnalysisToForm() {
-            if (!currentAnalysisResult) {
-                alert('적용할 분석 결과가 없습니다.');
-                return;
-            }
-            
-            const analysis = currentAnalysisResult;
-            console.log('🔧 분석 결과 적용 시작:', analysis);
-            
-            // 안전한 요소 업데이트 함수
-            const safeSetValue = (elementId, value) => {
-                const element = document.getElementById(elementId);
-                if (element) {
-                    element.value = value;
-                    console.log(`✅ ${elementId} 값 적용:`, value);
-                } else {
-                    console.warn(`⚠️ 요소를 찾을 수 없음: ${elementId}`);
-                }
-            };
-            
-            // MBTI 적용
-            if (analysis.mbti_suggestion && analysis.mbti_suggestion.length === 4) {
-                safeSetValue('charMbti', analysis.mbti_suggestion);
-            }
-            
-            // 말투 적용 (charSpeechStyle이 실제로 존재하는지 확인)
-            if (analysis.speech_style) {
-                safeSetValue('charSpeechStyle', analysis.speech_style);
-            }
-            
-            // 설명 적용 (안전한 방식)
-            if (analysis.appearance || analysis.background_suggestion) {
-                let description = '';
-                if (analysis.appearance) description += `외모: ${analysis.appearance}. `;
-                if (analysis.background_suggestion) description += `배경: ${analysis.background_suggestion}.`;
-                safeSetValue('charDescription', description);
-            }
-            
-            // 기타 필드들도 안전하게 적용
-            if (analysis.name_suggestion) {
-                safeSetValue('charName', analysis.name_suggestion);
-            }
-            
-            if (analysis.age_suggestion) {
-                safeSetValue('charAge', analysis.age_suggestion);
-            }
-            
-            alert('🎉 분석 결과가 폼에 적용되었습니다!');
-        }
 
         // === 더미 데이터 삭제 기능 ===
         async function resetAllCharacters() {
@@ -4277,6 +4026,7 @@
             document.getElementById('charSpeechStyle').value = '';
             
             // AI 생성 영역 초기화
+            generatedCharacter = null; // 글로벌 변수도 초기화
             document.getElementById('aiGenerationStatus').innerHTML = '';
             document.getElementById('characterPreview').style.display = 'none';
             
@@ -4330,15 +4080,6 @@
             safeSetValue('charGenre', character.genre);
             safeSetValue('charMainSituation', character.main_situation);
 
-            // 이미지가 있으면 미리보기 설정
-            if (character.image) {
-                const previewImg = document.getElementById('previewImg');
-                const imagePreview = document.getElementById('imagePreview');
-                if (previewImg && imagePreview) {
-                    previewImg.src = character.image;
-                    imagePreview.style.display = 'block';
-                }
-            }
 
             // 모달 표시
             document.getElementById('characterModal').style.display = 'block';
@@ -4438,10 +4179,6 @@
                 
                 alert(successMessage);
                 closeModal('characterModal');
-                
-                // UI 최종 업데이트
-                console.log('🔄 저장 후 최종 UI 동기화...');
-                await loadAllData(); // 새로운 통합 로딩 함수 사용
                 
                 console.log('✅ 캐릭터 저장 프로세스 완료!');
                 
@@ -4859,7 +4596,7 @@ GitHub Token:`);
                 family: document.getElementById('charFamily').value || 'only_child',
                 hometown: document.getElementById('charHometown').value || 'seoul',
                 relationship: document.getElementById('charRelationship').value,
-                image: uploadedImageBase64 ? `data:image/jpeg;base64,${uploadedImageBase64}` : null,
+                image: null,
                 hair: document.getElementById('charHair').value || 'long_straight',
                 eyes: document.getElementById('charEyes').value || 'round_cute',
                 body: document.getElementById('charBody').value || 'petite',
@@ -4956,10 +4693,16 @@ GitHub Token:`);
                 // 현재 선택된 데이터 수집
                 const currentData = collectCharacterData();
                 
+                // 세션에서 API 키 가져오기
+                const sessionApiKey = sessionStorage.getItem('openai_api_key');
+                
                 // AI API 호출 (character-ai-generator.js 사용)
                 const response = await fetch('/api/character-ai-generator', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-OpenAI-Key': sessionApiKey || '' // API 키 헤더 추가
+                    },
                     body: JSON.stringify({
                         action: 'generate_character',
                         answers: currentData
@@ -4987,8 +4730,14 @@ GitHub Token:`);
             }
         }
 
+        // 생성된 캐릭터를 저장할 글로벌 변수
+        let generatedCharacter = null;
+
         // AI 생성 결과 표시
         function displayAIGeneratedCharacter(character) {
+            // 글로벌 변수에 저장
+            generatedCharacter = character;
+            
             const previewDiv = document.getElementById('characterPreview');
             previewDiv.innerHTML = `
                 <h4>🎭 AI 생성 결과 미리보기</h4>
@@ -5002,7 +4751,7 @@ GitHub Token:`);
                         '긴 생머리, 동그랗고 귀여운 눈, 큐트 캐주얼'}</p>
                     <p><strong>관계:</strong> ${translateRelationship(character.relationship || 'secret_crush')}</p>
                     <p><strong>말투:</strong> ${translateSpeechStyle(character.speech_style || 'soft_warm')}</p>
-                    <button class="btn btn-primary" onclick="applyAIGeneratedData(${JSON.stringify(JSON.stringify(character))})">
+                    <button class="btn btn-primary" onclick="applyAIGeneratedData()">
                         💖 이 캐릭터 적용하기
                     </button>
                 </div>
@@ -5010,13 +4759,23 @@ GitHub Token:`);
         }
 
         // AI 생성 데이터를 폼에 적용
-        function applyAIGeneratedData(characterData) {
+        function applyAIGeneratedData() {
+            if (!generatedCharacter) {
+                alert('⚠️ 먼저 AI로 캐릭터를 생성해주세요.');
+                return;
+            }
+            
             try {
-                const character = JSON.parse(characterData);
+                const character = generatedCharacter;
+                console.log('🎭 AI 캐릭터 폼 적용:', character);
                 
                 // 기본 정보 적용
-                if (character.name) document.getElementById('charName').value = character.name;
-                if (character.age) document.getElementById('charAge').value = character.age;
+                if (character.name) {
+                    document.getElementById('charName').value = character.name;
+                }
+                if (character.age) {
+                    document.getElementById('charAge').value = character.age;
+                }
                 if (character.mbti) {
                     document.getElementById('charMbti').value = character.mbti;
                     // MBTI 버튼도 시각적으로 선택
@@ -5025,18 +4784,90 @@ GitHub Token:`);
                     });
                 }
                 
-                // 외모 정보 적용
-                if (character.appearance) {
-                    if (character.appearance.hair) document.getElementById('charHair').value = character.appearance.hair;
-                    if (character.appearance.eyes) document.getElementById('charEyes').value = character.appearance.eyes;
-                    if (character.appearance.style) document.getElementById('charStyle').value = character.appearance.style;
+                // 성격 특성 적용
+                if (character.personality_traits && Array.isArray(character.personality_traits)) {
+                    // 기존 선택 초기화
+                    document.querySelectorAll('.trait-btn.selected').forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
+                    // 새 특성 선택
+                    character.personality_traits.forEach(trait => {
+                        const btn = document.querySelector(`[data-trait="${trait}"]`);
+                        if (btn) btn.classList.add('selected');
+                    });
                 }
                 
-                alert('💖 AI 생성 캐릭터가 폼에 적용되었습니다! 저장 버튼을 눌러주세요.');
+                // 취미 적용
+                if (character.personality && character.personality.hobbies && Array.isArray(character.personality.hobbies)) {
+                    // 기존 선택 초기화
+                    document.querySelectorAll('.hobby-btn.selected').forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
+                    // 새 취미 선택
+                    character.personality.hobbies.forEach(hobby => {
+                        const btn = document.querySelector(`[data-hobby="${hobby}"]`);
+                        if (btn) btn.classList.add('selected');
+                    });
+                }
+                
+                // 배경 정보 적용
+                if (character.major) {
+                    document.getElementById('charMajor').value = character.major;
+                }
+                if (character.relationship) {
+                    document.getElementById('charRelationship').value = character.relationship;
+                }
+                if (character.background) {
+                    if (character.background.family) {
+                        document.getElementById('charFamily').value = character.background.family;
+                    }
+                    if (character.background.hometown) {
+                        document.getElementById('charHometown').value = character.background.hometown;
+                    }
+                }
+                
+                // 외모 정보 적용
+                if (character.appearance) {
+                    if (character.appearance.hair) {
+                        document.getElementById('charHair').value = character.appearance.hair;
+                    }
+                    if (character.appearance.eyes) {
+                        document.getElementById('charEyes').value = character.appearance.eyes;
+                    }
+                    if (character.appearance.style) {
+                        document.getElementById('charStyle').value = character.appearance.style;
+                    }
+                }
+                
+                // 말투 정보 적용
+                if (character.speech_style) {
+                    document.getElementById('charSpeechStyle').value = character.speech_style;
+                }
+                if (character.speech_habit) {
+                    document.getElementById('charSpeechHabit').value = character.speech_habit;
+                }
+                
+                // 기타 정보 적용
+                if (character.personality && character.personality.values) {
+                    document.getElementById('charValues').value = character.personality.values;
+                }
+                if (character.story_context && character.story_context.genre) {
+                    document.getElementById('charGenre').value = character.story_context.genre;
+                }
+                if (character.story_context && character.story_context.main_situation) {
+                    document.getElementById('charMainSituation').value = character.story_context.main_situation;
+                }
+                
+                // 성공 메시지
+                alert('💖 AI 생성 캐릭터가 폼에 완벽하게 적용되었습니다!\n\n이제 "저장" 버튼을 눌러서 캐릭터를 완성해주세요.');
+                
+                // AI 생성 영역 숨기기
+                document.getElementById('characterPreview').style.display = 'none';
+                document.getElementById('aiGenerationStatus').innerHTML = '✅ 캐릭터가 폼에 적용되었습니다!';
                 
             } catch (error) {
-                console.error('AI 데이터 적용 오류:', error);
-                alert('데이터 적용 중 오류가 발생했습니다.');
+                console.error('❌ AI 데이터 적용 오류:', error);
+                alert('데이터 적용 중 오류가 발생했습니다. 다시 시도해주세요.');
             }
         }
 
@@ -5178,6 +5009,173 @@ GitHub Token:`);
         window.onScenarioChange = onScenarioChange;
         
         // 중복 초기화 제거됨 - loadAllData()에서 통합 처리
+    </script>
+
+    <!-- 온라인 데이터 클라이언트 로드 -->
+    <script src="js/online-data-client.js"></script>
+
+    <script>
+        // 🌐 온라인 전용 데이터 관리로 전환
+        console.log('🚀 온라인 전용 관리 시스템 시작...');
+
+        // LocalStorage 사용 중단 경고
+        if (localStorage.getItem('chatgame_characters') || localStorage.getItem('scenarios')) {
+            console.warn('⚠️ 기존 LocalStorage 데이터 발견 - 온라인 동기화 필요');
+
+            // 기존 데이터 마이그레이션 알림
+            const migrationConfirm = confirm(`
+🔄 데이터 마이그레이션 알림
+
+기존 로컬 저장 데이터가 발견되었습니다.
+앞으로는 GitHub 온라인 저장소를 사용합니다.
+
+✅ 장점:
+- 다른 컴퓨터에서도 접근 가능
+- 데이터 영구 보존
+- 협업 및 공유 가능
+- 버전 관리 지원
+
+기존 데이터를 온라인으로 이전하시겠습니까?`);
+
+            if (migrationConfirm) {
+                migrateLocalToOnline();
+            }
+        }
+
+        // LocalStorage → GitHub 마이그레이션
+        async function migrateLocalToOnline() {
+            try {
+                console.log('🔄 데이터 마이그레이션 시작...');
+
+                // 로컬 데이터 로드
+                const localCharacters = JSON.parse(localStorage.getItem('chatgame_characters') || '{}');
+                const localScenarios = JSON.parse(localStorage.getItem('scenarios') || '{}');
+
+                let migratedCount = 0;
+
+                // 캐릭터 마이그레이션
+                for (const [id, character] of Object.entries(localCharacters)) {
+                    try {
+                        await window.onlineDataClient.saveCharacter(character);
+                        migratedCount++;
+                        console.log(`✅ 캐릭터 마이그레이션: ${character.name}`);
+                    } catch (error) {
+                        console.error(`❌ 캐릭터 마이그레이션 실패: ${character.name}`, error);
+                    }
+                }
+
+                // 시나리오 마이그레이션
+                for (const [id, scenario] of Object.entries(localScenarios)) {
+                    try {
+                        await window.onlineDataClient.saveScenario(scenario);
+                        migratedCount++;
+                        console.log(`✅ 시나리오 마이그레이션: ${scenario.title || id}`);
+                    } catch (error) {
+                        console.error(`❌ 시나리오 마이그레이션 실패: ${scenario.title || id}`, error);
+                    }
+                }
+
+                alert(`✅ 마이그레이션 완료!\n\n${migratedCount}개 항목이 온라인으로 이전되었습니다.\n\n이제 GitHub에서 데이터를 관리합니다.`);
+
+                // 로컬 데이터 백업 후 제거 (선택사항)
+                const backupConfirm = confirm('로컬 데이터를 백업 파일로 저장 후 제거하시겠습니까?');
+                if (backupConfirm) {
+                    createLocalBackup(localCharacters, localScenarios);
+                    localStorage.removeItem('chatgame_characters');
+                    localStorage.removeItem('scenarios');
+                    console.log('🧹 로컬 데이터 정리 완료');
+                }
+
+            } catch (error) {
+                console.error('❌ 마이그레이션 실패:', error);
+                alert('마이그레이션 중 오류가 발생했습니다:\n' + error.message);
+            }
+        }
+
+        // 로컬 데이터 백업 파일 생성
+        function createLocalBackup(characters, scenarios) {
+            const backup = {
+                timestamp: new Date().toISOString(),
+                characters,
+                scenarios,
+                note: 'LocalStorage → GitHub 마이그레이션 백업'
+            };
+
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `chatgame-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            console.log('💾 백업 파일 다운로드 시작');
+        }
+
+        // 전역 함수 교체: 온라인 데이터 클라이언트 사용
+        window.loadCharacters = async function() {
+            console.log('🌐 온라인에서 캐릭터 로드...');
+            try {
+                const charactersData = await window.onlineDataClient.loadCharacters();
+                window.characters = charactersData;
+                displayCharacters();
+                updateCharacterStats();
+                console.log('✅ 캐릭터 온라인 로드 완료');
+            } catch (error) {
+                console.error('❌ 캐릭터 온라인 로드 실패:', error);
+                alert('캐릭터 데이터를 불러오는 중 오류가 발생했습니다:\n' + error.message);
+            }
+        };
+
+        window.loadScenarios = async function() {
+            console.log('🌐 온라인에서 시나리오 로드...');
+            try {
+                const scenariosData = await window.onlineDataClient.loadScenarios();
+                window.scenarios = scenariosData;
+                displayScenarios();
+                updateScenarioStats();
+                console.log('✅ 시나리오 온라인 로드 완료');
+            } catch (error) {
+                console.error('❌ 시나리오 온라인 로드 실패:', error);
+                alert('시나리오 데이터를 불러오는 중 오류가 발생했습니다:\n' + error.message);
+            }
+        };
+
+        // 온라인 동기화 상태 모니터링
+        setInterval(async () => {
+            const isOnline = await window.onlineDataClient.checkOnlineStatus();
+            const statusIndicator = document.getElementById('onlineStatus') || createStatusIndicator();
+
+            statusIndicator.textContent = isOnline ? '🌐 온라인' : '📴 오프라인';
+            statusIndicator.style.color = isOnline ? '#28a745' : '#dc3545';
+
+            // 오프라인에서 온라인으로 복구 시 큐 재시도
+            if (isOnline && window.onlineDataClient.requestQueue.length > 0) {
+                await window.onlineDataClient.retryQueuedRequests();
+            }
+        }, 30000); // 30초마다 체크
+
+        // 온라인 상태 표시기 생성
+        function createStatusIndicator() {
+            const indicator = document.createElement('div');
+            indicator.id = 'onlineStatus';
+            indicator.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: white;
+                padding: 8px 12px;
+                border-radius: 20px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                font-size: 14px;
+                font-weight: bold;
+                z-index: 1000;
+            `;
+            document.body.appendChild(indicator);
+            return indicator;
+        }
+
+        console.log('✅ 온라인 전용 시스템 초기화 완료');
     </script>
 </body>
 </html>

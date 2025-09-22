@@ -53,7 +53,7 @@ export default async function handler(req, res) {
     // 완성된 캐릭터 생성
     if (action === 'generate_character') {
       const { answers } = req.body;
-      const character = await generateCompleteCharacter(answers);
+      const character = await generateCompleteCharacter(answers, req);
       
       // 캐릭터 데이터베이스에 저장
       await saveCharacterToDatabase(character);
@@ -271,8 +271,20 @@ async function generateNextQuestion(currentStep, answers) {
   }
 }
 
-async function generateCompleteCharacter(answers) {
-  const OPENAI_API_KEY = getGlobalApiKey();
+async function generateCompleteCharacter(answers, req = null) {
+  // 헤더에서 API 키 확인 (우선순위 1)
+  const headerApiKey = req?.headers?.['x-openai-key'];
+  
+  // 전역 API 키 (우선순위 2)
+  const globalApiKey = getGlobalApiKey();
+  
+  const OPENAI_API_KEY = headerApiKey || globalApiKey;
+  
+  console.log('🔍 API 키 확인:', {
+    headerKey: headerApiKey ? `${headerApiKey.substring(0, 4)}...` : 'None',
+    globalKey: globalApiKey ? `${globalApiKey.substring(0, 4)}...` : 'None',
+    finalKey: OPENAI_API_KEY ? `${OPENAI_API_KEY.substring(0, 4)}...` : 'None'
+  });
   
   const character = {
     id: 'char_' + Date.now(),
@@ -378,41 +390,57 @@ ${JSON.stringify(answers, null, 2)}
 }
 
 function createCharacterPrompt(answers) {
+  // 입력된 정보 분석
+  const providedInfo = Object.entries(answers)
+    .filter(([key, value]) => value && value !== '' && value !== 'undefined')
+    .map(([key, value]) => `${key}: ${value}`)
+    .join('\n');
+    
   return `
-다음 정보를 바탕으로 완전한 캐릭터 프로파일을 JSON으로 생성해주세요:
+당신은 전문 캐릭터 디자이너입니다. 제공된 정보가 부족하더라도 논리적으로 추정하여 완전한 캐릭터를 생성해주세요.
 
-${JSON.stringify(answers, null, 2)}
+**제공된 정보:**
+${providedInfo || '정보 없음 - 완전히 새로운 캐릭터 생성 필요'}
 
-다음 구조로 생성해주세요:
+**생성 규칙:**
+1. 부족한 정보는 제공된 정보와 일관성 있게 추정
+2. MBTI가 주어지면 해당 성격에 맞게 모든 특성 결정
+3. 로맨스 게임 캐릭터로서 매력적이고 입체적인 성격
+4. 한국어 로맨스 웹툰/게임 스타일 캐릭터
+
+**필수 출력 JSON 구조:**
 {
-  "name": "캐릭터 이름",
-  "age": "나이",
-  "gender": "성별",
-  "mbti": "MBTI 유형",
+  "name": "적절한 한국 이름",
+  "age": "숫자",
+  "gender": "female",
+  "mbti": "4글자 MBTI",
   "personality_traits": ["특성1", "특성2", "특성3"],
+  "major": "전공분야",
+  "relationship": "관계설정",
+  "speech_style": "말투특징",
+  "speech_habit": "입버릇",
   "appearance": {
-    "hair": "헤어 스타일과 색상",
-    "eyes": "눈 모양과 색상",
-    "height": "키",
-    "style": "패션 스타일"
+    "hair": "헤어스타일",
+    "eyes": "눈모양",
+    "style": "패션스타일"
   },
   "background": {
-    "occupation": "직업",
-    "family": "가족 관계",
-    "education": "학력"
+    "family": "가족관계",
+    "hometown": "출신지역",
+    "occupation": "직업/학생"
   },
   "personality": {
-    "speech_pattern": "말투 특징",
-    "hobbies": ["취미1", "취미2"],
-    "values": ["가치관1", "가치관2"],
-    "fears": ["두려워하는 것"]
+    "hobbies": ["취미1", "취미2", "취미3"],
+    "values": "가치관",
+    "fears": "두려워하는것"
   },
   "story_context": {
-    "genre": "장르",
-    "role": "역할",
-    "initial_situation": "첫 등장 상황"
+    "genre": "school_romance",
+    "main_situation": "첫만남상황"
   }
 }
+
+반드시 JSON만 출력하세요. 다른 텍스트는 포함하지 마세요.
 `;
 }
 
@@ -439,15 +467,73 @@ function generateFallbackQuestion(currentStep, answers) {
 }
 
 function generateFallbackCharacter(character) {
+  console.log('🎭 Fallback 캐릭터 생성:', character);
+  
+  // MBTI 기반 지능적 추정
+  const mbti = character.mbti || 'INFP';
+  const mbtiTemplates = {
+    'INFP': {
+      name: '윤아',
+      personality_traits: ['감성적', '이상주의적', '내향적'],
+      speech_style: '부드럽고 따뜻한 말투',
+      speech_habit: '종종 망설이며 말하기',
+      major: 'art',
+      hobbies: ['독서', '그림그리기', '음악감상']
+    },
+    'ENFP': {
+      name: '미나',
+      personality_traits: ['외향적', '열정적', '창의적'],
+      speech_style: '밝고 에너지 넘치는 말투',
+      speech_habit: '자주 감탄사 사용',
+      major: 'media',
+      hobbies: ['댄스', '여행', '사람만나기']
+    },
+    'INTJ': {
+      name: '서연',
+      personality_traits: ['논리적', '독립적', '완벽주의'],
+      speech_style: '간결하고 정확한 말투',
+      speech_habit: '정확한 표현 추구',
+      major: 'engineering',
+      hobbies: ['독서', '연구', '계획세우기']
+    }
+  };
+  
+  const template = mbtiTemplates[mbti] || mbtiTemplates['INFP'];
+  
   return {
     ...character,
-    name: character.name || "미스터리 캐릭터",
-    personality_traits: ["매력적", "신비로운", "독특한"],
+    id: character.id || `char_${Date.now()}`,
+    name: character.name || template.name,
+    age: character.age || '20',
+    gender: 'female',
+    mbti: mbti,
+    personality_traits: character.personality_traits?.length > 0 ? character.personality_traits : template.personality_traits,
+    major: character.major || template.major,
+    relationship: character.relationship || 'junior',
+    speech_style: character.speech_style || template.speech_style,
+    speech_habit: character.speech_habit || template.speech_habit,
     appearance: {
-      hair: "흑발의 단정한 헤어스타일",
-      eyes: "깊고 인상적인 눈빛",
-      style: "세련되고 모던한 스타일"
-    }
+      hair: character.hair || '긴 직모',
+      eyes: character.eyes || '둥글고 큰 눈',
+      style: character.style || '깔끔하고 캐주얼한 스타일'
+    },
+    background: {
+      family: character.family || 'only_child',
+      hometown: character.hometown || 'seoul',
+      occupation: '대학생'
+    },
+    personality: {
+      hobbies: character.hobbies?.length > 0 ? character.hobbies : template.hobbies,
+      values: character.values || 'love_family',
+      fears: '혼자 남겨지는 것'
+    },
+    story_context: {
+      genre: character.genre || 'school_romance',
+      main_situation: character.main_situation || 'first_meeting'
+    },
+    created_date: new Date().toISOString().split('T')[0],
+    source: 'ai_fallback',
+    generation_method: 'fallback_template'
   };
 }
 
