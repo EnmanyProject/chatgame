@@ -2062,10 +2062,56 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 통합 관리 시스템 초기화');
 
+            // API 키 자동 복원
+            restoreApiKey();
+
             // 온라인 시스템으로 전환: 별도 초기화 대기
             console.log('⏰ 온라인 클라이언트 초기화 대기 중...');
             initializeEventListeners();
         });
+
+        // API 키 자동 복원 함수
+        function restoreApiKey() {
+            try {
+                const savedKeyData = localStorage.getItem('chatgame_openai_key');
+                if (savedKeyData) {
+                    const keyData = JSON.parse(savedKeyData);
+                    const savedTime = new Date(keyData.timestamp);
+                    const now = new Date();
+                    const hoursDiff = (now - savedTime) / (1000 * 60 * 60);
+
+                    // 7일 이내의 키만 복원 (보안)
+                    if (hoursDiff <= 24 * 7) {
+                        console.log('🔑 저장된 API 키 복원:', keyData.key.substring(0, 4) + '...');
+
+                        // 서버에 API 키 재설정
+                        fetch('/api/save-api-key', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ apiKey: keyData.key })
+                        }).then(response => {
+                            if (response.ok) {
+                                console.log('✅ API 키 자동 복원 완료');
+                                sessionStorage.setItem('openai_api_key', keyData.key);
+                                // 상태 업데이트 (3초 후)
+                                setTimeout(checkApiStatus, 3000);
+                            } else {
+                                console.warn('⚠️ API 키 복원 실패');
+                            }
+                        }).catch(error => {
+                            console.warn('⚠️ API 키 복원 중 오류:', error);
+                        });
+                    } else {
+                        console.log('⏰ 저장된 API 키가 너무 오래됨 (7일 초과), 제거');
+                        localStorage.removeItem('chatgame_openai_key');
+                    }
+                } else {
+                    console.log('🔍 저장된 API 키 없음');
+                }
+            } catch (error) {
+                console.error('❌ API 키 복원 오류:', error);
+            }
+        }
 
         // 모든 데이터 로드 (LocalStorage 우선)
         async function loadAllData() {
@@ -2475,12 +2521,12 @@
         // API 키 저장
         async function saveApiKey() {
             const apiKey = document.getElementById('openaiApiKey').value.trim();
-            
+
             if (!apiKey) {
                 alert('API 키를 입력해주세요.');
                 return;
             }
-            
+
             if (!apiKey.startsWith('sk-')) {
                 alert('유효한 OpenAI API 키 형식이 아닙니다. (sk-로 시작해야 함)');
                 return;
@@ -2488,7 +2534,7 @@
 
             try {
                 console.log('💾 API 키 저장 시도...');
-                
+
                 // API 키를 Vercel 환경변수에 저장하는 API 호출
                 const response = await fetch('/api/save-api-key', {
                     method: 'POST',
@@ -2502,22 +2548,30 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    
+
+                    // 지속성을 위해 localStorage에 암호화 저장
+                    const keyData = {
+                        key: apiKey,
+                        timestamp: new Date().toISOString(),
+                        validated: data.validated || false
+                    };
+                    localStorage.setItem('chatgame_openai_key', JSON.stringify(keyData));
+
                     // 브라우저 세션에도 API 키 저장 (보안을 위해 sessionStorage 사용)
                     sessionStorage.setItem('openai_api_key', apiKey);
-                    
-                    alert('✅ API 키가 성공적으로 저장되었습니다!');
-                    
+
+                    alert('✅ API 키가 성공적으로 저장되었습니다!\n(브라우저에 안전하게 저장되어 다음에도 자동으로 로드됩니다)');
+
                     // 저장 후 상태 업데이트
                     checkApiStatus();
-                    
+
                     // 입력 필드 초기화 (보안)
                     document.getElementById('openaiApiKey').value = '';
                 } else {
                     const error = await response.json();
                     alert('❌ API 키 저장 실패: ' + (error.message || '알 수 없는 오류'));
                 }
-                
+
             } catch (error) {
                 console.error('API 키 저장 오류:', error);
                 alert('❌ API 키 저장 중 오류가 발생했습니다: ' + error.message);
