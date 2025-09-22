@@ -26,25 +26,6 @@
       ],
       "updated_at": "2025-09-22T14:01:24.673Z",
       "source": "github_api"
-    },
-    "scenario_비_오는_날의_우산_1758549914720": {
-      "id": "scenario_비_오는_날의_우산_1758549914720",
-      "title": "비 오는 날의 우산",
-      "description": "스터디 그룹에서 만난 두 사람이 학업을 통해 마음을 나누게 되는 과정",
-      "background_setting": "계단 교실",
-      "mood": "코믹",
-      "available_characters": [
-        "미화__enfj_1758549110361"
-      ],
-      "scenario_id": "scenario_비_오는_날의_우산_1758549914720",
-      "action": "create",
-      "created_date": "2025-09-22",
-      "episode_count": 0,
-      "tags": [
-        "코믹"
-      ],
-      "updated_at": "2025-09-22T14:12:01.373Z",
-      "source": "github_api"
     }
   },
   "scenario_templates": {
