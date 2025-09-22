@@ -1399,11 +1399,199 @@
             font-size: 0.9em;
             line-height: 1.4;
         }
+
+        /* 🔐 로그인 모달 스타일 */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .login-header h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        .login-header p {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+
+        .login-form {
+            text-align: left;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-status {
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .login-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .login-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .login-status.loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .login-help {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .login-help code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #495057;
+        }
+
+        /* 로그인 후 헤더에 사용자 정보 표시 */
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
-    <div class="admin-container">
-        <div class="header">
+    <!-- 🔐 로그인 모달 -->
+    <div id="loginModal" class="login-modal" style="display: block;">
+        <div class="login-container">
+            <div class="login-header">
+                <h2>🔐 어드민 로그인</h2>
+                <p>관리자 계정으로 로그인해주세요</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="input-group">
+                    <label for="username">사용자명</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="login-btn">
+                    🚀 로그인
+                </button>
+                <div id="loginStatus" class="login-status"></div>
+            </form>
+            <div class="login-help">
+                <p><strong>기본 계정:</strong></p>
+                <p>사용자명: <code>admin</code></p>
+                <p>비밀번호: <code>chatgame2025</code></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 메인 어드민 인터페이스 -->
+    <div id="adminInterface" class="admin-container" style="display: none;">
+        <div class="header" style="position: relative;">
+            <!-- 사용자 정보 표시 -->
+            <div id="userInfo" class="user-info">
+                <span id="userWelcome">👤 admin</span>
+                <button onclick="logout()" class="logout-btn">로그아웃</button>
+            </div>
+
             <h1>🎮 통합 관리 시스템</h1>
             <p>MBTI 로맨스 게임의 시나리오, 에피소드, 캐릭터를 한 곳에서 관리합니다</p>
 
@@ -2413,6 +2601,11 @@
     </div>
 
     <script>
+        // 🔐 인증 관련 전역 변수
+        let currentSessionId = null;
+        let currentUser = null;
+        let isAuthenticated = false;
+
         // 전역 변수
         let scenarios = {};
         let episodes = {};
@@ -2427,13 +2620,230 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 통합 관리 시스템 초기화');
 
-            // API 키 자동 복원
-            restoreApiKey();
+            // 🔐 로그인 시스템 초기화
+            initializeAuth();
+
+            // 기존 초기화는 로그인 후에 실행
+        });
+
+        // 🔐 ================ 로그인 인증 시스템 ================
+
+        // 로그인 시스템 초기화
+        function initializeAuth() {
+            console.log('🔐 로그인 시스템 초기화');
+
+            // 세션 확인
+            const savedSession = sessionStorage.getItem('admin_session_id');
+            if (savedSession) {
+                console.log('💾 저장된 세션 확인 중...');
+                checkSession(savedSession);
+            } else {
+                showLoginModal();
+            }
+
+            // 로그인 폼 이벤트 리스너
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', handleLogin);
+            }
+        }
+
+        // 로그인 모달 표시
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('adminInterface').style.display = 'none';
+        }
+
+        // 로그인 모달 숨기기
+        function hideLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('adminInterface').style.display = 'block';
+        }
+
+        // 로그인 처리
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const statusEl = document.getElementById('loginStatus');
+
+            if (!username || !password) {
+                showLoginStatus('사용자명과 비밀번호를 입력해주세요.', 'error');
+                return;
+            }
+
+            showLoginStatus('로그인 중...', 'loading');
+
+            try {
+                const response = await fetch('/api/admin-auth?action=login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    console.log('✅ 로그인 성공:', data);
+
+                    // 세션 정보 저장
+                    currentSessionId = data.sessionId;
+                    currentUser = data.user;
+                    isAuthenticated = true;
+
+                    sessionStorage.setItem('admin_session_id', data.sessionId);
+                    sessionStorage.setItem('admin_user', JSON.stringify(data.user));
+
+                    showLoginStatus('로그인 성공! 시스템을 초기화하는 중...', 'success');
+
+                    // 사용자 정보 업데이트
+                    updateUserInfo(data.user);
+
+                    // 로그인된 사용자의 API 키 로드
+                    await loadUserApiKey();
+
+                    // 메인 시스템 초기화
+                    setTimeout(() => {
+                        hideLoginModal();
+                        initializeMainSystem();
+                    }, 1000);
+
+                } else {
+                    showLoginStatus(data.message || '로그인에 실패했습니다.', 'error');
+                }
+
+            } catch (error) {
+                console.error('❌ 로그인 오류:', error);
+                showLoginStatus('로그인 중 오류가 발생했습니다: ' + error.message, 'error');
+            }
+        }
+
+        // 세션 확인
+        async function checkSession(sessionId) {
+            try {
+                const response = await fetch(`/api/admin-auth?action=check-session&sessionId=${sessionId}`);
+                const data = await response.json();
+
+                if (data.success && data.authenticated) {
+                    console.log('✅ 세션 유효함:', data);
+
+                    currentSessionId = sessionId;
+                    currentUser = data.user;
+                    isAuthenticated = true;
+
+                    updateUserInfo(data.user);
+                    await loadUserApiKey();
+                    hideLoginModal();
+                    initializeMainSystem();
+                } else {
+                    console.log('❌ 세션 무효함, 로그인 필요');
+                    sessionStorage.removeItem('admin_session_id');
+                    sessionStorage.removeItem('admin_user');
+                    showLoginModal();
+                }
+            } catch (error) {
+                console.error('❌ 세션 확인 오류:', error);
+                showLoginModal();
+            }
+        }
+
+        // 로그인 상태 메시지 표시
+        function showLoginStatus(message, type) {
+            const statusEl = document.getElementById('loginStatus');
+            statusEl.textContent = message;
+            statusEl.className = `login-status ${type}`;
+            statusEl.style.display = 'block';
+        }
+
+        // 사용자 정보 업데이트
+        function updateUserInfo(user) {
+            const userWelcome = document.getElementById('userWelcome');
+            if (userWelcome) {
+                userWelcome.textContent = `👤 ${user.username}`;
+                if (user.hasApiKey) {
+                    userWelcome.textContent += ' 🔑';
+                }
+            }
+        }
+
+        // 사용자 API 키 로드
+        async function loadUserApiKey() {
+            if (!currentSessionId) return;
+
+            try {
+                const response = await fetch(`/api/admin-auth?action=get-api-key&sessionId=${currentSessionId}`);
+                const data = await response.json();
+
+                if (data.success && data.hasApiKey) {
+                    console.log('🔑 사용자 API 키 로드됨:', data.keyPreview);
+
+                    // API 키를 다른 시스템에서 사용할 수 있도록 전역 설정
+                    if (data.apiKey) {
+                        sessionStorage.setItem('openai_api_key', data.apiKey);
+                    }
+
+                    // API 상태 확인
+                    setTimeout(() => {
+                        checkApiStatus();
+                    }, 1000);
+                } else {
+                    console.log('📝 사용자 API 키 없음');
+                }
+            } catch (error) {
+                console.error('❌ API 키 로드 오류:', error);
+            }
+        }
+
+        // 로그아웃
+        async function logout() {
+            if (!currentSessionId) return;
+
+            try {
+                await fetch('/api/admin-auth?action=logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ sessionId: currentSessionId })
+                });
+            } catch (error) {
+                console.error('❌ 로그아웃 API 오류:', error);
+            }
+
+            // 로컬 정보 정리
+            currentSessionId = null;
+            currentUser = null;
+            isAuthenticated = false;
+
+            sessionStorage.removeItem('admin_session_id');
+            sessionStorage.removeItem('admin_user');
+            sessionStorage.removeItem('openai_api_key');
+
+            // 로그인 화면 표시
+            showLoginModal();
+
+            // 폼 초기화
+            document.getElementById('loginForm').reset();
+            document.getElementById('loginStatus').style.display = 'none';
+
+            console.log('👋 로그아웃 완료');
+        }
+
+        // 메인 시스템 초기화 (로그인 후 실행)
+        function initializeMainSystem() {
+            console.log('🚀 메인 시스템 초기화 시작...');
+
+            // 기존 초기화 코드들
+            initializeEventListeners();
 
             // 온라인 시스템으로 전환: 별도 초기화 대기
             console.log('⏰ 온라인 클라이언트 초기화 대기 중...');
-            initializeEventListeners();
-        });
+        }
+
+        // 🔐 ================ 로그인 시스템 끝 ================
 
         // API 키 자동 복원 함수
         function restoreApiKey() {
@@ -2888,7 +3298,7 @@
             }
         }
 
-        // API 키 저장
+        // API 키 저장 (로그인 기반)
         async function saveApiKey() {
             const apiKey = document.getElementById('openaiApiKey').value.trim();
 
@@ -2902,16 +3312,22 @@
                 return;
             }
 
-            try {
-                console.log('💾 API 키 저장 시도...');
+            if (!currentSessionId) {
+                showNotification('로그인이 필요합니다.', 'error');
+                return;
+            }
 
-                // API 키를 Vercel 환경변수에 저장하는 API 호출
-                const response = await fetch('/api/save-api-key', {
+            try {
+                console.log('💾 API 키 저장 시도 (로그인 기반)...');
+
+                // 🔐 로그인된 사용자 세션으로 API 키 저장
+                const response = await fetch('/api/admin-auth?action=save-api-key', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
+                        sessionId: currentSessionId,
                         apiKey: apiKey
                     })
                 });
@@ -2919,18 +3335,16 @@
                 if (response.ok) {
                     const data = await response.json();
 
-                    // 지속성을 위해 localStorage에 암호화 저장
-                    const keyData = {
-                        key: apiKey,
-                        timestamp: new Date().toISOString(),
-                        validated: data.validated || false
-                    };
-                    localStorage.setItem('chatgame_openai_key', JSON.stringify(keyData));
-
-                    // 브라우저 세션에도 API 키 저장 (보안을 위해 sessionStorage 사용)
+                    // 브라우저 세션에도 API 키 저장
                     sessionStorage.setItem('openai_api_key', apiKey);
 
-                    showNotification('✅ API 키가 성공적으로 저장되었습니다!\n(브라우저에 안전하게 저장되어 다음에도 자동으로 로드됩니다)', 'success');
+                    showNotification('✅ API 키가 성공적으로 저장되었습니다!\n(로그인된 계정에 안전하게 저장됩니다)', 'success');
+
+                    // 사용자 정보 업데이트 (API 키 보유 표시)
+                    if (currentUser) {
+                        currentUser.hasApiKey = true;
+                        updateUserInfo(currentUser);
+                    }
 
                     // 저장 후 상태 업데이트
                     checkApiStatus();
