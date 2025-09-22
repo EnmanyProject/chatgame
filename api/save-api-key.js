@@ -33,15 +33,20 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log('🔑 API 키 저장 요청 받음');
+    console.log('🔑 API 키 저장 요청 받음:', `${apiKey.substring(0, 4)}...`);
 
     // 전역 변수, 환경변수, 메모리 저장소에 모두 저장
     globalApiKey = apiKey;
     process.env.OPENAI_API_KEY = apiKey;
     apiKeyStore.key = apiKey;
     apiKeyStore.timestamp = new Date().toISOString();
-    
+
     console.log('✅ API 키 전역 저장 완료');
+    console.log('🔍 저장 확인:', {
+      globalApiKey: globalApiKey ? `${globalApiKey.substring(0, 4)}...` : 'None',
+      envKey: process.env.OPENAI_API_KEY ? `${process.env.OPENAI_API_KEY.substring(0, 4)}...` : 'None',
+      storeKey: apiKeyStore.key ? `${apiKeyStore.key.substring(0, 4)}...` : 'None'
+    });
 
     // 즉시 연결 테스트 수행
     try {
@@ -111,7 +116,14 @@ export default async function handler(req, res) {
 // 전역 API 키 접근 함수 (다른 API에서 사용)
 export function getGlobalApiKey() {
   // 우선 순위: 메모리 저장소 → 전역 변수 → 환경변수
-  return apiKeyStore.key || globalApiKey || process.env.OPENAI_API_KEY;
+  const result = apiKeyStore.key || globalApiKey || process.env.OPENAI_API_KEY;
+  console.log('🔍 getGlobalApiKey 호출:', {
+    storeKey: apiKeyStore.key ? `${apiKeyStore.key.substring(0, 4)}...` : 'None',
+    globalKey: globalApiKey ? `${globalApiKey.substring(0, 4)}...` : 'None',
+    envKey: process.env.OPENAI_API_KEY ? `${process.env.OPENAI_API_KEY.substring(0, 4)}...` : 'None',
+    result: result ? `${result.substring(0, 4)}...` : 'None'
+  });
+  return result;
 }
 
 // API 키 저장소 상태 확인 함수
