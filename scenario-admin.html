@@ -2458,8 +2458,8 @@
                             if (response.ok) {
                                 console.log('✅ API 키 자동 복원 완료');
                                 sessionStorage.setItem('openai_api_key', keyData.key);
-                                // 상태 업데이트 (3초 후)
-                                setTimeout(checkApiStatus, 3000);
+                                // 상태 업데이트 (1초 후)
+                                setTimeout(checkApiStatus, 1000);
                             } else {
                                 console.warn('⚠️ API 키 복원 실패');
                             }
@@ -2893,12 +2893,12 @@
             const apiKey = document.getElementById('openaiApiKey').value.trim();
 
             if (!apiKey) {
-                alert('API 키를 입력해주세요.');
+                showNotification('API 키를 입력해주세요.', 'warning');
                 return;
             }
 
             if (!apiKey.startsWith('sk-')) {
-                alert('유효한 OpenAI API 키 형식이 아닙니다. (sk-로 시작해야 함)');
+                showNotification('유효한 OpenAI API 키 형식이 아닙니다. (sk-로 시작해야 함)', 'error');
                 return;
             }
 
@@ -2930,7 +2930,7 @@
                     // 브라우저 세션에도 API 키 저장 (보안을 위해 sessionStorage 사용)
                     sessionStorage.setItem('openai_api_key', apiKey);
 
-                    alert('✅ API 키가 성공적으로 저장되었습니다!\n(브라우저에 안전하게 저장되어 다음에도 자동으로 로드됩니다)');
+                    showNotification('✅ API 키가 성공적으로 저장되었습니다!\n(브라우저에 안전하게 저장되어 다음에도 자동으로 로드됩니다)', 'success');
 
                     // 저장 후 상태 업데이트
                     checkApiStatus();
@@ -2939,12 +2939,12 @@
                     document.getElementById('openaiApiKey').value = '';
                 } else {
                     const error = await response.json();
-                    alert('❌ API 키 저장 실패: ' + (error.message || '알 수 없는 오류'));
+                    showNotification('❌ API 키 저장 실패: ' + (error.message || '알 수 없는 오류'), 'error');
                 }
 
             } catch (error) {
                 console.error('API 키 저장 오류:', error);
-                alert('❌ API 키 저장 중 오류가 발생했습니다: ' + error.message);
+                showNotification('❌ API 키 저장 중 오류가 발생했습니다: ' + error.message, 'error');
             }
         }
 
@@ -3031,6 +3031,8 @@
                 const badgeElement = document.getElementById('apiStatus');
                 const usageElement = document.getElementById('apiUsage');
                 const testElement = document.getElementById('lastTest');
+
+                console.log('🔍 API 키 상태 상세 정보:', envData.environment.apiKeyDetails);
 
                 if (envData.environment.OPENAI_API_KEY === '✅ 설정됨') {
                     console.log('✅ API 키가 설정되어 있음, 사용량 확인 중...');
@@ -5628,6 +5630,81 @@ GitHub Token:`);
                 console.error('❌ AI 설정 초기화 실패:', error);
                 showNotification('❌ AI 설정 초기화에 실패했습니다: ' + error.message, 'error');
             }
+        }
+
+        // 알림 메시지 표시 함수
+        function showNotification(message, type = 'info') {
+            // 기존 알림이 있으면 제거
+            const existingNotification = document.querySelector('.notification-popup');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            // 알림 요소 생성
+            const notification = document.createElement('div');
+            notification.className = 'notification-popup';
+
+            // 타입별 스타일 설정
+            let backgroundColor = '#f8f9fa';
+            let borderColor = '#dee2e6';
+            let textColor = '#495057';
+
+            switch (type) {
+                case 'success':
+                    backgroundColor = '#d4edda';
+                    borderColor = '#c3e6cb';
+                    textColor = '#155724';
+                    break;
+                case 'error':
+                    backgroundColor = '#f8d7da';
+                    borderColor = '#f5c6cb';
+                    textColor = '#721c24';
+                    break;
+                case 'warning':
+                    backgroundColor = '#fff3cd';
+                    borderColor = '#ffeaa7';
+                    textColor = '#856404';
+                    break;
+            }
+
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10000;
+                background: ${backgroundColor};
+                border: 1px solid ${borderColor};
+                color: ${textColor};
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                max-width: 400px;
+                font-size: 14px;
+                font-weight: 500;
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.3s ease;
+            `;
+
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            // 애니메이션 효과
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+
+            // 3초 후 자동 제거
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 300);
+            }, 3000);
         }
 
         // 보조 함수들
