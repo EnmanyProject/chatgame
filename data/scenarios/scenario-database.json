@@ -8,24 +8,24 @@
     "reset_reason": "Clean scenarios data reset"
   },
   "scenarios": {
-    "scenario_우연한_재회_1758549176800": {
-      "id": "scenario_우연한_재회_1758549176800",
-      "title": "우연한 재회",
-      "description": "졸업을 앞두고 마지막으로 전하고 싶었던 마음을 고백하는 상황",
+    "scenario_첫_눈이_내린_날_1758550446175": {
+      "title": "첫 눈이 내린 날",
+      "description": "비 오는 날 우산을 함께 쓰게 된 두 사람의 설레는 만남",
       "background_setting": "벚꽃이 만발한 공원",
-      "mood": "드라마틱",
+      "mood": "따뜻함",
       "available_characters": [
-        "미화__infj_1758548492510"
+        "미화__infj_1758550387707"
       ],
-      "scenario_id": "scenario_우연한_재회_1758549176800",
-      "action": "create",
       "created_date": "2025-09-22",
       "episode_count": 0,
       "tags": [
-        "드라마틱"
+        "따뜻함"
       ],
-      "updated_at": "2025-09-22T14:01:24.673Z",
-      "source": "github_api"
+      "source": "github_api",
+      "active": true,
+      "id": "scenario_첫_눈이_내린_날_1758550446175",
+      "action": "create",
+      "updated_at": "2025-09-22T14:14:08.197Z"
     }
   },
   "scenario_templates": {
