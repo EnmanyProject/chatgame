@@ -5235,6 +5235,164 @@ GitHub Token:`);
             }
         };
 
+        // 시나리오 저장 함수도 온라인 클라이언트로 교체
+        window.saveScenario = async function() {
+            console.log('💾 === 온라인 시나리오 저장 시작 ===');
+
+            const title = document.getElementById('scenarioTitle').value;
+            const description = document.getElementById('scenarioDescription').value;
+            const backgroundSetting = document.getElementById('backgroundSetting').value;
+            const mood = document.getElementById('mood').value;
+
+            console.log('📝 입력값 확인:');
+            console.log('  - 제목:', title || '(비어있음)');
+            console.log('  - 설명:', description || '(비어있음)');
+            console.log('  - 배경:', backgroundSetting || '(비어있음)');
+            console.log('  - 분위기:', mood || '(비어있음)');
+
+            if (!title || !description || !backgroundSetting || !mood) {
+                console.error('❌ 필수 입력값 누락');
+                alert(`모든 필수 항목을 입력해주세요.\n\n현재 입력값:\n제목: ${title || '미입력'}\n설명: ${description || '미입력'}\n배경: ${backgroundSetting || '미입력'}\n분위기: ${mood || '미입력'}`);
+                return;
+            }
+
+            // 온라인 데이터 클라이언트 확인
+            if (!window.onlineDataClient) {
+                console.error('❌ 온라인 데이터 클라이언트가 로드되지 않았습니다');
+                alert('⚠️ 온라인 시스템 로드 오류\n\n페이지를 새로고침 후 다시 시도해주세요.');
+                return;
+            }
+
+            try {
+                // 시나리오 데이터 구성
+                const scenarioData = {
+                    title,
+                    description,
+                    background_setting: backgroundSetting,
+                    mood,
+                    available_characters: Array.from(selectedCharacters || []),
+                    created_date: new Date().toISOString().split('T')[0],
+                    episode_count: 0,
+                    tags: [mood],
+                    source: 'scenario_admin',
+                    active: true
+                };
+
+                // 새 생성인지 수정인지 확인
+                const scenarioId = document.getElementById('scenarioId').value;
+                if (!scenarioId) {
+                    // 새 시나리오 생성
+                    const titleKey = title.toLowerCase()
+                        .replace(/[^a-zA-Z가-힣0-9]/g, '_')
+                        .replace(/_+/g, '_')
+                        .replace(/^_|_$/g, '');
+                    scenarioData.id = `scenario_${titleKey}_${Date.now()}`;
+                    scenarioData.action = 'create';
+                } else {
+                    // 기존 시나리오 수정
+                    scenarioData.id = scenarioId;
+                    scenarioData.action = 'update';
+                }
+
+                // 저장 버튼 상태 변경
+                const saveButton = document.querySelector('#scenarioModal .btn-primary') ||
+                                  document.querySelector('button[onclick*="saveScenario"]');
+
+                if (saveButton) {
+                    saveButton.disabled = true;
+                    saveButton.textContent = '🌐 온라인 저장 중...';
+                }
+
+                console.log('💾 온라인에 저장할 시나리오 데이터:', scenarioData);
+
+                // 온라인 데이터 클라이언트를 통해 저장
+                const result = await window.onlineDataClient.saveScenario(scenarioData);
+
+                if (result && result.success) {
+                    console.log('🎉 저장 성공! 전체 시나리오 목록 새로고침...');
+
+                    // 성공 시 전체 시나리오 목록을 다시 로드하여 최신 상태 유지
+                    await window.loadScenarios();
+
+                    const successMessage = scenarioData.action === 'create' ?
+                        `💖 새로운 시나리오 '${title}'가 GitHub에 저장되었습니다!\n✅ 온라인에서 영구 보관됩니다!` :
+                        `✨ 시나리오 '${title}'가 성공적으로 수정되었습니다!`;
+
+                    alert(successMessage);
+
+                    // 모달 닫기
+                    if (typeof closeModal === 'function') {
+                        closeModal('scenarioModal');
+                    } else {
+                        const modal = document.getElementById('scenarioModal');
+                        if (modal) modal.style.display = 'none';
+                    }
+
+                    console.log('✅ 온라인 시나리오 저장 완료!');
+                } else {
+                    throw new Error(result?.error || '온라인 저장 실패 - 결과 없음');
+                }
+
+            } catch (error) {
+                console.error('❌ 온라인 시나리오 저장 실패:', error);
+
+                let errorMessage = '온라인 저장 중 오류가 발생했습니다:\n' + error.message;
+
+                if (error.message.includes('GitHub Token')) {
+                    errorMessage += '\n\n🔐 해결책: GitHub Token을 설정해주세요';
+                }
+
+                alert(errorMessage);
+            } finally {
+                // 버튼 상태 복원
+                const saveButton = document.querySelector('#scenarioModal .btn-primary') ||
+                                  document.querySelector('button[onclick*="saveScenario"]');
+
+                if (saveButton) {
+                    saveButton.disabled = false;
+                    saveButton.textContent = '저장';
+                }
+            }
+        };
+
+        // 시나리오 삭제 함수도 온라인 클라이언트로 교체
+        window.deleteScenario = async function(scenarioId) {
+            if (!confirm('정말로 이 시나리오를 삭제하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                console.log('🗑️ 온라인에서 시나리오 삭제:', scenarioId);
+
+                // 온라인 데이터 클라이언트 확인
+                if (!window.onlineDataClient) {
+                    console.error('❌ 온라인 데이터 클라이언트가 로드되지 않았습니다');
+                    alert('⚠️ 온라인 시스템 로드 오류\n\n페이지를 새로고침 후 다시 시도해주세요.');
+                    return;
+                }
+
+                // 온라인 데이터 클라이언트를 통해 삭제 (시나리오 삭제 기능 추가 필요)
+                // 현재는 캐릭터 삭제만 구현되어 있으므로 수동으로 처리
+                const result = await window.onlineDataClient.deleteScenario?.(scenarioId);
+
+                if (result && result.success) {
+                    console.log('🎉 삭제 성공! 전체 시나리오 목록 새로고침...');
+
+                    // 성공 시 전체 시나리오 목록을 다시 로드하여 최신 상태 유지
+                    await window.loadScenarios();
+
+                    alert('✅ 시나리오가 성공적으로 삭제되었습니다!');
+                    console.log('✅ 시나리오 삭제 및 목록 새로고침 완료');
+                } else {
+                    throw new Error('시나리오 삭제 기능이 아직 구현되지 않았습니다. 개발 중입니다.');
+                }
+
+            } catch (error) {
+                console.error('❌ 온라인 시나리오 삭제 실패:', error);
+                alert(`❌ 시나리오 삭제 실패\n\n오류 메시지: ${error.message}\n\n현재 시나리오 삭제 기능은 개발 중입니다.`);
+            }
+        };
+
         // 전역 함수 교체: 온라인 데이터 클라이언트 사용
         window.loadCharacters = async function() {
             console.log('🌐 온라인에서 캐릭터 로드...');

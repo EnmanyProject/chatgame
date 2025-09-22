@@ -269,6 +269,39 @@ GitHub Token:`);
         }
     }
 
+    async deleteScenario(scenarioId) {
+        console.log('🗑️ 온라인에서 시나리오 삭제:', scenarioId);
+
+        try {
+            const response = await fetch(`${this.baseUrl}?action=delete&type=scenarios&id=${scenarioId}`, {
+                method: 'DELETE',
+                headers: this.getHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                // 캐시에서 제거
+                const cached = this.cache.get('scenarios') || {};
+                delete cached[scenarioId];
+                this.cache.set('scenarios', cached);
+
+                console.log(`✅ 시나리오 ${scenarioId} 삭제 완료 (온라인)`);
+                return result;
+            } else {
+                throw new Error(result.error || '시나리오 삭제 실패');
+            }
+
+        } catch (error) {
+            console.error('❌ 시나리오 온라인 삭제 실패:', error);
+            throw error;
+        }
+    }
+
     // === 에피소드 관리 ===
     async loadEpisodes() {
         console.log('📥 온라인에서 에피소드 로드...');
