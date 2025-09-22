@@ -1068,44 +1068,43 @@
                 console.log('🌐 대화 생성 (온라인 API 기반)...');
 
                 try {
-                    // 온라인 에피소드 생성 API 호출
-                    const response = await fetch('/api/scenario-manager', {
+                    // 온라인 시나리오 API 호출로 대화 생성
+                    const response = await fetch('/api/scenario', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            action: 'generate_dialogue',
-                            scenario_id: gameState.currentScenario.id,
-                            character_id: gameState.currentCharacter.id,
-                            choice_number: gameState.choiceNumber,
+                            action: 'generate',
+                            scenario: {
+                                id: gameState.currentScenario.id,
+                                title: gameState.currentScenario.title,
+                                setting: gameState.currentScenario.setting || gameState.currentScenario.background_setting,
+                                mood: gameState.currentScenario.mood
+                            },
+                            character: {
+                                id: gameState.currentCharacter.id,
+                                name: gameState.currentCharacter.name,
+                                mbti: gameState.currentCharacter.mbti,
+                                personality: gameState.currentCharacter.personality_traits
+                            },
+                            choiceNumber: gameState.choiceNumber,
                             affection: gameState.affection,
-                            mbti: gameState.currentCharacter.mbti,
-                            mood: gameState.currentScenario.mood || '로맨틱'
+                            previousChoices: gameState.previousChoices
                         })
                     });
 
                     if (response.ok) {
                         const apiData = await response.json();
-                        if (apiData.success && apiData.dialogue) {
-                            console.log('✅ 온라인 API 대화 생성 성공:', apiData.dialogue);
-                            var data = {
-                                success: true,
-                                generated: {
-                                    dialogue: apiData.dialogue.character_dialogue,
-                                    narration: apiData.dialogue.character_narration,
-                                    choices: apiData.dialogue.choices || [
-                                        {"text": "계속 대화하기", "affection_impact": 1},
-                                        {"text": "다른 주제로 바꾸기", "affection_impact": 0},
-                                        {"text": "잠시 생각해보기", "affection_impact": -1}
-                                    ]
-                                }
-                            };
+                        if (apiData.success && apiData.generated) {
+                            console.log('✅ 온라인 API 대화 생성 성공:', apiData.generated);
+                            var data = apiData;
                         } else {
-                            throw new Error('API 응답 형식 오류');
+                            throw new Error('API 응답 형식 오류: ' + JSON.stringify(apiData));
                         }
                     } else {
-                        throw new Error('API 호출 실패: ' + response.status);
+                        const errorText = await response.text();
+                        throw new Error('API 호출 실패: ' + response.status + ' - ' + errorText);
                     }
                 } catch (apiError) {
                     console.warn('⚠️ 온라인 API 실패, 로컬 대화 생성으로 대체:', apiError);
