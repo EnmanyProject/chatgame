@@ -1,6 +1,4 @@
 // API 키 저장 API - 향상된 세션 관리
-import { getActiveApiKey } from './admin-auth.js';
-
 let globalApiKey = null; // 전역 변수로 API 키 저장
 
 // 메모리 저장소 (Vercel 서버리스 환경에서 공유)
@@ -117,12 +115,10 @@ export default async function handler(req, res) {
 
 // 전역 API 키 접근 함수 (다른 API에서 사용)
 export function getGlobalApiKey() {
-  // 우선 순위: 로그인된 사용자 API 키 → 메모리 저장소 → 전역 변수 → 환경변수
-  const authApiKey = getActiveApiKey();
-  const result = authApiKey || apiKeyStore.key || globalApiKey || process.env.OPENAI_API_KEY;
+  // 우선 순위: 메모리 저장소 → 전역 변수 → 환경변수
+  const result = apiKeyStore.key || globalApiKey || process.env.OPENAI_API_KEY;
 
   console.log('🔍 getGlobalApiKey 호출:', {
-    authKey: authApiKey ? `${authApiKey.substring(0, 4)}...` : 'None',
     storeKey: apiKeyStore.key ? `${apiKeyStore.key.substring(0, 4)}...` : 'None',
     globalKey: globalApiKey ? `${globalApiKey.substring(0, 4)}...` : 'None',
     envKey: process.env.OPENAI_API_KEY ? `${process.env.OPENAI_API_KEY.substring(0, 4)}...` : 'None',

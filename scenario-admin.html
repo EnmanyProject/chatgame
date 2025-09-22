@@ -2785,10 +2785,11 @@
                         sessionStorage.setItem('openai_api_key', data.apiKey);
                     }
 
-                    // API 상태 확인
+                    // API 상태 확인 (더 긴 대기 시간)
                     setTimeout(() => {
+                        console.log('🔄 로그인 후 API 상태 확인...');
                         checkApiStatus();
-                    }, 1000);
+                    }, 2000);
                 } else {
                     console.log('📝 사용자 API 키 없음');
                 }
@@ -3346,8 +3347,11 @@
                         updateUserInfo(currentUser);
                     }
 
-                    // 저장 후 상태 업데이트
-                    checkApiStatus();
+                    // 저장 후 상태 업데이트 (지연 추가)
+                    setTimeout(() => {
+                        console.log('🔄 API 키 저장 후 상태 확인...');
+                        checkApiStatus();
+                    }, 2000);
 
                     // 입력 필드 초기화 (보안)
                     document.getElementById('openaiApiKey').value = '';

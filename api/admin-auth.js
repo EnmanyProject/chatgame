@@ -208,6 +208,15 @@ async function handleSaveApiKey(req, res) {
   user.apiKey = apiKey;
   session.apiKey = apiKey;
 
+  // save-api-key.js의 메모리 저장소도 업데이트
+  process.env.OPENAI_API_KEY = apiKey;
+
+  console.log('🔑 API 키 저장 완료:', {
+    username: session.username,
+    keyPreview: apiKey.substring(0, 4) + '...',
+    envSet: !!process.env.OPENAI_API_KEY
+  });
+
   // OpenAI API 유효성 검증
   try {
     const testResponse = await fetch('https://api.openai.com/v1/chat/completions', {
