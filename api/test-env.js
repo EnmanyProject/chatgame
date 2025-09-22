@@ -1,6 +1,5 @@
-// 환경변수 테스트 API - Secure Storage 지원
+// 환경변수 테스트 API - 간소화된 버전
 import { getGlobalApiKey, getApiKeyStatus } from './save-api-key.js';
-import { getGlobalApiKey as getSecureApiKey } from './secure-api-storage.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -16,13 +15,8 @@ export default async function handler(req, res) {
   const envApiKey = process.env.OPENAI_API_KEY;
   const apiKeyStatus = getApiKeyStatus();
 
-  // Secure Storage에서 키 확인
-  let secureApiKey = null;
-  try {
-    secureApiKey = await getSecureApiKey();
-  } catch (error) {
-    console.warn('⚠️ Secure Storage API 키 조회 오류:', error.message);
-  }
+  // 간단한 키 확인
+  const secureApiKey = null; // 현재는 사용하지 않음
 
   console.log('🔍 API 키 소스 확인:', {
     cache: cacheApiKey ? `${cacheApiKey.substring(0, 4)}...` : 'None',
@@ -31,7 +25,7 @@ export default async function handler(req, res) {
     status: apiKeyStatus
   });
 
-  const finalKey = secureApiKey || cacheApiKey || envApiKey;
+  const finalKey = cacheApiKey || envApiKey;
 
   const envStatus = {
     OPENAI_API_KEY: finalKey ? '✅ 설정됨' : '❌ 미설정',

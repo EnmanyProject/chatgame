@@ -19,13 +19,15 @@ const ENCRYPTION_KEY = process.env.API_ENCRYPTION_KEY || 'default-key-change-in-
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 /**
- * Encrypt API key with AES-256-GCM
+ * Encrypt API key with AES-256-CBC (simplified for Vercel)
  */
 function encryptApiKey(apiKey) {
   try {
+    const algorithm = 'aes-256-cbc';
+    const key = crypto.scryptSync(ENCRYPTION_KEY, 'salt', 32);
     const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipher(ENCRYPTION_ALGORITHM, ENCRYPTION_KEY);
 
+    const cipher = crypto.createCipher(algorithm, ENCRYPTION_KEY);
     let encrypted = cipher.update(apiKey, 'utf8', 'hex');
     encrypted += cipher.final('hex');
 
@@ -36,16 +38,17 @@ function encryptApiKey(apiKey) {
     };
   } catch (error) {
     console.error('❌ API 키 암호화 오류:', error);
-    throw new Error('API 키 암호화 실패');
+    throw new Error('API 키 암호화 실패: ' + error.message);
   }
 }
 
 /**
- * Decrypt API key with AES-256-GCM
+ * Decrypt API key with AES-256-CBC (simplified for Vercel)
  */
 function decryptApiKey(encryptedData) {
   try {
-    const decipher = crypto.createDecipher(ENCRYPTION_ALGORITHM, ENCRYPTION_KEY);
+    const algorithm = 'aes-256-cbc';
+    const decipher = crypto.createDecipher(algorithm, ENCRYPTION_KEY);
 
     let decrypted = decipher.update(encryptedData.encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
@@ -53,7 +56,7 @@ function decryptApiKey(encryptedData) {
     return decrypted;
   } catch (error) {
     console.error('❌ API 키 복호화 오류:', error);
-    throw new Error('API 키 복호화 실패');
+    throw new Error('API 키 복호화 실패: ' + error.message);
   }
 }
 
