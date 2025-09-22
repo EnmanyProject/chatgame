@@ -7,27 +7,7 @@
     "reset_at": "2025-09-22T13:30:28.115Z",
     "reset_reason": "Clean scenarios data reset"
   },
-  "scenarios": {
-    "scenario_우연한_재회_1758549176800": {
-      "id": "scenario_우연한_재회_1758549176800",
-      "title": "우연한 재회",
-      "description": "졸업을 앞두고 마지막으로 전하고 싶었던 마음을 고백하는 상황",
-      "background_setting": "벚꽃이 만발한 공원",
-      "mood": "드라마틱",
-      "available_characters": [
-        "미화__infj_1758548492510"
-      ],
-      "scenario_id": "scenario_우연한_재회_1758549176800",
-      "action": "create",
-      "created_date": "2025-09-22",
-      "episode_count": 0,
-      "tags": [
-        "드라마틱"
-      ],
-      "updated_at": "2025-09-22T14:01:24.673Z",
-      "source": "github_api"
-    }
-  },
+  "scenarios": {},
   "scenario_templates": {
     "romance_template": {
       "mood_options": [
