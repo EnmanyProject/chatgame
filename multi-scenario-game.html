@@ -1064,21 +1064,64 @@
                     }
                 }
 
-                // LocalStorage 기반 대화 생성
-                console.log('🤖 대화 생성 (LocalStorage 기반)...');
-                
-                const localData = generateLocalDialogue(
-                    gameState.currentScenario,
-                    gameState.currentCharacter, 
-                    gameState.choiceNumber,
-                    gameState.affection
-                );
-                
-                const data = { success: true, generated: localData };
+                // 온라인 API 기반 대화 생성
+                console.log('🌐 대화 생성 (온라인 API 기반)...');
+
+                try {
+                    // 온라인 에피소드 생성 API 호출
+                    const response = await fetch('/api/scenario-manager', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            action: 'generate_dialogue',
+                            scenario_id: gameState.currentScenario.id,
+                            character_id: gameState.currentCharacter.id,
+                            choice_number: gameState.choiceNumber,
+                            affection: gameState.affection,
+                            mbti: gameState.currentCharacter.mbti,
+                            mood: gameState.currentScenario.mood || '로맨틱'
+                        })
+                    });
+
+                    if (response.ok) {
+                        const apiData = await response.json();
+                        if (apiData.success && apiData.dialogue) {
+                            console.log('✅ 온라인 API 대화 생성 성공:', apiData.dialogue);
+                            var data = {
+                                success: true,
+                                generated: {
+                                    dialogue: apiData.dialogue.character_dialogue,
+                                    narration: apiData.dialogue.character_narration,
+                                    choices: apiData.dialogue.choices || [
+                                        {"text": "계속 대화하기", "affection_impact": 1},
+                                        {"text": "다른 주제로 바꾸기", "affection_impact": 0},
+                                        {"text": "잠시 생각해보기", "affection_impact": -1}
+                                    ]
+                                }
+                            };
+                        } else {
+                            throw new Error('API 응답 형식 오류');
+                        }
+                    } else {
+                        throw new Error('API 호출 실패: ' + response.status);
+                    }
+                } catch (apiError) {
+                    console.warn('⚠️ 온라인 API 실패, 로컬 대화 생성으로 대체:', apiError);
+                    // API 실패 시 로컬 대화 생성으로 fallback
+                    const localData = generateLocalDialogue(
+                        gameState.currentScenario,
+                        gameState.currentCharacter,
+                        gameState.choiceNumber,
+                        gameState.affection
+                    );
+                    var data = { success: true, generated: localData };
+                }
                 
                 if (data.success && data.generated) {
                     const generated = data.generated;
-                    console.log('✅ 로컬 대화 생성 성공:', generated);
+                    console.log('✅ 대화 생성 성공 (온라인 우선):', generated);
                     
                     // generated 객체 검증
                     if (generated.dialogue && generated.choices) {
