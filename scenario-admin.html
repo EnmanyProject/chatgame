@@ -1211,14 +1211,33 @@
 
         .status-connected {
             color: #28a745;
+            font-weight: bold;
         }
 
         .status-disconnected {
             color: #dc3545;
+            font-weight: bold;
+        }
+
+        .status-warning {
+            color: #ffc107;
+            font-weight: bold;
+        }
+
+        .status-unknown {
+            color: #6c757d;
+            font-weight: bold;
         }
 
         .status-testing {
-            color: #ffc107;
+            color: #17a2b8;
+            font-weight: bold;
+        }
+
+        /* API 사용량 표시 개선 */
+        #apiUsage {
+            font-size: 0.9em;
+            line-height: 1.4;
         }
     </style>
 </head>
@@ -2573,26 +2592,93 @@
             }
         }
 
-        // API 상태 확인
+        // API 상태 확인 (개선된 버전)
         async function checkApiStatus() {
             try {
-                const response = await fetch('/api/test-env');
-                const data = await response.json();
-                
-                if (data.environment.OPENAI_API_KEY === '✅ 설정됨') {
-                    document.getElementById('openaiStatus').textContent = '✅ API 키 설정됨';
-                    document.getElementById('openaiStatus').className = 'status-connected';
-                    document.getElementById('apiStatus').textContent = '✅';
+                console.log('🔍 API 상태 확인 시작...');
+
+                // 1단계: API 키 설정 상태 확인
+                const envResponse = await fetch('/api/test-env');
+                const envData = await envResponse.json();
+
+                console.log('📋 환경변수 상태:', envData);
+
+                const statusElement = document.getElementById('openaiStatus');
+                const badgeElement = document.getElementById('apiStatus');
+                const usageElement = document.getElementById('apiUsage');
+                const testElement = document.getElementById('lastTest');
+
+                if (envData.environment.OPENAI_API_KEY === '✅ 설정됨') {
+                    console.log('✅ API 키가 설정되어 있음, 사용량 확인 중...');
+
+                    // 2단계: API 사용량 및 유효성 확인
+                    try {
+                        const usageResponse = await fetch('/api/openai-usage');
+
+                        if (usageResponse.ok) {
+                            const usageData = await usageResponse.json();
+                            console.log('📊 사용량 데이터:', usageData);
+
+                            // API 상태 업데이트
+                            statusElement.textContent = `✅ API 연결됨 (${usageData.data.keyPreview})`;
+                            statusElement.className = 'status-connected';
+                            badgeElement.textContent = '✅';
+
+                            // 사용량 정보 업데이트
+                            const rateLimit = usageData.data.rateLimit;
+                            let usageText = `모델 ${usageData.data.totalModels}개 사용가능`;
+
+                            if (rateLimit.remainingRequests !== 'Unknown') {
+                                usageText += `\n요청 한도: ${rateLimit.remainingRequests}/${rateLimit.limitRequests}`;
+                            }
+                            if (rateLimit.remainingTokens !== 'Unknown') {
+                                usageText += `\n토큰 한도: ${rateLimit.remainingTokens}/${rateLimit.limitTokens}`;
+                            }
+
+                            usageElement.innerHTML = usageText.replace(/\n/g, '<br>');
+                            testElement.textContent = new Date(usageData.data.lastChecked).toLocaleString('ko-KR');
+
+                            console.log('✅ API 상태 및 사용량 확인 완료');
+
+                        } else {
+                            // API 키는 있지만 유효하지 않음
+                            const errorData = await usageResponse.json();
+                            statusElement.textContent = `⚠️ API 키 오류 (${envData.environment.keyPreview})`;
+                            statusElement.className = 'status-warning';
+                            badgeElement.textContent = '⚠️';
+                            usageElement.textContent = `오류: ${errorData.message}`;
+                            testElement.textContent = new Date().toLocaleString('ko-KR');
+
+                            console.warn('⚠️ API 키는 설정되어 있지만 유효하지 않음:', errorData.message);
+                        }
+
+                    } catch (usageError) {
+                        console.warn('⚠️ 사용량 확인 중 오류:', usageError);
+                        statusElement.textContent = `⚠️ API 확인 실패 (${envData.environment.keyPreview})`;
+                        statusElement.className = 'status-warning';
+                        badgeElement.textContent = '⚠️';
+                        usageElement.textContent = '사용량 확인 실패';
+                        testElement.textContent = new Date().toLocaleString('ko-KR');
+                    }
+
                 } else {
-                    document.getElementById('openaiStatus').textContent = '❌ API 키 미설정';
-                    document.getElementById('openaiStatus').className = 'status-disconnected';
-                    document.getElementById('apiStatus').textContent = '❌';
+                    // API 키가 설정되지 않음
+                    statusElement.textContent = '❌ API 키 미설정';
+                    statusElement.className = 'status-disconnected';
+                    badgeElement.textContent = '❌';
+                    usageElement.textContent = 'API 키를 먼저 설정해주세요';
+                    testElement.textContent = '없음';
+
+                    console.log('❌ API 키가 설정되지 않음');
                 }
-                
+
             } catch (error) {
-                console.error('API 상태 확인 오류:', error);
-                document.getElementById('openaiStatus').textContent = '❓ 상태 불명';
+                console.error('❌ API 상태 확인 실패:', error);
+                document.getElementById('openaiStatus').textContent = '❓ 연결 실패';
+                document.getElementById('openaiStatus').className = 'status-unknown';
                 document.getElementById('apiStatus').textContent = '❓';
+                document.getElementById('apiUsage').textContent = '상태 확인 실패';
+                document.getElementById('lastTest').textContent = '오류';
             }
         }
 
