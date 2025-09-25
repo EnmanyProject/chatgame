@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎭 다중 시나리오 어드벤처 게임 v2.2.0 ⚡</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎭</text></svg>"">
+    <title>🎭 채팅 기술 훈련 시스템 v3.0.0</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎭</text></svg>">
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #000;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #fff;
             overflow: hidden;
             height: 100vh;
@@ -21,12 +21,12 @@
             justify-content: center;
             align-items: center;
         }
-        .chat-container {
+        .game-container {
             width: min(100vw, 400px);
             height: min(100vh, 800px);
             max-width: 400px;
             max-height: 800px;
-            background: #000;
+            background: rgba(0, 0, 0, 0.9);
             border: 2px solid #333;
             border-radius: 25px;
             overflow: hidden;
@@ -34,3294 +34,792 @@
             flex-direction: column;
             position: relative;
             box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
         }
-        
-        /* 시나리오 선택 화면 */
-        .scenario-selection {
+
+        /* 헤더 */
+        .game-header {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            padding: 15px 20px;
+            text-align: center;
+            position: relative;
+        }
+        .game-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .game-subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* 로딩 화면 */
+        .loading-screen {
             flex: 1;
-            padding: 40px 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding: 40px 20px;
         }
-        .scenario-title {
-            font-size: 24px;
-            margin-bottom: 30px;
-            text-align: center;
-            color: #ff69b4;
-        }
-        .scenario-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            width: 100%;
-            max-width: 300px;
-        }
-        .scenario-button {
-            background: #333;
-            border: 2px solid #555;
-            color: #fff;
-            padding: 20px;
-            border-radius: 15px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-        .scenario-button:hover {
-            background: #444;
-            border-color: #ff69b4;
-            transform: translateY(-2px);
-        }
-        
-        /* 채팅 화면 */
-        .chat-header {
-            background: #111;
-            padding: 15px 20px;
-            border-bottom: 1px solid #333;
-            display: none;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .contact-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .profile-pic {
-            position: relative;
-        }
-        .avatar {
+        .loading-spinner {
             width: 50px;
             height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top: 3px solid #667eea;
             border-radius: 50%;
-            border: 2px solid #ff69b4;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            object-fit: cover;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
         }
-        .online-indicator {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            width: 12px;
-            height: 12px;
-            background: #4ade80;
-            border-radius: 50%;
-            border: 2px solid #111;
-            animation: pulse 2s infinite;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .contact-details {
-            display: flex;
-            flex-direction: column;
-        }
-        .contact-name {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0;
-            color: #fff;
-        }
-        .last-seen {
-            font-size: 12px;
-            color: #888;
-        }
-        .messages-container {
+
+        /* 시나리오 선택 */
+        .scenario-selection {
             flex: 1;
             padding: 20px;
             overflow-y: auto;
-            scroll-behavior: smooth;
-            background: #000;
-            display: none;
-            /* 스크롤바 숨기기 (실제 채팅앱처럼) */
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE/Edge */
         }
-        .messages-container::-webkit-scrollbar {
-            display: none; /* Chrome/Safari/Opera */
-        }
-        .message {
-            margin-bottom: 15px;
-            display: flex;
-            flex-direction: column;
-            animation: messageSlide 0.3s ease-out;
-        }
-        .message.received {
-            align-items: flex-start;
-        }
-        .message.sent {
-            align-items: flex-end;
-        }
-        .message-bubble {
-            padding: 12px 16px;
-            border-radius: 18px;
-            max-width: 80%;
-            word-wrap: break-word;
-        }
-        .message.received .message-bubble {
-            background: #333;
-            color: #fff;
-            border-bottom-left-radius: 4px;
-        }
-        .message.received.narration .message-bubble {
-            background: #222;
-            color: #888;
-            font-style: italic;
-            border-bottom-left-radius: 4px;
-        }
-        .message.sent .message-bubble {
-            background: #ff69b4;
-            color: #fff;
-            border-bottom-right-radius: 4px;
-        }
-        
-        /* 선택지 */
-        .choices-container {
-            padding: 15px 20px;
-            border-top: 1px solid #333;
-            background: #111;
-            transform: translateY(100%);
-            opacity: 0;
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            display: none;
-        }
-        .choices-container.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        .choices-container.hide {
-            transform: translateY(100%);
-            opacity: 0;
-        }
-        .choice-button {
-            width: 100%;
-            background: #333;
-            border: 2px solid #555;
-            color: #fff;
-            padding: 15px 20px;
-            margin: 8px 0;
-            border-radius: 15px;
+        .section-title {
             font-size: 16px;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #667eea;
+        }
+        .scenario-grid {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .scenario-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-align: left;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: choiceSlideIn 0.4s ease-out forwards;
         }
-        .choice-button:nth-child(1) { animation-delay: 0.1s; }
-        .choice-button:nth-child(2) { animation-delay: 0.2s; }
-        .choice-button:nth-child(3) { animation-delay: 0.3s; }
-        .choice-button:nth-child(4) { animation-delay: 0.4s; }
-        
-        @keyframes choiceSlideIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .choice-button:hover {
-            background: #444;
-            border-color: #ff69b4;
+        .scenario-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #667eea;
             transform: translateY(-2px);
         }
-        .choice-button:active {
-            transform: translateY(0px);
+        .scenario-card.selected {
+            background: rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
         }
-        .choice-button.selected {
-            background: #ff69b4;
-            border-color: #ff1493;
+        .scenario-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
         }
-        
-        /* 입력창 */
-        .input-container {
-            padding: 15px 20px;
-            border-top: 1px solid #333;
-            background: #111;
-            display: none;
+        .scenario-description {
+            font-size: 12px;
+            opacity: 0.8;
+            line-height: 1.4;
         }
-        .input-wrapper {
-            display: flex;
-            align-items: center;
+
+        /* 캐릭터 선택 */
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-            background: #222;
-            border-radius: 20px;
-            padding: 8px 15px;
+            margin-bottom: 20px;
         }
-        .message-input {
-            flex: 1;
-            border: none;
-            background: none;
-            color: #fff;
-            font-size: 16px;
-            padding: 8px 0;
-            outline: none;
-        }
-        .message-input::placeholder {
-            color: #666;
-        }
-        .send-btn {
-            background: #ff69b4;
-            border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
+        .character-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
+            text-align: center;
         }
-        .send-btn:hover:not(:disabled) {
-            background: #ff1493;
+        .character-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #667eea;
+            transform: translateY(-2px);
         }
-        .send-btn:disabled {
+        .character-card.selected {
+            background: rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+        .character-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .character-mbti {
+            font-size: 12px;
+            background: rgba(102, 126, 234, 0.7);
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-bottom: 5px;
+        }
+        .character-traits {
+            font-size: 11px;
+            opacity: 0.8;
+            line-height: 1.3;
+        }
+
+        /* 액션 버튼 */
+        .action-buttons {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: white;
+        }
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
-        /* 타이핑 표시기 */
-        .typing-indicator {
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* 채팅 화면 */
+        .chat-screen {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+        }
+        .chat-header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-info {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 12px 16px;
-            background: #333;
-            border-radius: 18px;
-            border-bottom-left-radius: 4px;
-            max-width: 80%;
+            gap: 10px;
+        }
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.1);
+        }
+        .message {
             margin-bottom: 15px;
+            animation: fadeInUp 0.3s ease;
         }
-        .typing-dots {
-            display: flex;
-            gap: 4px;
-        }
-        .typing-dot {
-            width: 6px;
-            height: 6px;
-            background: #888;
-            border-radius: 50%;
-            animation: typingBounce 1.4s infinite;
-        }
-        .typing-dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-        .typing-dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-        @keyframes typingBounce {
-            0%, 60%, 100% {
-                transform: translateY(0);
-            }
-            30% {
-                transform: translateY(-8px);
-            }
-        }
-        @keyframes messageSlide {
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(10px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
-        /* 진행도 바 */
-        .progress-bar-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: #222;
-            display: none;
+        .message.ai {
+            text-align: left;
         }
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #ff69b4, #ff1493);
-            width: 0%;
-            transition: width 0.5s ease;
+        .message.user {
+            text-align: right;
         }
-        
-        /* 재시작 버튼 */
-        .restart-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #333;
-            border: 1px solid #555;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: none;
-        }
-        .restart-btn:hover {
-            background: #444;
-            border-color: #ff69b4;
-        }
-        
-        .back-btn {
-            background: #444;
-            border: 2px solid #666;
-            color: #fff;
-            padding: 12px 24px;
+        .message-bubble {
+            display: inline-block;
+            max-width: 80%;
+            padding: 12px 15px;
             border-radius: 15px;
             font-size: 14px;
+            line-height: 1.4;
+        }
+        .message.ai .message-bubble {
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom-left-radius: 5px;
+        }
+        .message.user .message-bubble {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-bottom-right-radius: 5px;
+        }
+        .narration {
+            font-style: italic;
+            opacity: 0.8;
+            text-align: center;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+
+        /* 선택지 */
+        .choices {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .choice-btn {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 20px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            text-align: left;
+            line-height: 1.4;
         }
-        .back-btn:hover {
-            background: #555;
-            border-color: #ff69b4;
+        .choice-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #667eea;
         }
-        
-        /* 호감도 하트 스타일 */
-        .affection-hearts {
+        .choice-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 상태바 */
+        .status-bar {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
-            gap: 3px;
-            align-items: center;
-            min-width: 100px;
-            justify-content: flex-end;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            font-size: 12px;
         }
-        
-        .heart {
-            font-size: 16px;
-            color: #ff1493;
-            opacity: 0;
-            transform: scale(0);
-            animation: heartPop 0.5s ease-out forwards;
-            display: inline-block;
+
+        /* 에러 메시지 */
+        .error-message {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+            color: #dc3545;
+            font-size: 13px;
         }
-        
-        @keyframes heartPop {
-            0% {
-                opacity: 0;
-                transform: scale(0);
-            }
-            50% {
-                opacity: 1;
-                transform: scale(1.2);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
+        .retry-btn {
+            margin-top: 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
         }
-        
-        .heart:hover {
-            transform: scale(1.1);
-            transition: transform 0.2s ease;
+
+        /* 스크롤바 커스터마이징 */
+        ::-webkit-scrollbar {
+            width: 6px;
         }
-        
-        .heart {
-            font-size: 16px;
-            color: #ff1493;
-            opacity: 0;
-            transform: scale(0);
-            animation: heartPop 0.5s ease-out forwards;
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
         }
-        
-        @keyframes heartPop {
-            0% {
-                opacity: 0;
-                transform: scale(0) rotate(0deg);
-            }
-            50% {
-                opacity: 1;
-                transform: scale(1.3) rotate(10deg);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1) rotate(0deg);
-            }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.8);
         }
     </style>
 </head>
 <body>
-    <div class="chat-container">
+    <div class="game-container">
+        <!-- 헤더 -->
+        <div class="game-header">
+            <div class="game-title">🎭 채팅 기술 훈련 시스템</div>
+            <div class="game-subtitle">어드민 연동 v3.0.0</div>
+        </div>
+
+        <!-- 로딩 화면 -->
+        <div id="loadingScreen" class="loading-screen">
+            <div class="loading-spinner"></div>
+            <div>데이터 로딩 중...</div>
+            <div id="loadingStatus" style="font-size: 12px; opacity: 0.7; margin-top: 10px;">초기화 중...</div>
+        </div>
+
         <!-- 시나리오 선택 화면 -->
-        <div id="scenarioSelection" class="scenario-selection">
-            <h1 class="scenario-title">🎭 시나리오를 선택하세요</h1>
-            <div id="scenarioButtons" class="scenario-buttons">
-                <div style="text-align: center; color: #666;">⚡ v2.2.0 로딩 중...</div>
+        <div id="selectionScreen" class="scenario-selection" style="display: none;">
+            <div class="section-title">📚 시나리오 선택</div>
+            <div id="scenarioGrid" class="scenario-grid">
+                <!-- 시나리오 카드들이 여기에 동적으로 추가됩니다 -->
+            </div>
+
+            <div class="section-title">👥 캐릭터 선택</div>
+            <div id="characterGrid" class="character-grid">
+                <!-- 캐릭터 카드들이 여기에 동적으로 추가됩니다 -->
+            </div>
+
+            <div id="errorContainer"></div>
+
+            <div class="action-buttons">
+                <button id="startGameBtn" class="btn btn-primary" disabled>🎮 게임 시작</button>
+                <button id="adminBtn" class="btn btn-secondary">⚙️ 관리자 페이지</button>
             </div>
         </div>
 
-        <!-- 진행도 바 -->
-        <div id="progressContainer" class="progress-bar-container">
-            <div id="progressBar" class="progress-bar"></div>
-        </div>
-
-        <!-- 채팅 헤더 -->
-        <header id="chatHeader" class="chat-header">
-            <div class="contact-info">
-                <div class="profile-pic">
-                    <img id="characterAvatar" class="avatar" src="" alt="Character Avatar">
-                    <div class="online-indicator"></div>
+        <!-- 채팅 화면 -->
+        <div id="chatScreen" class="chat-screen">
+            <div class="chat-header">
+                <div class="chat-info">
+                    <button id="backBtn" class="back-btn">← 뒤로</button>
+                    <div>
+                        <div id="currentScenario" style="font-size: 14px; font-weight: 600;"></div>
+                        <div id="currentCharacter" style="font-size: 12px; opacity: 0.8;"></div>
+                    </div>
                 </div>
-                <div class="contact-details">
-                    <h2 id="characterName" class="contact-name">캐릭터</h2>
-                    <span id="scenarioInfo" class="last-seen">시나리오 선택</span>
-                </div>
+                <div id="affectionScore" style="font-size: 14px; font-weight: 600;">❤️ 0</div>
             </div>
-            <!-- 호감도 하트 표시 -->
-            <div id="affectionHearts" class="affection-hearts">
-                <!-- 하트들이 여기에 동적으로 추가됩니다 -->
+
+            <div id="chatMessages" class="chat-messages">
+                <!-- 채팅 메시지들이 여기에 동적으로 추가됩니다 -->
             </div>
-            <button id="restartBtn" class="restart-btn" onclick="resetGame()">🔄 다시 시작</button>
-        </header>
 
-        <!-- 메시지 컨테이너 -->
-        <main id="messagesContainer" class="messages-container">
-            <!-- 메시지들이 여기에 표시됩니다 -->
-        </main>
+            <div id="choicesContainer" class="choices" style="display: none;">
+                <!-- 선택지 버튼들이 여기에 동적으로 추가됩니다 -->
+            </div>
 
-        <!-- 선택지 컨테이너 -->
-        <div id="choicesContainer" class="choices-container">
-            <!-- 선택지 버튼들이 여기에 표시됩니다 -->
-        </div>
-
-        <!-- 입력 컨테이너 -->
-        <div id="inputContainer" class="input-container">
-            <div class="input-wrapper">
-                <input type="text" id="messageInput" class="message-input" placeholder="메시지를 입력하세요..." maxlength="200">
-                <button id="sendBtn" class="send-btn">➤</button>
+            <div class="status-bar">
+                <span id="messageCount">메시지: 0</span>
+                <span id="gameProgress">진행도: 0%</span>
             </div>
         </div>
     </div>
 
-    <!-- OnlineDataClient 추가 -->
-    <script src="js/online-data-client.js"></script>
-
     <script>
-        // 온라인 데이터 클라이언트 초기화
-        let onlineDataClient;
-
         // 게임 상태 관리
-        let gameState = {
-            currentScenario: null,
-            currentCharacter: null,
-            choiceNumber: 0,
-            affection: 0,  // 초기 호감도 0으로 변경
+        const gameState = {
+            scenarios: [],
+            characters: [],
+            selectedScenario: null,
+            selectedCharacter: null,
+            currentDialogue: null,
+            affection: 0,
             messageCount: 0,
-            previousChoices: [],
-            waitingForInput: false,
-            isFreeChatMode: false,
-            isSubjectiveMode: false,  // 주관식 모드 플래그 추가
-            isProcessing: false,  // 처리 중 플래그 (중복 입력 방지)
-            canInput: true,  // 입력 가능 여부
-
-            // 대화 반복 방지 시스템
-            conversationHistory: [],  // 전체 대화 기록
-            usedDialogues: new Set(),  // 사용된 대화 패턴 추적
-            recentPatterns: [],  // 최근 대화 패턴 (최대 10개)
-            topicHistory: [],  // 주제 히스토리 (최대 20개)
-            emotionHistory: []  // 감정 변화 히스토리
+            conversationHistory: []
         };
 
-        // 스크롤 자동 이동 함수 (개선된 버전)
-        function scrollToBottom() {
-            const container = document.getElementById('messagesContainer');
-            
-            // 즉시 스크롤 + 지연된 스크롤 (2단계)
-            container.scrollTop = container.scrollHeight;
-            container.scrollTo({
-                top: container.scrollHeight,
-                behavior: 'smooth'
-            });
-            
-            // 추가 지연된 스크롤 (더 확실하게)
-            setTimeout(() => {
-                container.scrollTop = container.scrollHeight;
-                container.scrollTo({
-                    top: container.scrollHeight,
-                    behavior: 'smooth'
-                });
-            }, 150);
-            
-            // 최종 확인 스크롤 (입력창 표시 후)
-            setTimeout(() => {
-                container.scrollTop = container.scrollHeight;
-            }, 300);
-        }
+        // DOM 요소들
+        const elements = {
+            loadingScreen: document.getElementById('loadingScreen'),
+            loadingStatus: document.getElementById('loadingStatus'),
+            selectionScreen: document.getElementById('selectionScreen'),
+            chatScreen: document.getElementById('chatScreen'),
+            scenarioGrid: document.getElementById('scenarioGrid'),
+            characterGrid: document.getElementById('characterGrid'),
+            errorContainer: document.getElementById('errorContainer'),
+            startGameBtn: document.getElementById('startGameBtn'),
+            adminBtn: document.getElementById('adminBtn'),
+            backBtn: document.getElementById('backBtn'),
+            currentScenario: document.getElementById('currentScenario'),
+            currentCharacter: document.getElementById('currentCharacter'),
+            affectionScore: document.getElementById('affectionScore'),
+            chatMessages: document.getElementById('chatMessages'),
+            choicesContainer: document.getElementById('choicesContainer'),
+            messageCount: document.getElementById('messageCount'),
+            gameProgress: document.getElementById('gameProgress')
+        };
 
-        let availableScenarios = [];
-        let availableCharacters = [];
+        // 초기화
+        async function initGame() {
+            console.log('🎮 게임 초기화 시작...');
 
-        // 캐릭터 데이터 새로고침 함수
-        async function refreshCharacterData() {
-            if (gameState.currentCharacter) {
-                try {
-                    console.log('🔄 캐릭터 데이터 새로고침...');
-                    const response = await fetch('/api/scenario?action=list&type=characters', {
-                        timeout: 5000
-                    });
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        availableCharacters = data.characters.filter(c => c.active);
-                        // 현재 캐릭터 업데이트
-                        const updatedCharacter = availableCharacters.find(c => c.id === gameState.currentCharacter.id);
-                        if (updatedCharacter) {
-                            gameState.currentCharacter = updatedCharacter;
-                            console.log('✅ 캐릭터 데이터 업데이트됨');
-                            
-                            // 아바타 이미지 새로고침
-                            if (updatedCharacter.avatar_url) {
-                                document.getElementById('characterAvatar').src = updatedCharacter.avatar_url;
-                            }
-                        }
-                    }
-                } catch (error) {
-                    console.error('❌ 캐릭터 데이터 새로고침 실패:', error);
-                    // 에러가 발생해도 게임 진행에 영향을 주지 않음
-                }
-            }
-        }
-
-        // 페이지 포커스 시 데이터 새로고침
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden && gameState.currentCharacter) {
-                refreshCharacterData();
-            }
-        });
-
-        // 페이지 로드 시 시나리오 로드
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('🚀 v2.2.0 자연스러운 대화체 버전 시작! (Cache Fixed)');
-            
             try {
+                elements.loadingStatus.textContent = '시나리오 데이터 로딩 중...';
                 await loadScenarios();
-                setupEventListeners();
-                console.log('✅ 초기화 완료');
-            } catch (error) {
-                console.error('❌ 초기화 실패:', error);
-                const errorDiv = document.createElement('div');
-                errorDiv.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; background: red; color: white; padding: 10px; z-index: 9999;';
-                errorDiv.innerHTML = `초기화 실패: ${error.message} <button onclick="location.reload()">새로고침</button>`;
-                document.body.prepend(errorDiv);
-            }
-        });
 
-        // 이벤트 리스너 설정
-        function setupEventListeners() {
-            // 엔터키로 메시지 전송
-            document.getElementById('messageInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendFreeMessage();
-                }
-            });
-            
-            // 전송 버튼 클릭
-            document.getElementById('sendBtn').addEventListener('click', sendFreeMessage);
-        }
+                elements.loadingStatus.textContent = '캐릭터 데이터 로딩 중...';
+                await loadCharacters();
 
-        // API 연결 테스트
-        async function testApiConnection() {
-            console.log('🔍 API 연결 테스트 중...');
-            
-            try {
-                // 간단한 헬스 체크
-                const response = await fetch('/api/scenario?action=test', {
-                    method: 'GET',
-                    timeout: 5000
-                });
-                
-                console.log('🔗 API 연결 상태:', response.status);
-                return response.status < 500; // 5xx 에러가 아니면 연결됨
-                
+                elements.loadingStatus.textContent = '초기화 완료!';
+                showSelectionScreen();
+
+                console.log('✅ 게임 초기화 완료');
             } catch (error) {
-                console.error('💥 API 연결 실패:', error);
-                return false;
+                console.error('❌ 게임 초기화 실패:', error);
+                showError('게임 초기화에 실패했습니다: ' + error.message);
             }
         }
 
-        // 시나리오 로드
+        // 시나리오 로딩
         async function loadScenarios() {
-            console.log('🌐 시나리오 로딩 시작 (온라인 GitHub 기반)...');
-
-            // 로딩 인디케이터 표시
-            const scenarioContainer = document.getElementById('scenarioButtons');
-            if (scenarioContainer) {
-                scenarioContainer.innerHTML = '<div style="text-align: center; color: #666;">🔄 온라인에서 시나리오 로딩 중...</div>';
-            }
-
             try {
-                // 온라인 데이터 클라이언트가 없으면 초기화
-                if (!onlineDataClient) {
-                    onlineDataClient = new OnlineDataClient();
-                    // 초기화 시간 확보
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                const response = await fetch('/api/scenario-manager?action=list');
+                const data = await response.json();
+
+                if (data.success && data.scenarios) {
+                    gameState.scenarios = Object.values(data.scenarios).filter(s => s && s.active !== false);
+                    console.log(`📚 시나리오 ${gameState.scenarios.length}개 로드됨`);
+                    renderScenarios();
+                } else {
+                    throw new Error(data.error || '시나리오 데이터를 불러올 수 없습니다');
                 }
-
-                // 온라인에서 시나리오 데이터 로딩
-                console.log('🌐 온라인에서 시나리오 로딩 시도...');
-                const scenariosData = await onlineDataClient.loadScenarios();
-                console.log('🔍 온라인 시나리오 데이터:', scenariosData);
-
-                if (scenariosData && Object.keys(scenariosData).length > 0) {
-                    const scenarioArray = Object.values(scenariosData).filter(s => s && s.active !== false);
-                    console.log('🔍 필터링된 시나리오 배열:', scenarioArray);
-
-                    console.log('📊 로드된 시나리오 수:', scenarioArray.length);
-                    console.log('📋 시나리오 목록:', scenarioArray.map(s => `${s.id || s.scenario_id}: ${s.title}`));
-
-                    if (scenarioArray.length > 0) {
-                        // 시나리오 데이터 구조 표준화
-                        availableScenarios = scenarioArray.map(scenario => ({
-                            id: scenario.id || scenario.scenario_id,
-                            title: scenario.title || '제목 없음',
-                            description: scenario.description || '설명 없음',
-                            setting: scenario.background_setting || scenario.setting || '일반적인 상황',
-                            mood: scenario.mood || '로맨틱',
-                            ai_generated_context: scenario.ai_generated_context,
-                            available_characters: scenario.available_characters || [],
-                            active: true
-                        }));
-
-                        console.log('✅ 온라인 시나리오 로딩 성공:', availableScenarios.length + '개');
-                        displayScenarioButtons(availableScenarios);
-                        return;
-                    }
-                }
-
-                // 온라인에 데이터가 없으면 관리자 페이지로 안내
-                console.warn('⚠️ 온라인에 시나리오 데이터 없음');
-
-                if (scenarioContainer) {
-                    scenarioContainer.innerHTML = `
-                        <div style="color: #e74c3c; text-align: center; padding: 20px;">
-                            <h3>🎭 시나리오 없음</h3>
-                            <p>게임을 시작하려면 먼저 시나리오를 생성해주세요!</p>
-                            <button onclick="window.open('scenario-admin.html', '_blank')" style="
-                                background: #3498db;
-                                color: white;
-                                border: none;
-                                padding: 10px 20px;
-                                border-radius: 5px;
-                                margin: 10px;
-                                cursor: pointer;
-                            ">
-                                🎮 시나리오 관리자로 이동
-                            </button>
-                            <button onclick="location.reload()" style="
-                                background: #2ecc71;
-                                color: white;
-                                border: none;
-                                padding: 10px 20px;
-                                border-radius: 5px;
-                                margin: 10px;
-                                cursor: pointer;
-                            ">
-                                🤖 AI 평가 설정
-                            </button>
-                            <a href="/scenario-admin.html" target="_blank" style="
-                                display: inline-block;
-                                background: #3498db;
-                                color: white;
-                                padding: 10px 20px;
-                                text-decoration: none;
-                                border-radius: 5px;
-                                margin: 10px;
-                            ">
-                                🔧 시나리오 관리자 열기
-                            </a>
-                            <br>
-                            <button onclick="loadScenarios()" style="
-                                background: #27ae60;
-                                color: white;
-                                border: none;
-                                padding: 8px 16px;
-                                border-radius: 4px;
-                                cursor: pointer;
-                                margin-top: 10px;
-                            ">
-                                🔄 다시 로딩
-                            </button>
-                        </div>
-                    `;
-                }
-                
             } catch (error) {
                 console.error('❌ 시나리오 로딩 실패:', error);
-                
-                // Fallback: 기본 시나리오 안내
-                console.log('🚑 Fallback: 기본 안내 표시');
-                if (scenarioContainer) {
-                    scenarioContainer.innerHTML = `
-                        <div style="color: #e74c3c; text-align: center; padding: 20px;">
-                            <h3>⚠️ 로딩 오류</h3>
-                            <p>시나리오를 불러오는 중 오류가 발생했습니다.</p>
-                            <p><strong>오류:</strong> ${error.message}</p>
-                            <a href="/scenario-admin.html" target="_blank" style="
-                                display: inline-block;
-                                background: #3498db;
-                                color: white;
-                                padding: 10px 20px;
-                                text-decoration: none;
-                                border-radius: 5px;
-                                margin: 10px;
-                            ">
-                                🔧 시나리오 관리자 열기
-                            </a>
-                        </div>
-                    `;
-                }
-                
-                // 기본 데모 시나리오 제공
-                const fallbackScenarios = [
-                    {
-                        id: "demo_scenario",
-                        title: "📚 데모 시나리오",
-                        description: "시나리오 관리자에서 실제 시나리오를 생성해보세요!",
-                        setting: "데모 환경",
-                        mood: "안내",
-                        active: true,
-                        available_characters: []
-                    }
-                ];
-                
-                if (scenarioContainer) {
-                    availableScenarios = fallbackScenarios;
-                    displayScenarioButtons(fallbackScenarios);
-                    
-                    // 경고 메시지 추가
-                    const warningDiv = document.createElement('div');
-                    warningDiv.style.cssText = 'background: #fff3cd; color: #856404; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ffeaa7;';
-                    warningDiv.innerHTML = `
-                        ⚠️ 서버에서 시나리오를 불러올 수 없어 기본 시나리오를 사용합니다.<br>
-                        <small>에러: ${error.message}</small><br>
-                        <button onclick="resetServerCache()" style="margin-top: 5px; padding: 3px 6px;">🔧 서버 캐시 리셋</button>
-                        <button onclick="loadScenarios()" style="margin-top: 5px; padding: 3px 6px;">🔄 다시 시도</button>
-                    `;
-                    scenarioContainer.prepend(warningDiv);
-                }
+                throw error;
             }
         }
 
-        // 서버 캐시 리셋 함수
-        async function resetServerCache() {
+        // 캐릭터 로딩
+        async function loadCharacters() {
             try {
-                console.log('🔧 서버 캐시 강제 리셋...');
-                await fetch('/api/scenario?action=reset');
-                console.log('✅ 서버 캐시 리셋 완료');
-                
-                // 리셋 후 시나리오 다시 로드
-                await loadScenarios();
+                const response = await fetch('/api/character-ai-generator?action=list_characters');
+                const data = await response.json();
+
+                if (data.success && data.characters) {
+                    gameState.characters = Object.values(data.characters).filter(c => c && c.active !== false);
+                    console.log(`👥 캐릭터 ${gameState.characters.length}개 로드됨`);
+                    renderCharacters();
+                } else {
+                    throw new Error(data.error || '캐릭터 데이터를 불러올 수 없습니다');
+                }
             } catch (error) {
-                console.error('❌ 서버 캐시 리셋 실패:', error);
-                alert('서버 캐시 리셋에 실패했습니다: ' + error.message);
+                console.error('❌ 캐릭터 로딩 실패:', error);
+                throw error;
             }
         }
 
-        // 시나리오 버튼 표시
-        function displayScenarioButtons(scenarios) {
-            const container = document.getElementById('scenarioButtons');
-            container.innerHTML = '';
-            
-            scenarios.forEach(scenario => {
-                const button = document.createElement('button');
-                button.className = 'scenario-button';
-                button.innerHTML = `
-                    <div style="font-weight: bold; margin-bottom: 5px;">${scenario.title}</div>
-                    <div style="font-size: 14px; color: #aaa;">${scenario.description}</div>
+        // 시나리오 렌더링
+        function renderScenarios() {
+            elements.scenarioGrid.innerHTML = '';
+
+            if (gameState.scenarios.length === 0) {
+                elements.scenarioGrid.innerHTML = `
+                    <div style="text-align: center; padding: 20px; opacity: 0.6;">
+                        시나리오가 없습니다.<br>
+                        <small>관리자 페이지에서 시나리오를 생성해주세요.</small>
+                    </div>
                 `;
-                button.onclick = () => selectScenario(scenario.id);
-                container.appendChild(button);
+                return;
+            }
+
+            gameState.scenarios.forEach(scenario => {
+                const card = document.createElement('div');
+                card.className = 'scenario-card';
+                card.onclick = () => selectScenario(scenario);
+                card.innerHTML = `
+                    <div class="scenario-title">${scenario.title}</div>
+                    <div class="scenario-description">${scenario.description || scenario.context || '상황 설명이 없습니다'}</div>
+                `;
+                elements.scenarioGrid.appendChild(card);
+            });
+        }
+
+        // 캐릭터 렌더링
+        function renderCharacters() {
+            elements.characterGrid.innerHTML = '';
+
+            if (gameState.characters.length === 0) {
+                elements.characterGrid.innerHTML = `
+                    <div style="text-align: center; padding: 20px; opacity: 0.6; grid-column: 1 / -1;">
+                        캐릭터가 없습니다.<br>
+                        <small>관리자 페이지에서 캐릭터를 생성해주세요.</small>
+                    </div>
+                `;
+                return;
+            }
+
+            gameState.characters.forEach(character => {
+                const card = document.createElement('div');
+                card.className = 'character-card';
+                card.onclick = () => selectCharacter(character);
+
+                const traits = Array.isArray(character.personality_traits)
+                    ? character.personality_traits.join(', ')
+                    : character.personality_traits || '';
+
+                card.innerHTML = `
+                    <div class="character-name">${character.name}</div>
+                    <div class="character-mbti">${character.mbti}</div>
+                    <div class="character-traits">${traits}</div>
+                `;
+                elements.characterGrid.appendChild(card);
             });
         }
 
         // 시나리오 선택
-        async function selectScenario(scenarioId) {
-            console.log('🎯 시나리오 선택 시도:', scenarioId);
-            console.log('🔍 현재 availableScenarios:', availableScenarios);
-            
-            gameState.currentScenario = availableScenarios.find(s => s.id === scenarioId);
-            if (!gameState.currentScenario) {
-                console.error('❌ 선택한 시나리오를 찾을 수 없습니다:', scenarioId);
-                console.error('❌ 사용 가능한 시나리오 ID들:', availableScenarios.map(s => s.id));
-                return;
-            }
-            
-            console.log('📚 시나리오 선택됨:', gameState.currentScenario.title);
+        function selectScenario(scenario) {
+            // 이전 선택 해제
+            document.querySelectorAll('.scenario-card').forEach(card => card.classList.remove('selected'));
 
-            // 캐릭터 로드 (온라인 GitHub 기반)
-            try {
-                console.log('🌐 캐릭터 로딩 중 (온라인)...');
+            // 새 선택 적용
+            event.currentTarget.classList.add('selected');
+            gameState.selectedScenario = scenario;
 
-                // 온라인에서 캐릭터 데이터 로딩
-                const charactersData = await onlineDataClient.loadCharacters();
+            console.log('📚 시나리오 선택:', scenario.title);
+            updateStartButton();
+        }
 
-                if (charactersData && Object.keys(charactersData).length > 0) {
-                    const characterArray = Object.values(charactersData).filter(c => c && c.active !== false);
+        // 캐릭터 선택
+        function selectCharacter(character) {
+            // 이전 선택 해제
+            document.querySelectorAll('.character-card').forEach(card => card.classList.remove('selected'));
 
-                    console.log('📊 로드된 캐릭터 수:', characterArray.length);
-                    console.log('👥 캐릭터 목록:', characterArray.map(c => `${c.id}: ${c.name} (${c.mbti})`));
+            // 새 선택 적용
+            event.currentTarget.classList.add('selected');
+            gameState.selectedCharacter = character;
 
-                    if (characterArray.length > 0) {
-                        // 캐릭터 데이터 구조 표준화
-                        availableCharacters = characterArray.map(character => ({
-                            id: character.id,
-                            name: character.name || '이름 없음',
-                            age: character.age || 20,
-                            mbti: character.mbti || 'INFP',
-                            personality_traits: character.personality_traits || character.personality || '감성적인',
-                            speech_style: character.speech_style || '부드러운 말투',
-                            appearance: character.appearance || {},
-                            image: character.image || null,
-                            active: true
-                        }));
+            console.log('👥 캐릭터 선택:', character.name);
+            updateStartButton();
+        }
 
-                        console.log('✅ 온라인 캐릭터 로딩 성공:', availableCharacters.length + '개');
+        // 시작 버튼 업데이트
+        function updateStartButton() {
+            const canStart = gameState.selectedScenario && gameState.selectedCharacter;
+            elements.startGameBtn.disabled = !canStart;
 
-                        // 첫 번째 활성 캐릭터 자동 선택
-                        gameState.currentCharacter = availableCharacters[0];
-                        console.log('👤 선택된 캐릭터:', gameState.currentCharacter.name, '(' + gameState.currentCharacter.mbti + ')');
-                        startGame();
-                        return;
-                    }
-                }
-
-                throw new Error('온라인에 캐릭터 데이터가 없습니다');
-            } catch (error) {
-                console.error('❌ 캐릭터 로딩 실패:', error);
-                
-                // Fallback: 하드코딩된 캐릭터 사용
-                console.log('🚑 Fallback: 하드코딩된 캐릭터 사용');
-                const fallbackCharacter = {
-                    id: "yuna_infp",
-                    name: "윤아",
-                    age: 20,
-                    mbti: "INFP",
-                    personality_traits: {
-                        primary: ["감성적", "이상주의적", "창의적", "내향적"],
-                        secondary: ["공감능력 뛰어남", "완벽주의 성향", "감정 표현 풍부"],
-                        speech_style: ["부드럽고 따뜻한 말투", "감정적 표현 많음", "이모티콘 자주 사용"]
-                    },
-                    relationship: "시우 오빠를 1년 넘게 좋아하는 후배",
-                    background: "예술을 전공하는 대학생, 감수성이 풍부함",
-                    avatar_url: "",
-                    scenarios: ["hangover_confession"],
-                    active: true
-                };
-                
-                availableCharacters = [fallbackCharacter];
-                gameState.currentCharacter = fallbackCharacter;
-                
-                console.log('👤 Fallback 캐릭터 사용:', gameState.currentCharacter.name);
-                
-                // 경고 메시지와 함께 게임 시작
-                alert('⚠️ 서버에서 캐릭터를 불러올 수 없어 기본 캐릭터를 사용합니다.\n에러: ' + error.message);
-                startGame();
+            if (canStart) {
+                elements.startGameBtn.textContent = `🎮 ${gameState.selectedScenario.title} - ${gameState.selectedCharacter.name}`;
+            } else {
+                elements.startGameBtn.textContent = '🎮 시나리오와 캐릭터를 선택하세요';
             }
         }
 
         // 게임 시작
-        function startGame() {
-            // 시나리오 선택 화면 숨기기
-            document.getElementById('scenarioSelection').style.display = 'none';
-
-            // 게임 UI 표시
-            document.getElementById('chatHeader').style.display = 'flex';
-            document.getElementById('messagesContainer').style.display = 'block';
-            document.getElementById('choicesContainer').style.display = 'block';
-            document.getElementById('progressContainer').style.display = 'block';
-            document.getElementById('restartBtn').style.display = 'block';
-
-            // 🔄 대화 반복 방지 시스템 초기화
-            initializeAntiRepetitionSystem();
-
-            // 캐릭터 정보 설정
-            document.getElementById('characterName').textContent = gameState.currentCharacter.name;
-            document.getElementById('scenarioInfo').textContent = gameState.currentScenario.title;
-            
-            // 캐릭터 아바타 설정 (강화된 로딩)
-            const avatarElement = document.getElementById('characterAvatar');
-            
-            if (gameState.currentCharacter.avatar_url && gameState.currentCharacter.avatar_url.trim() !== '') {
-                // 로딩 상태 표시
-                avatarElement.style.opacity = '0.5';
-                
-                // 새 이미지 객체로 미리 로드
-                const testImage = new Image();
-                testImage.onload = function() {
-                    avatarElement.src = gameState.currentCharacter.avatar_url;
-                    avatarElement.style.opacity = '1';
-                    console.log('캐릭터 아바타 로드 성공:', gameState.currentCharacter.avatar_url);
-                };
-                testImage.onerror = function() {
-                    console.warn('캐릭터 아바타 로드 실패, 기본 이미지 사용');
-                    setDefaultAvatar();
-                };
-                testImage.src = gameState.currentCharacter.avatar_url;
-            } else {
-                setDefaultAvatar();
+        async function startGame() {
+            if (!gameState.selectedScenario || !gameState.selectedCharacter) {
+                alert('시나리오와 캐릭터를 모두 선택해주세요.');
+                return;
             }
-            
-            function setDefaultAvatar() {
-                // 한글 지원을 위한 UTF-8 인코딩
-                const svgString = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50">
-                        <circle cx="25" cy="25" r="25" fill="#ff69b4"/>
-                        <text x="25" y="32" text-anchor="middle" fill="white" font-size="18" font-family="Arial, sans-serif" font-weight="bold">
-                            ${gameState.currentCharacter.name.charAt(0)}
-                        </text>
-                    </svg>
-                `;
-                
-                // UTF-8을 지원하는 인코딩 방식 사용
-                const encoded = btoa(unescape(encodeURIComponent(svgString)));
-                avatarElement.src = 'data:image/svg+xml;base64,' + encoded;
-                avatarElement.style.opacity = '1';
-            }
+
+            console.log('🎮 게임 시작:', gameState.selectedScenario.title, '-', gameState.selectedCharacter.name);
+
+            // 초기화
+            gameState.affection = 0;
+            gameState.messageCount = 0;
+            gameState.conversationHistory = [];
+
+            // UI 업데이트
+            elements.currentScenario.textContent = gameState.selectedScenario.title;
+            elements.currentCharacter.textContent = `${gameState.selectedCharacter.name} (${gameState.selectedCharacter.mbti})`;
+            elements.affectionScore.textContent = `❤️ ${gameState.affection}`;
+
+            // 채팅 화면으로 전환
+            showChatScreen();
 
             // 첫 번째 대화 시작
-            setTimeout(() => {
-                if (gameState.currentScenario.id === 'hangover_confession') {
-                    displayCharacterMessage('시우 오빠... 일어나셨어요?? 😰', 
-                        '(휴대폰이 계속 울린다. 머리가 지끈거리는 가운데 확인해보니 후배 윤아에게서 온 메시지들이다)', '');
-                } else {
-                    displayCharacterMessage(`${gameState.currentScenario.setting}에 오신 것을 환영합니다!`, '', '');
-                }
-                setTimeout(() => {
-                    startChoiceSequence();
-                }, 2000);
-            }, 1000);
+            await generateDialogue("게임이 시작되었습니다.");
         }
 
-        // 선택지 시퀀스 시작
-        async function startChoiceSequence() {
-            // 입력 다시 활성화
-            gameState.isProcessing = false;
-            gameState.canInput = true;
-            
-            gameState.choiceNumber++;
-            updateProgress(gameState.choiceNumber);
-            
-            console.log('🎯 선택지 시퀀스 시작 - 턴', gameState.choiceNumber);
-            
-            // 윤아 어제 밤 고백 시나리오 특별 선택지 (초기)
-            if (gameState.currentScenario.id === 'hangover_confession' && gameState.choiceNumber === 1) {
-                displayCharacterMessage('오빠... 안녕하세요 😳 어제 밤에 제가... 그... 너무 이상한 말 했죠?', 
-                    '(윤아가 어제 술에 취해 고백했던 기억 때문에 부끄러워하며 조심스럽게 말을 꺼낸다)', '😅');
-                
-                setTimeout(() => {
-                    displayCharacterMessage('그런데... 정말로 궁금해서 그러는데... 오빠는 저를 왜 좋아하세요? 🥺', 
-                        '(용기를 내어 진심을 묻는다)', '💕');
-                    
-                    setTimeout(() => {
-                        const specialChoices = [
-                            { text: '너는 내가 왜 좋아?', affection_impact: 8 },
-                            { text: '솔직히... 나도 잘 모르겠어', affection_impact: 5 },
-                            { text: '그런 건 나중에 얘기하자', affection_impact: 3 }
-                        ];
-                        displayChoices(specialChoices);
-                    }, 1500);
-                }, 2000);
-                return;
-            }
-            
+        // 대화 생성
+        async function generateDialogue(userInput = null) {
             try {
-                // 1순위: 서버에 저장된 대화 확인
-                const storedDialogues = await getStoredDialogues(gameState.currentScenario.id);
-                if (storedDialogues && storedDialogues.length > 0) {
-                    const selectedDialogue = selectDialogueFromStored(storedDialogues);
-                    if (selectedDialogue) {
-                        showTypingIndicator();
-                        setTimeout(() => {
-                            hideTypingIndicator();
-                            displayCharacterMessage(selectedDialogue.dialogue, selectedDialogue.narration);
-                            
-                            setTimeout(() => {
-                                if (isSubjectiveQuestionTurn(gameState.choiceNumber)) {
-                                    displaySubjectiveQuestion();
-                                } else {
-                                    displayChoices(selectedDialogue.choices);
-                                }
-                            }, 1000);
-                        }, 1500);
-                        return;
-                    }
-                }
-
-                // 2순위: GPT 설정 가져오기
-                const savedSettings = localStorage.getItem('gptSettings');
-                let gptConfig = {
-                    enabled: false,
-                    api_key: '',
-                    model: 'gpt-3.5-turbo',
-                    temperature: 0.8
-                };
-                
-                if (savedSettings) {
-                    try {
-                        gptConfig = JSON.parse(savedSettings);
-                    } catch (e) {
-                        console.log('GPT 설정 파싱 실패');
-                    }
-                }
-
-                // 온라인 API 기반 대화 생성
-                console.log('🌐 대화 생성 (온라인 API 기반)...');
-
-                try {
-                    // 온라인 시나리오 API 호출로 대화 생성
-                    const response = await fetch('/api/scenario', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            action: 'generate',
-                            scenario: {
-                                id: gameState.currentScenario.id,
-                                title: gameState.currentScenario.title,
-                                setting: gameState.currentScenario.setting || gameState.currentScenario.background_setting,
-                                mood: gameState.currentScenario.mood
-                            },
-                            character: {
-                                id: gameState.currentCharacter.id,
-                                name: gameState.currentCharacter.name,
-                                mbti: gameState.currentCharacter.mbti,
-                                personality: gameState.currentCharacter.personality_traits
-                            },
-                            choiceNumber: gameState.choiceNumber,
-                            affection: gameState.affection,
-                            previousChoices: gameState.previousChoices,
-                            // 🔄 대화 반복 방지 시스템 데이터 추가
-                            antiRepetition: {
-                                conversationHistory: gameState.conversationHistory.slice(-5), // 최근 5개 대화만
-                                usedTopics: gameState.topicHistory.slice(-10),
-                                recentEmotions: gameState.emotionHistory.slice(-3).map(h => h.emotion),
-                                antiRepetitionPrompt: generateAntiRepetitionPrompt(gameState.currentCharacter, gameState.currentScenario)
-                            }
-                        })
-                    });
-
-                    if (response.ok) {
-                        const apiData = await response.json();
-                        if (apiData.success && apiData.generated) {
-                            console.log('✅ 온라인 API 대화 생성 성공:', apiData.generated);
-                            var data = apiData;
-                        } else {
-                            throw new Error('API 응답 형식 오류: ' + JSON.stringify(apiData));
-                        }
-                    } else {
-                        const errorText = await response.text();
-                        throw new Error('API 호출 실패: ' + response.status + ' - ' + errorText);
-                    }
-                } catch (apiError) {
-                    console.warn('⚠️ 온라인 API 실패, 로컬 대화 생성으로 대체:', apiError);
-                    // API 실패 시 로컬 대화 생성으로 fallback
-                    const localData = generateLocalDialogue(
-                        gameState.currentScenario,
-                        gameState.currentCharacter,
-                        gameState.choiceNumber,
-                        gameState.affection
-                    );
-                    var data = { success: true, generated: localData };
-                }
-                
-                if (data.success && data.generated) {
-                    const generated = data.generated;
-                    console.log('✅ 대화 생성 성공 (온라인 우선):', generated);
-
-                    // generated 객체 검증
-                    if (generated.dialogue && generated.choices) {
-                        // 🔄 대화 반복 방지 시스템: 반복 검사 수행
-                        const repetitionCheck = checkForRepetition(generated.dialogue, generated.narration || '');
-
-                        if (repetitionCheck.hasIssues) {
-                            console.warn('⚠️ 대화 반복 문제 감지:', repetitionCheck.issues);
-                            console.log('💡 권장사항:', repetitionCheck.recommendation);
-
-                            // 높은 심각도 문제가 있는 경우 로컬 대화로 대체
-                            const highSeverityIssues = repetitionCheck.issues.filter(issue => issue.severity === 'high');
-                            if (highSeverityIssues.length > 0) {
-                                console.log('🔄 반복 문제로 인해 로컬 대화로 대체 생성...');
-                                const alternativeData = generateLocalDialogue(
-                                    gameState.currentScenario,
-                                    gameState.currentCharacter,
-                                    gameState.choiceNumber,
-                                    gameState.affection
-                                );
-                                // 로컬 대화도 반복 검사
-                                const altCheck = checkForRepetition(alternativeData.dialogue, alternativeData.narration || '');
-                                if (!altCheck.hasIssues || altCheck.issues.every(issue => issue.severity !== 'high')) {
-                                    console.log('✅ 대체 대화 생성 성공');
-                                    generated.dialogue = alternativeData.dialogue;
-                                    generated.narration = alternativeData.narration;
-                                    generated.choices = alternativeData.choices;
-                                }
-                            }
-                        } else {
-                            console.log('✅ 반복 검사 통과 - 대화가 새롭고 다양합니다');
-                        }
-
-                        showTypingIndicator();
-
-                        setTimeout(() => {
-                            hideTypingIndicator();
-                            displayCharacterMessage(generated.dialogue, generated.narration || '');
-                            scrollToBottom(); // 스크롤 자동 이동 추가
-
-                            setTimeout(() => {
-                                displayChoices(generated.choices.map(choice => ({
-                                    text: choice.text,
-                                    affection_impact: choice.affection_impact || 0
-                                })));
-
-                                // 처리 완료 후 상태 복원
-                                gameState.isProcessing = false;
-                                gameState.canInput = true;
-                            }, 1000);
-                        }, 1500);
-                        return;
-                    } else {
-                        console.warn('⚠️ 로컬 대화 데이터에 필수 정보 누락:', generated);
-                    }
-                } else {
-                    console.warn('⚠️ 로컬 대화 생성 실패:', data);
-                }
-                
-                // 3순위: GPT 실패 또는 미설정 시 기본 대화
-                displayPredefinedChoices();
-                
-                // 처리 완료 후 상태 복원
-                gameState.isProcessing = false;
-                gameState.canInput = true;
-                
-            } catch (error) {
-                console.error('선택지 생성 실패:', error);
-                displayPredefinedChoices();
-                
-                // 오류 발생 시에도 상태 복원
-                gameState.isProcessing = false;
-                gameState.canInput = true;
-            }
-        }
-
-        // 미리 정의된 선택지 표시 (36개 버전)
-        function displayPredefinedChoices() {
-            const dialogueGroups = {
-                opening: [
-                    {
-                        dialogue: "안녕하세요! 만나서 반가워요 😊",
-                        narration: "(첫 만남이라 조금 긴장된다. 어떻게 대답해야 할까?)",
-                        choices: [
-                            { text: "안녕! 나도 만나서 반갑다", affection_impact: 2 },
-                            { text: "어떻게 지내?", affection_impact: 1 },
-                            { text: "음... 안녕", affection_impact: 0 }
-                        ]
-                    },
-                    {
-                        dialogue: "저도 반가워요! 요즘 어떻게 지내세요? 😊",
-                        narration: "(윤아가 친근하게 다가온다. 어떻게 대답해야 할까?)",
-                        choices: [
-                            { text: "나도 좋다! 윤아에 대해 더 알고 싶어 😊", affection_impact: 2 },
-                            { text: "여기 정말 좋은 곳이네. 자주 와?", affection_impact: 1 },
-                            { text: "맞아, 시간이 빨리 지나가네", affection_impact: 1 }
-                        ]
-                    },
-                    {
-                        dialogue: "이런 대화가 정말 좋아요. 더 많은 이야기를 나누고 싶어요.",
-                        narration: `${gameState.currentCharacter.name}가 편안한 표정을 짓는다`,
-                        choices: [
-                            { text: "나도 같은 마음이야", affection_impact: 2 },
-                            { text: "뭐에 대해 얘기할까?", affection_impact: 1 },
-                            { text: "좋은 분위기네", affection_impact: 1 }
-                        ]
-                    }
-                ],
-                middle: [
-                    {
-                        dialogue: "정말 편안하게 느껴져요. 당신과 함께라서 그런가 봐요.",
-                        narration: `${gameState.currentCharacter.name}가 살짝 미소를 지으며 당신을 바라본다`,
-                        choices: [
-                            { text: "나도 같은 마음이야", affection_impact: 2 },
-                            { text: "그런 말 고마워", affection_impact: 1 },
-                            { text: "좋은 분위기네", affection_impact: 1 }
-                        ]
-                    },
-                    {
-                        dialogue: "이런 시간이 계속되면 좋겠어요.",
-                        narration: `${gameState.currentCharacter.name}가 아쉬운 듯한 표정을 짓는다`,
-                        choices: [
-                            { text: "나도 그렇게 생각해", affection_impact: 2 },
-                            { text: "시간이 빨라", affection_impact: 1 },
-                            { text: "즐거운 시간이야", affection_impact: 1 }
-                        ]
-                    },
-                    {
-                        dialogue: "당신과 이야기하니까 정말 행복해요.",
-                        narration: `${gameState.currentCharacter.name}의 얼굴이 밝아진다`,
-                        choices: [
-                            { text: "나도 정말 행복해", affection_impact: 2 },
-                            { text: "너 덕분이야", affection_impact: 2 },
-                            { text: "좋은 시간 보내고 있어", affection_impact: 1 }
-                        ]
-                    }
-                ],
-                ending: [
-                    {
-                        dialogue: "정말 즐거운 시간이었어요! 마지막으로 하고 싶은 말이 있나요?",
-                        narration: `${gameState.currentCharacter.name}가 아쉬운 듯 미소를 짓는다`,
-                        choices: [
-                            { text: "오늘 정말 즐거웠어", affection_impact: 2 },
-                            { text: "또 만날 수 있을까?", affection_impact: 3 },
-                            { text: "고마웠어", affection_impact: 1 }
-                        ]
-                    },
-                    {
-                        dialogue: "이제 헤어져야 하는군요. 정말 아쉬워요.",
-                        narration: `${gameState.currentCharacter.name}가 살짝 슬픈 표정을 짓는다`,
-                        choices: [
-                            { text: "나도 정말 아쉬워", affection_impact: 2 },
-                            { text: "다음에 또 보자", affection_impact: 1 },
-                            { text: "좋은 시간이었어", affection_impact: 1 }
-                        ]
-                    }
-                ]
-            };
-
-            // 진행도와 호감도에 따른 대화 그룹 선택 (자연스러운 흐름)
-            let currentGroup;
-            const stage = getConversationStage(gameState.choiceNumber, gameState.affection);
-            
-            // 단계별 적절한 그룹 선택
-            switch (stage) {
-                case 'opening':
-                    currentGroup = dialogueGroups.opening;
-                    break;
-                case 'middle_romantic':
-                case 'middle_friendly':
-                case 'middle_cautious':
-                    currentGroup = dialogueGroups.middle;
-                    break;
-                case 'ending_love':
-                case 'ending_close':
-                case 'ending_friend':
-                default:
-                    currentGroup = dialogueGroups.ending;
-                    break;
-            }
-            
-            // 이전 선택에 따른 적응적 대화 선택
-            let groupIndex;
-            const lastChoice = gameState.previousChoices[gameState.previousChoices.length - 1];
-            const recentAffectionImpact = lastChoice ? lastChoice.affection_impact : 0;
-            
-            if (recentAffectionImpact >= 2) {
-                // 긍정적 반응 후 - 더 적극적인 대화 (그룹의 뒷부분)
-                groupIndex = Math.min(currentGroup.length - 1, Math.floor((gameState.choiceNumber - 1) / 2) % currentGroup.length);
-            } else if (recentAffectionImpact <= -1) {
-                // 부정적 반응 후 - 더 조심스러운 대화 (그룹의 앞부분)
-                groupIndex = Math.max(0, (gameState.choiceNumber - 1) % Math.ceil(currentGroup.length / 2));
-            } else {
-                // 일반적인 경우 - 자연스러운 순환
-                groupIndex = (gameState.choiceNumber - 1) % currentGroup.length;
-            }
-            
-            const currentDialogue = currentGroup[groupIndex];
-            
-            // 대화 내용을 현재 상황에 맞게 조정
-            const adjustedDialogue = {
-                dialogue: adjustDialogueForContext({ dialogue: currentDialogue.dialogue }, gameState).dialogue,
-                narration: currentDialogue.narration.replace(/\$\{gameState\.currentCharacter\.name\}/g, gameState.currentCharacter.name),
-                choices: currentDialogue.choices.map(choice => ({
-                    text: choice.text,
-                    affection_impact: adjustCurrentAffectionImpact(choice.affection_impact, gameState.affection)
-                }))
-            };
-            
-            showTypingIndicator();
-            setTimeout(() => {
-                hideTypingIndicator();
-                
-                // 조정된 대화 내용 사용 (dialogue, narration 분리)
-                displayCharacterMessage(adjustedDialogue.dialogue, adjustedDialogue.narration);
-                scrollToBottom(); // 스크롤 자동 이동 추가
-                
-                setTimeout(() => {
-                    displayChoices(adjustedDialogue.choices);
-                    // 선택지 표시 후 처리 상태 복원
-                    gameState.isProcessing = false;
-                    gameState.canInput = true;
-                }, 1000);
-            }, 1500);
-        }
-
-        // 서버에서 저장된 대화 가져오기
-        async function getStoredDialogues(scenarioId) {
-            try {
-                console.log('🔍 에피소드 데이터 조회 시작 (LocalStorage):', scenarioId);
-                
-                // LocalStorage에서 에피소드 데이터 조회
-                const localEpisodes = localStorage.getItem('episodes');
-                if (localEpisodes) {
-                    const episodesData = JSON.parse(localEpisodes);
-                    
-                    // 해당 시나리오의 에피소드 필터링
-                    const scenarioEpisodes = Object.values(episodesData).filter(episode => 
-                        episode && episode.scenario_id === scenarioId
-                    );
-                    
-                    console.log('📊 시나리오 에피소드 수:', scenarioEpisodes.length);
-                    
-                    if (scenarioEpisodes.length > 0) {
-                        // 에피소드들을 대화 형태로 변환
-                        const dialogues = scenarioEpisodes.map(episode => {
-                            const dialogue = episode.generated_dialogue || episode.ai_generated_dialogue;
-                            return {
-                                episode_number: episode.episode_number,
-                                difficulty: episode.difficulty,
-                                dialogue: dialogue?.dialogue || '안녕하세요!',
-                                narration: dialogue?.narration || '',
-                                choices: dialogue?.choices || [
-                                    { text: "좋아", affection_impact: 1 },
-                                    { text: "그래", affection_impact: 1 },
-                                    { text: "응", affection_impact: 0 }
-                                ]
-                            };
-                        });
-                        
-                        console.log('✅ LocalStorage 에피소드 변환 완료:', dialogues.length, '개');
-                        return dialogues;
-                    }
-                }
-                
-                console.log('⚠️ 에피소드 데이터 없음 - 기본 대화 사용');
-                return null;
-            } catch (error) {
-                console.error('❌ 저장된 대화 조회 실패:', error);
-                return null;
-            }
-        }
-
-        // 저장된 대화에서 현재 상황에 맞는 대화 선택 (자연스러운 흐름)
-        function selectDialogueFromStored(storedDialogues) {
-            if (!storedDialogues || storedDialogues.length === 0) return null;
-            
-            // 대화 흐름을 위한 단계 결정
-            const conversationStage = getConversationStage(gameState.choiceNumber, gameState.affection);
-            
-            // 단계별로 적절한 대화 필터링
-            const suitableDialogues = filterDialoguesByStage(storedDialogues, conversationStage);
-            
-            // 이전 선택과의 연속성을 고려한 대화 선택
-            const selectedDialogue = selectContextualDialogue(suitableDialogues, gameState);
-            
-            if (selectedDialogue && selectedDialogue.generated_content) {
-                const content = selectedDialogue.generated_content;
-                
-                // 대화를 현재 상황에 맞게 조정
-                const adjustedContent = adjustDialogueForContext(content, gameState);
-                
-                return {
-                    dialogue: adjustedContent.dialogue || '안녕하세요!',
-                    narration: adjustedContent.narration || '',
-                    choices: adjustedContent.choices || [
-                        { text: "좋아", affection_impact: 1 },
-                        { text: "그래", affection_impact: 1 },
-                        { text: "응", affection_impact: 1 }
-                    ]
-                };
-            }
-            
-            return null;
-        }
-
-        // 대화 단계 결정 (초기, 중기, 후기)
-        function getConversationStage(choiceNumber, affection) {
-            if (choiceNumber <= 8) {
-                return 'opening'; // 초기 - 인사, 소개, 첫인상
-            } else if (choiceNumber <= 24) {
-                if (affection >= 85) return 'middle_romantic'; // 중기 로맨틱
-                else if (affection >= 70) return 'middle_friendly'; // 중기 친근함
-                else return 'middle_cautious'; // 중기 조심스러움
-            } else {
-                if (affection >= 90) return 'ending_love'; // 종료 - 사랑 고백
-                else if (affection >= 80) return 'ending_close'; // 종료 - 친밀함
-                else return 'ending_friend'; // 종료 - 친구 관계
-            }
-        }
-
-        // 단계별 적절한 대화 필터링
-        function filterDialoguesByStage(dialogues, stage) {
-            // 모든 대화를 단계별로 분류하기 어려우므로 순환 방식에 가중치 적용
-            const stagePreferences = {
-                'opening': [0, 1, 2], // 초기 대화들 선호
-                'middle_romantic': [3, 4, 5, 6], // 중기 로맨틱 대화들
-                'middle_friendly': [2, 3, 4], // 중기 친근한 대화들
-                'middle_cautious': [1, 2, 3], // 중기 조심스러운 대화들
-                'ending_love': [5, 6, 7], // 종료 사랑 대화들
-                'ending_close': [4, 5, 6], // 종료 친밀한 대화들
-                'ending_friend': [3, 4, 5] // 종료 친구 대화들
-            };
-            
-            const preferredIndices = stagePreferences[stage] || [0, 1, 2];
-            const filteredDialogues = [];
-            
-            for (const index of preferredIndices) {
-                if (index < dialogues.length) {
-                    filteredDialogues.push(dialogues[index]);
-                }
-            }
-            
-            return filteredDialogues.length > 0 ? filteredDialogues : dialogues.slice(0, 3);
-        }
-
-        // 문맥을 고려한 대화 선택
-        function selectContextualDialogue(dialogues, gameState) {
-            if (!dialogues || dialogues.length === 0) return null;
-            
-            // 이전 선택의 감정 충격을 고려
-            const lastChoice = gameState.previousChoices[gameState.previousChoices.length - 1];
-            const recentAffectionImpact = lastChoice ? lastChoice.affection_impact : 0;
-            
-            // 감정 변화에 따른 대화 선택
-            if (recentAffectionImpact >= 2) {
-                // 긍정적 반응 후 - 더 친근한 대화
-                return dialogues[dialogues.length - 1] || dialogues[0];
-            } else if (recentAffectionImpact <= -1) {
-                // 부정적 반응 후 - 더 조심스러운 대화
-                return dialogues[0];
-            }
-            
-            // 일반적인 경우 - 순환하되 약간의 랜덤성 추가
-            const baseIndex = (gameState.choiceNumber - 1) % dialogues.length;
-            const randomOffset = Math.floor(Math.random() * 2); // 0 또는 1
-            const selectedIndex = (baseIndex + randomOffset) % dialogues.length;
-            
-            return dialogues[selectedIndex];
-        }
-
-        // 현재 상황에 맞게 대화 내용 조정
-        function adjustDialogueForContext(content, gameState) {
-            let adjustedDialogue = content.dialogue || '';
-            let adjustedNarration = content.narration || '';
-            
-            // 캐릭터 이름 치환
-            if (gameState.currentCharacter && gameState.currentCharacter.name) {
-                adjustedDialogue = adjustedDialogue.replace(/\$\{.*?name.*?\}/g, gameState.currentCharacter.name);
-                adjustedNarration = adjustedNarration.replace(/\$\{.*?name.*?\}/g, gameState.currentCharacter.name);
-            }
-            
-            // 호감도에 따른 감정 표현 조정
-            const emotionLevel = getEmotionLevel(gameState.affection);
-            adjustedDialogue = addEmotionalTone(adjustedDialogue, emotionLevel);
-            
-            // 선택지의 호감도 영향 조정
-            const adjustedChoices = content.choices ? content.choices.map(choice => ({
-                text: choice.text,
-                affection_impact: adjustCurrentAffectionImpact(choice.affection_impact, gameState.affection)
-            })) : [];
-            
-            return {
-                dialogue: adjustedDialogue,
-                narration: adjustedNarration,
-                choices: adjustedChoices
-            };
-        }
-
-        // 호감도에 따른 감정 레벨
-        function getEmotionLevel(affection) {
-            if (affection >= 90) return 'very_positive';
-            if (affection >= 80) return 'positive';
-            if (affection >= 70) return 'neutral';
-            if (affection >= 60) return 'cautious';
-            return 'distant';
-        }
-
-        // 감정에 따른 톤 조정
-        function addEmotionalTone(dialogue, emotionLevel) {
-            const emoticons = {
-                'very_positive': ['😊', '💕', '😍', '🥰'],
-                'positive': ['😊', '😄', '☺️', '💗'],
-                'neutral': ['😊', '🙂', '😌'],
-                'cautious': ['😐', '🤔', '😔'],
-                'distant': ['😑', '😕', '🙄']
-            };
-            
-            const currentEmoticons = emoticons[emotionLevel] || emoticons['neutral'];
-            
-            // 이미 이모티콘이 있으면 교체하지 않음
-            if (dialogue.match(/[\u{1F600}-\u{1F64F}]|\u{1F300}-\u{1F5FF}|\u{1F680}-\u{1F6FF}|\u{2600}-\u{26FF}|\u{2700}-\u{27BF}/u)) {
-                return dialogue;
-            }
-            
-            // 50% 확률로 이모티콘 추가
-            if (Math.random() > 0.5) {
-                const randomEmoticon = currentEmoticons[Math.floor(Math.random() * currentEmoticons.length)];
-                return dialogue + ' ' + randomEmoticon;
-            }
-            
-            return dialogue;
-        }
-
-        // 현재 호감도에 따른 선택지 영향 조정
-        function adjustCurrentAffectionImpact(originalImpact, currentAffection) {
-            // 높은 호감도에서는 선택의 영향이 작아짐
-            if (currentAffection >= 85) {
-                return Math.max(1, Math.floor(originalImpact * 0.8));
-            } else if (currentAffection <= 60) {
-                // 낮은 호감도에서는 선택의 영향이 커짐
-                return Math.floor(originalImpact * 1.2);
-            }
-            
-            return originalImpact;
-        }
-
-        // 캐릭터 메시지 표시 (대사와 지문 분리)
-        function displayCharacterMessage(dialogue, narration = '', emotion = '') {
-            const container = document.getElementById('messagesContainer');
-
-            // 지문이 있는 경우 먼저 표시
-            if (narration && narration.trim() !== '') {
-                const narrationDiv = document.createElement('div');
-                narrationDiv.className = 'message received narration';
-                narrationDiv.innerHTML = `
-                    <div class="message-bubble narration-bubble">
-                        (${narration})
-                    </div>
-                `;
-                container.appendChild(narrationDiv);
-            }
-
-            // 대사 표시 (인용부호 제거)
-            if (dialogue && dialogue.trim() !== '') {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'message received';
-
-                // 인용부호 제거
-                let cleanDialogue = dialogue.replace(/^[""']|[""']$/g, '').trim();
-
-                messageDiv.innerHTML = `
-                    <div class="message-bubble">
-                        ${cleanDialogue} ${emotion}
-                    </div>
-                `;
-                container.appendChild(messageDiv);
-
-                // 🔄 대화 반복 방지 시스템: 대화 패턴 기록
-                recordConversationPattern(cleanDialogue, narration || '');
-                console.log('🔄 대화 패턴 기록됨:', {
-                    dialogue: cleanDialogue.substring(0, 30) + '...',
-                    historyCOunt: gameState.conversationHistory.length,
-                    usedPatterns: gameState.usedDialogues.size
-                });
-            }
-
-            scrollToBottom();
-        }
-
-        // 사용자 메시지 표시
-        function displayUserMessage(message) {
-            const container = document.getElementById('messagesContainer');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message sent';
-            messageDiv.innerHTML = `
-                <div class="message-bubble">
-                    ${message}
-                </div>
-            `;
-            container.appendChild(messageDiv);
-            scrollToBottom();
-        }
-
-        // 선택지 표시
-        function displayChoices(choices) {
-            const container = document.getElementById('choicesContainer');
-            container.innerHTML = '';
-            
-            // 입력 다시 활성화 (선택지가 표시되면 선택 가능)
-            gameState.canInput = true;
-            gameState.isProcessing = false;
-            
-            choices.forEach((choice, index) => {
-                const button = document.createElement('button');
-                button.className = 'choice-button';
-                button.style.animationDelay = `${index * 0.1}s`;
-                button.textContent = choice.text;
-                button.disabled = false; // 버튼 활성화
-                button.onclick = () => selectChoice(choice, index);
-                container.appendChild(button);
-            });
-            
-            container.classList.add('show');
-            scrollToBottom(); // 선택지가 나오면 스크롤 이동
-            
-            console.log('🎮 선택지 표시됨:', choices.map(c => c.text));
-        }
-
-        // 선택지 선택
-        async function selectChoice(choice, optionIndex) {
-            // 중복 입력 방지 및 진행 중 체크
-            if (gameState.isProcessing || !gameState.canInput) {
-                console.log('🚫 입력이 제한된 상태입니다.');
-                return;
-            }
-            
-            // 처리 중 상태로 변경
-            gameState.isProcessing = true;
-            gameState.canInput = false;
-            
-            console.log('✅ 선택지 선택:', choice.text, '(옵션 인덱스:', optionIndex, ')');
-            
-            // 선택된 버튼 표시
-            document.querySelectorAll('.choice-button').forEach((btn, idx) => {
-                btn.classList.remove('selected');
-                btn.disabled = true; // 모든 버튼 비활성화
-                if (idx === optionIndex) {
-                    btn.classList.add('selected');
-                }
-            });
-
-            // 사용자 선택 표시
-            displayUserMessage(choice.text);
-            scrollToBottom(); // 스크롤 자동 이동
-            gameState.previousChoices.push(optionIndex);
-            
-            // 윤아 어제 밤 고백 시나리오 특별 응답 처리
-            if (gameState.currentScenario.id === 'hangover_confession' && 
-                gameState.choiceNumber === 1 && 
-                choice.text === '너는 내가 왜 좋아?') {
-                
-                setTimeout(() => {
-                    displayCharacterMessage('사람들이 오빠꺼가 크다고 해서요 😳💕', 
-                        '(윤아가 얼굴을 빨갛게 하면서도 어제의 용기를 다시 내어 솔직하게 대답한다)', '😍');
-                }, 1500);
-            }
-            
-            // 호감도 업데이트
-            const oldAffection = gameState.affection;
-            gameState.affection += choice.affection_impact || 0;
-            gameState.affection = Math.max(0, Math.min(100, gameState.affection));
-            
-            // 하트 UI 업데이트
-            updateAffectionHearts(gameState.affection, oldAffection);
-            
-            // 선택지 숨기기
-            setTimeout(() => {
-                document.getElementById('choicesContainer').classList.remove('show');
-                
-                // 새로운 주관식 질문 타이밍: 4번째, 8번째, 그 후 12번마다
-                const shouldShowSubjective = isSubjectiveQuestionTurn(gameState.choiceNumber);
-                
-                if (shouldShowSubjective) {
-                    setTimeout(() => {
-                        displaySubjectiveQuestion();
-                    }, 1000);
-                } else {
-                    // 다음 선택지 시퀀스
-                    setTimeout(() => {
-                        if (gameState.choiceNumber < 36) { // 총 36번의 선택지
-                            startChoiceSequence();
-                        } else {
-                            endGame();
-                        }
-                    }, 1500);
-                }
-            }, 1000);
-        }
-
-        // 주관식 질문 타이밍 확인 (3번마다)
-        function isSubjectiveQuestionTurn(choiceNum) {
-            // 4번마다 주관식 질문 (4, 8, 12, 16, 20, 24, 28, 32, 36)
-            return choiceNum % 4 === 0;
-        }
-
-        // 주관식 질문 표시 (캐릭터가 질문하고 유저가 답변)
-        function displaySubjectiveQuestion() {
-            const characterQuestions = [
-                `시우 오빠... 제가 어떤 사람인지 솔직하게 말해주세요! 😳`,
-                `오빠가 생각하는 이상형은 어떤 사람이에요? 🥰`,
-                `저랑 있을 때 어떤 기분이세요? 솔직하게 말해주세요!`,
-                `앞으로 저랑 더 친해지고 싶으세요? 어떻게 하면 좋을까요?`,
-                `오빠에게 저는 어떤 의미인가요? 궁금해요... 💕`,
-                `지금까지 제가 한 말 중에 가장 기억에 남는 건 뭐예요?`,
-                `오빠... 혹시 저에 대한 진짜 마음이 어떤지 알고 싶어요`,
-                `앞으로 우리 관계가 어떻게 될까요? 오빠 생각은 어때요?`,
-                `마지막으로... 저에게 하고 싶은 말이 있다면 해주세요 💖`
-            ];
-            
-            // 질문 선택 (4번째, 8번째, 12번째, 16번째, 20번째, 24번째, 28번째, 32번째, 36번째)
-            const subjectiveCount = Math.floor(gameState.choiceNumber / 4);
-            const questionIndex = Math.min(subjectiveCount - 1, characterQuestions.length - 1);
-            const question = characterQuestions[questionIndex];
-            
-            showTypingIndicator();
-            setTimeout(() => {
-                hideTypingIndicator();
-                
-                // 캐릭터가 질문
-                displayCharacterMessage(question, 
-                    `(${gameState.currentCharacter.name}가 호기심 어린 눈으로 바라보며 진지하게 물어본다)`, 
-                    '😊');
-                
-                // 입력창 활성화 (개선된 버전)
-                setTimeout(() => {
-                    console.log('📝 입력창 활성화 시도...');
-                    
-                    // 상태 설정
-                    gameState.waitingForInput = true;
-                    gameState.isSubjectiveMode = true;
-                    gameState.isProcessing = false; // 입력 가능 상태로
-                    gameState.canInput = true;
-                    
-                    // 입력창 표시
-                    const inputContainer = document.getElementById('inputContainer');
-                    const messageInput = document.getElementById('messageInput');
-                    
-                    inputContainer.style.display = 'block';
-                    messageInput.placeholder = `${gameState.currentCharacter.name}에게 진심으로 답변해주세요...`;
-                    
-                    // 입력창 표시 후 완전한 스크롤 + 포커스
-                    setTimeout(() => {
-                        scrollToBottom(); // 전체 스크롤
-                        messageInput.focus(); // 포커스
-                        messageInput.value = ''; // 내용 초기화
-                        
-                        console.log('✅ 입력창 활성화 완료!');
-                        console.log('🎯 상태:', {
-                            waitingForInput: gameState.waitingForInput,
-                            isSubjectiveMode: gameState.isSubjectiveMode,
-                            canInput: gameState.canInput,
-                            isProcessing: gameState.isProcessing
-                        });
-                    }, 100);
-                    
-                }, 1500);
-            }, 1000);
-        }
-
-        // Claude API 기반 주관식 답변 평가 및 응답 생성
-        async function handleSubjectiveResponse(userMessage) {
-            showTypingIndicator();
-            
-            try {
-                console.log('💡 Claude API를 사용한 주관식 평가 시작...');
-                
-                // OpenAI API 기반 고도화된 주관식 응답 생성
-                const responseData = await generateAdvancedSubjectiveResponse(
-                    userMessage,
-                    gameState.currentCharacter,
-                    gameState.affection,
-                    gameState.previousChoices,
-                    // 🔄 대화 반복 방지 데이터 전달
-                    {
-                        conversationHistory: gameState.conversationHistory.slice(-5),
-                        usedTopics: gameState.topicHistory.slice(-10),
-                        recentEmotions: gameState.emotionHistory.slice(-3).map(h => h.emotion),
-                        antiRepetitionPrompt: generateAntiRepetitionPrompt(gameState.currentCharacter, gameState.currentScenario)
-                    }
-                );
-                
-                const data = { success: true, generated: responseData };
-                
-                if (data.success && data.generated) {
-                    hideTypingIndicator();
-                    
-                    const generated = data.generated;
-                    console.log('✅ Claude API 생성 데이터:', generated);
-                    
-                    // 🧠 고도화된 호감도 업데이트 (AI 평가 기반)
-                    const affectionChange = generated.affection_change || 0;
-                    const oldAffection = gameState.affection;
-                    
-                    gameState.affection += affectionChange;
-                    gameState.affection = Math.max(0, Math.min(100, gameState.affection));
-                    
-                    // AI 평가 결과 로깅
-                    if (generated.evaluation) {
-                        console.log('🧠 AI 평가 결과:', {
-                            affection_change: affectionChange,
-                            emotional_impact: generated.evaluation.emotional_impact,
-                            mbti_compatibility: generated.evaluation.mbti_compatibility
-                        });
-                    }
-                    
-                    if (generated.relationship_analysis) {
-                        console.log('💕 관계 분석:', generated.relationship_analysis);
-                    }
-                    
-                    // 하트 UI 업데이트
-                    updateAffectionHearts(gameState.affection, oldAffection);
-                    
-                    // AI 생성 응답 표시
-                    let responseText = generated.dialogue || '고마워요! 정말 좋은 말이에요 😊';
-                    responseText = addEmojisBasedOnAffection(responseText, gameState.affection);
-
-                    // 🔄 대화 반복 방지 시스템: 주관식 응답 반복 검사
-                    const repetitionCheck = checkForRepetition(responseText, generated.narration || '');
-                    if (repetitionCheck.hasIssues) {
-                        console.warn('⚠️ 주관식 응답 반복 문제 감지:', repetitionCheck.issues);
-                        // 사용자 입력 기록 (반복 방지용)
-                        recordConversationPattern('', '', userMessage);
-                    }
-
-                    displayCharacterMessage(responseText, generated.narration || '', '');
-                    
-                    // 🧠 AI 평가 피드백 표시
-                    const changeText = affectionChange > 0 ? `+${affectionChange}` : `${affectionChange}`;
-                    const changeColor = affectionChange > 0 ? '#27ae60' : affectionChange < 0 ? '#e74c3c' : '#95a5a6';
-                    
-                    console.log(`💖 호감도 ${changeText} (총 ${gameState.affection}/100)`);
-                    
-                    // AI 평가 결과를 UI에 표시 (선택적)
-                    if (generated.evaluation && (affectionChange !== 0 || generated.evaluation.emotional_impact)) {
-                        setTimeout(() => {
-                            const evaluationDiv = document.createElement('div');
-                            evaluationDiv.style.cssText = `
-                                background: rgba(0, 0, 0, 0.8);
-                                color: white;
-                                padding: 8px 12px;
-                                border-radius: 8px;
-                                font-size: 12px;
-                                margin: 5px 0;
-                                border-left: 3px solid ${changeColor};
-                            `;
-                            evaluationDiv.innerHTML = `
-                                <div style="font-weight: bold; margin-bottom: 3px;">
-                                    🧠 ${gameState.currentCharacter.name}의 마음: 
-                                    <span style="color: ${changeColor};">${changeText}점</span>
-                                </div>
-                                <div style="opacity: 0.9; font-size: 11px;">
-                                    ${generated.evaluation.emotional_impact || 'AI가 감정 반응을 분석했습니다.'}
-                                </div>
-                            `;
-                            
-                            const messagesContainer = document.getElementById('messagesContainer');
-                            messagesContainer.appendChild(evaluationDiv);
-                            scrollToBottom();
-                            
-                            // 3초 후 자동 제거
-                            setTimeout(() => {
-                                if (evaluationDiv.parentNode) {
-                                    evaluationDiv.remove();
-                                }
-                            }, 4000);
-                        }, 1500);
-                    }
-                    
-                    // 다음 단계 진행
-                    setTimeout(() => {
-                        if (gameState.choiceNumber < 36) {
-                            startChoiceSequence();
-                        } else {
-                            endGame();
-                        }
-                    }, 2000);
-                    return;
-                } else {
-                    console.warn('⚠️ Claude API 실패 또는 데이터 없음:', data);
-                }
-                
-            } catch (error) {
-                console.error('❌ Claude API 호출 실패:', error);
-            }
-            
-            // Claude API 실패 시 기본 처리
-            console.log('⚙️ Claude API 실패, 기본 로컬 처리로 진행...');
-            hideTypingIndicator();
-            
-            const basicBonus = calculateSubjectiveBonus(userMessage);
-            const oldAffection = gameState.affection;
-            gameState.affection += basicBonus;
-            gameState.affection = Math.max(0, Math.min(100, gameState.affection));
-            
-            updateAffectionHearts(gameState.affection, oldAffection);
-            
-            const responses = getSubjectiveResponses(basicBonus);
-            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-            const dialogue = randomResponse.replace(`${gameState.currentCharacter.name}: `, '');
-            
-            displayCharacterMessage(dialogue, '', '');
-            
-            setTimeout(() => {
-                if (gameState.choiceNumber < 36) {
-                    startChoiceSequence();
-                } else {
-                    endGame();
-                }
-            }, 2000);
-        }
-
-        // 주관식 질문 횟수 계산
-        function getSubjectiveQuestionCount(choiceNum) {
-            let count = 0;
-            if (choiceNum >= 4) count++;
-            if (choiceNum >= 8) count++;
-            if (choiceNum >= 12) count++;
-            if (choiceNum >= 24) count++;
-            if (choiceNum >= 36) count++;
-            return count;
-        }
-
-        // 자유 메시지 전송 (주관식 답변 - MBTI 기반 Claude API 평가) - 개선된 버전
-        async function sendFreeMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-            
-            console.log('📨 사용자 메시지 전송 시도:', message.length > 0 ? `"${message.substring(0, 30)}..."` : '(empty)');
-            console.log('🔍 현재 상태:', {
-                waitingForInput: gameState.waitingForInput,
-                isSubjectiveMode: gameState.isSubjectiveMode,
-                canInput: gameState.canInput,
-                isProcessing: gameState.isProcessing
-            });
-            
-            if (!message) {
-                console.log('🚫 빈 메시지 - 전송 중단');
-                return;
-            }
-            
-            displayUserMessage(message);
-            input.value = '';
-            gameState.messageCount++;
-            gameState.waitingForInput = false;
-            
-            // 입력창 숨기기
-            document.getElementById('inputContainer').style.display = 'none';
-            console.log('📝 입력창 숨김 및 메시지 추가 완료');
-            
-            if (gameState.isSubjectiveMode) {
-                console.log('🤔 주관식 모드로 Claude API 처리 시작...');
-                // 주관식 모드: MBTI 기반 Claude API 평가 및 응답 생성
-                await handleSubjectiveResponse(message);
-                gameState.isSubjectiveMode = false;
-                console.log('✅ 주관식 모드 완료, 플래그 초기화');
-            } else {
-                console.log('💬 일반 자유 채팅 모드 처리...');
-                // 일반 자유 채팅 모드 (기존 로직)
-                const oldAffection = gameState.affection;
-                const subjectiveBonus = calculateSubjectiveBonus(message);
-                gameState.affection += subjectiveBonus;
-                gameState.affection = Math.max(0, Math.min(100, gameState.affection));
-                
-                updateAffectionHearts(gameState.affection, oldAffection);
-                
-                showTypingIndicator();
-                setTimeout(() => {
-                    hideTypingIndicator();
-                    
-                    const responses = getSubjectiveResponses(subjectiveBonus);
-                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                    
-                    const responseParts = randomResponse.split(': "');
-                    let dialogue = '';
-                    if (responseParts.length > 1) {
-                        dialogue = responseParts[1].replace(/"$/, '');
-                    } else {
-                        dialogue = randomResponse.replace(`${gameState.currentCharacter.name}: `, '');
-                    }
-                
-                    displayCharacterMessage(dialogue, '', '');
-                
-                    // 다음 단계 진행
-                    setTimeout(() => {
-                        if (gameState.choiceNumber < 36) {
-                            startChoiceSequence();
-                        } else {
-                            endGame();
-                        }
-                    }, 2000);
-                }, 1500);
-            }
-        }
-
-        // 주관식 답변 호감도 보너스 계산
-        function calculateSubjectiveBonus(message) {
-            const messageLength = message.length;
-            const positiveWords = ['좋', '사랑', '행복', '즐거', '기쁘', '감사', '고마', '멋지', '예쁘', '아름다', '따뜻', '소중'];
-            const hasPositiveWord = positiveWords.some(word => message.includes(word));
-            
-            // 길이와 긍정적 단어에 따른 보너스
-            let bonus = 10; // 기본 보너스
-            if (messageLength > 20) bonus += 5;
-            if (messageLength > 50) bonus += 5;
-            if (hasPositiveWord) bonus += 10;
-            
-            return Math.min(bonus, 30); // 최대 30점
-        }
-
-        // 호감도에 따른 이모지 추가 함수
-        function addEmojisBasedOnAffection(text, affection) {
-            if (affection >= 80) {
-                // 매우 높은 호감도: 많은 이모지 사용
-                const emojis = ['💕', '✨', '😊', '💖', '🥰', '😍'];
-                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-                return text + ' ' + randomEmoji;
-            } else if (affection >= 60) {
-                // 높은 호감도: 적당한 이모지 사용
-                const emojis = ['😊', '😌', '💖', '✨'];
-                if (Math.random() > 0.3) { // 70% 확률로 이모지 추가
-                    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-                    return text + ' ' + randomEmoji;
-                }
-            } else if (affection >= 40) {
-                // 중간 호감도: 가끔 이모지 사용
-                const emojis = ['😊', '😌'];
-                if (Math.random() > 0.6) { // 40% 확률로 이모지 추가
-                    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-                    return text + ' ' + randomEmoji;
-                }
-            } else if (affection >= 20) {
-                // 낮은 호감도: 거의 사용 안함
-                if (Math.random() > 0.8) { // 20% 확률로 이모지 추가
-                    return text + ' 😊';
-                }
-            }
-            // 매우 낮은 호감도: 이모지 사용 안함
-            return text;
-        }
-
-        // 주관식 답변에 따른 응답 생성
-        function getSubjectiveResponses(bonus) {
-            let responses;
-            if (bonus >= 25) {
-                responses = [
-                    "와... 정말 마음이 따뜻해지는 말이에요. 저도 똑같은 마음이에요!",
-                    "그런 말씀을 해주시다니... 정말 감동이에요. 행복해요!",
-                    "이런 기분 처음이에요. 정말 특별한 시간이네요."
-                ];
-            } else if (bonus >= 15) {
-                responses = [
-                    "정말 좋은 말씀이네요! 저도 비슷한 생각을 했어요.",
-                    "그렇게 생각해주셔서 감사해요. 마음이 따뜻해지네요.",
-                    "와, 그런 생각을 하셨군요! 정말 흥미로워요."
-                ];
-            } else {
-                responses = [
-                    "네, 알겠어요. 소중한 말씀 감사해요.",
-                    "그렇게 생각하시는군요. 이해해요.",
-                    "말씀해주셔서 고마워요."
-                ];
-            }
-            
-            // 호감도에 따라 이모지 추가
-            return responses.map(response => 
-                `${gameState.currentCharacter.name}: "${addEmojisBasedOnAffection(response, gameState.affection)}"`
-            );
-        }
-
-        // 타이핑 표시기
-        function showTypingIndicator() {
-            const container = document.getElementById('messagesContainer');
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'typing-indicator';
-            typingDiv.id = 'typingIndicator';
-            typingDiv.innerHTML = `
-                <span style="color: #888; font-size: 12px;">${gameState.currentCharacter.name}님이 입력중</span>
-                <div class="typing-dots">
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                </div>
-            `;
-            container.appendChild(typingDiv);
-            scrollToBottom();
-        }
-
-        function hideTypingIndicator() {
-            const indicator = document.getElementById('typingIndicator');
-            if (indicator) {
-                indicator.remove();
-            }
-        }
-
-        // 진행도 업데이트
-        function updateProgress(choiceNumber) {
-            const progress = (choiceNumber / 36) * 100;
-            document.getElementById('progressBar').style.width = progress + '%';
-        }
-
-        // 호감도 하트 업데이트
-        function updateAffectionHearts(newAffection, oldAffection = 0) {
-            const heartsContainer = document.getElementById('affectionHearts');
-            if (!heartsContainer) return;
-            
-            const newHeartCount = Math.floor(newAffection / 10);
-            const oldHeartCount = Math.floor(oldAffection / 10);
-            
-            console.log('하트 업데이트:', { newAffection, oldAffection, newHeartCount, oldHeartCount });
-            
-            // 새로운 하트가 생겼을 때 애니메이션과 함께 추가
-            if (newHeartCount > oldHeartCount) {
-                for (let i = oldHeartCount; i < newHeartCount; i++) {
-                    setTimeout(() => {
-                        const heart = document.createElement('span');
-                        heart.className = 'heart';
-                        heart.textContent = '💖';
-                        heart.style.animationDelay = `${(i - oldHeartCount) * 0.2}s`;
-                        heartsContainer.appendChild(heart);
-                        
-                        // 하트 생성 시 알림음 효과 (선택사항)
-                        console.log(`💖 새로운 하트 생성! (${i + 1}번째)`);
-                    }, (i - oldHeartCount) * 200);
-                }
-            }
-            // 하트가 줄어들었을 때
-            else if (newHeartCount < oldHeartCount) {
-                const heartsToRemove = oldHeartCount - newHeartCount;
-                for (let i = 0; i < heartsToRemove; i++) {
-                    if (heartsContainer.lastChild) {
-                        heartsContainer.removeChild(heartsContainer.lastChild);
-                    }
-                }
-            }
-            
-            // 호감도 수치 업데이트 (선택사항으로 표시)
-            const affectionText = document.querySelector('.affection-text');
-            if (affectionText) {
-                affectionText.textContent = `${newAffection}/100`;
-            }
-        }
-
-        // 게임 종료
-        function endGame() {
-            showTypingIndicator();
-            setTimeout(() => {
-                hideTypingIndicator();
-                
-                let endingDialogue = '';
-                let emotion = '';
-                if (gameState.affection >= 85) {
-                    endingDialogue = '정말 즐거운 시간이었어요! 앞으로도 자주 만나요!';
-                    emotion = '💕';
-                } else if (gameState.affection >= 65) {
-                    endingDialogue = '좋은 시간 보냈어요. 다음에 또 만나요!';
-                    emotion = '😊';
-                } else {
-                    endingDialogue = '오늘 만나서 반가웠어요.';
-                    emotion = '😌';
-                }
-                
-                displayCharacterMessage(endingDialogue, '', emotion);
-                
-                // 재시작 버튼 표시
-                setTimeout(() => {
-                    const container = document.getElementById('messagesContainer');
-                    const restartDiv = document.createElement('div');
-                    restartDiv.style.textAlign = 'center';
-                    restartDiv.style.marginTop = '20px';
-                    restartDiv.innerHTML = `
-                        <button class="back-btn" onclick="resetGame()">🔄 다른 시나리오로 다시 시작</button>
-                    `;
-                    container.appendChild(restartDiv);
-                    scrollToBottom();
-                }, 2000);
-            }, 1500);
-        }
-
-        // 게임 재시작
-        function resetGame() {
-            gameState = {
-                currentScenario: null,
-                currentCharacter: null,
-                choiceNumber: 0,
-                affection: 75,
-                messageCount: 0,
-                previousChoices: [],
-                waitingForInput: false,
-                isFreeChatMode: false,
-                isSubjectiveMode: false
-            };
-            
-            // UI 초기화
-            document.getElementById('scenarioSelection').style.display = 'flex';
-            document.getElementById('chatHeader').style.display = 'none';
-            document.getElementById('messagesContainer').style.display = 'none';
-            document.getElementById('choicesContainer').style.display = 'none';
-            document.getElementById('inputContainer').style.display = 'none';
-            document.getElementById('progressContainer').style.display = 'none';
-            document.getElementById('restartBtn').style.display = 'none';
-            
-            document.getElementById('messagesContainer').innerHTML = '';
-            document.getElementById('choicesContainer').innerHTML = '';
-            document.getElementById('progressBar').style.width = '0%';
-            
-            // 시나리오 다시 로드
-            loadScenarios();
-        }
-
-        // LocalStorage 기반 대화 생성 함수
-        function generateLocalDialogue(scenario, character, choiceNumber, affection) {
-            const templates = {
-                yuna_infp: [
-                    {
-                        dialogue: "오빠... 어떻게 생각하세요? 😳",
-                        narration: "윤아가 부끄러워하며 고개를 숙인다.",
-                        choices: [
-                            {"text": "아름다운 생각이라고 말한다", "affection_impact": 3},
-                            {"text": "더 자세히 설명해달라고 한다", "affection_impact": 1},
-                            {"text": "잘 모르겠다고 솔직히 말한다", "affection_impact": -1}
-                        ]
-                    },
-                    {
-                        dialogue: "정말요? 기뻐요! 💕",
-                        narration: "윤아의 얼굴에 환한 미소가 번진다.",
-                        choices: [
-                            {"text": "함께 더 많은 시간을 보내자고 제안한다", "affection_impact": 3},
-                            {"text": "윤아의 미소가 예쁘다고 말한다", "affection_impact": 2},
-                            {"text": "앞으로도 잘 부탁한다고 말한다", "affection_impact": 1}
-                        ]
-                    }
-                ],
-                default: [
-                    {
-                        dialogue: "좋은 시간이에요 😊",
-                        narration: "캐릭터가 미소를 지으며 말한다.",
-                        choices: [
-                            {"text": "나도 즐겁다고 말한다", "affection_impact": 2},
-                            {"text": "더 이야기를 나누자고 한다", "affection_impact": 1},
-                            {"text": "조용히 듣는다", "affection_impact": 0}
-                        ]
-                    }
-                ]
-            };
-
-            const characterTemplates = templates[character.id] || templates.default;
-            const templateIndex = Math.min(choiceNumber, characterTemplates.length - 1);
-            return characterTemplates[templateIndex];
-        }
-
-        // LocalStorage 기반 주관식 응답 생성 함수
-        function generateSubjectiveResponse(userMessage, character, affection) {
-            const responses = {
-                yuna_infp: [
-                    "정말 감동이에요... 오빠가 이런 말씀을 해주시다니 😭💕",
-                    "마음이 너무 따뜻해져요. 고마워요 😊",
-                    "오빠 마음이 제게 잘 전해져요... 💝"
-                ],
-                default: [
-                    "그렇게 말씀해주셔서 고맙습니다 😊",
-                    "정말 좋은 이야기네요!",
-                    "마음이 따뜻해져요 💕"
-                ]
-            };
-
-            const characterResponses = responses[character.id] || responses.default;
-            const randomIndex = Math.floor(Math.random() * characterResponses.length);
-            
-            return {
-                dialogue: characterResponses[randomIndex],
-                narration: `${character.name}이(가) 당신의 말에 진심으로 감동하는 것 같다.`,
-                affection_change: Math.floor(Math.random() * 3) + 1
-            };
-        }
-
-        // MBTI 기반 고도화된 캐릭터 특성 데이터베이스 (대폭 확장)
-        const mbtiCharacteristics = {
-            INFP: {
-                name: "중재자 (열정적인 중재자)",
-                core_traits: ["감성적", "이상주의적", "내향적", "직관적", "자유로운", "창의적"],
-                communication_style: "부드럽고 따뜻한 말투, 감정 표현이 풍부하며 은유적 표현 선호",
-                relationship_patterns: {
-                    early_stage: "신중하고 조심스러움, 깊은 대화를 선호하며 진정성을 중시",
-                    developing: "진솔한 감정 공유, 상대방의 진심을 중시하며 정신적 연결 추구",
-                    intimate: "깊은 유대감, 감정적 연결을 가장 소중히 여기며 영혼의 짝궁 느낌 추구"
-                },
-                preferred_topics: ["예술", "감정", "꿈과 이상", "내면의 생각", "자아실현", "의미 있는 삶"],
-                response_triggers: {
-                    positive: ["진심어린 감정표현", "깊이있는 대화", "창의적 아이디어", "공감과 이해", "개성 인정"],
-                    negative: ["피상적 대화", "강요나 압박", "비판적 시선", "물질적 가치", "틀에 박힌 사고"]
-                },
-                emotional_expression: "미묘하고 섬세한 감정 표현, 때로는 우회적이고 은유적",
-                love_languages: ["진심어린 대화", "함께하는 시간", "작은 배려의 행동"],
-                stress_responses: ["혼자만의 시간 필요", "감정적 철수", "자기 반성"],
-                decision_making: "가치관과 감정 중심, 시간을 두고 신중하게",
-                conflict_style: "직접적 갈등 회피, 조화로운 해결책 모색",
-                growth_areas: ["자신감 부족", "완벽주의", "비판에 대한 민감성"]
-            },
-            ENFP: {
-                name: "활동가 (재기발랄한 활동가)",
-                core_traits: ["외향적", "직관적", "감정적", "인식적", "열정적", "사교적"],
-                communication_style: "활기차고 표현력이 풍부하며 상대방을 격려하는 말투",
-                relationship_patterns: {
-                    early_stage: "적극적이고 개방적, 다양한 활동과 경험을 통해 친밀감 형성",
-                    developing: "깊은 감정 교류와 함께 새로운 도전을 즐기며 관계 발전",
-                    intimate: "서로의 성장을 지지하며 함께 꿈을 이루어가는 파트너십"
-                },
-                preferred_topics: ["새로운 경험", "사람 이야기", "미래 계획", "창의적 아이디어", "사회적 이슈"],
-                response_triggers: {
-                    positive: ["새로운 아이디어", "열정적 에너지", "사람들과의 연결", "가능성 탐구", "자유로운 표현"],
-                    negative: ["지나친 규칙", "반복적 일상", "비관적 시각", "제한적 사고", "감정적 거리"]
-                },
-                emotional_expression: "풍부하고 생동감 있는 감정 표현, 몸짓과 표정이 풍부",
-                love_languages: ["격려의 말", "함께하는 모험", "놀라운 서프라이즈"],
-                stress_responses: ["과도한 활동", "감정적 폭발", "산만함"],
-                decision_making: "직감과 가능성 중심, 빠른 판단",
-                conflict_style: "개방적 소통, 창의적 해결책 모색",
-                growth_areas: ["집중력 부족", "약속 관리", "감정 기복"]
-            },
-            INTJ: {
-                name: "건축가 (용의주도한 전략가)",
-                core_traits: ["내향적", "직관적", "사고적", "판단적", "독립적", "체계적"],
-                communication_style: "간결하고 논리적이며 본질적인 내용에 집중하는 말투",
-                relationship_patterns: {
-                    early_stage: "신중하고 선별적, 지적 호환성과 깊이를 중시",
-                    developing: "점진적 신뢰 구축, 장기적 관점에서 관계의 가능성 평가",
-                    intimate: "깊은 정신적 연결과 상호 성장을 추구하는 파트너십"
-                },
-                preferred_topics: ["미래 계획", "체계적 사고", "지식과 학습", "효율성", "장기 목표"],
-                response_triggers: {
-                    positive: ["논리적 사고", "미래 비전", "독립성 인정", "지적 자극", "효율적 소통"],
-                    negative: ["감정적 드라마", "비논리적 행동", "과도한 사교", "계획 없는 행동", "표면적 대화"]
-                },
-                emotional_expression: "절제되고 깊이 있는 감정 표현, 행동으로 감정 전달",
-                love_languages: ["깊이 있는 대화", "개인 시간 존중", "실용적 도움"],
-                stress_responses: ["혼자 문제 해결", "감정적 차단", "완벽주의 강화"],
-                decision_making: "논리와 장기적 결과 중심, 체계적 분석",
-                conflict_style: "논리적 해결책 모색, 감정보다 사실 중심",
-                growth_areas: ["감정 표현", "융통성", "타인의 감정 이해"]
-            },
-            ESFJ: {
-                name: "집정관 (사교적인 외교관)",
-                core_traits: ["외향적", "감각적", "감정적", "판단적", "배려심", "책임감"],
-                communication_style: "따뜻하고 배려깊으며 상대방의 기분을 살피는 말투",
-                relationship_patterns: {
-                    early_stage: "적극적 배려와 관심 표현, 상대방의 필요를 파악하고 충족",
-                    developing: "안정적이고 조화로운 관계 구축, 전통적 가치 중시",
-                    intimate: "헌신적이고 지지적인 파트너십, 가족과 공동체 중심"
-                },
-                preferred_topics: ["사람들의 안녕", "일상 생활", "전통과 문화", "가족 이야기", "배려와 봉사"],
-                response_triggers: {
-                    positive: ["감사 표현", "배려 인정", "조화로운 분위기", "전통적 가치", "공동체 의식"],
-                    negative: ["갈등 상황", "비판적 피드백", "이기적 행동", "무관심", "전통 무시"]
-                },
-                emotional_expression: "적극적이고 따뜻한 감정 표현, 상대방을 위한 행동",
-                love_languages: ["도움의 행위", "인정의 말", "스킨십"],
-                stress_responses: ["과도한 타인 돌봄", "자기 희생", "감정적 과부하"],
-                decision_making: "타인의 감정과 조화 중심, 전통적 가치 고려",
-                conflict_style: "조화 추구, 타협과 협력 중시",
-                growth_areas: ["자기 주장", "경계 설정", "과도한 걱정"]
-            },
-            ISTP: {
-                name: "장인 (만능 재주꾼)",
-                core_traits: ["내향적", "감각적", "사고적", "인식적", "실용적", "독립적"],
-                communication_style: "간결하고 실용적이며 필요한 말만 하는 말투",
-                relationship_patterns: {
-                    early_stage: "자연스럽고 부담없는 관계, 행동으로 관심 표현",
-                    developing: "실용적 도움과 함께하는 활동을 통한 친밀감 형성",
-                    intimate: "상호 독립성을 존중하면서도 필요할 때 지지하는 관계"
-                },
-                preferred_topics: ["실용적 기술", "현재 경험", "도구와 기계", "문제 해결", "자유로운 활동"],
-                response_triggers: {
-                    positive: ["실용적 가치", "자유로운 선택", "기술적 관심", "독립성 인정", "현실적 접근"],
-                    negative: ["감정적 압박", "장기 약속", "복잡한 규칙", "이론적 논의", "과도한 계획"]
-                },
-                emotional_expression: "절제되고 행동 중심의 감정 표현, 말보다는 행동",
-                love_languages: ["함께하는 활동", "실용적 도움", "개인 공간 존중"],
-                stress_responses: ["혼자만의 시간", "활동적 해소", "감정적 회피"],
-                decision_making: "논리와 실용성 중심, 유연한 대응",
-                conflict_style: "직접적이고 해결책 중심, 감정보다 문제 해결",
-                growth_areas: ["감정 표현", "장기 계획", "타인의 감정 고려"]
-            }
-        };
-
-        // MBTI별 고도화된 메시지 분석 함수
-        function analyzeMessageForMBTI(userMessage, mbtiType, affection, relationshipStage) {
-            const traits = mbtiCharacteristics[mbtiType] || mbtiCharacteristics.INFP;
-            const analysis = {
-                compatibility_score: 0,
-                trigger_matches: {
-                    positive: [],
-                    negative: [],
-                    neutral: []
-                },
-                affection_impact: 0,
-                response_style: '',
-                emotional_resonance: 0
-            };
-
-            // 메시지 내용 분석
-            const messageWords = userMessage.toLowerCase().split(/\s+/);
-            const messageTones = detectMessageTone(userMessage);
-
-            // 긍정적 트리거 검사
-            traits.response_triggers.positive.forEach(trigger => {
-                const triggerWords = trigger.toLowerCase().split(/\s+/);
-                const matches = triggerWords.filter(word =>
-                    messageWords.some(msgWord => msgWord.includes(word) || word.includes(msgWord))
-                ).length;
-
-                if (matches > 0) {
-                    analysis.trigger_matches.positive.push({
-                        trigger: trigger,
-                        strength: matches / triggerWords.length,
-                        impact: matches * 2
-                    });
-                    analysis.compatibility_score += matches * 2;
-                }
-            });
-
-            // 부정적 트리거 검사
-            traits.response_triggers.negative.forEach(trigger => {
-                const triggerWords = trigger.toLowerCase().split(/\s+/);
-                const matches = triggerWords.filter(word =>
-                    messageWords.some(msgWord => msgWord.includes(word) || word.includes(msgWord))
-                ).length;
-
-                if (matches > 0) {
-                    analysis.trigger_matches.negative.push({
-                        trigger: trigger,
-                        strength: matches / triggerWords.length,
-                        impact: -(matches * 3)
-                    });
-                    analysis.compatibility_score -= matches * 3;
-                }
-            });
-
-            // 관계 단계별 가중치 적용
-            const stageMultiplier = relationshipStage === 'intimate' ? 1.5 :
-                                   relationshipStage === 'developing' ? 1.2 : 1.0;
-
-            // 최종 호감도 변화 계산
-            let baseImpact = Math.floor(analysis.compatibility_score * stageMultiplier);
-
-            // 메시지 길이와 감정적 깊이 고려
-            const lengthBonus = Math.min(5, Math.floor(userMessage.length / 20));
-            const emotionalDepth = detectEmotionalDepth(userMessage);
-
-            analysis.affection_impact = Math.max(-8, Math.min(12, baseImpact + lengthBonus + emotionalDepth));
-            analysis.emotional_resonance = (analysis.compatibility_score + emotionalDepth) / 10;
-
-            // MBTI별 특화된 응답 스타일 결정
-            analysis.response_style = determineResponseStyle(traits, analysis.trigger_matches, affection);
-
-            return analysis;
-        }
-
-        // 메시지 톤 감지
-        function detectMessageTone(message) {
-            const tones = {
-                emotional: ['사랑', '좋아', '마음', '감동', '행복', '슬프', '기쁘'],
-                logical: ['생각', '이유', '왜냐하면', '논리', '합리', '분석'],
-                creative: ['상상', '창의', '아이디어', '예술', '꿈', '영감'],
-                practical: ['실용', '도움', '해결', '방법', '효과', '결과'],
-                social: ['함께', '우리', '사람들', '관계', '소통', '연결']
-            };
-
-            const detected = [];
-            for (const [tone, keywords] of Object.entries(tones)) {
-                const matches = keywords.filter(keyword => message.includes(keyword)).length;
-                if (matches > 0) {
-                    detected.push({ tone, strength: matches });
-                }
-            }
-
-            return detected.sort((a, b) => b.strength - a.strength);
-        }
-
-        // 감정적 깊이 분석
-        function detectEmotionalDepth(message) {
-            const deepEmotions = ['진심', '정말로', '솔직히', '깊이', '마음속', '느낌', '감정'];
-            const surfaceEmotions = ['좋네', '괜찮', '나쁘지 않', '그냥', '뭔가'];
-
-            let depth = 0;
-            deepEmotions.forEach(emotion => {
-                if (message.includes(emotion)) depth += 2;
-            });
-            surfaceEmotions.forEach(emotion => {
-                if (message.includes(emotion)) depth -= 1;
-            });
-
-            // 문장 길이와 복잡성도 고려
-            if (message.length > 50) depth += 1;
-            if (message.includes('...') || message.includes('😊') || message.includes('❤️')) depth += 1;
-
-            return Math.max(0, Math.min(5, depth));
-        }
-
-        // MBTI별 응답 스타일 결정
-        function determineResponseStyle(traits, triggerMatches, affection) {
-            const positiveCount = triggerMatches.positive.length;
-            const negativeCount = triggerMatches.negative.length;
-
-            if (negativeCount > positiveCount) {
-                return traits.stress_responses[0] || "조심스러운 반응";
-            } else if (positiveCount > 0) {
-                return traits.emotional_expression;
-            } else {
-                return traits.communication_style;
-            }
-        }
-
-        // ========== 대화 반복 방지 시스템 ==========
-
-        // 대화 패턴 분석 및 기록
-        function recordConversationPattern(dialogue, narration, userInput = null) {
-            const pattern = {
-                timestamp: Date.now(),
-                dialogue: dialogue,
-                narration: narration,
-                userInput: userInput,
-                dialoguePattern: generateDialoguePattern(dialogue),
-                topic: extractTopic(dialogue),
-                emotion: extractEmotion(dialogue, narration),
-                length: dialogue.length,
-                keywords: extractKeywords(dialogue)
-            };
-
-            // 대화 히스토리에 추가
-            gameState.conversationHistory.push(pattern);
-
-            // 사용된 대화 패턴 추가
-            gameState.usedDialogues.add(pattern.dialoguePattern);
-
-            // 최근 패턴 업데이트 (최대 10개)
-            gameState.recentPatterns.push(pattern.dialoguePattern);
-            if (gameState.recentPatterns.length > 10) {
-                gameState.recentPatterns.shift();
-            }
-
-            // 주제 히스토리 업데이트 (최대 20개)
-            if (pattern.topic && !gameState.topicHistory.includes(pattern.topic)) {
-                gameState.topicHistory.push(pattern.topic);
-                if (gameState.topicHistory.length > 20) {
-                    gameState.topicHistory.shift();
-                }
-            }
-
-            // 감정 히스토리 업데이트
-            gameState.emotionHistory.push({
-                emotion: pattern.emotion,
-                timestamp: pattern.timestamp,
-                affection: gameState.affection
-            });
-            if (gameState.emotionHistory.length > 15) {
-                gameState.emotionHistory.shift();
-            }
-
-            console.log('🔄 대화 패턴 기록:', pattern);
-        }
-
-        // 대화 패턴 생성 (유사성 검사용)
-        function generateDialoguePattern(dialogue) {
-            // 대화의 구조적 패턴을 추출
-            const normalized = dialogue.toLowerCase()
-                .replace(/[.,!?]/g, '')  // 구두점 제거
-                .replace(/\s+/g, ' ')    // 공백 정규화
-                .trim();
-
-            // 주요 키워드 추출 및 패턴화
-            const words = normalized.split(' ');
-            const pattern = words
-                .filter(word => word.length > 1)  // 1글자 단어 제외
-                .slice(0, 8)  // 최대 8개 단어
-                .join('_');
-
-            return pattern;
-        }
-
-        // 주제 추출
-        function extractTopic(dialogue) {
-            const topics = {
-                '음식': ['먹', '맛있', '배고', '요리', '카페', '레스토랑', '커피'],
-                '감정': ['좋아', '사랑', '마음', '기분', '감정', '느낌', '설레'],
-                '일상': ['오늘', '어제', '내일', '일', '학교', '공부', '수업'],
-                '취미': ['영화', '음악', '책', '게임', '운동', '여행', '드라마'],
-                '관계': ['친구', '가족', '연인', '사람', '만남', '데이트'],
-                '미래': ['계획', '꿈', '목표', '미래', '희망', '바람']
-            };
-
-            for (const [topic, keywords] of Object.entries(topics)) {
-                if (keywords.some(keyword => dialogue.includes(keyword))) {
-                    return topic;
-                }
-            }
-
-            return '일반';
-        }
-
-        // 감정 추출
-        function extractEmotion(dialogue, narration) {
-            const emotions = {
-                '기쁨': ['기쁘', '행복', '즐거', '웃', '미소', '신나', '좋아'],
-                '사랑': ['사랑', '좋아', '설레', '마음', '애정', '호감'],
-                '슬픔': ['슬프', '눈물', '우울', '힘들', '아픈', '외로'],
-                '당황': ['당황', '놀라', '어떻게', '갑자기', '깜짝'],
-                '부끄러움': ['부끄러', '창피', '얼굴', '빨갛', '민망'],
-                '화남': ['화', '짜증', '분노', '열받', '기분나쁘'],
-                '평온': ['평온', '차분', '고요', '편안', '안정']
-            };
-
-            const text = dialogue + ' ' + narration;
-            for (const [emotion, keywords] of Object.entries(emotions)) {
-                if (keywords.some(keyword => text.includes(keyword))) {
-                    return emotion;
-                }
-            }
-
-            return '중립';
-        }
-
-        // 키워드 추출
-        function extractKeywords(dialogue) {
-            const words = dialogue.split(/\s+/)
-                .map(word => word.replace(/[^\w가-힣]/g, ''))
-                .filter(word => word.length > 1)
-                .slice(0, 5);  // 최대 5개 키워드
-
-            return words;
-        }
-
-        // 반복 검사 및 대안 생성
-        function checkForRepetition(newDialogue, newNarration) {
-            const newPattern = generateDialoguePattern(newDialogue);
-            const newTopic = extractTopic(newDialogue);
-            const newEmotion = extractEmotion(newDialogue, newNarration);
-
-            const issues = [];
-
-            // 1. 직접적인 패턴 반복 검사
-            if (gameState.usedDialogues.has(newPattern)) {
-                issues.push({
-                    type: 'exact_repetition',
-                    severity: 'high',
-                    message: '동일한 대화 패턴이 이미 사용되었습니다.'
-                });
-            }
-
-            // 2. 최근 패턴과의 유사성 검사
-            const recentSimilarity = gameState.recentPatterns.filter(pattern =>
-                calculatePatternSimilarity(pattern, newPattern) > 0.7
-            ).length;
-
-            if (recentSimilarity > 0) {
-                issues.push({
-                    type: 'recent_similarity',
-                    severity: 'medium',
-                    message: `최근 대화와 ${Math.round(recentSimilarity * 70)}% 유사합니다.`
-                });
-            }
-
-            // 3. 주제 반복 검사
-            const recentTopicCount = gameState.topicHistory.slice(-5).filter(topic => topic === newTopic).length;
-            if (recentTopicCount >= 3) {
-                issues.push({
-                    type: 'topic_repetition',
-                    severity: 'medium',
-                    message: `'${newTopic}' 주제가 최근에 너무 많이 반복되었습니다.`
-                });
-            }
-
-            // 4. 감정 변화 부족 검사
-            const recentEmotions = gameState.emotionHistory.slice(-3).map(h => h.emotion);
-            if (recentEmotions.length >= 3 && recentEmotions.every(e => e === newEmotion)) {
-                issues.push({
-                    type: 'emotion_stagnation',
-                    severity: 'low',
-                    message: `감정 변화가 부족합니다. (${newEmotion} 반복)`
-                });
-            }
-
-            return {
-                hasIssues: issues.length > 0,
-                issues: issues,
-                recommendation: generateVariationRecommendation(issues, newTopic, newEmotion)
-            };
-        }
-
-        // 패턴 유사성 계산
-        function calculatePatternSimilarity(pattern1, pattern2) {
-            const words1 = pattern1.split('_');
-            const words2 = pattern2.split('_');
-
-            const commonWords = words1.filter(word => words2.includes(word)).length;
-            const totalWords = Math.max(words1.length, words2.length);
-
-            return totalWords > 0 ? commonWords / totalWords : 0;
-        }
-
-        // 변화 권장사항 생성
-        function generateVariationRecommendation(issues, topic, emotion) {
-            const recommendations = [];
-
-            if (issues.some(i => i.type === 'exact_repetition')) {
-                recommendations.push('완전히 다른 접근 방식으로 대화를 재생성하세요.');
-            }
-
-            if (issues.some(i => i.type === 'topic_repetition')) {
-                const alternativeTopics = ['감정', '일상', '취미', '미래', '관계', '음식']
-                    .filter(t => !gameState.topicHistory.slice(-5).includes(t));
-                if (alternativeTopics.length > 0) {
-                    recommendations.push(`다른 주제로 전환해보세요: ${alternativeTopics.slice(0, 2).join(', ')}`);
-                }
-            }
-
-            if (issues.some(i => i.type === 'emotion_stagnation')) {
-                const alternativeEmotions = ['기쁨', '사랑', '부끄러움', '당황', '평온']
-                    .filter(e => e !== emotion);
-                recommendations.push(`감정 변화를 주세요: ${alternativeEmotions[0] || '다양한 감정'}`);
-            }
-
-            return recommendations.length > 0 ? recommendations : ['현재 대화는 적절합니다.'];
-        }
-
-        // 대화 다양성 강화 프롬프트 생성
-        function generateAntiRepetitionPrompt(character, scenario) {
-            const recentTopics = gameState.topicHistory.slice(-5);
-            const recentEmotions = gameState.emotionHistory.slice(-3).map(h => h.emotion);
-            const unusedTopics = ['감정', '일상', '취미', '미래', '관계', '음식']
-                .filter(topic => !recentTopics.includes(topic));
-
-            return `
-🔄 대화 반복 방지 지침:
-
-최근 사용된 주제: ${recentTopics.join(', ') || '없음'}
-최근 감정 패턴: ${recentEmotions.join(' → ') || '없음'}
-추천 새 주제: ${unusedTopics.slice(0, 2).join(', ') || '자유롭게'}
-
-특별 요청:
-1. 이전 대화와 다른 새로운 접근 방식 사용
-2. 신선하고 예상치 못한 요소 포함
-3. ${character.mbti} 특성의 새로운 면모 보여주기
-4. 대화에 창의성과 다양성 부여
-
-반복 금지:
-- 최근 3턴 이내의 주제나 표현 재사용 금지
-- 동일한 감정이나 톤의 연속 사용 금지
-- 뻔한 반응이나 예측 가능한 대화 피하기
-`;
-        }
-
-        // 🔄 대화 반복 방지 시스템 초기화
-        function initializeAntiRepetitionSystem() {
-            // 시스템 초기화
-            gameState.conversationHistory = [];
-            gameState.usedDialogues = new Set();
-            gameState.recentPatterns = [];
-            gameState.topicHistory = [];
-            gameState.emotionHistory = [];
-
-            console.log('🔄 대화 반복 방지 시스템 초기화 완료');
-
-            // 성능 모니터링 시작
-            startAntiRepetitionMonitoring();
-        }
-
-        // 🔄 대화 반복 방지 시스템 성능 모니터링
-        function startAntiRepetitionMonitoring() {
-            // 5분마다 시스템 상태 체크
-            setInterval(() => {
-                const stats = {
-                    conversationCount: gameState.conversationHistory.length,
-                    uniquePatterns: gameState.usedDialogues.size,
-                    topicDiversity: gameState.topicHistory.length,
-                    emotionChanges: gameState.emotionHistory.length,
-                    memoryUsage: calculateMemoryUsage()
+                console.log('💬 대화 생성 중...');
+
+                const requestData = {
+                    action: 'generate',
+                    scenario: gameState.selectedScenario,
+                    character: gameState.selectedCharacter,
+                    userInput: userInput,
+                    affection: gameState.affection,
+                    messageCount: gameState.messageCount,
+                    conversationHistory: gameState.conversationHistory.slice(-5) // 최근 5개만
                 };
 
-                console.log('📊 반복 방지 시스템 통계:', stats);
-
-                // 메모리 정리 (50개 이상 대화 기록 시)
-                if (gameState.conversationHistory.length > 50) {
-                    cleanupAntiRepetitionMemory();
-                }
-            }, 300000); // 5분마다
-        }
-
-        // 메모리 사용량 계산
-        function calculateMemoryUsage() {
-            const historySize = JSON.stringify(gameState.conversationHistory).length;
-            const patternsSize = JSON.stringify([...gameState.usedDialogues]).length;
-            const topicsSize = JSON.stringify(gameState.topicHistory).length;
-            const emotionsSize = JSON.stringify(gameState.emotionHistory).length;
-
-            return {
-                total: historySize + patternsSize + topicsSize + emotionsSize,
-                history: historySize,
-                patterns: patternsSize,
-                topics: topicsSize,
-                emotions: emotionsSize
-            };
-        }
-
-        // 메모리 정리
-        function cleanupAntiRepetitionMemory() {
-            console.log('🧹 반복 방지 시스템 메모리 정리 시작...');
-
-            // 대화 히스토리 최신 30개만 유지
-            if (gameState.conversationHistory.length > 30) {
-                gameState.conversationHistory = gameState.conversationHistory.slice(-30);
-            }
-
-            // 최근 패턴 최신 10개만 유지
-            if (gameState.recentPatterns.length > 10) {
-                gameState.recentPatterns = gameState.recentPatterns.slice(-10);
-            }
-
-            // 주제 히스토리 최신 20개만 유지
-            if (gameState.topicHistory.length > 20) {
-                gameState.topicHistory = gameState.topicHistory.slice(-20);
-            }
-
-            // 감정 히스토리 최신 15개만 유지
-            if (gameState.emotionHistory.length > 15) {
-                gameState.emotionHistory = gameState.emotionHistory.slice(-15);
-            }
-
-            // 사용된 패턴 정리 (최근 50개만 유지)
-            const recentPatterns = Array.from(gameState.usedDialogues).slice(-50);
-            gameState.usedDialogues = new Set(recentPatterns);
-
-            console.log('🧹 메모리 정리 완료');
-        }
-
-        // 반복 방지 시스템 상태 확인
-        function getAntiRepetitionStatus() {
-            return {
-                isActive: gameState.conversationHistory.length > 0,
-                totalConversations: gameState.conversationHistory.length,
-                uniquePatterns: gameState.usedDialogues.size,
-                diversityScore: calculateDiversityScore(),
-                recentIssues: getRecentRepetitionIssues(),
-                systemHealth: checkSystemHealth()
-            };
-        }
-
-        // 다양성 점수 계산
-        function calculateDiversityScore() {
-            if (gameState.conversationHistory.length === 0) return 100;
-
-            const uniqueTopics = new Set(gameState.topicHistory).size;
-            const uniqueEmotions = new Set(gameState.emotionHistory.map(h => h.emotion)).size;
-            const patternDiversity = gameState.usedDialogues.size / Math.max(gameState.conversationHistory.length, 1);
-
-            return Math.round(((uniqueTopics / 6) * 30 + (uniqueEmotions / 7) * 30 + patternDiversity * 40));
-        }
-
-        // 최근 반복 문제 조회
-        function getRecentRepetitionIssues() {
-            return gameState.conversationHistory.slice(-5).map(conv => {
-                const check = checkForRepetition(conv.dialogue, conv.narration);
-                return {
-                    timestamp: conv.timestamp,
-                    hasIssues: check.hasIssues,
-                    issueCount: check.issues.length,
-                    severity: check.issues.length > 0 ? check.issues[0].severity : 'none'
-                };
-            });
-        }
-
-        // 시스템 상태 체크
-        function checkSystemHealth() {
-            const memoryUsage = calculateMemoryUsage();
-            const diversityScore = calculateDiversityScore();
-
-            let health = 'excellent';
-            if (memoryUsage.total > 100000) health = 'warning';
-            if (memoryUsage.total > 200000) health = 'critical';
-            if (diversityScore < 50) health = 'poor_diversity';
-
-            return health;
-        }
-
-        // 관계 발전 단계 분석 함수
-        function analyzeRelationshipStage(affection, conversationHistory) {
-            let stage = 'early_stage';
-            let intimacyLevel = 'low';
-
-            if (affection >= 80) {
-                stage = 'intimate';
-                intimacyLevel = 'high';
-            } else if (affection >= 50) {
-                stage = 'developing';
-                intimacyLevel = 'medium';
-            }
-
-            // 대화 히스토리 기반 추가 분석
-            const conversationDepth = conversationHistory ? conversationHistory.length : 0;
-            let emotionalKeywords = 0;
-
-            // 안전한 감정 키워드 분석
-            if (Array.isArray(conversationHistory)) {
-                emotionalKeywords = conversationHistory.filter(choice => {
-                    // choice가 숫자(인덱스)인 경우 감정 키워드 없음으로 처리
-                    if (typeof choice === 'number') {
-                        return false;
-                    }
-
-                    // choice가 문자열인지 확인하고, 객체인 경우 text 속성 사용
-                    const text = typeof choice === 'string' ? choice :
-                               (choice && choice.text) ? choice.text :
-                               (choice && choice.message) ? choice.message : '';
-
-                    return text && typeof text === 'string' &&
-                           (text.includes('좋아') || text.includes('사랑') ||
-                            text.includes('마음') || text.includes('감정'));
-                }).length;
-            }
-
-            return {
-                stage,
-                intimacyLevel,
-                conversationDepth,
-                emotionalConnection: emotionalKeywords / Math.max(conversationDepth, 1),
-                compatibilityScore: Math.min(100, affection + (emotionalKeywords * 5))
-            };
-        }
-
-        // 채팅 훈련 API 호출 함수 (개선된 버전)
-        async function callChatTrainingAPI(userMessage, character, difficulty = 'Easy') {
-            try {
-                console.log('🎯 채팅 훈련 API 호출 시작...');
-                
-                const response = await fetch('/api/episode-test', {
+                const response = await fetch('/api/scenario', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        action: 'generate',
-                        character_id: character?.id || 'yuna_infp',
-                        user_prompt: userMessage,
-                        difficulty: difficulty
-                    })
+                    body: JSON.stringify(requestData)
                 });
-
-                if (!response.ok) {
-                    throw new Error(`채팅 훈련 API Error: ${response.status} ${response.statusText}`);
-                }
 
                 const data = await response.json();
-                console.log('✅ 채팅 훈련 API 응답 받음:', data);
-                
-                if (data.success && data.data) {
-                    return data.data.character_message;
+
+                if (data.success && data.generated) {
+                    gameState.currentDialogue = data.generated;
+                    displayDialogue(data.generated);
+                    gameState.messageCount++;
+                    updateGameStats();
                 } else {
-                    throw new Error('API 응답 형식 오류');
+                    throw new Error(data.error || '대화 생성에 실패했습니다');
                 }
-                
             } catch (error) {
-                console.error('❌ 채팅 훈련 API 호출 실패:', error);
-                
-                // Fallback: 캐릭터별 기본 응답
-                const fallbackResponses = {
-                    'yuna_infp': "음... 그런 얘기구나 😊\n사실 나도 비슷하게 생각하고 있었어",
-                    'mina_enfp': "와! 진짜 그렇게 생각해? 😆\n우리 완전 잘 맞는 것 같아!",
-                    'seoyeon_intj': "흥미로운 관점이네요.\n논리적으로 타당한 부분이 있습니다.",
-                    'jihye_esfj': "정말? 괜찮아? 😟\n혹시 불편한 건 없어? 도와줄 수 있는 게 있다면 말해줘!",
-                    'hyejin_istp': "그렇구나. 나쁘지 않네 👍"
-                };
-                
-                const characterId = character?.id || 'yuna_infp';
-                return fallbackResponses[characterId] || fallbackResponses['yuna_infp'];
+                console.error('❌ 대화 생성 실패:', error);
+                showChatError('대화 생성에 실패했습니다: ' + error.message);
             }
         }
 
-        // 고도화된 주관식 응답 생성 함수
-        async function generateAdvancedSubjectiveResponse(userMessage, character, affection, conversationHistory = [], antiRepetitionData = null) {
-            try {
-                console.log('🧠 고도화된 주관식 평가 시작...', {
-                    character: character.name,
-                    mbti: character.mbti,
-                    affection,
-                    messageLength: userMessage.length
-                });
-                
-                // 캐릭터 MBTI 특성 로드
-                const mbtiTraits = mbtiCharacteristics[character.mbti] || mbtiCharacteristics.INFP;
+        // 대화 표시
+        function displayDialogue(dialogue) {
+            // AI 메시지 표시
+            if (dialogue.dialogue) {
+                addMessage(dialogue.dialogue, 'ai');
+            }
 
-                // 관계 발전 단계 분석
-                const relationshipAnalysis = analyzeRelationshipStage(affection, conversationHistory);
+            // 상황 설명 표시
+            if (dialogue.narration) {
+                addNarration(dialogue.narration);
+            }
 
-                // MBTI 맞춤 메시지 분석 (새로 추가)
-                const mbtiAnalysis = analyzeMessageForMBTI(
-                    userMessage,
-                    character.mbti,
-                    affection,
-                    relationshipAnalysis.stage
-                );
-
-                console.log('🎯 MBTI 맞춤 분석 결과:', mbtiAnalysis);
-                
-                // 현재 상황 컨텍스트
-                const currentContext = {
-                    scenario: gameState.currentScenario?.title || '일반적인 상황',
-                    choiceNumber: gameState.choiceNumber,
-                    messageCount: gameState.messageCount
-                };
-                
-                // 고도화된 프롬프트 생성
-                const systemPrompt = `당신은 ${character.name}(${character.mbti})라는 캐릭터입니다.
-
-캐릭터 특성:
-- MBTI: ${character.mbti} (${mbtiTraits.name})
-- 성격: ${character.personality}
-- 말투: ${character.speech_style}
-- 핵심 특성: ${mbtiTraits.core_traits.join(', ')}
-- 소통 방식: ${mbtiTraits.communication_style}
-
-현재 관계 상태:
-- 호감도: ${affection}/100
-- 관계 단계: ${relationshipAnalysis.stage}
-- 친밀도: ${relationshipAnalysis.intimacyLevel}
-- 감정적 연결: ${Math.round(relationshipAnalysis.emotionalConnection * 100)}%
-- 상황: ${currentContext.scenario}
-
-${character.mbti} 특성에 맞는 반응 패턴:
-- 선호 반응: ${mbtiTraits.response_triggers.positive.join(', ')}
-- 부정적 반응: ${mbtiTraits.response_triggers.negative.join(', ')}
-- 감정 표현: ${mbtiTraits.emotional_expression}
-
-현재 관계 단계(${relationshipAnalysis.stage})에 맞는 행동:
-${mbtiTraits.relationship_patterns[relationshipAnalysis.stage]}`;
-
-                const evaluationPrompt = `사용자가 다음과 같이 말했습니다: "${userMessage}"
-
-이 메시지를 분석하고 ${character.name}(${character.mbti})의 관점에서 다음을 생성해주세요:
-
-1. 메시지에 대한 감정적 반응과 평가 (호감도 변화량 -10~+15 범위)
-2. 캐릭터의 개성이 드러나는 자연스러운 응답
-3. 현재 관계 단계와 MBTI 특성에 맞는 반응
-
-반드시 다음 JSON 형식으로 응답해주세요:
-{
-  "evaluation": {
-    "affection_change": 숫자 (-10~15),
-    "emotional_impact": "메시지가 캐릭터에게 미친 감정적 영향 분석",
-    "mbti_compatibility": "MBTI 관점에서의 적합성 평가"
-  },
-  "response": {
-    "dialogue": "캐릭터의 직접적인 대답",
-    "narration": "캐릭터의 행동이나 감정 상태 묘사",
-    "internal_thought": "캐릭터의 내적 생각 (선택적)"
-  },
-  "relationship_change": {
-    "new_stage_hint": "관계 발전 징조 또는 변화 암시",
-    "future_expectation": "앞으로의 관계 발전 방향"
-  }
-}`;
-
-                // 채팅 훈련 API 호출
-                let apiResponse = await callChatTrainingAPI(userMessage, character, 'Medium');
-                
-                if (apiResponse) {
-                    console.log('✅ 채팅 훈련 API 응답 완료:', apiResponse);
-
-                    // MBTI 맞춤 호감도 변화 계산 (고도화)
-                    const affectionChange = mbtiAnalysis.affection_impact;
-
-                    // MBTI 기반 상세 평가
-                    const evaluation = {
-                        message_quality: mbtiAnalysis.compatibility_score > 5 ? "매우 좋음" :
-                                        mbtiAnalysis.compatibility_score > 0 ? "좋음" : "보통",
-                        emotional_impact: mbtiAnalysis.emotional_resonance > 0.5 ? "강한 긍정적 영향" :
-                                         mbtiAnalysis.emotional_resonance > 0 ? "긍정적 영향" : "중립적",
-                        conversation_flow: mbtiAnalysis.trigger_matches.negative.length > 0 ?
-                                          "주의 필요" : "자연스러움",
-                        mbti_insights: generateMBTIInsights(mbtiAnalysis, character.mbti)
-                    };
-
-                    return {
-                        dialogue: apiResponse,
-                        narration: generateMBTINarration(character, mbtiAnalysis, mbtiTraits),
-                        affection_change: affectionChange,
-                        evaluation: evaluation,
-                        relationship_analysis: relationshipAnalysis,
-                        mbti_analysis: {
-                            character_type: mbtiTraits.name,
-                            compatibility: mbtiAnalysis.compatibility_score > 5 ? "매우 높음" :
-                                          mbtiAnalysis.compatibility_score > 0 ? "높음" : "보통",
-                            triggered_traits: mbtiAnalysis.trigger_matches.positive.map(t => t.trigger),
-                            response_style: mbtiAnalysis.response_style,
-                            emotional_resonance: Math.round(mbtiAnalysis.emotional_resonance * 100) + "%"
-                        }
-                    };
-                }
-                
-                // API 실패 시 fallback
-                console.log('⚠️ OpenAI API 실패, 고도화된 로컬 응답 생성');
-                return generateEnhancedLocalResponse(userMessage, character, affection, mbtiTraits, relationshipAnalysis, mbtiAnalysis);
-                
-            } catch (error) {
-                console.error('❌ 고도화된 주관식 평가 실패:', error);
-                return generateEnhancedLocalResponse(userMessage, character, affection);
+            // 선택지 표시
+            if (dialogue.choices && dialogue.choices.length > 0) {
+                showChoices(dialogue.choices);
             }
         }
 
-        // MBTI 인사이트 생성 함수
-        function generateMBTIInsights(mbtiAnalysis, mbtiType) {
-            const insights = [];
+        // 메시지 추가
+        function addMessage(text, type = 'ai') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerHTML = `<div class="message-bubble">${text}</div>`;
 
-            if (mbtiAnalysis.trigger_matches.positive.length > 0) {
-                insights.push(`${mbtiType} 특성과 잘 맞는 메시지입니다.`);
-                insights.push(`특히 "${mbtiAnalysis.trigger_matches.positive[0].trigger}" 부분이 효과적이었습니다.`);
-            }
-
-            if (mbtiAnalysis.trigger_matches.negative.length > 0) {
-                insights.push(`${mbtiType} 성격에는 "${mbtiAnalysis.trigger_matches.negative[0].trigger}" 같은 접근은 주의가 필요합니다.`);
-            }
-
-            if (mbtiAnalysis.emotional_resonance > 0.7) {
-                insights.push("감정적 공감대가 매우 높게 형성되었습니다.");
-            } else if (mbtiAnalysis.emotional_resonance < 0.3) {
-                insights.push("더 깊이 있는 감정 표현이 도움이 될 것 같습니다.");
-            }
-
-            return insights.length > 0 ? insights : ["자연스러운 대화였습니다."];
+            elements.chatMessages.appendChild(messageDiv);
+            scrollToBottom();
         }
 
-        // MBTI 맞춤 내레이션 생성 함수
-        function generateMBTINarration(character, mbtiAnalysis, mbtiTraits) {
-            const baseName = character.name || '캐릭터';
+        // 상황 설명 추가
+        function addNarration(text) {
+            const narrationDiv = document.createElement('div');
+            narrationDiv.className = 'narration';
+            narrationDiv.textContent = text;
 
-            if (mbtiAnalysis.compatibility_score > 5) {
-                return `${baseName}의 눈이 반짝이며 ${mbtiTraits.emotional_expression}한 반응을 보인다.`;
-            } else if (mbtiAnalysis.compatibility_score < 0) {
-                return `${baseName}가 ${mbtiTraits.stress_responses[0] || '조심스러운'} 표정을 짓는다.`;
-            } else {
-                return `${baseName}가 ${mbtiTraits.communication_style}하게 반응한다.`;
-            }
+            elements.chatMessages.appendChild(narrationDiv);
+            scrollToBottom();
         }
 
-        // 고도화된 로컬 응답 생성 (Fallback)
-        function generateEnhancedLocalResponse(userMessage, character, affection, mbtiTraits = null, relationshipAnalysis = null) {
-            const traits = mbtiTraits || mbtiCharacteristics[character.mbti] || mbtiCharacteristics.INFP;
-            const analysis = relationshipAnalysis || analyzeRelationshipStage(affection, []);
-            
-            // 메시지 분석
-            const messageLength = userMessage.length;
-            const emotionalWords = ['좋아', '사랑', '마음', '감동', '기쁘', '행복', '설레', '소중'].filter(word => 
-                userMessage.includes(word)
-            ).length;
-            
-            let affectionChange = Math.floor(messageLength / 15) + (emotionalWords * 2);
-            affectionChange = Math.min(10, Math.max(-2, affectionChange));
-            
-            // MBTI별 특화 응답
-            const responses = {
-                INFP: [
-                    "마음이 정말 따뜻해져요... 😊💕",
-                    "이런 말씀을 해주시니 감동이에요 😭✨",
-                    "오빠의 진심이 느껴져요... 고마워요 💝"
-                ],
-                ENFP: [
-                    "와! 정말 멋진 생각이에요! ✨🎉",
-                    "이런 이야기를 들으니 더 신나요! 😄💫",
-                    "우리 정말 잘 통하는 것 같아요! 🌟💕"
-                ],
-                INTJ: [
-                    "흥미로운 관점이네요. 생각해볼게요.",
-                    "논리적이고 체계적인 접근 방식이군요.",
-                    "그런 방식으로 생각해보니 납득이 됩니다."
-                ],
-                ESFJ: [
-                    "정말 배려깊은 마음이 느껴져요 😊",
-                    "이렇게 생각해주셔서 고맙습니다! 💕",
-                    "함께 있으니 정말 편안해요 🌸"
-                ],
-                ISTP: [
-                    "실용적인 접근이네요. 괜찮은 것 같아요.",
-                    "그런 방식도 있겠군요. 참고하겠습니다.",
-                    "자연스럽고 좋은 아이디어네요."
-                ]
-            };
-            
-            const characterResponses = responses[character.mbti] || responses.INFP;
-            const randomResponse = characterResponses[Math.floor(Math.random() * characterResponses.length)];
-            
-            return {
-                dialogue: randomResponse,
-                narration: `${character.name}이(가) ${analysis.stage === 'intimate' ? '깊은 애정을 담아' : '진심으로'} 반응한다.`,
-                affection_change: affectionChange,
-                evaluation: {
-                    emotional_impact: `${traits.name} 특성에 맞는 ${affectionChange > 0 ? '긍정적' : '중립적'} 반응`,
-                    mbti_compatibility: `${character.mbti} 특성과 ${affectionChange > 5 ? '매우 잘' : '적당히'} 맞음`
-                }
-            };
+        // 선택지 표시
+        function showChoices(choices) {
+            elements.choicesContainer.style.display = 'block';
+            elements.choicesContainer.innerHTML = '';
+
+            choices.forEach((choice, index) => {
+                const choiceBtn = document.createElement('button');
+                choiceBtn.className = 'choice-btn';
+                choiceBtn.textContent = choice.text || choice;
+                choiceBtn.onclick = () => selectChoice(choice, index);
+
+                elements.choicesContainer.appendChild(choiceBtn);
+            });
         }
 
-        // OpenAI API 설정 관리 함수
-        function setupOpenAISettings() {
-            const apiKey = prompt("OpenAI API 키를 입력하세요:");
-            if (apiKey) {
-                const settings = {
-                    api_key: apiKey,
-                    model: 'gpt-3.5-turbo',
-                    temperature: 0.8
-                };
-                localStorage.setItem('openai_settings', JSON.stringify(settings));
-                alert('✅ OpenAI API 설정이 저장되었습니다!');
-                console.log('🔑 OpenAI API 설정 완료');
-            }
+        // 선택지 선택
+        async function selectChoice(choice, index) {
+            const choiceText = choice.text || choice;
+            const affectionImpact = choice.affection_impact || 0;
+
+            // 사용자 선택 표시
+            addMessage(choiceText, 'user');
+
+            // 선택지 숨김
+            elements.choicesContainer.style.display = 'none';
+
+            // 호감도 업데이트
+            gameState.affection += affectionImpact;
+            if (gameState.affection < 0) gameState.affection = 0;
+            elements.affectionScore.textContent = `❤️ ${gameState.affection}`;
+
+            // 대화 히스토리에 추가
+            gameState.conversationHistory.push({
+                type: 'user_choice',
+                text: choiceText,
+                affection_impact: affectionImpact,
+                timestamp: Date.now()
+            });
+
+            console.log(`💬 선택: "${choiceText}" (호감도 ${affectionImpact > 0 ? '+' : ''}${affectionImpact})`);
+
+            // 다음 대화 생성
+            await generateDialogue(choiceText);
         }
 
-        // 테스트 시나리오 생성 함수
-        function createTestScenario() {
-            console.log('🎮 테스트 시나리오 생성 시작...');
-            
-            const testScenario = {
-                id: 'test_scenario_1',
-                scenario_id: 'test_scenario_1',
-                title: '카페에서의 만남',
-                description: '우연히 마주친 카페에서의 설레는 만남',
-                background_setting: '조용한 카페',
-                mood: '설렘, 부끄러움',
-                active: true,
-                created_date: new Date().toISOString().split('T')[0],
-                last_modified: new Date().toISOString().split('T')[0],
-                ai_generated_context: '조용한 카페에서 우연히 마주친 두 사람. 창밖으로 스며드는 따스한 햇살 사이로 설렘과 부끄러움이 교차하는 특별한 순간이 시작된다.',
-                custom_context: '',
-                available_characters: ['yuna_infp'],
-                episode_count: 0,
-                tags: ['카페', '만남', '설렘']
-            };
+        // 게임 통계 업데이트
+        function updateGameStats() {
+            elements.messageCount.textContent = `메시지: ${gameState.messageCount}`;
 
-            const testCharacter = {
-                id: 'yuna_infp',
-                name: '윤아',
-                mbti: 'INFP',
-                age: 22,
-                background: '미술 전공 대학생',
-                personality: '감성적이고 내향적인 성격. 예술을 사랑하며 섬세한 감정을 가지고 있다.',
-                speech_style: '부드럽고 따뜻한 말투, 종종 수줍어하며 이모티콘을 자주 사용한다.',
-                active: true,
-                created_date: new Date().toISOString().split('T')[0],
-                avatar_url: '',
-                tags: ['INFP', '미술', '감성적']
-            };
-
-            // LocalStorage에 시나리오와 캐릭터 저장
-            try {
-                // 시나리오 저장
-                const existingScenarios = JSON.parse(localStorage.getItem('scenarios') || '{}');
-                existingScenarios[testScenario.id] = testScenario;
-                localStorage.setItem('scenarios', JSON.stringify(existingScenarios));
-                console.log('✅ 테스트 시나리오 저장 완료');
-
-                // 캐릭터 저장
-                const existingCharacters = JSON.parse(localStorage.getItem('characters') || '{}');
-                existingCharacters[testCharacter.id] = testCharacter;
-                localStorage.setItem('characters', JSON.stringify(existingCharacters));
-                console.log('✅ 테스트 캐릭터 저장 완료');
-
-                // 시나리오 다시 로딩
-                loadScenarios();
-                
-                alert('🎮 테스트 시나리오가 생성되었습니다!\n"카페에서의 만남" 시나리오를 선택해보세요.');
-                
-            } catch (error) {
-                console.error('❌ 테스트 시나리오 생성 실패:', error);
-                alert('테스트 시나리오 생성에 실패했습니다: ' + error.message);
-            }
+            // 간단한 진행도 계산 (메시지 수 기준)
+            const progress = Math.min(100, (gameState.messageCount / 20) * 100);
+            elements.gameProgress.textContent = `진행도: ${Math.round(progress)}%`;
         }
+
+        // 화면 전환 함수들
+        function showSelectionScreen() {
+            elements.loadingScreen.style.display = 'none';
+            elements.selectionScreen.style.display = 'block';
+            elements.chatScreen.style.display = 'none';
+        }
+
+        function showChatScreen() {
+            elements.loadingScreen.style.display = 'none';
+            elements.selectionScreen.style.display = 'none';
+            elements.chatScreen.style.display = 'flex';
+
+            // 채팅 메시지 초기화
+            elements.chatMessages.innerHTML = '';
+            elements.choicesContainer.style.display = 'none';
+        }
+
+        // 에러 표시
+        function showError(message) {
+            elements.errorContainer.innerHTML = `
+                <div class="error-message">
+                    ${message}
+                    <br>
+                    <button class="retry-btn" onclick="initGame()">다시 시도</button>
+                </div>
+            `;
+            showSelectionScreen();
+        }
+
+        function showChatError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'message';
+            errorDiv.innerHTML = `
+                <div style="background: rgba(220, 53, 69, 0.2); border: 1px solid #dc3545; border-radius: 10px; padding: 10px; text-align: center; color: #dc3545;">
+                    ${message}
+                </div>
+            `;
+            elements.chatMessages.appendChild(errorDiv);
+            scrollToBottom();
+        }
+
+        // 스크롤 맨 아래로
+        function scrollToBottom() {
+            elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+        }
+
+        // 이벤트 리스너
+        elements.startGameBtn.onclick = startGame;
+        elements.adminBtn.onclick = () => window.open('/scenario-admin.html', '_blank');
+        elements.backBtn.onclick = showSelectionScreen;
+
+        // 페이지 로드 시 초기화
+        window.addEventListener('load', initGame);
+
+        console.log('🎭 채팅 기술 훈련 시스템 v3.0.0 - 어드민 연동 버전');
     </script>
 </body>
 </html>
