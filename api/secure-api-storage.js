@@ -15,8 +15,20 @@ const GITHUB_CONFIG = {
 const ENCRYPTION_ALGORITHM = 'aes-256-gcm';
 const ENCRYPTION_KEY = process.env.API_ENCRYPTION_KEY || 'default-key-change-in-production';
 
-// GitHub Personal Access Token from environment
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+// GitHub Personal Access Token from environment (다양한 이름 지원)
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN ||
+                     process.env.GITHUB_ACCESS_TOKEN ||
+                     process.env.GITHUB_PAT ||
+                     process.env.GH_TOKEN ||
+                     process.env.VERCEL_GIT_COMMIT_REF; // Vercel 자동 생성 토큰도 시도
+
+console.log('🔍 GitHub 토큰 확인:', {
+  GITHUB_TOKEN: !!process.env.GITHUB_TOKEN,
+  GITHUB_ACCESS_TOKEN: !!process.env.GITHUB_ACCESS_TOKEN,
+  GITHUB_PAT: !!process.env.GITHUB_PAT,
+  GH_TOKEN: !!process.env.GH_TOKEN,
+  선택된토큰: GITHUB_TOKEN ? `${GITHUB_TOKEN.substring(0, 4)}...` : '없음'
+});
 
 /**
  * Encrypt API key with AES-256-CBC (simplified for Vercel)
