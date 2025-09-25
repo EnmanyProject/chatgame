@@ -210,8 +210,13 @@ async function handleSaveApiKey(req, res) {
     user.apiKey = apiKey;
     session.apiKey = apiKey;
 
-    // 환경변수에도 설정 (즉시 사용 가능)
+    // 환경변수에도 설정 (즉시 사용 가능) - 덮어쓰기
     process.env.OPENAI_API_KEY = apiKey;
+
+    console.log('🔄 환경변수 업데이트:', {
+      기존: process.env.OPENAI_API_KEY ? `${process.env.OPENAI_API_KEY.substring(0, 4)}...` : 'None',
+      새키: `${apiKey.substring(0, 4)}...`
+    });
 
     console.log('🔑 API 키 저장 완료:', {
       username: session.username,
