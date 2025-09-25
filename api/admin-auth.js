@@ -378,11 +378,49 @@ export function getActiveApiKey() {
   }
 
   if (latestSession) {
+    console.log('🔑 admin-auth에서 세션 API 키 반환:', `${latestSession.apiKey.substring(0, 4)}...`);
     return latestSession.apiKey;
   }
 
   // 환경변수에서 fallback
-  return process.env.OPENAI_API_KEY || null;
+  const envKey = process.env.OPENAI_API_KEY;
+  if (envKey) {
+    console.log('🔑 admin-auth에서 환경변수 API 키 반환:', `${envKey.substring(0, 4)}...`);
+    return envKey;
+  }
+
+  console.log('❌ admin-auth에서 API 키 없음');
+  return null;
+}
+
+// API 키 상태 확인 (다른 API에서 사용)
+export function getAdminApiKeyStatus() {
+  let hasActiveKey = false;
+  let keyPreview = 'None';
+  let sessionCount = 0;
+  let latestActivity = null;
+
+  for (const session of activeSessions.values()) {
+    if (session.apiKey) {
+      hasActiveKey = true;
+      keyPreview = `${session.apiKey.substring(0, 4)}...`;
+      sessionCount++;
+
+      const activityTime = new Date(session.lastActivity);
+      if (!latestActivity || activityTime > latestActivity) {
+        latestActivity = activityTime;
+      }
+    }
+  }
+
+  return {
+    hasActiveKey,
+    keyPreview,
+    sessionCount,
+    latestActivity: latestActivity ? latestActivity.toISOString() : null,
+    hasEnvKey: !!process.env.OPENAI_API_KEY,
+    storage: 'admin-session-memory'
+  };
 }
 
 // 세션 정리 (1시간 비활성 세션 제거)

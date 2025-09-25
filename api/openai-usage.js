@@ -1,5 +1,6 @@
 // OpenAI API 사용량 확인 API
 import { getGlobalApiKey } from './save-api-key.js';
+import { getActiveApiKey } from './admin-auth.js';
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -18,7 +19,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        const apiKey = getGlobalApiKey();
+        const apiKey = getActiveApiKey() || getGlobalApiKey();
 
         if (!apiKey) {
             return res.status(400).json({
