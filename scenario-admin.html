@@ -2729,8 +2729,13 @@
                     tokenLength: authToken ? authToken.length : 0
                 });
 
-                // 임시: URL 파라미터 방식으로 테스트 (디버깅용)
-                const response = await fetch(`/api/admin-auth?action=check-session&authToken=${encodeURIComponent(authToken)}`);
+                // Authorization 헤더로 토큰 전송
+                const response = await fetch('/api/admin-auth?action=check-session', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
                 const data = await response.json();
 
                 if (data.success && data.authenticated) {
@@ -2785,8 +2790,13 @@
                     tokenLength: currentAuthToken ? currentAuthToken.length : 0
                 });
 
-                // 임시: URL 파라미터 방식으로 테스트 (디버깅용)
-                const response = await fetch(`/api/admin-auth?action=get-api-key&authToken=${encodeURIComponent(currentAuthToken)}`);
+                // Authorization 헤더로 토큰 전송
+                const response = await fetch('/api/admin-auth?action=get-api-key', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${currentAuthToken}`
+                    }
+                });
                 const data = await response.json();
 
                 if (data.success && data.hasApiKey) {
