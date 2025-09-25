@@ -435,6 +435,8 @@ async function handleGetApiKey(req, res) {
     query: req.query,
     hasAuthHeader: !!req.headers.authorization,
     authHeaderPreview: req.headers.authorization ? req.headers.authorization.substring(0, 20) + '...' : 'None',
+    authHeaderFull: req.headers.authorization || 'None',
+    allHeaders: Object.keys(req.headers),
     hasQueryToken: !!req.query.authToken,
     queryTokenPreview: req.query.authToken ? req.query.authToken.substring(0, 20) + '...' : 'None'
   });
