@@ -11,14 +11,14 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // 다양한 소스에서 API 키 확인
+  // 다양한 소스에서 API 키 확인 (통합 저장소)
   const cacheApiKey = getGlobalApiKey(); // save-api-key.js 캐시
-  const adminApiKey = getActiveApiKey(); // admin-auth.js 세션
+  const adminApiKey = await getActiveApiKey(); // admin-auth.js 통합 저장소 (async)
   const envApiKey = process.env.OPENAI_API_KEY;
   const apiKeyStatus = getApiKeyStatus();
-  const adminApiKeyStatus = getAdminApiKeyStatus();
+  const adminApiKeyStatus = await getAdminApiKeyStatus(); // 통합 저장소 (async)
 
-  console.log('🔍 API 키 소스 확인:', {
+  console.log('🔍 API 키 소스 확인 (통합 저장소):', {
     cache: cacheApiKey ? `${cacheApiKey.substring(0, 4)}...` : 'None',
     admin: adminApiKey ? `${adminApiKey.substring(0, 4)}...` : 'None',
     env: envApiKey ? `${envApiKey.substring(0, 4)}...` : 'None',
@@ -26,7 +26,7 @@ export default async function handler(req, res) {
     adminStatus: adminApiKeyStatus
   });
 
-  // 우선 순위: admin-auth 세션 키 → save-api-key 캐시 → 환경변수
+  // 우선 순위: 통합 admin-auth (메모리→GitHub→환경변수) → save-api-key 캐시 → 직접 환경변수
   const finalKey = adminApiKey || cacheApiKey || envApiKey;
 
   // 실제 OpenAI API 테스트로 상태 확인
@@ -60,7 +60,7 @@ export default async function handler(req, res) {
     NODE_ENV: process.env.NODE_ENV || 'undefined',
     timestamp: new Date().toISOString(),
     keyPreview: actualKeyPreview,
-    // 상세한 상태 정보
+    // 상세한 통합 저장소 상태 정보
     apiKeyDetails: {
       ...apiKeyStatus,
       ...adminApiKeyStatus,
@@ -68,8 +68,23 @@ export default async function handler(req, res) {
       cacheKey: cacheApiKey ? `${cacheApiKey.substring(0, 4)}...` : 'None',
       adminKey: adminApiKey ? `${adminApiKey.substring(0, 4)}...` : 'None',
       finalKey: finalKey ? `${finalKey.substring(0, 4)}...` : 'None',
-      storageType: adminApiKey ? 'admin-session-memory' : 'save-api-key-cache',
-      keySource: adminApiKey ? 'admin-auth-session' : (cacheApiKey ? 'save-api-key-cache' : 'environment')
+
+      // 통합 저장소 정보
+      unifiedStorage: {
+        isActive: adminApiKeyStatus?.unifiedSystem || false,
+        storageType: adminApiKeyStatus?.storage || 'none',
+        hasFallback: !!(cacheApiKey || envApiKey),
+        keySource: adminApiKey ?
+          `admin-auth-unified(${adminApiKeyStatus?.storage})` :
+          (cacheApiKey ? 'save-api-key-cache' : 'environment'),
+        priorityChain: 'admin-unified → cache → env'
+      },
+
+      // 기존 호환성
+      storageType: adminApiKeyStatus?.storage || 'fallback',
+      keySource: adminApiKey ?
+        `admin-auth-unified(${adminApiKeyStatus?.storage})` :
+        (cacheApiKey ? 'save-api-key-cache' : 'environment')
     }
   };
 

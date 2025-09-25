@@ -203,18 +203,29 @@ async function handleSaveApiKey(req, res) {
     });
   }
 
-  // 🔐 API 키 저장 (임시 메모리 기반 + 검증)
+  // 🔐 API 키 저장 (통합 저장소: 메모리 + GitHub + 환경변수)
   try {
-    // 세션과 사용자 객체에 저장
+    // 1. 세션과 사용자 객체에 저장 (기존)
     const user = adminUsers[session.username];
     user.apiKey = apiKey;
     session.apiKey = apiKey;
 
-    // 환경변수에도 설정 (즉시 사용 가능) - 덮어쓰기
+    // 2. 환경변수에 설정 (즉시 사용 가능)
     process.env.OPENAI_API_KEY = apiKey;
 
-    console.log('🔄 환경변수 업데이트:', {
-      기존: process.env.OPENAI_API_KEY ? `${process.env.OPENAI_API_KEY.substring(0, 4)}...` : 'None',
+    // 3. GitHub 보안 저장소에 영구 저장
+    try {
+      const { storeUserApiKey } = await import('./secure-api-storage.js');
+      await storeUserApiKey(session.username, apiKey);
+      console.log('✅ GitHub 보안 저장소에 API 키 저장 완료');
+    } catch (error) {
+      console.warn('⚠️ GitHub 저장소 저장 실패 (메모리/환경변수는 유지):', error.message);
+    }
+
+    console.log('🔄 통합 저장소 업데이트:', {
+      메모리: '✅ 저장됨',
+      환경변수: '✅ 저장됨',
+      GitHub: '⏳ 시도됨',
       새키: `${apiKey.substring(0, 4)}...`
     });
 
@@ -368,53 +379,111 @@ async function handleDeleteApiKey(req, res) {
   }
 }
 
-// 활성 API 키 가져오기 (다른 API에서 사용) - 메모리 기반
-export function getActiveApiKey() {
-  // 가장 최근에 활동한 세션의 API 키 반환
-  let latestSession = null;
-  let latestTime = 0;
+// 활성 API 키 가져오기 (다른 API에서 사용) - 통합 저장소 기반
+export async function getActiveApiKey() {
+  try {
+    // 1. 메모리 세션에서 우선 확인 (가장 빠름)
+    let latestSession = null;
+    let latestTime = 0;
 
-  for (const session of activeSessions.values()) {
-    const activityTime = new Date(session.lastActivity).getTime();
-    if (activityTime > latestTime && session.apiKey) {
-      latestTime = activityTime;
-      latestSession = session;
+    for (const session of activeSessions.values()) {
+      const activityTime = new Date(session.lastActivity).getTime();
+      if (activityTime > latestTime && session.apiKey) {
+        latestTime = activityTime;
+        latestSession = session;
+      }
     }
-  }
 
-  if (latestSession) {
-    console.log('🔑 admin-auth에서 세션 API 키 반환:', `${latestSession.apiKey.substring(0, 4)}...`);
-    return latestSession.apiKey;
-  }
+    if (latestSession) {
+      console.log('🔑 admin-auth에서 세션 API 키 반환:', `${latestSession.apiKey.substring(0, 4)}...`);
+      // 환경변수에도 설정하여 다른 API에서 사용 가능
+      process.env.OPENAI_API_KEY = latestSession.apiKey;
+      return latestSession.apiKey;
+    }
 
-  // 환경변수에서 fallback
-  const envKey = process.env.OPENAI_API_KEY;
-  if (envKey) {
-    console.log('🔑 admin-auth에서 환경변수 API 키 반환:', `${envKey.substring(0, 4)}...`);
-    return envKey;
-  }
+    // 2. GitHub 보안 저장소에서 확인
+    try {
+      const { getGlobalApiKey } = await import('./secure-api-storage.js');
+      const githubKey = await getGlobalApiKey();
 
-  console.log('❌ admin-auth에서 API 키 없음');
-  return null;
+      if (githubKey) {
+        console.log('🔑 admin-auth에서 GitHub 저장소 API 키 반환:', `${githubKey.substring(0, 4)}...`);
+        return githubKey;
+      }
+    } catch (error) {
+      console.warn('⚠️ GitHub 저장소 접근 실패:', error.message);
+    }
+
+    // 3. 환경변수에서 fallback
+    const envKey = process.env.OPENAI_API_KEY;
+    if (envKey && envKey.startsWith('sk-')) {
+      console.log('🔑 admin-auth에서 환경변수 API 키 반환:', `${envKey.substring(0, 4)}...`);
+      return envKey;
+    }
+
+    console.log('❌ admin-auth에서 API 키 없음 (모든 저장소 확인함)');
+    return null;
+
+  } catch (error) {
+    console.error('❌ admin-auth API 키 조회 오류:', error);
+
+    // 오류 시에도 환경변수 확인
+    const envKey = process.env.OPENAI_API_KEY;
+    if (envKey && envKey.startsWith('sk-')) {
+      return envKey;
+    }
+
+    return null;
+  }
 }
 
-// API 키 상태 확인 (다른 API에서 사용)
-export function getAdminApiKeyStatus() {
+// API 키 상태 확인 (다른 API에서 사용) - 통합 저장소 기반
+export async function getAdminApiKeyStatus() {
   let hasActiveKey = false;
   let keyPreview = 'None';
   let sessionCount = 0;
   let latestActivity = null;
+  let storageType = 'none';
 
+  // 1. 메모리 세션 확인
   for (const session of activeSessions.values()) {
     if (session.apiKey) {
       hasActiveKey = true;
       keyPreview = `${session.apiKey.substring(0, 4)}...`;
       sessionCount++;
+      storageType = 'admin-session-memory';
 
       const activityTime = new Date(session.lastActivity);
       if (!latestActivity || activityTime > latestActivity) {
         latestActivity = activityTime;
       }
+    }
+  }
+
+  // 2. GitHub 저장소 확인 (세션에 키가 없는 경우)
+  if (!hasActiveKey) {
+    try {
+      const { getGlobalApiKey } = await import('./secure-api-storage.js');
+      const githubKey = await getGlobalApiKey();
+
+      if (githubKey) {
+        hasActiveKey = true;
+        keyPreview = `${githubKey.substring(0, 4)}...`;
+        storageType = 'github-encrypted-storage';
+        latestActivity = new Date(); // 현재 시간으로 설정
+      }
+    } catch (error) {
+      console.warn('⚠️ GitHub 저장소 상태 확인 실패:', error.message);
+    }
+  }
+
+  // 3. 환경변수 확인 (다른 곳에 키가 없는 경우)
+  if (!hasActiveKey) {
+    const envKey = process.env.OPENAI_API_KEY;
+    if (envKey && envKey.startsWith('sk-')) {
+      hasActiveKey = true;
+      keyPreview = `${envKey.substring(0, 4)}...`;
+      storageType = 'environment-variable';
     }
   }
 
@@ -424,7 +493,8 @@ export function getAdminApiKeyStatus() {
     sessionCount,
     latestActivity: latestActivity ? latestActivity.toISOString() : null,
     hasEnvKey: !!process.env.OPENAI_API_KEY,
-    storage: 'admin-session-memory'
+    storage: storageType,
+    unifiedSystem: true // 통합 저장소 시스템임을 표시
   };
 }
 

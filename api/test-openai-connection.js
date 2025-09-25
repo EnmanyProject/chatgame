@@ -22,19 +22,20 @@ export default async function handler(req, res) {
     // 헤더에서 API 키 확인 (우선 순위 1)
     const headerApiKey = req.headers['x-openai-key'];
 
-    // admin-auth 세션에서 API 키 가져오기 (우선 순위 2)
-    const adminApiKey = getActiveApiKey();
+    // admin-auth 통합 저장소에서 API 키 가져오기 (우선 순위 2) - 메모리 → GitHub → 환경변수
+    const adminApiKey = await getActiveApiKey(); // async로 변경
 
     // 전역 API 키 또는 환경변수에서 API 키 가져오기 (우선 순위 3)
     const globalApiKey = getGlobalApiKey();
 
     const OPENAI_API_KEY = headerApiKey || adminApiKey || globalApiKey;
-    
-    console.log('🔍 API 키 확인:', {
+
+    console.log('🔍 API 키 확인 (통합 저장소):', {
       fromHeader: headerApiKey ? `${headerApiKey.substring(0, 4)}...` : '없음',
-      fromAdmin: adminApiKey ? `${adminApiKey.substring(0, 4)}...` : '없음',
+      fromAdminUnified: adminApiKey ? `${adminApiKey.substring(0, 4)}...` : '없음',
       fromGlobal: globalApiKey ? `${globalApiKey.substring(0, 4)}...` : '없음',
-      final: OPENAI_API_KEY ? `${OPENAI_API_KEY.substring(0, 4)}...` : '없음'
+      final: OPENAI_API_KEY ? `${OPENAI_API_KEY.substring(0, 4)}...` : '없음',
+      priorityChain: 'header → admin-unified(memory→github→env) → global'
     });
     
     if (!OPENAI_API_KEY) {
