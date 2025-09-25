@@ -322,22 +322,34 @@ async function handleSaveApiKey(req, res) {
     return res.status(405).json({ success: false, message: 'POST 요청만 허용됩니다.' });
   }
 
+  console.log('🔍 handleSaveApiKey 디버깅:', {
+    hasBody: !!req.body,
+    bodyKeys: req.body ? Object.keys(req.body) : [],
+    authTokenExists: !!(req.body && req.body.authToken),
+    authTokenPreview: req.body && req.body.authToken ? req.body.authToken.substring(0, 20) + '...' : 'None',
+    apiKeyExists: !!(req.body && req.body.apiKey)
+  });
+
   const { authToken, apiKey } = req.body;
 
   if (!authToken || !apiKey) {
+    console.error('❌ 요청 데이터 부족:', { authToken: !!authToken, apiKey: !!apiKey });
     return res.status(400).json({
       success: false,
       message: '인증 토큰과 API 키가 필요합니다.'
     });
   }
 
+  console.log('🔐 토큰 검증 시도...');
   const payload = verifyAuthToken(authToken);
   if (!payload) {
+    console.error('❌ 토큰 검증 실패 - 401 반환');
     return res.status(401).json({
       success: false,
       message: '인증되지 않은 요청입니다. 다시 로그인해주세요.'
     });
   }
+  console.log('✅ 토큰 검증 성공:', { username: payload.username });
 
   if (!apiKey.startsWith('sk-')) {
     return res.status(400).json({
