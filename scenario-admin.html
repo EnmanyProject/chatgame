@@ -2602,7 +2602,7 @@
 
     <script>
         // 🔐 인증 관련 전역 변수
-        let currentSessionId = null;
+        let currentAuthToken = null;
         let currentUser = null;
         let isAuthenticated = false;
 
@@ -2633,10 +2633,10 @@
             console.log('🔐 로그인 시스템 초기화');
 
             // 세션 확인
-            const savedSession = sessionStorage.getItem('admin_session_id');
-            if (savedSession) {
-                console.log('💾 저장된 세션 확인 중...');
-                checkSession(savedSession);
+            const savedToken = sessionStorage.getItem('admin_auth_token');
+            if (savedToken) {
+                console.log('💾 저장된 토큰 확인 중...');
+                checkAuthToken(savedToken);
             } else {
                 showLoginModal();
             }
@@ -2690,11 +2690,11 @@
                     console.log('✅ 로그인 성공:', data);
 
                     // 세션 정보 저장
-                    currentSessionId = data.sessionId;
+                    currentAuthToken = data.authToken;
                     currentUser = data.user;
                     isAuthenticated = true;
 
-                    sessionStorage.setItem('admin_session_id', data.sessionId);
+                    sessionStorage.setItem('admin_auth_token', data.authToken);
                     sessionStorage.setItem('admin_user', JSON.stringify(data.user));
 
                     showLoginStatus('로그인 성공! 시스템을 초기화하는 중...', 'success');
@@ -2721,16 +2721,16 @@
             }
         }
 
-        // 세션 확인
-        async function checkSession(sessionId) {
+        // 토큰 확인
+        async function checkAuthToken(authToken) {
             try {
-                const response = await fetch(`/api/admin-auth?action=check-session&sessionId=${sessionId}`);
+                const response = await fetch(`/api/admin-auth?action=check-session&authToken=${authToken}`);
                 const data = await response.json();
 
                 if (data.success && data.authenticated) {
-                    console.log('✅ 세션 유효함:', data);
+                    console.log('✅ 토큰 유효함:', data);
 
-                    currentSessionId = sessionId;
+                    currentAuthToken = authToken;
                     currentUser = data.user;
                     isAuthenticated = true;
 
@@ -2739,8 +2739,8 @@
                     hideLoginModal();
                     initializeMainSystem();
                 } else {
-                    console.log('❌ 세션 무효함, 로그인 필요');
-                    sessionStorage.removeItem('admin_session_id');
+                    console.log('❌ 토큰 무효함 또는 만료됨, 로그인 필요');
+                    sessionStorage.removeItem('admin_auth_token');
                     sessionStorage.removeItem('admin_user');
                     showLoginModal();
                 }
@@ -2771,10 +2771,10 @@
 
         // 사용자 API 키 로드
         async function loadUserApiKey() {
-            if (!currentSessionId) return;
+            if (!currentAuthToken) return;
 
             try {
-                const response = await fetch(`/api/admin-auth?action=get-api-key&sessionId=${currentSessionId}`);
+                const response = await fetch(`/api/admin-auth?action=get-api-key&authToken=${currentAuthToken}`);
                 const data = await response.json();
 
                 if (data.success && data.hasApiKey) {
@@ -2800,7 +2800,7 @@
 
         // 로그아웃
         async function logout() {
-            if (!currentSessionId) return;
+            if (!currentAuthToken) return;
 
             try {
                 await fetch('/api/admin-auth?action=logout', {
@@ -2808,18 +2808,18 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ sessionId: currentSessionId })
+                    body: JSON.stringify({ authToken: currentAuthToken })
                 });
             } catch (error) {
                 console.error('❌ 로그아웃 API 오류:', error);
             }
 
             // 로컬 정보 정리
-            currentSessionId = null;
+            currentAuthToken = null;
             currentUser = null;
             isAuthenticated = false;
 
-            sessionStorage.removeItem('admin_session_id');
+            sessionStorage.removeItem('admin_auth_token');
             sessionStorage.removeItem('admin_user');
             sessionStorage.removeItem('openai_api_key');
 
@@ -3313,7 +3313,7 @@
                 return;
             }
 
-            if (!currentSessionId) {
+            if (!currentAuthToken) {
                 showNotification('로그인이 필요합니다.', 'error');
                 return;
             }
@@ -3328,7 +3328,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        sessionId: currentSessionId,
+                        authToken: currentAuthToken,
                         apiKey: apiKey
                     })
                 });
@@ -3339,7 +3339,14 @@
                     // 브라우저 세션에도 API 키 저장
                     sessionStorage.setItem('openai_api_key', apiKey);
 
-                    showNotification('✅ API 키가 성공적으로 저장되었습니다!\n(로그인된 계정에 안전하게 저장됩니다)', 'success');
+                    // 토큰 기반: 응답에서 업데이트된 토큰 처리
+                    if (data.authToken && data.authToken !== currentAuthToken) {
+                        console.log('🔄 토큰 업데이트 (hasApiKey 상태 변경)');
+                        currentAuthToken = data.authToken;
+                        sessionStorage.setItem('admin_auth_token', data.authToken);
+                    }
+
+                    showNotification('✅ API 키가 성공적으로 저장되었습니다!\n(토큰 기반 암호화 저장)', 'success');
 
                     // 사용자 정보 업데이트 (API 키 보유 표시)
                     if (currentUser) {
@@ -3535,22 +3542,30 @@
             try {
                 console.log('🗑️ API 키 안전 삭제 시도...');
 
-                // 로그인된 사용자의 세션 기반 삭제
-                if (currentSessionId) {
+                // 로그인된 사용자의 토큰 기반 삭제
+                if (currentAuthToken) {
                     const response = await fetch('/api/admin-auth?action=delete-api-key', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            sessionId: currentSessionId
+                            authToken: currentAuthToken
                         })
                     });
 
                     if (response.ok) {
                         const data = await response.json();
-                        console.log('✅ 로그인 기반 API 키 삭제 성공:', data.message);
-                        showNotification('✅ API 키가 안전하게 삭제되었습니다!\n(GitHub 암호화 저장소에서 완전 제거됨)', 'success');
+                        console.log('✅ 토큰 기반 API 키 삭제 성공:', data.message);
+
+                        // 토큰 기반: 응답에서 업데이트된 토큰 처리
+                        if (data.authToken && data.authToken !== currentAuthToken) {
+                            console.log('🔄 토큰 업데이트 (hasApiKey=false 상태 변경)');
+                            currentAuthToken = data.authToken;
+                            sessionStorage.setItem('admin_auth_token', data.authToken);
+                        }
+
+                        showNotification('✅ API 키가 안전하게 삭제되었습니다!\n(토큰 기반 암호화 저장소에서 완전 제거됨)', 'success');
                     } else {
                         const error = await response.json();
                         console.warn('⚠️ 로그인 기반 삭제 실패, 일반 삭제 시도:', error.message);
