@@ -224,11 +224,22 @@ async function handleLogout(req, res) {
 
 // 토큰 확인 (세션 확인 대신)
 async function handleCheckSession(req, res) {
+  // 디버깅: 헤더와 쿼리 파라미터 상태 확인
+  console.log('🔍 handleCheckSession 요청 디버깅:', {
+    method: req.method,
+    query: req.query,
+    hasAuthHeader: !!req.headers.authorization,
+    authHeaderPreview: req.headers.authorization ? req.headers.authorization.substring(0, 20) + '...' : 'None',
+    hasQueryToken: !!req.query.authToken,
+    queryTokenPreview: req.query.authToken ? req.query.authToken.substring(0, 20) + '...' : 'None'
+  });
+
   // URL 파라미터 또는 Authorization 헤더에서 토큰 추출
   const authToken = req.query.authToken ||
                    (req.headers.authorization && req.headers.authorization.replace('Bearer ', ''));
 
   if (!authToken) {
+    console.error('❌ 토큰 확인: 토큰 없음');
     return res.status(400).json({
       success: false,
       message: '인증 토큰이 필요합니다.'
@@ -354,11 +365,22 @@ async function handleSaveApiKey(req, res) {
 
 // API 키 조회 (토큰 인증된 사용자만)
 async function handleGetApiKey(req, res) {
+  // 디버깅: 헤더와 쿼리 파라미터 상태 확인
+  console.log('🔍 handleGetApiKey 요청 디버깅:', {
+    method: req.method,
+    query: req.query,
+    hasAuthHeader: !!req.headers.authorization,
+    authHeaderPreview: req.headers.authorization ? req.headers.authorization.substring(0, 20) + '...' : 'None',
+    hasQueryToken: !!req.query.authToken,
+    queryTokenPreview: req.query.authToken ? req.query.authToken.substring(0, 20) + '...' : 'None'
+  });
+
   // URL 파라미터 또는 Authorization 헤더에서 토큰 추출
   const authToken = req.query.authToken ||
                    (req.headers.authorization && req.headers.authorization.replace('Bearer ', ''));
 
   if (!authToken) {
+    console.error('❌ API 키 조회: 토큰 없음');
     return res.status(400).json({
       success: false,
       message: '인증 토큰이 필요합니다.'

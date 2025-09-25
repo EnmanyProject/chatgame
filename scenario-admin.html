@@ -2724,11 +2724,13 @@
         // 토큰 확인
         async function checkAuthToken(authToken) {
             try {
-                const response = await fetch(`/api/admin-auth?action=check-session`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
+                console.log('🔍 checkAuthToken 디버깅:', {
+                    tokenPreview: authToken ? authToken.substring(0, 20) + '...' : 'None',
+                    tokenLength: authToken ? authToken.length : 0
                 });
+
+                // 임시: URL 파라미터 방식으로 테스트 (디버깅용)
+                const response = await fetch(`/api/admin-auth?action=check-session&authToken=${encodeURIComponent(authToken)}`);
                 const data = await response.json();
 
                 if (data.success && data.authenticated) {
@@ -2778,11 +2780,13 @@
             if (!currentAuthToken) return;
 
             try {
-                const response = await fetch(`/api/admin-auth?action=get-api-key`, {
-                    headers: {
-                        'Authorization': `Bearer ${currentAuthToken}`
-                    }
+                console.log('🔍 loadUserApiKey 디버깅:', {
+                    tokenPreview: currentAuthToken ? currentAuthToken.substring(0, 20) + '...' : 'None',
+                    tokenLength: currentAuthToken ? currentAuthToken.length : 0
                 });
+
+                // 임시: URL 파라미터 방식으로 테스트 (디버깅용)
+                const response = await fetch(`/api/admin-auth?action=get-api-key&authToken=${encodeURIComponent(currentAuthToken)}`);
                 const data = await response.json();
 
                 if (data.success && data.hasApiKey) {
