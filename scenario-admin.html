@@ -2724,7 +2724,11 @@
         // 토큰 확인
         async function checkAuthToken(authToken) {
             try {
-                const response = await fetch(`/api/admin-auth?action=check-session&authToken=${authToken}`);
+                const response = await fetch(`/api/admin-auth?action=check-session`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
                 const data = await response.json();
 
                 if (data.success && data.authenticated) {
@@ -2774,7 +2778,11 @@
             if (!currentAuthToken) return;
 
             try {
-                const response = await fetch(`/api/admin-auth?action=get-api-key&authToken=${currentAuthToken}`);
+                const response = await fetch(`/api/admin-auth?action=get-api-key`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentAuthToken}`
+                    }
+                });
                 const data = await response.json();
 
                 if (data.success && data.hasApiKey) {

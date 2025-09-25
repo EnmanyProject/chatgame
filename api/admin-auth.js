@@ -224,7 +224,9 @@ async function handleLogout(req, res) {
 
 // 토큰 확인 (세션 확인 대신)
 async function handleCheckSession(req, res) {
-  const { authToken } = req.query;
+  // URL 파라미터 또는 Authorization 헤더에서 토큰 추출
+  const authToken = req.query.authToken ||
+                   (req.headers.authorization && req.headers.authorization.replace('Bearer ', ''));
 
   if (!authToken) {
     return res.status(400).json({
@@ -352,7 +354,9 @@ async function handleSaveApiKey(req, res) {
 
 // API 키 조회 (토큰 인증된 사용자만)
 async function handleGetApiKey(req, res) {
-  const { authToken } = req.query;
+  // URL 파라미터 또는 Authorization 헤더에서 토큰 추출
+  const authToken = req.query.authToken ||
+                   (req.headers.authorization && req.headers.authorization.replace('Bearer ', ''));
 
   if (!authToken) {
     return res.status(400).json({
