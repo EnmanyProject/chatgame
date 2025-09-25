@@ -29,11 +29,37 @@ export default async function handler(req, res) {
   // 우선 순위: admin-auth 세션 키 → save-api-key 캐시 → 환경변수
   const finalKey = adminApiKey || cacheApiKey || envApiKey;
 
+  // 실제 OpenAI API 테스트로 상태 확인
+  let actualApiStatus = '❌ 미설정';
+  let actualKeyPreview = 'No key';
+
+  if (finalKey) {
+    try {
+      // 간단한 OpenAI API 테스트
+      const testResponse = await fetch('https://api.openai.com/v1/models', {
+        headers: {
+          'Authorization': `Bearer ${finalKey}`
+        }
+      });
+
+      if (testResponse.ok) {
+        actualApiStatus = '✅ 설정됨 (OpenAI 연결 확인됨)';
+        actualKeyPreview = `${finalKey.substring(0, 4)}...`;
+      } else {
+        actualApiStatus = '⚠️ 키 있음 (OpenAI 인증 실패)';
+        actualKeyPreview = `${finalKey.substring(0, 4)}...`;
+      }
+    } catch (error) {
+      actualApiStatus = finalKey ? '⚠️ 키 있음 (연결 테스트 실패)' : '❌ 미설정';
+      actualKeyPreview = finalKey ? `${finalKey.substring(0, 4)}...` : 'No key';
+    }
+  }
+
   const envStatus = {
-    OPENAI_API_KEY: finalKey ? '✅ 설정됨' : '❌ 미설정',
+    OPENAI_API_KEY: actualApiStatus,
     NODE_ENV: process.env.NODE_ENV || 'undefined',
     timestamp: new Date().toISOString(),
-    keyPreview: finalKey ? `${finalKey.substring(0, 4)}...` : 'No key',
+    keyPreview: actualKeyPreview,
     // 상세한 상태 정보
     apiKeyDetails: {
       ...apiKeyStatus,
