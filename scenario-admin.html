@@ -3333,14 +3333,14 @@
             try {
                 console.log('💾 API 키 저장 시도 (로그인 기반)...');
 
-                // 🔐 로그인된 사용자 세션으로 API 키 저장
+                // 🔐 로그인된 사용자 토큰으로 API 키 저장
                 const response = await fetch('/api/admin-auth?action=save-api-key', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentAuthToken}`
                     },
                     body: JSON.stringify({
-                        authToken: currentAuthToken,
                         apiKey: apiKey
                     })
                 });
@@ -3559,11 +3559,9 @@
                     const response = await fetch('/api/admin-auth?action=delete-api-key', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            authToken: currentAuthToken
-                        })
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${currentAuthToken}`
+                        }
                     });
 
                     if (response.ok) {

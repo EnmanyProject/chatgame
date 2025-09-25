@@ -322,21 +322,23 @@ async function handleSaveApiKey(req, res) {
     return res.status(405).json({ success: false, message: 'POST 요청만 허용됩니다.' });
   }
 
-  console.log('🔍 handleSaveApiKey 디버깅:', {
-    hasBody: !!req.body,
-    bodyKeys: req.body ? Object.keys(req.body) : [],
-    authTokenExists: !!(req.body && req.body.authToken),
-    authTokenPreview: req.body && req.body.authToken ? req.body.authToken.substring(0, 20) + '...' : 'None',
-    apiKeyExists: !!(req.body && req.body.apiKey)
-  });
+  // Authorization 헤더에서 토큰 추출
+  const authToken = req.headers.authorization && req.headers.authorization.replace('Bearer ', '');
+  const { apiKey } = req.body;
 
-  const { authToken, apiKey } = req.body;
+  console.log('🔍 handleSaveApiKey 디버깅:', {
+    hasAuthHeader: !!req.headers.authorization,
+    authTokenExists: !!authToken,
+    authTokenPreview: authToken ? authToken.substring(0, 20) + '...' : 'None',
+    hasBody: !!req.body,
+    apiKeyExists: !!apiKey
+  });
 
   if (!authToken || !apiKey) {
     console.error('❌ 요청 데이터 부족:', { authToken: !!authToken, apiKey: !!apiKey });
     return res.status(400).json({
       success: false,
-      message: '인증 토큰과 API 키가 필요합니다.'
+      message: 'Authorization 헤더와 API 키가 필요합니다.'
     });
   }
 
@@ -519,12 +521,13 @@ async function handleDeleteApiKey(req, res) {
     return res.status(405).json({ success: false, message: 'POST 요청만 허용됩니다.' });
   }
 
-  const { authToken } = req.body;
+  // Authorization 헤더에서 토큰 추출
+  const authToken = req.headers.authorization && req.headers.authorization.replace('Bearer ', '');
 
   if (!authToken) {
     return res.status(400).json({
       success: false,
-      message: '인증 토큰이 필요합니다.'
+      message: 'Authorization 헤더가 필요합니다.'
     });
   }
 
