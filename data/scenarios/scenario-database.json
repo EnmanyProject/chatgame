@@ -7,7 +7,27 @@
     "reset_at": "2025-09-22T15:35:28.575Z",
     "reset_reason": "Clean scenarios data reset"
   },
-  "scenarios": {},
+  "scenarios": {
+    "scenario_도서관의_속삭임_1758797105450": {
+      "title": "도서관의 속삭임",
+      "description": "취한 상태에서 진심을 고백한 후, 다음 날 어색해진 두 사람의 이야기",
+      "background_setting": "벚꽃이 만발한 공원",
+      "mood": "드라마틱",
+      "available_characters": [
+        "소희_enfp_1758797073480"
+      ],
+      "created_date": "2025-09-25",
+      "episode_count": 0,
+      "tags": [
+        "드라마틱"
+      ],
+      "source": "github_api",
+      "active": true,
+      "id": "scenario_도서관의_속삭임_1758797105450",
+      "action": "create",
+      "updated_at": "2025-09-25T10:45:06.625Z"
+    }
+  },
   "scenario_templates": {
     "romance_template": {
       "mood_options": [
