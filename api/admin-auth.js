@@ -43,14 +43,38 @@ function createAuthToken(username) {
 function verifyAuthToken(token) {
   try {
     if (!token) {
+      console.error('❌ 토큰 검증: 토큰이 없습니다');
       throw new Error('토큰이 없습니다');
     }
 
+    console.log('🔍 토큰 검증 시작:', {
+      tokenPreview: token.substring(0, 30) + '...',
+      tokenLength: token.length
+    });
+
     // Base64 디코딩
-    const decoded = Buffer.from(token, 'base64').toString('utf8');
-    const [payloadStr, signature] = decoded.split('.');
+    let decoded;
+    try {
+      decoded = Buffer.from(token, 'base64').toString('utf8');
+      console.log('✅ Base64 디코딩 성공, 길이:', decoded.length);
+    } catch (decodeError) {
+      console.error('❌ Base64 디코딩 실패:', decodeError.message);
+      throw new Error('Base64 디코딩 실패: ' + decodeError.message);
+    }
+
+    const parts = decoded.split('.');
+    if (parts.length !== 2) {
+      console.error('❌ 토큰 형식 오류: parts.length =', parts.length);
+      throw new Error('잘못된 토큰 형식 (점으로 분리된 2개 부분이 필요)');
+    }
+
+    const [payloadStr, signature] = parts;
 
     if (!payloadStr || !signature) {
+      console.error('❌ 토큰 구성 요소 누락:', {
+        hasPayload: !!payloadStr,
+        hasSignature: !!signature
+      });
       throw new Error('잘못된 토큰 형식');
     }
 
@@ -59,23 +83,49 @@ function verifyAuthToken(token) {
       .update(payloadStr)
       .digest('hex');
 
+    console.log('🔍 서명 검증:', {
+      receivedSig: signature.substring(0, 16) + '...',
+      expectedSig: expectedSignature.substring(0, 16) + '...',
+      match: signature === expectedSignature
+    });
+
     if (signature !== expectedSignature) {
+      console.error('❌ 서명 불일치');
       throw new Error('토큰 서명이 유효하지 않습니다');
     }
 
-    const payload = JSON.parse(payloadStr);
+    // JSON 파싱
+    let payload;
+    try {
+      payload = JSON.parse(payloadStr);
+      console.log('✅ JSON 파싱 성공:', {
+        username: payload.username,
+        hasApiKey: payload.hasApiKey,
+        exp: payload.exp
+      });
+    } catch (jsonError) {
+      console.error('❌ JSON 파싱 실패:', jsonError.message);
+      throw new Error('페이로드 JSON 파싱 실패: ' + jsonError.message);
+    }
 
     // 만료 시간 확인
-    if (Date.now() > payload.exp) {
+    const now = Date.now();
+    if (now > payload.exp) {
+      console.error('❌ 토큰 만료:', {
+        now,
+        exp: payload.exp,
+        diff: now - payload.exp
+      });
       throw new Error('토큰이 만료되었습니다');
     }
 
     // 사용자 존재 확인
     if (!adminUsers[payload.username]) {
+      console.error('❌ 사용자 없음:', payload.username);
       throw new Error('유효하지 않은 사용자');
     }
 
-    console.log('✅ 토큰 검증 성공:', {
+    console.log('✅ 토큰 검증 완전 성공:', {
       username: payload.username,
       loginTime: payload.loginTime,
       hasApiKey: payload.hasApiKey
@@ -84,7 +134,7 @@ function verifyAuthToken(token) {
     return payload;
 
   } catch (error) {
-    console.error('❌ 토큰 검증 실패:', error.message);
+    console.error('❌ 토큰 검증 최종 실패:', error.message);
     return null;
   }
 }
