@@ -147,7 +147,8 @@ function verifyAuthToken(token) {
 
   } catch (error) {
     console.error('❌ 토큰 검증 최종 실패:', error.message);
-    return null;
+    // 디버깅을 위해 에러 메시지를 포함한 객체 반환
+    return { error: error.message, success: false };
   }
 }
 
@@ -514,6 +515,10 @@ async function handleGetApiKey(req, res) {
     payload = verifyAuthToken(authToken);
     if (!payload) {
       tokenError = 'Token verification returned null';
+    } else if (payload.error) {
+      // verifyAuthToken에서 에러 객체를 반환한 경우
+      tokenError = payload.error;
+      payload = null;
     }
   } catch (error) {
     tokenError = error.message;
