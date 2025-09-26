@@ -62,13 +62,22 @@ function verifyAuthToken(token) {
       throw new Error('Base64 디코딩 실패: ' + decodeError.message);
     }
 
-    const parts = decoded.split('.');
-    if (parts.length !== 2) {
-      console.error('❌ 토큰 형식 오류: parts.length =', parts.length);
-      throw new Error('잘못된 토큰 형식 (점으로 분리된 2개 부분이 필요)');
+    // 마지막 점에서만 분리 (JSON 내부의 점들 무시)
+    const lastDotIndex = decoded.lastIndexOf('.');
+    if (lastDotIndex === -1) {
+      console.error('❌ 토큰 형식 오류: 점 구분자를 찾을 수 없음');
+      throw new Error('잘못된 토큰 형식 (점 구분자 없음)');
     }
 
-    const [payloadStr, signature] = parts;
+    const payloadStr = decoded.substring(0, lastDotIndex);
+    const signature = decoded.substring(lastDotIndex + 1);
+
+    console.log('🔍 토큰 분리 결과:', {
+      payloadLength: payloadStr.length,
+      signatureLength: signature.length,
+      payloadPreview: payloadStr.substring(0, 50) + '...',
+      signaturePreview: signature.substring(0, 20) + '...'
+    });
 
     if (!payloadStr || !signature) {
       console.error('❌ 토큰 구성 요소 누락:', {
