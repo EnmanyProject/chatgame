@@ -508,11 +508,27 @@ async function handleGetApiKey(req, res) {
     });
   }
 
-  const payload = verifyAuthToken(authToken);
+  let payload;
+  let tokenError;
+  try {
+    payload = verifyAuthToken(authToken);
+    if (!payload) {
+      tokenError = 'Token verification returned null';
+    }
+  } catch (error) {
+    tokenError = error.message;
+    payload = null;
+  }
+
   if (!payload) {
     return res.status(401).json({
       success: false,
-      message: '인증되지 않은 요청입니다.'
+      message: '인증되지 않은 요청입니다.',
+      debug: {
+        tokenError: tokenError,
+        tokenPreview: authToken ? authToken.substring(0, 30) + '...' : 'None',
+        tokenLength: authToken ? authToken.length : 0
+      }
     });
   }
 
