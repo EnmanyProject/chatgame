@@ -499,7 +499,12 @@ async function handleGetApiKey(req, res) {
     console.error('❌ API 키 조회: 토큰 없음');
     return res.status(400).json({
       success: false,
-      message: '인증 토큰이 필요합니다.'
+      message: '인증 토큰이 필요합니다.',
+      debug: {
+        authHeader: authHeader || 'None',
+        headersKeys: Object.keys(req.headers),
+        hasAuthInHeaders: !!req.headers.authorization
+      }
     });
   }
 
