@@ -94,12 +94,16 @@ function verifyAuthToken(token) {
     });
 
     if (signature !== expectedSignature) {
-      console.error('❌ 서명 불일치 상세:', {
+      const debugInfo = {
         received: signature,
         expected: expectedSignature,
-        secret: ADMIN_SECRET
-      });
-      throw new Error('토큰 서명이 유효하지 않습니다');
+        secret: ADMIN_SECRET,
+        payloadUsed: payloadStr
+      };
+      console.error('❌ 서명 불일치 상세:', debugInfo);
+
+      // 클라이언트에서 볼 수 있도록 에러 응답에 포함
+      throw new Error(`토큰 서명이 유효하지 않습니다. Debug: ${JSON.stringify(debugInfo)}`);
     }
 
     // JSON 파싱
