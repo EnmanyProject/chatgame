@@ -473,6 +473,13 @@ async function handleGetApiKey(req, res) {
     'Bearer': req.headers.Bearer
   });
 
+  // 헤더 객체 전체 내용과 타입 확인
+  console.log('🔍 전체 헤더 객체 타입 및 내용:', {
+    headersType: typeof req.headers,
+    headersKeys: Object.keys(req.headers),
+    headersEntries: Object.entries(req.headers)
+  });
+
   // URL 파라미터 또는 Authorization 헤더에서 토큰 추출 (다양한 케이스 대응)
   const authHeader = req.headers.authorization ||
                     req.headers.Authorization ||
