@@ -296,9 +296,20 @@ async function handleCheckSession(req, res) {
     queryTokenPreview: req.query.authToken ? req.query.authToken.substring(0, 20) + '...' : 'None'
   });
 
-  // URL 파라미터 또는 Authorization 헤더에서 토큰 추출
+  // URL 파라미터 또는 Authorization 헤더에서 토큰 추출 (다양한 케이스 대응)
+  const authHeader = req.headers.authorization ||
+                    req.headers.Authorization ||
+                    req.headers['authorization'] ||
+                    req.headers['Authorization'];
+
   const authToken = req.query.authToken ||
-                   (req.headers.authorization && req.headers.authorization.replace('Bearer ', ''));
+                   (authHeader && authHeader.replace('Bearer ', ''));
+
+  console.log('🔍 handleCheckSession 토큰 추출 결과:', {
+    authHeader: authHeader || 'None',
+    extractedToken: authToken ? authToken.substring(0, 20) + '...' : 'None',
+    tokenLength: authToken ? authToken.length : 0
+  });
 
   if (!authToken) {
     console.error('❌ 토큰 확인: 토큰 없음');
@@ -462,9 +473,20 @@ async function handleGetApiKey(req, res) {
     'Bearer': req.headers.Bearer
   });
 
-  // URL 파라미터 또는 Authorization 헤더에서 토큰 추출
+  // URL 파라미터 또는 Authorization 헤더에서 토큰 추출 (다양한 케이스 대응)
+  const authHeader = req.headers.authorization ||
+                    req.headers.Authorization ||
+                    req.headers['authorization'] ||
+                    req.headers['Authorization'];
+
   const authToken = req.query.authToken ||
-                   (req.headers.authorization && req.headers.authorization.replace('Bearer ', ''));
+                   (authHeader && authHeader.replace('Bearer ', ''));
+
+  console.log('🔍 최종 토큰 추출 결과:', {
+    authHeader: authHeader || 'None',
+    extractedToken: authToken ? authToken.substring(0, 20) + '...' : 'None',
+    tokenLength: authToken ? authToken.length : 0
+  });
 
   if (!authToken) {
     console.error('❌ API 키 조회: 토큰 없음');
