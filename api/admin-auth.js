@@ -448,9 +448,18 @@ async function handleGetApiKey(req, res) {
     hasAuthHeader: !!req.headers.authorization,
     authHeaderPreview: req.headers.authorization ? req.headers.authorization.substring(0, 20) + '...' : 'None',
     authHeaderFull: req.headers.authorization || 'None',
-    allHeaders: Object.keys(req.headers),
+    allHeaders: req.headers,  // 모든 헤더 내용 출력
     hasQueryToken: !!req.query.authToken,
     queryTokenPreview: req.query.authToken ? req.query.authToken.substring(0, 20) + '...' : 'None'
+  });
+
+  // 추가: authorization 관련 헤더들 모두 확인
+  console.log('🔍 Authorization 관련 헤더 상세 체크:', {
+    'authorization': req.headers.authorization,
+    'Authorization': req.headers.Authorization,
+    'AUTHORIZATION': req.headers.AUTHORIZATION,
+    'bearer': req.headers.bearer,
+    'Bearer': req.headers.Bearer
   });
 
   // URL 파라미터 또는 Authorization 헤더에서 토큰 추출
