@@ -662,36 +662,46 @@ async function handleDeleteApiKey(req, res) {
 
 // 활성 API 키 가져오기 (다른 API에서 사용) - 토큰 없이 통합 저장소 기반
 export async function getActiveApiKey() {
+  console.log('🔍 getActiveApiKey 호출됨 - 모든 저장소 확인 시작');
+
   try {
-    // 1. GitHub 보안 저장소에서 최신 API 키 확인
+    // 1. 환경변수 우선 확인 (Vercel에서 가장 확실한 방법)
+    const envKey = process.env.OPENAI_API_KEY;
+    if (envKey && envKey.startsWith('sk-')) {
+      console.log('✅ admin-auth에서 환경변수 API 키 발견:', `${envKey.substring(0, 4)}...`);
+      return envKey;
+    }
+    console.log('❌ 환경변수에 유효한 API 키 없음:', {
+      hasEnvKey: !!envKey,
+      envKeyPreview: envKey ? envKey.substring(0, 4) + '...' : 'None'
+    });
+
+    // 2. GitHub 보안 저장소에서 시도 (환경변수 없을 때만)
     try {
       const { getGlobalApiKey } = await import('./secure-api-storage.js');
       const githubKey = await getGlobalApiKey();
 
-      if (githubKey) {
-        console.log('🔑 admin-auth에서 GitHub 저장소 API 키 반환:', `${githubKey.substring(0, 4)}...`);
+      if (githubKey && githubKey.startsWith('sk-')) {
+        console.log('✅ admin-auth에서 GitHub 저장소 API 키 발견:', `${githubKey.substring(0, 4)}...`);
+        // GitHub에서 찾은 키를 환경변수에도 설정
+        process.env.OPENAI_API_KEY = githubKey;
         return githubKey;
       }
+      console.log('❌ GitHub 저장소에서 유효한 API 키 없음');
     } catch (error) {
       console.warn('⚠️ GitHub 저장소 접근 실패:', error.message);
-    }
-
-    // 2. 환경변수에서 fallback
-    const envKey = process.env.OPENAI_API_KEY;
-    if (envKey && envKey.startsWith('sk-')) {
-      console.log('🔑 admin-auth에서 환경변수 API 키 반환:', `${envKey.substring(0, 4)}...`);
-      return envKey;
     }
 
     console.log('❌ admin-auth에서 API 키 없음 (모든 저장소 확인함)');
     return null;
 
   } catch (error) {
-    console.error('❌ admin-auth API 키 조회 오류:', error);
+    console.error('❌ admin-auth API 키 조회 전체 오류:', error);
 
-    // 오류 시에도 환경변수 확인
+    // 최종 fallback으로 환경변수 다시 확인
     const envKey = process.env.OPENAI_API_KEY;
     if (envKey && envKey.startsWith('sk-')) {
+      console.log('🔄 오류 복구: 환경변수에서 API 키 발견');
       return envKey;
     }
 
