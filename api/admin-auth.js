@@ -83,14 +83,22 @@ function verifyAuthToken(token) {
       .update(payloadStr)
       .digest('hex');
 
-    console.log('🔍 서명 검증:', {
-      receivedSig: signature.substring(0, 16) + '...',
-      expectedSig: expectedSignature.substring(0, 16) + '...',
+    console.log('🔍 서명 검증 상세:', {
+      receivedSig: signature,
+      expectedSig: expectedSignature,
+      receivedLength: signature.length,
+      expectedLength: expectedSignature.length,
+      secretLength: ADMIN_SECRET.length,
+      payloadLength: payloadStr.length,
       match: signature === expectedSignature
     });
 
     if (signature !== expectedSignature) {
-      console.error('❌ 서명 불일치');
+      console.error('❌ 서명 불일치 상세:', {
+        received: signature,
+        expected: expectedSignature,
+        secret: ADMIN_SECRET
+      });
       throw new Error('토큰 서명이 유효하지 않습니다');
     }
 
