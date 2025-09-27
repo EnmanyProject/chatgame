@@ -73,13 +73,17 @@ module.exports = async function handler(req, res) {
     if (action === 'list_characters') {
       try {
         console.log('📋 캐릭터 리스트 조회 시작...');
-        const characters = await loadCharacterDatabase();
-        console.log('✅ 캐릭터 DB 로드 성공:', Object.keys(characters.characters || {}).length, '개');
 
+        // 간단한 응답으로 테스트
         return res.json({
           success: true,
-          characters: characters.characters || {},
-          metadata: characters.metadata || {}
+          characters: {},
+          metadata: {
+            version: "2.0.0",
+            total_characters: 0,
+            source: "vercel_safe_mode",
+            timestamp: new Date().toISOString()
+          }
         });
       } catch (error) {
         console.error('❌ 캐릭터 리스트 조회 실패:', error);
