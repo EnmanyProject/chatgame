@@ -1,17 +1,5 @@
-// 환경변수 테스트 API - admin-auth 연동
-import { getActiveApiKey, getAdminApiKeyStatus } from './admin-auth.js';
-
-// save-api-key.js의 함수들은 fallback으로만 사용 (선택적)
-let getGlobalApiKey, getApiKeyStatus;
-try {
-  const saveApiKeyModule = await import('./save-api-key.js');
-  getGlobalApiKey = saveApiKeyModule.getGlobalApiKey;
-  getApiKeyStatus = saveApiKeyModule.getApiKeyStatus;
-} catch (error) {
-  console.warn('⚠️ save-api-key.js 모듈 로드 실패 (무시 가능):', error.message);
-  getGlobalApiKey = () => null;
-  getApiKeyStatus = () => ({ status: 'module_load_failed' });
-}
+// 환경변수 테스트 API - admin-auth 연동 (간소화)
+// import 문제 해결을 위해 동적 import로 변경
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -25,6 +13,9 @@ export default async function handler(req, res) {
   // 다양한 소스에서 API 키 확인 (통합 저장소) - 우선순위 재정렬
   console.log('🔍 API 키 확인 시작 - 모든 저장소 체크');
 
+  let adminApiKey = null;
+  let cacheApiKey = null;
+
   // 1. 환경변수 직접 확인 (가장 확실한 방법)
   const envApiKey = process.env.OPENAI_API_KEY;
   console.log('🔍 환경변수 직접 확인:', {
@@ -32,19 +23,29 @@ export default async function handler(req, res) {
     envKeyPreview: envApiKey && envApiKey.startsWith('sk-') ? `${envApiKey.substring(0, 4)}...` : 'Invalid or None'
   });
 
-  // 2. admin-auth 통합 저장소 (개선된 로직)
-  const adminApiKey = await getActiveApiKey(); // admin-auth.js 통합 저장소 (async)
-  console.log('🔍 admin-auth 통합 저장소:', {
-    hasAdminKey: !!adminApiKey,
-    adminKeyPreview: adminApiKey ? `${adminApiKey.substring(0, 4)}...` : 'None'
-  });
-
-  // 3. save-api-key 캐시 (fallback)
-  let cacheApiKey;
+  // 2. admin-auth 통합 저장소 (동적 import로 안전하게)
   try {
-    cacheApiKey = getGlobalApiKey(); // save-api-key.js 캐시 - 동기함수이면 await 제거
+    const adminAuthModule = await import('./admin-auth.js');
+    adminApiKey = await adminAuthModule.getActiveApiKey();
+    console.log('🔍 admin-auth 통합 저장소:', {
+      hasAdminKey: !!adminApiKey,
+      adminKeyPreview: adminApiKey ? `${adminApiKey.substring(0, 4)}...` : 'None'
+    });
   } catch (error) {
-    console.warn('⚠️ save-api-key 캐시 확인 실패:', error.message);
+    console.warn('⚠️ admin-auth 모듈 로드/실행 실패:', error.message);
+    adminApiKey = null;
+  }
+
+  // 3. save-api-key 캐시 (동적 import로 안전하게)
+  try {
+    const saveApiKeyModule = await import('./save-api-key.js');
+    cacheApiKey = saveApiKeyModule.getGlobalApiKey();
+    console.log('🔍 save-api-key 캐시:', {
+      hasCacheKey: !!cacheApiKey,
+      cacheKeyPreview: cacheApiKey ? `${cacheApiKey.substring(0, 4)}...` : 'None'
+    });
+  } catch (error) {
+    console.warn('⚠️ save-api-key 모듈 로드/실행 실패:', error.message);
     cacheApiKey = null;
   }
 
@@ -83,22 +84,25 @@ export default async function handler(req, res) {
     }
   }
 
-  // 관리자 API 키 상태 확인 (개선된 로깅과 함께)
-  let adminApiKeyStatus;
+  // 관리자 API 키 상태 확인 (동적 import로 안전하게)
+  let adminApiKeyStatus = { error: 'not_loaded' };
   try {
-    adminApiKeyStatus = await getAdminApiKeyStatus();
+    const adminAuthModule = await import('./admin-auth.js');
+    adminApiKeyStatus = await adminAuthModule.getAdminApiKeyStatus();
     console.log('✅ 관리자 API 키 상태 확인 완료:', adminApiKeyStatus);
   } catch (error) {
     console.warn('⚠️ 관리자 API 키 상태 확인 실패:', error.message);
     adminApiKeyStatus = { error: error.message };
   }
 
-  // API 키 상태 확인 (fallback)
-  let apiKeyStatus;
+  // API 키 상태 확인 (동적 import로 안전하게)
+  let apiKeyStatus = { error: 'not_loaded' };
   try {
-    apiKeyStatus = getApiKeyStatus();
+    const saveApiKeyModule = await import('./save-api-key.js');
+    apiKeyStatus = saveApiKeyModule.getApiKeyStatus();
+    console.log('✅ save-api-key 상태 확인 완료:', apiKeyStatus);
   } catch (error) {
-    console.warn('⚠️ API 키 상태 확인 실패:', error.message);
+    console.warn('⚠️ save-api-key 상태 확인 실패:', error.message);
     apiKeyStatus = { error: error.message };
   }
 

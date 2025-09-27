@@ -106,8 +106,10 @@ export async function getGlobalApiKeySync() {
     return apiKeyStore.key;
   }
 
+  // Secure Storage를 동적 import로 로드하여 circular dependency 방지
   try {
-    const secureKey = await getGlobalApiKey();
+    const secureStorageModule = await import('./secure-api-storage.js');
+    const secureKey = await secureStorageModule.getGlobalApiKey();
     if (secureKey) {
       // 캐시에 저장
       apiKeyStore.key = secureKey;
