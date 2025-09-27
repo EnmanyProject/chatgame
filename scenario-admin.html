@@ -5879,20 +5879,64 @@ GitHub Token:`);
             
             const previewDiv = document.getElementById('characterPreview');
             previewDiv.innerHTML = `
-                <h4>🎭 AI 생성 결과 미리보기</h4>
+                <h4>🎭 AI 생성결과보기</h4>
                 <div class="character-preview-content">
-                    <p><strong>이름:</strong> ${character.name}</p>
-                    <p><strong>나이:</strong> ${character.age}세</p>
-                    <p><strong>MBTI:</strong> ${character.mbti}</p>
-                    <p><strong>성격:</strong> ${character.personality_traits ? character.personality_traits.join(', ') : '감성적, 내향적, 이상주의적'}</p>
-                    <p><strong>외모:</strong> ${character.appearance ? 
-                        `${character.appearance.hair}, ${character.appearance.eyes}, ${character.appearance.style}` : 
-                        '긴 생머리, 동그랗고 귀여운 눈, 큐트 캐주얼'}</p>
-                    <p><strong>관계:</strong> ${translateRelationship(character.relationship || 'secret_crush')}</p>
-                    <p><strong>말투:</strong> ${translateSpeechStyle(character.speech_style || 'soft_warm')}</p>
-                    <button class="btn btn-primary" onclick="applyAIGeneratedData()">
-                        💖 이 캐릭터 적용하기
-                    </button>
+                    <div class="preview-section">
+                        <h5>👤 기본 정보</h5>
+                        <p><strong>이름:</strong> ${character.name}</p>
+                        <p><strong>나이:</strong> ${character.age}세</p>
+                        <p><strong>성별:</strong> ${character.gender === 'female' ? '여성' : '남성'}</p>
+                        <p><strong>MBTI:</strong> ${character.mbti}</p>
+                    </div>
+
+                    <div class="preview-section">
+                        <h5>🌟 성격 & 특성</h5>
+                        <p><strong>성격 특성:</strong> ${Array.isArray(character.personality_traits) ? character.personality_traits.join(', ') : character.personality_traits || '감성적, 내향적'}</p>
+                        <p><strong>전공:</strong> ${character.major || '일반 전공'}</p>
+                        <p><strong>관계:</strong> ${character.relationship || '친구'}</p>
+                        <p><strong>가치관:</strong> ${character.values || '가족 중심'}</p>
+                    </div>
+
+                    <div class="preview-section">
+                        <h5>👀 외모 & 스타일</h5>
+                        <p><strong>헤어스타일:</strong> ${character.appearance?.hair || character.hair || '긴 생머리'}</p>
+                        <p><strong>눈:</strong> ${character.appearance?.eyes || character.eyes || '큰 눈'}</p>
+                        <p><strong>스타일:</strong> ${character.appearance?.style || character.style || '캐주얼'}</p>
+                    </div>
+
+                    <div class="preview-section">
+                        <h5>🏠 배경 정보</h5>
+                        <p><strong>가족:</strong> ${character.family || character.background?.family || '평범한 가정'}</p>
+                        <p><strong>고향:</strong> ${character.hometown || character.background?.hometown || '서울'}</p>
+                        <p><strong>직업:</strong> ${character.background?.occupation || '대학생'}</p>
+                    </div>
+
+                    <div class="preview-section">
+                        <h5>💬 말투 & 습관</h5>
+                        <p><strong>말투:</strong> ${character.speech_style || '친근한 말투'}</p>
+                        <p><strong>말버릇:</strong> ${character.speech_habit || '이모티콘을 자주 사용함'}</p>
+                    </div>
+
+                    <div class="preview-section">
+                        <h5>🎯 취미 & 관심사</h5>
+                        <p><strong>취미:</strong> ${Array.isArray(character.hobbies) ? character.hobbies.join(', ') : character.hobbies || '독서, 음악감상'}</p>
+                        <p><strong>두려움:</strong> ${character.personality?.fears || character.fears || '거절당하는 것'}</p>
+                    </div>
+
+                    <div class="preview-section">
+                        <h5>📖 스토리 배경</h5>
+                        <p><strong>만나는 상황:</strong> ${character.story_context?.main_situation || '대학교에서 처음 만나는 상황'}</p>
+                        <p><strong>생성 방식:</strong> ${character.generation_method || 'ai_random_generation'}</p>
+                    </div>
+
+                    <div class="preview-actions">
+                        <button class="btn btn-primary" onclick="applyAIGeneratedData()">
+                            💖 이 캐릭터 적용하기
+                        </button>
+                        <button class="btn btn-secondary" onclick="generateRandomCharacter()" style="margin-left: 10px;">
+                            🎲 다시 생성하기
+                        </button>
+                    </div>
                 </div>
             `;
         }
