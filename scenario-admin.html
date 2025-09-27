@@ -7106,13 +7106,6 @@
                 return;
             }
 
-            // 온라인 데이터 클라이언트 확인
-            if (!window.onlineDataClient) {
-                console.error('❌ 온라인 데이터 클라이언트가 로드되지 않았습니다');
-                alert('⚠️ 온라인 시스템 로드 오류\n\n페이지를 새로고침 후 다시 시도해주세요.');
-                return;
-            }
-
             try {
                 // 간단한 캐릭터 데이터 생성 (복잡한 collectCharacterData 대신)
                 const characterId = `${name.toLowerCase().replace(/\s+/g, '_')}_${mbti.toLowerCase()}_${Date.now()}`;
@@ -7170,10 +7163,25 @@
                     saveButton.textContent = '🌐 온라인 저장 중...';
                 }
 
-                console.log('💾 온라인에 저장할 캐릭터 데이터:', finalCharacterData);
+                console.log('💾 API를 통해 저장할 캐릭터 데이터:', finalCharacterData);
 
-                // 온라인 데이터 클라이언트를 통해 저장
-                const result = await window.onlineDataClient.saveCharacter(finalCharacterData);
+                // 직접 API 호출로 캐릭터 저장
+                const response = await fetch('/api/character-ai-generator', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'save_character',
+                        character: finalCharacterData
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API 호출 실패: ${response.status}`);
+                }
+
+                const result = await response.json();
 
                 if (result && result.success) {
                     console.log('🎉 저장 성공! 전체 캐릭터 목록 새로고침...');
