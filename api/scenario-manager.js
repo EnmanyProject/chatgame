@@ -328,23 +328,44 @@ async function updateScenario(data) {
 
 // AI 컨텍스트 재생성
 async function regenerateAIContext(data) {
-  const scenario = await loadScenarioDatabase().then(db => db.scenarios[data.scenario_id]);
-  
-  if (!scenario) {
-    throw new Error('Scenario not found');
+  console.log('🔄 AI 컨텍스트 재생성 시작:', data);
+
+  // 시나리오 ID가 있는 경우 기존 시나리오 업데이트
+  if (data.scenario_id) {
+    const db = await loadScenarioDatabase();
+    const scenario = db.scenarios[data.scenario_id];
+
+    if (!scenario) {
+      throw new Error(`Scenario not found: ${data.scenario_id}. Available: ${Object.keys(db.scenarios).join(', ')}`);
+    }
+
+    const newContext = await generateAIContext({
+      title: data.title || scenario.title,
+      description: data.description || scenario.description,
+      background_setting: data.background_setting || scenario.background_setting,
+      mood: data.mood || scenario.mood
+    });
+
+    scenario.ai_generated_context = newContext;
+    await saveScenarioToDatabase(scenario);
+
+    return scenario;
   }
-  
-  const newContext = await generateAIContext({
-    title: data.title || scenario.title,
-    description: data.description || scenario.description,
-    background_setting: data.background_setting || scenario.background_setting,
-    mood: data.mood || scenario.mood
-  });
-  
-  scenario.ai_generated_context = newContext;
-  await saveScenarioToDatabase(scenario);
-  
-  return scenario;
+
+  // 시나리오 ID가 없는 경우 새로운 컨텍스트만 생성
+  else {
+    const newContext = await generateAIContext({
+      title: data.title,
+      description: data.description,
+      background_setting: data.background_setting,
+      mood: data.mood
+    });
+
+    return {
+      ai_generated_context: newContext,
+      message: 'AI 컨텍스트가 생성되었습니다'
+    };
+  }
 }
 
 // 태그 추출 함수
