@@ -583,6 +583,64 @@
             min-height: 100px;
         }
 
+        /* 기존 컨텍스트 표시 */
+        .existing-context {
+            background: #f0f8ff;
+            border: 2px solid #4a90e2;
+            border-radius: 8px;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .context-header {
+            background: #4a90e2;
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .context-label {
+            font-size: 14px;
+        }
+
+        .context-date {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .context-content {
+            padding: 15px;
+            line-height: 1.6;
+            color: #333;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* 컨텍스트 없음 표시 */
+        .no-context {
+            background: #fff9e6;
+            border: 2px dashed #f39c12;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .no-context-message {
+            color: #e67e22;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .no-context-help {
+            color: #8e6a00;
+            font-size: 14px;
+        }
+
         /* 대화 미리보기 */
         .dialogue-preview {
             background: #f8f9ff;
@@ -2267,7 +2325,14 @@
                             🤖 AI 컨텍스트 생성
                         </button>
                         <div id="aiContext" class="ai-context">
-                            AI가 생성한 소설풍 시나리오 컨텍스트가 여기에 표시됩니다
+                            <div class="no-context">
+                                <div class="no-context-message">
+                                    💡 AI 컨텍스트를 생성해주세요
+                                </div>
+                                <div class="no-context-help">
+                                    위의 "🤖 AI 컨텍스트 생성" 버튼을 클릭하여 소설풍 시나리오 컨텍스트를 생성하세요
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -3893,7 +3958,16 @@
             if (mode === 'create') {
                 document.getElementById('scenarioModalTitle').textContent = '새 시나리오 만들기';
                 document.getElementById('scenarioForm').reset();
-                document.getElementById('aiContext').innerHTML = 'AI가 생성한 소설풍 시나리오 컨텍스트가 여기에 표시됩니다';
+                document.getElementById('aiContext').innerHTML = `
+                    <div class="no-context">
+                        <div class="no-context-message">
+                            💡 AI 컨텍스트를 생성해주세요
+                        </div>
+                        <div class="no-context-help">
+                            위의 "🤖 AI 컨텍스트 생성" 버튼을 클릭하여 소설풍 시나리오 컨텍스트를 생성하세요
+                        </div>
+                    </div>
+                `;
                 selectedCharacters.clear();
                 // 캐릭터 선택기를 다시 로딩하여 최신 캐릭터 목록 표시
                 loadCharacterSelector();
@@ -3929,7 +4003,30 @@
             document.getElementById('scenarioDescription').value = scenario.description;
             document.getElementById('backgroundSetting').value = scenario.background_setting;
             document.getElementById('mood').value = scenario.mood;
-            document.getElementById('aiContext').innerHTML = scenario.ai_generated_context || '';
+            // AI 생성 컨텍스트 표시 개선
+            const aiContextDiv = document.getElementById('aiContext');
+            if (scenario.ai_generated_context && scenario.ai_generated_context.trim()) {
+                aiContextDiv.innerHTML = `
+                    <div class="existing-context">
+                        <div class="context-header">
+                            <span class="context-label">📖 기존 생성된 컨텍스트</span>
+                            <span class="context-date">${scenario.updated_at ? new Date(scenario.updated_at).toLocaleString('ko-KR') : ''}</span>
+                        </div>
+                        <div class="context-content">${scenario.ai_generated_context}</div>
+                    </div>
+                `;
+            } else {
+                aiContextDiv.innerHTML = `
+                    <div class="no-context">
+                        <div class="no-context-message">
+                            ⚠️ 아직 AI 컨텍스트가 생성되지 않았습니다
+                        </div>
+                        <div class="no-context-help">
+                            위의 "🤖 AI 컨텍스트 생성" 버튼을 클릭하여 컨텍스트를 생성하세요
+                        </div>
+                    </div>
+                `;
+            }
             document.getElementById('customContext').value = scenario.custom_context || '';
 
             // 캐릭터 선택 상태 복원
@@ -4161,7 +4258,16 @@
                 alert(`❌ AI 컨텍스트 생성 실패\n\n${userMessage}\n\n다시 시도하거나 관리자에게 문의해주세요.`);
 
                 // UI 상태 복원
-                aiContextDiv.innerHTML = 'AI가 생성한 소설풍 시나리오 컨텍스트가 여기에 표시됩니다';
+                aiContextDiv.innerHTML = `
+                    <div class="no-context">
+                        <div class="no-context-message">
+                            💡 AI 컨텍스트를 생성해주세요
+                        </div>
+                        <div class="no-context-help">
+                            위의 "🤖 AI 컨텍스트 생성" 버튼을 클릭하여 소설풍 시나리오 컨텍스트를 생성하세요
+                        </div>
+                    </div>
+                `;
             }
         }
 
