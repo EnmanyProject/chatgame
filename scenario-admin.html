@@ -4237,7 +4237,32 @@
 
                 if (data.success && data.scenario && data.scenario.ai_generated_context) {
                     console.log('✅ AI 컨텍스트 생성 성공');
-                    aiContextDiv.innerHTML = data.scenario.ai_generated_context;
+
+                    // UI에 컨텍스트 표시 (새로운 스타일 적용)
+                    aiContextDiv.innerHTML = `
+                        <div class="existing-context">
+                            <div class="context-header">
+                                <span class="context-label">📖 방금 생성된 컨텍스트</span>
+                                <span class="context-date">${new Date().toLocaleString('ko-KR')}</span>
+                            </div>
+                            <div class="context-content">${data.scenario.ai_generated_context}</div>
+                        </div>
+                    `;
+
+                    // 메모리의 시나리오 데이터 업데이트
+                    const scenarioId = document.getElementById('scenarioId').value;
+                    if (scenarioId && scenarios[scenarioId]) {
+                        scenarios[scenarioId].ai_generated_context = data.scenario.ai_generated_context;
+                        scenarios[scenarioId].updated_at = new Date().toISOString();
+                        console.log('🔄 메모리 시나리오 데이터 업데이트 완료:', scenarioId);
+                    }
+
+                    // window.scenarios도 업데이트 (호환성)
+                    if (window.scenarios && window.scenarios[scenarioId]) {
+                        window.scenarios[scenarioId].ai_generated_context = data.scenario.ai_generated_context;
+                        window.scenarios[scenarioId].updated_at = new Date().toISOString();
+                    }
+
                 } else {
                     throw new Error(data.message || '알 수 없는 오류가 발생했습니다.');
                 }

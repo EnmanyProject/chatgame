@@ -187,9 +187,20 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('❌ 캐릭터 생성 AI 오류:', error);
-    return res.status(500).json({ 
-      success: false, 
-      message: 'Internal server error',
+    console.error('에러 상세 정보:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      action: action,
+      method: req.method,
+      body: req.body ? Object.keys(req.body) : 'no body'
+    });
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Internal server error',
+      action: action,
+      timestamp: new Date().toISOString(),
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
@@ -255,20 +266,55 @@ async function generateNextQuestion(currentStep, answers) {
       })
     });
 
+    console.log('📡 OpenAI API 응답 상태:', response.status);
+
     if (response.ok) {
       const data = await response.json();
       const aiResponse = data.choices[0]?.message?.content;
-      
-      if (aiResponse) {
-        return JSON.parse(aiResponse);
+
+      console.log('🤖 AI 응답 내용:', aiResponse?.substring(0, 200) + '...');
+
+      if (aiResponse && aiResponse.trim()) {
+        try {
+          return JSON.parse(aiResponse);
+        } catch (parseError) {
+          console.error('❌ JSON 파싱 실패:', parseError);
+          console.error('파싱 실패한 AI 응답:', aiResponse);
+          throw new Error('AI 응답을 파싱할 수 없습니다. 다시 시도해주세요.');
+        }
+      } else {
+        console.error('❌ AI 응답이 비어있음');
+        throw new Error('OpenAI API에서 빈 응답을 받았습니다. 다시 시도해주세요.');
       }
+    } else {
+      const errorText = await response.text();
+      console.error('❌ OpenAI API 호출 실패:', response.status, errorText);
+
+      let errorMessage = `OpenAI API 오류 (${response.status})`;
+      if (response.status === 401) {
+        errorMessage = 'API 키가 유효하지 않습니다. OpenAI API 키를 확인해주세요.';
+      } else if (response.status === 429) {
+        errorMessage = 'API 사용량 한도를 초과했습니다. 잠시 후 다시 시도해주세요.';
+      } else if (response.status >= 500) {
+        errorMessage = 'OpenAI 서버에 일시적인 문제가 있습니다. 잠시 후 다시 시도해주세요.';
+      }
+
+      throw new Error(errorMessage);
     }
-    
-    console.error('❌ OpenAI API에서 빈 응답 반환');
-    throw new Error('OpenAI API에서 빈 응답을 받았습니다. 다시 시도해주세요.');
 
   } catch (error) {
     console.error('❌ AI 질문 생성 오류:', error);
+    console.error('에러 상세 정보:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
+
+    // OpenAI API 응답 오류 처리
+    if (error.message.includes('JSON')) {
+      console.error('❌ JSON 파싱 오류 - AI 응답이 올바른 JSON 형식이 아닙니다');
+      throw new Error('AI가 올바르지 않은 형식으로 응답했습니다. 다시 시도해주세요.');
+    }
 
     // 네트워크 오류 처리
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
