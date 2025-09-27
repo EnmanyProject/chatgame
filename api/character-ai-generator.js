@@ -1,7 +1,7 @@
 // AI 캐릭터 생성 API - 세계관 최강 버전
 import fs from 'fs';
 import path from 'path';
-import { getGlobalApiKey } from './save-api-key.js';
+// import { getGlobalApiKey } from './save-api-key.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -217,11 +217,25 @@ function generateBasicOptions() {
 }
 
 async function generateNextQuestion(currentStep, answers) {
-  const OPENAI_API_KEY = getGlobalApiKey();
-  
-  if (!OPENAI_API_KEY) {
-    console.log('⚠️ API 키 없음, fallback 사용');
-    return generateFallbackQuestion(currentStep, answers);
+  // 1. 환경변수에서 우선 확인
+  let OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+  // 2. 환경변수에 없으면 admin-auth에서 로드
+  if (!OPENAI_API_KEY || !OPENAI_API_KEY.startsWith('sk-')) {
+    console.log('🔍 환경변수에 API 키 없음, admin-auth에서 로드 시도...');
+    try {
+      const { getActiveApiKey } = await import('./admin-auth.js');
+      OPENAI_API_KEY = await getActiveApiKey();
+      console.log('🔍 admin-auth에서 API 키 로드 결과:', OPENAI_API_KEY ? `${OPENAI_API_KEY.substring(0, 4)}...` : 'None');
+    } catch (error) {
+      console.warn('⚠️ admin-auth에서 API 키 로드 실패:', error.message);
+    }
+  }
+
+  if (!OPENAI_API_KEY || !OPENAI_API_KEY.startsWith('sk-')) {
+    console.error('❌ OpenAI API key not configured in any storage');
+    console.error('환경변수 또는 admin-auth 저장소에 API 키를 설정해주세요');
+    throw new Error('API 키가 설정되지 않았습니다. 관리자 페이지에서 OpenAI API 키를 먼저 저장해주세요.');
   }
 
   try {
@@ -262,30 +276,38 @@ async function generateNextQuestion(currentStep, answers) {
       }
     }
     
-    console.log('⚠️ AI 질문 생성 실패, fallback 사용');
-    return generateFallbackQuestion(currentStep, answers);
-    
+    console.error('❌ OpenAI API에서 빈 응답 반환');
+    throw new Error('OpenAI API에서 빈 응답을 받았습니다. 다시 시도해주세요.');
+
   } catch (error) {
     console.error('❌ AI 질문 생성 오류:', error);
-    return generateFallbackQuestion(currentStep, answers);
+
+    // 네트워크 오류 처리
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('네트워크 연결에 문제가 있습니다. 인터넷 연결을 확인하고 다시 시도해주세요.');
+    }
+
+    // 기타 오류는 그대로 전달
+    throw error;
   }
 }
 
 async function generateCompleteCharacter(answers, req = null) {
-  // 헤더에서 API 키 확인 (우선순위 1)
-  const headerApiKey = req?.headers?.['x-openai-key'];
-  
-  // 전역 API 키 (우선순위 2)
-  const globalApiKey = getGlobalApiKey();
-  
-  const OPENAI_API_KEY = headerApiKey || globalApiKey;
-  
-  console.log('🔍 API 키 확인:', {
-    headerKey: headerApiKey ? `${headerApiKey.substring(0, 4)}...` : 'None',
-    globalKey: globalApiKey ? `${globalApiKey.substring(0, 4)}...` : 'None',
-    finalKey: OPENAI_API_KEY ? `${OPENAI_API_KEY.substring(0, 4)}...` : 'None'
-  });
-  
+  // 1. 환경변수에서 우선 확인
+  let OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+  // 2. 환경변수에 없으면 admin-auth에서 로드
+  if (!OPENAI_API_KEY || !OPENAI_API_KEY.startsWith('sk-')) {
+    console.log('🔍 환경변수에 API 키 없음, admin-auth에서 로드 시도...');
+    try {
+      const { getActiveApiKey } = await import('./admin-auth.js');
+      OPENAI_API_KEY = await getActiveApiKey();
+      console.log('🔍 admin-auth에서 API 키 로드 결과:', OPENAI_API_KEY ? `${OPENAI_API_KEY.substring(0, 4)}...` : 'None');
+    } catch (error) {
+      console.warn('⚠️ admin-auth에서 API 키 로드 실패:', error.message);
+    }
+  }
+
   const character = {
     id: 'char_' + Date.now(),
     created_date: new Date().toISOString().split('T')[0],
@@ -293,9 +315,10 @@ async function generateCompleteCharacter(answers, req = null) {
     ...answers
   };
 
-  if (!OPENAI_API_KEY) {
-    console.log('⚠️ API 키 없음, fallback 캐릭터 생성');
-    return generateFallbackCharacter(character);
+  if (!OPENAI_API_KEY || !OPENAI_API_KEY.startsWith('sk-')) {
+    console.error('❌ OpenAI API key not configured in any storage');
+    console.error('환경변수 또는 admin-auth 저장소에 API 키를 설정해주세요');
+    throw new Error('API 키가 설정되지 않았습니다. 관리자 페이지에서 OpenAI API 키를 먼저 저장해주세요.');
   }
 
   try {
@@ -333,12 +356,20 @@ async function generateCompleteCharacter(answers, req = null) {
         return { ...character, ...aiData };
       }
     }
-    
-    return generateFallbackCharacter(character);
-    
+
+    console.error('❌ OpenAI API에서 빈 응답을 받았습니다');
+    throw new Error('OpenAI API에서 빈 응답을 받았습니다. 다시 시도해주세요.');
+
   } catch (error) {
     console.error('❌ AI 캐릭터 생성 오류:', error);
-    return generateFallbackCharacter(character);
+
+    // 네트워크 오류 등의 경우 더 친화적인 메시지 제공
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('네트워크 연결에 문제가 있습니다. 인터넷 연결을 확인하고 다시 시도해주세요.');
+    }
+
+    // 기타 오류는 그대로 전달
+    throw error;
   }
 }
 
@@ -444,98 +475,7 @@ ${providedInfo || '정보 없음 - 완전히 새로운 캐릭터 생성 필요'}
 `;
 }
 
-// Fallback 함수들
-function generateFallbackQuestion(currentStep, answers) {
-  const fallbacks = {
-    2: {
-      question: {
-        text: "이 캐릭터의 성격은 어떤 편인가요?",
-        type: "multiple_choice",
-        required: true
-      },
-      options: [
-        { id: 'intj', text: 'INTJ - 논리적이고 독립적', icon: '🧠' },
-        { id: 'infp', text: 'INFP - 감성적이고 이상주의적', icon: '🌸' },
-        { id: 'enfp', text: 'ENFP - 외향적이고 열정적', icon: '✨' },
-        { id: 'istp', text: 'ISTP - 실용적이고 독립적', icon: '🔧' }
-      ]
-    }
-    // 다른 단계들 추가...
-  };
-  
-  return fallbacks[currentStep + 1] || { question: { text: "완료되었습니다!", type: "text" }, options: [] };
-}
-
-function generateFallbackCharacter(character) {
-  console.log('🎭 Fallback 캐릭터 생성:', character);
-  
-  // MBTI 기반 지능적 추정
-  const mbti = character.mbti || 'INFP';
-  const mbtiTemplates = {
-    'INFP': {
-      name: '윤아',
-      personality_traits: ['감성적', '이상주의적', '내향적'],
-      speech_style: '부드럽고 따뜻한 말투',
-      speech_habit: '종종 망설이며 말하기',
-      major: 'art',
-      hobbies: ['독서', '그림그리기', '음악감상']
-    },
-    'ENFP': {
-      name: '미나',
-      personality_traits: ['외향적', '열정적', '창의적'],
-      speech_style: '밝고 에너지 넘치는 말투',
-      speech_habit: '자주 감탄사 사용',
-      major: 'media',
-      hobbies: ['댄스', '여행', '사람만나기']
-    },
-    'INTJ': {
-      name: '서연',
-      personality_traits: ['논리적', '독립적', '완벽주의'],
-      speech_style: '간결하고 정확한 말투',
-      speech_habit: '정확한 표현 추구',
-      major: 'engineering',
-      hobbies: ['독서', '연구', '계획세우기']
-    }
-  };
-  
-  const template = mbtiTemplates[mbti] || mbtiTemplates['INFP'];
-  
-  return {
-    ...character,
-    id: character.id || `char_${Date.now()}`,
-    name: character.name || template.name,
-    age: character.age || '20',
-    gender: 'female',
-    mbti: mbti,
-    personality_traits: character.personality_traits?.length > 0 ? character.personality_traits : template.personality_traits,
-    major: character.major || template.major,
-    relationship: character.relationship || 'junior',
-    speech_style: character.speech_style || template.speech_style,
-    speech_habit: character.speech_habit || template.speech_habit,
-    appearance: {
-      hair: character.hair || '긴 직모',
-      eyes: character.eyes || '둥글고 큰 눈',
-      style: character.style || '깔끔하고 캐주얼한 스타일'
-    },
-    background: {
-      family: character.family || 'only_child',
-      hometown: character.hometown || 'seoul',
-      occupation: '대학생'
-    },
-    personality: {
-      hobbies: character.hobbies?.length > 0 ? character.hobbies : template.hobbies,
-      values: character.values || 'love_family',
-      fears: '혼자 남겨지는 것'
-    },
-    story_context: {
-      genre: character.genre || 'school_romance',
-      main_situation: character.main_situation || 'first_meeting'
-    },
-    created_date: new Date().toISOString().split('T')[0],
-    source: 'ai_fallback',
-    generation_method: 'fallback_template'
-  };
-}
+// Fallback 함수들은 제거됨 - 실제 AI 생성 실패 시 에러 발생
 
 // 데이터베이스 함수들
 async function loadCharacterDatabase() {
@@ -747,11 +687,25 @@ async function resetAllCharacters() {
 // 캐릭터 이미지 분석 함수 (OpenAI Vision API)
 async function analyzeCharacterImage(imageBase64) {
   try {
-    const OPENAI_API_KEY = getGlobalApiKey();
-    
-    if (!OPENAI_API_KEY) {
-      console.warn('⚠️ OpenAI API key not configured, using fallback analysis');
-      return generateFallbackImageAnalysis();
+    // 1. 환경변수에서 우선 확인
+    let OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+    // 2. 환경변수에 없으면 admin-auth에서 로드
+    if (!OPENAI_API_KEY || !OPENAI_API_KEY.startsWith('sk-')) {
+      console.log('🔍 환경변수에 API 키 없음, admin-auth에서 로드 시도...');
+      try {
+        const { getActiveApiKey } = await import('./admin-auth.js');
+        OPENAI_API_KEY = await getActiveApiKey();
+        console.log('🔍 admin-auth에서 API 키 로드 결과:', OPENAI_API_KEY ? `${OPENAI_API_KEY.substring(0, 4)}...` : 'None');
+      } catch (error) {
+        console.warn('⚠️ admin-auth에서 API 키 로드 실패:', error.message);
+      }
+    }
+
+    if (!OPENAI_API_KEY || !OPENAI_API_KEY.startsWith('sk-')) {
+      console.error('❌ OpenAI API key not configured in any storage');
+      console.error('환경변수 또는 admin-auth 저장소에 API 키를 설정해주세요');
+      throw new Error('API 키가 설정되지 않았습니다. 관리자 페이지에서 OpenAI API 키를 먼저 저장해주세요.');
     }
 
     console.log('🔍 OpenAI Vision API 이미지 분석 시작...');
@@ -807,29 +761,36 @@ async function analyzeCharacterImage(imageBase64) {
           return { raw_analysis: analysis };
         }
       } else {
-        console.warn('⚠️ Vision API 응답이 비어있음, fallback 사용');
-        return generateFallbackImageAnalysis();
+        console.error('❌ Vision API에서 빈 응답을 받았습니다');
+        throw new Error('이미지 분석 API에서 빈 응답을 받았습니다. 다시 시도해주세요.');
       }
     } else {
       const errorText = await response.text();
       console.error('❌ Vision API 호출 실패:', response.status, errorText);
-      return generateFallbackImageAnalysis();
+
+      let errorMessage = `이미지 분석 API 오류 (${response.status})`;
+      if (response.status === 401) {
+        errorMessage = 'API 키가 유효하지 않습니다. 올바른 OpenAI API 키를 확인해주세요.';
+      } else if (response.status === 429) {
+        errorMessage = 'API 사용량 한도를 초과했습니다. 잠시 후 다시 시도해주세요.';
+      } else if (response.status >= 500) {
+        errorMessage = 'OpenAI 서버에 일시적인 문제가 있습니다. 잠시 후 다시 시도해주세요.';
+      }
+
+      throw new Error(errorMessage);
     }
 
   } catch (error) {
     console.error('❌ 이미지 분석 오류:', error);
-    return generateFallbackImageAnalysis();
+
+    // 네트워크 오류 등의 경우 더 친화적인 메시지 제공
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('네트워크 연결에 문제가 있습니다. 인터넷 연결을 확인하고 다시 시도해주세요.');
+    }
+
+    // 기타 오류는 그대로 전달
+    throw error;
   }
 }
 
-// Fallback 이미진 분석
-function generateFallbackImageAnalysis() {
-  return {
-    appearance: "매력적인 외모, 추측 불가",
-    personality_prediction: "사진에서 느껴지는 따뜻하고 친근한 인상",
-    mbti_suggestion: "INFP, ENFP, ISFJ 중 선택 권장",
-    speech_style: "부드럽고 친근한 말투",
-    background_suggestion: "대학생 또는 직장인으로 설정 권장",
-    note: "OpenAI API가 설정되지 않아 기본 분석을 제공합니다."
-  };
-}
+// Fallback 이미지 분석 제거됨 - 실제 AI 분석 실패 시 에러 발생

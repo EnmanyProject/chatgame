@@ -78,14 +78,23 @@ function decryptApiKey(encryptedData) {
  * Get stored API keys from GitHub
  */
 async function getStoredApiKeys() {
+  console.log('🔍 getStoredApiKeys 함수 시작');
+  console.log('🔍 GITHUB_TOKEN 상태:', {
+    hasToken: !!GITHUB_TOKEN,
+    tokenLength: GITHUB_TOKEN ? GITHUB_TOKEN.length : 0,
+    tokenPreview: GITHUB_TOKEN ? `${GITHUB_TOKEN.substring(0, 4)}...` : 'None'
+  });
+
   if (!GITHUB_TOKEN) {
-    console.warn('⚠️ GitHub Token이 설정되지 않음');
+    console.warn('⚠️ GitHub Token이 설정되지 않음 - 빈 객체 반환');
     return {};
   }
 
   try {
     const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.filePath}`;
+    console.log('🔍 GitHub API 호출 URL:', url);
 
+    console.log('🔍 GitHub API 요청 시작...');
     const response = await fetch(url, {
       headers: {
         'Authorization': `token ${GITHUB_TOKEN}`,
@@ -94,21 +103,54 @@ async function getStoredApiKeys() {
       }
     });
 
+    console.log('🔍 GitHub API 응답:', {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok
+    });
+
     if (response.status === 404) {
-      console.log('📁 API 키 저장소 파일이 없음, 새로 생성');
+      console.log('📁 API 키 저장소 파일이 없음 (404) - 새로 생성 필요');
       return {};
     }
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ GitHub API 호출 실패 상세:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorBody: errorText
+      });
       throw new Error(`GitHub API 오류: ${response.status} ${response.statusText}`);
     }
 
+    console.log('✅ GitHub API 응답 성공 - 데이터 파싱 시작');
     const data = await response.json();
-    const content = Buffer.from(data.content, 'base64').toString('utf8');
+    console.log('🔍 GitHub API 응답 데이터:', {
+      hasContent: !!data.content,
+      contentLength: data.content ? data.content.length : 0,
+      sha: data.sha ? data.sha.substring(0, 8) + '...' : 'None'
+    });
 
-    return JSON.parse(content);
+    const content = Buffer.from(data.content, 'base64').toString('utf8');
+    console.log('🔍 Base64 디코딩 결과:', {
+      contentLength: content.length,
+      contentPreview: content.substring(0, 100) + '...'
+    });
+
+    const parsedContent = JSON.parse(content);
+    console.log('🔍 JSON 파싱 결과:', {
+      keysCount: Object.keys(parsedContent).length,
+      keys: Object.keys(parsedContent)
+    });
+
+    return parsedContent;
   } catch (error) {
-    console.error('❌ GitHub에서 API 키 로드 오류:', error);
+    console.error('❌ GitHub에서 API 키 로드 전체 오류:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     return {};
   }
 }
@@ -304,39 +346,97 @@ export async function removeUserApiKey(username) {
  * Returns the most recently updated API key
  */
 export async function getGlobalApiKey() {
+  console.log('🔍 secure-api-storage getGlobalApiKey 호출 시작');
+
   try {
+    console.log('🔍 GitHub에서 저장된 API 키 조회 시작...');
     const apiKeys = await getStoredApiKeys();
 
+    console.log('🔍 getStoredApiKeys 결과:', {
+      keysCount: Object.keys(apiKeys).length,
+      keys: Object.keys(apiKeys),
+      hasKeys: Object.keys(apiKeys).length > 0
+    });
+
     if (Object.keys(apiKeys).length === 0) {
-      console.log('📝 저장된 API 키 없음');
-      return process.env.OPENAI_API_KEY || null;
+      console.log('📝 저장된 API 키 없음 - 환경변수로 fallback');
+      const envFallback = process.env.OPENAI_API_KEY || null;
+      console.log('🔍 환경변수 fallback 결과:', {
+        hasEnvKey: !!envFallback,
+        envKeyPreview: envFallback ? envFallback.substring(0, 4) + '...' : 'None'
+      });
+      return envFallback;
     }
 
     // Find the most recently updated key
     let latestKey = null;
     let latestTime = 0;
+    let latestUsername = null;
 
+    console.log('🔍 최신 API 키 검색 중...');
     for (const [username, keyData] of Object.entries(apiKeys)) {
+      console.log(`🔍 사용자 ${username} 키 데이터:`, {
+        hasLastUpdated: !!keyData.lastUpdated,
+        lastUpdated: keyData.lastUpdated,
+        hasKeyPreview: !!keyData.keyPreview,
+        keyPreview: keyData.keyPreview,
+        hasEncrypted: !!keyData.encrypted
+      });
+
       const updateTime = new Date(keyData.lastUpdated).getTime();
       if (updateTime > latestTime) {
         latestTime = updateTime;
         latestKey = keyData;
+        latestUsername = username;
       }
     }
 
-    if (latestKey) {
-      const apiKey = decryptApiKey(latestKey);
-      process.env.OPENAI_API_KEY = apiKey;
+    console.log('🔍 최신 키 선택 결과:', {
+      hasLatestKey: !!latestKey,
+      latestUsername,
+      latestTime: new Date(latestTime).toISOString()
+    });
 
-      console.log(`🔑 전역 API 키 설정 완료: ${latestKey.keyPreview}`);
-      return apiKey;
+    if (latestKey) {
+      console.log('🔓 API 키 복호화 시도...');
+      try {
+        const apiKey = decryptApiKey(latestKey);
+        console.log('✅ API 키 복호화 성공:', {
+          keyLength: apiKey ? apiKey.length : 0,
+          keyFormat: apiKey && apiKey.startsWith('sk-') ? 'Valid OpenAI format' : 'Invalid format',
+          keyPreview: apiKey && apiKey.startsWith('sk-') ? `${apiKey.substring(0, 4)}...` : 'Invalid'
+        });
+
+        process.env.OPENAI_API_KEY = apiKey;
+        console.log('🔄 환경변수에 API 키 설정 완료');
+
+        console.log(`🔑 전역 API 키 설정 완료: ${latestKey.keyPreview}`);
+        return apiKey;
+      } catch (decryptError) {
+        console.error('❌ API 키 복호화 실패:', {
+          message: decryptError.message,
+          stack: decryptError.stack
+        });
+        return process.env.OPENAI_API_KEY || null;
+      }
     }
 
+    console.log('❌ 유효한 최신 키를 찾지 못함');
     return process.env.OPENAI_API_KEY || null;
 
   } catch (error) {
-    console.error('❌ 전역 API 키 조회 오류:', error);
-    return process.env.OPENAI_API_KEY || null;
+    console.error('❌ 전역 API 키 조회 전체 오류:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+
+    const envFallback = process.env.OPENAI_API_KEY || null;
+    console.log('🔄 오류 시 환경변수 fallback:', {
+      hasEnvKey: !!envFallback,
+      envKeyPreview: envFallback ? envFallback.substring(0, 4) + '...' : 'None'
+    });
+    return envFallback;
   }
 }
 

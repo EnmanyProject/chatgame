@@ -677,19 +677,33 @@ export async function getActiveApiKey() {
     });
 
     // 2. GitHub 보안 저장소에서 시도 (환경변수 없을 때만)
+    console.log('🔍 GitHub 저장소에서 API 키 로드 시도...');
     try {
       const { getGlobalApiKey } = await import('./secure-api-storage.js');
+      console.log('✅ secure-api-storage.js 모듈 로드 성공');
+
       const githubKey = await getGlobalApiKey();
+      console.log('🔍 GitHub getGlobalApiKey 결과:', {
+        hasKey: !!githubKey,
+        keyType: typeof githubKey,
+        keyLength: githubKey ? githubKey.length : 0,
+        keyPreview: githubKey && githubKey.startsWith('sk-') ? `${githubKey.substring(0, 4)}...` : 'Invalid key format'
+      });
 
       if (githubKey && githubKey.startsWith('sk-')) {
         console.log('✅ admin-auth에서 GitHub 저장소 API 키 발견:', `${githubKey.substring(0, 4)}...`);
         // GitHub에서 찾은 키를 환경변수에도 설정
         process.env.OPENAI_API_KEY = githubKey;
+        console.log('🔄 GitHub 키를 환경변수에 설정 완료');
         return githubKey;
       }
-      console.log('❌ GitHub 저장소에서 유효한 API 키 없음');
+      console.log('❌ GitHub 저장소에서 유효한 API 키 없음 - 키가 없거나 형식 불일치');
     } catch (error) {
-      console.warn('⚠️ GitHub 저장소 접근 실패:', error.message);
+      console.error('❌ GitHub 저장소 접근 실패 (상세):', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
     }
 
     console.log('❌ admin-auth에서 API 키 없음 (모든 저장소 확인함)');
@@ -697,6 +711,7 @@ export async function getActiveApiKey() {
 
   } catch (error) {
     console.error('❌ admin-auth API 키 조회 전체 오류:', error);
+    console.error('❌ 전체 오류 스택:', error.stack);
 
     // 최종 fallback으로 환경변수 다시 확인
     const envKey = process.env.OPENAI_API_KEY;
