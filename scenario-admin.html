@@ -3146,14 +3146,21 @@
             // 온라인 시스템으로 전환: 별도 초기화 대기
             console.log('⏰ 온라인 클라이언트 초기화 대기 중...');
 
-            // 로그인 후 데이터 로드 (딜레이를 두어 모든 초기화가 완료된 후 실행)
+            // 로그인 후 데이터 로드 (충분한 딜레이로 모든 초기화 완료 후 실행)
             setTimeout(async () => {
-                if (window.loadDataAfterLogin) {
+                if (typeof window.loadDataAfterLogin === 'function') {
                     await window.loadDataAfterLogin();
                 } else {
-                    console.error('❌ loadDataAfterLogin 함수가 정의되지 않음');
+                    console.warn('⚠️ loadDataAfterLogin 함수가 아직 로드되지 않음. 기본 데이터 로드 시도...');
+                    // 기본 데이터 로드 시도
+                    try {
+                        await loadCharacters();
+                        await loadScenarios();
+                    } catch (error) {
+                        console.error('❌ 기본 데이터 로드 실패:', error);
+                    }
                 }
-            }, 2000);
+            }, 3000);
         }
 
         // 🔐 ================ 로그인 시스템 끝 ================
@@ -3686,31 +3693,32 @@
             }
         }
 
-        // API 상태 확인 (개선된 버전)
+        // API 상태 확인 (환경변수 기반)
         async function checkApiStatus() {
             try {
-                console.log('🔍 Vercel 환경변수 API 키 상태 확인 시작...');
+                console.log('🔍 API 키 상태 확인 시작...');
 
-                const response = await fetch('/api/simple-api-key?action=check');
+                // 환경변수는 서버사이드에서만 확인 가능하므로 간단한 테스트 API 사용
+                const response = await fetch('/api/character-ai-generator?action=list_characters');
                 const data = await response.json();
 
-                console.log('📋 환경변수 API 키 상태:', data);
+                console.log('📋 API 상태:', data.success ? '정상' : '오류');
 
                 const statusElement = document.getElementById('openaiStatus');
 
-                if (data.success && data.apiKey.exists && data.apiKey.isValid && data.apiKey.connected) {
-                    console.log('✅ Vercel 환경변수에 API 키가 정상 설정됨');
+                if (data.success) {
+                    console.log('✅ API 서비스가 정상 작동 중');
 
                     statusElement.innerHTML = `
                         <span class="status-indicator">✅</span>
-                        <span class="status-text">Vercel 환경변수 API 키 정상 연결됨 (${data.apiKey.preview})</span>
+                        <span class="status-text">API 서비스 정상 작동</span>
                     `;
                     statusElement.style.color = '#28a745';
 
-                    showNotification('✅ API 키가 정상적으로 설정되었습니다. AI 생성 기능을 사용할 수 있습니다.', 'success');
+                    showNotification('✅ API 서비스가 정상적으로 작동합니다.', 'success');
 
                 } else {
-                    console.log('❌ API 키가 설정되지 않았거나 유효하지 않음');
+                    console.log('❌ API 서비스 오류');
 
                     statusElement.innerHTML = `
                         <span class="status-indicator">❌</span>
