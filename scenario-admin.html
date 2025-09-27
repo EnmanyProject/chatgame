@@ -3917,8 +3917,21 @@
         }
 
         function editScenario(scenarioId) {
-            const scenario = scenarios[scenarioId];
-            if (!scenario) return;
+            console.log('🔧 시나리오 편집 시작:', scenarioId);
+            const scenariosData = window.scenarios || scenarios || {};
+            const scenario = scenariosData[scenarioId];
+
+            console.log('📋 시나리오 데이터 확인:', {
+                scenarioId,
+                hasScenario: !!scenario,
+                availableIds: Object.keys(scenariosData)
+            });
+
+            if (!scenario) {
+                console.error('❌ 시나리오를 찾을 수 없습니다:', scenarioId);
+                alert('시나리오를 찾을 수 없습니다.');
+                return;
+            }
 
             currentMode = 'edit';
             document.getElementById('scenarioModalTitle').textContent = '시나리오 수정';
