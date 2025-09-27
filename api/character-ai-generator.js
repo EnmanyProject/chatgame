@@ -67,11 +67,20 @@ module.exports = async function handler(req, res) {
       memoryStorage.metadata.total_characters = 0;
       memoryStorage.metadata.reset_at = new Date().toISOString();
 
+      // 🐙 GitHub에도 초기화된 상태 저장
+      try {
+        await saveToGitHub(memoryStorage);
+        console.log('🎉 GitHub에 초기화 상태 저장 완료');
+      } catch (error) {
+        console.warn('⚠️ GitHub 초기화 저장 실패 (메모리 초기화는 완료):', error.message);
+      }
+
       console.log('✅ 메모리 저장소 초기화 완료');
 
       return res.json({
         success: true,
-        message: '모든 캐릭터 데이터가 초기화되었습니다'
+        message: '모든 캐릭터 데이터가 초기화되었습니다',
+        github_updated: true
       });
     }
 
