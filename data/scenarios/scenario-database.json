@@ -4,68 +4,10 @@
     "created_date": "2025-09-16",
     "total_scenarios": 0,
     "ai_context_engine": "claude-3.5-sonnet",
-    "reset_at": "2025-09-22T15:35:28.575Z",
+    "reset_at": "2025-09-27T01:23:46.586Z",
     "reset_reason": "Clean scenarios data reset"
   },
-  "scenarios": {
-    "scenario_도서관의_속삭임_1758797105450": {
-      "title": "도서관의 속삭임",
-      "description": "취한 상태에서 진심을 고백한 후, 다음 날 어색해진 두 사람의 이야기",
-      "background_setting": "벚꽃이 만발한 공원",
-      "mood": "드라마틱",
-      "available_characters": [
-        "소희_enfp_1758797073480"
-      ],
-      "created_date": "2025-09-25",
-      "episode_count": 0,
-      "tags": [
-        "드라마틱"
-      ],
-      "source": "github_api",
-      "active": true,
-      "id": "scenario_도서관의_속삭임_1758797105450",
-      "action": "create",
-      "updated_at": "2025-09-25T10:45:06.625Z"
-    },
-    "scenario_운명의_만남_1758934164331": {
-      "title": "운명의 만남",
-      "description": "매일 같은 시간, 같은 카페에서 마주치는 두 사람이 서로에게 관심을 갖게 되는 상황",
-      "background_setting": "학생식당",
-      "mood": "코믹",
-      "available_characters": [
-        "유나__intp_1758866345749"
-      ],
-      "created_date": "2025-09-27",
-      "episode_count": 0,
-      "tags": [
-        "코믹"
-      ],
-      "source": "github_api",
-      "active": true,
-      "id": "scenario_운명의_만남_1758934164331",
-      "action": "create",
-      "updated_at": "2025-09-27T00:49:25.220Z"
-    },
-    "scenario_도서관의_속삭임_1758934258616": {
-      "title": "도서관의 속삭임",
-      "description": "취한 상태에서 진심을 고백한 후, 다음 날 어색해진 두 사람의 이야기",
-      "background_setting": "기숙사 라운지",
-      "mood": "청춘",
-      "available_characters": [
-        "미화__enfp_1758556263173"
-      ],
-      "created_date": "2025-09-27",
-      "episode_count": 0,
-      "tags": [
-        "청춘"
-      ],
-      "source": "github_api",
-      "active": true,
-      "id": "scenario_도서관의_속삭임_1758934258616",
-      "action": "create",
-      "updated_at": "2025-09-27T00:50:59.473Z"
-    }
-  },
+  "scenarios": {},
   "scenario_templates": {
     "romance_template": {
       "mood_options": [
