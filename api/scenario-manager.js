@@ -397,15 +397,38 @@ VALIDATION: 작성 전에 반드시 확인하세요
 
 // Fallback 제거됨 - AI 생성 실패 시 에러 처리로 대체
 
-// 시나리오 데이터베이스 로드
+// 시나리오 데이터베이스 로드 (GitHub API 우선)
 async function loadScenarioDatabase() {
   try {
+    console.log('📥 시나리오 데이터베이스 로드 시작...');
+
+    // 1. 먼저 GitHub에서 최신 데이터 시도
+    const githubData = await loadFromGitHub();
+    if (githubData) {
+      console.log('✅ GitHub에서 시나리오 데이터 로드 성공');
+      return githubData;
+    }
+
+    // 2. GitHub 실패 시 로컬 파일 시도
+    console.log('🔄 로컬 파일에서 시나리오 데이터 로드 시도...');
     const scenarioPath = path.join(process.cwd(), 'data', 'scenarios', 'scenario-database.json');
     const scenarioData = fs.readFileSync(scenarioPath, 'utf8');
-    return JSON.parse(scenarioData);
+    const parsedData = JSON.parse(scenarioData);
+    console.log('✅ 로컬 파일에서 시나리오 데이터 로드 성공');
+    return parsedData;
+
   } catch (error) {
-    console.error('Failed to load scenario database:', error);
-    return { metadata: {}, scenarios: {} };
+    console.error('❌ 시나리오 데이터베이스 로드 실패:', error);
+    console.log('🆕 새로운 빈 데이터베이스 생성');
+    return {
+      metadata: {
+        version: '1.0.0',
+        created_date: new Date().toISOString().split('T')[0],
+        total_scenarios: 0,
+        ai_context_engine: 'gpt-4o-mini'
+      },
+      scenarios: {}
+    };
   }
 }
 
@@ -480,15 +503,23 @@ async function saveScenarioToDatabase(scenario) {
     console.log('📊 저장 후 시나리오 수:', Object.keys(db.scenarios).length);
     console.log('💾 파일 쓰기 시작...');
     
+    // 1. 로컬 파일 쓰기 시도 (임시 저장)
     try {
       fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
-      console.log('✅ 시나리오 파일 쓰기 완료');
-      return true;
+      console.log('✅ 시나리오 로컬 파일 쓰기 완료');
     } catch (writeError) {
-      console.error('❌ 시나리오 파일 쓰기 실패:', writeError.message);
-      // Vercel 환경에서는 파일 쓰기가 제한될 수 있지만,
-      // 메모리에서는 업데이트되었으므로 부분적 성공으로 처리
-      console.log('⚠️ 시나리오 파일 쓰기 실패했지만 메모리 업데이트는 완료');
+      console.warn('⚠️ 시나리오 로컬 파일 쓰기 실패:', writeError.message);
+    }
+
+    // 2. GitHub API를 통한 영구 저장
+    try {
+      console.log('🐙 GitHub API를 통한 시나리오 영구 저장 시작...');
+      await saveToGitHub(db, 'data/scenarios/scenario-database.json');
+      console.log('✅ 시나리오 GitHub 저장 완료');
+      return true;
+    } catch (githubError) {
+      console.error('❌ 시나리오 GitHub 저장 실패:', githubError.message);
+      console.log('💡 로컬 메모리에는 저장되었지만 GitHub 동기화 실패');
       return true; // 메모리 업데이트는 성공했으므로 true 반환
     }
     
@@ -566,6 +597,130 @@ async function regenerateAIContext(data) {
       ai_generated_context: newContext,
       message: 'AI 컨텍스트가 생성되었습니다'
     };
+  }
+}
+
+// 🐙 GitHub API를 통한 시나리오 데이터 저장 함수
+async function saveToGitHub(db, filePath) {
+  const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+  const REPO_OWNER = 'EnmanyProject';
+  const REPO_NAME = 'chatgame';
+
+  if (!GITHUB_TOKEN) {
+    throw new Error('GITHUB_TOKEN 환경 변수가 설정되지 않았습니다.');
+  }
+
+  try {
+    console.log('🐙 GitHub API를 통한 시나리오 저장 시작...');
+
+    const getFileUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`;
+
+    // 1. 기존 파일의 SHA 값 확인 (파일 업데이트에 필요)
+    let currentFileSha = null;
+    try {
+      const getResponse = await fetch(getFileUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${GITHUB_TOKEN}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'ChatGame-Scenario-Saver'
+        }
+      });
+
+      if (getResponse.ok) {
+        const fileData = await getResponse.json();
+        currentFileSha = fileData.sha;
+        console.log('📂 기존 파일 SHA 확인:', currentFileSha);
+      } else {
+        console.log('📂 새 파일 생성 (기존 파일 없음)');
+      }
+    } catch (error) {
+      console.log('📂 새 파일 생성 (파일 조회 실패):', error.message);
+    }
+
+    // 2. 시나리오 데이터를 JSON으로 변환
+    const scenarioDataJson = JSON.stringify(db, null, 2);
+    const encodedContent = Buffer.from(scenarioDataJson, 'utf8').toString('base64');
+
+    // 3. GitHub API로 파일 업데이트/생성
+    const updateData = {
+      message: `💾 시나리오 데이터 업데이트 - ${db.metadata.total_scenarios}개 시나리오`,
+      content: encodedContent,
+      branch: 'main'
+    };
+
+    if (currentFileSha) {
+      updateData.sha = currentFileSha;
+    }
+
+    const updateResponse = await fetch(getFileUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+        'User-Agent': 'ChatGame-Scenario-Saver'
+      },
+      body: JSON.stringify(updateData)
+    });
+
+    if (!updateResponse.ok) {
+      const errorData = await updateResponse.text();
+      throw new Error(`GitHub API 오류: ${updateResponse.status} - ${errorData}`);
+    }
+
+    const result = await updateResponse.json();
+    console.log('🎉 시나리오 GitHub 저장 성공:', {
+      sha: result.content.sha,
+      size: result.content.size,
+      download_url: result.content.download_url
+    });
+
+    return result;
+
+  } catch (error) {
+    console.error('❌ 시나리오 GitHub 저장 실패:', error);
+    throw error;
+  }
+}
+
+// 🐙 GitHub에서 시나리오 데이터 로드 함수
+async function loadFromGitHub() {
+  const REPO_OWNER = 'EnmanyProject';
+  const REPO_NAME = 'chatgame';
+  const FILE_PATH = 'data/scenarios/scenario-database.json';
+
+  try {
+    console.log('🐙 GitHub에서 시나리오 데이터 로드 시도...');
+
+    const getFileUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+    const response = await fetch(getFileUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'ChatGame-Scenario-Loader'
+      }
+    });
+
+    if (response.ok) {
+      const fileData = await response.json();
+      const decodedContent = Buffer.from(fileData.content, 'base64').toString('utf8');
+      const scenarioData = JSON.parse(decodedContent);
+
+      console.log('✅ GitHub에서 시나리오 데이터 로드 성공:', {
+        총시나리오수: scenarioData.metadata?.total_scenarios || 0,
+        버전: scenarioData.metadata?.version || 'unknown'
+      });
+
+      return scenarioData;
+    } else {
+      console.log('📂 GitHub에 저장된 시나리오 파일이 없음');
+      return null;
+    }
+
+  } catch (error) {
+    console.warn('⚠️ GitHub 시나리오 로드 실패:', error.message);
+    return null;
   }
 }
 
