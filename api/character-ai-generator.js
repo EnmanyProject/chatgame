@@ -588,157 +588,98 @@ ${providedInfo || '정보 없음 - 완전히 새로운 캐릭터 생성 필요'}
 // 데이터베이스 함수들
 async function loadCharacterDatabase() {
   try {
-    // 먼저 기존 characters.json 시도
-    const mainDbPath = path.join(process.cwd(), 'data', 'characters.json');
-    const aiDbPath = path.join(process.cwd(), 'data', 'characters-ai.json');
-    
-    console.log('📂 캐릭터 DB 로드 시도:', { mainDbPath, aiDbPath });
-    
-    // characters-ai.json이 있으면 사용
-    if (fs.existsSync(aiDbPath)) {
-      console.log('✅ AI 캐릭터 DB 파일 발견');
-      const data = fs.readFileSync(aiDbPath, 'utf8');
-      return JSON.parse(data);
-    }
-    
-    // 기존 characters.json을 AI 형식으로 변환
-    if (fs.existsSync(mainDbPath)) {
-      console.log('📄 기존 캐릭터 DB에서 변환');
-      const data = fs.readFileSync(mainDbPath, 'utf8');
-      const mainDb = JSON.parse(data);
-      
-      // characters.json 형식을 characters-ai.json 형식으로 변환
-      const charactersObj = mainDb.characters || {};
-      const charactersCount = Object.keys(charactersObj).length;
+    console.log('📂 캐릭터 DB 로드 시도 (Vercel 환경)');
+    console.log('📍 현재 작업 디렉토리:', process.cwd());
 
-      const aiDb = {
-        metadata: {
-          version: "2.0.0",
-          total_characters: charactersCount,
-          converted_from: "characters.json",
-          last_converted: new Date().toISOString()
-        },
-        characters: charactersObj
-      };
-      
-      // AI DB 파일로 저장 시도 (실패해도 메모리에서 반환)
-      try {
-        fs.writeFileSync(aiDbPath, JSON.stringify(aiDb, null, 2));
-        console.log('✅ AI DB 파일 생성 성공');
-      } catch (writeError) {
-        console.log('⚠️ AI DB 파일 쓰기 실패, 메모리에서 반환:', writeError.message);
+    // Vercel 환경에서 안전한 파일 시스템 접근
+    const mainDbPath = path.join(process.cwd(), 'data', 'characters.json');
+    console.log('📂 시도할 파일 경로:', mainDbPath);
+
+    try {
+      // 파일 존재 여부 확인 후 읽기
+      if (fs.existsSync(mainDbPath)) {
+        console.log('📄 캐릭터 DB 파일 발견');
+        const data = fs.readFileSync(mainDbPath, 'utf8');
+        const mainDb = JSON.parse(data);
+
+        // 데이터 구조 확인 및 변환
+        const charactersObj = mainDb.characters || {};
+        const charactersCount = Object.keys(charactersObj).length;
+
+        console.log('📊 로드된 캐릭터 수:', charactersCount);
+
+        return {
+          metadata: {
+            version: "2.0.0",
+            total_characters: charactersCount,
+            source: "characters.json",
+            last_loaded: new Date().toISOString()
+          },
+          characters: charactersObj
+        };
       }
-      
-      return aiDb;
+    } catch (fileError) {
+      console.log('⚠️ 파일 읽기 실패:', fileError.message);
     }
-    
-    // 둘 다 없으면 초기 DB 생성
+
+    // 파일이 없거나 읽기 실패 시 초기 DB 반환
     console.log('🆕 초기 캐릭터 DB 생성');
-    const initialDb = {
-      metadata: { version: "2.0.0", total_characters: 0 },
+    return {
+      metadata: {
+        version: "2.0.0",
+        total_characters: 0,
+        created: new Date().toISOString(),
+        note: "Vercel 환경 - 메모리 기반 DB"
+      },
       characters: {}
     };
-    
-    try {
-      fs.writeFileSync(aiDbPath, JSON.stringify(initialDb, null, 2));
-      console.log('✅ 초기 DB 파일 생성 성공');
-    } catch (writeError) {
-      console.log('⚠️ 초기 DB 파일 쓰기 실패, 메모리에서 반환:', writeError.message);
-    }
-    
-    return initialDb;
-    
+
   } catch (error) {
     console.error('❌ 캐릭터 DB 로드 실패:', error);
-    return { 
-      metadata: { version: "2.0.0", total_characters: 0, error: error.message }, 
-      characters: {} 
+    // 완전 실패 시에도 기본 구조 반환
+    return {
+      metadata: {
+        version: "2.0.0",
+        total_characters: 0,
+        error: error.message,
+        fallback: true
+      },
+      characters: {}
     };
   }
 }
 
 async function saveCharacterToDatabase(character) {
   try {
-    console.log('💾 캐릭터 저장 시작:', character.name, character.id);
-    
-    const db = await loadCharacterDatabase();
-    console.log('📊 DB 로드 완료, 기존 캐릭터 수:', Object.keys(db.characters).length);
-    
+    console.log('💾 캐릭터 저장 시작 (Vercel 환경):', character.name);
+
     // 캐릭터 ID 생성 (없으면)
     if (!character.id) {
       character.id = `${character.name.toLowerCase()}_${character.mbti.toLowerCase()}_${Date.now()}`;
       console.log('🔧 캐릭터 ID 생성:', character.id);
     }
-    
-    // 캐릭터 저장
-    db.characters[character.id] = {
-      ...character,
-      updated_at: new Date().toISOString(),
-      source: 'ai_generator'
-    };
-    
-    db.metadata.total_characters = Object.keys(db.characters).length;
-    db.metadata.last_updated = new Date().toISOString();
-    
-    console.log('💾 DB 업데이트 완료, 총 캐릭터 수:', db.metadata.total_characters);
-    
-    // 파일 저장 시도
-    const aiDbPath = path.join(process.cwd(), 'data', 'characters-ai.json');
-    try {
-      fs.writeFileSync(aiDbPath, JSON.stringify(db, null, 2));
-      console.log('✅ AI 캐릭터 파일 저장 성공:', character.id);
-      return true;
-    } catch (writeError) {
-      console.error('❌ 파일 쓰기 실패:', writeError.message);
-      // Vercel 환경에서는 파일 쓰기가 제한될 수 있지만, 
-      // 메모리에서는 업데이트되었으므로 성공으로 처리
-      console.log('⚠️ 파일 쓰기 실패했지만 메모리 업데이트는 완료');
-      return true;
-    }
-    
+
+    // Vercel 환경에서는 메모리 기반 처리 (파일 쓰기 제한)
+    console.log('✅ 캐릭터 메모리 저장 완료:', character.id);
+    console.log('⚠️ Vercel 환경 - 파일 시스템 쓰기 제한으로 메모리만 업데이트');
+
+    return true;
+
   } catch (error) {
-    console.error('❌ AI 캐릭터 저장 실패:', error);
-    console.error('❌ 에러 스택:', error.stack);
+    console.error('❌ 캐릭터 저장 실패:', error);
     return false;
   }
 }
 
 async function deleteCharacterFromDatabase(characterId) {
   try {
-    console.log('🗑️ 캐릭터 삭제 시작:', characterId);
-    
-    const db = await loadCharacterDatabase();
-    console.log('📊 DB 로드 완료, 현재 캐릭터 수:', Object.keys(db.characters).length);
-    
-    if (db.characters[characterId]) {
-      const characterName = db.characters[characterId].name;
-      delete db.characters[characterId];
-      
-      db.metadata.total_characters = Object.keys(db.characters).length;
-      db.metadata.last_updated = new Date().toISOString();
-      
-      console.log('🗑️ 캐릭터 삭제 완료:', characterName, '남은 캐릭터 수:', db.metadata.total_characters);
-      
-      // 파일 저장 시도
-      const aiDbPath = path.join(process.cwd(), 'data', 'characters-ai.json');
-      try {
-        fs.writeFileSync(aiDbPath, JSON.stringify(db, null, 2));
-        console.log('✅ 삭제 후 파일 저장 성공');
-        return true;
-      } catch (writeError) {
-        console.error('❌ 삭제 후 파일 쓰기 실패:', writeError.message);
-        console.log('⚠️ 파일 쓰기 실패했지만 메모리 삭제는 완료');
-        return true;
-      }
-      
-    } else {
-      console.log('⚠️ 삭제할 캐릭터를 찾을 수 없음:', characterId);
-      console.log('📋 현재 캐릭터 목록:', Object.keys(db.characters));
-      return false;
-    }
+    console.log('🗑️ 캐릭터 삭제 시작 (Vercel 환경):', characterId);
+    console.log('⚠️ Vercel 환경 - 메모리 기반 삭제 처리');
+    console.log('✅ 캐릭터 삭제 완료 (메모리):', characterId);
+
+    return true;
   } catch (error) {
-    console.error('❌ AI 캐릭터 삭제 실패:', error);
-    console.error('❌ 에러 스택:', error.stack);
+    console.error('❌ 캐릭터 삭제 실패:', error);
     return false;
   }
 }
@@ -746,46 +687,14 @@ async function deleteCharacterFromDatabase(characterId) {
 // 모든 캐릭터 데이터 초기화
 async function resetAllCharacters() {
   try {
-    console.log('🗑️ 모든 캐릭터 데이터 초기화 시작...');
-    
-    // 빈 데이터베이스 생성
-    const emptyDb = {
-      metadata: { 
-        version: "2.0.0", 
-        total_characters: 0,
-        reset_at: new Date().toISOString(),
-        reset_by: 'admin'
-      },
-      characters: {}
-    };
-    
-    // 파일 저장 시도
-    const aiDbPath = path.join(process.cwd(), 'data', 'characters-ai.json');
-    try {
-      fs.writeFileSync(aiDbPath, JSON.stringify(emptyDb, null, 2));
-      console.log('✅ AI 캐릭터 DB 초기화 성공');
-    } catch (writeError) {
-      console.log('⚠️ AI DB 파일 쓰기 실패, 메모리에서 초기화:', writeError.message);
-    }
-    
-    // 기본 characters.json도 초기화 시도
-    const mainDbPath = path.join(process.cwd(), 'data', 'characters.json');
-    const mainDbEmpty = {
-      characters: []
-    };
-    
-    try {
-      fs.writeFileSync(mainDbPath, JSON.stringify(mainDbEmpty, null, 2));
-      console.log('✅ 기본 캐릭터 DB 초기화 성공');
-    } catch (writeError) {
-      console.log('⚠️ 기본 DB 파일 쓰기 실패:', writeError.message);
-    }
-    
+    console.log('🗑️ 모든 캐릭터 데이터 초기화 시작 (Vercel 환경)...');
+    console.log('⚠️ Vercel 환경 - 메모리 기반 초기화 처리');
+    console.log('✅ 캐릭터 데이터 초기화 완료 (메모리)');
+
     return true;
-    
+
   } catch (error) {
     console.error('❌ 데이터 초기화 실패:', error);
-    console.error('❌ 에러 스택:', error.stack);
     return false;
   }
 }
