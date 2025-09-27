@@ -4113,11 +4113,56 @@
             const aiContextDiv = document.getElementById('aiContext');
             aiContextDiv.innerHTML = '<div class="loading"></div> AI가 컨텍스트를 생성 중입니다...';
 
-            // Fallback: 로컬 템플릿 기반 컨텍스트 생성
-            setTimeout(() => {
-                const context = generateLocalAIContext(title, description, backgroundSetting, mood);
-                aiContextDiv.innerHTML = context;
-            }, 1500);
+            try {
+                console.log('🤖 AI 컨텍스트 생성 요청 시작...');
+
+                const response = await fetch('/api/scenario-manager?action=regenerate_context', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title,
+                        description,
+                        background_setting: backgroundSetting,
+                        mood
+                    })
+                });
+
+                console.log('📡 API 응답 상태:', response.status);
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || errorData.message || `HTTP ${response.status} 오류`);
+                }
+
+                const data = await response.json();
+
+                if (data.success && data.scenario && data.scenario.ai_generated_context) {
+                    console.log('✅ AI 컨텍스트 생성 성공');
+                    aiContextDiv.innerHTML = data.scenario.ai_generated_context;
+                } else {
+                    throw new Error(data.message || '알 수 없는 오류가 발생했습니다.');
+                }
+
+            } catch (error) {
+                console.error('❌ AI 컨텍스트 생성 실패:', error);
+
+                // 사용자에게 친화적인 에러 메시지 표시
+                let userMessage = error.message;
+
+                if (error.message.includes('fetch')) {
+                    userMessage = '네트워크 연결에 문제가 있습니다. 인터넷 연결을 확인하고 다시 시도해주세요.';
+                } else if (error.message.includes('API 키')) {
+                    userMessage = 'OpenAI API 키가 설정되지 않았거나 유효하지 않습니다.\n관리자 페이지에서 API 키를 다시 확인해주세요.';
+                }
+
+                // 에러 팝업 표시
+                alert(`❌ AI 컨텍스트 생성 실패\n\n${userMessage}\n\n다시 시도하거나 관리자에게 문의해주세요.`);
+
+                // UI 상태 복원
+                aiContextDiv.innerHTML = 'AI가 생성한 소설풍 시나리오 컨텍스트가 여기에 표시됩니다';
+            }
         }
 
         function generateLocalAIContext(title, description, backgroundSetting, mood) {

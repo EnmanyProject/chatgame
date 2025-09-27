@@ -157,9 +157,9 @@ async function generateAIContext(scenarioData) {
     }
 
     if (!OPENAI_API_KEY || !OPENAI_API_KEY.startsWith('sk-')) {
-      console.warn('❌ OpenAI API key not configured in any storage');
-      console.warn('환경변수 또는 admin-auth 저장소에 API 키를 설정해주세요');
-      return generateFallbackContext(scenarioData);
+      console.error('❌ OpenAI API key not configured in any storage');
+      console.error('환경변수 또는 admin-auth 저장소에 API 키를 설정해주세요');
+      throw new Error('API 키가 설정되지 않았습니다. 관리자 페이지에서 OpenAI API 키를 먼저 저장해주세요.');
     }
 
     console.log('🤖 OpenAI API 호출 시작...');
@@ -222,17 +222,27 @@ async function generateAIContext(scenarioData) {
       const data = await response.json();
       const generatedText = data.choices[0]?.message?.content;
       
-      if (generatedText) {
+      if (generatedText && generatedText.trim()) {
         console.log('✅ AI 컨텍스트 생성 성공');
         return generatedText.trim();
       } else {
-        console.warn('⚠️ AI 응답이 비어있음, fallback 사용');
-        return generateFallbackContext(scenarioData);
+        console.error('❌ AI 응답이 비어있음');
+        throw new Error('OpenAI API에서 빈 응답을 받았습니다. 다시 시도해주세요.');
       }
     } else {
       const errorText = await response.text();
-      console.error('❌ API 호출 실패:', response.status, errorText);
-      return generateFallbackContext(scenarioData);
+      console.error('❌ OpenAI API 호출 실패:', response.status, errorText);
+      let errorMessage = `OpenAI API 오류 (${response.status})`;
+
+      if (response.status === 401) {
+        errorMessage = 'API 키가 유효하지 않습니다. 올바른 OpenAI API 키를 확인해주세요.';
+      } else if (response.status === 429) {
+        errorMessage = 'API 사용량 한도를 초과했습니다. 잠시 후 다시 시도해주세요.';
+      } else if (response.status >= 500) {
+        errorMessage = 'OpenAI 서버에 일시적인 문제가 있습니다. 잠시 후 다시 시도해주세요.';
+      }
+
+      throw new Error(errorMessage);
     }
 
   } catch (error) {
@@ -241,26 +251,18 @@ async function generateAIContext(scenarioData) {
       message: error.message,
       stack: error.stack
     });
-    return generateFallbackContext(scenarioData);
+
+    // 네트워크 오류 등의 경우 더 친화적인 메시지 제공
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('네트워크 연결에 문제가 있습니다. 인터넷 연결을 확인하고 다시 시도해주세요.');
+    }
+
+    // 기타 오류는 그대로 전달
+    throw error;
   }
 }
 
-// Fallback 컨텍스트 생성 (3배 확장)
-function generateFallbackContext(scenarioData) {
-  const contexts = {
-    '카페': `따스한 오후 햇살이 창문 너머로 스며드는 조용한 카페. 원두 내리는 향긋한 냄새와 은은한 재즈 음악이 흐르는 이곳에서, 평범했던 일상이 특별한 순간으로 바뀌기 시작한다. 커피잔을 두 손으로 감싸며 창밖을 바라보던 시선이 우연히 마주친 그 순간, 시간이 멈춘 듯한 고요함이 흘렀다. 심장이 조금씩 빨라지는 것을 느끼며, 자연스럽게 미소가 번진다. 테이블 사이의 거리가 생각보다 가깝게 느껴지고, 상대방의 작은 움직임 하나하나가 눈에 들어온다. 이런 마음이 사랑의 시작일까? 아직은 확신할 수 없지만, 분명한 것은 지금 이 순간이 오래도록 기억에 남을 것이라는 사실이다.`,
-
-    '도서관': `책들이 빼곡히 들어선 조용한 도서관, 형광등의 백색 불빛 아래서 집중하며 읽고 있던 책장을 넘기는 소리만이 고요함을 깬다. 평소와 다름없이 공부에 몰두하고 있던 중, 옆자리에 조심스럽게 앉는 누군가의 기척이 느껴진다. 고개를 들어 살짝 바라본 순간, 진지하게 책을 읽고 있는 그 사람의 옆모습이 눈에 들어온다. 책 페이지를 넘기는 섬세한 손길, 집중할 때 살짝 찌푸려지는 눈썹, 가끔씩 입가에 머무는 미묘한 미소까지. 평범한 일상 속에서 문득 찾아온 설렘에 가슴이 두근거린다. 같은 공간에서 호흡하고 있다는 것만으로도 왠지 모를 친밀감이 느껴지며, 혹시 시선이 마주칠까 봐 조심스럽게 책에 시선을 고정하면서도 계속해서 그쪽을 의식하게 된다.`,
-
-    '공원': `계절의 변화를 고스란히 담고 있는 공원길, 바람에 살랑이는 나뭇잎들과 발밑에서 바스락거리는 낙엽 소리가 어우러져 자연만의 음악을 만들어낸다. 벤치에 앉아 하늘을 바라보며 생각에 잠겨있던 중, 같은 길을 걷고 있는 그 사람과 자연스럽게 시선이 마주쳤다. 순간 마음속으로 번지는 온화한 감정, 마치 봄날의 따스한 햇살이 얼굴을 어루만지는 듯한 기분이다. 공원을 걷는 사람들의 여유로운 발걸음, 아이들의 웃음소리, 강아지들의 짖는 소리까지 모든 것이 평온하고 아름답게 느껴진다. 이런 자연스러운 만남이 가져다주는 설렘은 예상치 못했던 선물처럼 다가온다. 같은 하늘 아래서 같은 시간을 보내고 있다는 우연한 일치가 운명처럼 느껴지며, 이 순간을 조금 더 오래 간직하고 싶다는 마음이 든다.`,
-
-    'default': `${scenarioData.background_setting}의 특별한 분위기 속에서 시작되는 이야기. ${scenarioData.mood}한 감정이 서서히 마음속에 스며들며, ${scenarioData.description}의 상황이 예상치 못한 설렘을 가져다준다. 두 사람 사이에 흐르는 미묘한 긴장감과 호기심, 그리고 조심스럽게 싹트는 호감이 일상의 평범함을 특별한 순간으로 바꾸어 놓는다. 작은 시선의 교차, 우연한 스킨십, 자연스러운 대화의 시작까지 모든 것이 마치 영화의 한 장면처럼 아름답게 펼쳐진다. 아직은 사랑이라고 말하기엔 이르지만, 분명히 무언가 특별한 일이 시작되고 있다는 것을 두 사람 모두 느끼고 있다. 이 만남이 가져올 변화에 대한 기대감과 설렘이 가슴 한편을 달콤하게 채워나간다.`
-  };
-
-  // 배경에 따른 특화된 컨텍스트 또는 기본 컨텍스트 선택
-  const selectedContext = contexts[scenarioData.background_setting] || contexts['default'];
-  return selectedContext;
-}
+// Fallback 제거됨 - AI 생성 실패 시 에러 처리로 대체
 
 // 시나리오 데이터베이스 로드
 async function loadScenarioDatabase() {
