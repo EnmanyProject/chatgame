@@ -2954,6 +2954,15 @@
 
             // 온라인 시스템으로 전환: 별도 초기화 대기
             console.log('⏰ 온라인 클라이언트 초기화 대기 중...');
+
+            // 로그인 후 데이터 로드 (딜레이를 두어 모든 초기화가 완료된 후 실행)
+            setTimeout(async () => {
+                if (window.loadDataAfterLogin) {
+                    await window.loadDataAfterLogin();
+                } else {
+                    console.error('❌ loadDataAfterLogin 함수가 정의되지 않음');
+                }
+            }, 2000);
         }
 
         // 🔐 ================ 로그인 시스템 끝 ================
@@ -3533,7 +3542,6 @@
 
                 showNotification('⚠️ API 상태 확인 중 오류가 발생했습니다.', 'warning');
             }
-        }
         }
 
         // API 키 삭제 (로그인 기반 + Secure Storage)
@@ -5020,7 +5028,7 @@
             }
         }
 
-        function displayCharacters() {
+        window.displayCharacters = function displayCharacters() {
             console.log('🎨 === 캐릭터 표시 함수 시작 ===');
             const container = document.getElementById('charactersContainer');
             const characterArray = Object.values(characters);
@@ -6414,18 +6422,25 @@ GitHub Token:`);
         window.onlineDataClient = new OnlineDataClient();
         console.log('✅ 온라인 데이터 클라이언트 초기화 완료 (JWT 인증 정상화)');
 
-        // 초기화 완료 후 자동으로 데이터 로드
-        setTimeout(async () => {
+        // 로그인 후 데이터 로드 함수 정의
+        window.loadDataAfterLogin = async function() {
             try {
-                console.log('🚀 온라인 시스템 자동 데이터 로드 시작...');
+                console.log('🚀 로그인 후 데이터 로드 시작...');
+
+                // displayCharacters 함수가 정의되어 있는지 확인
+                if (typeof displayCharacters !== 'function') {
+                    console.error('❌ displayCharacters 함수가 정의되지 않음');
+                    return;
+                }
+
                 await window.loadCharacters();
                 await window.loadScenarios();
-                console.log('✅ 온라인 시스템 자동 데이터 로드 완료');
+                console.log('✅ 로그인 후 데이터 로드 완료');
             } catch (error) {
-                console.error('❌ 자동 데이터 로드 실패:', error);
+                console.error('❌ 로그인 후 데이터 로드 실패:', error);
                 console.log('💡 페이지를 새로고침하거나 수동으로 데이터를 로드해주세요');
             }
-        }, 1000); // 1초 대기 후 로드 (토큰 초기화 시간 확보)
+        };
 
         // LocalStorage 사용 중단 경고
         if (localStorage.getItem('chatgame_characters') || localStorage.getItem('scenarios')) {
