@@ -139,6 +139,44 @@ async function createNewScenario(data) {
   return newScenario;
 }
 
+// 캐릭터 사용 검증 함수
+function validateCharacterUsage(generatedText, characters) {
+  const issues = [];
+
+  if (!characters || characters.length === 0) {
+    return { isValid: true, issues: [] }; // 캐릭터가 없으면 검증하지 않음
+  }
+
+  // 제공된 캐릭터 이름들
+  const validNames = characters.map(char => char.name);
+  console.log('🔍 검증할 캐릭터 이름들:', validNames);
+
+  // 금지된 임의 이름들 (기존에 AI가 잘못 사용한 이름들)
+  const forbiddenNames = ['윤하', '지현', '수진', '민지', '소연', '하영', '예은', '다은', '채원', '서현'];
+
+  // 텍스트에서 이름 찾기
+  const foundForbiddenNames = forbiddenNames.filter(name => generatedText.includes(name));
+  const foundValidNames = validNames.filter(name => generatedText.includes(name));
+
+  if (foundForbiddenNames.length > 0) {
+    issues.push(`금지된 임의 이름 사용: ${foundForbiddenNames.join(', ')}`);
+  }
+
+  if (foundValidNames.length === 0 && validNames.length > 0) {
+    issues.push(`제공된 캐릭터 이름이 전혀 사용되지 않음: ${validNames.join(', ')}`);
+  }
+
+  console.log('🔍 검증 결과 - 발견된 유효 이름:', foundValidNames);
+  console.log('🔍 검증 결과 - 발견된 금지 이름:', foundForbiddenNames);
+
+  return {
+    isValid: issues.length === 0,
+    issues: issues,
+    foundValidNames: foundValidNames,
+    foundForbiddenNames: foundForbiddenNames
+  };
+}
+
 // AI 컨텍스트 생성 함수 (OpenAI API 사용)
 async function generateAIContext(scenarioData) {
   try {
@@ -169,33 +207,33 @@ async function generateAIContext(scenarioData) {
       characterInfo = '\n등장인물: 시나리오에 맞는 매력적인 캐릭터들을 창조해주세요.\n';
     }
 
-    const prompt = `다음 정보를 바탕으로 MBTI 로맨스 게임의 풍부하고 상세한 시나리오 컨텍스트를 소설풍으로 작성해주세요:
+    const prompt = `🚨 MANDATORY CHARACTER CONSTRAINT 🚨
+다음 등장인물 정보를 EXACTLY 그대로 사용하여 시나리오를 작성하세요:${characterInfo}
 
+⚠️ WARNING: 위에 명시된 캐릭터 이름과 정보만 사용하고, 절대로 다른 이름(윤하, 지현, 수진 등)이나 새로운 캐릭터를 만들지 마세요!
+
+기본 시나리오 정보:
 제목: ${scenarioData.title}
 설명: ${scenarioData.description}
 배경: ${scenarioData.background_setting}
-분위기: ${scenarioData.mood}${characterInfo}
+분위기: ${scenarioData.mood}
 
-상세 요구사항:
-1. **캐릭터 활용**: 위에 제공된 등장인물의 이름, 나이, MBTI, 성격, 외모, 취미, 말투를 정확히 반영
-2. **MBTI 특성**: 각 캐릭터의 MBTI 성격유형에 맞는 행동과 사고 패턴을 자연스럽게 표현
-3. **길이와 구조**: 600-900자 분량의 충분히 상세한 소설풍 시놉시스
-4. **장면 묘사**: 공간의 분위기, 시간대, 날씨, 주변 환경을 세밀하게 묘사
-5. **캐릭터 심리**: 등장인물의 내면 감정, 생각, 과거 경험을 깊이 있게 표현
-6. **감각적 묘사**: 시각, 청각, 후각, 촉각 등 오감을 활용한 생생한 묘사
-7. **감정 전개**: 만남 전 → 첫 만남 → 감정 변화의 단계별 상세 묘사
-8. **문화적 배경**: 한국의 대학생/직장인 문화, 계절감, 사회적 맥락 반영
-9. **로맨스 요소**: 미묘한 설렘, 긴장감, 호감의 싹트는 순간들을 세밀하게 표현
-10. **대화 암시**: 실제 대화는 아니지만 어떤 대화가 오갈지 예상되는 상황 설정
-11. **몰입감**: 읽는 사람이 그 상황에 완전히 빠져들 수 있는 생동감 있는 묘사
+🎯 핵심 요구사항 (순서대로 검토하세요):
+1. ✅ **캐릭터 정확성 CHECK**: 위에 제공된 정확한 이름을 사용했나요?
+2. ✅ **MBTI 반영 CHECK**: 해당 캐릭터의 MBTI 특성을 반영했나요?
+3. ✅ **성격 일치 CHECK**: 성격 특성이 정확히 반영되었나요?
 
-작성 가이드:
-- **중요**: 제공된 캐릭터의 실제 이름, 나이, 성격을 반드시 사용하세요
-- 단순한 상황 설명이 아닌 소설의 한 장면처럼 작성
-- 등장인물의 미묘한 표정, 몸짓, 시선 처리까지 세밀하게 묘사
-- 그 순간의 공기감, 긴장감, 설렘을 독자가 느낄 수 있도록 표현
-- 과거와 현재, 내면과 외면을 오가는 입체적인 서술
-- 읽는 순간 영화의 한 장면이 떠오를 정도의 구체성
+추가 작성 가이드:
+- **길이**: 600-900자 분량의 상세한 소설풍 컨텍스트
+- **장면 묘사**: 공간, 시간, 분위기의 세밀한 묘사
+- **감정 표현**: 등장인물의 내면 감정과 심리 상태
+- **문화적 배경**: 한국의 대학/직장 문화 반영
+- **로맨스 요소**: 미묘한 설렘과 긴장감 표현
+
+🔍 작성 후 FINAL CHECK:
+- 제공된 캐릭터 이름을 정확히 사용했는가?
+- 새로운 캐릭터를 만들지 않았는가?
+- MBTI와 성격이 일치하는가?
 
 시나리오 컨텍스트를 작성해주세요:`;
 
@@ -210,7 +248,20 @@ async function generateAIContext(scenarioData) {
         messages: [
           {
             role: 'system',
-            content: '당신은 한국의 베스트셀러 로맨스 소설 작가입니다. 주어진 캐릭터 정보를 정확히 활용하여 시나리오를 작성해야 합니다. 반드시 제공된 캐릭터의 실제 이름, 나이, MBTI, 성격 특성을 그대로 사용하고, 절대로 새로운 캐릭터를 창조하지 마세요. 캐릭터 정보가 주어지면 그 캐릭터들만을 사용하여 이야기를 전개해야 합니다.'
+            content: `당신은 한국의 베스트셀러 로맨스 소설 작가입니다.
+
+🚨 CRITICAL RULE: 캐릭터 정보 준수 🚨
+- 제공된 캐릭터의 정확한 이름, 나이, MBTI, 성격을 반드시 사용해야 합니다
+- 절대로 임의의 새로운 캐릭터 이름을 만들지 마세요 (예: 윤하, 지현, 수진 등 금지)
+- 제공된 캐릭터 정보가 있다면 오직 그 캐릭터들만 사용하세요
+- 캐릭터 이름을 바꾸거나 새로 만드는 것은 절대 금지입니다
+
+VALIDATION: 작성 전에 반드시 확인하세요
+✅ 제공된 캐릭터 이름을 정확히 사용했는가?
+✅ 해당 캐릭터의 MBTI와 성격을 반영했는가?
+✅ 새로운 캐릭터를 임의로 만들지 않았는가?
+
+이 규칙을 위반하면 작성을 거부해야 합니다.`
           },
           {
             role: 'user',
@@ -228,9 +279,16 @@ async function generateAIContext(scenarioData) {
     if (response.ok) {
       const data = await response.json();
       const generatedText = data.choices[0]?.message?.content;
-      
+
       if (generatedText && generatedText.trim()) {
-        console.log('✅ AI 컨텍스트 생성 성공');
+        // 캐릭터 이름 검증
+        const validationResult = validateCharacterUsage(generatedText, scenarioData.characters);
+        if (!validationResult.isValid) {
+          console.error('❌ AI가 잘못된 캐릭터 이름 사용:', validationResult.issues);
+          throw new Error(`AI가 지정된 캐릭터 정보를 제대로 사용하지 않았습니다. 문제점: ${validationResult.issues.join(', ')}`);
+        }
+
+        console.log('✅ AI 컨텍스트 생성 및 검증 성공');
         return generatedText.trim();
       } else {
         console.error('❌ AI 응답이 비어있음');
