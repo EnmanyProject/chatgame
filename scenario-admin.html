@@ -4330,15 +4330,30 @@
             try {
                 console.log('🤖 AI 컨텍스트 생성 요청 시작...');
 
+                // 먼저 최신 캐릭터 데이터를 로드
+                console.log('🔄 최신 캐릭터 데이터 로드 중...');
+                await window.loadCharacters();
+
                 // 선택된 캐릭터 정보 수집
+                console.log('📋 현재 전역 characters:', Object.keys(characters || {}));
+                console.log('📋 선택된 캐릭터 ID들:', selectedCharacters);
+
                 const selectedCharacterData = [];
                 for (const charId of selectedCharacters) {
-                    if (characters[charId]) {
-                        selectedCharacterData.push(characters[charId]);
+                    const character = characters[charId] || window.characters?.[charId];
+                    if (character) {
+                        selectedCharacterData.push(character);
+                        console.log('✅ 캐릭터 찾음:', charId, character.name);
+                    } else {
+                        console.warn('⚠️ 캐릭터 미발견:', charId);
                     }
                 }
 
                 console.log('👥 선택된 캐릭터 정보:', selectedCharacterData);
+
+                if (selectedCharacterData.length === 0) {
+                    throw new Error('선택된 캐릭터 정보를 찾을 수 없습니다. 캐릭터를 먼저 생성하고 선택해주세요.');
+                }
 
                 const response = await fetch('/api/scenario-manager?action=regenerate_context', {
                     method: 'POST',
@@ -6944,12 +6959,7 @@
                 return;
             }
 
-            // 온라인 데이터 클라이언트 확인
-            if (!window.onlineDataClient) {
-                console.error('❌ 온라인 데이터 클라이언트가 로드되지 않았습니다');
-                alert('⚠️ 온라인 시스템 로드 오류\n\n페이지를 새로고침 후 다시 시도해주세요.');
-                return;
-            }
+            // 직접 API 호출로 시나리오 저장
 
             try {
                 // 시나리오 데이터 구성
@@ -6991,10 +7001,22 @@
                     saveButton.textContent = '🌐 온라인 저장 중...';
                 }
 
-                console.log('💾 온라인에 저장할 시나리오 데이터:', scenarioData);
+                console.log('💾 API를 통해 저장할 시나리오 데이터:', scenarioData);
 
-                // 온라인 데이터 클라이언트를 통해 저장
-                const result = await window.onlineDataClient.saveScenario(scenarioData);
+                // 직접 API 호출로 시나리오 저장
+                const response = await fetch('/api/scenario-manager', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(scenarioData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API 호출 실패: ${response.status}`);
+                }
+
+                const result = await response.json();
 
                 if (result && result.success) {
                     console.log('🎉 저장 성공! 전체 시나리오 목록 새로고침...');
