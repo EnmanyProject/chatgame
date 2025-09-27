@@ -196,13 +196,12 @@ function validateCharacterUsage(generatedText, characters) {
 // AI 컨텍스트 생성 함수 (OpenAI API 사용)
 async function generateAIContext(scenarioData) {
   try {
-    // 간단한 API 키 조회 방식 사용
-    const { getSimpleApiKey } = await import('./simple-api-key.js');
-    const OPENAI_API_KEY = await getSimpleApiKey();
+    // 환경변수에서 직접 API 키 가져오기
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
     if (!OPENAI_API_KEY) {
       console.error('❌ OpenAI API 키가 설정되지 않았습니다');
-      throw new Error('API 키가 설정되지 않았습니다. 관리자 페이지에서 OpenAI API 키를 먼저 저장해주세요.');
+      throw new Error('API 키가 설정되지 않았습니다. Vercel 환경변수에서 OPENAI_API_KEY를 설정해주세요.');
     }
 
     console.log('🤖 OpenAI API 호출 시작...');
