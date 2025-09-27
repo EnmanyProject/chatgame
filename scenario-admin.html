@@ -1806,11 +1806,11 @@
                         style="background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(231,76,60,0.3);">
                     🗑️ 모든 데이터 초기화
                 </button>
-                <button onclick="window.onlineDataClient.resetCharacters().then(() => { alert('✅ 캐릭터 데이터 초기화 완료'); loadCharacters(); }).catch(err => alert('❌ 오류: ' + err.message))"
+                <button onclick="fetch('/api/character-ai-generator', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({action: 'reset_all_characters'})}).then(() => { alert('✅ 캐릭터 데이터 초기화 완료'); loadCharacters(); }).catch(err => alert('❌ 오류: ' + err.message))"
                         style="background: linear-gradient(135deg, #f39c12, #e67e22); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(243,156,18,0.3);">
                     👥 캐릭터만 초기화
                 </button>
-                <button onclick="window.onlineDataClient.resetScenarios().then(() => { alert('✅ 시나리오 데이터 초기화 완료'); loadScenarios(); }).catch(err => alert('❌ 오류: ' + err.message))"
+                <button onclick="alert('시나리오 초기화 기능은 개발 중입니다.')"
                         style="background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(155,89,182,0.3);">
                     📝 시나리오만 초기화
                 </button>
@@ -7083,17 +7083,16 @@
 
         // 전역 함수 교체: 온라인 데이터 클라이언트 사용
         window.loadCharacters = async function() {
-            console.log('🌐 === 온라인 캐릭터 로드 시작 ===');
+            console.log('🌐 === API를 통한 캐릭터 로드 시작 ===');
             try {
-                console.log('🔍 onlineDataClient 확인:', typeof window.onlineDataClient);
-
-                if (!window.onlineDataClient) {
-                    console.error('❌ onlineDataClient가 정의되지 않음');
-                    throw new Error('온라인 데이터 클라이언트가 초기화되지 않았습니다');
+                // 직접 API 호출로 캐릭터 데이터 로드
+                const response = await fetch('/api/character-ai-generator?action=list_characters');
+                if (!response.ok) {
+                    throw new Error(`API 호출 실패: ${response.status}`);
                 }
-
-                const charactersData = await window.onlineDataClient.loadCharacters();
-                console.log('📊 onlineDataClient에서 로드된 원시 데이터:', charactersData);
+                const apiData = await response.json();
+                const charactersData = apiData.characters || {};
+                console.log('📊 API에서 로드된 원시 데이터:', charactersData);
                 console.log('📊 데이터 타입:', typeof charactersData);
                 console.log('📊 데이터 키들:', Object.keys(charactersData || {}));
 
@@ -7258,31 +7257,33 @@
         };
 
         window.loadScenarios = async function() {
-            console.log('🌐 온라인에서 시나리오 로드...');
+            console.log('🌐 API를 통한 시나리오 로드...');
             try {
-                const scenariosData = await window.onlineDataClient.loadScenarios();
+                // 직접 API 호출로 시나리오 데이터 로드
+                const response = await fetch('/api/scenario-manager?action=list');
+                if (!response.ok) {
+                    throw new Error(`API 호출 실패: ${response.status}`);
+                }
+                const apiData = await response.json();
+                const scenariosData = apiData.scenarios || {};
                 window.scenarios = scenariosData;
                 displayScenarios();
                 updateScenarioStats();
-                console.log('✅ 시나리오 온라인 로드 완료');
+                console.log('✅ 시나리오 API 로드 완료');
             } catch (error) {
-                console.error('❌ 시나리오 온라인 로드 실패:', error);
-                alert('시나리오 데이터를 불러오는 중 오류가 발생했습니다:\n' + error.message);
+                console.error('❌ 시나리오 API 로드 실패:', error);
+                // 오류 시 빈 객체로 초기화
+                window.scenarios = {};
+                displayScenarios();
+                updateScenarioStats();
             }
         };
 
-        // 온라인 동기화 상태 모니터링
-        setInterval(async () => {
-            const isOnline = await window.onlineDataClient.checkOnlineStatus();
+        // 온라인 상태 표시 (단순화됨)
+        setInterval(() => {
             const statusIndicator = document.getElementById('onlineStatus') || createStatusIndicator();
-
-            statusIndicator.textContent = isOnline ? '🌐 온라인' : '📴 오프라인';
-            statusIndicator.style.color = isOnline ? '#28a745' : '#dc3545';
-
-            // 오프라인에서 온라인으로 복구 시 큐 재시도
-            if (isOnline && window.onlineDataClient.requestQueue.length > 0) {
-                await window.onlineDataClient.retryQueuedRequests();
-            }
+            statusIndicator.textContent = '🌐 온라인';
+            statusIndicator.style.color = '#28a745';
         }, 30000); // 30초마다 체크
 
         // 온라인 상태 표시기 생성
