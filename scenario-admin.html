@@ -5906,8 +5906,8 @@ GitHub Token:`);
 
                     <div class="preview-section">
                         <h5>🏠 배경 정보</h5>
-                        <p><strong>가족:</strong> ${character.family || character.background?.family || '평범한 가정'}</p>
-                        <p><strong>고향:</strong> ${character.hometown || character.background?.hometown || '서울'}</p>
+                        <p><strong>가족:</strong> ${character.family || character.background?.family || '정보 없음'}</p>
+                        <p><strong>고향:</strong> ${character.hometown || character.background?.hometown || '정보 없음'}</p>
                         <p><strong>직업:</strong> ${character.background?.occupation || '대학생'}</p>
                     </div>
 
@@ -7003,8 +7003,8 @@ GitHub Token:`);
                     mbti: mbti,
                     gender: document.getElementById('charGender')?.value || 'female',
 
-                    // ✨ 실제 사용자 선택값 반영
-                    personality_traits: selectedPersonalities.length > 0 ? selectedPersonalities : ['친근한', '매력적인', '스마트한'],
+                    // ✨ 실제 사용자 선택값 반영 (기본값 없음)
+                    personality_traits: selectedPersonalities.length > 0 ? selectedPersonalities : [],
                     major: document.getElementById('charMajor')?.value || 'general',
                     family: document.getElementById('charFamily')?.value || 'average',
                     hometown: document.getElementById('charHometown')?.value || 'seoul',
@@ -7016,8 +7016,8 @@ GitHub Token:`);
                         style: document.getElementById('charStyle')?.value || '캐주얼'
                     },
 
-                    // ✨ 취미도 실제 선택값 반영
-                    hobbies: selectedHobbies.length > 0 ? selectedHobbies : ['독서', '음악감상', '산책'],
+                    // ✨ 취미도 실제 선택값 반영 (기본값 없음)
+                    hobbies: selectedHobbies.length > 0 ? selectedHobbies : [],
                     values: document.getElementById('charValues')?.value || 'family_oriented',
                     speech_style: document.getElementById('charSpeechStyle')?.value || '친근한 말투',
                     speech_habit: document.getElementById('charSpeechHabit')?.value || '자주 미소짓기',

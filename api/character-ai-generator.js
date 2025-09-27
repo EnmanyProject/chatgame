@@ -307,7 +307,7 @@ function completeCharacterFromInput(inputData) {
   console.log('📝 입력된 데이터:', inputData);
 
   // 기본값 설정
-  const name = inputData.name || inputData.answers?.name || '미지의 소녀';
+  const name = inputData.name || inputData.answers?.name || randomChoice(['미나', '지수', '서연', '혜진', '유나', '소영', '하늘', '별', '가을', '민정', '수빈', '채원']);
   const mbti = inputData.mbti || inputData.answers?.mbti || 'INFP';
   const age = inputData.age || inputData.answers?.age || 22;
 
