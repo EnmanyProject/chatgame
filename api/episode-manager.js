@@ -1156,15 +1156,31 @@ async function loadScenarioDatabase() {
   }
 }
 
-// 캐릭터 데이터베이스 로드
+// 캐릭터 데이터베이스 로드 (character-ai-generator API 호출)
 async function loadCharacterDatabase() {
   try {
-    const characterPath = path.join(process.cwd(), 'data', 'characters.json');
-    const characterData = fs.readFileSync(characterPath, 'utf8');
-    console.log('✅ 캐릭터 데이터베이스 로드 성공');
-    return JSON.parse(characterData);
+    console.log('🔄 캐릭터 API에서 데이터 로드 시도...');
+
+    // 내부 API 호출 (같은 서버 내에서)
+    const response = await fetch('https://chatgame-seven.vercel.app/api/character-ai-generator?action=list_characters');
+
+    if (response.ok) {
+      const result = await response.json();
+      if (result.success) {
+        console.log('✅ 캐릭터 API에서 로드 성공:', Object.keys(result.characters).length, '개');
+        return {
+          characters: result.characters,
+          metadata: result.metadata
+        };
+      } else {
+        throw new Error(result.message || '캐릭터 API 호출 실패');
+      }
+    } else {
+      throw new Error(`캐릭터 API HTTP ${response.status}: ${response.statusText}`);
+    }
   } catch (error) {
     console.error('❌ 캐릭터 데이터베이스 로드 실패:', error);
+    console.log('📋 빈 캐릭터 DB 반환');
     return { metadata: {}, characters: {} };
   }
 }
