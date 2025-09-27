@@ -49,16 +49,41 @@
       "source": "api_save",
       "active": true,
       "updated_at": "2025-09-27T06:10:32.355Z"
+    },
+    "수진_infj_1758953533444": {
+      "id": "수진_infj_1758953533444",
+      "name": "수진",
+      "age": 24,
+      "mbti": "INFJ",
+      "gender": "female",
+      "personality_traits": [],
+      "major": "general",
+      "family": "average",
+      "hometown": "seoul",
+      "relationship": "동갑",
+      "appearance": {
+        "hair": "긴 생머리",
+        "eyes": "둥근 눈",
+        "style": "캐주얼"
+      },
+      "hobbies": [],
+      "values": "family_oriented",
+      "speech_style": "논리적인 말투",
+      "speech_habit": "이모티콘을 자주 사용함",
+      "created_at": "2025-09-27T06:12:13.445Z",
+      "source": "api_save",
+      "active": true,
+      "updated_at": "2025-09-27T06:12:13.958Z"
     }
   },
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 2,
+    "total_characters": 3,
     "created": "2025-09-27T06:05:55.975Z",
     "storage_type": "memory",
     "reset_at": "2025-09-27T01:23:56.078Z",
     "reset_reason": "Clean characters data reset",
-    "last_accessed": "2025-09-27T06:09:25.624Z",
-    "last_updated": "2025-09-27T06:10:32.355Z"
+    "last_accessed": "2025-09-27T06:10:54.170Z",
+    "last_updated": "2025-09-27T06:12:13.958Z"
   }
 }
