@@ -34,40 +34,6 @@
       "active": true,
       "updated_at": "2025-09-27T01:24:25.923Z"
     },
-    "유나__infp_1758937037202": {
-      "id": "유나__infp_1758937037202",
-      "name": "유나 ",
-      "age": "21",
-      "mbti": "INFP",
-      "gender": "female",
-      "personality_traits": [
-        "친근한",
-        "매력적인",
-        "스마트한"
-      ],
-      "major": "general",
-      "family": "average",
-      "hometown": "seoul",
-      "relationship": "friend",
-      "appearance": {
-        "hair": "긴 생머리",
-        "eyes": "둥근 눈",
-        "style": "캐주얼"
-      },
-      "hobbies": [
-        "독서",
-        "음악감상",
-        "산책"
-      ],
-      "values": "family_oriented",
-      "speech_style": "친근한 말투",
-      "speech_habit": "자주 미소짓기",
-      "genre": "school_romance",
-      "created_at": "2025-09-27T01:37:17.202Z",
-      "source": "github_api",
-      "active": true,
-      "updated_at": "2025-09-27T01:37:17.768Z"
-    },
     "미화__infj_1758937076815": {
       "id": "미화__infj_1758937076815",
       "name": "미화 ",
