@@ -184,7 +184,7 @@ function completeCharacterFromInput(inputData) {
   // 기본값 설정
   const name = inputData.name || inputData.answers?.name || '미지의 소녀';
   const mbti = inputData.mbti || inputData.answers?.mbti || 'INFP';
-  const age = inputData.age || inputData.answers?.age || '22';
+  const age = inputData.age || inputData.answers?.age || 22;
 
   console.log('✅ 추출된 핵심 정보:', { name, mbti, age });
 
@@ -192,43 +192,53 @@ function completeCharacterFromInput(inputData) {
   const template = getTemplateByMBTI(mbti);
 
   return {
-    id: `${name.toLowerCase().replace(/\s+/g, '_')}_${mbti.toLowerCase()}_${Date.now()}`,
+    id: inputData.id || `${name.toLowerCase().replace(/\s+/g, '_')}_${mbti.toLowerCase()}_${Date.now()}`,
     name: name,
     age: parseInt(age) || 22,
-    gender: 'female',
+    gender: inputData.gender || 'female',
     mbti: mbti,
 
-    // 입력된 것이 있으면 사용, 없으면 MBTI 템플릿 기본값
+    // ✨ 모든 입력 필드를 우선적으로 사용, 없으면 MBTI 템플릿 기본값
     personality_traits: inputData.personality_traits || template.personalities.slice(0, 3),
     major: inputData.major || '대학생',
+    family: inputData.family || '평범한 가정',
+    hometown: inputData.hometown || '서울',
     relationship: inputData.relationship || '친구',
     speech_style: inputData.speech_style || `${template.speech_styles[0]} 말투`,
     speech_habit: inputData.speech_habit || '이모티콘을 자주 사용함',
 
     appearance: {
-      hair: inputData.hair || '긴 머리',
-      eyes: inputData.eyes || '큰 눈',
-      style: inputData.style || '캐주얼한 스타일'
+      hair: inputData.appearance?.hair || inputData.hair || '긴 머리',
+      eyes: inputData.appearance?.eyes || inputData.eyes || '큰 눈',
+      style: inputData.appearance?.style || inputData.style || '캐주얼한 스타일'
     },
 
     background: {
-      family: inputData.family || '평범한 가정',
-      hometown: inputData.hometown || '서울',
-      occupation: '대학생'
+      family: inputData.background?.family || inputData.family || '평범한 가정',
+      hometown: inputData.background?.hometown || inputData.hometown || '서울',
+      occupation: inputData.background?.occupation || '대학생'
     },
 
     personality: {
-      hobbies: inputData.hobbies || template.hobbies.slice(0, 3),
-      values: inputData.values || `${mbti} 유형의 가치관`,
-      fears: '거절당하는 것'
+      hobbies: inputData.personality?.hobbies || inputData.hobbies || template.hobbies.slice(0, 3),
+      values: inputData.personality?.values || inputData.values || `${mbti} 유형의 가치관`,
+      fears: inputData.personality?.fears || inputData.fears || '거절당하는 것'
     },
+
+    // ✨ scenario-admin.html에서 온 추가 필드들도 보존
+    values: inputData.values || `${mbti} 유형의 가치관`,
+    hobbies: inputData.hobbies || template.hobbies.slice(0, 3),
 
     story_context: {
-      main_situation: '대학교에서 처음 만나는 상황'
+      main_situation: inputData.story_context?.main_situation || '대학교에서 처음 만나는 상황'
     },
 
-    created_date: new Date().toISOString().split('T')[0],
-    generation_method: 'ai_completion'
+    // ✨ 원본 메타데이터 보존
+    created_at: inputData.created_at || new Date().toISOString(),
+    created_date: inputData.created_date || new Date().toISOString().split('T')[0],
+    generation_method: inputData.generation_method || 'ai_completion',
+    source: inputData.source || 'api_generate',
+    active: inputData.active !== undefined ? inputData.active : true
   };
 }
 

@@ -6941,31 +6941,49 @@ GitHub Token:`);
                 // 간단한 캐릭터 데이터 생성 (복잡한 collectCharacterData 대신)
                 const characterId = `${name.toLowerCase().replace(/\s+/g, '_')}_${mbti.toLowerCase()}_${Date.now()}`;
 
+                // 💎 실제 사용자 선택값을 모두 수집하여 반영
+                console.log('📝 폼 데이터 수집 중...');
+
+                // 성격 특성 체크박스에서 선택된 항목들 수집
+                const selectedPersonalities = Array.from(document.querySelectorAll('input[name="personality"]:checked')).map(cb => cb.value);
+                console.log('  - 선택된 성격:', selectedPersonalities);
+
+                // 취미 체크박스에서 선택된 항목들 수집
+                const selectedHobbies = Array.from(document.querySelectorAll('input[name="hobbies"]:checked')).map(cb => cb.value);
+                console.log('  - 선택된 취미:', selectedHobbies);
+
                 const finalCharacterData = {
                     id: characterId,
                     name: name,
-                    age: document.getElementById('charAge')?.value || '22',
+                    age: parseInt(document.getElementById('charAge')?.value) || 22,
                     mbti: mbti,
-                    gender: 'female',
-                    personality_traits: ['친근한', '매력적인', '스마트한'],
-                    major: 'general',
-                    family: 'average',
-                    hometown: 'seoul',
-                    relationship: 'friend',
+                    gender: document.getElementById('charGender')?.value || 'female',
+
+                    // ✨ 실제 사용자 선택값 반영
+                    personality_traits: selectedPersonalities.length > 0 ? selectedPersonalities : ['친근한', '매력적인', '스마트한'],
+                    major: document.getElementById('charMajor')?.value || 'general',
+                    family: document.getElementById('charFamily')?.value || 'average',
+                    hometown: document.getElementById('charHometown')?.value || 'seoul',
+                    relationship: document.getElementById('charRelationship')?.value || 'friend',
+
                     appearance: {
-                        hair: '긴 생머리',
-                        eyes: '둥근 눈',
-                        style: '캐주얼'
+                        hair: document.getElementById('charHair')?.value || '긴 생머리',
+                        eyes: document.getElementById('charEyes')?.value || '둥근 눈',
+                        style: document.getElementById('charStyle')?.value || '캐주얼'
                     },
-                    hobbies: ['독서', '음악감상', '산책'],
-                    values: 'family_oriented',
-                    speech_style: '친근한 말투',
-                    speech_habit: '자주 미소짓기',
-                    // genre 필드 제거됨
+
+                    // ✨ 취미도 실제 선택값 반영
+                    hobbies: selectedHobbies.length > 0 ? selectedHobbies : ['독서', '음악감상', '산책'],
+                    values: document.getElementById('charValues')?.value || 'family_oriented',
+                    speech_style: document.getElementById('charSpeechStyle')?.value || '친근한 말투',
+                    speech_habit: document.getElementById('charSpeechHabit')?.value || '자주 미소짓기',
+
                     created_at: new Date().toISOString(),
                     source: 'scenario_admin',
                     active: true
                 };
+
+                console.log('💾 최종 캐릭터 데이터:', finalCharacterData);
 
                 // 저장 버튼 상태 변경
                 const saveButton = document.querySelector('#characterModal .btn-primary') ||
