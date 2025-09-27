@@ -5839,14 +5839,23 @@ GitHub Token:`);
                         throw new Error(result.message || 'AI 생성 실패');
                     }
                 } else {
-                    throw new Error(`API 오류: ${response.status}`);
+                    // 서버에서 상세한 오류 정보 가져오기
+                    let errorMessage = `API 오류: ${response.status}`;
+                    try {
+                        const errorData = await response.json();
+                        console.error('🔥 서버 오류 상세:', errorData);
+                        errorMessage = errorData.message || errorMessage;
+                    } catch (parseError) {
+                        console.error('⚠️ 오류 응답 파싱 실패:', parseError);
+                    }
+                    throw new Error(errorMessage);
                 }
             } catch (error) {
-                console.error('AI 캐릭터 생성 오류:', error);
-                statusDiv.innerHTML = '⚠️ AI 생성 중 오류가 발생했습니다. 수동으로 완성해주세요.';
-                
-                // Fallback: 기본 여성 캐릭터 템플릿 제공
-                generateFallbackFemaleCharacter();
+                console.error('❌ AI 캐릭터 생성 실패:', error);
+                statusDiv.innerHTML = `❌ AI 생성 실패: ${error.message}`;
+
+                // 사용자에게 명확한 오류 메시지 표시
+                alert(`캐릭터 생성 실패\n\n${error.message}\n\n다시 시도해주세요.`);
             }
         }
 
@@ -5995,36 +6004,7 @@ GitHub Token:`);
         }
 
         // Fallback 여성 캐릭터 생성
-        function generateFallbackFemaleCharacter() {
-            const femaleTemplates = [
-                {
-                    name: '윤서', age: '20', mbti: 'INFP', 
-                    traits: ['감성적', '내향적', '이상주의적'],
-                    major: 'art', relationship: 'secret_crush',
-                    hair: 'long_straight', eyes: 'round_cute', style: 'cute_casual',
-                    speech_style: 'soft_warm', genre: 'school_romance'
-                },
-                {
-                    name: '하은', age: '21', mbti: 'ENFP',
-                    traits: ['활발한', '열정적', '창의적'], 
-                    major: 'music', relationship: 'childhood_friend',
-                    hair: 'shoulder_wave', eyes: 'almond_elegant', style: 'feminine_lovely',
-                    speech_style: 'bright_cheerful', genre: 'daily_romance'
-                },
-                {
-                    name: '소희', age: '19', mbti: 'ISFJ',
-                    traits: ['차분한', '배려심 많은', '내향적'],
-                    major: 'education', relationship: 'senior_friend', 
-                    hair: 'short_bob', eyes: 'double_eyelid', style: 'natural_simple',
-                    speech_style: 'gentle_caring', genre: 'healing_romance'
-                }
-            ];
-            
-            const template = femaleTemplates[Math.floor(Math.random() * femaleTemplates.length)];
-            displayAIGeneratedCharacter(template);
-            document.getElementById('characterPreview').style.display = 'block';
-            document.getElementById('aiGenerationStatus').innerHTML = '🌸 여성 캐릭터 템플릿이 제공되었습니다.';
-        }
+        // generateFallbackFemaleCharacter 함수 제거됨 - fallback 처리 안함
 
         // 관계 번역 함수
         function translateRelationship(rel) {
