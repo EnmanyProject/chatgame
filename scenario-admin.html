@@ -3839,13 +3839,7 @@
             try {
                 console.log('🐙 GitHub API로 시나리오 저장 시작:', scenario.title);
                 
-                // GitHub 토큰 확인/로드
-                if (!GITHUB_CONFIG.token) {
-                    const tokenLoaded = await loadGitHubToken();
-                    if (!tokenLoaded) {
-                        throw new Error('GitHub token not available');
-                    }
-                }
+                // GitHub 토큰은 서버사이드에서 환경변수로 처리
                 
                 // 시나리오 ID 생성 (없으면)
                 if (!scenario.id && !scenario.scenario_id) {
@@ -5120,14 +5114,14 @@
             try {
                 console.log('🐙 GitHub API에서 캐릭터 로드...');
                 
-                // GitHub 토큰 확인
-                if (!GITHUB_CONFIG.token) {
-                    console.log('🔐 GitHub 토큰 로드 시도...');
-                    await loadGitHubToken();
-                }
+                // GitHub 토큰은 서버사이드에서 환경변수로 처리
+                console.log('🔐 GitHub 토큰은 서버에서 자동 관리됨');
                 
-                if (GITHUB_CONFIG.token) {
-                    const gitHubCharacters = await loadCharactersFromGitHub();
+                // API를 통해 GitHub 데이터 로드 (토큰은 서버에서 처리)
+                const apiResponse = await fetch('/api/character-ai-generator?action=list_characters');
+                if (apiResponse.ok) {
+                    const apiData = await apiResponse.json();
+                    const gitHubCharacters = apiData.characters || {};
                     const characterCount = Object.keys(gitHubCharacters).length;
                     console.log('📊 GitHub 캐릭터 수:', characterCount);
                     
@@ -5654,50 +5648,7 @@
             branch: 'main'           // 브랜치명
         };
         
-        // GitHub Personal Access Token 로드
-        async function loadGitHubToken() {
-            try {
-                // 환경변수에서 토큰 로드 시도
-                const response = await fetch('/api/github-token');
-                if (response.ok) {
-                    const data = await response.json();
-                    GITHUB_CONFIG.token = data.token;
-                    console.log('✅ GitHub 토큰 로드 성공');
-                    return true;
-                }
-            } catch (error) {
-                console.warn('⚠️ 환경변수 토큰 로드 실패:', error);
-            }
-            
-            // 로컬스토리지에서 토큰 로드 시도
-            const localToken = localStorage.getItem('github_token');
-            if (localToken) {
-                GITHUB_CONFIG.token = localToken;
-                console.log('💾 로컬 GitHub 토큰 사용');
-                return true;
-            }
-            
-            // 토큰이 없으면 사용자에게 요청
-            const userToken = prompt(`
-🔐 GitHub Personal Access Token이 필요합니다!
-
-1. GitHub.com → Settings → Developer settings → Personal access tokens
-2. Generate new token (classic)
-3. Select scopes: 'repo' (Full control of private repositories)
-4. Copy token and paste below:
-
-GitHub Token:`);
-            
-            if (userToken && userToken.trim().length > 20) {
-                GITHUB_CONFIG.token = userToken.trim();
-                localStorage.setItem('github_token', GITHUB_CONFIG.token);
-                console.log('🔐 사용자 GitHub 토큰 저장됨');
-                return true;
-            }
-            
-            console.error('❌ GitHub 토큰 없음 - 로컬 저장소로 폴백');
-            return false;
-        }
+        // GitHub 토큰은 이제 서버사이드에서 환경변수로 관리됨
         
         // GitHub API로 파일 내용 가져오기
         async function getFileFromGitHub(filePath) {
@@ -5814,13 +5765,7 @@ GitHub Token:`);
             try {
                 console.log('🐙 GitHub API로 캐릭터 저장 시작:', character.name);
                 
-                // GitHub 토큰 확인/로드
-                if (!GITHUB_CONFIG.token) {
-                    const tokenLoaded = await loadGitHubToken();
-                    if (!tokenLoaded) {
-                        throw new Error('GitHub token not available');
-                    }
-                }
+                // GitHub 토큰은 서버사이드에서 환경변수로 처리
                 
                 // 캐릭터 ID 생성 (없으면)
                 if (!character.id) {
@@ -6813,15 +6758,11 @@ GitHub Token:`);
         // 중복 초기화 제거됨 - loadAllData()에서 통합 처리
     </script>
 
-    <!-- 온라인 데이터 클라이언트 로드 -->
-    <script src="js/online-data-client.js"></script>
-
     <script>
         // 🌐 온라인 전용 데이터 관리로 전환
         console.log('🚀 온라인 전용 관리 시스템 시작...');
 
-        // OnlineDataClient 초기화 (JWT 인증 문제 해결 후 재활성화)
-        window.onlineDataClient = new OnlineDataClient();
+        // 간소화된 직접 API 호출 방식 사용
         console.log('✅ 온라인 데이터 클라이언트 초기화 완료 (JWT 인증 정상화)');
 
         // 로그인 후 데이터 로드 함수 정의
