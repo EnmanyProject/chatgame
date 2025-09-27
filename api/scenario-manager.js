@@ -99,8 +99,24 @@ module.exports = async function handler(req, res) {
 
 // 새 시나리오 생성 함수
 async function createNewScenario(data) {
-  const { scenario_id, title, description, background_setting, mood, available_characters } = data;
-  
+  const {
+    scenario_id = `scenario_${Date.now()}`,
+    title = '새로운 시나리오',
+    description = '',
+    background_setting = '카페',
+    mood = '편안한',
+    available_characters = []
+  } = data;
+
+  console.log('📝 시나리오 생성 데이터:', {
+    scenario_id,
+    title,
+    description,
+    background_setting,
+    mood,
+    available_characters
+  });
+
   // AI를 이용한 소설풍 컨텍스트 생성
   const aiContext = await generateAIContext({
     title, 
@@ -502,6 +518,10 @@ async function regenerateAIContext(data) {
 
 // 태그 추출 함수
 function extractTags(description, mood) {
-  const keywords = [...description.split(' '), ...mood.split(', ')];
+  // undefined나 null 체크
+  const desc = description || '';
+  const moodStr = mood || '';
+
+  const keywords = [...desc.split(' '), ...moodStr.split(', ')];
   return keywords.map(word => word.toLowerCase().replace(/[^a-zA-Z가-힣]/g, '')).filter(tag => tag.length > 1);
 }
