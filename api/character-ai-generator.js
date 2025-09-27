@@ -36,7 +36,7 @@ export default async function handler(req, res) {
         stepName: '기본 정보',
         question: initialQuestion,
         options: generateBasicOptions(),
-        progress: 12.5 // 1/8 * 100
+        progress: 14.3 // 1/7 * 100
       });
     }
 
@@ -51,7 +51,7 @@ export default async function handler(req, res) {
         stepName: getStepName(currentStep + 1),
         question: nextQuestion.question,
         options: nextQuestion.options,
-        progress: ((currentStep + 1) / 8) * 100
+        progress: ((currentStep + 1) / 7) * 100
       });
     }
 
@@ -440,9 +440,9 @@ async function generateCompleteCharacter(answers, req = null) {
 
 function getStepName(step) {
   const stepNames = [
-    '', '기본 정보', '성격 설정', '배경 설정', 
-    '관계 설정', '상황 설정', '외모 설정', 
-    '내면/습관', '장르 설정'
+    '', '기본 정보', '성격 설정', '배경 설정',
+    '관계 설정', '상황 설정', '외모 설정',
+    '내면/습관'
   ];
   return stepNames[step] || '완료';
 }
@@ -454,8 +454,7 @@ function getStepInfo(step) {
     4: { name: '관계 설정', focus: '가족, 친구, 연인 관계' },
     5: { name: '상황 설정', focus: '현재 상황, 도입부, 갈등' },
     6: { name: '외모 설정', focus: '헤어, 눈, 체형, 스타일' },
-    7: { name: '내면/습관', focus: '취미, 가치관, 특기, 습관' },
-    8: { name: '장르 설정', focus: '스토리 장르, 로맨스 유형' }
+    7: { name: '내면/습관', focus: '취미, 가치관, 특기, 습관' }
   };
   return steps[step];
 }
@@ -497,15 +496,17 @@ function createCharacterPrompt(answers) {
 ${providedInfo || '정보 없음 - 완전히 새로운 캐릭터 생성 필요'}
 
 **생성 규칙:**
-1. 부족한 정보는 제공된 정보와 일관성 있게 추정
-2. MBTI가 주어지면 해당 성격에 맞게 모든 특성 결정
-3. 로맨스 게임 캐릭터로서 매력적이고 입체적인 성격
-4. 한국어 로맨스 웹툰/게임 스타일 캐릭터
+1. **제공된 정보를 반드시 정확히 반영** - 사용자가 선택한 내용은 절대 변경하지 않기
+2. 부족한 정보는 제공된 정보와 일관성 있게 추정
+3. MBTI가 주어지면 해당 성격에 맞게 모든 특성 결정
+4. 로맨스 게임 캐릭터로서 매력적이고 입체적인 성격
+5. 한국어 로맨스 웹툰/게임 스타일 캐릭터
+6. **나이는 반드시 18세 이상 30세 이하로 설정**
 
 **필수 출력 JSON 구조:**
 {
   "name": "적절한 한국 이름",
-  "age": "숫자",
+  "age": "18-30 사이의 숫자",
   "gender": "female",
   "mbti": "4글자 MBTI",
   "personality_traits": ["특성1", "특성2", "특성3"],
@@ -529,7 +530,6 @@ ${providedInfo || '정보 없음 - 완전히 새로운 캐릭터 생성 필요'}
     "fears": "두려워하는것"
   },
   "story_context": {
-    "genre": "school_romance",
     "main_situation": "첫만남상황"
   }
 }
