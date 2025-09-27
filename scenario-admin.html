@@ -1784,7 +1784,6 @@
             <div class="login-help">
                 <p><strong>기본 계정:</strong></p>
                 <p>사용자명: <code>admin</code></p>
-                <p>비밀번호: <code>chatgame2025</code></p>
             </div>
         </div>
     </div>
@@ -7217,7 +7216,7 @@ GitHub Token:`);
                     name: name,
                     age: parseInt(document.getElementById('charAge')?.value) || 22,
                     mbti: mbti,
-                    gender: document.getElementById('charGender')?.value || 'female',
+                    gender: 'female',
 
                     // ✨ 실제 사용자 선택값 반영 (기본값 없음)
                     personality_traits: selectedPersonalities.length > 0 ? selectedPersonalities : [],

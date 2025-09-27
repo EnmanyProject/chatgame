@@ -4,7 +4,7 @@ import crypto from 'crypto';
 // 간단한 사용자 저장소 (실제로는 데이터베이스나 안전한 저장소 사용)
 const adminUsers = {
   'admin': {
-    password: 'chatgame2025', // 실제로는 해시된 비밀번호
+    password: 'a6979', // 실제로는 해시된 비밀번호
     lastLogin: null
   }
 };

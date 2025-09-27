@@ -257,7 +257,7 @@ function generateRandomCharacterFromInput(inputData) {
     id: `${name.toLowerCase().replace(/\s+/g, '_')}_${mbti.toLowerCase()}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     name: name,
     age: parseInt(age),
-    gender: inputData.gender || randomChoice(['female', 'female', 'female', 'male']), // 75% 여성
+    gender: 'female', // 무조건 여성
     mbti: mbti,
 
     // 🎯 AI가 매번 다르게 선택
@@ -338,7 +338,7 @@ function completeCharacterFromInput(inputData) {
     id: inputData.id || `${name.toLowerCase().replace(/\s+/g, '_')}_${mbti.toLowerCase()}_${Date.now()}`,
     name: name,
     age: parseInt(age) || 22,
-    gender: inputData.gender || 'female',
+    gender: 'female', // 무조건 여성
     mbti: mbti,
 
     // ✨ 모든 입력 필드를 우선적으로 사용, 없으면 MBTI 템플릿 기본값
