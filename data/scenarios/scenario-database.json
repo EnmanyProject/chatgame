@@ -27,25 +27,6 @@
       "action": "create",
       "updated_at": "2025-09-25T10:45:06.625Z"
     },
-    "scenario_카페의_특별한_손님_1758866368789": {
-      "title": "카페의 특별한 손님",
-      "description": "매일 같은 시간, 같은 카페에서 마주치는 두 사람이 서로에게 관심을 갖게 되는 상황",
-      "background_setting": "기숙사 라운지",
-      "mood": "신비로움",
-      "available_characters": [
-        "유나__intp_1758866345749"
-      ],
-      "created_date": "2025-09-26",
-      "episode_count": 0,
-      "tags": [
-        "신비로움"
-      ],
-      "source": "github_api",
-      "active": true,
-      "id": "scenario_카페의_특별한_손님_1758866368789",
-      "action": "create",
-      "updated_at": "2025-09-26T05:59:29.562Z"
-    },
     "scenario_운명의_만남_1758934164331": {
       "title": "운명의 만남",
       "description": "매일 같은 시간, 같은 카페에서 마주치는 두 사람이 서로에게 관심을 갖게 되는 상황",
