@@ -72,12 +72,24 @@ export default async function handler(req, res) {
 
     // 캐릭터 리스트 조회
     if (action === 'list_characters') {
-      const characters = await loadCharacterDatabase();
-      return res.json({
-        success: true,
-        characters: characters.characters,
-        metadata: characters.metadata
-      });
+      try {
+        console.log('📋 캐릭터 리스트 조회 시작...');
+        const characters = await loadCharacterDatabase();
+        console.log('✅ 캐릭터 DB 로드 성공:', Object.keys(characters.characters || {}).length, '개');
+
+        return res.json({
+          success: true,
+          characters: characters.characters || {},
+          metadata: characters.metadata || {}
+        });
+      } catch (error) {
+        console.error('❌ 캐릭터 리스트 조회 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: '캐릭터 목록을 불러오는 중 오류가 발생했습니다',
+          error: error.message
+        });
+      }
     }
 
     // 모든 캐릭터 데이터 초기화 (더미 데이터 삭제)
@@ -599,20 +611,18 @@ async function loadCharacterDatabase() {
       const mainDb = JSON.parse(data);
       
       // characters.json 형식을 characters-ai.json 형식으로 변환
+      const charactersObj = mainDb.characters || {};
+      const charactersCount = Object.keys(charactersObj).length;
+
       const aiDb = {
-        metadata: { 
-          version: "2.0.0", 
-          total_characters: mainDb.characters ? mainDb.characters.length : 0,
-          converted_from: "characters.json"
+        metadata: {
+          version: "2.0.0",
+          total_characters: charactersCount,
+          converted_from: "characters.json",
+          last_converted: new Date().toISOString()
         },
-        characters: {}
+        characters: charactersObj
       };
-      
-      if (mainDb.characters && Array.isArray(mainDb.characters)) {
-        mainDb.characters.forEach(char => {
-          aiDb.characters[char.id] = char;
-        });
-      }
       
       // AI DB 파일로 저장 시도 (실패해도 메모리에서 반환)
       try {
