@@ -7,27 +7,7 @@
     "reset_at": "2025-09-27T01:23:46.586Z",
     "reset_reason": "Clean scenarios data reset"
   },
-  "scenarios": {
-    "scenario_카페의_특별한_손님_1758942370875": {
-      "title": "카페의 특별한 손님",
-      "description": "과제를 함께 하면서 서로를 알아가는 팀원들의 로맨스",
-      "background_setting": "벚꽃이 만발한 공원",
-      "mood": "현실적",
-      "available_characters": [
-        "미화_enfp_1758941116853"
-      ],
-      "created_date": "2025-09-27",
-      "episode_count": 0,
-      "tags": [
-        "현실적"
-      ],
-      "source": "github_api",
-      "active": true,
-      "id": "scenario_카페의_특별한_손님_1758942370875",
-      "action": "update",
-      "updated_at": "2025-09-27T03:20:03.847Z"
-    }
-  },
+  "scenarios": {},
   "scenario_templates": {
     "romance_template": {
       "mood_options": [
