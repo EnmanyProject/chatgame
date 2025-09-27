@@ -362,7 +362,12 @@ async function generateCompleteCharacter(answers, req = null) {
         messages: [
           {
             role: 'system',
-            content: '당신은 완벽한 캐릭터 프로파일을 생성하는 전문가입니다. 일관성 있고 매력적인 캐릭터를 만들어주세요.'
+            content: `당신은 완벽한 캐릭터 프로파일을 생성하는 전문가입니다.
+규칙:
+1. 반드시 유효한 JSON 형식으로만 응답하세요
+2. 코드 블록이나 설명 텍스트를 추가하지 마세요
+3. JSON 앞뒤에 다른 텍스트를 추가하지 마세요
+4. 일관성 있고 매력적인 캐릭터를 만들어주세요`
           },
           {
             role: 'user',
@@ -384,13 +389,40 @@ async function generateCompleteCharacter(answers, req = null) {
 
       if (aiCharacter && aiCharacter.trim()) {
         try {
-          const aiData = JSON.parse(aiCharacter);
+          // JSON 추출 및 정리
+          let cleanedResponse = aiCharacter.trim();
+
+          // 코드 블록 제거 (```json...``` 패턴)
+          if (cleanedResponse.includes('```')) {
+            const jsonMatch = cleanedResponse.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+            if (jsonMatch) {
+              cleanedResponse = jsonMatch[1];
+            } else {
+              // 코드 블록 마커만 제거
+              cleanedResponse = cleanedResponse.replace(/```(?:json)?/g, '');
+            }
+          }
+
+          // 불필요한 텍스트 제거 (JSON 이전/이후)
+          const jsonStart = cleanedResponse.indexOf('{');
+          const jsonEnd = cleanedResponse.lastIndexOf('}');
+
+          if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+            cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
+          }
+
+          console.log('🧹 정리된 AI 응답:', cleanedResponse.substring(0, 200) + '...');
+
+          const aiData = JSON.parse(cleanedResponse);
           console.log('✅ AI 캐릭터 데이터 파싱 성공');
+          console.log('📊 파싱된 데이터 키:', Object.keys(aiData));
+
           return { ...character, ...aiData };
         } catch (parseError) {
           console.error('❌ AI 캐릭터 JSON 파싱 실패:', parseError);
-          console.error('파싱 실패한 AI 응답:', aiCharacter);
-          throw new Error('AI 캐릭터 응답을 파싱할 수 없습니다. 다시 시도해주세요.');
+          console.error('❌ 원본 AI 응답 (처음 500자):', aiCharacter.substring(0, 500));
+          console.error('❌ 파싱 에러 상세:', parseError.message);
+          throw new Error('AI가 올바르지 않은 형식으로 응답했습니다. 다시 시도해주세요.');
         }
       } else {
         console.error('❌ AI 캐릭터 응답이 비어있음');
@@ -534,7 +566,11 @@ ${providedInfo || '정보 없음 - 완전히 새로운 캐릭터 생성 필요'}
   }
 }
 
-반드시 JSON만 출력하세요. 다른 텍스트는 포함하지 마세요.
+🚨 중요: 반드시 위의 JSON 구조만 출력하세요.
+- 코드 블록(```) 사용 금지
+- 설명 텍스트 추가 금지
+- JSON 외의 어떤 텍스트도 포함하지 마세요
+- 순수한 JSON만 응답하세요
 `;
 }
 
