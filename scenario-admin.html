@@ -1276,6 +1276,64 @@
             margin: 20px 0;
         }
 
+        .vercel-env-guide {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .guide-description {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .setup-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content strong {
+            color: #333;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .step-content p {
+            margin: 0;
+            color: #666;
+            line-height: 1.5;
+        }
+
         .api-key-input-group {
             display: flex;
             gap: 10px;
@@ -1775,24 +1833,56 @@
             </div>
 
             <div class="api-settings-container">
-                <div class="form-group">
-                    <label for="openaiApiKey">🔑 OpenAI API 키:</label>
-                    <div class="api-key-input-group">
-                        <input type="password" id="openaiApiKey" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
-                        <button type="button" id="toggleApiKey" onclick="toggleApiKeyVisibility()">👁️</button>
+                <div class="vercel-env-guide">
+                    <h3>🔧 Vercel 환경변수 설정 안내</h3>
+                    <p class="guide-description">AI 생성 기능을 사용하려면 Vercel 대시보드에서 OpenAI API 키를 환경변수로 설정해야 합니다.</p>
+
+                    <div class="setup-steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <div class="step-content">
+                                <strong>Vercel 대시보드 접속</strong>
+                                <p><a href="https://vercel.com/dashboard" target="_blank" style="color: #667eea;">🔗 Vercel Dashboard</a> → 프로젝트 선택</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <div class="step-content">
+                                <strong>환경변수 페이지 이동</strong>
+                                <p>Settings → Environment Variables</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <div class="step-content">
+                                <strong>API 키 추가</strong>
+                                <p>변수명: <code style="background: #e3f2fd; padding: 2px 6px; border-radius: 4px;">OPENAI_API_KEY</code><br>
+                                값: 실제 OpenAI API 키 (sk-로 시작)</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <div class="step-content">
+                                <strong>환경 선택</strong>
+                                <p>Production, Preview, Development 모두 체크</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">5</span>
+                            <div class="step-content">
+                                <strong>저장 및 재배포</strong>
+                                <p>Save 클릭 후 약 1-2분 대기</p>
+                            </div>
+                        </div>
                     </div>
-                    <small class="form-help">API 키는 안전하게 암호화되어 저장됩니다</small>
                 </div>
 
                 <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="saveApiKey()">
-                        💾 API 키 저장
+                    <button class="btn btn-secondary" onclick="checkApiStatus()">
+                        🔄 API 키 상태 확인
                     </button>
-                    <button class="btn btn-secondary" onclick="testApiConnection()">
-                        🧪 연결 테스트
-                    </button>
-                    <button class="btn btn-warning" onclick="clearApiKey()">
-                        🗑️ API 키 삭제
+                    <button class="btn btn-primary" onclick="openVercelDashboard()">
+                        🚀 Vercel 대시보드 열기
                     </button>
                 </div>
 
@@ -3322,53 +3412,10 @@
         }
 
         // 간단한 API 키 저장 (새로운 방식)
-        async function saveApiKey() {
-            const apiKey = document.getElementById('openaiApiKey').value.trim();
-
-            if (!apiKey) {
-                showNotification('API 키를 입력해주세요.', 'warning');
-                return;
-            }
-
-            if (!apiKey.startsWith('sk-')) {
-                showNotification('유효한 OpenAI API 키 형식이 아닙니다. (sk-로 시작해야 함)', 'error');
-                return;
-            }
-
-            try {
-                console.log('💾 간단한 API 키 저장 시도...');
-
-                // 새로운 간단한 API 키 저장 방식
-                const response = await fetch('/api/simple-api-key?action=save', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ apiKey })
-                });
-
-                const result = await response.json();
-                console.log('💾 간단한 API 키 저장 응답:', result);
-
-                if (result.success) {
-                    showNotification(result.message, 'success');
-
-                    // 입력 필드 초기화 (보안)
-                    document.getElementById('openaiApiKey').value = '';
-
-                    // 저장 후 상태 업데이트
-                    setTimeout(() => {
-                        console.log('🔄 API 키 저장 후 상태 확인...');
-                        checkApiStatus();
-                    }, 1000);
-                } else {
-                    showNotification('❌ API 키 저장 실패: ' + (result.message || '알 수 없는 오류'), 'error');
-                }
-
-            } catch (error) {
-                console.error('❌ API 키 저장 오류:', error);
-                showNotification('❌ API 키 저장 중 오류가 발생했습니다: ' + error.message, 'error');
-            }
+        // Vercel 대시보드 열기
+        function openVercelDashboard() {
+            window.open('https://vercel.com/dashboard', '_blank');
+            showNotification('🚀 Vercel 대시보드가 새 탭에서 열렸습니다. 프로젝트를 선택하고 Environment Variables를 설정하세요.', 'info');
         }
 
         // API 연결 테스트
@@ -3442,34 +3489,51 @@
         // API 상태 확인 (개선된 버전)
         async function checkApiStatus() {
             try {
-                console.log('🔍 API 상태 확인 시작...');
+                console.log('🔍 Vercel 환경변수 API 키 상태 확인 시작...');
 
-                // 새로운 간단한 API 키 상태 확인
                 const response = await fetch('/api/simple-api-key?action=check');
                 const data = await response.json();
 
-                console.log('📋 간단한 API 키 상태:', data);
+                console.log('📋 환경변수 API 키 상태:', data);
 
-                const statusElement = document.getElementById('openaiStatus');
-                const badgeElement = document.getElementById('apiStatus');
-                const usageElement = document.getElementById('apiUsage');
-                const testElement = document.getElementById('lastTest');
+                const statusElement = document.getElementById('apiStatus');
 
-                if (data.success && data.apiKey.exists && data.apiKey.isValid) {
-                    console.log('✅ API 키가 설정되어 있음');
+                if (data.success && data.apiKey.exists && data.apiKey.isValid && data.apiKey.connected) {
+                    console.log('✅ Vercel 환경변수에 API 키가 정상 설정됨');
 
-                    // API 연결 상태 확인
-                    if (data.apiKey.connected) {
-                        // API 상태 업데이트 - 연결됨
-                        statusElement.textContent = `✅ 연결됨 (${data.apiKey.preview})`;
-                        statusElement.className = 'status-connected';
-                        badgeElement.textContent = '✅';
+                    statusElement.innerHTML = `
+                        <span class="status-indicator">✅</span>
+                        <span class="status-text">Vercel 환경변수 API 키 정상 연결됨 (${data.apiKey.preview})</span>
+                    `;
+                    statusElement.style.color = '#28a745';
 
-                        // 사용량 정보 표시
-                        usageElement.innerHTML = '✅ API 키 정상 작동<br>AI 생성 기능 사용 가능';
-                        testElement.textContent = new Date(data.timestamp).toLocaleString('ko-KR');
+                    showNotification('✅ API 키가 정상적으로 설정되었습니다. AI 생성 기능을 사용할 수 있습니다.', 'success');
 
-                        console.log('✅ API 상태 확인 완료 - 정상 연결');
+                } else {
+                    console.log('❌ API 키가 설정되지 않았거나 유효하지 않음');
+
+                    statusElement.innerHTML = `
+                        <span class="status-indicator">❌</span>
+                        <span class="status-text">Vercel 환경변수에 OPENAI_API_KEY가 설정되지 않았습니다</span>
+                    `;
+                    statusElement.style.color = '#dc3545';
+
+                    showNotification('❌ API 키가 설정되지 않았습니다. Vercel 대시보드에서 OPENAI_API_KEY 환경변수를 설정해주세요.', 'error');
+                }
+
+            } catch (error) {
+                console.error('❌ API 상태 확인 오류:', error);
+
+                const statusElement = document.getElementById('apiStatus');
+                statusElement.innerHTML = `
+                    <span class="status-indicator">⚠️</span>
+                    <span class="status-text">API 상태 확인 중 오류 발생</span>
+                `;
+                statusElement.style.color = '#ffc107';
+
+                showNotification('⚠️ API 상태 확인 중 오류가 발생했습니다.', 'warning');
+            }
+        }
 
                     } else {
                         // API 키는 있지만 연결되지 않음
