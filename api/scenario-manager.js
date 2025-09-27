@@ -153,26 +153,44 @@ async function generateAIContext(scenarioData) {
 
     console.log('🤖 OpenAI API 호출 시작...');
 
+    // 캐릭터 정보 문자열 생성
+    let characterInfo = '';
+    if (scenarioData.characters && scenarioData.characters.length > 0) {
+      characterInfo = '\n등장인물:\n';
+      scenarioData.characters.forEach((char, index) => {
+        characterInfo += `${index + 1}. **${char.name}** (${char.age}세, ${char.mbti})\n`;
+        characterInfo += `   - 성격: ${char.personality_traits ? char.personality_traits.join(', ') : '정보 없음'}\n`;
+        characterInfo += `   - 외모: ${char.appearance ? Object.values(char.appearance).join(', ') : '정보 없음'}\n`;
+        characterInfo += `   - 취미: ${char.hobbies ? char.hobbies.join(', ') : '정보 없음'}\n`;
+        characterInfo += `   - 말투: ${char.speech_style || '정보 없음'}\n`;
+        characterInfo += `   - 전공/관계: ${char.major || '일반'}, ${char.relationship || '친구'}\n\n`;
+      });
+    } else {
+      characterInfo = '\n등장인물: 시나리오에 맞는 매력적인 캐릭터들을 창조해주세요.\n';
+    }
+
     const prompt = `다음 정보를 바탕으로 MBTI 로맨스 게임의 풍부하고 상세한 시나리오 컨텍스트를 소설풍으로 작성해주세요:
 
 제목: ${scenarioData.title}
 설명: ${scenarioData.description}
 배경: ${scenarioData.background_setting}
-분위기: ${scenarioData.mood}
+분위기: ${scenarioData.mood}${characterInfo}
 
 상세 요구사항:
-1. **길이와 구조**: 600-900자 분량의 충분히 상세한 소설풍 시놉시스
-2. **장면 묘사**: 공간의 분위기, 시간대, 날씨, 주변 환경을 세밀하게 묘사
-3. **캐릭터 심리**: 등장인물의 내면 감정, 생각, 과거 경험을 깊이 있게 표현
-4. **감각적 묘사**: 시각, 청각, 후각, 촉각 등 오감을 활용한 생생한 묘사
-5. **감정 전개**: 만남 전 → 첫 만남 → 감정 변화의 단계별 상세 묘사
-6. **문화적 배경**: 한국의 대학생/직장인 문화, 계절감, 사회적 맥락 반영
-7. **MBTI 특성**: 각 성격유형별 특징적인 행동과 사고 패턴 자연스럽게 반영
-8. **로맨스 요소**: 미묘한 설렘, 긴장감, 호감의 싹트는 순간들을 세밀하게 표현
-9. **대화 암시**: 실제 대화는 아니지만 어떤 대화가 오갈지 예상되는 상황 설정
-10. **몰입감**: 읽는 사람이 그 상황에 완전히 빠져들 수 있는 생동감 있는 묘사
+1. **캐릭터 활용**: 위에 제공된 등장인물의 이름, 나이, MBTI, 성격, 외모, 취미, 말투를 정확히 반영
+2. **MBTI 특성**: 각 캐릭터의 MBTI 성격유형에 맞는 행동과 사고 패턴을 자연스럽게 표현
+3. **길이와 구조**: 600-900자 분량의 충분히 상세한 소설풍 시놉시스
+4. **장면 묘사**: 공간의 분위기, 시간대, 날씨, 주변 환경을 세밀하게 묘사
+5. **캐릭터 심리**: 등장인물의 내면 감정, 생각, 과거 경험을 깊이 있게 표현
+6. **감각적 묘사**: 시각, 청각, 후각, 촉각 등 오감을 활용한 생생한 묘사
+7. **감정 전개**: 만남 전 → 첫 만남 → 감정 변화의 단계별 상세 묘사
+8. **문화적 배경**: 한국의 대학생/직장인 문화, 계절감, 사회적 맥락 반영
+9. **로맨스 요소**: 미묘한 설렘, 긴장감, 호감의 싹트는 순간들을 세밀하게 표현
+10. **대화 암시**: 실제 대화는 아니지만 어떤 대화가 오갈지 예상되는 상황 설정
+11. **몰입감**: 읽는 사람이 그 상황에 완전히 빠져들 수 있는 생동감 있는 묘사
 
 작성 가이드:
+- **중요**: 제공된 캐릭터의 실제 이름, 나이, 성격을 반드시 사용하세요
 - 단순한 상황 설명이 아닌 소설의 한 장면처럼 작성
 - 등장인물의 미묘한 표정, 몸짓, 시선 처리까지 세밀하게 묘사
 - 그 순간의 공기감, 긴장감, 설렘을 독자가 느낄 수 있도록 표현
@@ -343,7 +361,8 @@ async function regenerateAIContext(data) {
       title: data.title || scenario.title,
       description: data.description || scenario.description,
       background_setting: data.background_setting || scenario.background_setting,
-      mood: data.mood || scenario.mood
+      mood: data.mood || scenario.mood,
+      characters: data.characters || []
     });
 
     scenario.ai_generated_context = newContext;
@@ -358,7 +377,8 @@ async function regenerateAIContext(data) {
       title: data.title,
       description: data.description,
       background_setting: data.background_setting,
-      mood: data.mood
+      mood: data.mood,
+      characters: data.characters || []
     });
 
     return {

@@ -4105,6 +4105,16 @@
             try {
                 console.log('🤖 AI 컨텍스트 생성 요청 시작...');
 
+                // 선택된 캐릭터 정보 수집
+                const selectedCharacterData = [];
+                for (const charId of selectedCharacters) {
+                    if (characters[charId]) {
+                        selectedCharacterData.push(characters[charId]);
+                    }
+                }
+
+                console.log('👥 선택된 캐릭터 정보:', selectedCharacterData);
+
                 const response = await fetch('/api/scenario-manager?action=regenerate_context', {
                     method: 'POST',
                     headers: {
@@ -4114,7 +4124,8 @@
                         title,
                         description,
                         background_setting: backgroundSetting,
-                        mood
+                        mood,
+                        characters: selectedCharacterData
                     })
                 });
 
