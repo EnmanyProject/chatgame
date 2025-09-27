@@ -1,5 +1,5 @@
 // 간단한 API 키 관리 - Vercel 환경변수 전용
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -87,7 +87,7 @@ export default async function handler(req, res) {
 }
 
 // 다른 API에서 사용할 수 있는 간단한 API 키 조회 함수
-export async function getSimpleApiKey() {
+module.exports.getSimpleApiKey = async function getSimpleApiKey() {
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (apiKey && apiKey.startsWith('sk-')) {

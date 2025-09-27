@@ -1,9 +1,8 @@
 // AI 캐릭터 생성 API - 세계관 최강 버전
-import fs from 'fs';
-import path from 'path';
-// import { getGlobalApiKey } from './save-api-key.js';
+const fs = require('fs');
+const path = require('path');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -245,9 +244,8 @@ function generateBasicOptions() {
 }
 
 async function generateNextQuestion(currentStep, answers) {
-  // 간단한 API 키 조회 방식 사용
-  const { getSimpleApiKey } = await import('./simple-api-key.js');
-  const OPENAI_API_KEY = await getSimpleApiKey();
+  // 환경변수에서 직접 API 키 조회
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
   if (!OPENAI_API_KEY) {
     console.error('❌ OpenAI API 키가 설정되지 않았습니다');
@@ -344,9 +342,8 @@ async function generateNextQuestion(currentStep, answers) {
 }
 
 async function generateCompleteCharacter(answers, req = null) {
-  // 간단한 API 키 조회 방식 사용
-  const { getSimpleApiKey } = await import('./simple-api-key.js');
-  const OPENAI_API_KEY = await getSimpleApiKey();
+  // 환경변수에서 직접 API 키 조회
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
   const character = {
     id: 'char_' + Date.now(),
@@ -797,7 +794,7 @@ async function resetAllCharacters() {
 async function analyzeCharacterImage(imageBase64) {
   try {
     // 간단한 API 키 조회 방식 사용
-    const { getSimpleApiKey } = await import('./simple-api-key.js');
+    const { getSimpleApiKey } = require('./simple-api-key.js');
     const OPENAI_API_KEY = await getSimpleApiKey();
 
     if (!OPENAI_API_KEY) {
