@@ -1,4 +1,16 @@
 // AI 캐릭터 생성 API - 새로운 안전 버전
+
+// 메모리 기반 캐릭터 저장소 (세션 동안 유지)
+let memoryStorage = {
+  characters: {},
+  metadata: {
+    version: "2.0.0",
+    total_characters: 0,
+    created: new Date().toISOString(),
+    storage_type: "memory"
+  }
+};
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -20,16 +32,16 @@ module.exports = async function handler(req, res) {
     // 캐릭터 리스트 조회
     if (action === 'list_characters') {
       console.log('📋 캐릭터 리스트 조회...');
+      console.log('📊 현재 메모리 저장소:', Object.keys(memoryStorage.characters).length, '개');
+
+      // 메타데이터 업데이트
+      memoryStorage.metadata.total_characters = Object.keys(memoryStorage.characters).length;
+      memoryStorage.metadata.last_accessed = new Date().toISOString();
 
       return res.json({
         success: true,
-        characters: {},
-        metadata: {
-          version: "2.0.0",
-          total_characters: 0,
-          source: "new_api_version",
-          timestamp: new Date().toISOString()
-        }
+        characters: memoryStorage.characters,
+        metadata: memoryStorage.metadata
       });
     }
 
@@ -37,32 +49,63 @@ module.exports = async function handler(req, res) {
     if (action === 'reset_all_characters') {
       console.log('🗑️ 캐릭터 데이터 초기화...');
 
+      // 메모리 저장소 초기화
+      memoryStorage.characters = {};
+      memoryStorage.metadata.total_characters = 0;
+      memoryStorage.metadata.reset_at = new Date().toISOString();
+
+      console.log('✅ 메모리 저장소 초기화 완료');
+
       return res.json({
         success: true,
-        message: '모든 캐릭터 데이터가 초기화되었습니다 (테스트 모드)'
+        message: '모든 캐릭터 데이터가 초기화되었습니다'
       });
     }
 
     // 캐릭터 저장
     if (action === 'save_character') {
-      const { character } = req.body;
+      // scenario-admin.html에서 {action: 'save_character', character: {...}} 형태로 전송
+      const characterData = req.body.character || req.body;
 
-      if (!character || !character.name || !character.mbti) {
+      // action 필드 제거 (characterData에 action이 있을 경우)
+      if (characterData.action) {
+        delete characterData.action;
+      }
+
+      console.log('💾 캐릭터 저장 요청:', characterData);
+
+      if (!characterData.name || !characterData.mbti) {
         return res.status(400).json({
           success: false,
           message: 'Character name and MBTI are required'
         });
       }
 
-      console.log('💾 캐릭터 저장:', character.name);
+      console.log('💾 캐릭터 저장 시작:', characterData.name);
+
+      // ID가 없으면 생성
+      if (!characterData.id) {
+        characterData.id = `${characterData.name.toLowerCase().replace(/\s+/g, '_')}_${characterData.mbti.toLowerCase()}_${Date.now()}`;
+      }
+
+      // 메모리 저장소에 저장
+      memoryStorage.characters[characterData.id] = {
+        ...characterData,
+        updated_at: new Date().toISOString(),
+        source: 'api_save'
+      };
+
+      // 메타데이터 업데이트
+      memoryStorage.metadata.total_characters = Object.keys(memoryStorage.characters).length;
+      memoryStorage.metadata.last_updated = new Date().toISOString();
+
+      console.log('✅ 캐릭터 저장 완료:', characterData.id);
+      console.log('📊 총 캐릭터 수:', memoryStorage.metadata.total_characters);
 
       return res.json({
         success: true,
-        character: {
-          ...character,
-          id: `${character.name.toLowerCase()}_${character.mbti.toLowerCase()}_${Date.now()}`
-        },
-        message: 'Character saved successfully (test mode)'
+        character: memoryStorage.characters[characterData.id],
+        message: 'Character saved successfully'
       });
     }
 
@@ -95,10 +138,27 @@ module.exports = async function handler(req, res) {
 
       console.log('🗑️ 캐릭터 삭제:', character_id);
 
-      return res.json({
-        success: true,
-        message: 'Character deleted successfully (test mode)'
-      });
+      if (memoryStorage.characters[character_id]) {
+        const characterName = memoryStorage.characters[character_id].name;
+        delete memoryStorage.characters[character_id];
+
+        // 메타데이터 업데이트
+        memoryStorage.metadata.total_characters = Object.keys(memoryStorage.characters).length;
+        memoryStorage.metadata.last_updated = new Date().toISOString();
+
+        console.log('✅ 캐릭터 삭제 완료:', characterName);
+        console.log('📊 남은 캐릭터 수:', memoryStorage.metadata.total_characters);
+
+        return res.json({
+          success: true,
+          message: 'Character deleted successfully'
+        });
+      } else {
+        return res.status(404).json({
+          success: false,
+          message: 'Character not found'
+        });
+      }
     }
 
     return res.status(400).json({
