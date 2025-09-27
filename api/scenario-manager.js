@@ -88,10 +88,11 @@ export default async function handler(req, res) {
       OPENAI_API_KEY: process.env.OPENAI_API_KEY ? '***설정됨***' : '❌ 미설정'
     });
     
-    return res.status(500).json({ 
-      success: false, 
+    return res.status(500).json({
+      success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: error.message,
+      stack: error.stack?.split('\n').slice(0, 3).join('\n') // 첫 3줄만 표시
     });
   }
 }
