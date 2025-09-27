@@ -2460,6 +2460,11 @@
                                     <option value="23">23세 (대학원생)</option>
                                     <option value="24">24세 (대학원생)</option>
                                     <option value="25">25세 (사회 초년생)</option>
+                                    <option value="26">26세 (사회인)</option>
+                                    <option value="27">27세 (사회인)</option>
+                                    <option value="28">28세 (직장인)</option>
+                                    <option value="29">29세 (직장인)</option>
+                                    <option value="30">30세 (성숙한 직장인)</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -2627,6 +2632,10 @@
                                     <button type="button" class="hobby-btn" data-hobby="exercise">🏃‍♀️ 운동</button>
                                     <button type="button" class="hobby-btn" data-hobby="travel">✈️ 여행</button>
                                     <button type="button" class="hobby-btn" data-hobby="movies">🎬 영화 감상</button>
+                                    <button type="button" class="hobby-btn" data-hobby="gaming">🎮 게임</button>
+                                    <button type="button" class="hobby-btn" data-hobby="dancing">💃 댄스</button>
+                                    <button type="button" class="hobby-btn" data-hobby="shopping">🛍️ 쇼핑</button>
+                                    <button type="button" class="hobby-btn" data-hobby="cafe">☕ 카페 탐방</button>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -2653,6 +2662,9 @@
                                 <button type="button" class="speech-btn" data-speech="shy_cute">😊 수줍고 귀여운</button>
                                 <button type="button" class="speech-btn" data-speech="mature_elegant">👑 성숙하고 우아한</button>
                                 <button type="button" class="speech-btn" data-speech="playful_fun">🎪 장난스럽고 재미있는</button>
+                                <button type="button" class="speech-btn" data-speech="sexy_flirty">😈 섹시하고 유혹적인</button>
+                                <button type="button" class="speech-btn" data-speech="mysterious_seductive">🌙 신비롭고 매혹적인</button>
+                                <button type="button" class="speech-btn" data-speech="cute_naughty">😏 귀엽게 응큼한</button>
                             </div>
                             <div class="form-group">
                                 <label>특별한 말버릇/습관</label>
@@ -2662,33 +2674,7 @@
                         </div>
                     </div>
 
-                    <!-- 장르/시나리오 설정 -->
-                    <div class="char-category">
-                        <h3>📖 장르 & 시나리오 타입</h3>
-                        <div class="genre-grid">
-                            <div class="form-group">
-                                <label>로맨스 장르</label>
-                                <select id="charGenre">
-                                    <option value="school_romance">🏫 학원 로맨스</option>
-                                    <option value="daily_romance">☀️ 일상 로맨스</option>
-                                    <option value="sweet_romance">🍯 달콤한 로맨스</option>
-                                    <option value="emotional_romance">💔 감성 로맨스</option>
-                                    <option value="healing_romance">🌿 힐링 로맨스</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>주요 시나리오 상황</label>
-                                <select id="charMainSituation">
-                                    <option value="confession_aftermath">고백 후 어색한 상황</option>
-                                    <option value="study_together">함께 공부하는 상황</option>
-                                    <option value="festival_date">축제 데이트 상황</option>
-                                    <option value="rainy_day">비 오는 날 상황</option>
-                                    <option value="cafe_meeting">카페에서 만나는 상황</option>
-                                    <option value="library_encounter">도서관에서 우연한 만남</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- 장르/시나리오 설정 섹션 제거됨 -->
 
                     <!-- AI 생성 영역 -->
                     <div class="char-category ai-generation">
@@ -5172,15 +5158,38 @@
 
         window.displayCharacters = function displayCharacters() {
             console.log('🎨 === 캐릭터 표시 함수 시작 ===');
+            console.log('🔍 전역 characters 변수 확인:', typeof characters, characters);
+            console.log('🔍 window.characters 확인:', typeof window.characters, window.characters);
+
             const container = document.getElementById('charactersContainer');
-            const characterArray = Object.values(characters);
+            if (!container) {
+                console.error('❌ charactersContainer 요소를 찾을 수 없음!');
+                return;
+            }
+
+            const characterArray = Object.values(characters || {});
             console.log('📊 표시할 캐릭터 수:', characterArray.length);
-            console.log('📋 캐릭터 목록:', characterArray.map(c => `${c.name} (${c.id})`));
+            console.log('📋 캐릭터 목록:', characterArray.map(c => `${c?.name || 'NO_NAME'} (${c?.id || 'NO_ID'})`));
             
+            if (characterArray.length === 0) {
+                console.log('📭 캐릭터가 없음 - 빈 상태 메시지 표시');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>🎭 생성된 캐릭터가 없습니다</p>
+                        <p><small>위의 "🎭✨ AI 캐릭터 생성기" 버튼을 클릭하여 새로운 캐릭터를 만들어보세요!</small></p>
+                        <button class="btn btn-primary" onclick="openCharacterModal('create')" style="margin-top: 10px;">
+                            ✨ 지금 캐릭터 만들기
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            console.log('🎨 캐릭터 카드 HTML 생성 중...');
             container.innerHTML = characterArray.map(character => `
                 <div class="character-card">
                     <div class="character-image">
-                        ${character.image ? 
+                        ${character.image ?
                             `<img src="${character.image}" alt="${character.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 100 100\\"><rect width=\\"100\\" height=\\"100\\" fill=\\"%23f0f0f0\\"/><text x=\\"50\\" y=\\"50\\" text-anchor=\\"middle\\" dy=\\".3em\\" fill=\\"%23999\\">${character.name.charAt(0)}</text></svg>'"/>` :
                             `<div class="no-image">${character.name.charAt(0)}</div>`
                         }
@@ -5197,6 +5206,7 @@
                     </div>
                 </div>
             `).join('');
+            console.log('✅ 캐릭터 카드 HTML 생성 완료');
         }
 
         function updateCharacterStats() {
@@ -5301,8 +5311,8 @@
             safeSetValue('charValues', character.values);
             safeSetValue('charSpeechStyle', character.speech_style);
             safeSetValue('charSpeechHabit', character.speech_habit);
-            safeSetValue('charGenre', character.genre);
-            safeSetValue('charMainSituation', character.main_situation);
+            // charGenre 필드 제거됨
+            // charMainSituation 필드 제거됨
 
 
             // 모달 표시
@@ -5725,8 +5735,8 @@ GitHub Token:`);
                 values: document.getElementById('charValues').value || 'love_family',
                 speech_style: document.getElementById('charSpeechStyle').value,
                 speech_habit: document.getElementById('charSpeechHabit').value || '',
-                genre: document.getElementById('charGenre').value || 'school_romance',
-                main_situation: document.getElementById('charMainSituation').value || 'confession_aftermath'
+                // genre 필드 제거됨
+                // main_situation 필드 제거됨
             };
         }
 
@@ -5965,8 +5975,8 @@ GitHub Token:`);
                 safeSetValue('charSpeechStyle', character.speech_style);
                 safeSetValue('charSpeechHabit', character.speech_habit);
                 safeSetValue('charValues', character.personality?.values);
-                safeSetValue('charGenre', character.story_context?.genre);
-                safeSetValue('charMainSituation', character.story_context?.main_situation);
+                // charGenre 필드 제거됨
+                // charMainSituation 필드 제거됨
 
                 console.log('✅ 모든 폼 요소 적용 완료!');
 
@@ -6027,7 +6037,10 @@ GitHub Token:`);
                 'gentle_caring': '다정하고 배려깊은',
                 'shy_cute': '수줍고 귀여운',
                 'mature_elegant': '성숙하고 우아한',
-                'playful_fun': '장난스럽고 재미있는'
+                'playful_fun': '장난스럽고 재미있는',
+                'sexy_flirty': '섹시하고 유혹적인',
+                'mysterious_seductive': '신비롭고 매혹적인',
+                'cute_naughty': '귀엽게 응큼한'
             };
             return translations[style] || style;
         }
@@ -6862,27 +6875,39 @@ GitHub Token:`);
 
         // 전역 함수 교체: 온라인 데이터 클라이언트 사용
         window.loadCharacters = async function() {
-            console.log('🌐 온라인에서 캐릭터 로드...');
+            console.log('🌐 === 온라인 캐릭터 로드 시작 ===');
             try {
+                console.log('🔍 onlineDataClient 확인:', typeof window.onlineDataClient);
+
+                if (!window.onlineDataClient) {
+                    console.error('❌ onlineDataClient가 정의되지 않음');
+                    throw new Error('온라인 데이터 클라이언트가 초기화되지 않았습니다');
+                }
+
                 const charactersData = await window.onlineDataClient.loadCharacters();
-                console.log('📊 로드된 캐릭터 데이터:', charactersData);
+                console.log('📊 onlineDataClient에서 로드된 원시 데이터:', charactersData);
+                console.log('📊 데이터 타입:', typeof charactersData);
+                console.log('📊 데이터 키들:', Object.keys(charactersData || {}));
 
                 // 전역 characters 변수와 window.characters 모두 업데이트
                 characters = charactersData || {};
                 window.characters = characters;
 
-                console.log('📋 전역 변수 확인:', Object.keys(characters).length, '개 캐릭터');
+                console.log('📋 전역 변수 설정 후 확인:', typeof characters, Object.keys(characters).length, '개 캐릭터');
+                console.log('📋 window.characters 확인:', typeof window.characters, Object.keys(window.characters || {}).length, '개 캐릭터');
 
                 displayCharacters();
                 updateCharacterStats();
-                console.log('✅ 캐릭터 온라인 로드 완료');
+                console.log('✅ === 캐릭터 온라인 로드 완료 ===');
             } catch (error) {
                 console.error('❌ 캐릭터 온라인 로드 실패:', error);
+                console.error('❌ 에러 상세:', error.stack);
                 alert('캐릭터 데이터를 불러오는 중 오류가 발생했습니다:\n' + error.message);
 
                 // 오류 발생 시 빈 데이터로 초기화
                 characters = {};
                 window.characters = characters;
+                console.log('🔄 빈 데이터로 초기화 완료');
                 displayCharacters();
                 updateCharacterStats();
             }
@@ -6936,7 +6961,7 @@ GitHub Token:`);
                     values: 'family_oriented',
                     speech_style: '친근한 말투',
                     speech_habit: '자주 미소짓기',
-                    genre: 'school_romance',
+                    // genre 필드 제거됨
                     created_at: new Date().toISOString(),
                     source: 'scenario_admin',
                     active: true

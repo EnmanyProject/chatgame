@@ -100,23 +100,29 @@ export default async function handler(req, res) {
 
 // 새 에피소드 생성 함수
 async function createNewEpisode(data) {
-  const { 
-    scenario_id, 
-    character_id, 
-    character_name, 
-    user_input_prompt, 
+  const {
+    scenario_id,
+    character_id,
+    character_name,
+    user_input_prompt,
     difficulty = 'easy',
-    episode_number 
+    episode_number
   } = data;
 
   // 시나리오 정보 로드하여 컨텍스트 확인
   const scenarioContext = await getScenarioContext(scenario_id);
-  
+
+  // 캐릭터 데이터베이스에서 실제 캐릭터 정보 로드
+  const characterDb = await loadCharacterDatabase();
+  const actualCharacter = characterDb.characters[character_id];
+
+  console.log('🎭 에피소드 생성용 캐릭터 정보:', actualCharacter);
+
   // AI를 이용한 대화 및 선택지 생성
   const aiDialogue = await generateEpisodeDialogue({
     scenario_context: scenarioContext,
     character_id,
-    character_name,
+    character_data: actualCharacter, // 실제 캐릭터 데이터 전달
     user_input_prompt,
     difficulty
   });
@@ -287,7 +293,7 @@ const moodVariations = [
 ];
 
 // 🎯 채팅 훈련용 프롬프트 생성 (다양성 강화)
-function generateChatTrainingPrompt({scenario_context, character_id, character_name, user_input_prompt, difficulty}) {
+function generateChatTrainingPrompt({scenario_context, character_id, character_data, user_input_prompt, difficulty}) {
   const difficultyGuides = {
     'Easy': {
       focus: '기본적인 대화 매너와 관심 표현',
@@ -317,12 +323,31 @@ function generateChatTrainingPrompt({scenario_context, character_id, character_n
   const randomStarter = conversationStarters[Math.floor(Math.random() * conversationStarters.length)];
   const randomMood = moodVariations[Math.floor(Math.random() * moodVariations.length)];
   
+  // 캐릭터 정보 문자열 생성
+  let characterDetails = '';
+  if (character_data) {
+    characterDetails = `
+🎭 상세 캐릭터 정보:
+- 이름: ${character_data.name}
+- 나이: ${character_data.age}세
+- MBTI: ${character_data.mbti}
+- 성격: ${character_data.personality_traits ? character_data.personality_traits.join(', ') : '정보 없음'}
+- 외모: ${character_data.appearance ? Object.values(character_data.appearance).join(', ') : '정보 없음'}
+- 취미: ${character_data.hobbies ? character_data.hobbies.join(', ') : '정보 없음'}
+- 말투: ${character_data.speech_style || '정보 없음'}
+- 말버릇: ${character_data.speech_habit || '정보 없음'}
+- 가치관: ${character_data.values || '정보 없음'}
+- 관계: ${character_data.relationship || '친구'}`;
+  } else {
+    characterDetails = `
+🎭 캐릭터 정보: ${character_id} (상세 정보 없음)`;
+  }
+
   return `
 💬 채팅 기술 향상을 위한 풍부하고 상세한 대화 시뮬레이션을 생성해주세요.
 
 🎭 상세 설정:
-- 배경 상황: ${scenario_context}
-- 여성 캐릭터: ${character_name} (${character_id})
+- 배경 상황: ${scenario_context}${characterDetails}
 - 현재 대화 상황: ${user_input_prompt}
 - 훈련 난이도: ${difficulty} (${guide.focus})
 - 대화 시작 스타일: ${randomStarter}
@@ -330,7 +355,7 @@ function generateChatTrainingPrompt({scenario_context, character_id, character_n
 - 핵심 채팅 기법: ${guide.techniques.join(', ')}
 
 📱 몰입형 채팅 시나리오:
-당신은 ${character_name}과(와) ${scenario_context} 상황에서 실시간 채팅을 나누고 있습니다.
+당신은 ${character_data ? character_data.name : character_id}과(와) ${scenario_context} 상황에서 실시간 채팅을 나누고 있습니다.
 ${user_input_prompt}
 
 🎯 5배 확장된 대화 요구사항:
@@ -350,9 +375,9 @@ ${user_input_prompt}
 - 감정 공감 (Empathetic): 깊은 이해와 공감 표현
 
 **3. 심화된 MBTI 특성 반영**
-- ${character_id} 특성에 맞는 구체적인 반응 패턴
-- 성격 유형별 선호하는 대화 스타일 적용
-- 개인의 가치관과 관심사를 대화에 자연스럽게 녹여냄
+- ${character_data ? character_data.mbti : character_id} 특성에 맞는 구체적인 반응 패턴
+- ${character_data ? character_data.personality_traits ? character_data.personality_traits.join(', ') + ' 성격을' : '성격 유형별' : '성격 유형별'} 선호하는 대화 스타일 적용
+- ${character_data ? character_data.values || '개인의 가치관' : '개인의 가치관'}과 ${character_data ? character_data.hobbies ? character_data.hobbies.join(', ') + ' 등의 관심사' : '관심사' : '관심사'}를 대화에 자연스럽게 녹여냄
 - 스트레스 상황과 편안한 상황에서의 다른 반응
 
 **4. 실전 채팅 기술 교육**
@@ -1000,19 +1025,25 @@ async function generateChatTrainingDialogue(data) {
       console.warn('⚠️ 시나리오를 찾을 수 없음, 기본 컨텍스트 사용');
     }
 
-    // 캐릭터 정보 가져오기
+    // 캐릭터 데이터베이스에서 실제 캐릭터 정보 로드
+    const characterDb = await loadCharacterDatabase();
+    const actualCharacter = characterDb.characters[character_id];
+
+    console.log('🎭 채팅 훈련용 캐릭터 정보:', actualCharacter);
+
+    // Fallback 캐릭터 특성 (기존 시스템과 호환성 유지)
     const characterTraits = getCharacterTraits(character_id);
-    
+
     // OpenAI API를 통한 대화 생성 시도
     const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-    
+
     if (OPENAI_API_KEY) {
       console.log('🤖 OpenAI API로 채팅 훈련 대화 생성 중...');
-      
+
       const chatTrainingPrompt = generateChatTrainingPrompt({
         scenario_context: scenario?.ai_generated_context || '일상적인 대화 상황',
         character_id,
-        character_name: characterTraits.name,
+        character_data: actualCharacter, // 실제 캐릭터 데이터 전달
         user_input_prompt: user_prompt,
         difficulty: difficulty || 'Easy'
       });
@@ -1073,9 +1104,9 @@ async function generateChatTrainingDialogue(data) {
     
     return {
       character_message: fallbackDialogue.dialogue,
-      context: `${characterTraits.name}과의 대화 상황`,
+      context: `${actualCharacter ? actualCharacter.name : characterTraits.name}과의 대화 상황`,
       choices: fallbackDialogue.choices,
-      conversation_flow: `${characterTraits.name}의 ${characterTraits.personality} 성격이 반영된 자연스러운 대화 흐름`
+      conversation_flow: `${actualCharacter ? actualCharacter.name : characterTraits.name}의 ${actualCharacter ? actualCharacter.personality_traits ? actualCharacter.personality_traits.join(', ') : characterTraits.personality : characterTraits.personality} 성격이 반영된 자연스러운 대화 흐름`
     };
 
   } catch (error) {
@@ -1122,6 +1153,19 @@ async function loadScenarioDatabase() {
   } catch (error) {
     console.error('Failed to load scenario database:', error);
     return { metadata: {}, scenarios: {} };
+  }
+}
+
+// 캐릭터 데이터베이스 로드
+async function loadCharacterDatabase() {
+  try {
+    const characterPath = path.join(process.cwd(), 'data', 'characters.json');
+    const characterData = fs.readFileSync(characterPath, 'utf8');
+    console.log('✅ 캐릭터 데이터베이스 로드 성공');
+    return JSON.parse(characterData);
+  } catch (error) {
+    console.error('❌ 캐릭터 데이터베이스 로드 실패:', error);
+    return { metadata: {}, characters: {} };
   }
 }
 

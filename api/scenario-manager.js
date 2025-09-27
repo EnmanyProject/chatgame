@@ -191,19 +191,36 @@ async function generateAIContext(scenarioData) {
 
     console.log('🤖 OpenAI API 호출 시작...');
 
-    // 캐릭터 정보 문자열 생성
+    // 캐릭터 데이터베이스에서 실제 캐릭터 정보 로드
     let characterInfo = '';
-    if (scenarioData.characters && scenarioData.characters.length > 0) {
-      characterInfo = '\n등장인물:\n';
-      scenarioData.characters.forEach((char, index) => {
-        characterInfo += `${index + 1}. **${char.name}** (${char.age}세, ${char.mbti})\n`;
-        characterInfo += `   - 성격: ${char.personality_traits ? char.personality_traits.join(', ') : '정보 없음'}\n`;
-        characterInfo += `   - 외모: ${char.appearance ? Object.values(char.appearance).join(', ') : '정보 없음'}\n`;
-        characterInfo += `   - 취미: ${char.hobbies ? char.hobbies.join(', ') : '정보 없음'}\n`;
-        characterInfo += `   - 말투: ${char.speech_style || '정보 없음'}\n`;
-        characterInfo += `   - 전공/관계: ${char.major || '일반'}, ${char.relationship || '친구'}\n\n`;
+    if (scenarioData.available_characters && scenarioData.available_characters.length > 0) {
+      console.log('📋 캐릭터 ID 목록:', scenarioData.available_characters);
+
+      // 캐릭터 데이터베이스 로드
+      const characterDb = await loadCharacterDatabase();
+      console.log('🎭 로드된 캐릭터 DB:', Object.keys(characterDb.characters));
+
+      characterInfo = '\n등장인물 (상세 정보):\n';
+      scenarioData.available_characters.forEach((charId, index) => {
+        const char = characterDb.characters[charId];
+        if (char) {
+          characterInfo += `${index + 1}. **${char.name}** (${char.age}세, ${char.mbti})\n`;
+          characterInfo += `   - 성격: ${char.personality_traits ? char.personality_traits.join(', ') : '정보 없음'}\n`;
+          characterInfo += `   - 외모: ${char.appearance ? Object.values(char.appearance).join(', ') : '정보 없음'}\n`;
+          characterInfo += `   - 취미: ${char.hobbies ? char.hobbies.join(', ') : '정보 없음'}\n`;
+          characterInfo += `   - 말투: ${char.speech_style || '정보 없음'}\n`;
+          characterInfo += `   - 말버릇: ${char.speech_habit || '정보 없음'}\n`;
+          characterInfo += `   - 전공: ${char.major || '일반'}\n`;
+          characterInfo += `   - 관계: ${char.relationship || '친구'}\n`;
+          characterInfo += `   - 가치관: ${char.values || '정보 없음'}\n`;
+          characterInfo += `   - 고향: ${char.hometown || '정보 없음'}\n\n`;
+        } else {
+          console.warn(`⚠️ 캐릭터 ID ${charId}를 찾을 수 없음`);
+          characterInfo += `${index + 1}. 캐릭터 ID: ${charId} (정보를 찾을 수 없음)\n\n`;
+        }
       });
     } else {
+      console.log('⚠️ 캐릭터 정보가 없어 기본 메시지 사용');
       characterInfo = '\n등장인물: 시나리오에 맞는 매력적인 캐릭터들을 창조해주세요.\n';
     }
 
@@ -281,8 +298,16 @@ VALIDATION: 작성 전에 반드시 확인하세요
       const generatedText = data.choices[0]?.message?.content;
 
       if (generatedText && generatedText.trim()) {
-        // 캐릭터 이름 검증
-        const validationResult = validateCharacterUsage(generatedText, scenarioData.characters);
+        // 캐릭터 이름 검증 (실제 캐릭터 데이터 사용)
+        let actualCharacters = [];
+        if (scenarioData.available_characters && scenarioData.available_characters.length > 0) {
+          const characterDb = await loadCharacterDatabase();
+          actualCharacters = scenarioData.available_characters.map(charId =>
+            characterDb.characters[charId]
+          ).filter(char => char); // null/undefined 필터링
+        }
+
+        const validationResult = validateCharacterUsage(generatedText, actualCharacters);
         if (!validationResult.isValid) {
           console.error('❌ AI가 잘못된 캐릭터 이름 사용:', validationResult.issues);
           throw new Error(`AI가 지정된 캐릭터 정보를 제대로 사용하지 않았습니다. 문제점: ${validationResult.issues.join(', ')}`);
@@ -338,6 +363,19 @@ async function loadScenarioDatabase() {
   } catch (error) {
     console.error('Failed to load scenario database:', error);
     return { metadata: {}, scenarios: {} };
+  }
+}
+
+// 캐릭터 데이터베이스 로드
+async function loadCharacterDatabase() {
+  try {
+    const characterPath = path.join(process.cwd(), 'data', 'characters.json');
+    const characterData = fs.readFileSync(characterPath, 'utf8');
+    console.log('✅ 캐릭터 데이터베이스 로드 성공');
+    return JSON.parse(characterData);
+  } catch (error) {
+    console.error('❌ 캐릭터 데이터베이스 로드 실패:', error);
+    return { metadata: {}, characters: {} };
   }
 }
 
@@ -420,7 +458,7 @@ async function regenerateAIContext(data) {
       description: data.description || scenario.description,
       background_setting: data.background_setting || scenario.background_setting,
       mood: data.mood || scenario.mood,
-      characters: data.characters || []
+      available_characters: data.available_characters || scenario.available_characters || []
     });
 
     scenario.ai_generated_context = newContext;
@@ -436,7 +474,7 @@ async function regenerateAIContext(data) {
       description: data.description,
       background_setting: data.background_setting,
       mood: data.mood,
-      characters: data.characters || []
+      available_characters: data.available_characters || []
     });
 
     return {

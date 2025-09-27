@@ -83,20 +83,22 @@ GitHub Token:`);
         console.log('📥 온라인에서 캐릭터 로드...');
 
         try {
-            const response = await fetch(`${this.baseUrl}?action=load&type=characters`, {
-                headers: this.getHeaders()
-            });
+            // 캐릭터 AI 생성기 API 사용
+            const response = await fetch(`/api/character-ai-generator?action=list_characters&_t=${Date.now()}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
 
             const result = await response.json();
+            console.log('📊 API 응답 데이터:', result);
 
             if (result.success) {
-                this.cache.set('characters', result.data);
-                console.log(`✅ 캐릭터 ${result.count}개 로드 완료 (온라인)`);
-                return result.data;
+                // characters 객체를 직접 반환 (data.characters가 아님)
+                const charactersData = result.characters || {};
+                this.cache.set('characters', charactersData);
+                console.log(`✅ 캐릭터 ${Object.keys(charactersData).length}개 로드 완료 (AI API)`);
+                return charactersData;
             } else {
                 throw new Error(result.error || '캐릭터 로드 실패');
             }
@@ -119,10 +121,16 @@ GitHub Token:`);
         console.log('💾 온라인에 캐릭터 저장:', characterData.name);
 
         try {
-            const response = await fetch(`${this.baseUrl}?action=save&type=characters`, {
+            // 캐릭터 AI 생성기 API 사용
+            const response = await fetch('/api/character-ai-generator', {
                 method: 'POST',
-                headers: this.getHeaders(),
-                body: JSON.stringify(characterData)
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'save_character',
+                    ...characterData
+                })
             });
 
             if (!response.ok) {
@@ -134,10 +142,10 @@ GitHub Token:`);
             if (result.success) {
                 // 캐시 업데이트
                 const cached = this.cache.get('characters') || {};
-                cached[result.id] = result.data;
+                cached[result.character.id] = result.character;
                 this.cache.set('characters', cached);
 
-                console.log(`✅ 캐릭터 '${characterData.name}' 저장 완료 (온라인)`);
+                console.log(`✅ 캐릭터 '${characterData.name}' 저장 완료 (AI API)`);
                 return result;
             } else {
                 throw new Error(result.error || '캐릭터 저장 실패');
@@ -161,9 +169,16 @@ GitHub Token:`);
         console.log('🗑️ 온라인에서 캐릭터 삭제:', characterId);
 
         try {
-            const response = await fetch(`${this.baseUrl}?action=delete&type=characters&id=${characterId}`, {
-                method: 'DELETE',
-                headers: this.getHeaders()
+            // 캐릭터 AI 생성기 API 사용
+            const response = await fetch('/api/character-ai-generator', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'delete_character',
+                    character_id: characterId
+                })
             });
 
             if (!response.ok) {
@@ -178,7 +193,7 @@ GitHub Token:`);
                 delete cached[characterId];
                 this.cache.set('characters', cached);
 
-                console.log(`✅ 캐릭터 ${characterId} 삭제 완료 (온라인)`);
+                console.log(`✅ 캐릭터 ${characterId} 삭제 완료 (AI API)`);
                 return result;
             } else {
                 throw new Error(result.error || '캐릭터 삭제 실패');
@@ -387,9 +402,15 @@ GitHub Token:`);
         console.log('🗑️ 캐릭터 데이터 완전 초기화...');
 
         try {
-            const response = await fetch(`${this.baseUrl}?action=reset&type=characters`, {
+            // 캐릭터 AI 생성기 API 사용
+            const response = await fetch('/api/character-ai-generator', {
                 method: 'POST',
-                headers: this.getHeaders()
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'reset_all_characters'
+                })
             });
 
             if (!response.ok) {
@@ -401,7 +422,7 @@ GitHub Token:`);
             if (result.success) {
                 // 캐시 초기화
                 this.cache.set('characters', {});
-                console.log('✅ 캐릭터 데이터 완전 초기화 완료');
+                console.log('✅ 캐릭터 데이터 완전 초기화 완료 (AI API)');
                 return result;
             } else {
                 throw new Error(result.error || '캐릭터 초기화 실패');
