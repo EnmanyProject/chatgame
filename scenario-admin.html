@@ -3570,7 +3570,7 @@
 
                 console.log('📋 환경변수 API 키 상태:', data);
 
-                const statusElement = document.getElementById('apiStatus');
+                const statusElement = document.getElementById('openaiStatus');
 
                 if (data.success && data.apiKey.exists && data.apiKey.isValid && data.apiKey.connected) {
                     console.log('✅ Vercel 환경변수에 API 키가 정상 설정됨');
@@ -3598,7 +3598,7 @@
             } catch (error) {
                 console.error('❌ API 상태 확인 오류:', error);
 
-                const statusElement = document.getElementById('apiStatus');
+                const statusElement = document.getElementById('openaiStatus');
                 statusElement.innerHTML = `
                     <span class="status-indicator">⚠️</span>
                     <span class="status-text">API 상태 확인 중 오류 발생</span>
