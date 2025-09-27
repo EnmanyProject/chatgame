@@ -217,24 +217,12 @@ function generateBasicOptions() {
 }
 
 async function generateNextQuestion(currentStep, answers) {
-  // 1. 환경변수에서 우선 확인
-  let OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+  // 간단한 API 키 조회 방식 사용
+  const { getSimpleApiKey } = await import('./simple-api-key.js');
+  const OPENAI_API_KEY = await getSimpleApiKey();
 
-  // 2. 환경변수에 없으면 admin-auth에서 로드
-  if (!OPENAI_API_KEY || !OPENAI_API_KEY.startsWith('sk-')) {
-    console.log('🔍 환경변수에 API 키 없음, admin-auth에서 로드 시도...');
-    try {
-      const { getActiveApiKey } = await import('./admin-auth.js');
-      OPENAI_API_KEY = await getActiveApiKey();
-      console.log('🔍 admin-auth에서 API 키 로드 결과:', OPENAI_API_KEY ? `${OPENAI_API_KEY.substring(0, 4)}...` : 'None');
-    } catch (error) {
-      console.warn('⚠️ admin-auth에서 API 키 로드 실패:', error.message);
-    }
-  }
-
-  if (!OPENAI_API_KEY || !OPENAI_API_KEY.startsWith('sk-')) {
-    console.error('❌ OpenAI API key not configured in any storage');
-    console.error('환경변수 또는 admin-auth 저장소에 API 키를 설정해주세요');
+  if (!OPENAI_API_KEY) {
+    console.error('❌ OpenAI API 키가 설정되지 않았습니다');
     throw new Error('API 키가 설정되지 않았습니다. 관리자 페이지에서 OpenAI API 키를 먼저 저장해주세요.');
   }
 
@@ -293,20 +281,9 @@ async function generateNextQuestion(currentStep, answers) {
 }
 
 async function generateCompleteCharacter(answers, req = null) {
-  // 1. 환경변수에서 우선 확인
-  let OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
-  // 2. 환경변수에 없으면 admin-auth에서 로드
-  if (!OPENAI_API_KEY || !OPENAI_API_KEY.startsWith('sk-')) {
-    console.log('🔍 환경변수에 API 키 없음, admin-auth에서 로드 시도...');
-    try {
-      const { getActiveApiKey } = await import('./admin-auth.js');
-      OPENAI_API_KEY = await getActiveApiKey();
-      console.log('🔍 admin-auth에서 API 키 로드 결과:', OPENAI_API_KEY ? `${OPENAI_API_KEY.substring(0, 4)}...` : 'None');
-    } catch (error) {
-      console.warn('⚠️ admin-auth에서 API 키 로드 실패:', error.message);
-    }
-  }
+  // 간단한 API 키 조회 방식 사용
+  const { getSimpleApiKey } = await import('./simple-api-key.js');
+  const OPENAI_API_KEY = await getSimpleApiKey();
 
   const character = {
     id: 'char_' + Date.now(),
@@ -315,9 +292,8 @@ async function generateCompleteCharacter(answers, req = null) {
     ...answers
   };
 
-  if (!OPENAI_API_KEY || !OPENAI_API_KEY.startsWith('sk-')) {
-    console.error('❌ OpenAI API key not configured in any storage');
-    console.error('환경변수 또는 admin-auth 저장소에 API 키를 설정해주세요');
+  if (!OPENAI_API_KEY) {
+    console.error('❌ OpenAI API 키가 설정되지 않았습니다');
     throw new Error('API 키가 설정되지 않았습니다. 관리자 페이지에서 OpenAI API 키를 먼저 저장해주세요.');
   }
 
@@ -687,24 +663,12 @@ async function resetAllCharacters() {
 // 캐릭터 이미지 분석 함수 (OpenAI Vision API)
 async function analyzeCharacterImage(imageBase64) {
   try {
-    // 1. 환경변수에서 우선 확인
-    let OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+    // 간단한 API 키 조회 방식 사용
+    const { getSimpleApiKey } = await import('./simple-api-key.js');
+    const OPENAI_API_KEY = await getSimpleApiKey();
 
-    // 2. 환경변수에 없으면 admin-auth에서 로드
-    if (!OPENAI_API_KEY || !OPENAI_API_KEY.startsWith('sk-')) {
-      console.log('🔍 환경변수에 API 키 없음, admin-auth에서 로드 시도...');
-      try {
-        const { getActiveApiKey } = await import('./admin-auth.js');
-        OPENAI_API_KEY = await getActiveApiKey();
-        console.log('🔍 admin-auth에서 API 키 로드 결과:', OPENAI_API_KEY ? `${OPENAI_API_KEY.substring(0, 4)}...` : 'None');
-      } catch (error) {
-        console.warn('⚠️ admin-auth에서 API 키 로드 실패:', error.message);
-      }
-    }
-
-    if (!OPENAI_API_KEY || !OPENAI_API_KEY.startsWith('sk-')) {
-      console.error('❌ OpenAI API key not configured in any storage');
-      console.error('환경변수 또는 admin-auth 저장소에 API 키를 설정해주세요');
+    if (!OPENAI_API_KEY) {
+      console.error('❌ OpenAI API 키가 설정되지 않았습니다');
       throw new Error('API 키가 설정되지 않았습니다. 관리자 페이지에서 OpenAI API 키를 먼저 저장해주세요.');
     }
 

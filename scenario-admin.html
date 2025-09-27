@@ -3321,7 +3321,7 @@
             }
         }
 
-        // API 키 저장 (로그인 기반)
+        // 간단한 API 키 저장 (새로운 방식)
         async function saveApiKey() {
             const apiKey = document.getElementById('openaiApiKey').value.trim();
 
@@ -3335,62 +3335,38 @@
                 return;
             }
 
-            if (!currentAuthToken) {
-                showNotification('로그인이 필요합니다.', 'error');
-                return;
-            }
-
             try {
-                console.log('💾 API 키 저장 시도 (로그인 기반)...');
+                console.log('💾 간단한 API 키 저장 시도...');
 
-                // 🔐 로그인된 사용자 토큰으로 API 키 저장
-                const response = await fetch('/api/admin-auth?action=save-api-key', {
+                // 새로운 간단한 API 키 저장 방식
+                const response = await fetch('/api/simple-api-key?action=save', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${currentAuthToken}`
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        apiKey: apiKey
-                    })
+                    body: JSON.stringify({ apiKey })
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
+                const result = await response.json();
+                console.log('💾 간단한 API 키 저장 응답:', result);
 
-                    // 브라우저 세션에도 API 키 저장
-                    sessionStorage.setItem('openai_api_key', apiKey);
-
-                    // 토큰 기반: 응답에서 업데이트된 토큰 처리
-                    if (data.authToken && data.authToken !== currentAuthToken) {
-                        console.log('🔄 토큰 업데이트 (hasApiKey 상태 변경)');
-                        currentAuthToken = data.authToken;
-                        sessionStorage.setItem('admin_auth_token', data.authToken);
-                    }
-
-                    showNotification('✅ API 키가 성공적으로 저장되었습니다!\n(토큰 기반 암호화 저장)', 'success');
-
-                    // 사용자 정보 업데이트 (API 키 보유 표시)
-                    if (currentUser) {
-                        currentUser.hasApiKey = true;
-                        updateUserInfo(currentUser);
-                    }
-
-                    // 저장 후 상태 업데이트 (지연 추가)
-                    setTimeout(() => {
-                        console.log('🔄 API 키 저장 후 상태 확인...');
-                        checkApiStatus();
-                    }, 2000);
+                if (result.success) {
+                    showNotification(result.message, 'success');
 
                     // 입력 필드 초기화 (보안)
                     document.getElementById('openaiApiKey').value = '';
+
+                    // 저장 후 상태 업데이트
+                    setTimeout(() => {
+                        console.log('🔄 API 키 저장 후 상태 확인...');
+                        checkApiStatus();
+                    }, 1000);
                 } else {
-                    const error = await response.json();
-                    showNotification('❌ API 키 저장 실패: ' + (error.message || '알 수 없는 오류'), 'error');
+                    showNotification('❌ API 키 저장 실패: ' + (result.message || '알 수 없는 오류'), 'error');
                 }
 
             } catch (error) {
-                console.error('API 키 저장 오류:', error);
+                console.error('❌ API 키 저장 오류:', error);
                 showNotification('❌ API 키 저장 중 오류가 발생했습니다: ' + error.message, 'error');
             }
         }
@@ -3468,75 +3444,47 @@
             try {
                 console.log('🔍 API 상태 확인 시작...');
 
-                // 1단계: API 키 설정 상태 확인
-                const envResponse = await fetch('/api/test-env');
-                const envData = await envResponse.json();
+                // 새로운 간단한 API 키 상태 확인
+                const response = await fetch('/api/simple-api-key?action=check');
+                const data = await response.json();
 
-                console.log('📋 환경변수 상태:', envData);
+                console.log('📋 간단한 API 키 상태:', data);
 
                 const statusElement = document.getElementById('openaiStatus');
                 const badgeElement = document.getElementById('apiStatus');
                 const usageElement = document.getElementById('apiUsage');
                 const testElement = document.getElementById('lastTest');
 
-                console.log('🔍 API 키 상태 상세 정보:', envData.environment.apiKeyDetails);
+                if (data.success && data.apiKey.exists && data.apiKey.isValid) {
+                    console.log('✅ API 키가 설정되어 있음');
 
-                if (envData.environment.OPENAI_API_KEY === '✅ 설정됨') {
-                    console.log('✅ API 키가 설정되어 있음, 사용량 확인 중...');
+                    // API 연결 상태 확인
+                    if (data.apiKey.connected) {
+                        // API 상태 업데이트 - 연결됨
+                        statusElement.textContent = `✅ 연결됨 (${data.apiKey.preview})`;
+                        statusElement.className = 'status-connected';
+                        badgeElement.textContent = '✅';
 
-                    // 2단계: API 사용량 및 유효성 확인
-                    try {
-                        const usageResponse = await fetch('/api/openai-usage');
+                        // 사용량 정보 표시
+                        usageElement.innerHTML = '✅ API 키 정상 작동<br>AI 생성 기능 사용 가능';
+                        testElement.textContent = new Date(data.timestamp).toLocaleString('ko-KR');
 
-                        if (usageResponse.ok) {
-                            const usageData = await usageResponse.json();
-                            console.log('📊 사용량 데이터:', usageData);
+                        console.log('✅ API 상태 확인 완료 - 정상 연결');
 
-                            // API 상태 업데이트
-                            statusElement.textContent = `✅ API 연결됨 (${usageData.data.keyPreview})`;
-                            statusElement.className = 'status-connected';
-                            badgeElement.textContent = '✅';
-
-                            // 사용량 정보 업데이트
-                            const rateLimit = usageData.data.rateLimit;
-                            let usageText = `모델 ${usageData.data.totalModels}개 사용가능`;
-
-                            if (rateLimit.remainingRequests !== 'Unknown') {
-                                usageText += `\n요청 한도: ${rateLimit.remainingRequests}/${rateLimit.limitRequests}`;
-                            }
-                            if (rateLimit.remainingTokens !== 'Unknown') {
-                                usageText += `\n토큰 한도: ${rateLimit.remainingTokens}/${rateLimit.limitTokens}`;
-                            }
-
-                            usageElement.innerHTML = usageText.replace(/\n/g, '<br>');
-                            testElement.textContent = new Date(usageData.data.lastChecked).toLocaleString('ko-KR');
-
-                            console.log('✅ API 상태 및 사용량 확인 완료');
-
-                        } else {
-                            // API 키는 있지만 유효하지 않음
-                            const errorData = await usageResponse.json();
-                            statusElement.textContent = `⚠️ API 키 오류 (${envData.environment.keyPreview})`;
-                            statusElement.className = 'status-warning';
-                            badgeElement.textContent = '⚠️';
-                            usageElement.textContent = `오류: ${errorData.message}`;
-                            testElement.textContent = new Date().toLocaleString('ko-KR');
-
-                            console.warn('⚠️ API 키는 설정되어 있지만 유효하지 않음:', errorData.message);
-                        }
-
-                    } catch (usageError) {
-                        console.warn('⚠️ 사용량 확인 중 오류:', usageError);
-                        statusElement.textContent = `⚠️ API 확인 실패 (${envData.environment.keyPreview})`;
+                    } else {
+                        // API 키는 있지만 연결되지 않음
+                        statusElement.textContent = `⚠️ 연결 실패 (${data.apiKey.preview})`;
                         statusElement.className = 'status-warning';
                         badgeElement.textContent = '⚠️';
-                        usageElement.textContent = '사용량 확인 실패';
-                        testElement.textContent = new Date().toLocaleString('ko-KR');
+                        usageElement.textContent = 'API 키는 설정되었지만 OpenAI 연결에 실패했습니다';
+                        testElement.textContent = new Date(data.timestamp).toLocaleString('ko-KR');
+
+                        console.warn('⚠️ API 키는 설정되어 있지만 연결되지 않음');
                     }
 
                 } else {
                     // API 키가 설정되지 않음
-                    statusElement.textContent = '❌ API 키 미설정';
+                    statusElement.textContent = '❌ 미연결';
                     statusElement.className = 'status-disconnected';
                     badgeElement.textContent = '❌';
                     usageElement.textContent = 'API 키를 먼저 설정해주세요';
