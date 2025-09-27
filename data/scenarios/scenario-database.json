@@ -83,6 +83,25 @@
       "id": "scenario_카페의_특별한_손님_1758935335430",
       "action": "create",
       "updated_at": "2025-09-27T01:08:56.943Z"
+    },
+    "scenario_비_오는_날의_우산_1758935797606": {
+      "title": "비 오는 날의 우산",
+      "description": "스터디 그룹에서 만난 두 사람이 학업을 통해 마음을 나누게 되는 과정",
+      "background_setting": "학교 축제 현장",
+      "mood": "신비로움",
+      "available_characters": [
+        "유나__intp_1758866345749"
+      ],
+      "created_date": "2025-09-27",
+      "episode_count": 0,
+      "tags": [
+        "신비로움"
+      ],
+      "source": "github_api",
+      "active": true,
+      "id": "scenario_비_오는_날의_우산_1758935797606",
+      "action": "create",
+      "updated_at": "2025-09-27T01:16:38.381Z"
     }
   },
   "scenario_templates": {
