@@ -64,6 +64,25 @@
       "id": "scenario_운명의_만남_1758934164331",
       "action": "create",
       "updated_at": "2025-09-27T00:49:25.220Z"
+    },
+    "scenario_도서관의_속삭임_1758934258616": {
+      "title": "도서관의 속삭임",
+      "description": "취한 상태에서 진심을 고백한 후, 다음 날 어색해진 두 사람의 이야기",
+      "background_setting": "기숙사 라운지",
+      "mood": "청춘",
+      "available_characters": [
+        "미화__enfp_1758556263173"
+      ],
+      "created_date": "2025-09-27",
+      "episode_count": 0,
+      "tags": [
+        "청춘"
+      ],
+      "source": "github_api",
+      "active": true,
+      "id": "scenario_도서관의_속삭임_1758934258616",
+      "action": "create",
+      "updated_at": "2025-09-27T00:50:59.473Z"
     }
   },
   "scenario_templates": {
