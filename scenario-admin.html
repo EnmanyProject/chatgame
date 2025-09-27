@@ -3534,37 +3534,6 @@
                 showNotification('⚠️ API 상태 확인 중 오류가 발생했습니다.', 'warning');
             }
         }
-
-                    } else {
-                        // API 키는 있지만 연결되지 않음
-                        statusElement.textContent = `⚠️ 연결 실패 (${data.apiKey.preview})`;
-                        statusElement.className = 'status-warning';
-                        badgeElement.textContent = '⚠️';
-                        usageElement.textContent = 'API 키는 설정되었지만 OpenAI 연결에 실패했습니다';
-                        testElement.textContent = new Date(data.timestamp).toLocaleString('ko-KR');
-
-                        console.warn('⚠️ API 키는 설정되어 있지만 연결되지 않음');
-                    }
-
-                } else {
-                    // API 키가 설정되지 않음
-                    statusElement.textContent = '❌ 미연결';
-                    statusElement.className = 'status-disconnected';
-                    badgeElement.textContent = '❌';
-                    usageElement.textContent = 'API 키를 먼저 설정해주세요';
-                    testElement.textContent = '없음';
-
-                    console.log('❌ API 키가 설정되지 않음');
-                }
-
-            } catch (error) {
-                console.error('❌ API 상태 확인 실패:', error);
-                document.getElementById('openaiStatus').textContent = '❓ 연결 실패';
-                document.getElementById('openaiStatus').className = 'status-unknown';
-                document.getElementById('apiStatus').textContent = '❓';
-                document.getElementById('apiUsage').textContent = '상태 확인 실패';
-                document.getElementById('lastTest').textContent = '오류';
-            }
         }
 
         // API 키 삭제 (로그인 기반 + Secure Storage)
