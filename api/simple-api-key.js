@@ -1,4 +1,6 @@
-// 간단한 API 키 관리 - Vercel 환경변수 직접 사용
+// 간단한 API 키 관리 - 런타임 메모리 저장
+let runtimeApiKey = null;
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -13,7 +15,7 @@ export default async function handler(req, res) {
   try {
     // API 키 확인
     if (action === 'check') {
-      const apiKey = process.env.OPENAI_API_KEY;
+      const apiKey = runtimeApiKey || process.env.OPENAI_API_KEY;
 
       let testResult = null;
       if (apiKey && apiKey.startsWith('sk-')) {
@@ -91,9 +93,10 @@ export default async function handler(req, res) {
 
         console.log('✅ API 키 유효성 검증 성공');
 
-        // 런타임에 환경변수 설정 (현재 인스턴스에서만 유효)
-        process.env.OPENAI_API_KEY = apiKey;
-        console.log('✅ 런타임 환경변수 설정 완료');
+        // 런타임 메모리에 API 키 저장 (모듈 레벨 변수)
+        runtimeApiKey = apiKey;
+        process.env.OPENAI_API_KEY = apiKey; // 환경변수도 설정 (현재 인스턴스용)
+        console.log('✅ 런타임 메모리 및 환경변수 설정 완료', `${apiKey.substring(0, 4)}...`);
 
         return res.json({
           success: true,
@@ -133,13 +136,14 @@ export default async function handler(req, res) {
 
 // 다른 API에서 사용할 수 있는 간단한 API 키 조회 함수
 export async function getSimpleApiKey() {
-  const apiKey = process.env.OPENAI_API_KEY;
+  // 런타임 메모리에서 먼저 확인
+  const apiKey = runtimeApiKey || process.env.OPENAI_API_KEY;
 
   if (apiKey && apiKey.startsWith('sk-')) {
     console.log('✅ Simple API Key 발견:', `${apiKey.substring(0, 4)}...`);
     return apiKey;
   }
 
-  console.log('❌ Simple API Key 없음');
+  console.log('❌ Simple API Key 없음 - runtimeApiKey:', !!runtimeApiKey, 'env:', !!process.env.OPENAI_API_KEY);
   return null;
 }
