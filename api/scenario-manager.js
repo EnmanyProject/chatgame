@@ -227,10 +227,20 @@ async function generateAIContext(scenarioData) {
         throw new Error('생성된 캐릭터가 없습니다. 먼저 캐릭터를 생성한 후 시나리오를 생성해주세요.');
       }
 
+      console.log('🔍 캐릭터 매칭 상세 정보:');
+      console.log('  - 요청된 캐릭터 ID들:', scenarioData.available_characters);
+      console.log('  - DB에 있는 캐릭터 ID들:', Object.keys(characterDb.characters));
+
       characterInfo = '\n등장인물 (상세 정보):\n';
+      let foundCharacters = 0;
+
       scenarioData.available_characters.forEach((charId, index) => {
+        console.log(`🔎 캐릭터 ${index + 1} 검색 중: ${charId}`);
         const char = characterDb.characters[charId];
+
         if (char) {
+          foundCharacters++;
+          console.log(`✅ 캐릭터 발견: ${char.name} (${char.mbti})`);
           characterInfo += `${index + 1}. **${char.name}** (${char.age}세, ${char.mbti})\n`;
           characterInfo += `   - 성격: ${char.personality_traits ? char.personality_traits.join(', ') : '정보 없음'}\n`;
           characterInfo += `   - 외모: ${char.appearance ? Object.values(char.appearance).join(', ') : '정보 없음'}\n`;
@@ -242,10 +252,17 @@ async function generateAIContext(scenarioData) {
           characterInfo += `   - 가치관: ${char.values || '정보 없음'}\n`;
           characterInfo += `   - 고향: ${char.hometown || '정보 없음'}\n\n`;
         } else {
-          console.warn(`⚠️ 캐릭터 ID ${charId}를 찾을 수 없음`);
+          console.warn(`❌ 캐릭터 ID ${charId}를 DB에서 찾을 수 없음`);
           characterInfo += `${index + 1}. 캐릭터 ID: ${charId} (정보를 찾을 수 없음)\n\n`;
         }
       });
+
+      console.log(`📊 매칭 결과: ${foundCharacters}/${scenarioData.available_characters.length} 캐릭터 발견`);
+
+      if (foundCharacters === 0) {
+        console.error('❌ 요청된 캐릭터 중 DB에서 찾을 수 있는 캐릭터가 없음');
+        throw new Error(`요청된 캐릭터들(${scenarioData.available_characters.join(', ')})을 데이터베이스에서 찾을 수 없습니다. 캐릭터가 삭제되었거나 ID가 올바르지 않을 수 있습니다.`);
+      }
     } else {
       console.log('⚠️ 캐릭터 정보가 없어 기본 메시지 사용');
       characterInfo = '\n등장인물: 시나리오에 맞는 매력적인 캐릭터들을 창조해주세요.\n';
@@ -531,12 +548,19 @@ async function regenerateAIContext(data) {
 
   // 시나리오 ID가 없는 경우 새로운 컨텍스트만 생성
   else {
+    console.log('📝 전달받은 데이터:', {
+      available_characters: data.available_characters,
+      characters: data.characters,
+      characterCount: (data.available_characters || []).length
+    });
+
     const newContext = await generateAIContext({
       title: data.title,
       description: data.description,
       background_setting: data.background_setting,
       mood: data.mood,
-      available_characters: data.available_characters || []
+      available_characters: data.available_characters || [],
+      characters: data.characters || [] // 캐릭터 전체 데이터도 전달
     });
 
     return {

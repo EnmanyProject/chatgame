@@ -4349,7 +4349,8 @@
                         description,
                         background_setting: backgroundSetting,
                         mood,
-                        characters: selectedCharacterData
+                        available_characters: selectedCharacters, // 캐릭터 ID 배열 전달
+                        characters: selectedCharacterData // 캐릭터 전체 데이터도 전달 (호환성)
                     })
                 });
 
@@ -4389,6 +4390,11 @@
                         window.scenarios[scenarioId].ai_generated_context = data.scenario.ai_generated_context;
                         window.scenarios[scenarioId].updated_at = new Date().toISOString();
                     }
+
+                    // 🔄 시나리오 목록 자동 새로고침 (새로 생성된 시나리오 표시)
+                    console.log('🔄 시나리오 목록 새로고침 중...');
+                    await loadScenarios();
+                    console.log('✅ 시나리오 목록 새로고침 완료');
 
                 } else {
                     throw new Error(data.message || '알 수 없는 오류가 발생했습니다.');
