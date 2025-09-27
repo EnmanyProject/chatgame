@@ -100,8 +100,8 @@
       "source": "github_api",
       "active": true,
       "id": "scenario_비_오는_날의_우산_1758935797606",
-      "action": "create",
-      "updated_at": "2025-09-27T01:16:38.381Z"
+      "action": "update",
+      "updated_at": "2025-09-27T01:16:53.735Z"
     }
   },
   "scenario_templates": {
