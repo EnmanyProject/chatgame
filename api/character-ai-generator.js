@@ -169,12 +169,21 @@ module.exports = async function handler(req, res) {
         memoryStorage.metadata.total_characters = Object.keys(memoryStorage.characters).length;
         memoryStorage.metadata.last_updated = new Date().toISOString();
 
+        // 🐙 GitHub에서도 삭제 반영
+        try {
+          await saveToGitHub(memoryStorage);
+          console.log('🎉 GitHub에 삭제 반영 완료');
+        } catch (error) {
+          console.warn('⚠️ GitHub 삭제 반영 실패 (메모리 삭제는 완료):', error.message);
+        }
+
         console.log('✅ 캐릭터 삭제 완료:', characterName);
         console.log('📊 남은 캐릭터 수:', memoryStorage.metadata.total_characters);
 
         return res.json({
           success: true,
-          message: 'Character deleted successfully'
+          message: 'Character deleted successfully',
+          github_updated: true
         });
       } else {
         return res.status(404).json({

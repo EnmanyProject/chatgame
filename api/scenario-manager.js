@@ -216,6 +216,17 @@ async function generateAIContext(scenarioData) {
       const characterDb = await loadCharacterDatabase();
       console.log('🎭 로드된 캐릭터 DB:', Object.keys(characterDb.characters));
 
+      // 🚨 캐릭터 로드 오류 체크
+      if (characterDb.loadError) {
+        console.error('❌ 캐릭터 데이터 로드 실패로 시나리오 생성 중단');
+        throw new Error(`캐릭터 정보를 불러올 수 없어 시나리오를 생성할 수 없습니다. 오류: ${characterDb.metadata.message}`);
+      }
+
+      if (Object.keys(characterDb.characters).length === 0) {
+        console.error('❌ 사용 가능한 캐릭터가 없어 시나리오 생성 중단');
+        throw new Error('생성된 캐릭터가 없습니다. 먼저 캐릭터를 생성한 후 시나리오를 생성해주세요.');
+      }
+
       characterInfo = '\n등장인물 (상세 정보):\n';
       scenarioData.available_characters.forEach((charId, index) => {
         const char = characterDb.characters[charId];
@@ -390,10 +401,20 @@ async function loadCharacterDatabase() {
     // 내부 API 호출 (같은 서버 내에서)
     const response = await fetch('https://chatgame-seven.vercel.app/api/character-ai-generator?action=list_characters');
 
+    console.log('📡 캐릭터 API 응답 상태:', response.status, response.statusText);
+
     if (response.ok) {
       const result = await response.json();
+      console.log('📄 캐릭터 API 응답 데이터:', {
+        success: result.success,
+        characterCount: result.characters ? Object.keys(result.characters).length : 0,
+        metadata: result.metadata
+      });
+
       if (result.success) {
         console.log('✅ 캐릭터 API에서 로드 성공:', Object.keys(result.characters).length, '개');
+        console.log('📋 캐릭터 ID 목록:', Object.keys(result.characters));
+
         return {
           characters: result.characters,
           metadata: result.metadata
@@ -402,12 +423,21 @@ async function loadCharacterDatabase() {
         throw new Error(result.message || '캐릭터 API 호출 실패');
       }
     } else {
+      const errorText = await response.text();
+      console.error('❌ HTTP 오류 응답:', errorText);
       throw new Error(`캐릭터 API HTTP ${response.status}: ${response.statusText}`);
     }
   } catch (error) {
     console.error('❌ 캐릭터 데이터베이스 로드 실패:', error);
-    console.log('📋 빈 캐릭터 DB 반환');
-    return { metadata: {}, characters: {} };
+    console.error('❌ 상세 오류:', error.stack);
+    console.log('⚠️ 시나리오 생성에 캐릭터 정보 없음 - 기본 메시지 반환');
+
+    // 빈 DB 대신 오류 상태를 명확히 표시
+    return {
+      metadata: { error: true, message: error.message },
+      characters: {},
+      loadError: true
+    };
   }
 }
 
