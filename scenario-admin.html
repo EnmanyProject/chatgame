@@ -945,6 +945,96 @@
             overflow-y: auto;
         }
 
+        /* 🎭 캐릭터 요약 섹션 스타일 */
+        .character-summary-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 2px solid #17a2b8;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #e8f7fa 0%, #f0f9fc 100%);
+            box-shadow: 0 3px 10px rgba(23, 162, 184, 0.15);
+        }
+
+        .character-summary-section h3 {
+            color: #17a2b8;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .current-character-display {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 3px solid #17a2b8;
+        }
+
+        .summary-label {
+            font-size: 0.85em;
+            font-weight: bold;
+            color: #17a2b8;
+            margin-bottom: 4px;
+        }
+
+        .summary-value {
+            font-size: 0.95em;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .summary-details {
+            margin-bottom: 15px;
+        }
+
+        .summary-row {
+            display: flex;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-row .summary-label {
+            min-width: 80px;
+            color: #17a2b8;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .summary-row .summary-value {
+            flex: 1;
+            color: #333;
+        }
+
+        .summary-actions {
+            text-align: center;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .summary-details.collapsed {
+            display: none;
+        }
+
         .char-category {
             margin-bottom: 20px;
             padding: 25px;
@@ -2440,8 +2530,59 @@
             <div class="modal-body">
                 <form id="characterForm">
                     <input type="hidden" id="characterId" />
-                    
-                    
+
+                    <!-- 🎭 캐릭터 요약 정보 (수정 모드일 때만 표시) -->
+                    <div id="characterSummarySection" class="character-summary-section" style="display: none;">
+                        <h3>🎭 현재 캐릭터 정보</h3>
+                        <div class="current-character-display">
+                            <div class="summary-grid">
+                                <div class="summary-item">
+                                    <span class="summary-label">이름:</span>
+                                    <span id="summaryName" class="summary-value">-</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">나이:</span>
+                                    <span id="summaryAge" class="summary-value">-</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">MBTI:</span>
+                                    <span id="summaryMbti" class="summary-value">-</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">성별:</span>
+                                    <span id="summaryGender" class="summary-value">-</span>
+                                </div>
+                            </div>
+                            <div class="summary-details">
+                                <div class="summary-row">
+                                    <span class="summary-label">성격특성:</span>
+                                    <span id="summaryPersonality" class="summary-value">-</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">취미:</span>
+                                    <span id="summaryHobbies" class="summary-value">-</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">외모:</span>
+                                    <span id="summaryAppearance" class="summary-value">-</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">배경:</span>
+                                    <span id="summaryBackground" class="summary-value">-</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">말투:</span>
+                                    <span id="summarySpeechStyle" class="summary-value">-</span>
+                                </div>
+                            </div>
+                            <div class="summary-actions">
+                                <button type="button" class="btn btn-info btn-sm" onclick="toggleCharacterSummary()">
+                                    <span id="summaryToggleText">📖 자세히 보기</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- 기본 정보 -->
                     <div class="char-category">
                         <h3>💖 기본 정보</h3>
@@ -5246,19 +5387,29 @@
 
         function openCharacterModal(mode) {
             currentMode = mode;
-            // 제목은 이미 HTML에서 설정되어 있으므로 변경하지 않음
+
+            // 🎭 새 캐릭터 생성 시에는 요약 섹션 숨기기
+            const summarySection = document.getElementById('characterSummarySection');
+            if (summarySection) {
+                summarySection.style.display = 'none';
+                console.log('✅ 요약 섹션 숨김 (새 캐릭터 생성 모드)');
+            }
+
+            // 모달 제목 원래대로 복원
+            document.getElementById('characterModalTitle').textContent = '🎭✨ 세계관 최강 AI 캐릭터 생성기';
+
             document.getElementById('characterForm').reset();
-            
+
             // 모든 선택 버튼들 초기화
             document.querySelectorAll('.mbti-btn.selected, .trait-btn.selected, .relationship-btn.selected, .hobby-btn.selected, .speech-btn.selected').forEach(btn => {
                 btn.classList.remove('selected');
             });
-            
+
             // 숨겨진 필드들 초기화
             document.getElementById('charMbti').value = '';
             document.getElementById('charRelationship').value = '';
             document.getElementById('charSpeechStyle').value = '';
-            
+
             // AI 생성 영역 초기화
             generatedCharacter = null; // 글로벌 변수도 초기화
             document.getElementById('aiGenerationStatus').innerHTML = '';
@@ -5276,7 +5427,7 @@
 
             console.log('✏️ 캐릭터 편집 시작:', character.name);
             currentMode = 'edit';
-            
+
             // 안전한 요소 설정 함수
             const safeSetValue = (elementId, value) => {
                 const element = document.getElementById(elementId);
@@ -5290,9 +5441,48 @@
                 }
             };
 
+            // 🎭 캐릭터 요약 섹션 표시 및 데이터 채우기
+            const summarySection = document.getElementById('characterSummarySection');
+            if (summarySection) {
+                summarySection.style.display = 'block';
+
+                // 요약 정보 채우기
+                document.getElementById('summaryName').textContent = character.name || '-';
+                document.getElementById('summaryAge').textContent = character.age ? `${character.age}세` : '-';
+                document.getElementById('summaryMbti').textContent = character.mbti || '-';
+                document.getElementById('summaryGender').textContent = character.gender === 'female' ? '여성' : character.gender === 'male' ? '남성' : '-';
+
+                // 성격특성
+                const personalityText = Array.isArray(character.personality_traits) && character.personality_traits.length > 0
+                    ? character.personality_traits.join(', ')
+                    : '-';
+                document.getElementById('summaryPersonality').textContent = personalityText;
+
+                // 취미
+                const hobbiesText = Array.isArray(character.hobbies) && character.hobbies.length > 0
+                    ? character.hobbies.join(', ')
+                    : '-';
+                document.getElementById('summaryHobbies').textContent = hobbiesText;
+
+                // 외모 (hair, eyes, style)
+                const appearanceText = character.appearance
+                    ? `${character.appearance.hair || ''} / ${character.appearance.eyes || ''} / ${character.appearance.style || ''}`.replace(/\s*\/\s*$/g, '').replace(/^\s*\/\s*/g, '')
+                    : '-';
+                document.getElementById('summaryAppearance').textContent = appearanceText || '-';
+
+                // 배경 (family, hometown)
+                const backgroundText = `${character.family || character.background?.family || ''} / ${character.hometown || character.background?.hometown || ''}`.replace(/\s*\/\s*$/g, '').replace(/^\s*\/\s*/g, '');
+                document.getElementById('summaryBackground').textContent = backgroundText || '-';
+
+                // 말투
+                document.getElementById('summarySpeechStyle').textContent = character.speech_style || '-';
+
+                console.log('✅ 캐릭터 요약 정보 표시 완료');
+            }
+
             // 모달 제목 설정
             safeSetValue('characterModalTitle', ''); // textContent로 따로 설정
-            document.getElementById('characterModalTitle').textContent = '캐릭터 수정';
+            document.getElementById('characterModalTitle').textContent = `🎭 캐릭터 수정: ${character.name}`;
             
             // 기본 필드들 설정
             safeSetValue('characterId', characterId);
@@ -5314,10 +5504,30 @@
             // charGenre 필드 제거됨
             // charMainSituation 필드 제거됨
 
+            // 🎯 체크박스 선택 복원 (성격특성, 취미)
+            if (Array.isArray(character.personality_traits)) {
+                character.personality_traits.forEach(trait => {
+                    const checkbox = document.querySelector(`input[name="personality"][value="${trait}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        console.log(`✅ 성격특성 체크: ${trait}`);
+                    }
+                });
+            }
+
+            if (Array.isArray(character.hobbies)) {
+                character.hobbies.forEach(hobby => {
+                    const checkbox = document.querySelector(`input[name="hobbies"][value="${hobby}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        console.log(`✅ 취미 체크: ${hobby}`);
+                    }
+                });
+            }
 
             // 모달 표시
             document.getElementById('characterModal').style.display = 'block';
-            console.log('✅ 캐릭터 편집 모달 표시 완료');
+            console.log('✅ 캐릭터 편집 모달 표시 완료 (요약 + 폼 데이터)');
         }
 
         // ⚠️ 기존 saveCharacter 함수 제거됨 - 새로운 온라인 전용 함수로 교체
@@ -7142,6 +7352,22 @@ GitHub Token:`);
         }
 
         console.log('✅ 온라인 전용 시스템 초기화 완료');
+
+        // 🎭 캐릭터 요약 섹션 접기/펼치기 함수
+        window.toggleCharacterSummary = function() {
+            const detailsSection = document.querySelector('.summary-details');
+            const toggleText = document.getElementById('summaryToggleText');
+
+            if (detailsSection && toggleText) {
+                if (detailsSection.classList.contains('collapsed')) {
+                    detailsSection.classList.remove('collapsed');
+                    toggleText.textContent = '📖 간단히 보기';
+                } else {
+                    detailsSection.classList.add('collapsed');
+                    toggleText.textContent = '📖 자세히 보기';
+                }
+            }
+        };
     </script>
 </body>
 </html>
