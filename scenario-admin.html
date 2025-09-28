@@ -3288,6 +3288,7 @@
                     try {
                         await loadCharacters();
                         await loadScenarios();
+                        displayAvailableScenarios(); // 시나리오 목록 자동 표시
                     } catch (error) {
                         console.error('❌ 기본 데이터 로드 실패:', error);
                     }
@@ -5305,57 +5306,31 @@
 
         async function generateBulkEpisodes() {
             console.log('🚀 에피소드 일괄 생성 시작...');
-            
-            // 1. 시나리오 선택
-            const availableScenarios = Object.keys(scenarios);
-            if (availableScenarios.length === 0) {
-                alert('생성된 시나리오가 없습니다. 먼저 시나리오를 생성해주세요.');
+
+            // 현재 선택된 시나리오 확인
+            if (!currentScenarioId) {
+                alert('먼저 시나리오를 선택해주세요.\n\n시나리오 목록에서 시나리오를 클릭하거나,\n"시나리오 선택" 드롭다운에서 선택해주세요.');
                 return;
             }
-            
-            let scenarioOptions = '사용 가능한 시나리오:\n';
-            availableScenarios.forEach((id, index) => {
-                scenarioOptions += `${index + 1}. ${scenarios[id].title} (ID: ${id})\n`;
-            });
-            
-            const scenarioChoice = prompt(`${scenarioOptions}\n시나리오 번호를 선택하세요 (1-${availableScenarios.length}):`);
-            if (!scenarioChoice) return;
-            
-            const selectedScenarioIndex = parseInt(scenarioChoice) - 1;
-            if (selectedScenarioIndex < 0 || selectedScenarioIndex >= availableScenarios.length) {
-                alert('올바른 시나리오 번호를 선택해주세요.');
+
+            const selectedScenario = window.scenarios?.[currentScenarioId];
+            if (!selectedScenario) {
+                alert('선택된 시나리오 정보를 찾을 수 없습니다.');
                 return;
             }
-            
-            const selectedScenarioId = availableScenarios[selectedScenarioIndex];
-            const selectedScenario = scenarios[selectedScenarioId];
-            console.log('✅ 선택된 시나리오:', selectedScenario.title);
-            
-            // 2. 캐릭터 선택  
-            const availableCharacters = Object.keys(characters);
-            if (availableCharacters.length === 0) {
-                alert('생성된 캐릭터가 없습니다. 먼저 캐릭터를 생성해주세요.');
+
+            console.log('✅ 현재 선택된 시나리오:', selectedScenario.title);
+
+            // 시나리오에 연결된 캐릭터 자동 사용
+            const characterId = selectedScenario.available_characters?.[0] || selectedScenario.character_id;
+            const character = window.characters?.[characterId];
+
+            if (!character) {
+                alert('시나리오에 연결된 캐릭터 정보를 찾을 수 없습니다.');
                 return;
             }
-            
-            let characterOptions = '사용 가능한 캐릭터:\n';
-            availableCharacters.forEach((id, index) => {
-                const char = characters[id];
-                characterOptions += `${index + 1}. ${char.name} (${char.mbti}) - ID: ${id}\n`;
-            });
-            
-            const characterChoice = prompt(`${characterOptions}\n캐릭터 번호를 선택하세요 (1-${availableCharacters.length}):`);
-            if (!characterChoice) return;
-            
-            const selectedCharacterIndex = parseInt(characterChoice) - 1;
-            if (selectedCharacterIndex < 0 || selectedCharacterIndex >= availableCharacters.length) {
-                alert('올바른 캐릭터 번호를 선택해주세요.');
-                return;
-            }
-            
-            const selectedCharacterId = availableCharacters[selectedCharacterIndex];
-            const selectedCharacter = characters[selectedCharacterId];
-            console.log('✅ 선택된 캐릭터:', selectedCharacter.name);
+
+            console.log('✅ 자동 선택된 캐릭터:', character.name);
             
             // 3. 에피소드 범위 선택
             const startNum = parseInt(prompt('시작 에피소드 번호 (1-36):'));
@@ -5369,7 +5344,7 @@
             const episodeCount = endNum - startNum + 1;
             
             // 4. 확인 및 생성
-            if (confirm(`📋 일괄 생성 설정:\n\n시나리오: ${selectedScenario.title}\n캐릭터: ${selectedCharacter.name} (${selectedCharacter.mbti})\n범위: ${startNum}번 ~ ${endNum}번 (총 ${episodeCount}개)\n\n생성하시겠습니까?`)) {
+            if (confirm(`📋 일괄 생성 설정:\n\n시나리오: ${selectedScenario.title}\n캐릭터: ${character.name} (${character.mbti})\n범위: ${startNum}번 ~ ${endNum}번 (총 ${episodeCount}개)\n\n생성하시겠습니까?`)) {
                 
                 console.log('🔄 에피소드 일괄 생성 진행...');
                 let successCount = 0;
@@ -5401,14 +5376,14 @@
                         else if (episodeNum >= 28 && episodeNum <= 36) difficulty = 'Expert';
                         
                         // 채팅 훈련 API를 사용한 대화 생성
-                        const generatedDialogue = await generateLocalDialogue(selectedCharacterId, selectedCharacter.name, userPrompt, difficulty);
+                        const generatedDialogue = await generateLocalDialogue(characterId, character.name, userPrompt, difficulty);
                         
                         // 에피소드 데이터 생성
                         const episodeData = {
                             episode_number: episodeNum,
-                            scenario_id: selectedScenarioId,
-                            character_id: selectedCharacterId,
-                            character_name: selectedCharacter.name,
+                            scenario_id: currentScenarioId,
+                            character_id: characterId,
+                            character_name: character.name,
                             user_input_prompt: userPrompt,
                             difficulty: difficulty,
                             ai_generated_dialogue: generatedDialogue,
@@ -7102,6 +7077,7 @@
 
                 await window.loadCharacters();
                 await window.loadScenarios();
+                displayAvailableScenarios(); // 시나리오 목록 자동 표시
                 console.log('✅ 로그인 후 데이터 로드 완료');
             } catch (error) {
                 console.error('❌ 로그인 후 데이터 로드 실패:', error);
