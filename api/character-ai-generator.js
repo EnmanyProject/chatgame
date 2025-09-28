@@ -496,12 +496,6 @@ function generateRandomCharacterFromInput(inputData) {
                                                                               '오해받는 것', '무시당하는 것', '변화하는 것'])
     },
 
-    story_context: {
-      main_situation: inputData.story_context?.main_situation || randomChoice([
-        '대학교에서 처음 만나는 상황', '카페에서 우연히 마주친 상황', '도서관에서 책을 빌리다 만난 상황',
-        '버스정류장에서 기다리다 만난 상황', '동아리 활동 중 만난 상황', '친구 소개로 만난 상황'
-      ])
-    },
 
     // 원본 메타데이터 보존
     created_at: new Date().toISOString(),
@@ -574,9 +568,6 @@ function completeCharacterFromInput(inputData) {
     values: inputData.values || `${mbti} 유형의 가치관`,
     hobbies: inputData.hobbies || template.hobbies.slice(0, 3),
 
-    story_context: {
-      main_situation: inputData.story_context?.main_situation || '대학교에서 처음 만나는 상황'
-    },
 
     // ✨ 원본 메타데이터 보존
     created_at: inputData.created_at || new Date().toISOString(),
