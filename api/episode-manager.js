@@ -25,22 +25,42 @@ module.exports = async function handler(req, res) {
 
     // 특정 시나리오의 에피소드 목록 조회
     if (action === 'list' && req.query.scenario_id) {
-      const episodes = await getEpisodesForScenario(req.query.scenario_id);
-      return res.json({
-        success: true,
-        episodes,
-        scenario_id: req.query.scenario_id
-      });
+      try {
+        console.log('📚 에피소드 목록 조회 요청:', req.query.scenario_id);
+        const episodes = await getEpisodesForScenario(req.query.scenario_id);
+        console.log('✅ 에피소드 조회 성공:', episodes.length, '개');
+        return res.json({
+          success: true,
+          episodes,
+          scenario_id: req.query.scenario_id
+        });
+      } catch (error) {
+        console.error('❌ 에피소드 목록 조회 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: '에피소드 목록 조회 실패: ' + error.message
+        });
+      }
     }
 
     // 새 에피소드 생성 (AI 대화 자동 생성)
     if (action === 'create') {
-      const newEpisode = await createNewEpisode(req.body);
-      return res.json({
-        success: true,
-        episode: newEpisode,
-        message: 'AI가 대화와 선택지를 자동 생성했습니다'
-      });
+      try {
+        console.log('✨ 새 에피소드 생성 요청:', req.body);
+        const newEpisode = await createNewEpisode(req.body);
+        console.log('✅ 에피소드 생성 성공:', newEpisode.id);
+        return res.json({
+          success: true,
+          episode: newEpisode,
+          message: 'AI가 대화와 선택지를 자동 생성했습니다'
+        });
+      } catch (error) {
+        console.error('❌ 에피소드 생성 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: '에피소드 생성 실패: ' + error.message
+        });
+      }
     }
 
     // 에피소드 상세 조회
@@ -903,10 +923,39 @@ function calculateRequiredAffection(difficulty, episode_number) {
 async function loadEpisodeDatabase() {
   try {
     const episodePath = path.join(process.cwd(), 'data', 'episodes', 'episode-database.json');
+    console.log('📂 에피소드 DB 로드 시도:', episodePath);
+
+    // 파일 존재 확인
+    if (!fs.existsSync(episodePath)) {
+      console.log('📝 에피소드 DB 파일이 없어서 초기 생성');
+      const initialDb = {
+        metadata: {
+          version: "1.0.0",
+          created_date: new Date().toISOString().split('T')[0],
+          total_episodes: 0,
+          ai_context_engine: "gpt-4o-mini",
+          last_updated: new Date().toISOString(),
+          data_source: "episode_manager_api"
+        },
+        episodes: {}
+      };
+
+      // 디렉토리 생성
+      const episodeDir = path.dirname(episodePath);
+      if (!fs.existsSync(episodeDir)) {
+        fs.mkdirSync(episodeDir, { recursive: true });
+      }
+
+      fs.writeFileSync(episodePath, JSON.stringify(initialDb, null, 2));
+      return initialDb;
+    }
+
     const episodeData = fs.readFileSync(episodePath, 'utf8');
-    return JSON.parse(episodeData);
+    const parsed = JSON.parse(episodeData);
+    console.log('✅ 에피소드 DB 로드 성공:', Object.keys(parsed.episodes || {}).length, '개 에피소드');
+    return parsed;
   } catch (error) {
-    console.error('Failed to load episode database:', error);
+    console.error('❌ 에피소드 DB 로드 실패:', error);
     return { metadata: {}, episodes: {} };
   }
 }
