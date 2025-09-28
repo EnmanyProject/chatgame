@@ -49,14 +49,39 @@
       "source": "api_save",
       "active": true,
       "updated_at": "2025-09-28T12:12:19.737Z"
+    },
+    "소운_intp_1759061742477": {
+      "id": "소운_intp_1759061742477",
+      "name": "소운",
+      "age": 20,
+      "mbti": "INTP",
+      "gender": "female",
+      "personality_traits": [],
+      "major": "general",
+      "family": "only_child",
+      "hometown": "seoul",
+      "relationship": "친구들과는 상호 존중을 바탕으로 한 좋은 관계를 유지하며, 안정적인 연애를 선호",
+      "appearance": {
+        "hair": "긴 생머리",
+        "eyes": "둥근 눈",
+        "style": "캐주얼"
+      },
+      "hobbies": [],
+      "values": "love_family",
+      "speech_style": "섬세하고 논리적인 말투. 상대방의 의견에 대해 깊이 듣고 이해하려는 경향이 있으며, 자신의 의견을 명확하게 전달하는 것을 중요시함.",
+      "speech_habit": "자신의 생각이나 아이디어를 설명할 때 '그렇지 않아?' 혹은 '이해가 돼?'라는 말을 자주 하며, 상대방의 의견에 대해 '그게 어떻게 가능해?' 라는 의문을 표현하는 말버릇이 있음.",
+      "created_at": "2025-09-28T12:15:42.477Z",
+      "source": "api_save",
+      "active": true,
+      "updated_at": "2025-09-28T12:15:43.432Z"
     }
   },
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 2,
+    "total_characters": 3,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-28T12:12:19.737Z",
-    "last_accessed": "2025-09-28T12:12:19.737Z"
+    "last_updated": "2025-09-28T12:15:43.432Z",
+    "last_accessed": "2025-09-28T12:15:43.431Z"
   }
 }
