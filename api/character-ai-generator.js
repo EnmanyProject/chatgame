@@ -60,22 +60,31 @@ module.exports = async function handler(req, res) {
 
     // 모든 캐릭터 데이터 초기화
     if (action === 'reset_all_characters') {
-      console.log('🗑️ 캐릭터 데이터 초기화...');
+      console.log('🐙 GitHub API 전용 캐릭터 데이터 초기화...');
 
-      // 메모리 저장소 초기화
-      memoryStorage.characters = {};
-      memoryStorage.metadata.total_characters = 0;
-      memoryStorage.metadata.reset_at = new Date().toISOString();
+      // 완전 초기화된 데이터 구조 생성
+      const resetData = {
+        characters: {},
+        metadata: {
+          ...DEFAULT_METADATA,
+          reset_at: new Date().toISOString(),
+          total_characters: 0
+        }
+      };
 
-      // 🐙 GitHub에도 초기화된 상태 저장
+      // GitHub API로 초기화 상태 저장
       try {
-        await saveToGitHub(memoryStorage);
+        await saveToGitHub(resetData);
         console.log('🎉 GitHub에 초기화 상태 저장 완료');
       } catch (error) {
-        console.warn('⚠️ GitHub 초기화 저장 실패 (메모리 초기화는 완료):', error.message);
+        console.error('❌ GitHub 초기화 저장 실패:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: 'GitHub 초기화 실패: ' + error.message
+        });
       }
 
-      console.log('✅ 메모리 저장소 초기화 완료');
+      console.log('✅ GitHub API 전용 캐릭터 초기화 완료');
 
       return res.json({
         success: true,
@@ -199,38 +208,57 @@ module.exports = async function handler(req, res) {
         });
       }
 
-      console.log('🗑️ 캐릭터 삭제:', character_id);
+      console.log('🐙 GitHub API 전용 캐릭터 삭제:', character_id);
 
-      if (memoryStorage.characters[character_id]) {
-        const characterName = memoryStorage.characters[character_id].name;
-        delete memoryStorage.characters[character_id];
+      // GitHub에서 현재 데이터 로드
+      const existingData = await loadFromGitHub();
 
-        // 메타데이터 업데이트
-        memoryStorage.metadata.total_characters = Object.keys(memoryStorage.characters).length;
-        memoryStorage.metadata.last_updated = new Date().toISOString();
-
-        // 🐙 GitHub에서도 삭제 반영
-        try {
-          await saveToGitHub(memoryStorage);
-          console.log('🎉 GitHub에 삭제 반영 완료');
-        } catch (error) {
-          console.warn('⚠️ GitHub 삭제 반영 실패 (메모리 삭제는 완료):', error.message);
-        }
-
-        console.log('✅ 캐릭터 삭제 완료:', characterName);
-        console.log('📊 남은 캐릭터 수:', memoryStorage.metadata.total_characters);
-
-        return res.json({
-          success: true,
-          message: 'Character deleted successfully',
-          github_updated: true
-        });
-      } else {
+      if (!existingData || !existingData.characters[character_id]) {
         return res.status(404).json({
           success: false,
           message: 'Character not found'
         });
       }
+
+      const characterName = existingData.characters[character_id].name;
+      console.log('🗑️ 삭제할 캐릭터:', characterName);
+
+      // 캐릭터 삭제된 새로운 데이터 구조 생성
+      const updatedData = {
+        characters: { ...existingData.characters },
+        metadata: {
+          ...existingData.metadata,
+          total_characters: Object.keys(existingData.characters).length - 1,
+          last_updated: new Date().toISOString(),
+          storage_type: 'github_api_only'
+        }
+      };
+
+      // 해당 캐릭터 삭제
+      delete updatedData.characters[character_id];
+
+      // GitHub API로 업데이트 저장
+      try {
+        await saveToGitHub(updatedData);
+        console.log('🎉 GitHub에서 캐릭터 삭제 완료');
+      } catch (error) {
+        console.error('❌ GitHub 삭제 실패:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: 'GitHub 삭제 실패: ' + error.message
+        });
+      }
+
+      console.log('✅ 캐릭터 삭제 완료:', characterName);
+      console.log('📊 남은 캐릭터 수:', updatedData.metadata.total_characters);
+
+      return res.json({
+        success: true,
+        message: 'Character deleted successfully',
+        character_id: character_id,
+        character_name: characterName,
+        github_updated: true
+      });
     }
 
     return res.status(400).json({
@@ -608,9 +636,9 @@ async function saveToGitHub(characterData) {
   try {
     console.log('🐙 GitHub API로 캐릭터 데이터 저장 시작...');
     console.log('📋 저장할 데이터:', {
-      총_캐릭터_수: Object.keys(memoryStorage.characters).length,
-      캐릭터_목록: Object.keys(memoryStorage.characters),
-      메타데이터: memoryStorage.metadata
+      총_캐릭터_수: Object.keys(characterData.characters).length,
+      캐릭터_목록: Object.keys(characterData.characters),
+      메타데이터: characterData.metadata
     });
 
     // 1. 현재 파일의 SHA 값 가져오기 (파일 업데이트에 필요)
@@ -639,12 +667,12 @@ async function saveToGitHub(characterData) {
     }
 
     // 2. 캐릭터 데이터를 JSON으로 변환
-    const characterDataJson = JSON.stringify(memoryStorage, null, 2);
+    const characterDataJson = JSON.stringify(characterData, null, 2);
     const encodedContent = Buffer.from(characterDataJson, 'utf8').toString('base64');
 
     // 3. GitHub API로 파일 업데이트/생성
     const updateData = {
-      message: `💾 캐릭터 데이터 업데이트 - ${memoryStorage.metadata.total_characters}개 캐릭터`,
+      message: `💾 캐릭터 데이터 업데이트 - ${characterData.metadata.total_characters}개 캐릭터`,
       content: encodedContent,
       branch: 'main'
     };
