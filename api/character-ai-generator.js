@@ -164,14 +164,29 @@ module.exports = async function handler(req, res) {
 
       console.log('🤖 AI 캐릭터 생성 시작:', inputData);
 
-      // 🎲 진짜 AI가 랜덤하게 완성
-      const character = generateRandomCharacterFromInput(inputData);
+      try {
+        // 🧠 실제 OpenAI API를 사용한 지능적 캐릭터 완성
+        const character = await generateCharacterWithAI(inputData);
 
-      return res.json({
-        success: true,
-        character: character,
-        message: '캐릭터가 성공적으로 완성되었습니다!'
-      });
+        return res.json({
+          success: true,
+          character: character,
+          message: '캐릭터가 AI에 의해 성공적으로 완성되었습니다!'
+        });
+      } catch (error) {
+        console.error('❌ AI 캐릭터 생성 실패:', error);
+
+        // AI 실패 시 fallback으로 기존 랜덤 생성 사용
+        console.log('🔄 Fallback: 랜덤 생성으로 전환');
+        const character = generateRandomCharacterFromInput(inputData);
+
+        return res.json({
+          success: true,
+          character: character,
+          message: '캐릭터가 완성되었습니다 (AI 오류로 인한 기본 생성)',
+          fallback: true
+        });
+      }
     }
 
     // 캐릭터 삭제
@@ -234,6 +249,143 @@ module.exports = async function handler(req, res) {
     });
   }
 };
+
+// 🧠 OpenAI API를 사용한 지능적 캐릭터 완성 함수
+async function generateCharacterWithAI(inputData) {
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+  if (!OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY 환경변수가 설정되지 않았습니다');
+  }
+
+  console.log('🤖 OpenAI API 캐릭터 생성 시작...');
+  // 프론트엔드에서 answers 필드로 데이터를 보내므로 처리
+  const userData = inputData.answers || inputData;
+
+  console.log('📝 입력 데이터:', {
+    name: userData.name,
+    mbti: userData.mbti,
+    age: userData.age,
+    personality_traits: userData.personality_traits,
+    hobbies: userData.hobbies,
+    speech_style: userData.speech_style
+  });
+
+  // 사용자가 선택한 특성들을 문자열로 변환
+  const selectedTraits = Array.isArray(userData.personality_traits) ? userData.personality_traits.join(', ') : '';
+  const selectedHobbies = Array.isArray(userData.hobbies) ? userData.hobbies.join(', ') : '';
+
+  const prompt = `다음 정보를 바탕으로 매력적인 여성 캐릭터를 완성해주세요:
+
+기본 정보:
+- 이름: ${userData.name || '랜덤으로 생성'}
+- 나이: ${userData.age || '20-25세 사이'}
+- MBTI: ${userData.mbti || '적절한 MBTI 선택'}
+
+선택된 특성들:
+- 성격 특성: ${selectedTraits || '매력적인 성격 특성들'}
+- 취미: ${selectedHobbies || '흥미로운 취미들'}
+- 말투 스타일: ${userData.speech_style || '자연스럽고 매력적인 말투'}
+
+요구사항:
+1. 🎭 말투 스타일 완성: "${userData.speech_style}"에 맞는 구체적이고 독특한 말버릇을 창조해주세요
+   - 예: "섹시하고 유혹적인 말투" → "말끝을 살짝 늘이며 숨소리를 섞는 습관", "아무말에도 윙크하는 습관"
+   - 예: "부드럽고 다정한 말투" → "상대의 이름을 자주 부르는 습관", "걱정될 때 손을 잡는 습관"
+
+2. 🧠 MBTI 정확성: ${userData.mbti} 특성을 정확히 반영해주세요
+3. 🇰🇷 한국 문화: 자연스러운 한국 여성 캐릭터로 만들어주세요
+4. ✨ 매력과 현실성: 환상적이지만 믿을 만한 캐릭터로 완성해주세요
+5. 🎯 개성 강화: 선택된 특성들을 바탕으로 독특하고 기억에 남는 캐릭터를 만들어주세요
+
+JSON 형식으로 응답해주세요:
+{
+  "name": "캐릭터 이름",
+  "age": 나이숫자,
+  "mbti": "MBTI",
+  "gender": "female",
+  "personality_traits": ["특성1", "특성2", "특성3"],
+  "major": "전공분야",
+  "family": "가족배경",
+  "hometown": "출신지역",
+  "relationship": "만남관계",
+  "appearance": {
+    "hair": "헤어스타일",
+    "eyes": "눈모양",
+    "style": "패션스타일"
+  },
+  "hobbies": ["취미1", "취미2", "취미3"],
+  "values": "가치관",
+  "speech_style": "구체적인 말투 설명",
+  "speech_habit": "구체적인 말버릇"
+}`;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'gpt-4',
+        messages: [
+          {
+            role: 'system',
+            content: '당신은 매력적이고 현실적인 여성 캐릭터를 만드는 전문가입니다. 사용자의 요구사항을 정확히 반영하여 완성도 높은 캐릭터를 만들어주세요.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.8,
+        max_tokens: 1000
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new Error(`OpenAI API 오류: ${response.status} - ${errorData}`);
+    }
+
+    const data = await response.json();
+    const aiResponse = data.choices[0].message.content;
+
+    console.log('🤖 OpenAI 응답:', aiResponse);
+
+    // JSON 응답 파싱
+    let characterData;
+    try {
+      // JSON 블록을 찾아서 파싱
+      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        characterData = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error('JSON 형식이 아닌 응답');
+      }
+    } catch (parseError) {
+      console.warn('⚠️ JSON 파싱 실패:', parseError.message);
+      throw new Error('AI 응답을 파싱할 수 없습니다');
+    }
+
+    // 기본 필드 추가
+    const completedCharacter = {
+      ...characterData,
+      id: `${characterData.name.toLowerCase().replace(/\s+/g, '_')}_${characterData.mbti.toLowerCase()}_${Date.now()}`,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      source: 'ai_generated',
+      active: true
+    };
+
+    console.log('✅ AI 캐릭터 생성 완료:', completedCharacter.name);
+    return completedCharacter;
+
+  } catch (error) {
+    console.error('❌ OpenAI API 호출 실패:', error);
+    throw error;
+  }
+}
 
 // 🎲 AI가 랜덤하게 캐릭터 완성하는 함수 (매번 다른 결과)
 function generateRandomCharacterFromInput(inputData) {
