@@ -2,9 +2,9 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-09-28",
-    "total_scenarios": 2,
+    "total_scenarios": 1,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-09-28T15:47:13.149Z",
+    "last_updated": "2025-09-28T15:49:42.621Z",
     "data_source": "github_api_only"
   },
   "scenarios": {
@@ -36,25 +36,6 @@
         "표현하려는",
         "상황",
         "은근한질투"
-      ],
-      "updated_by": "scenario_manager_github_only"
-    },
-    "scenario_1759074431604": {
-      "id": "scenario_1759074431604",
-      "scenario_id": "scenario_1759074431604",
-      "title": "�׽�Ʈ �ó�����",
-      "description": "API �׽�Ʈ�� �ó�����",
-      "background_setting": "ī��",
-      "mood": "������",
-      "active_status": true,
-      "created_date": "2025-09-28",
-      "last_modified": "2025-09-28T15:47:13.148Z",
-      "ai_generated_context": "죄송하지만, 요청하신 대화 시나리오를 작성할 수 없습니다. 제공된 캐릭터 정보가 없어서 정확한 이름과 성격을 사용할 수 없습니다. 제공해주실 캐릭터 정보를 주시면, 그에 맞추어 메신저 대화 시나리오를 작성해 드리겠습니다.",
-      "custom_context": "",
-      "available_characters": [],
-      "episode_count": 0,
-      "tags": [
-        "api"
       ],
       "updated_by": "scenario_manager_github_only"
     }
