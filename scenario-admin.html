@@ -4439,7 +4439,7 @@
                         description,
                         background_setting: backgroundSetting,
                         mood,
-                        available_characters: selectedCharacters, // 캐릭터 ID 배열 전달
+                        available_characters: Array.from(selectedCharacters), // 🔧 Set을 배열로 변환
                         characters: selectedCharacterData // 캐릭터 전체 데이터도 전달 (호환성)
                     })
                 });
