@@ -16,7 +16,9 @@ module.exports = async function handler(req, res) {
   console.log('📥 Scenario Manager 요청:', {
     method: req.method,
     action,
-    body: req.body,
+    bodyKeys: req.body ? Object.keys(req.body) : [],
+    title: req.body?.title,
+    description: req.body?.description ? req.body.description.substring(0, 50) + '...' : null,
     query: req.query
   });
 

@@ -4003,10 +4003,21 @@
         async function loadScenarios() {
             console.log('📚 === 시나리오 로드 시작 ===');
             console.log('🕒 로드 시간:', new Date().toISOString());
-            
+
             try {
-                console.log('🔄 시나리오 API 호출...');
-                const response = await fetch('/api/scenario-manager?action=list&_t=' + Date.now());
+                // 🔧 강력한 캐시 무효화 및 우선순위 설정
+                const timestamp = Date.now();
+                const randomParam = Math.random().toString(36).substring(7);
+                console.log('🔄 시나리오 API 호출... (캐시 무효화: ' + timestamp + ', 랜덤: ' + randomParam + ')');
+
+                const response = await fetch(`/api/scenario-manager?action=list&_t=${timestamp}&_r=${randomParam}`, {
+                    method: 'GET',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
                 console.log('📶 API 응답 상태:', response.status);
                 
                 const data = await response.json();
@@ -7257,11 +7268,39 @@
                         // 사용자에게 새로고침 중임을 알림
                         showRefreshNotification('시나리오 목록 업데이트 중...');
 
-                        // 시나리오 목록 새로고침
-                        await loadScenarios();
+                        // 🔍 저장된 시나리오 검증 및 새로고침
+                        const expectedTitle = title;
+                        let verificationAttempts = 0;
+                        let scenarioFound = false;
 
-                        console.log('✅ 시나리오 목록 새로고침 완료');
-                        showRefreshNotification('✅ 목록이 업데이트되었습니다!', true);
+                        while (verificationAttempts < 3 && !scenarioFound) {
+                            verificationAttempts++;
+                            console.log(`🔍 시나리오 검증 시도 ${verificationAttempts}/3: "${expectedTitle}" 찾는 중...`);
+
+                            await loadScenarios();
+
+                            // 현재 로드된 시나리오에서 방금 생성한 시나리오 확인
+                            const currentScenarios = window.scenarios || {};
+                            scenarioFound = Object.values(currentScenarios).some(scenario =>
+                                scenario.title === expectedTitle
+                            );
+
+                            if (scenarioFound) {
+                                console.log('✅ 저장된 시나리오 검증 성공:', expectedTitle);
+                                showRefreshNotification('✅ 목록이 업데이트되었습니다!', true);
+                                break;
+                            } else {
+                                console.warn(`⚠️ 시나리오 "${expectedTitle}" 아직 목록에 없음. 2초 후 재시도...`);
+                                if (verificationAttempts < 3) {
+                                    await new Promise(resolve => setTimeout(resolve, 2000));
+                                }
+                            }
+                        }
+
+                        if (!scenarioFound) {
+                            console.error(`❌ 시나리오 "${expectedTitle}" 검증 실패 - 수동 새로고침 필요`);
+                            showRefreshNotification('⚠️ 새로고침 버튼을 클릭해주세요', false);
+                        }
                     }, 2000);
 
                     // 모달 닫기
