@@ -1,6 +1,4 @@
-// 에피소드 관리 API - 간소화 버전
-const fs = require('fs');
-const path = require('path');
+// 에피소드 관리 API - GitHub API 전용 버전
 
 module.exports = async function handler(req, res) {
   // CORS 헤더 설정
@@ -98,38 +96,82 @@ module.exports = async function handler(req, res) {
   }
 };
 
-// 에피소드 데이터베이스 로드 (안전한 버전)
+// 에피소드 데이터베이스 로드 (GitHub API 사용)
 async function loadEpisodeDatabase() {
   try {
-    const dbPath = path.join(process.cwd(), 'data', 'episodes', 'episode-database.json');
-    console.log('📂 DB 경로:', dbPath);
+    console.log('🐙 GitHub API를 통한 에피소드 DB 로드 시작...');
 
-    // 파일 존재 확인
-    if (!fs.existsSync(dbPath)) {
+    // GitHub API를 통해 로드
+    const result = await loadFromGitHub('data/episodes/episode-database.json');
+
+    if (result.success) {
+      console.log('✅ GitHub API를 통한 에피소드 DB 로드 성공');
+      return result.data;
+    } else {
       console.log('📝 에피소드 DB 파일 없음 - 기본 구조 반환');
       return {
         metadata: {
           version: "1.0.0",
-          total_episodes: 0
+          total_episodes: 0,
+          created_date: new Date().toISOString().split('T')[0],
+          data_source: "github_api_only"
         },
         episodes: {}
       };
     }
 
-    // 파일 읽기
-    const data = fs.readFileSync(dbPath, 'utf8');
-    const parsed = JSON.parse(data);
-
-    console.log('✅ 에피소드 DB 로드 성공');
-    return parsed;
-
   } catch (error) {
-    console.error('❌ DB 로드 오류:', error.message);
+    console.error('❌ 에피소드 DB 로드 오류:', error.message);
     // 에러 시 기본 구조 반환
     return {
-      metadata: { error: error.message },
+      metadata: {
+        error: error.message,
+        version: "1.0.0",
+        total_episodes: 0
+      },
       episodes: {}
     };
+  }
+}
+
+// GitHub API 로드 함수
+async function loadFromGitHub(filePath) {
+  try {
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    if (!GITHUB_TOKEN) {
+      throw new Error('GITHUB_TOKEN 환경변수가 설정되지 않았습니다');
+    }
+
+    const owner = 'EnmanyProject';
+    const repo = 'chatgame';
+
+    console.log(`🐙 GitHub API 로드: ${filePath}`);
+
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        console.log('📄 파일이 존재하지 않음 (404)');
+        return { success: false, error: 'File not found' };
+      }
+      throw new Error(`GitHub API 오류: ${response.status}`);
+    }
+
+    const fileData = await response.json();
+    const content = Buffer.from(fileData.content, 'base64').toString('utf8');
+    const data = JSON.parse(content);
+
+    console.log('✅ GitHub API 로드 성공');
+    return { success: true, data: data };
+
+  } catch (error) {
+    console.error('❌ GitHub API 로드 실패:', error);
+    return { success: false, error: error.message };
   }
 }
 
@@ -223,24 +265,95 @@ async function createEpisode(data) {
   }
 }
 
-// 에피소드 데이터베이스 저장 함수
+// 에피소드 데이터베이스 저장 함수 (GitHub API 사용)
 async function saveEpisodeDatabase(database) {
   try {
-    const dbPath = path.join(process.cwd(), 'data', 'episodes', 'episode-database.json');
-    const dbDir = path.dirname(dbPath);
+    console.log('🐙 GitHub API를 통한 에피소드 저장 시작...');
 
-    // 디렉토리 생성 (없으면)
-    if (!fs.existsSync(dbDir)) {
-      fs.mkdirSync(dbDir, { recursive: true });
-      console.log('📂 에피소드 디렉토리 생성:', dbDir);
+    // GitHub API를 통해 저장 (시나리오와 동일한 방식)
+    const result = await saveToGitHub('data/episodes/episode-database.json', database);
+
+    if (result.success) {
+      console.log('✅ GitHub API를 통한 에피소드 저장 완료');
+    } else {
+      throw new Error(`GitHub API 저장 실패: ${result.error}`);
     }
 
-    // JSON 파일 저장
-    fs.writeFileSync(dbPath, JSON.stringify(database, null, 2), 'utf8');
-    console.log('💾 에피소드 데이터베이스 저장 완료:', dbPath);
+  } catch (error) {
+    console.error('❌ GitHub API 에피소드 저장 실패:', error);
+    throw error;
+  }
+}
+
+// GitHub API 저장 함수 (시나리오 매니저에서 사용하는 것과 동일)
+async function saveToGitHub(filePath, data) {
+  try {
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    if (!GITHUB_TOKEN) {
+      throw new Error('GITHUB_TOKEN 환경변수가 설정되지 않았습니다');
+    }
+
+    const owner = 'EnmanyProject';
+    const repo = 'chatgame';
+    const branch = 'main';
+
+    console.log(`🐙 GitHub API 저장: ${filePath}`);
+
+    // 현재 파일 정보 가져오기 (SHA 필요)
+    let currentSha = null;
+    try {
+      const getResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
+        headers: {
+          'Authorization': `token ${GITHUB_TOKEN}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+
+      if (getResponse.ok) {
+        const currentFile = await getResponse.json();
+        currentSha = currentFile.sha;
+        console.log('📄 기존 파일 SHA:', currentSha);
+      }
+    } catch (error) {
+      console.log('📝 새 파일 생성 (기존 파일 없음)');
+    }
+
+    // 파일 내용을 Base64로 인코딩
+    const content = Buffer.from(JSON.stringify(data, null, 2), 'utf8').toString('base64');
+
+    // GitHub API를 통해 파일 저장/업데이트
+    const saveData = {
+      message: `Update episodes database - ${new Date().toISOString()}`,
+      content: content,
+      branch: branch
+    };
+
+    if (currentSha) {
+      saveData.sha = currentSha; // 기존 파일 업데이트
+    }
+
+    const saveResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(saveData)
+    });
+
+    if (!saveResponse.ok) {
+      const errorText = await saveResponse.text();
+      throw new Error(`GitHub API 오류: ${saveResponse.status} - ${errorText}`);
+    }
+
+    const result = await saveResponse.json();
+    console.log('✅ GitHub API 저장 성공:', result.commit.sha);
+
+    return { success: true, commit: result.commit };
 
   } catch (error) {
-    console.error('❌ 에피소드 데이터베이스 저장 실패:', error);
-    throw error;
+    console.error('❌ GitHub API 저장 실패:', error);
+    return { success: false, error: error.message };
   }
 }
