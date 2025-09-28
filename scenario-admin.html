@@ -2898,6 +2898,47 @@
         let selectedCharacters = new Set();
         let generatedDialogue = null;
 
+        // 🔄 새로고침 알림 표시 함수
+        function showRefreshNotification(message, isSuccess = false) {
+            // 기존 알림이 있으면 제거
+            const existingNotification = document.getElementById('refreshNotification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            // 새 알림 생성
+            const notification = document.createElement('div');
+            notification.id = 'refreshNotification';
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${isSuccess ? '#28a745' : '#17a2b8'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                font-weight: bold;
+                font-size: 14px;
+                transition: all 0.3s ease;
+                max-width: 300px;
+            `;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            // 성공 메시지는 3초 후 자동 제거, 진행 중 메시지는 수동 제거
+            if (isSuccess) {
+                setTimeout(() => {
+                    if (notification && notification.parentNode) {
+                        notification.style.opacity = '0';
+                        setTimeout(() => notification.remove(), 300);
+                    }
+                }, 3000);
+            }
+        }
+
         // 페이지 초기화
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 통합 관리 시스템 초기화');
@@ -7208,6 +7249,20 @@
 
                     alert(successMessage);
 
+                    // 🕐 GitHub API 저장 완료 대기 후 시나리오 목록 새로고침
+                    setTimeout(async () => {
+                        console.log('🔄 GitHub 동기화 완료 예상 - 시나리오 목록 새로고침 시작...');
+
+                        // 사용자에게 새로고침 중임을 알림
+                        showRefreshNotification('시나리오 목록 업데이트 중...');
+
+                        // 시나리오 목록 새로고침
+                        await loadScenarios();
+
+                        console.log('✅ 시나리오 목록 새로고침 완료');
+                        showRefreshNotification('✅ 목록이 업데이트되었습니다!', true);
+                    }, 2000);
+
                     // 모달 닫기
                     if (typeof closeModal === 'function') {
                         closeModal('scenarioModal');
@@ -7379,12 +7434,21 @@
                 const result = await response.json();
 
                 if (result && result.success) {
-                    console.log('🎉 저장 성공! 전체 캐릭터 목록 새로고침...');
+                    console.log('🎉 저장 성공! GitHub 동기화 대기 후 새로고침...');
 
-                    // 성공 시 전체 캐릭터 목록을 다시 로드하여 최신 상태 유지
-                    await window.loadCharacters();
+                    // 🕐 GitHub API 저장 완료 대기 (2초 지연)
+                    setTimeout(async () => {
+                        console.log('🔄 GitHub 동기화 완료 예상 - 캐릭터 목록 새로고침 시작...');
 
-                    console.log('✅ 캐릭터 목록 새로고침 완료');
+                        // 사용자에게 새로고침 중임을 알림
+                        showRefreshNotification('캐릭터 목록 업데이트 중...');
+
+                        // 성공 시 전체 캐릭터 목록을 다시 로드하여 최신 상태 유지
+                        await window.loadCharacters();
+
+                        console.log('✅ 캐릭터 목록 새로고침 완료');
+                        showRefreshNotification('✅ 목록이 업데이트되었습니다!', true);
+                    }, 2000);
 
                     const successMessage = `💖 새로운 캐릭터 '${name}'가 GitHub에 저장되었습니다!\n✅ 온라인에서 영구 보관됩니다!`;
 
