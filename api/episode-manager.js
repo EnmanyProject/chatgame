@@ -62,7 +62,11 @@ module.exports = async function handler(req, res) {
         });
         return res.status(500).json({
           success: false,
-          message: '에피소드 목록 조회 실패: ' + error.message
+          message: '에피소드 목록 조회 실패: ' + (error.message || 'Unknown error'),
+          error_details: {
+            name: error.name,
+            stack: error.stack?.split('\n')[0] // 첫 번째 줄만
+          }
         });
       }
     }
@@ -137,8 +141,20 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ success: false, message: 'Unknown action' });
 
   } catch (error) {
-    console.error('Episode Manager API Error:', error);
-    return res.status(500).json({ success: false, message: 'Internal server error' });
+    console.error('❌ Episode Manager API Critical Error:', error);
+    console.error('❌ 요청 정보:', {
+      method: req.method,
+      action: action,
+      query: req.query
+    });
+    console.error('❌ 에러 스택:', error.stack);
+
+    return res.status(500).json({
+      success: false,
+      message: 'Episode Manager API 내부 서버 오류: ' + (error.message || 'Unknown error'),
+      error_type: error.name,
+      timestamp: new Date().toISOString()
+    });
   }
 }
 
@@ -1046,14 +1062,35 @@ async function getEpisodesForScenario(scenario_id) {
   try {
     console.log('🔍 getEpisodesForScenario 시작:', scenario_id);
     const db = await loadEpisodeDatabase();
+
+    // 안전한 데이터 검증
+    if (!db || !db.episodes || typeof db.episodes !== 'object') {
+      console.log('📝 에피소드 데이터 없음 - 빈 배열 반환');
+      return [];
+    }
+
     console.log('📊 DB 로드 결과:', {
       metadataExists: !!db.metadata,
-      episodesCount: Object.keys(db.episodes || {}).length,
-      allEpisodeIds: Object.keys(db.episodes || {})
+      episodesCount: Object.keys(db.episodes).length,
+      allEpisodeIds: Object.keys(db.episodes)
     });
 
-    const filtered = Object.values(db.episodes).filter(ep => {
-      console.log(`🔎 에피소드 체크: ${ep.id} - scenario_id: ${ep.scenario_id} (찾는 ID: ${scenario_id})`);
+    const episodes = Object.values(db.episodes);
+    console.log('📋 총 에피소드 개수:', episodes.length);
+
+    if (episodes.length === 0) {
+      console.log('📝 데이터베이스에 에피소드가 없음');
+      return [];
+    }
+
+    const filtered = episodes.filter(ep => {
+      // 안전한 객체 검증
+      if (!ep || typeof ep !== 'object') {
+        console.log('⚠️ 잘못된 에피소드 데이터:', ep);
+        return false;
+      }
+
+      console.log(`🔎 에피소드 체크: ${ep.id || 'NO_ID'} - scenario_id: ${ep.scenario_id || 'NO_SCENARIO'} (찾는 ID: ${scenario_id})`);
       return ep.scenario_id === scenario_id;
     });
 
@@ -1061,7 +1098,9 @@ async function getEpisodesForScenario(scenario_id) {
     return filtered;
   } catch (error) {
     console.error('❌ getEpisodesForScenario 오류:', error);
-    throw error;
+    console.error('❌ 에러 스택:', error.stack);
+    // 에러 발생 시 빈 배열 반환 (500 에러 방지)
+    return [];
   }
 }
 
