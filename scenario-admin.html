@@ -5203,9 +5203,12 @@
                     console.log('🔄 저장 후 최종 UI 동기화...');
                     await loadEpisodes(); // 에피소드 목록 새로고침
                     updateScenarioStats();
-                
+                } else {
+                    throw new Error(result.message || 'API 응답에서 success: false');
+                }
+
                 console.log('✅ 에피소드 저장 프로세스 완료!');
-                
+
             } catch (error) {
                 console.error('❌ 에피소드 저장 실패:', error);
                 alert('에피소드 저장 중 오류가 발생했습니다: ' + error.message);
