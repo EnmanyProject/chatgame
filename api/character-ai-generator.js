@@ -86,6 +86,14 @@ module.exports = async function handler(req, res) {
 
     // 캐릭터 저장 (GitHub API + 메모리 저장소)
     if (action === 'save_character') {
+      // 🐙 먼저 GitHub에서 최신 데이터 로드 (기존 캐릭터 보존)
+      try {
+        await loadFromGitHub();
+        console.log('🔄 GitHub에서 최신 데이터 동기화 완료');
+      } catch (error) {
+        console.warn('⚠️ GitHub 동기화 실패 (메모리 데이터 사용):', error.message);
+      }
+
       // scenario-admin.html에서 {action: 'save_character', character: {...}} 형태로 전송
       const characterData = req.body.character || req.body;
 
@@ -533,9 +541,11 @@ async function loadFromGitHub() {
 
       console.log('✅ GitHub에서 데이터 로드 성공:', characterData.metadata);
 
-      // 메모리 저장소에 로드된 데이터 병합
-      memoryStorage.characters = { ...memoryStorage.characters, ...characterData.characters };
+      // 🔧 메모리 저장소를 GitHub 데이터로 완전 교체 (병합 아님)
+      memoryStorage.characters = characterData.characters || {};
       memoryStorage.metadata = { ...memoryStorage.metadata, ...characterData.metadata };
+
+      console.log('📊 GitHub에서 로드된 캐릭터 수:', Object.keys(memoryStorage.characters).length);
 
       return characterData;
     } else {
