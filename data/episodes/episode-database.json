@@ -2,9 +2,9 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-09-28",
-    "total_episodes": 5,
+    "total_episodes": 6,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-09-28T16:03:39.066Z",
+    "last_updated": "2025-09-28T16:19:16.744Z",
     "data_source": "episode_manager_api"
   },
   "episodes": {
@@ -165,6 +165,38 @@
         ],
         "difficulty": "Easy",
         "generated_at": "2025-09-28T16:03:38.266Z",
+        "source": "chat_training_api"
+      }
+    },
+    "episode_scenario_1759073172435_1759076356657": {
+      "id": "episode_scenario_1759073172435_1759076356657",
+      "scenario_id": "scenario_1759073172435",
+      "episode_number": 1,
+      "title": "에피소드 1번",
+      "character_id": "미화_esfp_1759064886354",
+      "character_name": "미화",
+      "difficulty": "Easy",
+      "user_input_prompt": "우연히 마주친 상황에서 서로를 의식하며",
+      "created_at": "2025-09-28T16:19:16.657Z",
+      "dialogue": {
+        "dialogue": "안녕하세요! 이렇게 마주치니 좀 놀랍네요. 😊 오늘 날씨가 정말 좋죠? 기분이 좋아지는 것 같아요.",
+        "narration": "윤아는 부드러운 미소를 지으며 상대방을 바라본다. 가벼운 바람에 머리카락이 살짝 흩날리며, 조금 쑥스러운 듯 눈을 살짝 피한다. 마음이 두근거린다.",
+        "choices": [
+          {
+            "text": "안녕하세요! 저도 오늘 기분이 좋아요.",
+            "affection_impact": 3
+          },
+          {
+            "text": "네, 날씨가 정말 좋네요. 😊",
+            "affection_impact": 2
+          },
+          {
+            "text": "조금 놀랐어요. 자주 만나는 얼굴이 아니어서.",
+            "affection_impact": 1
+          }
+        ],
+        "difficulty": "Easy",
+        "generated_at": "2025-09-28T16:19:16.074Z",
         "source": "chat_training_api"
       }
     }
