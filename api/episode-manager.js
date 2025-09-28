@@ -37,8 +37,16 @@ module.exports = async function handler(req, res) {
     if (action === 'list' && req.query.scenario_id) {
       try {
         console.log('📚 에피소드 목록 조회 요청:', req.query.scenario_id);
+        console.log('🔍 요청 정보:', {
+          method: req.method,
+          query: req.query,
+          headers: req.headers['content-type']
+        });
+
         const episodes = await getEpisodesForScenario(req.query.scenario_id);
         console.log('✅ 에피소드 조회 성공:', episodes.length, '개');
+        console.log('📋 에피소드 목록:', episodes.map(ep => ({ id: ep.id, title: ep.title })));
+
         return res.json({
           success: true,
           episodes,
@@ -46,6 +54,12 @@ module.exports = async function handler(req, res) {
         });
       } catch (error) {
         console.error('❌ 에피소드 목록 조회 실패:', error);
+        console.error('❌ 에러 스택:', error.stack);
+        console.error('❌ 에러 세부사항:', {
+          name: error.name,
+          message: error.message,
+          code: error.code
+        });
         return res.status(500).json({
           success: false,
           message: '에피소드 목록 조회 실패: ' + error.message
@@ -1029,8 +1043,26 @@ async function getScenarioContext(scenario_id) {
 
 // 시나리오별 에피소드 조회
 async function getEpisodesForScenario(scenario_id) {
-  const db = await loadEpisodeDatabase();
-  return Object.values(db.episodes).filter(ep => ep.scenario_id === scenario_id);
+  try {
+    console.log('🔍 getEpisodesForScenario 시작:', scenario_id);
+    const db = await loadEpisodeDatabase();
+    console.log('📊 DB 로드 결과:', {
+      metadataExists: !!db.metadata,
+      episodesCount: Object.keys(db.episodes || {}).length,
+      allEpisodeIds: Object.keys(db.episodes || {})
+    });
+
+    const filtered = Object.values(db.episodes).filter(ep => {
+      console.log(`🔎 에피소드 체크: ${ep.id} - scenario_id: ${ep.scenario_id} (찾는 ID: ${scenario_id})`);
+      return ep.scenario_id === scenario_id;
+    });
+
+    console.log('✅ 필터링 완료:', filtered.length, '개 에피소드 발견');
+    return filtered;
+  } catch (error) {
+    console.error('❌ getEpisodesForScenario 오류:', error);
+    throw error;
+  }
 }
 
 // 캐릭터별 에피소드 조회

@@ -815,6 +815,27 @@
             gap: 20px;
         }
 
+        /* 정보 표시용 스타일 */
+        .info-display {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .info-title {
+            font-weight: bold;
+            color: #495057;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+
+        .info-character {
+            color: #6c757d;
+            font-size: 0.95em;
+        }
+
         .tuning-controls .form-group {
             background: white;
             padding: 20px;
@@ -2498,26 +2519,21 @@
                 <form id="episodeForm">
                     <input type="hidden" id="episodeId" />
                     <input type="hidden" id="episodeScenarioId" />
-                    
+
+                    <!-- 선택된 시나리오 정보 표시 -->
                     <div class="form-group">
-                        <label for="episodeScenarioSelect">시나리오 선택 *</label>
-                        <select id="episodeScenarioSelect" required onchange="onScenarioChange()">
-                            <option value="">시나리오를 선택하세요</option>
-                        </select>
-                        <small class="form-text">에피소드를 생성할 시나리오를 선택해주세요.</small>
+                        <label>📚 선택된 시나리오</label>
+                        <div id="selectedScenarioInfo" class="info-display">
+                            <div class="info-title">시나리오 제목이 여기에 표시됩니다</div>
+                            <div class="info-character">캐릭터: </div>
+                        </div>
+                        <small class="form-text">위 시나리오와 캐릭터로 에피소드가 자동 생성됩니다.</small>
                     </div>
 
                     <div class="form-group">
                         <label for="episodeNumber">에피소드 번호 (1-36) *</label>
-                        <input type="number" id="episodeNumber" min="1" max="36" required />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="characterSelect">캐릭터 선택 *</label>
-                        <select id="characterSelect" required>
-                            <option value="">먼저 시나리오를 선택하세요</option>
-                        </select>
-                        <small class="form-text">선택한 시나리오에서 사용 가능한 캐릭터만 표시됩니다.</small>
+                        <input type="number" id="episodeNumber" min="1" max="36" required readonly />
+                        <small class="form-text">선택한 빈 에피소드 번호가 자동으로 설정됩니다.</small>
                     </div>
 
                     <div class="form-group">
@@ -4908,12 +4924,46 @@
         }
 
         function createEpisode(number) {
+            // 현재 선택된 시나리오가 없으면 에러
+            if (!currentScenarioId) {
+                alert('먼저 시나리오를 선택해주세요.');
+                return;
+            }
+
             openEpisodeModal('create');
             document.getElementById('episodeNumber').value = number;
-            
+
             // 난이도 자동 설정
             const difficulty = getDifficultyByNumber(number);
             document.getElementById('difficulty').value = difficulty;
+
+            // 선택된 시나리오 정보 표시
+            updateSelectedScenarioInfo();
+        }
+
+        function updateSelectedScenarioInfo() {
+            const scenario = window.scenarios?.[currentScenarioId];
+            const infoContainer = document.getElementById('selectedScenarioInfo');
+
+            if (scenario && infoContainer) {
+                // 시나리오에 연결된 캐릭터 정보 가져오기
+                const characterId = scenario.available_characters?.[0];
+                const character = window.characters?.[characterId];
+
+                infoContainer.innerHTML = `
+                    <div class="info-title">${scenario.title}</div>
+                    <div class="info-character">캐릭터: ${character ? character.name : characterId || '캐릭터 정보 없음'}</div>
+                    <div class="info-description" style="color: #6c757d; margin-top: 5px; font-size: 0.9em;">${scenario.description}</div>
+                `;
+
+                // hidden input에 시나리오 ID 설정
+                document.getElementById('episodeScenarioId').value = currentScenarioId;
+            } else {
+                infoContainer.innerHTML = `
+                    <div class="info-title">시나리오 정보를 불러올 수 없습니다</div>
+                    <div class="info-character">먼저 시나리오를 선택해주세요.</div>
+                `;
+            }
         }
 
         // Episode Preview Functions
@@ -5059,38 +5109,71 @@
         }
 
         async function generateDialogue() {
-            const characterId = document.getElementById('characterSelect').value;
             const userPrompt = document.getElementById('userPrompt').value;
             const difficulty = document.getElementById('difficulty').value;
-            
-            if (!characterId || !userPrompt) {
-                alert('캐릭터와 상황 프롬프트를 입력해주세요.');
+
+            // 현재 선택된 시나리오에서 캐릭터 정보 가져오기
+            const currentScenario = window.scenarios?.[currentScenarioId];
+            if (!currentScenario) {
+                alert('시나리오 정보를 찾을 수 없습니다. 시나리오를 먼저 선택해주세요.');
                 return;
             }
-            
-            const characterName = getCharacterName(characterId);
+
+            const characterId = currentScenario.available_characters?.[0] || currentScenario.character_id;
+            const characterName = currentScenario.character_name || characterId;
+
+            if (!userPrompt) {
+                alert('상황 프롬프트를 입력해주세요.');
+                return;
+            }
+
             const previewDiv = document.getElementById('dialoguePreview');
             previewDiv.style.display = 'block';
-            
+
             document.getElementById('previewDialogue').innerHTML = '<div class="loading"></div> AI가 대화를 생성 중입니다...';
             document.getElementById('previewNarration').textContent = '';
             document.getElementById('previewChoices').innerHTML = '';
-            
+
             try {
-                console.log('🤖 로컬 대화 생성 시작...');
-                
+                console.log('🤖 AI 대화 생성 시작...');
+                console.log(`🎯 캐릭터: ${characterName} (${characterId})`);
+                console.log(`📝 프롬프트: ${userPrompt}`);
+                console.log(`⚡ 난이도: ${difficulty}`);
+
                 // 채팅 훈련 API를 사용한 대화 생성
                 generatedDialogue = await generateLocalDialogue(characterId, characterName, userPrompt, difficulty);
-                
+
                 // 짧은 지연으로 로딩 효과 제공
                 setTimeout(() => {
                     displayDialoguePreview(generatedDialogue);
-                    console.log('✅ 로컬 대화 생성 완료');
+                    console.log('✅ AI 대화 생성 완료');
                 }, 1000);
-                
+
             } catch (error) {
-                console.error('대화 생성 오류:', error);
-                document.getElementById('previewDialogue').textContent = '⚠️ 대화 생성에 실패했습니다.';
+                console.error('❌ 대화 생성 오류:', error);
+
+                // 에러 메시지 표시 (폴백 대신)
+                const errorMessage = `❌ AI 대화 생성 실패\n\n${error.message}\n\n• API 연결 상태를 확인해주세요\n• 잠시 후 다시 시도해주세요\n• 문제가 지속되면 관리자에게 문의하세요`;
+
+                document.getElementById('previewDialogue').innerHTML = `
+                    <div class="error-message">
+                        <p><strong>❌ AI 대화 생성 실패</strong></p>
+                        <p>${error.message}</p>
+                        <ul>
+                            <li>API 연결 상태를 확인해주세요</li>
+                            <li>잠시 후 다시 시도해주세요</li>
+                            <li>문제가 지속되면 관리자에게 문의하세요</li>
+                        </ul>
+                    </div>
+                `;
+
+                document.getElementById('previewNarration').textContent = '';
+                document.getElementById('previewChoices').innerHTML = '';
+
+                // 팝업으로도 에러 알림
+                setTimeout(() => {
+                    alert(errorMessage);
+                }, 1500);
             }
         }
 
@@ -5116,21 +5199,27 @@
         }
 
         async function saveEpisode() {
-            const scenarioId = document.getElementById('episodeScenarioSelect').value;
+            // 현재 선택된 시나리오 정보 사용
+            const scenarioId = currentScenarioId;
             const episodeNumber = parseInt(document.getElementById('episodeNumber').value);
-            const characterId = document.getElementById('characterSelect').value;
             const difficulty = document.getElementById('difficulty').value;
             const userPrompt = document.getElementById('userPrompt').value;
-            
-            if (!scenarioId || !episodeNumber || !characterId || !userPrompt) {
-                alert('모든 필수 항목을 입력해주세요.\n\n- 시나리오 선택\n- 에피소드 번호\n- 캐릭터 선택\n- 상황 프롬프트');
+
+            if (!scenarioId || !episodeNumber || !userPrompt) {
+                alert('모든 필수 항목을 입력해주세요.\n\n- 에피소드 번호\n- 난이도 설정\n- 상황 프롬프트');
                 return;
             }
-            
-            // 캐릭터 이름 가져오기
-            const charactersData = window.characters || {};
-            const character = charactersData[characterId];
-            const characterName = character ? character.name : characterId;
+
+            // 현재 시나리오에서 캐릭터 정보 가져오기
+            const currentScenario = window.scenarios?.[scenarioId];
+            if (!currentScenario) {
+                alert('선택된 시나리오 정보를 찾을 수 없습니다.');
+                return;
+            }
+
+            // 시나리오의 첫 번째 캐릭터 자동 사용
+            const characterId = currentScenario.available_characters?.[0] || currentScenario.character_id;
+            const characterName = currentScenario.character_name || characterId;
             
             const episodeData = {
                 scenario_id: scenarioId,
@@ -5837,68 +5926,15 @@
                         };
                     }
                 }
-                
-                // API 실패 시 fallback 사용
-                console.warn('⚠️ 채팅 훈련 API 실패, fallback 사용');
-                
+
+                // API 실패 시 에러 처리 (폴백 제거)
+                console.error('⚠️ 채팅 훈련 API 실패');
+                throw new Error('AI 대화 생성 API에 연결할 수 없습니다.');
+
             } catch (error) {
                 console.error('❌ 채팅 훈련 API 호출 오류:', error);
+                throw new Error(`AI 대화 생성 실패: ${error.message}`);
             }
-
-            // Fallback: 캐릭터별 개성 있는 대화형 응답
-            const characterResponses = {
-                'yuna_infp': {
-                    message: "음... 그런 얘기구나 😊\n사실 나도 비슷하게 생각하고 있었어",
-                    choices: [
-                        { text: "정말? 어떤 생각이었는지 궁금해", affection_impact: 3, strategy: "진심 어린 관심" },
-                        { text: "우리 생각이 비슷하네", affection_impact: 2, strategy: "공감대 형성" },
-                        { text: "그래? 나중에 더 자세히 얘기해줘", affection_impact: 1, strategy: "안전한 거리" }
-                    ]
-                },
-                'mina_enfp': {
-                    message: "와! 진짜 그렇게 생각해? 😆\n우리 완전 잘 맞는 것 같아!",
-                    choices: [
-                        { text: "너랑 대화하면 항상 즐거워", affection_impact: 3, strategy: "감정 공유" },
-                        { text: "미나는 정말 에너지가 넘치네", affection_impact: 2, strategy: "성격 인정" },
-                        { text: "그래, 우리 잘 맞는 것 같아", affection_impact: 1, strategy: "동조" }
-                    ]
-                },
-                'seoyeon_intj': {
-                    message: "흥미로운 관점이네요.\n논리적으로 타당한 부분이 있습니다.",
-                    choices: [
-                        { text: "서연의 의견도 듣고 싶어", affection_impact: 3, strategy: "지적 존중" },
-                        { text: "논리적으로 생각해줘서 고마워", affection_impact: 2, strategy: "능력 인정" },
-                        { text: "그래, 함께 생각해보자", affection_impact: 1, strategy: "협력 제안" }
-                    ]
-                },
-                'jihye_esfj': {
-                    message: "정말? 괜찮아? 😟\n혹시 불편한 건 없어? 도와줄 수 있는 게 있다면 말해줘!",
-                    choices: [
-                        { text: "걱정해줘서 정말 고마워", affection_impact: 3, strategy: "감사 표현" },
-                        { text: "지혜 덕분에 힘이 나", affection_impact: 2, strategy: "의존성 표현" },
-                        { text: "괜찮아, 신경 써줘서 고마워", affection_impact: 1, strategy: "안전한 거리" }
-                    ]
-                },
-                'hyejin_istp': {
-                    message: "그렇구나. 나쁘지 않네 👍",
-                    choices: [
-                        { text: "혜진의 솔직한 반응이 좋아", affection_impact: 3, strategy: "성격 인정" },
-                        { text: "더 자세히 얘기해줄래?", affection_impact: 1, strategy: "대화 유도" },
-                        { text: "그래, 나도 그렇게 생각해", affection_impact: 2, strategy: "동조와 공감" }
-                    ]
-                }
-            };
-
-            const characterData = characterResponses[characterId] || characterResponses['yuna_infp'];
-            
-            return {
-                dialogue: characterData.message,
-                narration: `${characterName}이 자연스럽게 반응하며 대화가 이어진다.`,
-                choices: characterData.choices,
-                difficulty: difficulty,
-                generated_at: new Date().toISOString(),
-                source: 'fallback_chat_training'
-            };
         }
 
         // 🚀 GitHub API 핵심 함수들 (혁신적 해결책!)
