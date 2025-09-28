@@ -5076,18 +5076,21 @@
             const narrationDisplay = document.getElementById('narrationDisplay');
             const choicesDisplay = document.getElementById('choicesDisplay');
 
-            // Get dialogue data - check both possible fields
-            const dialogueData = episode.generated_dialogue || episode.ai_generated_dialogue;
-            
+            // Get dialogue data - check all possible field names
+            const dialogueData = episode.dialogue || episode.generated_dialogue || episode.ai_generated_dialogue;
+
+            console.log('💬 에피소드 전체 데이터:', episode);
             console.log('💬 대화 데이터:', dialogueData);
 
             if (dialogueData) {
                 // Display character message
-                characterMessage.innerHTML = dialogueData.dialogue || dialogueData.character_message || '대화 내용이 없습니다.';
-                
+                const characterMsg = dialogueData.dialogue || dialogueData.character_message || '대화 내용이 없습니다.';
+                characterMessage.innerHTML = `<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff;">${characterMsg}</div>`;
+
                 // Display narration
                 if (dialogueData.narration || dialogueData.context) {
-                    narrationDisplay.innerHTML = dialogueData.narration || dialogueData.context;
+                    const narrationText = dialogueData.narration || dialogueData.context;
+                    narrationDisplay.innerHTML = `<div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; font-style: italic;">${narrationText}</div>`;
                     narrationDisplay.style.display = 'block';
                 } else {
                     narrationDisplay.style.display = 'none';
@@ -5095,25 +5098,39 @@
 
                 // Display choices
                 if (dialogueData.choices && Array.isArray(dialogueData.choices)) {
-                    let choicesHtml = '';
+                    let choicesHtml = '<div style="margin-top: 15px;"><h4 style="margin-bottom: 10px; color: #495057;">선택지:</h4>';
                     dialogueData.choices.forEach((choice, index) => {
                         const impact = choice.affection_impact || 0;
                         const impactClass = impact > 0 ? 'impact-positive' : impact < 0 ? 'impact-negative' : 'impact-neutral';
                         const impactText = impact > 0 ? `+${impact}` : impact < 0 ? `${impact}` : '0';
-                        
+
                         choicesHtml += `
-                            <div class="choice-preview">
-                                <div class="choice-text">${choice.text}</div>
-                                <div class="choice-impact ${impactClass}">호감도 ${impactText}</div>
+                            <div class="choice-preview" style="margin-bottom: 10px; padding: 12px; border: 1px solid #dee2e6; border-radius: 6px; background: #ffffff;">
+                                <div class="choice-text" style="font-weight: 500; margin-bottom: 5px;">${index + 1}. ${choice.text}</div>
+                                <div class="choice-impact ${impactClass}" style="font-size: 0.85em; font-weight: bold;">호감도 ${impactText}</div>
                             </div>
                         `;
                     });
+                    choicesHtml += '</div>';
                     choicesDisplay.innerHTML = choicesHtml;
                 } else {
                     choicesDisplay.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">선택지가 없습니다.</div>';
                 }
+
+                // 추가 정보 표시
+                if (dialogueData.generated_at || dialogueData.source) {
+                    const additionalInfo = document.createElement('div');
+                    additionalInfo.style.cssText = 'margin-top: 20px; padding: 10px; background: #e9ecef; border-radius: 6px; font-size: 0.85em; color: #6c757d;';
+                    additionalInfo.innerHTML = `
+                        ${dialogueData.generated_at ? `<div>생성 시간: ${new Date(dialogueData.generated_at).toLocaleString()}</div>` : ''}
+                        ${dialogueData.source ? `<div>생성 엔진: ${dialogueData.source}</div>` : ''}
+                        ${dialogueData.difficulty ? `<div>난이도: ${dialogueData.difficulty}</div>` : ''}
+                    `;
+                    choicesDisplay.appendChild(additionalInfo);
+                }
+
             } else {
-                characterMessage.innerHTML = '대화 데이터를 찾을 수 없습니다.';
+                characterMessage.innerHTML = '<div style="color: #dc3545; text-align: center; padding: 20px; background: #f8d7da; border-radius: 6px;">대화 데이터를 찾을 수 없습니다.</div>';
                 narrationDisplay.style.display = 'none';
                 choicesDisplay.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">대화 데이터가 없습니다.</div>';
             }
