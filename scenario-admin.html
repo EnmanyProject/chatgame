@@ -3700,13 +3700,19 @@
         // 시나리오 선택 (에피소드 섹션에서)
         function selectScenarioForEpisode(scenarioId) {
             console.log('🎯 시나리오 선택됨:', scenarioId);
-            
+
+            // 전역 변수에 현재 시나리오 ID 설정
+            currentScenarioId = scenarioId;
+            console.log('✅ currentScenarioId 설정됨:', currentScenarioId);
+
             const episodeSelect = document.getElementById('episodeScenarioSelect');
             if (episodeSelect) {
                 episodeSelect.value = scenarioId;
-                loadEpisodes(); // 에피소드 로딩
             }
-            
+
+            // 에피소드 로딩
+            loadEpisodes();
+
             // 선택된 시나리오 하이라이트
             document.querySelectorAll('.scenario-item').forEach(item => {
                 item.classList.remove('selected');
@@ -4746,10 +4752,21 @@
         }
 
         async function loadEpisodes() {
-            const scenarioId = document.getElementById('episodeScenarioSelect').value || currentScenarioId;
+            // 우선순위: currentScenarioId → episodeScenarioSelect 값
+            let scenarioId = currentScenarioId;
+
+            const episodeSelect = document.getElementById('episodeScenarioSelect');
+            if (episodeSelect && episodeSelect.value) {
+                scenarioId = episodeSelect.value;
+            }
+
             if (!scenarioId) {
                 document.getElementById('episodeInfo').style.display = 'none';
                 console.log('⚠️ 시나리오 ID가 없어서 에피소드 로딩을 건너뜁니다.');
+                console.log('🔍 디버그 정보:', {
+                    currentScenarioId: currentScenarioId,
+                    episodeSelectValue: episodeSelect ? episodeSelect.value : 'element not found'
+                });
                 return;
             }
 
