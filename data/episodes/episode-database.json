@@ -2,9 +2,9 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-09-28",
-    "total_episodes": 3,
+    "total_episodes": 4,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-09-28T16:03:21.043Z",
+    "last_updated": "2025-09-28T16:03:29.411Z",
     "data_source": "episode_manager_api"
   },
   "episodes": {
@@ -101,6 +101,38 @@
         ],
         "difficulty": "Easy",
         "generated_at": "2025-09-28T16:03:20.224Z",
+        "source": "chat_training_api"
+      }
+    },
+    "episode_scenario_1759074626974_1759075409303": {
+      "id": "episode_scenario_1759074626974_1759075409303",
+      "scenario_id": "scenario_1759074626974",
+      "episode_number": 2,
+      "title": "에피소드 2번",
+      "character_id": "미화_esfp_1759064886354",
+      "character_name": "미화",
+      "difficulty": "Easy",
+      "user_input_prompt": "함께 과제를 하면서 가까워지는 순간",
+      "created_at": "2025-09-28T16:03:29.303Z",
+      "dialogue": {
+        "dialogue": "우리 이렇게 함께 과제를 하니까 정말 좋다. ☺️ 뭔가 마음이 따뜻해지는 느낌이야. 너랑 이야기할 때마다 새로운 아이디어가 떠오르는 것 같아. 💖",
+        "narration": "윤아는 부드러운 미소를 지으며, 책상 위의 노트를 보면서 과제에 대한 이야기를 나눈다. 그녀의 눈빛은 따뜻함으로 가득 차 있으며, 상대방의 반응에 귀 기울이고 있다.",
+        "choices": [
+          {
+            "text": "나도 너와 함께해서 좋아. 더 이야기해보자.",
+            "affection_impact": 4
+          },
+          {
+            "text": "과제를 조금 더 효율적으로 진행해볼까?",
+            "affection_impact": 2
+          },
+          {
+            "text": "그냥 조용히 하자.",
+            "affection_impact": -2
+          }
+        ],
+        "difficulty": "Easy",
+        "generated_at": "2025-09-28T16:03:28.930Z",
         "source": "chat_training_api"
       }
     }
