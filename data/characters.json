@@ -24,13 +24,39 @@
       "source": "api_save",
       "active": true,
       "updated_at": "2025-09-28T10:42:38.036Z"
+    },
+    "소희_infj_1759056193990": {
+      "id": "소희_infj_1759056193990",
+      "name": "소희",
+      "age": 30,
+      "mbti": "INFJ",
+      "gender": "female",
+      "personality_traits": [],
+      "major": "general",
+      "family": "average",
+      "hometown": "seoul",
+      "relationship": "선배",
+      "appearance": {
+        "hair": "긴 생머리",
+        "eyes": "둥근 눈",
+        "style": "캐주얼"
+      },
+      "hobbies": [],
+      "values": "family_oriented",
+      "speech_style": "직설적인 말투",
+      "speech_habit": "입술을 깨무는 습관",
+      "created_at": "2025-09-28T10:43:13.990Z",
+      "source": "api_save",
+      "active": true,
+      "updated_at": "2025-09-28T10:43:15.606Z"
     }
   },
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 1,
+    "total_characters": 2,
     "created": "2025-09-28T10:42:27.330Z",
     "storage_type": "memory",
-    "last_updated": "2025-09-28T10:42:38.036Z"
+    "last_updated": "2025-09-28T10:43:15.606Z",
+    "last_accessed": "2025-09-28T10:42:49.969Z"
   }
 }
