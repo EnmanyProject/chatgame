@@ -1,16 +1,16 @@
 {
   "characters": {
-    "미화__enfp_1759056583611": {
-      "id": "미화__enfp_1759056583611",
-      "name": "미화 ",
-      "age": 20,
-      "mbti": "ENFP",
+    "소운__enfj_1759056269803": {
+      "id": "소운__enfj_1759056269803",
+      "name": "소운 ",
+      "age": 30,
+      "mbti": "ENFJ",
       "gender": "female",
       "personality_traits": [],
       "major": "general",
       "family": "average",
       "hometown": "seoul",
-      "relationship": "새로운 만남",
+      "relationship": "소개팅",
       "appearance": {
         "hair": "긴 생머리",
         "eyes": "둥근 눈",
@@ -18,12 +18,12 @@
       },
       "hobbies": [],
       "values": "family_oriented",
-      "speech_style": "실용적인 말투",
-      "speech_habit": "손짓을 많이 함",
-      "created_at": "2025-09-28T10:49:43.611Z",
+      "speech_style": "위트있는 말투",
+      "speech_habit": "입술을 깨무는 습관",
+      "created_at": "2025-09-28T10:44:29.804Z",
       "source": "api_save",
       "active": true,
-      "updated_at": "2025-09-28T10:49:44.486Z"
+      "updated_at": "2025-09-28T10:44:30.862Z"
     }
   },
   "metadata": {
@@ -31,7 +31,7 @@
     "total_characters": 1,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "memory",
-    "last_updated": "2025-09-28T10:54:08.204Z",
-    "last_accessed": "2025-09-28T10:53:59.779Z"
+    "last_updated": "2025-09-28T10:54:17.167Z",
+    "last_accessed": "2025-09-28T10:54:09.081Z"
   }
 }
