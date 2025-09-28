@@ -5904,7 +5904,13 @@
                 if (response.ok) {
                     const data = await response.json();
                     console.log('✅ 채팅 훈련 API 응답 받음:', data);
-                    
+
+                    // API가 비활성화된 경우 처리
+                    if (data.disabled || data.error === 'AI_API_DISABLED') {
+                        console.log('⚠️ AI 대화 생성 기능이 비활성화됨');
+                        throw new Error(data.message || 'AI 대화 생성 기능이 현재 비활성화되어 있습니다.');
+                    }
+
                     if (data.success && data.data) {
                         // API 응답을 게임 형식에 맞게 변환
                         return {

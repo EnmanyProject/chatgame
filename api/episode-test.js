@@ -22,11 +22,12 @@ module.exports = async function handler(req, res) {
 
       console.log(`🎭 ${character_id}의 ${difficulty} 난이도 대화 생성:`, user_prompt);
 
-      // 에러 메시지 반환 (폴백 제거됨)
-      return res.status(500).json({
+      // AI 대화 생성 비활성화 메시지 반환 (200 상태코드)
+      return res.status(200).json({
         success: false,
         message: 'AI 대화 생성 기능이 현재 비활성화되어 있습니다.',
         error: 'AI_API_DISABLED',
+        disabled: true,
         details: {
           character_id,
           difficulty,
