@@ -170,35 +170,77 @@ function filterEpisodesByScenario(database, scenario_id) {
   }
 }
 
-// 새 에피소드 생성 (기본 버전)
+// 새 에피소드 생성 및 저장 (GitHub API 활용)
 async function createEpisode(data) {
   try {
+    // 실제 AI 생성된 대화가 있다면 사용, 없으면 기본값
+    const dialogue = data.ai_generated_dialogue || data.generated_dialogue || {
+      character_message: "대화 내용이 여기에 표시됩니다.",
+      context: "상황 설명이 여기에 표시됩니다.",
+      choices: [
+        { text: "선택지 1", affection_impact: 1 },
+        { text: "선택지 2", affection_impact: 0 },
+        { text: "선택지 3", affection_impact: -1 }
+      ]
+    };
+
     const newEpisode = {
       id: `episode_${data.scenario_id}_${Date.now()}`,
       scenario_id: data.scenario_id,
       episode_number: data.episode_number || 1,
-      title: data.title || '새 에피소드',
+      title: data.title || `에피소드 ${data.episode_number || 1}번`,
       character_id: data.character_id,
       character_name: data.character_name,
-      difficulty: data.difficulty || 'easy',
+      difficulty: data.difficulty || 'Easy',
       user_input_prompt: data.user_input_prompt,
       created_at: new Date().toISOString(),
-      dialogue: {
-        message: "대화 내용이 여기에 표시됩니다.",
-        narration: "상황 설명이 여기에 표시됩니다.",
-        choices: [
-          { text: "선택지 1", affection_impact: 1 },
-          { text: "선택지 2", affection_impact: 0 },
-          { text: "선택지 3", affection_impact: -1 }
-        ]
-      }
+      dialogue: dialogue
     };
 
-    console.log('✅ 에피소드 생성 완료:', newEpisode.id);
+    console.log('✅ 에피소드 객체 생성 완료:', newEpisode.id);
+
+    // 실제 저장 - 기존 데이터베이스 로드
+    const database = await loadEpisodeDatabase();
+
+    // 에피소드 추가
+    database.episodes = database.episodes || {};
+    database.episodes[newEpisode.id] = newEpisode;
+
+    // 메타데이터 업데이트
+    database.metadata = database.metadata || {};
+    database.metadata.total_episodes = Object.keys(database.episodes).length;
+    database.metadata.last_updated = new Date().toISOString();
+
+    // 파일에 저장
+    await saveEpisodeDatabase(database);
+
+    console.log('✅ 에피소드 데이터베이스 저장 완료:', newEpisode.id);
     return newEpisode;
 
   } catch (error) {
-    console.error('❌ 에피소드 생성 오류:', error.message);
+    console.error('❌ 에피소드 생성 및 저장 오류:', error.message);
+    throw error;
+  }
+}
+
+// 에피소드 데이터베이스 저장 함수
+async function saveEpisodeDatabase(database) {
+  try {
+    const dbPath = path.join(process.cwd(), 'data', 'episodes', 'episode-database.json');
+    const dbDir = path.dirname(dbPath);
+
+    // 디렉토리 생성 (없으면)
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true });
+      console.log('📂 에피소드 디렉토리 생성:', dbDir);
+    }
+
+    // JSON 파일 저장
+    fs.writeFileSync(dbPath, JSON.stringify(database, null, 2), 'utf8');
+    console.log('💾 에피소드 데이터베이스 저장 완료:', dbPath);
+
+  } catch (error) {
+    console.error('❌ 에피소드 데이터베이스 저장 실패:', error);
     throw error;
   }
 }
