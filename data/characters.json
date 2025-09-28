@@ -1,37 +1,11 @@
 {
-  "characters": {
-    "미화_enfp_1759057439348": {
-      "id": "미화_enfp_1759057439348",
-      "name": "미화",
-      "age": 20,
-      "mbti": "ENFP",
-      "gender": "female",
-      "personality_traits": [],
-      "major": "general",
-      "family": "only_child",
-      "hometown": "seoul",
-      "relationship": "친구들과의 우정을 소중히 생각하며, 연애보다는 자신의 자유를 더 중요하게 여김",
-      "appearance": {
-        "hair": "긴 생머리",
-        "eyes": "둥근 눈",
-        "style": "캐주얼"
-      },
-      "hobbies": [],
-      "values": "helping_others",
-      "speech_style": "화려하고 감성적인 어휘를 사용하며, 말끝을 살짝 늘이며 숨소리를 섞는 습관 있음. 상대가 말할때 눈을 깜박이며 웃으며 윙크하는 습관 있음",
-      "speech_habit": "상대의 이름 뒤에 '~야'를 붙여 부르는 습관이 있고, '어떠니?'라는 말을 자주 사용함",
-      "created_at": "2025-09-28T11:03:59.348Z",
-      "source": "api_save",
-      "active": true,
-      "updated_at": "2025-09-28T11:04:00.293Z"
-    }
-  },
+  "characters": {},
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 1,
+    "total_characters": 0,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-28T11:52:04.239Z",
-    "last_accessed": "2025-09-28T11:52:04.239Z"
+    "last_updated": "2025-09-28T11:52:26.987Z",
+    "last_accessed": "2025-09-28T11:52:26.987Z"
   }
 }
