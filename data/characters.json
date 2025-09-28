@@ -1,36 +1,11 @@
 {
-  "characters": {
-    "미화__infj_1759055432889": {
-      "id": "미화__infj_1759055432889",
-      "name": "미화 ",
-      "age": 20,
-      "mbti": "INFJ",
-      "gender": "female",
-      "personality_traits": [],
-      "major": "general",
-      "family": "average",
-      "hometown": "seoul",
-      "relationship": "새로운 만남",
-      "appearance": {
-        "hair": "긴 생머리",
-        "eyes": "둥근 눈",
-        "style": "캐주얼"
-      },
-      "hobbies": [],
-      "values": "family_oriented",
-      "speech_style": "에너지 넘치는 말투",
-      "speech_habit": "볼을 부풀리는 습관",
-      "created_at": "2025-09-28T10:30:32.889Z",
-      "source": "api_save",
-      "active": true,
-      "updated_at": "2025-09-28T10:30:33.948Z"
-    }
-  },
+  "characters": {},
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 1,
+    "total_characters": 0,
     "created": "2025-09-28T10:29:44.426Z",
     "storage_type": "memory",
-    "last_updated": "2025-09-28T10:30:33.948Z"
+    "last_updated": "2025-09-28T10:41:21.957Z",
+    "last_accessed": "2025-09-28T10:41:10.428Z"
   }
 }
