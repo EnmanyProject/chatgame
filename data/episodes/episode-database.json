@@ -1,0 +1,11 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "created_date": "2025-09-28",
+    "total_episodes": 0,
+    "ai_context_engine": "gpt-4o-mini",
+    "last_updated": "2025-09-28T13:45:00.000Z",
+    "data_source": "episode_manager_api"
+  },
+  "episodes": {}
+}

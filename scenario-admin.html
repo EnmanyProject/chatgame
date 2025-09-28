@@ -4741,38 +4741,48 @@
             console.log('📚 에피소드 로딩 시작 - 시나리오:', scenarioId);
 
             try {
-                // LocalStorage에서 에피소드 로딩
-                const localEpisodes = localStorage.getItem('episodes');
-                let episodesData = {};
-                
-                if (localEpisodes) {
-                    const allEpisodes = JSON.parse(localEpisodes);
-                    console.log('📊 전체 에피소드 수:', Object.keys(allEpisodes).length);
-                    
-                    // 선택된 시나리오의 에피소드만 필터링
-                    Object.keys(allEpisodes).forEach(key => {
-                        const episode = allEpisodes[key];
-                        if (episode.scenario_id === scenarioId) {
-                            episodesData[episode.episode_number] = episode;
-                        }
-                    });
-                    
-                    console.log(`✅ 시나리오 ${scenarioId}의 에피소드:`, Object.keys(episodesData).length, '개');
+                // API에서 에피소드 로딩
+                console.log('🔗 Episode Manager API 호출:', `/api/episode-manager?action=list&scenario_id=${scenarioId}`);
+
+                const response = await fetch(`/api/episode-manager?action=list&scenario_id=${scenarioId}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
-                
+
+                const result = await response.json();
+                console.log('📊 API 응답:', result);
+
+                let episodesData = {};
+
+                if (result.success && result.episodes) {
+                    // API에서 받은 에피소드를 episode_number를 키로 하는 객체로 변환
+                    result.episodes.forEach(episode => {
+                        episodesData[episode.episode_number] = episode;
+                    });
+
+                    console.log(`✅ 시나리오 ${scenarioId}의 에피소드:`, Object.keys(episodesData).length, '개');
+                } else {
+                    console.log('📭 해당 시나리오에 생성된 에피소드가 없습니다.');
+                }
+
                 // 전역 변수 업데이트
                 episodes = episodesData;
                 window.episodes = episodesData;
-                
+
                 // UI 업데이트
                 displayEpisodes();
                 updateEpisodeStats();
-                
+
             } catch (error) {
-                console.error('에피소드 로드 오류:', error);
+                console.error('❌ 에피소드 API 로드 오류:', error);
+                // API 실패 시 빈 객체로 초기화
                 episodes = {};
+                window.episodes = {};
                 displayEpisodes();
                 updateEpisodeStats();
+
+                showNotification(`에피소드 로드 실패: ${error.message}`, 'error');
             }
         }
 
@@ -5158,45 +5168,41 @@
             try {
                 console.log('💾 === 에피소드 저장 시작 ===');
                 console.log('📊 에피소드 데이터:', episodeData);
-                
-                // 💾 LocalStorage 직접 저장 (확실한 방법!)
-                console.log('💾 LocalStorage에 에피소드 저장 시도...');
-                
-                // 현재 저장된 에피소드들을 가져옴
-                const existingEpisodes = localStorage.getItem('episodes');
-                const episodesData = existingEpisodes ? JSON.parse(existingEpisodes) : {};
-                
-                // 새 에피소드 추가/수정
-                episodesData[episodeData.id] = episodeData;
-                
-                // LocalStorage에 저장
-                localStorage.setItem('episodes', JSON.stringify(episodesData));
-                console.log('✅ LocalStorage 에피소드 저장 성공! 총', Object.keys(episodesData).length, '개 에피소드');
-                
-                // 시나리오의 에피소드 카운트도 업데이트
-                const scenariosData = window.scenarios || {};
-                if (scenariosData[scenarioId]) {
-                    const scenarioEpisodes = Object.values(episodesData).filter(ep => ep.scenario_id === scenarioId);
-                    scenariosData[scenarioId].episode_count = scenarioEpisodes.length;
-                    window.scenarios = scenariosData;
-                    
-                    // 시나리오도 LocalStorage에 저장
-                    localStorage.setItem('scenarios', JSON.stringify(scenariosData));
-                    console.log('✅ 시나리오 에피소드 카운트 업데이트:', scenariosData[scenarioId].episode_count);
+
+                // Episode Manager API 호출
+                console.log('🔗 Episode Manager API 호출...');
+
+                const apiUrl = '/api/episode-manager';
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(episodeData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
-                
-                // 저장 성공 메시지
-                const successMessage = currentMode === 'create' ? 
-                    `💖 새로운 에피소드 ${episodeNumber}번이 생성되었습니다!\n시나리오: ${scenariosData[scenarioId]?.title || scenarioId}\n캐릭터: ${characterName}` :
-                    `✨에피소드 ${episodeNumber}번이 수정되었습니다!`;
-                
-                alert(successMessage);
-                closeModal('episodeModal');
-                
-                // UI 최종 업데이트
-                console.log('🔄 저장 후 최종 UI 동기화...');
-                updateScenarioStats();
-                // loadEpisodes(); // 에피소드 목록도 새로고침 (필요시)
+
+                const result = await response.json();
+                console.log('📊 API 응답:', result);
+
+                if (result.success) {
+                    console.log('✅ Episode Manager API 저장 성공!');
+
+                    // 성공 메시지
+                    const successMessage = currentMode === 'create' ?
+                        `💖 새로운 에피소드 ${episodeNumber}번이 생성되었습니다!\n시나리오: ${window.scenarios?.[scenarioId]?.title || scenarioId}\n캐릭터: ${characterName}` :
+                        `✨에피소드 ${episodeNumber}번이 수정되었습니다!`;
+
+                    showNotification(successMessage, 'success');
+                    closeModal('episodeModal');
+
+                    // UI 최종 업데이트
+                    console.log('🔄 저장 후 최종 UI 동기화...');
+                    await loadEpisodes(); // 에피소드 목록 새로고침
+                    updateScenarioStats();
                 
                 console.log('✅ 에피소드 저장 프로세스 완료!');
                 
@@ -5319,18 +5325,26 @@
                             created_at: new Date().toISOString()
                         };
                         
-                        // LocalStorage에 저장
-                        const existingEpisodes = localStorage.getItem('episodes');
-                        const episodesData = existingEpisodes ? JSON.parse(existingEpisodes) : {};
-                        
-                        const episodeKey = `${selectedScenarioId}_${episodeNum}`;
-                        episodesData[episodeKey] = episodeData;
-                        
-                        localStorage.setItem('episodes', JSON.stringify(episodesData));
-                        
-                        // 전역 변수에도 저장
-                        if (!episodes) episodes = {};
-                        episodes[episodeKey] = episodeData;
+                        // Episode Manager API 호출
+                        const response = await fetch('/api/episode-manager', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                ...episodeData,
+                                action: 'create'
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`API 호출 실패: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                        if (!result.success) {
+                            throw new Error(result.message || 'API 저장 실패');
+                        }
                         
                         successCount++;
                         console.log(`✅ 에피소드 ${episodeNum}번 생성 완료`);
