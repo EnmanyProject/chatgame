@@ -1,41 +1,16 @@
 {
   "characters": {
-    "미화__enfp_1759056157209": {
-      "id": "미화__enfp_1759056157209",
-      "name": "미화 ",
-      "age": 20,
-      "mbti": "ENFP",
-      "gender": "female",
-      "personality_traits": [],
-      "major": "general",
-      "family": "average",
-      "hometown": "seoul",
-      "relationship": "친구",
-      "appearance": {
-        "hair": "긴 생머리",
-        "eyes": "둥근 눈",
-        "style": "캐주얼"
-      },
-      "hobbies": [],
-      "values": "family_oriented",
-      "speech_style": "은유적인 말투",
-      "speech_habit": "손짓을 많이 함",
-      "created_at": "2025-09-28T10:42:37.209Z",
-      "source": "api_save",
-      "active": true,
-      "updated_at": "2025-09-28T10:42:38.036Z"
-    },
-    "소희_infj_1759056193990": {
-      "id": "소희_infj_1759056193990",
-      "name": "소희",
+    "소운__enfj_1759056269803": {
+      "id": "소운__enfj_1759056269803",
+      "name": "소운 ",
       "age": 30,
-      "mbti": "INFJ",
+      "mbti": "ENFJ",
       "gender": "female",
       "personality_traits": [],
       "major": "general",
       "family": "average",
       "hometown": "seoul",
-      "relationship": "선배",
+      "relationship": "소개팅",
       "appearance": {
         "hair": "긴 생머리",
         "eyes": "둥근 눈",
@@ -43,20 +18,19 @@
       },
       "hobbies": [],
       "values": "family_oriented",
-      "speech_style": "직설적인 말투",
+      "speech_style": "위트있는 말투",
       "speech_habit": "입술을 깨무는 습관",
-      "created_at": "2025-09-28T10:43:13.990Z",
+      "created_at": "2025-09-28T10:44:29.804Z",
       "source": "api_save",
       "active": true,
-      "updated_at": "2025-09-28T10:43:15.606Z"
+      "updated_at": "2025-09-28T10:44:30.862Z"
     }
   },
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 2,
-    "created": "2025-09-28T10:42:27.330Z",
+    "total_characters": 1,
+    "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "memory",
-    "last_updated": "2025-09-28T10:43:15.606Z",
-    "last_accessed": "2025-09-28T10:42:49.969Z"
+    "last_updated": "2025-09-28T10:44:30.862Z"
   }
 }
