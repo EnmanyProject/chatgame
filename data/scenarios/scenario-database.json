@@ -2,32 +2,13 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-09-16",
-    "total_scenarios": 3,
+    "total_scenarios": 2,
     "ai_context_engine": "claude-3.5-sonnet",
     "reset_at": "2025-09-27T01:23:46.586Z",
     "reset_reason": "Clean scenarios data reset",
-    "last_updated": "2025-09-28T10:02:39.680Z"
+    "last_updated": "2025-09-28T10:19:47.249Z"
   },
   "scenarios": {
-    "scenario_카페의_특별한_손님_1758955651189": {
-      "title": "카페의 특별한 손님",
-      "description": "매일 같은 시간, 같은 카페에서 마주치는 두 사람이 서로에게 관심을 갖게 되는 상황",
-      "background_setting": "기숙사 라운지",
-      "mood": "따뜻함",
-      "available_characters": [
-        "미화__infj_1758955491977"
-      ],
-      "created_date": "2025-09-27",
-      "episode_count": 0,
-      "tags": [
-        "따뜻함"
-      ],
-      "source": "github_api",
-      "active": true,
-      "id": "scenario_카페의_특별한_손님_1758955651189",
-      "action": "create",
-      "updated_at": "2025-09-27T06:47:31.611Z"
-    },
     "scenario_1758959316382": {
       "id": "scenario_1758959316382",
       "scenario_id": "scenario_1758959316382",
