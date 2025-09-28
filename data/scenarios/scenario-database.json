@@ -1,53 +1,43 @@
 {
-  "success": true,
-  "scenarios": {},
   "metadata": {
     "version": "1.0.0",
-    "created_date": "2025-09-16",
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
+    "created_date": "2025-09-28",
     "total_scenarios": 1,
-    "ai_context_engine": "claude-3.5-sonnet",
-    "reset_at": "2025-09-27T01:23:46.586Z",
-    "reset_reason": "Clean scenarios data reset",
-    "last_updated": "2025-09-28T12:32:41.133Z",
+    "ai_context_engine": "gpt-4o-mini",
+    "last_updated": "2025-09-28T13:09:19.050Z",
     "data_source": "github_api_only"
   },
   "scenarios": {
-    "scenario_1759062750389": {
-      "id": "scenario_1759062750389",
-      "scenario_id": "scenario_1759062750389",
-      "title": "운명의 만남",
-      "description": "도서관에서 우연히 같은 책을 읽고 있던 두 사람이 조금씩 가까워지는 과정",
-      "background_setting": "중앙 도서관",
-      "mood": "코믹",
+    "scenario_1759064947079": {
+      "id": "scenario_1759064947079",
+      "scenario_id": "scenario_1759064947079",
+      "title": "카페의 특별한 손님",
+      "description": "매일 같은 시간, 같은 카페에서 마주치는 두 사람이 서로에게 관심을 갖게 되는 상황",
+      "background_setting": "벚꽃이 만발한 공원",
+      "mood": "달콤함",
       "active_status": true,
       "created_date": "2025-09-28",
-      "last_modified": "2025-09-28T12:32:41.133Z",
-      "ai_generated_context": "제목: 운명의 만남\n\n서울의 중앙 도서관, 오후의 햇살이 창문을 통해 부드럽게 스며들고 있었다. 조용한 공간에는 책장 사이로 흐르는 페이지의 속삭임과 가끔씩 들리는 마찰 소리만이 가득했다. 그곳에서 미진은 자신이 좋아하는 심리학 책을 읽고 있었다. 긴 생머리를 뒤로 넘기며 둥근 눈으로 페이지를 열심히 읽고 있던 그녀는, 어느 순간 자신의 앞에 앉은 남자와 눈이 마주쳤다.\n\n\"그래서... 그 부분이 정말 흥미로운 것 같아.\" 미진이 자연스럽게 말을 걸며 웃음을 터트렸다. 그 남자는 놀란 듯이 고개를 돌렸다가 다시 그녀를 바라보았다. 미진의 웃음이 전해지며 긴장감이 사라졌다. 그 남자도 책을 읽고 있었지만, 이제는 미진의 존재에 집중하기 시작했다. \n\n\"음... 나도 그 책을 읽고 있었어. 뭔가 공감이 가더라고.\" 남자는 조금 쑥스러운 듯 미소를 지으며 대답했다. 미진은 그의 반응을 살펴보며 눈을 반짝였다. \"그래서... 그럼 어떤 부분이 가장 기억에 남아?\" 미진의 질문에 남자는 잠시 생각하더니, 자신의 감정과 생각을 정리하기 시작했다. \n\n그들은 책에 대한 이야기를 나누며 서로에 대한 관심이 커져갔다. 미진은 남자의 말투와 표정에서 자신과 비슷한 성향을 느꼈고, 남자 역시 그녀의 솔직함과 매력에 끌리기 시작했다. 미진은 순간적으로 '이 사람과 더 이야기하고 싶다'는 생각이 들었다.\n\n\"그래서... 다음에는 같이 이 책을 읽어보는 건 어때?\" 미진이 제안하자, 남자는 고개를 끄덕이며 \"좋아, 우리 다음에 또 만나자.\"라고 답했다. 두 사람은 서로의 눈빛에서 예기치 않은 설렘을 느끼며 미소를 지었다. \n\n이렇게 중앙 도서관에서 우연히 시작된 그들의 만남은, 서로의 마음 속에 작은 불꽃을 지피기 시작했다. 미진은 사랑과 가족을 중요시하는 가치관을 가지고 있었기에, 이 만남이 특별하다는 것을 직감했다. 남자 역시 그 순간의 소중함을 느끼며 두 사람의 관계가 어떻게 발전할지 기대에 부풀었다. \n\n그날 이후, 도서관은 더 이상 단순한 공부의 공간이 아닌, 새로운 인연이 싹트는 특별한 장소로 기억되게 되었다.",
+      "last_modified": "2025-09-28T13:09:19.050Z",
+      "ai_generated_context": "**제목: 카페의 특별한 손님**\n\n봄바람이 살랑이는 벚꽃이 만발한 공원, 그 가운데 자리 잡은 작은 카페에서 미화는 매일 같은 시간, 같은 자리에서 그를 기다렸다. 카페의 창가에 앉아 따뜻한 아메리카노를 홀짝이며, 그녀의 긴 생머리가 햇빛에 반짝이는 모습은 마치 그 자체로 봄의 상징 같았다. 유혹적인 눈매로 주변을 살피며, 그녀는 오늘도 새로운 만남을 기대하고 있었다.\n\n“어, 또 여기서 만났네요.” 그가 들어서며 미소를 지었다. 미화는 그의 목소리에 귀를 기울이며, 자신감 넘치는 말투로 대답했다. “네, 이곳은 정말 매력적이에요. 당신도 이곳의 매력을 알았나 보네요.” 그녀의 목소리에는 섹시함이 묻어났고, 상대의 반응을 살피는 듯한 미소가 그를 더욱 끌어당겼다.\n\n그는 약간 당황한 듯한 표정으로 미화를 바라보았다. 그녀는 이런 반응을 즐기듯, 한층 더 매혹적인 표정을 지었다. “벚꽃이 이렇게 아름다울 때는 카페에 앉아 있는 게 가장 좋죠.” 미화의 말에 그도 고개를 끄덕였다. 둘은 자연스레 대화를 나누며 서로의 취향을 알아갔다.\n\n미화는 사랑과 가족을 중시하는 가치관을 가지고 있었다. 그렇기에 그녀는 그와의 대화에서 그가 어떤 사람인지, 어떤 가치를 중요하게 여기는지를 알고 싶어졌다. “당신은 어떤 걸 좋아해요? 사랑에 대해 어떻게 생각하나요?” 그녀의 질문에 그는 잠시 생각에 잠겼다. 미화는 그가 대답하는 동안, 그의 표정에서 느껴지는 긴장감과 설렘이 마음에 깊이 파고들었다.\n\n“사랑은…” 그가 대답을 이어가며 미화의 눈을 바라보았다. “사람을 변화시키는 힘이 있는 것 같아요. 사랑을 통해 성장할 수 있죠.” 그의 진지한 말에 미화는 심장이 두근거렸다. 그 순간, 두 사람 사이에는 미묘한 긴장감과 설렘이 흐르며, 벚꽃이 떨어지는 것처럼 자연스러운 아름다움이 펼쳐졌다.\n\n시간이 지나면서 그들은 서로에게 조금씩 더 깊이 빠져들었다. 매일 카페에서 마주치는 것이 단순한 우연이 아니라 운명처럼 느껴지기 시작했다. 미화는 사랑이 가득한 관계를 원하고 있었고, 그 또한 같은 마음일지도 모른다는 생각이 그녀의 마음을 따뜻하게 감싸주었다.\n\n벚꽃이 흩날리는 공원에서, 미화와 그 사이의 특별한 연결은 이제 시작에 불과했다.",
       "custom_context": "",
       "available_characters": [
-        "미진_estj_1759061539044"
+        "미화_esfp_1759064886354"
       ],
       "episode_count": 0,
       "tags": [
-        "도서관에서",
-        "우연히",
+        "매일",
         "같은",
-        "책을",
-        "읽고",
-        "있던",
+        "시간",
+        "같은",
+        "카페에서",
+        "마주치는",
         "사람이",
-        "조금씩",
-        "가까워지는",
-        "과정",
-        "코믹"
+        "서로에게",
+        "관심을",
+        "갖게",
+        "되는",
+        "상황",
+        "달콤함"
       ],
       "updated_by": "scenario_manager_github_only"
     }
@@ -77,69 +67,5 @@
         "새벽"
       ]
     }
-=======
-    "total_scenarios": 0,
-    "ai_context_engine": "claude-3.5-sonnet",
-    "reset_at": "2025-09-27T01:23:46.586Z",
-    "reset_reason": "Clean scenarios data reset",
-    "last_updated": "2025-09-28T12:21:35.257Z",
-    "data_source": "github_api_only"
->>>>>>> Stashed changes
-=======
-    "total_scenarios": 0,
-    "ai_context_engine": "claude-3.5-sonnet",
-    "reset_at": "2025-09-27T01:23:46.586Z",
-    "reset_reason": "Clean scenarios data reset",
-    "last_updated": "2025-09-28T12:21:35.257Z",
-    "data_source": "github_api_only"
->>>>>>> Stashed changes
-=======
-    "total_scenarios": 0,
-    "ai_context_engine": "claude-3.5-sonnet",
-    "reset_at": "2025-09-27T01:23:46.586Z",
-    "reset_reason": "Clean scenarios data reset",
-    "last_updated": "2025-09-28T12:21:35.257Z",
-    "data_source": "github_api_only"
->>>>>>> Stashed changes
-=======
-    "total_scenarios": 0,
-    "ai_context_engine": "claude-3.5-sonnet",
-    "reset_at": "2025-09-27T01:23:46.586Z",
-    "reset_reason": "Clean scenarios data reset",
-    "last_updated": "2025-09-28T12:21:35.257Z",
-    "data_source": "github_api_only"
->>>>>>> Stashed changes
-=======
-    "total_scenarios": 0,
-    "ai_context_engine": "claude-3.5-sonnet",
-    "reset_at": "2025-09-27T01:23:46.586Z",
-    "reset_reason": "Clean scenarios data reset",
-    "last_updated": "2025-09-28T12:21:35.257Z",
-    "data_source": "github_api_only"
->>>>>>> Stashed changes
-=======
-    "total_scenarios": 0,
-    "ai_context_engine": "claude-3.5-sonnet",
-    "reset_at": "2025-09-27T01:23:46.586Z",
-    "reset_reason": "Clean scenarios data reset",
-    "last_updated": "2025-09-28T12:21:35.257Z",
-    "data_source": "github_api_only"
->>>>>>> Stashed changes
-=======
-    "total_scenarios": 0,
-    "ai_context_engine": "claude-3.5-sonnet",
-    "reset_at": "2025-09-27T01:23:46.586Z",
-    "reset_reason": "Clean scenarios data reset",
-    "last_updated": "2025-09-28T12:21:35.257Z",
-    "data_source": "github_api_only"
->>>>>>> Stashed changes
-=======
-    "total_scenarios": 0,
-    "ai_context_engine": "claude-3.5-sonnet",
-    "reset_at": "2025-09-27T01:23:46.586Z",
-    "reset_reason": "Clean scenarios data reset",
-    "last_updated": "2025-09-28T12:21:35.257Z",
-    "data_source": "github_api_only"
->>>>>>> Stashed changes
   }
 }
