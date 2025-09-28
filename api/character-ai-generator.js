@@ -131,9 +131,18 @@ module.exports = async function handler(req, res) {
 
       // 🐙 GitHub API를 통한 영구 저장 시도
       try {
-        await saveToGitHub(memoryStorage);
-        console.log('🎉 GitHub에 성공적으로 저장됨');
+        console.log('🔄 GitHub 저장 시작 - 총 캐릭터 수:', Object.keys(memoryStorage.characters).length);
+        console.log('🔄 저장할 캐릭터 목록:', Object.keys(memoryStorage.characters));
+
+        const saveResult = await saveToGitHub(memoryStorage);
+        console.log('🎉 GitHub에 성공적으로 저장됨:', saveResult?.content?.sha ? '성공' : '실패');
+        console.log('💾 저장된 파일 크기:', saveResult?.content?.size, 'bytes');
       } catch (error) {
+        console.error('❌ GitHub 저장 실패 상세 오류:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
         console.warn('⚠️ GitHub 저장 실패 (메모리 저장은 완료):', error.message);
         // GitHub 저장 실패해도 메모리 저장은 성공으로 처리
       }
@@ -439,11 +448,19 @@ async function saveToGitHub(memoryStorage) {
   const FILE_PATH = 'data/characters.json';
 
   if (!GITHUB_TOKEN) {
+    console.error('❌ GITHUB_TOKEN 환경변수가 설정되지 않았습니다');
     throw new Error('GITHUB_TOKEN 환경변수가 설정되지 않았습니다');
   }
 
+  console.log('🔑 GitHub 토큰 확인됨 (길이:', GITHUB_TOKEN.length, ')');
+
   try {
     console.log('🐙 GitHub API로 캐릭터 데이터 저장 시작...');
+    console.log('📋 저장할 데이터:', {
+      총_캐릭터_수: Object.keys(memoryStorage.characters).length,
+      캐릭터_목록: Object.keys(memoryStorage.characters),
+      메타데이터: memoryStorage.metadata
+    });
 
     // 1. 현재 파일의 SHA 값 가져오기 (파일 업데이트에 필요)
     const getFileUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
