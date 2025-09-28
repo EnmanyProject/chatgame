@@ -2,11 +2,11 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-09-16",
-    "total_scenarios": 2,
+    "total_scenarios": 3,
     "ai_context_engine": "claude-3.5-sonnet",
     "reset_at": "2025-09-27T01:23:46.586Z",
     "reset_reason": "Clean scenarios data reset",
-    "last_updated": "2025-09-27T07:48:37.145Z"
+    "last_updated": "2025-09-28T10:02:39.680Z"
   },
   "scenarios": {
     "scenario_카페의_특별한_손님_1758955651189": {
@@ -58,6 +58,35 @@
         "되는",
         "상황",
         "신비로움"
+      ],
+      "updated_by": "scenario_manager"
+    },
+    "scenario_1759053757918": {
+      "id": "scenario_1759053757918",
+      "scenario_id": "scenario_1759053757918",
+      "title": "마지막 여름날",
+      "description": "졸업을 앞두고 마지막으로 전하고 싶었던 마음을 고백하는 상황",
+      "background_setting": "계단 교실",
+      "mood": "현실적",
+      "active_status": true,
+      "created_date": "2025-09-28",
+      "last_modified": "2025-09-28T10:02:39.680Z",
+      "ai_generated_context": "죄송하지만, 제공된 캐릭터 정보가 없으므로 시나리오를 작성할 수 없습니다. 캐릭터 정보를 제공해 주시면, 그에 맞춰 시나리오를 작성해드리겠습니다.",
+      "custom_context": "",
+      "available_characters": [
+        "미화__infj_1758955491977"
+      ],
+      "episode_count": 0,
+      "tags": [
+        "졸업을",
+        "앞두고",
+        "마지막으로",
+        "전하고",
+        "싶었던",
+        "마음을",
+        "고백하는",
+        "상황",
+        "현실적"
       ],
       "updated_by": "scenario_manager"
     }
