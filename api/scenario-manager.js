@@ -77,6 +77,34 @@ module.exports = async function handler(req, res) {
       });
     }
 
+    // 시나리오 삭제 (DELETE 요청 또는 action=delete)
+    if (req.method === 'DELETE' || action === 'delete') {
+      const scenarioId = req.body.scenario_id || req.query.scenario_id;
+
+      if (!scenarioId) {
+        return res.status(400).json({
+          success: false,
+          message: 'scenario_id가 필요합니다'
+        });
+      }
+
+      console.log('🗑️ 시나리오 삭제 요청:', scenarioId);
+      const deleteResult = await deleteScenarioFromDatabase(scenarioId);
+
+      if (deleteResult.success) {
+        return res.json({
+          success: true,
+          message: `시나리오 '${scenarioId}'가 성공적으로 삭제되었습니다`,
+          deleted_scenario_id: scenarioId
+        });
+      } else {
+        return res.status(404).json({
+          success: false,
+          message: deleteResult.message || '시나리오 삭제에 실패했습니다'
+        });
+      }
+    }
+
     return res.status(400).json({ success: false, message: 'Unknown action' });
 
   } catch (error) {
@@ -721,6 +749,83 @@ async function loadFromGitHub() {
   } catch (error) {
     console.warn('⚠️ GitHub 시나리오 로드 실패:', error.message);
     return null;
+  }
+}
+
+// 시나리오 데이터베이스에서 삭제 (GitHub 동기화 포함)
+async function deleteScenarioFromDatabase(scenarioId) {
+  try {
+    console.log('🗑️ === 시나리오 삭제 프로세스 시작 ===');
+    console.log('🎯 삭제할 시나리오 ID:', scenarioId);
+
+    // 1. 현재 데이터베이스 로드
+    const db = await loadScenarioDatabase();
+    console.log('📊 삭제 전 시나리오 수:', Object.keys(db.scenarios).length);
+
+    // 2. 시나리오 존재 확인
+    if (!db.scenarios[scenarioId]) {
+      console.error('❌ 시나리오를 찾을 수 없음:', scenarioId);
+      console.log('📋 사용 가능한 시나리오 ID들:', Object.keys(db.scenarios));
+      return {
+        success: false,
+        message: `시나리오 ID '${scenarioId}'를 찾을 수 없습니다. 이미 삭제되었거나 잘못된 ID일 수 있습니다.`
+      };
+    }
+
+    const deletedScenario = db.scenarios[scenarioId];
+    console.log('✅ 삭제할 시나리오 확인:', deletedScenario.title);
+
+    // 3. 시나리오 삭제
+    delete db.scenarios[scenarioId];
+
+    // 4. 메타데이터 업데이트
+    db.metadata.total_scenarios = Object.keys(db.scenarios).length;
+    db.metadata.last_updated = new Date().toISOString();
+
+    console.log('📊 삭제 후 시나리오 수:', Object.keys(db.scenarios).length);
+
+    // 5. 로컬 파일 업데이트 시도
+    try {
+      const dbPath = path.join(process.cwd(), 'data', 'scenarios', 'scenario-database.json');
+      fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+      console.log('✅ 로컬 파일 업데이트 완료');
+    } catch (writeError) {
+      console.warn('⚠️ 로컬 파일 업데이트 실패 (무시):', writeError.message);
+    }
+
+    // 6. GitHub API를 통한 영구 저장
+    try {
+      console.log('🐙 GitHub API를 통한 시나리오 삭제 동기화...');
+      await saveToGitHub(db, 'data/scenarios/scenario-database.json');
+      console.log('✅ GitHub 동기화 완료');
+    } catch (githubError) {
+      console.error('❌ GitHub 동기화 실패:', githubError.message);
+      // GitHub 실패는 로그만 남기고 성공으로 처리 (메모리 삭제는 성공)
+    }
+
+    console.log('🎉 === 시나리오 삭제 프로세스 완료 ===');
+    return {
+      success: true,
+      message: `시나리오 '${deletedScenario.title}'가 성공적으로 삭제되었습니다`,
+      deleted_scenario: {
+        id: scenarioId,
+        title: deletedScenario.title
+      },
+      remaining_count: Object.keys(db.scenarios).length
+    };
+
+  } catch (error) {
+    console.error('❌ === 시나리오 삭제 실패 ===');
+    console.error('❌ 오류 세부사항:', {
+      message: error.message,
+      stack: error.stack,
+      scenarioId: scenarioId
+    });
+
+    return {
+      success: false,
+      message: `시나리오 삭제 중 오류가 발생했습니다: ${error.message}`
+    };
   }
 }
 

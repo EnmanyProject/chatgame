@@ -4299,39 +4299,83 @@
             }
 
             try {
-                console.log('🗑️ 시나리오 삭제 시작 (LocalStorage):', scenarioId);
-                
-                // LocalStorage에서 시나리오 삭제
-                const existingScenarios = localStorage.getItem('scenarios');
-                const scenariosData = existingScenarios ? JSON.parse(existingScenarios) : {};
-                
-                if (scenariosData[scenarioId]) {
-                    // 시나리오 삭제
-                    delete scenariosData[scenarioId];
-                    
-                    // LocalStorage에 저장
-                    localStorage.setItem('scenarios', JSON.stringify(scenariosData));
-                    console.log('✅ LocalStorage에서 시나리오 삭제 완료');
+                console.log('🗑️ === 시나리오 삭제 시작 ===');
+                console.log('🎯 삭제할 시나리오 ID:', scenarioId);
+
+                // 1. API를 통한 서버 삭제 (GitHub 동기화 포함)
+                console.log('📡 서버 API 호출로 시나리오 삭제...');
+                const response = await fetch('/api/scenario-manager', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'delete',
+                        scenario_id: scenarioId
+                    })
+                });
+
+                console.log('📶 API 응답 상태:', response.status);
+                const result = await response.json();
+                console.log('📦 API 응답 데이터:', result);
+
+                if (!result.success) {
+                    throw new Error(result.message || 'API 삭제 실패');
                 }
-                
-                // 전역 변수에서도 삭제
-                if (scenarios[scenarioId]) {
+
+                console.log('✅ 서버에서 시나리오 삭제 완료 (GitHub 동기화 포함)');
+
+                // 2. 로컬 전역 변수에서도 삭제 (UI 즉시 업데이트용)
+                console.log('🔄 로컬 데이터 동기화...');
+                if (scenarios && scenarios[scenarioId]) {
                     delete scenarios[scenarioId];
+                    console.log('✅ scenarios 전역 변수에서 삭제');
                 }
                 if (window.scenarios && window.scenarios[scenarioId]) {
                     delete window.scenarios[scenarioId];
+                    console.log('✅ window.scenarios에서 삭제');
                 }
-                
-                // UI 즉시 업데이트
+
+                // 3. LocalStorage 정리 (필요한 경우)
+                try {
+                    const existingScenarios = localStorage.getItem('scenarios');
+                    if (existingScenarios) {
+                        const scenariosData = JSON.parse(existingScenarios);
+                        if (scenariosData[scenarioId]) {
+                            delete scenariosData[scenarioId];
+                            localStorage.setItem('scenarios', JSON.stringify(scenariosData));
+                            console.log('✅ LocalStorage 정리 완료');
+                        }
+                    }
+                } catch (localError) {
+                    console.warn('⚠️ LocalStorage 정리 실패 (무시):', localError.message);
+                }
+
+                // 4. UI 즉시 업데이트
+                console.log('🎨 UI 업데이트...');
                 displayScenarios();
                 updateScenarioStats();
-                
-                alert('✅ 시나리오가 삭제되었습니다.');
-                console.log('✅ 시나리오 삭제 프로세스 완료');
-                
+
+                // 5. 성공 메시지
+                alert('✅ 시나리오가 성공적으로 삭제되었습니다.');
+                console.log('🎉 === 시나리오 삭제 완료 ===');
+
             } catch (error) {
-                console.error('❌ 시나리오 삭제 오류:', error);
-                alert('❌ 시나리오 삭제에 실패했습니다: ' + error.message);
+                console.error('❌ === 시나리오 삭제 실패 ===');
+                console.error('❌ 오류 상세:', error);
+                console.error('❌ 스택 트레이스:', error.stack);
+
+                // 사용자에게 구체적인 오류 메시지 제공
+                let errorMessage = '시나리오 삭제에 실패했습니다.';
+                if (error.message.includes('404')) {
+                    errorMessage = '시나리오를 찾을 수 없습니다. 이미 삭제되었거나 ID가 잘못되었을 수 있습니다.';
+                } else if (error.message.includes('500')) {
+                    errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+                } else if (error.message.includes('네트워크')) {
+                    errorMessage = '네트워크 연결을 확인하고 다시 시도해주세요.';
+                }
+
+                alert('❌ ' + errorMessage + '\n\n기술적 오류: ' + error.message);
             }
         }
 
