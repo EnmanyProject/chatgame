@@ -25,15 +25,31 @@ module.exports = async function handler(req, res) {
     // 시나리오 목록 조회
     if (action === 'list') {
       console.log('📋 시나리오 목록 조회 시작...');
-      const scenarios = await loadScenarioDatabase();
-      console.log('📊 로드된 시나리오 수:', Object.keys(scenarios.scenarios).length);
-      console.log('📝 시나리오 ID 목록:', Object.keys(scenarios.scenarios));
-      
-      return res.json({
-        success: true,
-        scenarios: scenarios.scenarios,
-        metadata: scenarios.metadata
-      });
+
+      try {
+        const scenarios = await loadScenarioDatabase();
+        console.log('📊 로드된 시나리오 수:', Object.keys(scenarios.scenarios).length);
+        console.log('📝 시나리오 ID 목록:', Object.keys(scenarios.scenarios));
+
+        return res.json({
+          success: true,
+          scenarios: scenarios.scenarios,
+          metadata: scenarios.metadata
+        });
+      } catch (error) {
+        console.error('❌ 시나리오 목록 조회 실패:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: `시나리오 목록 조회 실패: ${error.message}`,
+          error_type: 'SCENARIO_DATABASE_ERROR',
+          troubleshooting: [
+            'GitHub API 연결 상태 확인',
+            'Vercel 환경변수 설정 확인',
+            '인터넷 연결 상태 확인',
+            'Repository 접근 권한 확인'
+          ]
+        });
+      }
     }
 
     // 새 시나리오 생성 (AI 컨텍스트 자동 생성)
@@ -480,9 +496,13 @@ async function loadScenarioDatabase() {
     return getDefaultScenarioDatabase();
 
   } catch (error) {
-    console.error('❌ GitHub API 시나리오 로드 실패:', error);
-    console.log('🆕 기본 빈 데이터베이스 생성');
-    return getDefaultScenarioDatabase();
+    console.error('❌ GitHub API 시나리오 로드 실패:', {
+      message: error.message,
+      stack: error.stack?.split('\n')[0]
+    });
+
+    // GitHub API 연결 실패 시 더 구체적인 에러 정보 제공
+    throw new Error(`시나리오 데이터 로드 실패: ${error.message}. GitHub API 연결을 확인하세요.`);
   }
 }
 

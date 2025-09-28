@@ -33,7 +33,23 @@ module.exports = async function handler(req, res) {
       console.log('🐙 GitHub API 전용 캐릭터 리스트 조회...');
 
       // GitHub API에서 직접 데이터 로드 (메모리 저장소 제거)
-      const characterData = await loadFromGitHub();
+      let characterData;
+      try {
+        characterData = await loadFromGitHub();
+      } catch (error) {
+        console.error('❌ 캐릭터 데이터 로드 실패:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: `캐릭터 데이터 로드 실패: ${error.message}`,
+          error_type: 'GITHUB_API_ERROR',
+          troubleshooting: [
+            'Vercel 환경변수 GITHUB_TOKEN 확인',
+            '인터넷 연결 상태 확인',
+            'GitHub API 상태 확인 (status.github.com)',
+            'Repository 접근 권한 확인'
+          ]
+        });
+      }
 
       if (!characterData) {
         console.log('📂 캐릭터 데이터가 없음 - 빈 응답 반환');
@@ -750,7 +766,13 @@ async function loadFromGitHub() {
     }
 
   } catch (error) {
-    console.warn('⚠️ GitHub 로드 실패:', error.message);
-    return null;
+    console.error('❌ GitHub 로드 실패:', {
+      message: error.message,
+      status: error.status,
+      stack: error.stack?.split('\n')[0]
+    });
+
+    // GitHub API 연결 실패 시 더 구체적인 에러 정보 제공
+    throw new Error(`GitHub API 연결 실패: ${error.message}. Vercel 환경변수 및 인터넷 연결을 확인하세요.`);
   }
 }
