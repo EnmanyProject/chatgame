@@ -5361,7 +5361,9 @@
             const episodeCount = endNum - startNum + 1;
             
             // 4. 확인 및 생성
-            if (confirm(`📋 일괄 생성 설정:\n\n시나리오: ${selectedScenario.title}\n캐릭터: ${character.name} (${character.mbti})\n범위: ${startNum}번 ~ ${endNum}번 (총 ${episodeCount}개)\n\n생성하시겠습니까?`)) {
+            const confirmMessage = `📋 일괄 생성 설정:\n\n시나리오: ${selectedScenario.title}\n캐릭터: ${character.name} (${character.mbti})\n범위: ${startNum}번 ~ ${endNum}번 (총 ${episodeCount}개)\n\n⚠️ 참고: AI 대화 생성 기능이 비활성화되어 있어 기본 템플릿으로 생성됩니다.\n\n생성하시겠습니까?`;
+
+            if (confirm(confirmMessage)) {
                 
                 console.log('🔄 에피소드 일괄 생성 진행...');
                 let successCount = 0;
@@ -5392,8 +5394,16 @@
                         else if (episodeNum >= 19 && episodeNum <= 27) difficulty = 'Hard';
                         else if (episodeNum >= 28 && episodeNum <= 36) difficulty = 'Expert';
                         
-                        // 채팅 훈련 API를 사용한 대화 생성
-                        const generatedDialogue = await generateLocalDialogue(characterId, character.name, userPrompt, difficulty);
+                        // 채팅 훈련 API를 사용한 대화 생성 (폴백 포함)
+                        let generatedDialogue;
+                        try {
+                            generatedDialogue = await generateLocalDialogue(characterId, character.name, userPrompt, difficulty);
+                        } catch (error) {
+                            console.log('⚠️ AI 대화 생성 실패, 기본 템플릿 사용:', error.message);
+
+                            // AI 비활성화 시 기본 대화 템플릿 사용
+                            generatedDialogue = generateBasicDialogue(character, userPrompt, difficulty);
+                        }
                         
                         // 에피소드 데이터 생성
                         const episodeData = {
@@ -5881,6 +5891,68 @@
         }
 
         // ⚠️ 기존 saveCharacter 함수 제거됨 - 새로운 온라인 전용 함수로 교체
+
+        // 기본 대화 템플릿 생성 함수 (AI 비활성화 시 사용)
+        function generateBasicDialogue(character, userPrompt, difficulty) {
+            console.log(`🎭 ${character.name}의 기본 템플릿 대화 생성 (${difficulty})`);
+
+            // MBTI별 기본 대화 패턴
+            const dialoguePatterns = {
+                'INFP': {
+                    message: `음... ${userPrompt.split(' ')[0]}하는 상황이구나 😊\n조금 부끄럽지만 마음이 두근거려`,
+                    choices: [
+                        { text: "괜찮다고 다정하게 말해준다", affection_impact: 3 },
+                        { text: "어떤 기분인지 궁금하다고 한다", affection_impact: 2 },
+                        { text: "자연스럽게 대화를 이어간다", affection_impact: 1 }
+                    ]
+                },
+                'ENFP': {
+                    message: `와! 정말 ${userPrompt.split(' ')[0]}하는 상황이네! 😆\n너무 신나고 기대돼!`,
+                    choices: [
+                        { text: "같이 즐거워하며 호응한다", affection_impact: 3 },
+                        { text: "에너지 넘치는 모습이 좋다고 한다", affection_impact: 2 },
+                        { text: "미소를 지으며 함께한다", affection_impact: 1 }
+                    ]
+                },
+                'INTJ': {
+                    message: `${userPrompt.split(' ')[0]}하는 상황이군요.\n흥미로운 전개입니다.`,
+                    choices: [
+                        { text: "생각을 더 자세히 들어보고 싶다", affection_impact: 3 },
+                        { text: "논리적인 접근이 인상적이라고 한다", affection_impact: 2 },
+                        { text: "침착하게 상황을 파악한다", affection_impact: 1 }
+                    ]
+                },
+                'ESFJ': {
+                    message: `어머, ${userPrompt.split(' ')[0]}하는 상황이야? 😟\n괜찮아? 뭔가 도와줄 게 있을까?`,
+                    choices: [
+                        { text: "배려해줘서 정말 고맙다고 한다", affection_impact: 3 },
+                        { text: "따뜻한 마음이 느껴진다고 한다", affection_impact: 2 },
+                        { text: "괜찮다고 안심시켜준다", affection_impact: 1 }
+                    ]
+                },
+                'ISTP': {
+                    message: `그렇구나. ${userPrompt.split(' ')[0]}하는 건가.\n나쁘지 않네 👍`,
+                    choices: [
+                        { text: "솔직한 반응이 좋다고 한다", affection_impact: 3 },
+                        { text: "더 자세히 얘기해달라고 한다", affection_impact: 2 },
+                        { text: "함께 상황을 즐긴다", affection_impact: 1 }
+                    ]
+                }
+            };
+
+            // 캐릭터 MBTI 추출 (기본값: INFP)
+            const mbti = character.mbti || 'INFP';
+            const pattern = dialoguePatterns[mbti] || dialoguePatterns['INFP'];
+
+            return {
+                dialogue: pattern.message,
+                narration: `${character.name}이 자연스럽게 반응하며 대화가 이어진다.`,
+                choices: pattern.choices,
+                difficulty: difficulty,
+                generated_at: new Date().toISOString(),
+                source: 'basic_template'
+            };
+        }
 
         // 채팅 훈련 API를 사용한 대화 생성 함수 (개선된 버전)
         async function generateLocalDialogue(characterId, characterName, userPrompt, difficulty) {
