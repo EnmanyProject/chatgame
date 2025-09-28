@@ -1,6 +1,5 @@
-// 시나리오 관리 API - v1.0.0
-const fs = require('fs');
-const path = require('path');
+// 시나리오 관리 API - v2.0.0 (GitHub API 전용)
+// 로컬 파일 시스템 의존성 완전 제거
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -431,36 +430,46 @@ VALIDATION: 작성 전에 반드시 확인하세요
 // 시나리오 데이터베이스 로드 (GitHub API 우선)
 async function loadScenarioDatabase() {
   try {
-    console.log('📥 시나리오 데이터베이스 로드 시작...');
+    console.log('🐙 GitHub API 전용 시나리오 데이터베이스 로드 시작...');
 
-    // 1. 먼저 GitHub에서 최신 데이터 시도
+    // GitHub API에서만 데이터 로드 (로컬 파일 의존성 완전 제거)
     const githubData = await loadFromGitHub();
     if (githubData) {
-      console.log('✅ GitHub에서 시나리오 데이터 로드 성공');
+      console.log('✅ GitHub에서 시나리오 데이터 로드 성공:', Object.keys(githubData.scenarios).length + '개');
       return githubData;
     }
 
-    // 2. GitHub 실패 시 로컬 파일 시도
-    console.log('🔄 로컬 파일에서 시나리오 데이터 로드 시도...');
-    const scenarioPath = path.join(process.cwd(), 'data', 'scenarios', 'scenario-database.json');
-    const scenarioData = fs.readFileSync(scenarioPath, 'utf8');
-    const parsedData = JSON.parse(scenarioData);
-    console.log('✅ 로컬 파일에서 시나리오 데이터 로드 성공');
-    return parsedData;
+    // GitHub API 실패 시 기본 구조 반환 (로컬 파일 시도 제거)
+    console.log('⚠️ GitHub API 접근 실패 - 기본 빈 데이터베이스 반환');
+    return getDefaultScenarioDatabase();
 
   } catch (error) {
-    console.error('❌ 시나리오 데이터베이스 로드 실패:', error);
-    console.log('🆕 새로운 빈 데이터베이스 생성');
-    return {
-      metadata: {
-        version: '1.0.0',
-        created_date: new Date().toISOString().split('T')[0],
-        total_scenarios: 0,
-        ai_context_engine: 'gpt-4o-mini'
-      },
-      scenarios: {}
-    };
+    console.error('❌ GitHub API 시나리오 로드 실패:', error);
+    console.log('🆕 기본 빈 데이터베이스 생성');
+    return getDefaultScenarioDatabase();
   }
+}
+
+// 기본 시나리오 데이터베이스 구조
+function getDefaultScenarioDatabase() {
+  return {
+    metadata: {
+      version: '1.0.0',
+      created_date: new Date().toISOString().split('T')[0],
+      total_scenarios: 0,
+      ai_context_engine: 'gpt-4o-mini',
+      last_updated: new Date().toISOString(),
+      data_source: 'github_api_only'
+    },
+    scenarios: {},
+    scenario_templates: {
+      romance_template: {
+        mood_options: ['설렘', '부끄러움', '긴장감', '달콤함', '애절함'],
+        setting_options: ['카페', '학교', '집', '공원', '도서관', '거리'],
+        time_options: ['아침', '점심', '저녁', '밤', '새벽']
+      }
+    }
+  };
 }
 
 // 캐릭터 데이터베이스 로드 (character-ai-generator API 호출)
@@ -514,35 +523,26 @@ async function loadCharacterDatabase() {
 // 시나리오 데이터베이스에 저장
 async function saveScenarioToDatabase(scenario) {
   try {
-    const dbPath = path.join(process.cwd(), 'data', 'scenarios', 'scenario-database.json');
-    console.log('📂 시나리오 DB 파일 경로:', dbPath);
-    console.log('💾 시나리오 저장 시작:', scenario.title, scenario.id);
-    
+    console.log('🐙 GitHub API 전용 시나리오 저장 시작:', scenario.title, scenario.id);
+
     const db = await loadScenarioDatabase();
     console.log('📊 저장 전 시나리오 수:', Object.keys(db.scenarios).length);
-    
+
     // 시나리오 저장 (타임스탬프 추가)
     db.scenarios[scenario.id] = {
       ...scenario,
       last_modified: new Date().toISOString(),
-      updated_by: 'scenario_manager'
+      updated_by: 'scenario_manager_github_only'
     };
-    
+
     db.metadata.total_scenarios = Object.keys(db.scenarios).length;
     db.metadata.last_updated = new Date().toISOString();
-    
-    console.log('📊 저장 후 시나리오 수:', Object.keys(db.scenarios).length);
-    console.log('💾 파일 쓰기 시작...');
-    
-    // 1. 로컬 파일 쓰기 시도 (임시 저장)
-    try {
-      fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
-      console.log('✅ 시나리오 로컬 파일 쓰기 완료');
-    } catch (writeError) {
-      console.warn('⚠️ 시나리오 로컬 파일 쓰기 실패:', writeError.message);
-    }
+    db.metadata.data_source = 'github_api_only';
 
-    // 2. GitHub API를 통한 영구 저장
+    console.log('📊 저장 후 시나리오 수:', Object.keys(db.scenarios).length);
+    console.log('🐙 GitHub API 저장 시작...');
+
+    // GitHub API를 통한 직접 저장 (로컬 파일 저장 제거)
     try {
       console.log('🐙 GitHub API를 통한 시나리오 영구 저장 시작...');
       await saveToGitHub(db, 'data/scenarios/scenario-database.json');
@@ -787,16 +787,7 @@ async function deleteScenarioFromDatabase(scenarioId) {
 
     console.log('📊 삭제 후 시나리오 수:', Object.keys(db.scenarios).length);
 
-    // 5. 로컬 파일 업데이트 시도
-    try {
-      const dbPath = path.join(process.cwd(), 'data', 'scenarios', 'scenario-database.json');
-      fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
-      console.log('✅ 로컬 파일 업데이트 완료');
-    } catch (writeError) {
-      console.warn('⚠️ 로컬 파일 업데이트 실패 (무시):', writeError.message);
-    }
-
-    // 6. GitHub API를 통한 영구 저장
+    // GitHub API를 통한 직접 저장 (로컬 파일 업데이트 제거)
     try {
       console.log('🐙 GitHub API를 통한 시나리오 삭제 동기화...');
       await saveToGitHub(db, 'data/scenarios/scenario-database.json');
