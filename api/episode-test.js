@@ -177,6 +177,8 @@ async function generateDialogueWithOpenAI(characterId, userPrompt, difficulty, a
 - 호감도는 ${diffSetting.affection_range} 범위에서 설정`;
 
   try {
+    console.log('🚀 OpenAI API 요청 시작...');
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -209,8 +211,23 @@ async function generateDialogueWithOpenAI(characterId, userPrompt, difficulty, a
       })
     });
 
+    console.log(`📊 OpenAI API 응답 상태: ${response.status} ${response.statusText}`);
+
     if (!response.ok) {
-      throw new Error(`OpenAI API 오류: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('❌ OpenAI API 오류 상세:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        body: errorText
+      });
+
+      // 520 오류는 일시적인 문제일 가능성이 높음
+      if (response.status === 520) {
+        throw new Error(`OpenAI API 일시적 오류 (520): 서버가 일시적으로 응답하지 않습니다. 잠시 후 다시 시도해주세요. 연속 요청 시 2-3초 간격을 두세요.`);
+      }
+
+      throw new Error(`OpenAI API 오류: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
     const data = await response.json();

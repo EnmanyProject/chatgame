@@ -5395,7 +5395,14 @@
                         else if (episodeNum >= 19 && episodeNum <= 27) difficulty = 'Hard';
                         else if (episodeNum >= 28 && episodeNum <= 36) difficulty = 'Expert';
                         
+                        // OpenAI API Rate Limiting 방지를 위한 지연 (2번째 요청부터)
+                        if (episodeNum > startNum) {
+                            console.log(`⏳ Rate Limiting 방지 대기 중... (${episodeNum}번째 요청)`);
+                            await new Promise(resolve => setTimeout(resolve, 2000)); // 2초 대기
+                        }
+
                         // 채팅 훈련 API를 사용한 대화 생성 (폴백 없음)
+                        console.log(`🎯 에피소드 ${episodeNum}번 생성 시작...`);
                         const generatedDialogue = await generateLocalDialogue(characterId, character.name, userPrompt, difficulty);
                         
                         // 에피소드 데이터 생성
