@@ -302,27 +302,30 @@ async function generateCharacterWithAI(inputData) {
   const selectedTraits = Array.isArray(userData.personality_traits) ? userData.personality_traits.join(', ') : '';
   const selectedHobbies = Array.isArray(userData.hobbies) ? userData.hobbies.join(', ') : '';
 
-  const prompt = `다음 정보를 바탕으로 매력적인 여성 캐릭터를 완성해주세요:
+  const prompt = `다음 정보를 바탕으로 매력적이고 섹시한 성인 여성 캐릭터를 완성해주세요:
 
 기본 정보:
 - 이름: ${userData.name || '랜덤으로 생성'}
-- 나이: ${userData.age || '20-25세 사이'}
+- 나이: ${userData.age || '20-30세 사이'} (성인 여성)
 - MBTI: ${userData.mbti || '적절한 MBTI 선택'}
 
 선택된 특성들:
-- 성격 특성: ${selectedTraits || '매력적인 성격 특성들'}
-- 취미: ${selectedHobbies || '흥미로운 취미들'}
-- 말투 스타일: ${userData.speech_style || '자연스럽고 매력적인 말투'}
+- 성격 특성: ${selectedTraits || '섹시하고 매력적인 성격 특성들'}
+- 취미: ${selectedHobbies || '성인 여성의 흥미로운 취미들'}
+- 말투 스타일: ${userData.speech_style || '매혹적이고 성인 매력이 넘치는 말투'}
+- 몸매 특성: ${userData.bust || '매력적인 가슴 사이즈'}, ${userData.waist_hip || '섹시한 허리/엉덩이 라인'}
 
 요구사항:
-1. 🎭 말투 스타일 완성: "${userData.speech_style}"에 맞는 구체적이고 독특한 말버릇을 창조해주세요
-   - 예: "섹시하고 유혹적인 말투" → "말끝을 살짝 늘이며 숨소리를 섞는 습관", "아무말에도 윙크하는 습관"
-   - 예: "부드럽고 다정한 말투" → "상대의 이름을 자주 부르는 습관", "걱정될 때 손을 잡는 습관"
+1. 🔥 성인 매력: 성숙하고 섹시한 성인 여성의 매력을 강조해주세요
+2. 💋 말투 스타일 완성: "${userData.speech_style}"에 맞는 구체적이고 유혹적인 말버릇을 창조해주세요
+   - 예: "관능적이고 속삭이는 말투" → "중요한 말을 할 때 상대 귀에 속삭이는 습관", "시선을 오래 마주치며 말하는 습관"
+   - 예: "섹시하고 도발적인 말투" → "말끝을 살짝 늘이며 입술을 살짝 핥는 습관", "자신감 있게 어깨를 움직이는 습관"
 
-2. 🧠 MBTI 정확성: ${userData.mbti} 특성을 정확히 반영해주세요
-3. 🇰🇷 한국 문화: 자연스러운 한국 여성 캐릭터로 만들어주세요
-4. ✨ 매력과 현실성: 환상적이지만 믿을 만한 캐릭터로 완성해주세요
-5. 🎯 개성 강화: 선택된 특성들을 바탕으로 독특하고 기억에 남는 캐릭터를 만들어주세요
+3. 🧠 MBTI 정확성: ${userData.mbti} 특성을 정확히 반영해주세요
+4. 🇰🇷 한국 문화: 자연스러운 한국 성인 여성 캐릭터로 만들어주세요
+5. ✨ 성인 매력과 현실성: 섹시하지만 믿을 만한 성인 캐릭터로 완성해주세요
+6. 🎯 개성 강화: 선택된 특성들을 바탕으로 독특하고 매혹적인 캐릭터를 만들어주세요
+7. 💃 몸매 반영: 선택된 몸매 특성을 자연스럽게 캐릭터 설정에 반영해주세요
 
 JSON 형식으로 응답해주세요:
 {
@@ -330,20 +333,23 @@ JSON 형식으로 응답해주세요:
   "age": 나이숫자,
   "mbti": "MBTI",
   "gender": "female",
-  "personality_traits": ["특성1", "특성2", "특성3"],
+  "personality_traits": ["섹시한 특성1", "매혹적인 특성2", "성인스러운 특성3"],
   "major": "전공분야",
   "family": "가족배경",
   "hometown": "출신지역",
-  "relationship": "만남관계",
+  "relationship": "성인 관계 설정",
   "appearance": {
-    "hair": "헤어스타일",
-    "eyes": "눈모양",
-    "style": "패션스타일"
+    "hair": "섹시한 헤어스타일",
+    "eyes": "유혹적인 눈모양",
+    "body": "매력적인 체형",
+    "bust": "가슴 사이즈 설명",
+    "waist_hip": "허리/엉덩이 라인 설명",
+    "style": "성인 매력의 패션스타일"
   },
-  "hobbies": ["취미1", "취미2", "취미3"],
-  "values": "가치관",
-  "speech_style": "구체적인 말투 설명",
-  "speech_habit": "구체적인 말버릇"
+  "hobbies": ["성인취미1", "매력적인취미2", "섹시한취미3"],
+  "values": "성인 여성의 가치관",
+  "speech_style": "구체적이고 매혹적인 말투 설명",
+  "speech_habit": "섹시하고 유혹적인 말버릇"
 }`;
 
   try {
@@ -358,7 +364,7 @@ JSON 형식으로 응답해주세요:
         messages: [
           {
             role: 'system',
-            content: '당신은 매력적이고 현실적인 여성 캐릭터를 만드는 전문가입니다. 사용자의 요구사항을 정확히 반영하여 완성도 높은 캐릭터를 만들어주세요.'
+            content: '당신은 매력적이고 섹시한 성인 여성 캐릭터를 만드는 전문가입니다. 성숙하고 매혹적인 성인 여성의 매력을 강조하며, 사용자의 요구사항을 정확히 반영하여 완성도 높은 성인 캐릭터를 만들어주세요. 모든 캐릭터는 20세 이상의 성인이며, 성인적 매력과 섹시함을 가진 캐릭터여야 합니다.'
           },
           {
             role: 'user',
