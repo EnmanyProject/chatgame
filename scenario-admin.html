@@ -4789,6 +4789,13 @@
 
                 const result = await response.json();
                 console.log('📊 API 응답:', result);
+                console.log('🔍 상세 디버깅:', {
+                    success: result.success,
+                    episodes_count: result.episodes ? result.episodes.length : 0,
+                    scenario_id: result.scenario_id,
+                    requested_scenario_id: scenarioId,
+                    first_episode: result.episodes && result.episodes[0] ? result.episodes[0] : 'none'
+                });
 
                 let episodesData = {};
 
@@ -4799,6 +4806,8 @@
                     });
 
                     console.log(`✅ 시나리오 ${scenarioId}의 에피소드:`, Object.keys(episodesData).length, '개');
+                    console.log('📋 에피소드 번호 목록:', Object.keys(episodesData));
+                    console.log('📄 첫 번째 에피소드 상세:', episodesData[Object.keys(episodesData)[0]]);
                 } else {
                     console.log('📭 해당 시나리오에 생성된 에피소드가 없습니다.');
                 }
@@ -4827,17 +4836,34 @@
             const grid = document.getElementById('episodesGrid');
             grid.innerHTML = '';
 
+            console.log('🎨 에피소드 표시 시작:', {
+                episodes_object: episodes,
+                episodes_keys: Object.keys(episodes),
+                currentDifficultyFilter: currentDifficultyFilter
+            });
+
+            let displayedCount = 0;
+            let completedCount = 0;
+
             for (let i = 1; i <= 36; i++) {
                 const episode = episodes[i];
                 const difficulty = getDifficultyByNumber(i);
-                
+
                 if (currentDifficultyFilter !== 'all' && difficulty !== currentDifficultyFilter) {
                     continue;
                 }
 
+                if (episode) {
+                    completedCount++;
+                    console.log(`✅ 에피소드 ${i}번 표시:`, episode.title || episode.id);
+                }
+
                 const card = createEpisodeCard(i, episode, difficulty);
                 grid.innerHTML += card;
+                displayedCount++;
             }
+
+            console.log(`🎨 에피소드 표시 완료: 표시됨 ${displayedCount}개, 완료됨 ${completedCount}개`);
         }
 
         function createEpisodeCard(number, episode, difficulty) {
