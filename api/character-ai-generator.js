@@ -1,14 +1,13 @@
-// AI 캐릭터 생성 API - 새로운 안전 버전
+// AI 캐릭터 생성 API - v3.0.0 (GitHub API 전용)
+// 메모리 저장소 제거, GitHub API만 사용
 
-// 메모리 기반 캐릭터 저장소 (세션 동안 유지)
-let memoryStorage = {
-  characters: {},
-  metadata: {
-    version: "2.0.0",
-    total_characters: 0,
-    created: new Date().toISOString(),
-    storage_type: "memory"
-  }
+// GitHub API 전용 저장소 (로컬 파일/메모리 의존성 제거)
+const DEFAULT_METADATA = {
+  version: "3.0.0",
+  total_characters: 0,
+  created: new Date().toISOString(),
+  storage_type: "github_api_only",
+  last_updated: new Date().toISOString()
 };
 
 module.exports = async function handler(req, res) {
@@ -31,27 +30,28 @@ module.exports = async function handler(req, res) {
   try {
     // 캐릭터 리스트 조회 (GitHub 동기화 포함)
     if (action === 'list_characters') {
-      console.log('📋 캐릭터 리스트 조회...');
+      console.log('🐙 GitHub API 전용 캐릭터 리스트 조회...');
 
-      // 🐙 GitHub에서 최신 데이터 로드 시도
-      try {
-        await loadFromGitHub();
-        console.log('🔄 GitHub에서 최신 데이터 동기화 완료');
-      } catch (error) {
-        console.warn('⚠️ GitHub 동기화 실패 (메모리 데이터 사용):', error.message);
+      // GitHub API에서 직접 데이터 로드 (메모리 저장소 제거)
+      const characterData = await loadFromGitHub();
+
+      if (!characterData) {
+        console.log('📂 캐릭터 데이터가 없음 - 빈 응답 반환');
+        return res.json({
+          success: true,
+          characters: {},
+          metadata: { ...DEFAULT_METADATA },
+          github_synced: false
+        });
       }
 
-      console.log('📊 현재 메모리 저장소:', Object.keys(memoryStorage.characters).length, '개');
-
-      // 메타데이터 업데이트
-      memoryStorage.metadata.total_characters = Object.keys(memoryStorage.characters).length;
-      memoryStorage.metadata.last_accessed = new Date().toISOString();
+      console.log('📊 GitHub에서 로드된 캐릭터 수:', Object.keys(characterData.characters || {}).length, '개');
 
       return res.json({
         success: true,
-        characters: memoryStorage.characters,
+        characters: characterData.characters,
         metadata: {
-          ...memoryStorage.metadata,
+          ...characterData.metadata,
           github_synced: true,
           sync_time: new Date().toISOString()
         }
@@ -86,13 +86,10 @@ module.exports = async function handler(req, res) {
 
     // 캐릭터 저장 (GitHub API + 메모리 저장소)
     if (action === 'save_character') {
-      // 🐙 먼저 GitHub에서 최신 데이터 로드 (기존 캐릭터 보존)
-      try {
-        await loadFromGitHub();
-        console.log('🔄 GitHub에서 최신 데이터 동기화 완료');
-      } catch (error) {
-        console.warn('⚠️ GitHub 동기화 실패 (메모리 데이터 사용):', error.message);
-      }
+      console.log('🐙 GitHub API 전용 캐릭터 저장 시작...');
+
+      // GitHub에서 최신 데이터 로드 (기존 캐릭터 보존)
+      const existingData = await loadFromGitHub();
 
       // scenario-admin.html에서 {action: 'save_character', character: {...}} 형태로 전송
       const characterData = req.body.character || req.body;
@@ -111,50 +108,52 @@ module.exports = async function handler(req, res) {
         });
       }
 
-      console.log('💾 캐릭터 저장 시작:', characterData.name);
+      console.log('💾 GitHub API 전용 캐릭터 저장 시작:', characterData.name);
 
       // ID가 없으면 생성
       if (!characterData.id) {
         characterData.id = `${characterData.name.toLowerCase().replace(/\s+/g, '_')}_${characterData.mbti.toLowerCase()}_${Date.now()}`;
       }
 
-      // 메모리 저장소에 저장
-      memoryStorage.characters[characterData.id] = {
-        ...characterData,
-        updated_at: new Date().toISOString(),
-        source: 'api_save'
+      // GitHub 데이터 구조 준비
+      const updatedData = {
+        characters: {
+          ...(existingData?.characters || {}),
+          [characterData.id]: {
+            ...characterData,
+            updated_at: new Date().toISOString(),
+            source: 'api_save'
+          }
+        },
+        metadata: {
+          ...(existingData?.metadata || DEFAULT_METADATA),
+          total_characters: Object.keys(existingData?.characters || {}).length + 1,
+          last_updated: new Date().toISOString(),
+          storage_type: 'github_api_only'
+        }
       };
 
-      // 메타데이터 업데이트
-      memoryStorage.metadata.total_characters = Object.keys(memoryStorage.characters).length;
-      memoryStorage.metadata.last_updated = new Date().toISOString();
-
-      // 🐙 GitHub API를 통한 영구 저장 시도
+      // GitHub API로 직접 저장 (메모리 저장소 제거)
       try {
-        console.log('🔄 GitHub 저장 시작 - 총 캐릭터 수:', Object.keys(memoryStorage.characters).length);
-        console.log('🔄 저장할 캐릭터 목록:', Object.keys(memoryStorage.characters));
-
-        const saveResult = await saveToGitHub(memoryStorage);
-        console.log('🎉 GitHub에 성공적으로 저장됨:', saveResult?.content?.sha ? '성공' : '실패');
-        console.log('💾 저장된 파일 크기:', saveResult?.content?.size, 'bytes');
+        console.log('🔄 GitHub 저장 시작 - 총 캐릭터 수:', Object.keys(updatedData.characters).length);
+        const saveResult = await saveToGitHub(updatedData);
+        console.log('🎉 GitHub에 성공적으로 저장됨');
       } catch (error) {
-        console.error('❌ GitHub 저장 실패 상세 오류:', {
-          message: error.message,
-          stack: error.stack,
-          name: error.name
+        console.error('❌ GitHub 저장 실패:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: 'GitHub 저장 실패: ' + error.message
         });
-        console.warn('⚠️ GitHub 저장 실패 (메모리 저장은 완료):', error.message);
-        // GitHub 저장 실패해도 메모리 저장은 성공으로 처리
       }
 
       console.log('✅ 캐릭터 저장 완료:', characterData.id);
-      console.log('📊 총 캐릭터 수:', memoryStorage.metadata.total_characters);
 
       return res.json({
         success: true,
-        character: memoryStorage.characters[characterData.id],
-        message: 'Character saved successfully',
-        github_saved: true // GitHub 저장 시도했음을 표시
+        character: characterData,
+        message: '캐릭터가 성공적으로 저장되었습니다',
+        id: characterData.id,
+        github_saved: true
       });
     }
 
@@ -593,7 +592,7 @@ function getTemplateByMBTI(mbti) {
 }
 
 // 🐙 GitHub API를 통한 영구 저장 함수
-async function saveToGitHub(memoryStorage) {
+async function saveToGitHub(characterData) {
   const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
   const REPO_OWNER = 'EnmanyProject';
   const REPO_NAME = 'chatgame';
@@ -710,11 +709,14 @@ async function loadFromGitHub() {
 
       console.log('✅ GitHub에서 데이터 로드 성공:', characterData.metadata);
 
-      // 🔧 메모리 저장소를 GitHub 데이터로 완전 교체 (병합 아님)
-      memoryStorage.characters = characterData.characters || {};
-      memoryStorage.metadata = { ...memoryStorage.metadata, ...characterData.metadata };
+      // 메타데이터에 GitHub 전용 표시 추가 (메모리 저장소 제거)
+      characterData.metadata = {
+        ...characterData.metadata,
+        storage_type: 'github_api_only',
+        last_accessed: new Date().toISOString()
+      };
 
-      console.log('📊 GitHub에서 로드된 캐릭터 수:', Object.keys(memoryStorage.characters).length);
+      console.log('📊 GitHub에서 로드된 캐릭터 수:', Object.keys(characterData.characters || {}).length);
 
       return characterData;
     } else {
