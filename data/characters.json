@@ -1,37 +1,11 @@
 {
-  "characters": {
-    "미진_estj_1759061539044": {
-      "id": "미진_estj_1759061539044",
-      "name": "미진",
-      "age": 20,
-      "mbti": "ESTJ",
-      "gender": "female",
-      "personality_traits": [],
-      "major": "general",
-      "family": "only_child",
-      "hometown": "seoul",
-      "relationship": "대학교 친구와의 만남",
-      "appearance": {
-        "hair": "긴 생머리",
-        "eyes": "둥근 눈",
-        "style": "캐주얼"
-      },
-      "hobbies": [],
-      "values": "love_family",
-      "speech_style": "말을 하는 동안 상대방의 반응을 주시하며 자연스럽게 표정이나 제스처로 감정을 표현함. 갑자기 웃음이 터져 나오는 매력적인 모습이 있음",
-      "speech_habit": "말을 시작하거나 끝낼 때 '그래서...' 라는 말을 자주 사용하며, 생각이 깊어질 때 '음..'이라는 사이머리를 내는 습관이 있음",
-      "created_at": "2025-09-28T12:12:19.044Z",
-      "source": "api_save",
-      "active": true,
-      "updated_at": "2025-09-28T12:12:19.737Z"
-    }
-  },
+  "characters": {},
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 1,
+    "total_characters": 0,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-28T12:56:56.768Z",
-    "last_accessed": "2025-09-28T12:56:56.768Z"
+    "last_updated": "2025-09-28T12:57:04.648Z",
+    "last_accessed": "2025-09-28T12:57:04.648Z"
   }
 }
