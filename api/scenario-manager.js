@@ -144,13 +144,23 @@ module.exports = async function handler(req, res) {
 
 // 새 시나리오 생성 함수
 async function createNewScenario(data) {
+  console.log('🎯 받은 데이터 전체:', JSON.stringify(data, null, 2));
+
   const {
-    scenario_id = `scenario_${Date.now()}`,
+    id = data.scenario_id || `scenario_${Date.now()}`,
+    scenario_id = data.id || `scenario_${Date.now()}`,
     title = '새로운 시나리오',
     description = '',
-    background_setting = '카페',
+    background_setting = '멤신저 대화',
     mood = '편안한',
-    available_characters = []
+    available_characters = [],
+    created_date = new Date().toISOString().split('T')[0],
+    episode_count = 0,
+    tags = [],
+    source = 'scenario_admin',
+    active = true,
+    ai_generated_context = '',
+    custom_context = ''
   } = data;
 
   console.log('📝 시나리오 생성 데이터:', {
@@ -178,14 +188,16 @@ async function createNewScenario(data) {
     description,
     background_setting,
     mood,
-    active_status: true,
-    created_date: new Date().toISOString().split('T')[0],
-    last_modified: new Date().toISOString().split('T')[0],
-    ai_generated_context: aiContext,
-    custom_context: "",
+    active_status: active,
+    created_date,
+    last_modified: new Date().toISOString(),
+    ai_generated_context: ai_generated_context || aiContext,
+    custom_context,
     available_characters: available_characters || [],
-    episode_count: 0,
-    tags: extractTags(description, mood)
+    episode_count,
+    tags: tags.length > 0 ? tags : extractTags(description, mood),
+    source,
+    updated_by: 'scenario_manager_github_only'
   };
 
   // 데이터베이스에 저장 (실제로는 파일 시스템 사용)
