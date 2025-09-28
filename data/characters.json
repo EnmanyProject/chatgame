@@ -1,64 +1,13 @@
 {
-  "characters": {
-    "미화__infj_1758955491977": {
-      "id": "미화__infj_1758955491977",
-      "name": "미화 ",
-      "age": 20,
-      "mbti": "INFJ",
-      "gender": "female",
-      "personality_traits": [],
-      "major": "general",
-      "family": "average",
-      "hometown": "seoul",
-      "relationship": "동아리 친구",
-      "appearance": {
-        "hair": "긴 생머리",
-        "eyes": "둥근 눈",
-        "style": "캐주얼"
-      },
-      "hobbies": [],
-      "values": "family_oriented",
-      "speech_style": "유쾌한 말투",
-      "speech_habit": "볼을 부풀리는 습관",
-      "created_at": "2025-09-27T06:44:51.977Z",
-      "source": "api_save",
-      "active": true,
-      "updated_at": "2025-09-27T06:44:52.248Z"
-    },
-    "수진_infj_1758958279295": {
-      "id": "수진_infj_1758958279295",
-      "name": "수진",
-      "age": 20,
-      "mbti": "INFJ",
-      "gender": "female",
-      "personality_traits": [],
-      "major": "general",
-      "family": "average",
-      "hometown": "seoul",
-      "relationship": "친구",
-      "appearance": {
-        "hair": "긴 생머리",
-        "eyes": "둥근 눈",
-        "style": "캐주얼"
-      },
-      "hobbies": [],
-      "values": "family_oriented",
-      "speech_style": "밝은 말투",
-      "speech_habit": "눈을 자주 깜빡임",
-      "created_at": "2025-09-27T07:31:19.296Z",
-      "source": "api_save",
-      "active": true,
-      "updated_at": "2025-09-27T07:31:19.623Z"
-    }
-  },
+  "characters": {},
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 2,
+    "total_characters": 0,
     "created": "2025-09-27T06:05:55.975Z",
     "storage_type": "memory",
     "reset_at": "2025-09-27T01:23:56.078Z",
     "reset_reason": "Clean characters data reset",
-    "last_accessed": "2025-09-27T07:30:55.794Z",
-    "last_updated": "2025-09-27T07:31:19.623Z"
+    "last_accessed": "2025-09-28T10:24:56.300Z",
+    "last_updated": "2025-09-28T10:25:01.127Z"
   }
 }
