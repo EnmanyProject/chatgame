@@ -4256,7 +4256,8 @@
                 description,
                 background_setting: backgroundSetting,
                 mood,
-                available_characters: Array.from(selectedCharacters)
+                available_characters: Array.from(selectedCharacters),
+                action: 'create' // 🔧 기본값으로 create 설정
             };
 
             if (currentMode === 'create') {
