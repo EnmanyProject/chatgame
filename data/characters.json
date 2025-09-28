@@ -24,39 +24,14 @@
       "source": "api_save",
       "active": true,
       "updated_at": "2025-09-28T11:04:00.293Z"
-    },
-    "세리_enfj_1759057835574": {
-      "id": "세리_enfj_1759057835574",
-      "name": "세리",
-      "age": 27,
-      "mbti": "ENFJ",
-      "gender": "female",
-      "personality_traits": [],
-      "major": "general",
-      "family": "only_child",
-      "hometown": "seoul",
-      "relationship": "당신과는 유년 시절 친구로 간절한 사랑을 항상 지켜본 사람",
-      "appearance": {
-        "hair": "긴 생머리",
-        "eyes": "둥근 눈",
-        "style": "캐주얼"
-      },
-      "hobbies": [],
-      "values": "love_family",
-      "speech_style": "주저 없이 직진하되, 상대의 말을 잘 듣고 이해하려는 노력을 보이며, 의미 있는 말을 중요시한다.",
-      "speech_habit": "상대방의 이야기를 들은 후 '그래서?'라며 이야기를 이끌어나가는 습관, '알았어. 이해해.'라는 말로 대화를 마무리하며 상대방을 안심시키는 말버릇",
-      "created_at": "2025-09-28T11:10:35.575Z",
-      "source": "api_save",
-      "active": true,
-      "updated_at": "2025-09-28T11:10:36.736Z"
     }
   },
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 2,
+    "total_characters": 1,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-28T11:51:46.075Z",
-    "last_accessed": "2025-09-28T11:51:46.075Z"
+    "last_updated": "2025-09-28T11:52:04.239Z",
+    "last_accessed": "2025-09-28T11:52:04.239Z"
   }
 }
