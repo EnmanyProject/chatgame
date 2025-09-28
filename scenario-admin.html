@@ -4467,30 +4467,8 @@
                         </div>
                     `;
 
-                    // 메모리의 시나리오 데이터 업데이트
-                    const scenarioId = document.getElementById('scenarioId').value;
-                    if (scenarioId && scenarios[scenarioId]) {
-                        scenarios[scenarioId].ai_generated_context = data.scenario.ai_generated_context;
-                        scenarios[scenarioId].updated_at = new Date().toISOString();
-                        console.log('🔄 메모리 시나리오 데이터 업데이트 완료:', scenarioId);
-                    }
-
-                    // window.scenarios도 업데이트 (호환성)
-                    if (window.scenarios && window.scenarios[scenarioId]) {
-                        window.scenarios[scenarioId].ai_generated_context = data.scenario.ai_generated_context;
-                        window.scenarios[scenarioId].updated_at = new Date().toISOString();
-                    }
-
-                    // 🔄 AI 컨텍스트 생성 후 자동으로 시나리오 저장
-                    console.log('💾 AI 컨텍스트 생성 완료 - 시나리오 자동 저장 시작...');
-                    try {
-                        await window.saveScenario();
-                        console.log('✅ 시나리오 자동 저장 완료');
-                    } catch (saveError) {
-                        console.error('❌ 시나리오 자동 저장 실패:', saveError);
-                        // 저장 실패해도 컨텍스트 생성은 성공했으므로 사용자에게 수동 저장 안내
-                        alert('AI 컨텍스트가 생성되었습니다!\n\n시나리오 저장을 위해 "시나리오 저장" 버튼을 눌러주세요.');
-                    }
+                    console.log('✅ AI 컨텍스트 UI 표시 완료');
+                    alert('✅ AI 컨텍스트가 생성되었습니다!\n\n이제 "저장" 버튼을 클릭하여 시나리오를 저장해주세요.');
 
                 } else {
                     throw new Error(data.message || '알 수 없는 오류가 발생했습니다.');
@@ -7152,6 +7130,11 @@
             // 직접 API 호출로 시나리오 저장
 
             try {
+                // AI 컨텍스트 수집
+                const aiContextDiv = document.getElementById('aiContext');
+                const aiContextContent = aiContextDiv.querySelector('.context-content');
+                const customContext = document.getElementById('customContext').value;
+
                 // 시나리오 데이터 구성
                 const scenarioData = {
                     title,
@@ -7163,8 +7146,13 @@
                     episode_count: 0,
                     tags: [mood],
                     source: 'scenario_admin',
-                    active: true
+                    active: true,
+                    ai_generated_context: aiContextContent ? aiContextContent.textContent : '',
+                    custom_context: customContext || ''
                 };
+
+                console.log('📝 수집된 AI 컨텍스트:', scenarioData.ai_generated_context ? '있음' : '없음');
+                console.log('📝 수집된 커스텀 컨텍스트:', scenarioData.custom_context ? '있음' : '없음');
 
                 // 새 생성인지 수정인지 확인
                 const scenarioId = document.getElementById('scenarioId').value;

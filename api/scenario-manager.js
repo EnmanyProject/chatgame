@@ -147,10 +147,11 @@ async function createNewScenario(data) {
 
   // AI를 이용한 소설풍 컨텍스트 생성
   const aiContext = await generateAIContext({
-    title, 
-    description, 
-    background_setting, 
-    mood
+    title,
+    description,
+    background_setting,
+    mood,
+    available_characters // 캐릭터 정보 전달
   });
   
   const newScenario = {
