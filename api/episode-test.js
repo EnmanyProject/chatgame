@@ -184,19 +184,28 @@ async function generateDialogueWithOpenAI(characterId, userPrompt, difficulty, a
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: '당신은 한국 로맨스 채팅 게임의 캐릭터입니다. 자연스럽고 감정적인 대화를 생성해주세요.'
+            content: `당신은 한국 로맨스 채팅 게임의 전문 대화 작가입니다.
+
+🎯 MISSION: JSON 형식으로 정확한 응답 생성
+- 반드시 올바른 JSON 형식으로만 응답하세요
+- 추가 텍스트나 설명 없이 JSON만 출력하세요
+- 한국어 자연스러운 대화로 작성하세요
+- 캐릭터의 MBTI 성격을 정확히 반영하세요
+
+🚨 CRITICAL: JSON 형식 준수 필수
+형식을 벗어나면 시스템 오류가 발생합니다.`
           },
           {
             role: 'user',
             content: prompt
           }
         ],
-        max_tokens: 1000,
-        temperature: 0.8
+        max_tokens: 800,
+        temperature: 0.7
       })
     });
 
