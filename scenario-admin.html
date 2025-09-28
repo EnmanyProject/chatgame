@@ -4900,26 +4900,25 @@
 
         function openEpisodeModal(mode) {
             currentMode = mode;
+
+            // 현재 선택된 시나리오가 없으면 경고
+            if (!currentScenarioId) {
+                alert('먼저 시나리오를 선택해주세요.\n\n시나리오 목록에서 시나리오를 클릭하거나,\n"시나리오 선택" 드롭다운에서 선택해주세요.');
+                return;
+            }
+
             document.getElementById('episodeModalTitle').textContent = '새 에피소드 생성';
             document.getElementById('episodeForm').reset();
             document.getElementById('dialoguePreview').style.display = 'none';
             generatedDialogue = null;
-            
-            // 시나리오 선택기 동적 로딩
-            loadEpisodeScenarioSelector();
-            
-            // 기존 시나리오 ID가 있으면 선택 상태로 설정
-            if (currentScenarioId) {
-                // 선택기가 로딩된 후 설정하기 위해 약간 지연
-                setTimeout(() => {
-                    const scenarioSelect = document.getElementById('episodeScenarioSelect');
-                    if (scenarioSelect.querySelector(`option[value="${currentScenarioId}"]`)) {
-                        scenarioSelect.value = currentScenarioId;
-                        onScenarioChange(); // 캐릭터 목록도 자동 업데이트
-                    }
-                }, 100);
-            }
-            
+
+            // 선택된 시나리오 정보 자동 표시
+            updateSelectedScenarioInfo();
+
+            // 에피소드 번호는 사용자가 직접 입력하도록 함
+            document.getElementById('episodeNumber').value = '';
+            document.getElementById('difficulty').value = 'easy';
+
             document.getElementById('episodeModal').style.display = 'block';
         }
 
