@@ -4300,6 +4300,8 @@
         }
 
         async function deleteScenario(scenarioId) {
+            console.log('🎯 deleteScenario 함수 호출됨! (GitHub API 연동 버전)');
+
             if (!confirm('정말로 이 시나리오를 삭제하시겠습니까?\n관련된 모든 에피소드도 함께 삭제됩니다.')) {
                 return;
             }
@@ -6485,6 +6487,7 @@
         window.editScenario = editScenario;
         window.deleteCharacter = deleteCharacter;
         window.deleteScenario = deleteScenario;
+        console.log('✅ deleteScenario 함수 전역 할당 완료:', typeof window.deleteScenario);
         window.onScenarioChange = onScenarioChange;
         window.resetAllDataWithConfirm = resetAllDataWithConfirm;
         window.applyAISettings = applyAISettings;
@@ -7159,12 +7162,7 @@
             }
         };
 
-        // 시나리오 삭제 함수도 온라인 클라이언트로 교체
-        window.deleteScenario = async function(scenarioId) {
-            // 현재 시나리오 삭제 API가 구현되지 않아 임시 처리
-            alert('🚧 시나리오 삭제 기능은 현재 개발 중입니다.\n\n시나리오를 삭제하려면 관리자에게 문의해주세요.');
-            console.log('🚧 시나리오 삭제 시도:', scenarioId, '- 기능 개발 중');
-        };
+        // 시나리오 삭제 함수는 위에서 이미 구현됨 (GitHub API 연동)
 
         // 전역 함수 교체: 온라인 데이터 클라이언트 사용
         window.loadCharacters = async function() {
