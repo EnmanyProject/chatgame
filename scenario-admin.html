@@ -3998,21 +3998,34 @@
         function displayScenarios() {
             console.log('🎨 === 시나리오 표시 함수 시작 ===');
             const container = document.getElementById('scenariosContainer');
-            
+
             // window.scenarios 또는 전역 scenarios 사용 (호환성)
             const scenariosData = window.scenarios || scenarios || {};
-            const scenarioArray = Object.values(scenariosData);
+
+            // 시나리오 배열을 키와 함께 매핑 (ID 문제 해결)
+            const scenarioArray = Object.entries(scenariosData).map(([key, scenario]) => ({
+                ...scenario,
+                // ID 우선순위: scenario.id > scenario.scenario_id > key
+                id: scenario.id || scenario.scenario_id || key
+            }));
+
             console.log('📊 표시할 시나리오 수:', scenarioArray.length);
             console.log('📊 시나리오 데이터 소스:', window.scenarios ? 'window.scenarios' : 'scenarios');
+
             if (scenarioArray.length > 0) {
-                console.log('📋 시나리오 목록:', scenarioArray.map(s => `${s.title} (${s.id || s.scenario_id})`));
+                console.log('📋 시나리오 목록:', scenarioArray.map(s => `${s.title} (${s.id})`));
+                console.log('🔍 시나리오 상세 정보:', scenarioArray.map(s => ({
+                    title: s.title,
+                    id: s.id,
+                    originalKey: Object.keys(scenariosData).find(key => scenariosData[key] === s)
+                })));
             } else {
                 console.log('📭 표시할 시나리오 없음');
             }
-            
+
             if (scenarioArray.length === 0) {
                 console.log('📭 시나리오 없음 - 빈 상태 표시');
-                
+
                 container.innerHTML = `
                     <div class="empty-state" style="grid-column: 1 / -1;">
                         <h3>📭 시나리오가 없습니다</h3>
@@ -4025,22 +4038,31 @@
                 return;
             }
 
-            container.innerHTML = scenarioArray.map(scenario => `
-                <div class="scenario-card">
-                    <h3>${scenario.title}</h3>
-                    <p class="description">${scenario.description}</p>
-                    <div class="metadata">
-                        ${scenario.tags ? scenario.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
-                        <span class="tag">캐릭터: ${scenario.available_characters ? scenario.available_characters.length : 0}명</span>
-                        <span class="tag">에피소드: ${scenario.episode_count || 0}개</span>
+            container.innerHTML = scenarioArray.map(scenario => {
+                const scenarioId = scenario.id;
+                console.log(`🎯 시나리오 카드 생성: ${scenario.title} (ID: ${scenarioId})`);
+
+                return `
+                    <div class="scenario-card">
+                        <h3>${scenario.title}</h3>
+                        <p class="description">${scenario.description}</p>
+                        <div class="metadata">
+                            <span class="tag">배경: ${scenario.background_setting || 'unknown'}</span>
+                            <span class="tag">분위기: ${scenario.mood || 'unknown'}</span>
+                            ${scenario.tags ? scenario.tags.slice(0, 3).map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
+                            <span class="tag">캐릭터: ${scenario.available_characters ? scenario.available_characters.length : 0}명</span>
+                            <span class="tag">에피소드: ${scenario.episode_count || 0}개</span>
+                        </div>
+                        <div class="actions">
+                            <button class="btn btn-success" onclick="editScenario('${scenarioId}')">수정</button>
+                            <button class="btn btn-primary" onclick="manageEpisodes('${scenarioId}')">에피소드</button>
+                            <button class="btn btn-danger" onclick="deleteScenario('${scenarioId}')">삭제</button>
+                        </div>
                     </div>
-                    <div class="actions">
-                        <button class="btn btn-success" onclick="editScenario('${scenario.id}')">수정</button>
-                        <button class="btn btn-primary" onclick="manageEpisodes('${scenario.id}')">에피소드</button>
-                        <button class="btn btn-danger" onclick="deleteScenario('${scenario.id}')">삭제</button>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
+
+            console.log('🎉 시나리오 카드 렌더링 완료');
         }
 
         function updateScenarioStats() {
