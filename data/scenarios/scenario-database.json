@@ -6,35 +6,39 @@
     "ai_context_engine": "claude-3.5-sonnet",
     "reset_at": "2025-09-27T01:23:46.586Z",
     "reset_reason": "Clean scenarios data reset",
-    "last_updated": "2025-09-28T10:20:03.129Z"
+    "last_updated": "2025-09-28T10:30:59.495Z"
   },
   "scenarios": {
-    "scenario_1759053757918": {
-      "id": "scenario_1759053757918",
-      "scenario_id": "scenario_1759053757918",
-      "title": "마지막 여름날",
-      "description": "졸업을 앞두고 마지막으로 전하고 싶었던 마음을 고백하는 상황",
-      "background_setting": "계단 교실",
-      "mood": "현실적",
+    "scenario_1759055458007": {
+      "id": "scenario_1759055458007",
+      "scenario_id": "scenario_1759055458007",
+      "title": "도서관의 속삭임",
+      "description": "매일 같은 시간, 같은 카페에서 마주치는 두 사람이 서로에게 관심을 갖게 되는 상황",
+      "background_setting": "야간 캠퍼스",
+      "mood": "드라마틱",
       "active_status": true,
       "created_date": "2025-09-28",
-      "last_modified": "2025-09-28T10:02:39.680Z",
-      "ai_generated_context": "죄송하지만, 제공된 캐릭터 정보가 없으므로 시나리오를 작성할 수 없습니다. 캐릭터 정보를 제공해 주시면, 그에 맞춰 시나리오를 작성해드리겠습니다.",
+      "last_modified": "2025-09-28T10:30:59.495Z",
+      "ai_generated_context": "죄송하지만, 제공된 캐릭터 정보가 없습니다. 캐릭터 정보를 제공해주시면 그에 맞춰 시나리오를 작성해드리겠습니다.",
       "custom_context": "",
       "available_characters": [
-        "미화__infj_1758955491977"
+        "미화__infj_1759055432889"
       ],
       "episode_count": 0,
       "tags": [
-        "졸업을",
-        "앞두고",
-        "마지막으로",
-        "전하고",
-        "싶었던",
-        "마음을",
-        "고백하는",
+        "매일",
+        "같은",
+        "시간",
+        "같은",
+        "카페에서",
+        "마주치는",
+        "사람이",
+        "서로에게",
+        "관심을",
+        "갖게",
+        "되는",
         "상황",
-        "현실적"
+        "드라마틱"
       ],
       "updated_by": "scenario_manager"
     }
