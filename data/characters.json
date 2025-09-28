@@ -55,14 +55,42 @@
       "source": "api_save",
       "active": true,
       "updated_at": "2025-09-28T13:34:01.031Z"
+    },
+    "소희_enfj_1759066523475": {
+      "id": "소희_enfj_1759066523475",
+      "name": "소희",
+      "age": 20,
+      "mbti": "ENFJ",
+      "gender": "female",
+      "personality_traits": [],
+      "major": "general",
+      "family": "only_child",
+      "hometown": "seoul",
+      "relationship": "열정적인 연애관계 중",
+      "appearance": {
+        "hair": "섹시한 긴 생머리",
+        "eyes": "유혹적인 눈매",
+        "body": "petite_sexy",
+        "bust": "small_cute",
+        "waist_hip": "slim_tight",
+        "style": "sexy_chic"
+      },
+      "hobbies": [],
+      "values": "love_family",
+      "speech_style": "진실한 감정을 솔직하게 표현하며, 상대의 마음을 잘 이해하고 반응한다. 말하는 톤은 부드럽고 친절하며, 자신의 매력을 표현하는 데 있어 뛰어나다.",
+      "speech_habit": "상대를 바라보며 진정성 있게 웃는 습관, 특히 중요한 말을 할 때는 상대의 귀에 속삭이는 듯한, 유혹적인 말투를 사용한다.",
+      "created_at": "2025-09-28T13:35:23.476Z",
+      "source": "api_save",
+      "active": true,
+      "updated_at": "2025-09-28T13:35:24.208Z"
     }
   },
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 2,
+    "total_characters": 3,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-28T13:34:01.031Z",
-    "last_accessed": "2025-09-28T13:34:01.031Z"
+    "last_updated": "2025-09-28T13:35:24.208Z",
+    "last_accessed": "2025-09-28T13:35:24.207Z"
   }
 }
