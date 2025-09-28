@@ -484,15 +484,42 @@
 
         .modal-content {
             background: white;
-            margin: 50px auto;
+            margin: 20px auto;
             padding: 0;
             border-radius: 15px;
             width: 90%;
-            max-width: 700px;
-            max-height: 85vh;
+            max-width: 800px;
+            max-height: 95vh;
             overflow-y: auto;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             animation: slideIn 0.3s ease;
+        }
+
+        /* 스크롤바 스타일 개선 */
+        .modal-content::-webkit-scrollbar,
+        .dialogue-container::-webkit-scrollbar,
+        .choices-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track,
+        .dialogue-container::-webkit-scrollbar-track,
+        .choices-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb,
+        .dialogue-container::-webkit-scrollbar-thumb,
+        .choices-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover,
+        .dialogue-container::-webkit-scrollbar-thumb:hover,
+        .choices-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
 
         @keyframes slideIn {
@@ -513,7 +540,9 @@
         }
 
         .modal-body {
-            padding: 30px;
+            padding: 25px 30px 35px 30px;
+            max-height: calc(95vh - 140px);
+            overflow-y: auto;
         }
 
         .form-group {
@@ -1326,14 +1355,24 @@
 
         /* Episode Preview Modal Styles */
         .preview-section {
-            margin-bottom: 25px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #fafbfc;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
         }
 
         .preview-section h3 {
             color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
+            margin: -5px 0 20px 0;
+            padding-bottom: 10px;
             border-bottom: 2px solid #667eea;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .preview-section:first-child {
+            margin-top: 0;
         }
 
         .metadata-grid {
@@ -1366,6 +1405,9 @@
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
         }
 
         .character-message {
@@ -1390,6 +1432,12 @@
         .choices-container {
             display: grid;
             gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background: #ffffff;
         }
 
         .choice-preview {
