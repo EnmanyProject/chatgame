@@ -3824,6 +3824,18 @@
             }
         }
         
+        // 시나리오 목록 새로고침 (메인 시나리오 섹션)
+        async function refreshScenarioList() {
+            console.log('🔄 시나리오 목록 새로고침...');
+            try {
+                await loadScenarios();
+                console.log('✅ 시나리오 목록 새로고침 완료');
+            } catch (error) {
+                console.error('❌ 시나리오 목록 새로고침 실패:', error);
+                throw error;
+            }
+        }
+
         // 에피소드 섹션의 시나리오 목록 새로고침
         function refreshEpisodeScenarioList() {
             console.log('🔄 에피소드 시나리오 목록 새로고침...');
@@ -5454,20 +5466,38 @@
             const narrationDisplay = document.getElementById('narrationDisplay');
             const choicesDisplay = document.getElementById('choicesDisplay');
 
-            // Get dialogue data - check all possible field names
-            const dialogueData = episode.dialogue || episode.generated_dialogue || episode.ai_generated_dialogue;
+            // Get dialogue data - check all possible field names and structures
+            let dialogueData = episode.dialogue || episode.generated_dialogue || episode.ai_generated_dialogue;
 
             console.log('💬 에피소드 전체 데이터:', episode);
             console.log('💬 대화 데이터:', dialogueData);
 
             if (dialogueData) {
+                // Handle different dialogue data structures
+                let characterMsg = '';
+                let narrationText = '';
+                let choices = [];
+
+                // Check if it's a story_flow structure
+                if (dialogueData.story_flow && Array.isArray(dialogueData.story_flow)) {
+                    const dialogueFlow = dialogueData.story_flow.find(item => item.type === 'dialogue');
+                    const choiceFlow = dialogueData.story_flow.find(item => item.type === 'choice_point');
+
+                    characterMsg = dialogueFlow ? dialogueFlow.text : '대화 내용이 없습니다.';
+                    narrationText = dialogueFlow ? dialogueFlow.narration : '';
+                    choices = choiceFlow ? choiceFlow.choices : [];
+                } else {
+                    // Standard dialogue structure
+                    characterMsg = dialogueData.dialogue || dialogueData.character_message || dialogueData.text || '대화 내용이 없습니다.';
+                    narrationText = dialogueData.narration || dialogueData.context || '';
+                    choices = dialogueData.choices || [];
+                }
+
                 // Display character message
-                const characterMsg = dialogueData.dialogue || dialogueData.character_message || '대화 내용이 없습니다.';
                 characterMessage.innerHTML = `<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff;">${characterMsg}</div>`;
 
                 // Display narration
-                if (dialogueData.narration || dialogueData.context) {
-                    const narrationText = dialogueData.narration || dialogueData.context;
+                if (narrationText) {
                     narrationDisplay.innerHTML = `<div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; font-style: italic;">${narrationText}</div>`;
                     narrationDisplay.style.display = 'block';
                 } else {
@@ -5475,9 +5505,9 @@
                 }
 
                 // Display choices
-                if (dialogueData.choices && Array.isArray(dialogueData.choices)) {
+                if (choices && Array.isArray(choices) && choices.length > 0) {
                     let choicesHtml = '<div style="margin-top: 15px;"><h4 style="margin-bottom: 10px; color: #495057;">선택지:</h4>';
-                    dialogueData.choices.forEach((choice, index) => {
+                    choices.forEach((choice, index) => {
                         const impact = choice.affection_impact || 0;
                         const impactClass = impact > 0 ? 'impact-positive' : impact < 0 ? 'impact-negative' : 'impact-neutral';
                         const impactText = impact > 0 ? `+${impact}` : impact < 0 ? `${impact}` : '0';
@@ -7929,8 +7959,15 @@
                         }
 
                         if (!scenarioFound) {
-                            console.error(`❌ 시나리오 "${expectedTitle}" 검증 실패 - 수동 새로고침 필요`);
-                            showRefreshNotification('⚠️ 새로고침 버튼을 클릭해주세요', false);
+                            console.warn(`⚠️ 시나리오 "${expectedTitle}" 자동 검증 실패 - 자동 새로고침 실행`);
+                            // 자동으로 새로고침 실행
+                            try {
+                                await refreshScenarioList();
+                                showRefreshNotification('✅ 시나리오가 저장되었습니다! (자동 새로고침 완료)', true);
+                            } catch (refreshError) {
+                                console.error('❌ 자동 새로고침 실패:', refreshError);
+                                showRefreshNotification('⚠️ 저장 완료되었으나 새로고침 버튼을 클릭해주세요', false);
+                            }
                         }
                     }, 2000);
 
