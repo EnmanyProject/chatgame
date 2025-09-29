@@ -4423,24 +4423,32 @@
         }
 
         // 대화 섹션의 시나리오 목록 새로고침
-        function refreshDialogueScenarioList() {
+        async function refreshDialogueScenarioList() {
             console.log('🔄 대화 시나리오 목록 새로고침...');
-            
-            // 두 곳 모두 업데이트
-            loadDialogueScenarioCards(); // 새로운 카드 형태
-            loadDialogueScenarioSelector(); // 모달용
-            displayAvailableScenarios(); // 에피소드 섹션용
-            
-            // 에피소드 섹션의 시나리오 선택 드롭다운도 업데이트
-            const dialogueSelect = document.getElementById('dialogueScenarioSelect');
-            if (dialogueSelect) {
-                loadDialogueScenarioSelector().then(() => {
-                    // 모달용 선택기의 내용을 에피소드 섹션으로 복사
-                    const modalSelect = document.getElementById('dialogueScenarioSelect');
-                    if (modalSelect) {
-                        dialogueSelect.innerHTML = modalSelect.innerHTML;
-                    }
-                });
+
+            try {
+                // 로딩 상태 표시
+                const container = document.getElementById('scenarioCardsContainer');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="loading-card">
+                            <div class="spinner"></div>
+                            <p>새로고침 중...</p>
+                        </div>
+                    `;
+                }
+
+                // 순차적으로 업데이트하여 깜빡임 방지
+                await loadDialogueScenarioCards(); // 새로운 카드 형태 (메인)
+                await loadDialogueScenarioSelector(); // 모달용
+
+                // 에피소드 목록도 새로고침
+                await loadEpisodesList();
+                await loadTotalEpisodeCount();
+
+                console.log('✅ 대화 시나리오 목록 새로고침 완료');
+            } catch (error) {
+                console.error('❌ 시나리오 목록 새로고침 실패:', error);
             }
         }
         
@@ -4581,6 +4589,17 @@
                     });
 
                     container.innerHTML = cardsHTML;
+
+                    // CSS 스타일 즉시 적용 보장
+                    container.offsetHeight; // 강제 리플로우
+
+                    // 카드 스타일 클래스 명시적 적용
+                    setTimeout(() => {
+                        const cards = container.querySelectorAll('.scenario-selection-card');
+                        cards.forEach(card => {
+                            card.classList.add('scenario-selection-card'); // 스타일 재적용
+                        });
+                    }, 0);
                 } else {
                     container.innerHTML = `
                         <div class="loading-card">
@@ -4724,19 +4743,30 @@
 
             // 에피소드 탭 선택 시 데이터 새로고침 및 목록 업데이트
             if (tabName === 'dialogues') {
-                setTimeout(() => {
+                setTimeout(async () => {
                     console.log('🔄 에피소드 탭 전환 - 데이터 새로고침');
-                    // 시나리오 목록 업데이트
-                    populateDialogueScenarioSelect();
-                    // 에피소드 목록 새로고침
-                    loadEpisodesList();
-                    // 에피소드 카운트 새로고침
-                    loadTotalEpisodeCount();
-                    // 기존 대화 목록도 새로고침
-                    if (dialogues && Object.keys(dialogues).length > 0) {
-                        displayDialogues();
+
+                    try {
+                        // 병렬로 데이터 로드
+                        await Promise.all([
+                            loadDialogueScenarioCards(), // 시나리오 카드 로드
+                            loadEpisodesList(), // 에피소드 목록 로드
+                            loadTotalEpisodeCount() // 에피소드 카운트 로드
+                        ]);
+
+                        // 시나리오 드롭다운 업데이트
+                        populateDialogueScenarioSelect();
+
+                        // 기존 대화 목록도 새로고침
+                        if (dialogues && Object.keys(dialogues).length > 0) {
+                            displayDialogues();
+                        }
+
+                        console.log('✅ 에피소드 탭 데이터 로드 완료');
+                    } catch (error) {
+                        console.error('❌ 에피소드 탭 데이터 로드 실패:', error);
                     }
-                }, 100);
+                }, 50);
             }
 
             // API 설정 탭 선택 시 상태 확인
