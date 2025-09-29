@@ -544,6 +544,13 @@ async function generateCharacterWithAI(inputData) {
 - 감성 지능: ${userData.emotional_intelligence || 7}/10
 - 자신감 수준: ${userData.confidence_level || 8}/10
 - 신비로움: ${userData.mystery_factor || 6}/10
+- 성적 호기심: ${userData.sexual_curiosity || 5}/10 (🔥 새로 추가)
+
+📋 과거 이력 (사용자 설정):
+- 남자친구 경험 수: ${userData.boyfriend_count || 2}명
+- 선호하는 스킨십: ${userData.preferred_skinship && userData.preferred_skinship.length > 0 ? userData.preferred_skinship.join(', ') : '손 잡기, 포옹, 가벼운 키스'}
+- 연애 경험 수준: ${userData.relationship_experience || 'intermediate'}
+- 첫 경험 연령대: ${userData.first_experience_age || 'late_teens'}
 
 🧠 심리적 깊이 (사용자 설정):
 - 핵심 욕구: ${userData.core_desires && userData.core_desires.length > 0 ? userData.core_desires.join(', ') : '의미있는 연결, 개인적 성장'}
@@ -584,7 +591,8 @@ ${selectedHobbies && selectedHobbies.length > 0 ? selectedHobbies.map(hobby => `
     "charm_points": ["선택된 매력포인트들"],
     "emotional_intelligence": 감성지능숫자,
     "confidence_level": 자신감숫자,
-    "mystery_factor": 신비로움숫자
+    "mystery_factor": 신비로움숫자,
+    "sexual_curiosity": 성적호기심숫자
   },
   "physical_allure": {
     "signature_features": ["특징적인 외모 요소들"],
@@ -621,6 +629,12 @@ ${selectedHobbies && selectedHobbies.length > 0 ? selectedHobbies.map(hobby => `
     "conversation_hooks": ["대화 주제/훅"],
     "speech_style": "말투 특성",
     "speech_quirks": ["말버릇들"]
+  },
+  "past_history": {
+    "boyfriend_count": 경험한남자친구수,
+    "preferred_skinship": ["선호하는 스킨십 유형들"],
+    "relationship_experience": "연애경험수준",
+    "first_experience_age": "첫경험연령대"
   },
   "relationship_progression": {
     "stages": {
@@ -740,6 +754,41 @@ ${selectedHobbies && selectedHobbies.length > 0 ? selectedHobbies.map(hobby => `
       if (!completedCharacter.conversation_dynamics) completedCharacter.conversation_dynamics = {};
       completedCharacter.conversation_dynamics.speech_style = finalDefaults.speech_style;
       console.log('✅ AI 응답 후 speech_style 기본값 적용:', completedCharacter.conversation_dynamics.speech_style);
+    }
+
+    // 🔥 새로운 필드들 검증 및 기본값 설정
+    // appeal_profile.sexual_curiosity 검증
+    if (!completedCharacter.appeal_profile?.sexual_curiosity ||
+        completedCharacter.appeal_profile.sexual_curiosity === null) {
+      if (!completedCharacter.appeal_profile) completedCharacter.appeal_profile = {};
+      completedCharacter.appeal_profile.sexual_curiosity = 5; // 기본값 5
+      console.log('✅ AI 응답 후 sexual_curiosity 기본값 적용:', completedCharacter.appeal_profile.sexual_curiosity);
+    }
+
+    // past_history 전체 섹션 검증 및 기본값 설정
+    if (!completedCharacter.past_history) {
+      completedCharacter.past_history = {
+        boyfriend_count: 2,
+        preferred_skinship: ['hand_holding', 'hug'],
+        relationship_experience: 'intermediate',
+        first_experience_age: 'late_teens'
+      };
+      console.log('✅ AI 응답 후 past_history 전체 섹션 기본값 적용:', completedCharacter.past_history);
+    } else {
+      // 개별 필드별 기본값 검증
+      if (!completedCharacter.past_history.boyfriend_count && completedCharacter.past_history.boyfriend_count !== 0) {
+        completedCharacter.past_history.boyfriend_count = 2;
+      }
+      if (!completedCharacter.past_history.preferred_skinship ||
+          (Array.isArray(completedCharacter.past_history.preferred_skinship) && completedCharacter.past_history.preferred_skinship.length === 0)) {
+        completedCharacter.past_history.preferred_skinship = ['hand_holding', 'hug'];
+      }
+      if (!completedCharacter.past_history.relationship_experience) {
+        completedCharacter.past_history.relationship_experience = 'intermediate';
+      }
+      if (!completedCharacter.past_history.first_experience_age) {
+        completedCharacter.past_history.first_experience_age = 'late_teens';
+      }
     }
 
     console.log('✅ AI 캐릭터 생성 완료:', completedCharacter.name);
@@ -1691,7 +1740,8 @@ function convertToV2Schema(frontendData) {
       charm_points: getValueOrDefault(frontendData.charm_points, [...mbtiDefaults.charm_points], 'charm_points'),
       emotional_intelligence: frontendData.emotional_intelligence || randomRange(6, 9),
       confidence_level: frontendData.confidence_level || randomRange(6, 9),
-      mystery_factor: frontendData.mystery_factor || randomRange(4, 8)
+      mystery_factor: frontendData.mystery_factor || randomRange(4, 8),
+      sexual_curiosity: frontendData.sexual_curiosity || randomRange(3, 7) // 🔥 새로 추가된 성적 호기심
     },
     physical_allure: {
       appearance: {
@@ -1712,6 +1762,13 @@ function convertToV2Schema(frontendData) {
     },
     conversation_dynamics: {
       speech_style: getValueOrDefault(frontendData.speech_style, mbtiDefaults.speech_style, 'speech_style')
+    },
+    // 📋 새로운 과거 이력 섹션 (v2.1 확장)
+    past_history: {
+      boyfriend_count: frontendData.boyfriend_count || randomRange(0, 5),
+      preferred_skinship: frontendData.preferred_skinship || null, // 배열 또는 null
+      relationship_experience: frontendData.relationship_experience || 'intermediate',
+      first_experience_age: frontendData.first_experience_age || 'late_teens'
     },
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),

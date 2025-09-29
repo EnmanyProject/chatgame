@@ -2013,6 +2013,45 @@
             box-shadow: 0 4px 8px rgba(156, 39, 176, 0.3);
         }
 
+        /* 🔥 새로 추가: 스킨십 버튼들과 과거 이력 스타일 */
+        .skinship-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .skinship-btn {
+            padding: 12px 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 15px;
+            background: #f8f9fa;
+            color: #495057;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .skinship-btn:hover {
+            border-color: #ff5722;
+            background: #fff3e0;
+            transform: translateY(-2px);
+        }
+
+        .skinship-btn.selected {
+            border-color: #ff5722;
+            background: #ff5722;
+            color: white;
+            box-shadow: 0 4px 8px rgba(255, 87, 34, 0.3);
+        }
+
+        .history-grid {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
         /* 매력 프로필 그리드 */
         .appeal-grid, .psychological-grid {
             display: grid;
@@ -4162,6 +4201,12 @@
                                 <label>신비로움 (1-10): <span id="mysteryValue">6</span></label>
                                 <input type="range" id="mysteryFactor" min="1" max="10" value="6" oninput="document.getElementById('mysteryValue').textContent = this.value">
                             </div>
+
+                            <!-- 🔥 새로 추가: 성적 호기심 -->
+                            <div class="form-group">
+                                <label>성적 호기심 (1-10): <span id="sexualCuriosityValue">5</span></label>
+                                <input type="range" id="sexualCuriosity" min="1" max="10" value="5" oninput="document.getElementById('sexualCuriosityValue').textContent = this.value">
+                            </div>
                         </div>
                     </div>
 
@@ -4196,6 +4241,53 @@
                                     <option value="gradual_building">🚶‍♀️ 점진적으로</option>
                                     <option value="moderate_pace">🏃‍♀️ 적당한 속도</option>
                                     <option value="quick_progression">💨 빠른 진전</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 📋 과거 이력 (새로 추가) -->
+                    <div class="char-category">
+                        <h3>📋 과거 이력</h3>
+                        <div class="history-grid">
+                            <div class="form-group">
+                                <label>남자친구 경험 수 (0-10): <span id="boyfriendCountValue">2</span></label>
+                                <input type="range" id="boyfriendCount" min="0" max="10" value="2" oninput="document.getElementById('boyfriendCountValue').textContent = this.value">
+                            </div>
+
+                            <div class="form-group">
+                                <label>좋아하는 스킨십 (최대 4개 선택)</label>
+                                <div class="skinship-options">
+                                    <button type="button" class="skinship-btn" data-skinship="hand_holding">🤝 손 잡기</button>
+                                    <button type="button" class="skinship-btn" data-skinship="light_hugs">🤗 가벼운 포옹</button>
+                                    <button type="button" class="skinship-btn" data-skinship="cheek_kiss">😘 볼 키스</button>
+                                    <button type="button" class="skinship-btn" data-skinship="shoulder_massage">💆‍♀️ 어깨 마사지</button>
+                                    <button type="button" class="skinship-btn" data-skinship="head_patting">👋 머리 쓰다듬기</button>
+                                    <button type="button" class="skinship-btn" data-skinship="back_rubbing">🖐️ 등 문지르기</button>
+                                    <button type="button" class="skinship-btn" data-skinship="intimate_cuddling">💕 깊은 포옹</button>
+                                    <button type="button" class="skinship-btn" data-skinship="passionate_kiss">💋 진한 키스</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>연애 경험 수준</label>
+                                <select id="relationshipExperience">
+                                    <option value="beginner">🌱 초보 (1-2번)</option>
+                                    <option value="intermediate">🌿 보통 (3-5번)</option>
+                                    <option value="experienced">🌳 경험 많음 (6-8번)</option>
+                                    <option value="very_experienced">🌴 매우 경험 많음 (9번 이상)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>첫 경험 나이</label>
+                                <select id="firstExperienceAge">
+                                    <option value="early_teens">🌸 중학교 (13-15세)</option>
+                                    <option value="late_teens">🌺 고등학교 (16-18세)</option>
+                                    <option value="early_twenties">🌻 대학교 초기 (19-21세)</option>
+                                    <option value="mid_twenties">🌹 대학교 후기/직장 초기 (22-25세)</option>
+                                    <option value="late_twenties">🌷 직장인 (26-29세)</option>
+                                    <option value="no_experience">❌ 경험 없음</option>
                                 </select>
                             </div>
                         </div>
@@ -8474,11 +8566,18 @@
                 emotional_intelligence: parseInt(document.getElementById('emotionalIntelligence')?.value) || 7,
                 confidence_level: parseInt(document.getElementById('confidenceLevel')?.value) || 8,
                 mystery_factor: parseInt(document.getElementById('mysteryFactor')?.value) || 6,
+                sexual_curiosity: parseInt(document.getElementById('sexualCuriosity')?.value) || 5, // 🔥 새로 추가
 
                 // 🧠 새로운 심리적 깊이 필드들
                 core_desires: getSelectedDesires(),
                 comfort_level: document.getElementById('comfortLevel')?.value || 'moderate_flirtation',
-                escalation_pace: document.getElementById('escalationPace')?.value || 'gradual_building'
+                escalation_pace: document.getElementById('escalationPace')?.value || 'gradual_building',
+
+                // 📋 새로운 과거 이력 필드들
+                boyfriend_count: parseInt(document.getElementById('boyfriendCount')?.value) || 2,
+                preferred_skinship: getSelectedSkinships(),
+                relationship_experience: document.getElementById('relationshipExperience')?.value || 'intermediate',
+                first_experience_age: document.getElementById('firstExperienceAge')?.value || 'late_teens'
             };
 
             console.log('📋 수집된 데이터:', data);
@@ -8534,6 +8633,17 @@
             });
             console.log('🎯 선택된 핵심 욕구:', selectedDesires);
             const result = selectedDesires.slice(0, 3); // 최대 3개
+            return result.length === 0 ? null : result; // 🚨 빈 배열이면 null 반환
+        }
+
+        // 🔥 새로 추가: 선택된 스킨십들 가져오기 (빈 배열이면 null 반환)
+        function getSelectedSkinships() {
+            const selectedSkinships = [];
+            document.querySelectorAll('.skinship-btn.selected').forEach(btn => {
+                selectedSkinships.push(btn.dataset.skinship);
+            });
+            console.log('🎯 선택된 스킨십:', selectedSkinships);
+            const result = selectedSkinships.slice(0, 4); // 최대 4개
             return result.length === 0 ? null : result; // 🚨 빈 배열이면 null 반환
         }
 
@@ -8615,6 +8725,20 @@
                         alert('핵심 욕구는 최대 3개까지만 선택 가능합니다.');
                     }
                     console.log('✅ 핵심 욕구 업데이트:', getSelectedDesires());
+                }
+
+                // 🔥 새로 추가: 스킨십 버튼 클릭 이벤트 (최대 4개 선택)
+                if (e.target.classList.contains('skinship-btn')) {
+                    const selectedSkinships = document.querySelectorAll('.skinship-btn.selected').length;
+
+                    if (e.target.classList.contains('selected')) {
+                        e.target.classList.remove('selected');
+                    } else if (selectedSkinships < 4) {
+                        e.target.classList.add('selected');
+                    } else {
+                        alert('좋아하는 스킨십은 최대 4개까지만 선택 가능합니다.');
+                    }
+                    console.log('✅ 선택된 스킨십:', getSelectedSkinships());
                 }
             });
         }
