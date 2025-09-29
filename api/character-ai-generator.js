@@ -1402,22 +1402,35 @@ ${getPsychologicalDescription(characterData)} 이런 특성들이 ${name}의 독
   return profileData;
 }
 
-// ✨ 빈 값 처리 헬퍼 함수 (빈 문자열, null, undefined 모두 처리)
+// ✨ 빈 값 처리 헬퍼 함수 (강화된 버전)
 function getValueOrDefault(value, defaultValue) {
-  console.log(`🔍 getValueOrDefault 검사: "${value}" (${typeof value}) -> ${!value || value === '' || (Array.isArray(value) && value.length === 0) ? '기본값 사용' : '입력값 사용'}`);
+  console.log(`🔍 getValueOrDefault 검사: "${JSON.stringify(value)}" (${typeof value})`);
 
-  // 빈 문자열(""), null, undefined, 빈 배열 모두 falsy로 처리
-  if (!value || value === '' || (Array.isArray(value) && value.length === 0)) {
-    console.log(`  → 기본값 적용: "${defaultValue}"`);
+  // 강화된 빈 값 감지
+  const isEmpty = (
+    value === null ||
+    value === undefined ||
+    value === '' ||
+    (Array.isArray(value) && value.length === 0) ||
+    (typeof value === 'string' && value.trim() === '')
+  );
+
+  if (isEmpty) {
+    console.log(`  → 기본값 적용: ${JSON.stringify(defaultValue)}`);
     return defaultValue;
   }
-  console.log(`  → 입력값 사용: "${value}"`);
+
+  console.log(`  → 입력값 사용: ${JSON.stringify(value)}`);
   return value;
 }
 
 // 🔄 프론트엔드 데이터를 v2.0 스키마로 변환 (강화된 기본값 로직)
 function convertToV2Schema(frontendData) {
   console.log('🔄 v2.0 스키마 변환 시작:', frontendData);
+  console.log('🔍 문제 필드 검사:');
+  console.log('  - frontendData.charm_points:', frontendData.charm_points);
+  console.log('  - frontendData.core_desires:', frontendData.core_desires);
+  console.log('  - frontendData.speech_style:', frontendData.speech_style);
 
   // 기본 ID 생성
   const characterId = `${frontendData.name.toLowerCase().replace(/\s+/g, '_')}_${frontendData.mbti.toLowerCase()}_${Date.now()}`;
@@ -1441,7 +1454,7 @@ function convertToV2Schema(frontendData) {
     },
     appeal_profile: {
       seduction_style: getValueOrDefault(frontendData.seduction_style, 'playful_confident'),
-      charm_points: getValueOrDefault(frontendData.personality_traits, randomSelect(charmOptions, 3)),
+      charm_points: getValueOrDefault(frontendData.charm_points, randomSelect(charmOptions, 3)),
       emotional_intelligence: frontendData.emotional_intelligence || randomRange(6, 9),
       confidence_level: frontendData.confidence_level || randomRange(6, 9),
       mystery_factor: frontendData.mystery_factor || randomRange(4, 8)
@@ -1457,7 +1470,7 @@ function convertToV2Schema(frontendData) {
       }
     },
     psychological_depth: {
-      core_desires: getValueOrDefault(frontendData.hobbies, randomSelect(desireOptions, 2)),
+      core_desires: getValueOrDefault(frontendData.core_desires, randomSelect(desireOptions, 2)),
       boundaries: {
         comfort_level: getValueOrDefault(frontendData.comfort_level, 'light_flirtation'),
         escalation_pace: getValueOrDefault(frontendData.escalation_pace, 'very_gradual')
