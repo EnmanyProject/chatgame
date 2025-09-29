@@ -734,13 +734,25 @@ async function loadFromGitHub() {
   try {
     console.log('🐙 GitHub에서 캐릭터 데이터 로드 시도...');
 
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
     const getFileUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+
+    // GitHub 토큰이 있으면 사용, 없으면 public 접근 시도
+    const headers = {
+      'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'ChatGame-Character-Loader'
+    };
+
+    if (GITHUB_TOKEN) {
+      headers['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
+      console.log('🔑 GitHub 토큰 사용하여 데이터 로드');
+    } else {
+      console.log('⚠️ GitHub 토큰 없이 public 접근 시도');
+    }
+
     const response = await fetch(getFileUrl, {
       method: 'GET',
-      headers: {
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'ChatGame-Character-Loader'
-      }
+      headers: headers
     });
 
     if (response.ok) {

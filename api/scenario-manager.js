@@ -589,42 +589,54 @@ function getDefaultScenarioDatabase() {
 // 캐릭터 데이터베이스 로드 (character-ai-generator API 호출)
 async function loadCharacterDatabase() {
   try {
-    console.log('🔄 캐릭터 API에서 데이터 로드 시도...');
+    console.log('🔄 GitHub API에서 직접 캐릭터 데이터 로드 시도...');
 
-    // 내부 API 호출 (같은 서버 내에서)
-    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://chatgame-seven.vercel.app';
-    const response = await fetch(`${baseUrl}/api/character-ai-generator?action=list_characters`);
+    // GitHub API 직접 호출로 HTTP 오류 회피
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    const REPO_OWNER = 'EnmanyProject';
+    const REPO_NAME = 'chatgame';
+    const FILE_PATH = 'data/characters.json';
 
-    console.log('📡 캐릭터 API 응답 상태:', response.status, response.statusText);
+    if (!GITHUB_TOKEN) {
+      throw new Error('GITHUB_TOKEN 환경변수가 설정되지 않았습니다. Vercel 환경변수를 확인해주세요.');
+    }
+
+    const getFileUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+    const response = await fetch(getFileUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'ChatGame-Scenario-Manager'
+      }
+    });
+
+    console.log('📡 GitHub API 응답 상태:', response.status, response.statusText);
 
     if (response.ok) {
-      const result = await response.json();
-      console.log('📄 캐릭터 API 응답 데이터:', {
-        success: result.success,
-        characterCount: result.characters ? Object.keys(result.characters).length : 0,
-        metadata: result.metadata
+      const fileData = await response.json();
+      const decodedContent = Buffer.from(fileData.content, 'base64').toString('utf8');
+      const characterData = JSON.parse(decodedContent);
+
+      console.log('✅ GitHub에서 캐릭터 데이터 로드 성공:', {
+        characterCount: Object.keys(characterData.characters || {}).length,
+        metadata: characterData.metadata
       });
 
-      if (result.success) {
-        console.log('✅ 캐릭터 API에서 로드 성공:', Object.keys(result.characters).length, '개');
-        console.log('📋 캐릭터 ID 목록:', Object.keys(result.characters));
+      console.log('📋 캐릭터 ID 목록:', Object.keys(characterData.characters || {}));
 
-        return {
-          characters: result.characters,
-          metadata: result.metadata
-        };
-      } else {
-        throw new Error(result.message || '캐릭터 API 호출 실패');
-      }
+      return {
+        characters: characterData.characters || {},
+        metadata: characterData.metadata || {}
+      };
     } else {
       const errorText = await response.text();
-      console.error('❌ HTTP 오류 응답:', errorText);
-      throw new Error(`캐릭터 API HTTP ${response.status}: ${response.statusText}`);
+      console.error('❌ GitHub API 오류 응답:', errorText);
+      throw new Error(`GitHub API HTTP ${response.status}: ${response.statusText} - ${errorText}`);
     }
   } catch (error) {
     console.error('❌ 캐릭터 데이터베이스 로드 실패:', error);
     console.error('❌ 상세 오류:', error.stack);
-    console.log('⚠️ 시나리오 생성에 캐릭터 정보 없음 - 기본 메시지 반환');
 
     // 빈 DB 대신 오류 상태를 명확히 표시
     return {
