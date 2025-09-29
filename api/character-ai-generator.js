@@ -343,22 +343,26 @@ module.exports = async function handler(req, res) {
           });
         }
 
-        // 2️⃣ 캐릭터 완전 생성 (AI 또는 템플릿 기반)
-        const completeCharacterData = await generateCompleteCharacterFromPartialInput(req.body);
+        console.log('✅ 필수 필드 검증 완료:', { name, age, mbti });
+        console.log('📋 받은 전체 데이터:', req.body);
 
-        // 3️⃣ 생성된 캐릭터로 프로필(프롬프트) 생성
-        const characterProfile = await generateCharacterProfile(completeCharacterData);
+        // 2️⃣ 프론트엔드 데이터를 v2.0 스키마로 변환
+        const characterData = convertToV2Schema(req.body);
+        console.log('🔄 v2.0 스키마로 변환 완료:', characterData);
+
+        // 3️⃣ 인물소개 프롬프트 생성
+        const characterProfile = generateSimpleProfile(characterData);
 
         console.log('🎉 통합 캐릭터 생성 완료:', {
-          character_name: completeCharacterData.basic_info?.name || completeCharacterData.name,
+          character_name: characterData.basic_info.name,
           has_profile: !!characterProfile.profile_text
         });
 
         return res.json({
           success: true,
-          character: completeCharacterData,
-          profile: characterProfile,
-          message: `${completeCharacterData.basic_info?.name || completeCharacterData.name} 캐릭터가 완전히 생성되었습니다!`,
+          character: characterData,
+          character_profile: characterProfile,
+          message: `${characterData.basic_info.name} 캐릭터가 완전히 생성되었습니다!`,
           workflow: 'unified_generation'
         });
 
@@ -1398,26 +1402,152 @@ ${getPsychologicalDescription(characterData)} 이런 특성들이 ${name}의 독
   return profileData;
 }
 
-// 🚀 통합된 캐릭터 생성 함수 (부분 입력 → 완전한 캐릭터)
-async function generateCompleteCharacterFromPartialInput(inputData) {
-  console.log('🚀 통합 캐릭터 생성 시작:', {
-    name: inputData.name,
-    age: inputData.age,
-    mbti: inputData.mbti,
-    additional_fields: Object.keys(inputData).filter(key => !['name', 'age', 'mbti'].includes(key)).length
-  });
+// 🔄 프론트엔드 데이터를 v2.0 스키마로 변환
+function convertToV2Schema(frontendData) {
+  console.log('🔄 v2.0 스키마 변환 시작:', frontendData);
 
-  try {
-    // OpenAI를 사용한 고품질 생성 시도
-    return await generateCharacterWithAI(inputData);
-  } catch (error) {
-    console.warn('⚠️ OpenAI 생성 실패, 랜덤 생성으로 대체:', error.message);
-    // 실패 시 랜덤 생성 사용
-    return generateRandomCharacterFromInput(inputData);
-  }
+  // 기본 ID 생성
+  const characterId = `${frontendData.name.toLowerCase().replace(/\s+/g, '_')}_${frontendData.mbti.toLowerCase()}_${Date.now()}`;
+
+  const v2Character = {
+    id: characterId,
+    basic_info: {
+      name: frontendData.name,
+      age: parseInt(frontendData.age),
+      mbti: frontendData.mbti,
+      occupation: frontendData.major || 'art',
+      gender: 'female'
+    },
+    appeal_profile: {
+      seduction_style: frontendData.seduction_style || 'playful_confident',
+      charm_points: frontendData.personality_traits || [],
+      emotional_intelligence: frontendData.emotional_intelligence || 7,
+      confidence_level: frontendData.confidence_level || 8,
+      mystery_factor: frontendData.mystery_factor || 6
+    },
+    physical_allure: {
+      appearance: {
+        hair: frontendData.appearance?.hair || frontendData.hair || 'long_straight',
+        eyes: frontendData.appearance?.eyes || frontendData.eyes || 'seductive_eyes',
+        body: frontendData.appearance?.body || frontendData.body || 'petite_sexy',
+        bust: frontendData.appearance?.bust || frontendData.bust || 'small_cute',
+        waist_hip: frontendData.appearance?.waist_hip || frontendData.waist_hip || 'slim_tight',
+        style: frontendData.appearance?.style || frontendData.style || 'sexy_chic'
+      }
+    },
+    psychological_depth: {
+      core_desires: frontendData.hobbies || [],
+      boundaries: {
+        comfort_level: frontendData.comfort_level || 'light_flirtation',
+        escalation_pace: frontendData.escalation_pace || 'very_gradual'
+      }
+    },
+    conversation_dynamics: {
+      speech_style: frontendData.speech_style || `${frontendData.mbti} 유형의 따뜻하고 자연스러운 말투`
+    },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    source: 'api_save',
+    active: true,
+    version: '2.0'
+  };
+
+  console.log('✅ v2.0 스키마 변환 완료:', v2Character);
+  return v2Character;
+}
+
+// 📝 간단한 인물소개 생성 (프롬프트 역할)
+function generateSimpleProfile(characterData) {
+  const name = characterData.basic_info.name;
+  const age = characterData.basic_info.age;
+  const mbti = characterData.basic_info.mbti;
+  const occupation = characterData.basic_info.occupation;
+  const seductionStyle = characterData.appeal_profile.seduction_style;
+  const hair = characterData.physical_allure.appearance.hair;
+  const body = characterData.physical_allure.appearance.body;
+  const comfortLevel = characterData.psychological_depth.boundaries.comfort_level;
+
+  const profileText = `**${name} (${age}세, ${mbti})**
+
+**기본 정보**
+${name}는 ${age}세의 매력적인 ${occupation} 전공 여성입니다. ${mbti} 성격으로 ${getMBTIDescription(mbti)} 특성을 가지고 있습니다.
+
+**외모와 매력**
+${getPhysicalDescription(hair, body, seductionStyle)} ${name}의 ${getSeductionStyleDescription(seductionStyle)} 매력이 돋보입니다.
+
+**대화 스타일**
+${characterData.conversation_dynamics.speech_style}로 대화하며, ${getComfortLevelDescription(comfortLevel)} 수준의 치정을 선호합니다.
+
+**시나리오 활용 가이드**
+- ${name}의 ${mbti} 특성과 ${seductionStyle} 스타일을 반영한 대화 생성
+- 호감도에 따른 단계별 반응 패턴 적용
+- ${name}의 ${comfortLevel} 경계선을 고려한 자연스러운 대화 전개`;
+
+  return {
+    character_id: characterData.id,
+    character_name: name,
+    profile_text: profileText,
+    generated_at: new Date().toISOString(),
+    generation_method: 'simple_template',
+    usage_guide: {
+      scenario_prompt: `${name}의 특성을 반영한 시나리오를 생성하세요:\n\n${profileText}`,
+      dialogue_prompt: profileText
+    }
+  };
 }
 
 // 헬퍼 함수들
+function getMBTIDescription(mbti) {
+  const descriptions = {
+    'INFP': '감성적이고 이상주의적인',
+    'ENFP': '열정적이고 외향적인',
+    'INTJ': '논리적이고 독립적인',
+    'ESFJ': '사교적이고 배려심 많은',
+    'ISTP': '실용적이고 독립적인',
+    'INFJ': '직관적이고 이상주의적인',
+    'ENTP': '창의적이고 도전적인',
+    'ISFJ': '헌신적이고 보호적인'
+  };
+  return descriptions[mbti] || '매력적이고 독특한';
+}
+
+function getPhysicalDescription(hair, body, seductionStyle) {
+  const hairDesc = {
+    'long_straight': '긴 직모',
+    'long_wavy': '긴 웨이브 머리',
+    'medium_bob': '단정한 단발머리',
+    'short_cute': '짧고 귀여운 머리'
+  }[hair] || '아름다운 머리';
+
+  const bodyDesc = {
+    'petite': '소귀하고 가녀린',
+    'petite_sexy': '소귀하지만 섹시한',
+    'average_height': '적당한 키에 균형잡힌',
+    'tall_elegant': '키 크고 우아한'
+  }[body] || '매력적인';
+
+  return `${hairDesc}과 ${bodyDesc} 체형을 가진`;
+}
+
+function getSeductionStyleDescription(style) {
+  const styles = {
+    'playful_confident': '장난스럽고 자신감 있는',
+    'innocent_charming': '순수하고 매력적인',
+    'mysterious_alluring': '신비롭고 유혹적인',
+    'direct_passionate': '직설적이고 열정적인'
+  };
+  return styles[style] || '매력적이고 자연스러운';
+}
+
+function getComfortLevelDescription(level) {
+  const levels = {
+    'light_flirtation': '가벼운 치정',
+    'moderate_flirtation': '적당한 치정',
+    'intimate_conversation': '친밀한 대화'
+  };
+  return levels[level] || '자연스러운';
+}
+
 function generateRandomName() {
   const names = ['미나', '지영', '수진', '하은', '유리', '서현', '예은', '소연', '지은', '민지'];
   return randomChoice(names);

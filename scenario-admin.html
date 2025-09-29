@@ -4276,17 +4276,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <div class="footer-left">
-                    <button type="button" class="btn btn-success" onclick="generateCompleteCharacter(event)" title="캐릭터 데이터 자동완성 + 인물소개까지 한번에 AI 생성">
-                        🤖 AI로 완전 생성
-                    </button>
-                    <button type="button" class="btn btn-info" onclick="autoCompleteCharacter(event)" title="미입력된 데이터를 AI가 자동으로 완성합니다">
-                        🎯 자동완성만
-                    </button>
-                    <button type="button" class="btn btn-warning" onclick="generateCharacterProfile(event)" title="현재 캐릭터의 상세한 인물 소개를 AI가 생성합니다">
-                        📝 인물소개만
-                    </button>
-                </div>
+                <!-- 불필요한 버튼들 제거됨 - 통합 생성 시스템으로 대체 -->
                 <div class="footer-right">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('characterModal')">취소</button>
                     <button type="button" class="btn btn-primary" onclick="saveCharacter()">💖 캐릭터 저장</button>
@@ -11424,7 +11414,7 @@
                     },
                     body: JSON.stringify({
                         action: 'generate_complete_character_with_profile',
-                        character_data: completeData
+                        ...completeData  // 데이터를 직접 전송 (character_data 객체로 감싸지 않음)
                     })
                 });
 
@@ -11586,6 +11576,16 @@
             if (!completeData.seduction_style) completeData.seduction_style = randomChoice(randomSelections.seduction_style);
             if (!completeData.comfort_level) completeData.comfort_level = randomChoice(randomSelections.comfort_level);
             if (!completeData.escalation_pace) completeData.escalation_pace = randomChoice(randomSelections.escalation_pace);
+
+            // 말투 관련 (새로 추가)
+            if (!completeData.speech_style) {
+                const speechStyles = ['친근한 말투', '부드러운 말투', '명랑한 말투', '차분한 말투', '애교 많은 말투'];
+                completeData.speech_style = randomChoice(speechStyles);
+            }
+            if (!completeData.speech_habit) {
+                const speechHabits = ['이모티콘 자주 사용', '웃음소리 많이 냄', '말끝을 길게 늘임', '상대방 이름 자주 부름'];
+                completeData.speech_habit = randomChoice(speechHabits);
+            }
 
             // 슬라이더 값들 (기본값 설정)
             if (!completeData.emotional_intelligence) completeData.emotional_intelligence = randomRange(6, 9);
