@@ -486,6 +486,165 @@
             margin-top: 20px;
         }
 
+        /* 에피소드 리스트 카드 스타일 (시나리오+캐릭터 조합) */
+        .episodes-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .episode-list-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 2px solid #5a67d8;
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(90, 103, 216, 0.2);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .episode-list-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(90, 103, 216, 0.3);
+            border-color: #4c51bf;
+        }
+
+        .episode-list-card .episode-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .episode-list-card .episode-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .episode-list-card .episode-subtitle {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .episode-list-card .episode-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .episode-list-card .episode-content {
+            margin-bottom: 20px;
+        }
+
+        .episode-list-card .character-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .episode-list-card .character-avatar {
+            font-size: 1.5em;
+            margin-right: 12px;
+        }
+
+        .episode-list-card .character-details {
+            flex: 1;
+        }
+
+        .episode-list-card .character-name {
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .episode-list-card .character-mbti {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        .episode-list-card .episode-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .episode-list-card .stat-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+        }
+
+        .episode-list-card .stat-number {
+            font-size: 1.2em;
+            font-weight: 700;
+            display: block;
+        }
+
+        .episode-list-card .stat-label {
+            font-size: 0.75em;
+            opacity: 0.8;
+        }
+
+        .episode-list-card .episode-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .episode-list-card .action-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: #5a67d8;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: 600;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .episode-list-card .action-btn:hover {
+            background: white;
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .episode-list-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+            opacity: 0;
+        }
+
+        .episode-list-card:hover::before {
+            animation: shimmer 1s ease-in-out;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); opacity: 0; }
+        }
+
         /* 난이도 탭 */
         .difficulty-tabs {
             display: flex;
@@ -2321,8 +2480,34 @@
                     </div>
                 </div>
 
-                <div id="dialoguesGrid" class="dialogues-grid">
-                    <!-- 36개의 대화 카드가 여기에 표시됩니다 -->
+                <!-- 생성된 에피소드 목록 (새로 추가) -->
+                <div class="episodes-list-section" style="margin-bottom: 30px;">
+                    <div class="section-header">
+                        <h4>📚 생성된 에피소드 목록</h4>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="loadEpisodesList()">
+                            🔄 새로고침
+                        </button>
+                    </div>
+                    <div id="episodesListContainer" class="episodes-cards-grid">
+                        <div class="loading-card">
+                            <div class="spinner"></div>
+                            <p>에피소드 로딩 중...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 선택된 에피소드의 대화 목록 -->
+                <div id="selectedEpisodeDialogues" style="display: none;">
+                    <div class="section-header">
+                        <h4 id="selectedEpisodeTitle">📖 에피소드 대화 목록</h4>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="closeEpisodeDialogues()">
+                            ❌ 닫기
+                        </button>
+                    </div>
+
+                    <div id="dialoguesGrid" class="dialogues-grid">
+                        <!-- 36개의 대화 카드가 여기에 표시됩니다 -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -4381,15 +4566,17 @@
                 }, 50);
             }
 
-            // 에피소드 탭 선택 시 시나리오 목록 업데이트 및 CSS 적용 보장
+            // 에피소드 탭 선택 시 시나리오 목록 업데이트 및 에피소드 목록 로드
             if (tabName === 'dialogues') {
                 populateDialogueScenarioSelect();
+                // 에피소드 목록 자동 로드
                 setTimeout(() => {
+                    loadEpisodesList();
                     if (dialogues && Object.keys(dialogues).length > 0) {
                         console.log('🔄 에피소드 탭 전환 - CSS 적용 보장을 위한 재표시');
                         displayDialogues();
                     }
-                }, 50);
+                }, 100);
             }
 
             // API 설정 탭 선택 시 상태 확인
@@ -8785,6 +8972,200 @@
                 }
             }
         };
+
+        // ✨ 에피소드 목록 관리 함수들 (새로 추가)
+
+        // 에피소드 목록 로드
+        async function loadEpisodesList() {
+            console.log('📚 에피소드 목록 로드 시작...');
+            const container = document.getElementById('episodesListContainer');
+
+            try {
+                // dialogue-manager API를 통해 전체 에피소드 데이터 로드
+                const response = await fetch('/api/dialogue-manager?action=get_all_episodes');
+                if (!response.ok) {
+                    throw new Error(`API 호출 실패: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('📊 에피소드 API 응답:', data);
+
+                if (!data.success) {
+                    throw new Error(data.message || '에피소드 데이터 로드 실패');
+                }
+
+                // 에피소드 데이터를 시나리오+캐릭터 조합으로 그룹화
+                const episodeGroups = groupEpisodesByScenarioCharacter(data.episodes || {});
+                console.log('📊 그룹화된 에피소드:', episodeGroups);
+
+                displayEpisodesList(episodeGroups);
+
+            } catch (error) {
+                console.error('❌ 에피소드 목록 로드 실패:', error);
+                container.innerHTML = `
+                    <div class="error-card">
+                        <h4>❌ 에피소드 로드 실패</h4>
+                        <p>${error.message}</p>
+                        <button class="btn btn-primary" onclick="loadEpisodesList()">🔄 다시 시도</button>
+                    </div>
+                `;
+            }
+        }
+
+        // 에피소드를 시나리오+캐릭터 조합으로 그룹화
+        function groupEpisodesByScenarioCharacter(episodes) {
+            const groups = {};
+
+            Object.values(episodes).forEach(episode => {
+                if (episode.scenario_id && episode.character_id) {
+                    const groupKey = `${episode.scenario_id}_${episode.character_id}`;
+
+                    if (!groups[groupKey]) {
+                        groups[groupKey] = {
+                            scenario_id: episode.scenario_id,
+                            character_id: episode.character_id,
+                            character_name: episode.character_name,
+                            episodes: [],
+                            total_dialogues: 0,
+                            created_at: episode.created_at
+                        };
+                    }
+
+                    groups[groupKey].episodes.push(episode);
+                    groups[groupKey].total_dialogues++;
+
+                    // 가장 최근 생성 시간으로 업데이트
+                    if (episode.created_at > groups[groupKey].created_at) {
+                        groups[groupKey].created_at = episode.created_at;
+                    }
+                }
+            });
+
+            return groups;
+        }
+
+        // 에피소드 목록 표시
+        function displayEpisodesList(episodeGroups) {
+            const container = document.getElementById('episodesListContainer');
+
+            if (Object.keys(episodeGroups).length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <h3>📭 생성된 에피소드가 없습니다</h3>
+                        <p>시나리오를 선택하고 AI로 에피소드를 생성해보세요!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const episodeCards = Object.entries(episodeGroups).map(([groupKey, group]) => {
+                // 시나리오 정보 가져오기
+                const scenariosData = window.scenarios || scenarios || {};
+                const scenario = scenariosData[group.scenario_id];
+                const scenarioTitle = scenario ? scenario.title : group.scenario_id;
+
+                // 캐릭터 정보 가져오기
+                const charactersData = window.characters || characters || {};
+                const character = charactersData[group.character_id];
+                const characterMbti = character ? character.mbti : 'Unknown';
+
+                // 난이도별 통계 계산
+                const difficultyStats = calculateDifficultyStats(group.episodes);
+
+                return `
+                    <div class="episode-list-card" onclick="viewEpisodeDialogues('${groupKey}', '${scenarioTitle}', '${group.character_name}')">
+                        <div class="episode-header">
+                            <div>
+                                <div class="episode-title">${scenarioTitle}</div>
+                                <div class="episode-subtitle">with ${group.character_name}</div>
+                            </div>
+                            <div class="episode-badge">${group.total_dialogues}개 대화</div>
+                        </div>
+
+                        <div class="episode-content">
+                            <div class="character-info">
+                                <div class="character-avatar">👤</div>
+                                <div class="character-details">
+                                    <div class="character-name">${group.character_name}</div>
+                                    <div class="character-mbti">MBTI: ${characterMbti}</div>
+                                </div>
+                            </div>
+
+                            <div class="episode-stats">
+                                <div class="stat-item">
+                                    <span class="stat-number">${difficultyStats.easy}</span>
+                                    <span class="stat-label">Easy</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">${difficultyStats.medium}</span>
+                                    <span class="stat-label">Medium</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">${difficultyStats.hard}</span>
+                                    <span class="stat-label">Hard</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">${difficultyStats.expert}</span>
+                                    <span class="stat-label">Expert</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="episode-actions">
+                            <span class="action-btn">📖 대화 보기</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = episodeCards;
+        }
+
+        // 난이도별 통계 계산
+        function calculateDifficultyStats(episodes) {
+            const stats = { easy: 0, medium: 0, hard: 0, expert: 0 };
+
+            episodes.forEach(episode => {
+                const difficulty = episode.difficulty ? episode.difficulty.toLowerCase() : 'easy';
+                if (stats.hasOwnProperty(difficulty)) {
+                    stats[difficulty]++;
+                }
+            });
+
+            return stats;
+        }
+
+        // 에피소드 대화 보기
+        function viewEpisodeDialogues(groupKey, scenarioTitle, characterName) {
+            console.log('📖 에피소드 대화 보기:', groupKey, scenarioTitle, characterName);
+
+            // 제목 업데이트
+            document.getElementById('selectedEpisodeTitle').textContent =
+                `📖 ${scenarioTitle} - ${characterName}의 대화 목록`;
+
+            // 에피소드 목록 숨기고 대화 목록 표시
+            document.querySelector('.episodes-list-section').style.display = 'none';
+            document.getElementById('selectedEpisodeDialogues').style.display = 'block';
+
+            // 현재 선택된 그룹의 시나리오 ID 설정 (첫 번째 언더스코어까지만 사용)
+            const parts = groupKey.split('_');
+            currentScenarioId = `${parts[0]}_${parts[1]}_${parts[2]}`;
+
+            // 해당 에피소드의 대화들 로드
+            loadDialogues();
+        }
+
+        // 에피소드 대화 보기 닫기
+        function closeEpisodeDialogues() {
+            document.querySelector('.episodes-list-section').style.display = 'block';
+            document.getElementById('selectedEpisodeDialogues').style.display = 'none';
+            currentScenarioId = null;
+        }
+
+        // 전역 함수로 등록
+        window.loadEpisodesList = loadEpisodesList;
+        window.viewEpisodeDialogues = viewEpisodeDialogues;
+        window.closeEpisodeDialogues = closeEpisodeDialogues;
     </script>
 </body>
 </html>
