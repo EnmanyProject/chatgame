@@ -1835,6 +1835,82 @@
             margin-bottom: 15px;
         }
 
+        /* 매력 프로필 버튼들 */
+        .charm-options, .desires-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .charm-btn, .desire-btn {
+            padding: 12px 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 15px;
+            background: white;
+            cursor: pointer;
+            font-size: 13px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .charm-btn:hover, .desire-btn:hover {
+            border-color: #e91e63;
+            background: #fce4ec;
+            transform: translateY(-2px);
+        }
+
+        .charm-btn.selected {
+            border-color: #e91e63;
+            background: #e91e63;
+            color: white;
+            box-shadow: 0 4px 8px rgba(233, 30, 99, 0.3);
+        }
+
+        .desire-btn.selected {
+            border-color: #9c27b0;
+            background: #9c27b0;
+            color: white;
+            box-shadow: 0 4px 8px rgba(156, 39, 176, 0.3);
+        }
+
+        /* 매력 프로필 그리드 */
+        .appeal-grid, .psychological-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        /* 슬라이더 스타일 */
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #e91e63;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #e91e63;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
         .speech-btn {
             padding: 12px;
             border: 2px solid #dee2e6;
@@ -3902,6 +3978,85 @@
                                     <option value="mature_sophisticated">👑 성숙한 세련됨</option>
                                     <option value="casual_alluring">🔥 캐주얼 매혹</option>
                                     <option value="provocative_fashion">😏 도발적 패션</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 💫 매력 프로필 (새로 추가) -->
+                    <div class="char-category">
+                        <h3>💫 매력 프로필</h3>
+                        <div class="appeal-grid">
+                            <div class="form-group">
+                                <label>유혹 스타일</label>
+                                <select id="seductionStyle">
+                                    <option value="playful_confident">🎭 장난스럽고 자신감 있는</option>
+                                    <option value="mysterious_elegant">🌙 신비롭고 우아한</option>
+                                    <option value="warm_nurturing">🌸 따뜻하고 포용적인</option>
+                                    <option value="intellectually_stimulating">🧠 지적이고 자극적인</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>매력 포인트 (최대 3개 선택)</label>
+                                <div class="charm-options">
+                                    <button type="button" class="charm-btn" data-charm="infectious_smile">😊 전염성 있는 미소</button>
+                                    <button type="button" class="charm-btn" data-charm="witty_banter">💬 재치있는 대화</button>
+                                    <button type="button" class="charm-btn" data-charm="confident_touch">🤲 자신감 있는 터치</button>
+                                    <button type="button" class="charm-btn" data-charm="mysterious_aura">🔮 신비로운 분위기</button>
+                                    <button type="button" class="charm-btn" data-charm="graceful_movements">💃 우아한 움직임</button>
+                                    <button type="button" class="charm-btn" data-charm="expressive_eyes">👀 표현력 있는 눈빛</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>감성 지능 (1-10): <span id="eiValue">7</span></label>
+                                <input type="range" id="emotionalIntelligence" min="1" max="10" value="7" oninput="document.getElementById('eiValue').textContent = this.value">
+                            </div>
+
+                            <div class="form-group">
+                                <label>자신감 수준 (1-10): <span id="confidenceValue">8</span></label>
+                                <input type="range" id="confidenceLevel" min="1" max="10" value="8" oninput="document.getElementById('confidenceValue').textContent = this.value">
+                            </div>
+
+                            <div class="form-group">
+                                <label>신비로움 (1-10): <span id="mysteryValue">6</span></label>
+                                <input type="range" id="mysteryFactor" min="1" max="10" value="6" oninput="document.getElementById('mysteryValue').textContent = this.value">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 🧠 심리적 깊이 (새로 추가) -->
+                    <div class="char-category">
+                        <h3>🧠 심리적 깊이</h3>
+                        <div class="psychological-grid">
+                            <div class="form-group">
+                                <label>핵심 욕구 (최대 3개 선택)</label>
+                                <div class="desires-options">
+                                    <button type="button" class="desire-btn" data-desire="meaningful_connection">💕 의미있는 연결</button>
+                                    <button type="button" class="desire-btn" data-desire="creative_expression">🎨 창조적 표현</button>
+                                    <button type="button" class="desire-btn" data-desire="personal_growth">🌱 개인적 성장</button>
+                                    <button type="button" class="desire-btn" data-desire="adventure_excitement">⚡ 모험과 자극</button>
+                                    <button type="button" class="desire-btn" data-desire="intellectual_stimulation">🧠 지적 자극</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>경계선 설정</label>
+                                <select id="comfortLevel">
+                                    <option value="light_flirtation">🌸 가벼운 플러팅</option>
+                                    <option value="moderate_flirtation">💋 적당한 플러팅</option>
+                                    <option value="intense_chemistry">🔥 강한 케미</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>관계 발전 속도</label>
+                                <select id="escalationPace">
+                                    <option value="very_gradual">🐌 매우 천천히</option>
+                                    <option value="gradual_building">🚶‍♀️ 점진적으로</option>
+                                    <option value="moderate_pace">🏃‍♀️ 적당한 속도</option>
+                                    <option value="quick_progression">💨 빠른 진전</option>
                                 </select>
                             </div>
                         </div>
@@ -7745,6 +7900,7 @@
             console.log('📋 캐릭터 데이터 수집 시작...');
 
             const data = {
+                // 기본 정보
                 name: document.getElementById('charName').value || '미지의 소녀',
                 age: document.getElementById('charAge').value || '20',
                 mbti: document.getElementById('charMbti').value,
@@ -7754,6 +7910,8 @@
                 family: document.getElementById('charFamily').value || 'only_child',
                 hometown: document.getElementById('charHometown').value || 'seoul',
                 relationship: document.getElementById('charRelationship').value,
+
+                // 외모 정보
                 image: null,
                 hair: document.getElementById('charHair').value || 'long_straight',
                 eyes: document.getElementById('charEyes').value || 'round_cute',
@@ -7761,17 +7919,34 @@
                 bust: document.getElementById('charBust')?.value || 'average',
                 waist_hip: document.getElementById('charWaistHip')?.value || 'balanced',
                 style: document.getElementById('charStyle').value || 'cute_casual',
+
+                // 내면/취미
                 hobbies: getSelectedHobbies(),
                 values: document.getElementById('charValues').value || 'love_family',
                 speech_style: document.getElementById('charSpeechStyle').value,
                 speech_habit: document.getElementById('charSpeechHabit').value || '',
+
+                // 💫 새로운 매력 프로필 필드들
+                seduction_style: document.getElementById('seductionStyle')?.value || 'playful_confident',
+                charm_points: getSelectedCharms(),
+                emotional_intelligence: parseInt(document.getElementById('emotionalIntelligence')?.value) || 7,
+                confidence_level: parseInt(document.getElementById('confidenceLevel')?.value) || 8,
+                mystery_factor: parseInt(document.getElementById('mysteryFactor')?.value) || 6,
+
+                // 🧠 새로운 심리적 깊이 필드들
+                core_desires: getSelectedDesires(),
+                comfort_level: document.getElementById('comfortLevel')?.value || 'moderate_flirtation',
+                escalation_pace: document.getElementById('escalationPace')?.value || 'gradual_building'
             };
 
             console.log('📋 수집된 데이터:', data);
             console.log('  - 선택된 성격특성:', data.personality_traits);
             console.log('  - 선택된 취미:', data.hobbies);
-            console.log('  - MBTI:', data.mbti);
-            console.log('  - 말투스타일:', data.speech_style);
+            console.log('  - 💫 매력 포인트:', data.charm_points);
+            console.log('  - 🧠 핵심 욕구:', data.core_desires);
+            console.log('  - 유혹 스타일:', data.seduction_style);
+            console.log('  - 감성지능/자신감/신비:', data.emotional_intelligence, data.confidence_level, data.mystery_factor);
+            console.log('  - 경계선/발전속도:', data.comfort_level, data.escalation_pace);
 
             return data;
         }
@@ -7796,6 +7971,26 @@
             });
             console.log('🎯 선택된 취미:', selectedHobbies);
             return selectedHobbies.slice(0, 5); // 최대 5개로 증가
+        }
+
+        // 선택된 매력 포인트들 가져오기
+        function getSelectedCharms() {
+            const selectedCharms = [];
+            document.querySelectorAll('.charm-btn.selected').forEach(btn => {
+                selectedCharms.push(btn.dataset.charm);
+            });
+            console.log('🎯 선택된 매력 포인트:', selectedCharms);
+            return selectedCharms.slice(0, 3); // 최대 3개
+        }
+
+        // 선택된 핵심 욕구들 가져오기
+        function getSelectedDesires() {
+            const selectedDesires = [];
+            document.querySelectorAll('.desire-btn.selected').forEach(btn => {
+                selectedDesires.push(btn.dataset.desire);
+            });
+            console.log('🎯 선택된 핵심 욕구:', selectedDesires);
+            return selectedDesires.slice(0, 3); // 최대 3개
         }
 
         // === AI 캐릭터 생성기 이벤트 리스너 초기화 ===
@@ -7848,6 +8043,34 @@
                     document.querySelectorAll('.speech-btn').forEach(btn => btn.classList.remove('selected'));
                     e.target.classList.add('selected');
                     document.getElementById('charSpeechStyle').value = e.target.dataset.speech;
+                }
+
+                // 💫 매력 포인트 버튼 클릭 이벤트 (최대 3개 선택)
+                if (e.target.classList.contains('charm-btn')) {
+                    const selectedCharms = document.querySelectorAll('.charm-btn.selected').length;
+
+                    if (e.target.classList.contains('selected')) {
+                        e.target.classList.remove('selected');
+                    } else if (selectedCharms < 3) {
+                        e.target.classList.add('selected');
+                    } else {
+                        alert('매력 포인트는 최대 3개까지만 선택 가능합니다.');
+                    }
+                    console.log('✅ 매력 포인트 업데이트:', getSelectedCharms());
+                }
+
+                // 🧠 핵심 욕구 버튼 클릭 이벤트 (최대 3개 선택)
+                if (e.target.classList.contains('desire-btn')) {
+                    const selectedDesires = document.querySelectorAll('.desire-btn.selected').length;
+
+                    if (e.target.classList.contains('selected')) {
+                        e.target.classList.remove('selected');
+                    } else if (selectedDesires < 3) {
+                        e.target.classList.add('selected');
+                    } else {
+                        alert('핵심 욕구는 최대 3개까지만 선택 가능합니다.');
+                    }
+                    console.log('✅ 핵심 욕구 업데이트:', getSelectedDesires());
                 }
             });
         }
@@ -7912,7 +8135,7 @@
         // 생성된 캐릭터를 저장할 글로벌 변수
         let generatedCharacter = null;
 
-        // AI 생성 결과 표시
+        // AI 생성 결과 표시 (새로운 스키마 대응)
         function displayAIGeneratedCharacter(character) {
             // 글로벌 변수에 저장
             generatedCharacter = character;
@@ -7925,47 +8148,63 @@
                 <div class="character-preview-content">
                     <div class="preview-section">
                         <h5>👤 기본 정보</h5>
-                        <p><strong>이름:</strong> ${character.name || '이름 없음'}</p>
-                        <p><strong>나이:</strong> ${character.age || '나이 정보 없음'}세</p>
-                        <p><strong>성별:</strong> ${character.gender === 'female' ? '여성' : character.gender === 'male' ? '남성' : '성별 정보 없음'}</p>
-                        <p><strong>MBTI:</strong> ${character.mbti || 'MBTI 정보 없음'}</p>
-                        <p><strong>전공:</strong> ${character.major || '전공 정보 없음'}</p>
+                        <p><strong>이름:</strong> ${character.basic_info?.name || character.name || '이름 없음'}</p>
+                        <p><strong>나이:</strong> ${character.basic_info?.age || character.age || '나이 정보 없음'}세</p>
+                        <p><strong>MBTI:</strong> ${character.basic_info?.mbti || character.mbti || 'MBTI 정보 없음'}</p>
+                        <p><strong>직업/전공:</strong> ${character.basic_info?.occupation || character.major || '직업 정보 없음'}</p>
                     </div>
 
                     <div class="preview-section">
-                        <h5>🌟 성격 & 특성</h5>
-                        <p><strong>성격 특성:</strong> ${Array.isArray(character.personality_traits) ? character.personality_traits.join(', ') : character.personality_traits || '성격 정보 없음'}</p>
-                        <p><strong>관계:</strong> ${character.relationship || '관계 정보 없음'}</p>
-                        <p><strong>가치관:</strong> ${character.values || '가치관 정보 없음'}</p>
+                        <h5>💫 매력 프로필</h5>
+                        <p><strong>유혹 스타일:</strong> ${character.appeal_profile?.seduction_style || '정보 없음'}</p>
+                        <p><strong>매력 포인트:</strong> ${Array.isArray(character.appeal_profile?.charm_points) ? character.appeal_profile.charm_points.join(', ') : '정보 없음'}</p>
+                        <p><strong>감성 지능:</strong> ${character.appeal_profile?.emotional_intelligence || '정보 없음'}/10</p>
+                        <p><strong>자신감:</strong> ${character.appeal_profile?.confidence_level || '정보 없음'}/10</p>
+                        <p><strong>신비로움:</strong> ${character.appeal_profile?.mystery_factor || '정보 없음'}/10</p>
                     </div>
 
                     <div class="preview-section">
                         <h5>👀 외모 & 스타일</h5>
-                        <p><strong>헤어스타일:</strong> ${character.appearance?.hair || character.hair || '헤어 정보 없음'}</p>
-                        <p><strong>눈:</strong> ${character.appearance?.eyes || character.eyes || '눈 정보 없음'}</p>
-                        <p><strong>체형:</strong> ${character.appearance?.body || character.body || '체형 정보 없음'}</p>
-                        <p><strong>가슴:</strong> ${character.appearance?.bust || character.bust || '정보 없음'}</p>
-                        <p><strong>허리/엉덩이:</strong> ${character.appearance?.waist_hip || character.waist_hip || '정보 없음'}</p>
-                        <p><strong>스타일:</strong> ${character.appearance?.style || character.style || '스타일 정보 없음'}</p>
+                        <p><strong>특징적 외모:</strong> ${Array.isArray(character.physical_allure?.signature_features) ? character.physical_allure.signature_features.join(', ') : '정보 없음'}</p>
+                        <p><strong>헤어스타일:</strong> ${character.physical_allure?.appearance?.hair || character.appearance?.hair || character.hair || '헤어 정보 없음'}</p>
+                        <p><strong>눈:</strong> ${character.physical_allure?.appearance?.eyes || character.appearance?.eyes || character.eyes || '눈 정보 없음'}</p>
+                        <p><strong>체형:</strong> ${character.physical_allure?.appearance?.body || character.appearance?.body || character.body || '체형 정보 없음'}</p>
+                        <p><strong>가슴:</strong> ${character.physical_allure?.appearance?.bust || character.appearance?.bust || character.bust || '정보 없음'}</p>
+                        <p><strong>허리/엉덩이:</strong> ${character.physical_allure?.appearance?.waist_hip || character.appearance?.waist_hip || character.waist_hip || '정보 없음'}</p>
+                        <p><strong>패션:</strong> ${character.physical_allure?.appearance?.style || character.appearance?.style || character.style || '스타일 정보 없음'}</p>
+                        <p><strong>매력적 습관:</strong> ${Array.isArray(character.physical_allure?.sensual_habits) ? character.physical_allure.sensual_habits.join(', ') : '정보 없음'}</p>
                     </div>
 
                     <div class="preview-section">
-                        <h5>🏠 배경 정보</h5>
-                        <p><strong>가족:</strong> ${character.family || character.background?.family || '가족 정보 없음'}</p>
-                        <p><strong>고향:</strong> ${character.hometown || character.background?.hometown || '고향 정보 없음'}</p>
-                        <p><strong>직업:</strong> ${character.background?.occupation || character.occupation || '직업 정보 없음'}</p>
+                        <h5>🧠 심리적 깊이</h5>
+                        <p><strong>핵심 욕구:</strong> ${Array.isArray(character.psychological_depth?.core_desires) ? character.psychological_depth.core_desires.join(', ') : '정보 없음'}</p>
+                        <p><strong>취약점:</strong> ${Array.isArray(character.psychological_depth?.vulnerabilities) ? character.psychological_depth.vulnerabilities.join(', ') : '정보 없음'}</p>
+                        <p><strong>경계선:</strong> ${character.psychological_depth?.boundaries?.comfort_level || '정보 없음'}</p>
+                        <p><strong>발전 속도:</strong> ${character.psychological_depth?.boundaries?.escalation_pace || '정보 없음'}</p>
                     </div>
 
                     <div class="preview-section">
-                        <h5>💬 말투 & 습관</h5>
-                        <p><strong>말투:</strong> ${character.speech_style || '말투 정보 없음'}</p>
-                        <p><strong>말버릇:</strong> ${character.speech_habit || '말버릇 정보 없음'}</p>
+                        <h5>💬 대화 특성</h5>
+                        <p><strong>플러팅 패턴:</strong> ${Array.isArray(character.conversation_dynamics?.flirtation_patterns) ? character.conversation_dynamics.flirtation_patterns.join(', ') : '정보 없음'}</p>
+                        <p><strong>대화 훅:</strong> ${Array.isArray(character.conversation_dynamics?.conversation_hooks) ? character.conversation_dynamics.conversation_hooks.join(', ') : '정보 없음'}</p>
+                        <p><strong>말투:</strong> ${character.conversation_dynamics?.speech_style || character.speech_style || '말투 정보 없음'}</p>
+                        <p><strong>말버릇:</strong> ${Array.isArray(character.conversation_dynamics?.speech_quirks) ? character.conversation_dynamics.speech_quirks.join(', ') : character.speech_habit || '정보 없음'}</p>
                     </div>
 
                     <div class="preview-section">
-                        <h5>🎯 취미 & 관심사</h5>
+                        <h5>🏠 배경 & 취미</h5>
+                        <p><strong>가족:</strong> ${character.background?.family || character.family || '가족 정보 없음'}</p>
+                        <p><strong>고향:</strong> ${character.background?.hometown || character.hometown || '고향 정보 없음'}</p>
+                        <p><strong>관계:</strong> ${character.background?.relationship || character.relationship || '관계 정보 없음'}</p>
                         <p><strong>취미:</strong> ${Array.isArray(character.hobbies) ? character.hobbies.join(', ') : character.hobbies || '취미 정보 없음'}</p>
-                        <p><strong>특별한 점:</strong> ${character.personality?.fears || character.fears || character.special_notes || '추가 정보 없음'}</p>
+                        <p><strong>가치관:</strong> ${character.values || '가치관 정보 없음'}</p>
+                    </div>
+
+                    <div class="preview-section">
+                        <h5>🎭 관계 진행 단계</h5>
+                        <p><strong>초기 매력:</strong> ${Array.isArray(character.relationship_progression?.stages?.initial_attraction?.behaviors) ? character.relationship_progression.stages.initial_attraction.behaviors.join(', ') : '정보 없음'}</p>
+                        <p><strong>긴장감 형성:</strong> ${Array.isArray(character.relationship_progression?.stages?.building_tension?.behaviors) ? character.relationship_progression.stages.building_tension.behaviors.join(', ') : '정보 없음'}</p>
+                        <p><strong>친밀한 연결:</strong> ${Array.isArray(character.relationship_progression?.stages?.intimate_connection?.behaviors) ? character.relationship_progression.stages.intimate_connection.behaviors.join(', ') : '정보 없음'}</p>
                     </div>
 
                     <div class="preview-actions">

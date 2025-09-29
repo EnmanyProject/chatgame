@@ -1,0 +1,100 @@
+{
+  "character_schema_v2": {
+    "id": "unique_character_id",
+    "basic_info": {
+      "name": "string",
+      "age": "number",
+      "mbti": "string",
+      "occupation": "string",
+      "gender": "female"
+    },
+    "appeal_profile": {
+      "seduction_style": {
+        "type": "enum",
+        "options": ["playful_confident", "mysterious_elegant", "warm_nurturing", "intellectually_stimulating"]
+      },
+      "charm_points": {
+        "type": "array",
+        "max_items": 3,
+        "options": ["infectious_smile", "witty_banter", "confident_touch", "mysterious_aura", "graceful_movements", "expressive_eyes"]
+      },
+      "emotional_intelligence": {
+        "type": "number",
+        "range": [1, 10]
+      },
+      "confidence_level": {
+        "type": "number",
+        "range": [1, 10]
+      },
+      "mystery_factor": {
+        "type": "number",
+        "range": [1, 10]
+      }
+    },
+    "physical_allure": {
+      "signature_features": "array",
+      "style_preference": "string",
+      "sensual_habits": "array",
+      "body_language": "string",
+      "appearance": {
+        "hair": "string",
+        "eyes": "string",
+        "body": "string",
+        "bust": "string",
+        "waist_hip": "string",
+        "style": "string"
+      }
+    },
+    "psychological_depth": {
+      "core_desires": {
+        "type": "array",
+        "options": ["meaningful_connection", "creative_expression", "personal_growth", "adventure_excitement", "intellectual_stimulation"]
+      },
+      "vulnerabilities": "array",
+      "boundaries": {
+        "comfort_level": {
+          "type": "enum",
+          "options": ["light_flirtation", "moderate_flirtation", "intense_chemistry"]
+        },
+        "escalation_pace": {
+          "type": "enum",
+          "options": ["very_gradual", "gradual_building", "moderate_pace", "quick_progression"]
+        }
+      },
+      "emotional_triggers": {
+        "positive": "array",
+        "negative": "array"
+      }
+    },
+    "conversation_dynamics": {
+      "flirtation_patterns": "array",
+      "response_tendencies": {
+        "to_humor": "string",
+        "to_compliments": "string",
+        "to_interest": "string"
+      },
+      "conversation_hooks": "array",
+      "speech_style": "string",
+      "speech_quirks": "array"
+    },
+    "relationship_progression": {
+      "stages": {
+        "initial_attraction": {
+          "behaviors": "array",
+          "affection_range": [0, 25],
+          "dialogue_style": "string"
+        },
+        "building_tension": {
+          "behaviors": "array",
+          "affection_range": [26, 60],
+          "dialogue_style": "string"
+        },
+        "intimate_connection": {
+          "behaviors": "array",
+          "affection_range": [61, 100],
+          "dialogue_style": "string"
+        }
+      }
+    }
+  }
+}

@@ -318,67 +318,135 @@ async function generateCharacterWithAI(inputData) {
   const selectedTraits = Array.isArray(userData.personality_traits) ? userData.personality_traits.join(', ') : '';
   const selectedHobbies = Array.isArray(userData.hobbies) ? userData.hobbies.join(', ') : '';
 
-  const prompt = `다음 사용자가 직접 선택한 정보를 바탕으로 매력적이고 섹시한 성인 여성 캐릭터를 완성해주세요:
+  const prompt = `당신은 복잡하고 매력적인 성인 여성 캐릭터를 창조하는 전문가입니다. 다음 사용자의 상세한 선택을 바탕으로 입체적이고 현실적인 캐릭터를 완성해주세요:
 
-🔥 사용자 선택 정보 (반드시 반영):
+🔥 기본 프로필 (사용자 선택):
 - 이름: ${userData.name || '사용자가 지정하지 않음'}
 - 나이: ${userData.age || '20-30세 사이'} (성인 여성)
 - MBTI: ${userData.mbti || '적절한 MBTI 선택'}
-- 전공: ${userData.major || '일반 전공'}
+- 직업/전공: ${userData.major || '일반 전공'}
 - 가족배경: ${userData.family || '일반 가정'}
 - 고향: ${userData.hometown || '서울'}
 - 관계설정: ${userData.relationship || '친구'}
+
+👀 외모 프로필 (사용자 선택):
 - 헤어스타일: ${userData.hair || '긴 생머리'}
 - 눈모양: ${userData.eyes || '큰 눈'}
 - 체형: ${userData.body || '보통 체형'}
-- 가슴사이즈: ${userData.bust || '보통 사이즈'}
+- 가슴: ${userData.bust || '보통 사이즈'}
 - 허리/엉덩이: ${userData.waist_hip || '균형잡힌 라인'}
 - 패션스타일: ${userData.style || '캐주얼'}
+
+💫 매력 프로필 (사용자 맞춤):
+- 유혹 스타일: ${userData.seduction_style || 'playful_confident'}
+- 매력 포인트: ${userData.charm_points && userData.charm_points.length > 0 ? userData.charm_points.join(', ') : '전염성 있는 미소, 재치있는 대화'}
+- 감성 지능: ${userData.emotional_intelligence || 7}/10
+- 자신감 수준: ${userData.confidence_level || 8}/10
+- 신비로움: ${userData.mystery_factor || 6}/10
+
+🧠 심리적 깊이 (사용자 설정):
+- 핵심 욕구: ${userData.core_desires && userData.core_desires.length > 0 ? userData.core_desires.join(', ') : '의미있는 연결, 개인적 성장'}
+- 경계선: ${userData.comfort_level || 'moderate_flirtation'}
+- 관계 발전 속도: ${userData.escalation_pace || 'gradual_building'}
+
+🎯 성격 특성 (사용자 선택):
+${selectedTraits && selectedTraits.length > 0 ? selectedTraits.map(trait => `- ${trait}`).join('\n') : '- 사용자가 선택하지 않음 (MBTI 기반 기본 성격 적용)'}
+
+🎨 취미/관심사 (사용자 선택):
+${selectedHobbies && selectedHobbies.length > 0 ? selectedHobbies.map(hobby => `- ${hobby}`).join('\n') : '- 사용자가 선택하지 않음 (연령대 맞춤 기본 취미 적용)'}
+
+💬 커뮤니케이션:
+- 말투 스타일: ${userData.speech_style || '매혹적이고 성인 매력이 넘치는 말투'}
+- 말버릇: ${userData.speech_habit || '표현력 있는 제스처 사용'}
 - 가치관: ${userData.values || '가족중심'}
 
-🎯 사용자가 선택한 성격 특성들:
-${selectedTraits && selectedTraits.length > 0 ? selectedTraits.map(trait => `- ${trait}`).join('\n') : '- 사용자가 선택하지 않음 (기본 성격 적용)'}
-
-🎨 사용자가 선택한 취미들:
-${selectedHobbies && selectedHobbies.length > 0 ? selectedHobbies.map(hobby => `- ${hobby}`).join('\n') : '- 사용자가 선택하지 않음 (기본 취미 적용)'}
-
-💬 말투 스타일: ${userData.speech_style || '매혹적이고 성인 매력이 넘치는 말투'}
-
 요구사항:
-1. 🔥 성인 매력: 성숙하고 섹시한 성인 여성의 매력을 강조해주세요
-2. 💋 말투 스타일 완성: "${userData.speech_style}"에 맞는 구체적이고 유혹적인 말버릇을 창조해주세요
-   - 예: "관능적이고 속삭이는 말투" → "중요한 말을 할 때 상대 귀에 속삭이는 습관", "시선을 오래 마주치며 말하는 습관"
-   - 예: "섹시하고 도발적인 말투" → "말끝을 살짝 늘이며 입술을 살짝 핥는 습관", "자신감 있게 어깨를 움직이는 습관"
+1. 🔥 복합적 매력: 사용자가 선택한 매력 프로필(유혹 스타일, 매력 포인트, 감성지능 등)을 정확히 반영
+2. 🧠 심리적 현실성: 핵심 욕구, 경계선, 관계 발전 속도를 바탕으로 입체적인 인격 구성
+3. 💬 대화 특성: 선택된 매력 포인트가 실제 대화에서 어떻게 나타날지 구체적으로 명시
+4. 🎯 MBTI 정확성: ${userData.mbti || 'ENFP'} 특성을 매력 프로필과 조화롭게 반영
+5. 🇰🇷 한국 문화: 자연스러운 한국 성인 여성으로서의 배경과 가치관
+6. ⚖️ 균형감: 매력적이면서도 존중받는 캐릭터, 건전한 경계선 유지
+7. 🎭 개성화: 선택된 모든 특성들이 조화롭게 통합된 독특한 매력
 
-3. 🧠 MBTI 정확성: ${userData.mbti} 특성을 정확히 반영해주세요
-4. 🇰🇷 한국 문화: 자연스러운 한국 성인 여성 캐릭터로 만들어주세요
-5. ✨ 성인 매력과 현실성: 섹시하지만 믿을 만한 성인 캐릭터로 완성해주세요
-6. 🎯 개성 강화: 선택된 특성들을 바탕으로 독특하고 매혹적인 캐릭터를 만들어주세요
-7. 💃 몸매 반영: 선택된 몸매 특성을 자연스럽게 캐릭터 설정에 반영해주세요
-
-JSON 형식으로 응답해주세요:
+다음 새로운 JSON 스키마로 응답해주세요:
 {
-  "name": "캐릭터 이름",
-  "age": 나이숫자,
-  "mbti": "MBTI",
-  "gender": "female",
-  "personality_traits": ["섹시한 특성1", "매혹적인 특성2", "성인스러운 특성3"],
-  "major": "전공분야",
-  "family": "가족배경",
-  "hometown": "출신지역",
-  "relationship": "성인 관계 설정",
-  "appearance": {
-    "hair": "섹시한 헤어스타일",
-    "eyes": "유혹적인 눈모양",
-    "body": "매력적인 체형",
-    "bust": "가슴 사이즈 설명",
-    "waist_hip": "허리/엉덩이 라인 설명",
-    "style": "성인 매력의 패션스타일"
+  "basic_info": {
+    "name": "캐릭터 이름",
+    "age": 나이숫자,
+    "mbti": "MBTI",
+    "occupation": "직업/전공",
+    "gender": "female"
   },
-  "hobbies": ["성인취미1", "매력적인취미2", "섹시한취미3"],
-  "values": "성인 여성의 가치관",
-  "speech_style": "구체적이고 매혹적인 말투 설명",
-  "speech_habit": "섹시하고 유혹적인 말버릇"
+  "appeal_profile": {
+    "seduction_style": "사용자 선택한 유혹 스타일",
+    "charm_points": ["선택된 매력포인트들"],
+    "emotional_intelligence": 감성지능숫자,
+    "confidence_level": 자신감숫자,
+    "mystery_factor": 신비로움숫자
+  },
+  "physical_allure": {
+    "signature_features": ["특징적인 외모 요소들"],
+    "sensual_habits": ["매력적인 습관들"],
+    "body_language": "바디랭귀지 특성",
+    "appearance": {
+      "hair": "헤어스타일 설명",
+      "eyes": "눈 특성",
+      "body": "체형 설명",
+      "bust": "가슴 사이즈 특성",
+      "waist_hip": "허리/엉덩이 라인",
+      "style": "패션 스타일"
+    }
+  },
+  "psychological_depth": {
+    "core_desires": ["핵심 욕구들"],
+    "vulnerabilities": ["약점/취약점"],
+    "boundaries": {
+      "comfort_level": "경계선 설정",
+      "escalation_pace": "관계 발전 속도"
+    },
+    "emotional_triggers": {
+      "positive": ["긍정적 반응 트리거들"],
+      "negative": ["부정적 반응 트리거들"]
+    }
+  },
+  "conversation_dynamics": {
+    "flirtation_patterns": ["플러팅 패턴들"],
+    "response_tendencies": {
+      "to_humor": "유머에 대한 반응",
+      "to_compliments": "칭찬에 대한 반응",
+      "to_interest": "관심 표현에 대한 반응"
+    },
+    "conversation_hooks": ["대화 주제/훅"],
+    "speech_style": "말투 특성",
+    "speech_quirks": ["말버릇들"]
+  },
+  "relationship_progression": {
+    "stages": {
+      "initial_attraction": {
+        "behaviors": ["초기 매력 단계 행동들"],
+        "affection_range": [0, 25],
+        "dialogue_style": "초기 단계 대화 스타일"
+      },
+      "building_tension": {
+        "behaviors": ["긴장감 형성 단계 행동들"],
+        "affection_range": [26, 60],
+        "dialogue_style": "발전 단계 대화 스타일"
+      },
+      "intimate_connection": {
+        "behaviors": ["친밀감 형성 단계 행동들"],
+        "affection_range": [61, 100],
+        "dialogue_style": "친밀 단계 대화 스타일"
+      }
+    }
+  },
+  "hobbies": ["취미들"],
+  "values": "가치관",
+  "background": {
+    "family": "가족 배경",
+    "hometown": "고향",
+    "relationship": "관계 설정"
+  }
 }`;
 
   try {
