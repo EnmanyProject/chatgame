@@ -486,6 +486,26 @@ async function generateCharacterWithAI(inputData) {
   // 프론트엔드에서 answers 필드로 데이터를 보내므로 처리
   const userData = inputData.answers || inputData;
 
+  // 🎯 MBTI 기본값 처리: null 값들을 MBTI 타입별 기본값으로 대체
+  const mbtiDefaults = generateMBTIDefaults(userData.mbti);
+  console.log(`🎯 [${userData.mbti}] MBTI 기본값 준비:`, mbtiDefaults);
+
+  // null 값들을 MBTI 기본값으로 대체
+  if (userData.charm_points === null || userData.charm_points === undefined || (Array.isArray(userData.charm_points) && userData.charm_points.length === 0)) {
+    userData.charm_points = mbtiDefaults.charm_points;
+    console.log('✅ charm_points MBTI 기본값 적용:', userData.charm_points);
+  }
+
+  if (userData.core_desires === null || userData.core_desires === undefined || (Array.isArray(userData.core_desires) && userData.core_desires.length === 0)) {
+    userData.core_desires = mbtiDefaults.core_desires;
+    console.log('✅ core_desires MBTI 기본값 적용:', userData.core_desires);
+  }
+
+  if (userData.speech_style === null || userData.speech_style === undefined || userData.speech_style === '') {
+    userData.speech_style = mbtiDefaults.speech_style;
+    console.log('✅ speech_style MBTI 기본값 적용:', userData.speech_style);
+  }
+
   console.log('📝 입력 데이터:', {
     name: userData.name,
     mbti: userData.mbti,
@@ -682,12 +702,45 @@ ${selectedHobbies && selectedHobbies.length > 0 ? selectedHobbies.map(hobby => `
     // 기본 필드 추가
     const completedCharacter = {
       ...characterData,
-      id: `${characterData.name.toLowerCase().replace(/\s+/g, '_')}_${characterData.mbti.toLowerCase()}_${Date.now()}`,
+      id: `${characterData.basic_info?.name?.toLowerCase().replace(/\s+/g, '_') || characterData.name?.toLowerCase().replace(/\s+/g, '_')}_${characterData.basic_info?.mbti?.toLowerCase() || characterData.mbti?.toLowerCase()}_${Date.now()}`,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       source: 'ai_generated',
-      active: true
+      active: true,
+      version: '2.0'
     };
+
+    // 🚨 중요: AI 응답에서도 빈 값들을 MBTI 기본값으로 다시 한번 검증
+    console.log('🔍 AI 응답 후 빈 값 검증 시작...');
+    const finalMbti = completedCharacter.basic_info?.mbti || completedCharacter.mbti;
+    const finalDefaults = generateMBTIDefaults(finalMbti);
+
+    // appeal_profile.charm_points 검증
+    if (!completedCharacter.appeal_profile?.charm_points ||
+        (Array.isArray(completedCharacter.appeal_profile.charm_points) && completedCharacter.appeal_profile.charm_points.length === 0) ||
+        completedCharacter.appeal_profile.charm_points === null) {
+      if (!completedCharacter.appeal_profile) completedCharacter.appeal_profile = {};
+      completedCharacter.appeal_profile.charm_points = [...finalDefaults.charm_points];
+      console.log('✅ AI 응답 후 charm_points 기본값 적용:', completedCharacter.appeal_profile.charm_points);
+    }
+
+    // psychological_depth.core_desires 검증
+    if (!completedCharacter.psychological_depth?.core_desires ||
+        (Array.isArray(completedCharacter.psychological_depth.core_desires) && completedCharacter.psychological_depth.core_desires.length === 0) ||
+        completedCharacter.psychological_depth.core_desires === null) {
+      if (!completedCharacter.psychological_depth) completedCharacter.psychological_depth = {};
+      completedCharacter.psychological_depth.core_desires = [...finalDefaults.core_desires];
+      console.log('✅ AI 응답 후 core_desires 기본값 적용:', completedCharacter.psychological_depth.core_desires);
+    }
+
+    // conversation_dynamics.speech_style 검증
+    if (!completedCharacter.conversation_dynamics?.speech_style ||
+        completedCharacter.conversation_dynamics.speech_style === null ||
+        completedCharacter.conversation_dynamics.speech_style === '') {
+      if (!completedCharacter.conversation_dynamics) completedCharacter.conversation_dynamics = {};
+      completedCharacter.conversation_dynamics.speech_style = finalDefaults.speech_style;
+      console.log('✅ AI 응답 후 speech_style 기본값 적용:', completedCharacter.conversation_dynamics.speech_style);
+    }
 
     console.log('✅ AI 캐릭터 생성 완료:', completedCharacter.name);
     return completedCharacter;
