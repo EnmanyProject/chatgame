@@ -1162,7 +1162,18 @@
             padding: 20px 30px;
             border-radius: 0 0 15px 15px;
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .footer-left {
+            display: flex;
+            gap: 10px;
+        }
+
+        .footer-right {
+            display: flex;
             gap: 15px;
         }
 
@@ -4137,8 +4148,18 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('characterModal')">취소</button>
-                <button type="button" class="btn btn-primary" onclick="saveCharacter()">💖 캐릭터 저장</button>
+                <div class="footer-left">
+                    <button type="button" class="btn btn-info" onclick="autoCompleteCharacter()" title="미입력된 데이터를 AI가 자동으로 완성합니다">
+                        🎯 자동완성
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="generateCharacterProfile()" title="현재 캐릭터의 상세한 인물 소개를 AI가 생성합니다">
+                        📝 인물소개 생성
+                    </button>
+                </div>
+                <div class="footer-right">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('characterModal')">취소</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCharacter()">💖 캐릭터 저장</button>
+                </div>
             </div>
         </div>
     </div>
@@ -10725,6 +10746,404 @@
         window.backToEpisodesList = backToEpisodesList;
         window.deleteEpisode = deleteEpisode;
         window.initializeEpisodeTab = initializeEpisodeTab;
+
+        // 🎯 캐릭터 자동 완성 함수 (새로 추가)
+        async function autoCompleteCharacter() {
+            console.log('🎯 캐릭터 자동 완성 시작');
+
+            try {
+                // 버튼 상태 변경
+                const button = event.target;
+                const originalText = button.textContent;
+                button.disabled = true;
+                button.textContent = '🎯 완성 중...';
+
+                // 현재 폼 데이터 수집
+                const formData = collectCharacterFormData();
+                console.log('📋 현재 폼 데이터:', formData);
+
+                // API 호출
+                const response = await fetch('/api/character-ai-generator', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'auto_complete_character',
+                        ...formData
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API 호출 실패: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('✅ 자동 완성 결과:', result);
+
+                if (result.success) {
+                    // 완성된 데이터로 폼 채우기
+                    fillCharacterForm(result.character);
+                    alert('🎉 캐릭터 정보가 자동으로 완성되었습니다!\n\n누락된 필드들이 AI에 의해 채워졌습니다.');
+                } else {
+                    throw new Error(result.message || '자동 완성 실패');
+                }
+
+            } catch (error) {
+                console.error('❌ 캐릭터 자동 완성 실패:', error);
+                alert(`❌ 자동 완성 실패:\n${error.message}\n\n다시 시도해주세요.`);
+            } finally {
+                // 버튼 상태 복원
+                const button = event.target;
+                button.disabled = false;
+                button.textContent = originalText;
+            }
+        }
+
+        // 📝 인물 소개 생성 함수 (새로 추가)
+        async function generateCharacterProfile() {
+            console.log('📝 인물 소개 생성 시작');
+
+            try {
+                // 버튼 상태 변경
+                const button = event.target;
+                const originalText = button.textContent;
+                button.disabled = true;
+                button.textContent = '📝 생성 중...';
+
+                // 현재 폼 데이터 수집
+                const formData = collectCharacterFormData();
+                console.log('📋 캐릭터 데이터:', formData);
+
+                if (!formData.basic_info?.name && !formData.name) {
+                    alert('❌ 최소한 캐릭터 이름은 입력해주세요!');
+                    return;
+                }
+
+                // API 호출
+                const response = await fetch('/api/character-ai-generator', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'generate_character_profile',
+                        ...formData
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API 호출 실패: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('✅ 인물 소개 생성 결과:', result);
+
+                if (result.success) {
+                    // 인물 소개 모달 표시
+                    showCharacterProfileModal(result.profile);
+                } else {
+                    throw new Error(result.message || '인물 소개 생성 실패');
+                }
+
+            } catch (error) {
+                console.error('❌ 인물 소개 생성 실패:', error);
+                alert(`❌ 인물 소개 생성 실패:\n${error.message}\n\n다시 시도해주세요.`);
+            } finally {
+                // 버튼 상태 복원
+                const button = event.target;
+                button.disabled = false;
+                button.textContent = originalText;
+            }
+        }
+
+        // 현재 폼 데이터 수집 함수
+        function collectCharacterFormData() {
+            const formData = {
+                id: document.getElementById('characterId')?.value || null,
+                basic_info: {
+                    name: document.getElementById('charName')?.value || '',
+                    age: parseInt(document.getElementById('charAge')?.value) || null,
+                    mbti: document.getElementById('charMbti')?.value || '',
+                    occupation: document.getElementById('charOccupation')?.value || '',
+                    gender: 'female'
+                },
+                appeal_profile: {
+                    seduction_style: document.getElementById('seductionStyle')?.value || '',
+                    charm_points: getSelectedCharmPoints(),
+                    emotional_intelligence: parseInt(document.getElementById('emotionalIntelligence')?.value) || null,
+                    confidence_level: parseInt(document.getElementById('confidenceLevel')?.value) || null,
+                    mystery_factor: parseInt(document.getElementById('mysteryFactor')?.value) || null
+                },
+                physical_allure: {
+                    appearance: {
+                        hair: document.getElementById('charHair')?.value || '',
+                        eyes: document.getElementById('charEyes')?.value || '',
+                        body: document.getElementById('charBody')?.value || '',
+                        bust: document.getElementById('charBust')?.value || '',
+                        waist_hip: document.getElementById('charWaistHip')?.value || '',
+                        style: document.getElementById('charStyle')?.value || ''
+                    }
+                },
+                psychological_depth: {
+                    core_desires: getSelectedCoreDesires(),
+                    boundaries: {
+                        comfort_level: document.getElementById('comfortLevel')?.value || '',
+                        escalation_pace: document.getElementById('escalationPace')?.value || ''
+                    }
+                },
+                conversation_dynamics: {
+                    speech_style: document.getElementById('charSpeechStyle')?.value || ''
+                }
+            };
+
+            console.log('📋 수집된 폼 데이터:', formData);
+            return formData;
+        }
+
+        // 선택된 매력 포인트 수집
+        function getSelectedCharmPoints() {
+            const selected = [];
+            const checkboxes = document.querySelectorAll('input[name="charm_points"]:checked');
+            checkboxes.forEach(cb => selected.push(cb.value));
+            return selected;
+        }
+
+        // 선택된 핵심 욕구 수집
+        function getSelectedCoreDesires() {
+            const selected = [];
+            const select = document.getElementById('coreDesires');
+            if (select) {
+                for (let option of select.selectedOptions) {
+                    selected.push(option.value);
+                }
+            }
+            return selected;
+        }
+
+        // 캐릭터 폼에 데이터 채우기
+        function fillCharacterForm(character) {
+            console.log('📝 폼 데이터 채우기:', character);
+
+            // 기본 정보
+            if (character.basic_info) {
+                if (character.basic_info.name) document.getElementById('charName').value = character.basic_info.name;
+                if (character.basic_info.age) document.getElementById('charAge').value = character.basic_info.age;
+                if (character.basic_info.mbti) document.getElementById('charMbti').value = character.basic_info.mbti;
+                if (character.basic_info.occupation) document.getElementById('charOccupation').value = character.basic_info.occupation;
+            }
+
+            // 매력 프로필
+            if (character.appeal_profile) {
+                if (character.appeal_profile.seduction_style) {
+                    const seductionSelect = document.getElementById('seductionStyle');
+                    if (seductionSelect) seductionSelect.value = character.appeal_profile.seduction_style;
+                }
+                if (character.appeal_profile.emotional_intelligence) {
+                    const eiSlider = document.getElementById('emotionalIntelligence');
+                    if (eiSlider) {
+                        eiSlider.value = character.appeal_profile.emotional_intelligence;
+                        // 슬라이더 값 표시 업데이트
+                        const eiValue = document.getElementById('eiValue');
+                        if (eiValue) eiValue.textContent = character.appeal_profile.emotional_intelligence;
+                    }
+                }
+                if (character.appeal_profile.confidence_level) {
+                    const clSlider = document.getElementById('confidenceLevel');
+                    if (clSlider) {
+                        clSlider.value = character.appeal_profile.confidence_level;
+                        const clValue = document.getElementById('clValue');
+                        if (clValue) clValue.textContent = character.appeal_profile.confidence_level;
+                    }
+                }
+                if (character.appeal_profile.mystery_factor) {
+                    const mfSlider = document.getElementById('mysteryFactor');
+                    if (mfSlider) {
+                        mfSlider.value = character.appeal_profile.mystery_factor;
+                        const mfValue = document.getElementById('mfValue');
+                        if (mfValue) mfValue.textContent = character.appeal_profile.mystery_factor;
+                    }
+                }
+            }
+
+            // 외모
+            if (character.physical_allure?.appearance) {
+                const appearance = character.physical_allure.appearance;
+                if (appearance.hair) document.getElementById('charHair').value = appearance.hair;
+                if (appearance.eyes) document.getElementById('charEyes').value = appearance.eyes;
+                if (appearance.body) document.getElementById('charBody').value = appearance.body;
+                if (appearance.bust) document.getElementById('charBust').value = appearance.bust;
+                if (appearance.waist_hip) document.getElementById('charWaistHip').value = appearance.waist_hip;
+                if (appearance.style) document.getElementById('charStyle').value = appearance.style;
+            }
+
+            // 심리적 특성
+            if (character.psychological_depth?.boundaries) {
+                const boundaries = character.psychological_depth.boundaries;
+                if (boundaries.comfort_level) {
+                    const comfortSelect = document.getElementById('comfortLevel');
+                    if (comfortSelect) comfortSelect.value = boundaries.comfort_level;
+                }
+                if (boundaries.escalation_pace) {
+                    const paceSelect = document.getElementById('escalationPace');
+                    if (paceSelect) paceSelect.value = boundaries.escalation_pace;
+                }
+            }
+
+            // 대화 스타일
+            if (character.conversation_dynamics?.speech_style) {
+                const speechInput = document.getElementById('charSpeechStyle');
+                if (speechInput) speechInput.value = character.conversation_dynamics.speech_style;
+            }
+        }
+
+        // 인물 소개 모달 표시
+        function showCharacterProfileModal(profile) {
+            console.log('📝 인물 소개 모달 표시:', profile);
+
+            // 모달 HTML이 없으면 생성
+            let modal = document.getElementById('characterProfileModal');
+            if (!modal) {
+                modal = createCharacterProfileModal();
+                document.body.appendChild(modal);
+            }
+
+            // 내용 채우기
+            document.getElementById('profileCharacterName').textContent = profile.character_name;
+            document.getElementById('profileText').textContent = profile.profile_text;
+
+            // 프롬프트 사용 가이드
+            document.getElementById('scenarioPrompt').textContent = profile.usage_guide.scenario_prompt;
+            document.getElementById('dialoguePrompt').textContent = profile.usage_guide.dialogue_prompt;
+
+            // 모달 표시
+            modal.style.display = 'block';
+        }
+
+        // 인물 소개 모달 HTML 생성
+        function createCharacterProfileModal() {
+            const modalHTML = `
+                <div id="characterProfileModal" class="modal">
+                    <div class="modal-content" style="max-width: 800px;">
+                        <div class="modal-header">
+                            <span class="close" onclick="closeModal('characterProfileModal')">&times;</span>
+                            <h2>📝 <span id="profileCharacterName">캐릭터</span> 인물 소개</h2>
+                        </div>
+                        <div class="modal-body">
+                            <div class="profile-section">
+                                <h3>🎭 캐릭터 프로필</h3>
+                                <div class="profile-content">
+                                    <pre id="profileText" style="white-space: pre-wrap; line-height: 1.6; font-family: inherit;"></pre>
+                                </div>
+                            </div>
+
+                            <div class="profile-section">
+                                <h3>🎮 프롬프트 활용 가이드</h3>
+                                <div class="prompt-tabs">
+                                    <button class="prompt-tab active" onclick="showPromptTab('scenario')">시나리오 제작용</button>
+                                    <button class="prompt-tab" onclick="showPromptTab('dialogue')">대화 생성용</button>
+                                </div>
+
+                                <div id="scenarioPromptTab" class="prompt-tab-content active">
+                                    <h4>📖 시나리오 제작 시 사용할 프롬프트:</h4>
+                                    <textarea id="scenarioPrompt" readonly style="width: 100%; height: 120px; font-size: 14px;"></textarea>
+                                    <button class="btn btn-info" onclick="copyToClipboard('scenarioPrompt')">📋 복사</button>
+                                </div>
+
+                                <div id="dialoguePromptTab" class="prompt-tab-content">
+                                    <h4>💬 대화 생성 시 사용할 프롬프트:</h4>
+                                    <textarea id="dialoguePrompt" readonly style="width: 100%; height: 120px; font-size: 14px;"></textarea>
+                                    <button class="btn btn-info" onclick="copyToClipboard('dialoguePrompt')">📋 복사</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('characterProfileModal')">닫기</button>
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                .profile-section {
+                    margin-bottom: 30px;
+                }
+
+                .profile-content {
+                    background: #f8f9fa;
+                    border: 1px solid #e9ecef;
+                    border-radius: 8px;
+                    padding: 20px;
+                    max-height: 400px;
+                    overflow-y: auto;
+                }
+
+                .prompt-tabs {
+                    display: flex;
+                    margin-bottom: 15px;
+                }
+
+                .prompt-tab {
+                    padding: 10px 20px;
+                    border: 1px solid #ddd;
+                    background: #f8f9fa;
+                    cursor: pointer;
+                    border-radius: 5px 5px 0 0;
+                }
+
+                .prompt-tab.active {
+                    background: #007bff;
+                    color: white;
+                }
+
+                .prompt-tab-content {
+                    display: none;
+                    padding: 15px;
+                    border: 1px solid #ddd;
+                    border-radius: 0 5px 5px 5px;
+                }
+
+                .prompt-tab-content.active {
+                    display: block;
+                }
+                </style>
+            `;
+
+            const div = document.createElement('div');
+            div.innerHTML = modalHTML;
+            return div.firstElementChild;
+        }
+
+        // 프롬프트 탭 전환
+        function showPromptTab(tabName) {
+            // 모든 탭 비활성화
+            document.querySelectorAll('.prompt-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.prompt-tab-content').forEach(content => content.classList.remove('active'));
+
+            // 선택된 탭 활성화
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'PromptTab').classList.add('active');
+        }
+
+        // 클립보드에 복사
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            element.select();
+            document.execCommand('copy');
+
+            // 버튼 텍스트 임시 변경
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '✅ 복사됨!';
+            setTimeout(() => {
+                button.textContent = originalText;
+            }, 2000);
+        }
+
+        // 전역 함수 등록
+        window.autoCompleteCharacter = autoCompleteCharacter;
+        window.generateCharacterProfile = generateCharacterProfile;
+        window.showPromptTab = showPromptTab;
+        window.copyToClipboard = copyToClipboard;
     </script>
 </body>
 </html>
