@@ -1402,12 +1402,29 @@ ${getPsychologicalDescription(characterData)} 이런 특성들이 ${name}의 독
   return profileData;
 }
 
-// 🔄 프론트엔드 데이터를 v2.0 스키마로 변환
+// ✨ 빈 값 처리 헬퍼 함수 (빈 문자열, null, undefined 모두 처리)
+function getValueOrDefault(value, defaultValue) {
+  // 빈 문자열(""), null, undefined, 빈 배열 모두 falsy로 처리
+  if (!value || (Array.isArray(value) && value.length === 0) || value === '') {
+    return defaultValue;
+  }
+  return value;
+}
+
+// 🔄 프론트엔드 데이터를 v2.0 스키마로 변환 (강화된 기본값 로직)
 function convertToV2Schema(frontendData) {
   console.log('🔄 v2.0 스키마 변환 시작:', frontendData);
 
   // 기본 ID 생성
   const characterId = `${frontendData.name.toLowerCase().replace(/\s+/g, '_')}_${frontendData.mbti.toLowerCase()}_${Date.now()}`;
+
+  // 허어 옵션 배열들
+  const hairOptions = ['long_straight', 'long_wavy', 'medium_bob', 'short_cute', 'curly_hair'];
+  const eyeOptions = ['round_cute', 'seductive_eyes', 'innocent_eyes', 'mysterious_eyes', 'bright_eyes'];
+  const styleOptions = ['cute_casual', 'sexy_chic', 'innocent_style', 'elegant_fashion', 'sporty_style'];
+  const occupationOptions = ['art', 'music', 'literature', 'psychology', 'business', 'design'];
+  const charmOptions = ['전염성 있는 미소', '예쁘게 웃는 모습', '장난스러운 말투', '사랑스러운 제스쳐'];
+  const desireOptions = ['의미있는 연결', '개인적 성장', '새로운 사람들과의 만남', '창의적 표현'];
 
   const v2Character = {
     id: characterId,
@@ -1415,35 +1432,35 @@ function convertToV2Schema(frontendData) {
       name: frontendData.name,
       age: parseInt(frontendData.age),
       mbti: frontendData.mbti,
-      occupation: frontendData.major || 'art',
+      occupation: getValueOrDefault(frontendData.major, randomChoice(occupationOptions)),
       gender: 'female'
     },
     appeal_profile: {
-      seduction_style: frontendData.seduction_style || 'playful_confident',
-      charm_points: frontendData.personality_traits || [],
-      emotional_intelligence: frontendData.emotional_intelligence || 7,
-      confidence_level: frontendData.confidence_level || 8,
-      mystery_factor: frontendData.mystery_factor || 6
+      seduction_style: getValueOrDefault(frontendData.seduction_style, 'playful_confident'),
+      charm_points: getValueOrDefault(frontendData.personality_traits, randomSelect(charmOptions, 3)),
+      emotional_intelligence: frontendData.emotional_intelligence || randomRange(6, 9),
+      confidence_level: frontendData.confidence_level || randomRange(6, 9),
+      mystery_factor: frontendData.mystery_factor || randomRange(4, 8)
     },
     physical_allure: {
       appearance: {
-        hair: frontendData.appearance?.hair || frontendData.hair || 'long_straight',
-        eyes: frontendData.appearance?.eyes || frontendData.eyes || 'seductive_eyes',
-        body: frontendData.appearance?.body || frontendData.body || 'petite_sexy',
-        bust: frontendData.appearance?.bust || frontendData.bust || 'small_cute',
-        waist_hip: frontendData.appearance?.waist_hip || frontendData.waist_hip || 'slim_tight',
-        style: frontendData.appearance?.style || frontendData.style || 'sexy_chic'
+        hair: getValueOrDefault(frontendData.appearance?.hair || frontendData.hair, randomChoice(hairOptions)),
+        eyes: getValueOrDefault(frontendData.appearance?.eyes || frontendData.eyes, randomChoice(eyeOptions)),
+        body: getValueOrDefault(frontendData.appearance?.body || frontendData.body, 'petite_sexy'),
+        bust: getValueOrDefault(frontendData.appearance?.bust || frontendData.bust, 'small_cute'),
+        waist_hip: getValueOrDefault(frontendData.appearance?.waist_hip || frontendData.waist_hip, 'slim_tight'),
+        style: getValueOrDefault(frontendData.appearance?.style || frontendData.style, randomChoice(styleOptions))
       }
     },
     psychological_depth: {
-      core_desires: frontendData.hobbies || [],
+      core_desires: getValueOrDefault(frontendData.hobbies, randomSelect(desireOptions, 2)),
       boundaries: {
-        comfort_level: frontendData.comfort_level || 'light_flirtation',
-        escalation_pace: frontendData.escalation_pace || 'very_gradual'
+        comfort_level: getValueOrDefault(frontendData.comfort_level, 'light_flirtation'),
+        escalation_pace: getValueOrDefault(frontendData.escalation_pace, 'very_gradual')
       }
     },
     conversation_dynamics: {
-      speech_style: frontendData.speech_style || `${frontendData.mbti} 유형의 따뜻하고 자연스러운 말투`
+      speech_style: getValueOrDefault(frontendData.speech_style, `${frontendData.mbti} 유형의 따뜻하고 자연스러운 말투`)
     },
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -1452,7 +1469,15 @@ function convertToV2Schema(frontendData) {
     version: '2.0'
   };
 
-  console.log('✅ v2.0 스키마 변환 완료:', v2Character);
+  console.log('✅ v2.0 스키마 변환 완료 (모든 필드 채울):', v2Character);
+  console.log('📈 기본값 적용 필드:');
+  console.log('  - occupation:', v2Character.basic_info.occupation);
+  console.log('  - hair:', v2Character.physical_allure.appearance.hair);
+  console.log('  - eyes:', v2Character.physical_allure.appearance.eyes);
+  console.log('  - style:', v2Character.physical_allure.appearance.style);
+  console.log('  - charm_points:', v2Character.appeal_profile.charm_points);
+  console.log('  - core_desires:', v2Character.psychological_depth.core_desires);
+
   return v2Character;
 }
 
@@ -1551,6 +1576,16 @@ function getComfortLevelDescription(level) {
 function generateRandomName() {
   const names = ['미나', '지영', '수진', '하은', '유리', '서현', '예은', '소연', '지은', '민지'];
   return randomChoice(names);
+}
+
+// 추가 헬퍼 함수들
+function randomSelect(array, count) {
+  const shuffled = [...array].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
+
+function randomRange(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function getMBTIDescription(mbti) {
