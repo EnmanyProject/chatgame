@@ -124,20 +124,29 @@ module.exports = async function handler(req, res) {
         delete characterData.action;
       }
 
-      console.log('💾 캐릭터 저장 요청:', characterData);
+      console.log('💾 캐릭터 저장 요청 v2.0:', characterData);
 
-      if (!characterData.name || !characterData.mbti) {
+      // 🔄 새로운 스키마와 기존 스키마 호환성 처리
+      const name = characterData.basic_info?.name || characterData.name;
+      const mbti = characterData.basic_info?.mbti || characterData.mbti;
+
+      console.log('📋 추출된 필수 정보:');
+      console.log('  - 이름:', name);
+      console.log('  - MBTI:', mbti);
+      console.log('  - 스키마 타입:', characterData.basic_info ? 'v2.0 (복잡한 스키마)' : 'v1.0 (기존 스키마)');
+
+      if (!name || !mbti) {
         return res.status(400).json({
           success: false,
-          message: 'Character name and MBTI are required'
+          message: 'Character name and MBTI are required (both v1.0 and v2.0 schema supported)'
         });
       }
 
-      console.log('💾 GitHub API 전용 캐릭터 저장 시작:', characterData.name);
+      console.log('💾 GitHub API 전용 캐릭터 저장 시작 v2.0:', name);
 
-      // ID가 없으면 생성
+      // ID가 없으면 생성 (v2.0 호환)
       if (!characterData.id) {
-        characterData.id = `${characterData.name.toLowerCase().replace(/\s+/g, '_')}_${characterData.mbti.toLowerCase()}_${Date.now()}`;
+        characterData.id = `${name.toLowerCase().replace(/\s+/g, '_')}_${mbti.toLowerCase()}_${Date.now()}`;
       }
 
       // GitHub 데이터 구조 준비

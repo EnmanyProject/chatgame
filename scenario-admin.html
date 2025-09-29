@@ -221,8 +221,17 @@
         }
 
         .btn-success {
-            background: #27ae60;
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
             color: white;
+            font-weight: bold;
+            border: none;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #229954 0%, #27ae60 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
         }
 
         .btn-danger {
@@ -233,6 +242,43 @@
         .btn-warning {
             background: #f39c12;
             color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #3498db 0%, #5dade2 100%);
+            color: white;
+            border: none;
+        }
+
+        .btn-info:hover {
+            background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+            transform: translateY(-1px);
+        }
+
+        /* AI 생성 버튼 특별 스타일 */
+        .footer-left .btn {
+            margin-right: 8px;
+            font-size: 13px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer-left .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .footer-left .btn:hover::before {
+            left: 100%;
         }
 
         /* 시나리오 그리드 */
@@ -1381,17 +1427,99 @@
             transition: width 0.3s ease;
         }
 
+        /* 캐릭터 상세 정보 모달 스타일 */
+        .modal-large {
+            max-width: 800px;
+            width: 90%;
+        }
+
+        .detail-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .detail-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        .detail-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .detail-item.detail-full {
+            grid-column: 1 / -1;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9em;
+        }
+
+        .detail-value {
+            color: #6c757d;
+            font-size: 0.9em;
+            text-align: right;
+            word-break: break-word;
+        }
+
+        .detail-item.detail-full .detail-value {
+            text-align: left;
+            width: 100%;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+        }
+
+        /* 캐릭터 카드에 클릭 기능 추가 */
+        .character-card {
+            cursor: pointer;
+        }
+
         /* 반응형 */
         @media (max-width: 768px) {
             .dialogues-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
-            
+
             .scenarios-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .characters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-large {
+                width: 95%;
+                margin: 20px auto;
+            }
+
+            .detail-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -4149,11 +4277,14 @@
             </div>
             <div class="modal-footer">
                 <div class="footer-left">
-                    <button type="button" class="btn btn-info" onclick="autoCompleteCharacter()" title="미입력된 데이터를 AI가 자동으로 완성합니다">
-                        🎯 자동완성
+                    <button type="button" class="btn btn-success" onclick="generateCompleteCharacter(event)" title="캐릭터 데이터 자동완성 + 인물소개까지 한번에 AI 생성">
+                        🤖 AI로 완전 생성
                     </button>
-                    <button type="button" class="btn btn-warning" onclick="generateCharacterProfile()" title="현재 캐릭터의 상세한 인물 소개를 AI가 생성합니다">
-                        📝 인물소개 생성
+                    <button type="button" class="btn btn-info" onclick="autoCompleteCharacter(event)" title="미입력된 데이터를 AI가 자동으로 완성합니다">
+                        🎯 자동완성만
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="generateCharacterProfile(event)" title="현재 캐릭터의 상세한 인물 소개를 AI가 생성합니다">
+                        📝 인물소개만
                     </button>
                 </div>
                 <div class="footer-right">
@@ -4203,6 +4334,172 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('dialoguePreviewModal')">닫기</button>
                 <button type="button" class="btn btn-primary" onclick="editDialogueFromPreview()">수정하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 캐릭터 상세 정보 모달 -->
+    <div id="characterDetailModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal('characterDetailModal')">&times;</span>
+                <h2 id="characterDetailTitle">👤 캐릭터 상세 정보</h2>
+            </div>
+            <div class="modal-body">
+                <div id="characterDetailContent">
+                    <!-- 기본 정보 섹션 -->
+                    <div class="detail-section">
+                        <h3>📋 기본 정보</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">이름:</span>
+                                <span id="detailName" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">나이:</span>
+                                <span id="detailAge" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">MBTI:</span>
+                                <span id="detailMbti" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">성별:</span>
+                                <span id="detailGender" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">전공/직업:</span>
+                                <span id="detailOccupation" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">관계:</span>
+                                <span id="detailRelationship" class="detail-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 외모 정보 섹션 -->
+                    <div class="detail-section">
+                        <h3>💄 외모 특징</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">헤어스타일:</span>
+                                <span id="detailHair" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">눈:</span>
+                                <span id="detailEyes" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">체형:</span>
+                                <span id="detailBody" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">가슴:</span>
+                                <span id="detailBust" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">허리/엉덩이:</span>
+                                <span id="detailWaistHip" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">스타일:</span>
+                                <span id="detailStyle" class="detail-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 성격 및 특성 -->
+                    <div class="detail-section">
+                        <h3>🎭 성격 및 특성</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item detail-full">
+                                <span class="detail-label">성격 특성:</span>
+                                <span id="detailPersonality" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item detail-full">
+                                <span class="detail-label">취미:</span>
+                                <span id="detailHobbies" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item detail-full">
+                                <span class="detail-label">가치관:</span>
+                                <span id="detailValues" class="detail-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 대화 스타일 -->
+                    <div class="detail-section">
+                        <h3>💬 대화 스타일</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item detail-full">
+                                <span class="detail-label">말투:</span>
+                                <span id="detailSpeechStyle" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item detail-full">
+                                <span class="detail-label">말버릇:</span>
+                                <span id="detailSpeechHabit" class="detail-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 매력 프로필 (v2.0 스키마용) -->
+                    <div class="detail-section" id="appealProfileSection" style="display: none;">
+                        <h3>💕 매력 프로필</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">유혹 스타일:</span>
+                                <span id="detailSeductionStyle" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">감정지능:</span>
+                                <span id="detailEmotionalIntelligence" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">자신감:</span>
+                                <span id="detailConfidenceLevel" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">신비감:</span>
+                                <span id="detailMysteryFactor" class="detail-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 배경 정보 -->
+                    <div class="detail-section">
+                        <h3>🏠 배경 정보</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">가족구성:</span>
+                                <span id="detailFamily" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">출신지:</span>
+                                <span id="detailHometown" class="detail-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 스키마 정보 -->
+                    <div class="detail-section">
+                        <h3>🔧 시스템 정보</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">데이터 버전:</span>
+                                <span id="detailSchemaVersion" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">생성 날짜:</span>
+                                <span id="detailCreatedDate" class="detail-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('characterDetailModal')">닫기</button>
+                <button type="button" class="btn btn-primary" onclick="editCurrentCharacter()">✏️ 편집</button>
             </div>
         </div>
     </div>
@@ -7381,7 +7678,7 @@
 
             console.log('🎨 캐릭터 카드 HTML 생성 중...');
             container.innerHTML = characterArray.map(character => `
-                <div class="character-card">
+                <div class="character-card" onclick="showCharacterDetail('${character.id}')">
                     <div class="character-image">
                         ${character.image ?
                             `<img src="${character.image}" alt="${character.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 100 100\\"><rect width=\\"100\\" height=\\"100\\" fill=\\"%23f0f0f0\\"/><text x=\\"50\\" y=\\"50\\" text-anchor=\\"middle\\" dy=\\".3em\\" fill=\\"%23999\\">${character.name.charAt(0)}</text></svg>'"/>` :
@@ -7389,11 +7686,14 @@
                         }
                     </div>
                     <div class="character-info">
-                        <div class="mbti">${character.mbti}</div>
-                        <h3>${character.name}</h3>
-                        <p class="traits">${character.personality_traits || character.personality || '특성 정보 없음'}</p>
-                        <p style="font-size: 0.9em; color: #95a5a6; margin-bottom: 15px;">${character.speech_style || '말투 정보 없음'}</p>
-                        <div class="actions">
+                        <div class="mbti">${getCharacterMBTI(character)}</div>
+                        <h3>${getCharacterName(character)}</h3>
+                        <p class="traits">${getCharacterTraits(character)}</p>
+                        <p style="font-size: 0.9em; color: #95a5a6; margin-bottom: 15px;">${getCharacterSpeechStyle(character)}</p>
+                        <div class="character-schema-info" style="font-size: 0.8em; color: #7f8c8d; margin-bottom: 10px;">
+                            ${character.version || (character.basic_info ? 'v2.0' : 'v1.0')} ${character.source ? `• ${character.source}` : ''}
+                        </div>
+                        <div class="actions" onclick="event.stopPropagation()">
                             <button class="btn btn-success" onclick="editCharacter('${character.id}')">수정</button>
                             <button class="btn btn-danger" onclick="deleteCharacter('${character.id}')">삭제</button>
                         </div>
@@ -7401,6 +7701,243 @@
                 </div>
             `).join('');
             console.log('✅ 캐릭터 카드 HTML 생성 완료');
+        }
+
+        // 🔄 스키마 호환성을 위한 헬퍼 함수들 (v2.0 업그레이드)
+        function getCharacterName(character) {
+            return character.basic_info?.name || character.name || '이름 없음';
+        }
+
+        function getCharacterMBTI(character) {
+            return character.basic_info?.mbti || character.mbti || 'MBTI 없음';
+        }
+
+        function getCharacterTraits(character) {
+            // v2.0 스키마의 경우
+            if (character.appeal_profile?.charm_points && Array.isArray(character.appeal_profile.charm_points)) {
+                return character.appeal_profile.charm_points.join(', ');
+            }
+
+            // v1.0 스키마의 경우
+            if (character.personality_traits) {
+                return Array.isArray(character.personality_traits)
+                    ? character.personality_traits.join(', ')
+                    : character.personality_traits;
+            }
+
+            // 기타 호환성
+            return character.personality || '특성 정보 없음';
+        }
+
+        function getCharacterSpeechStyle(character) {
+            return character.conversation_dynamics?.speech_style ||
+                   character.speech_style ||
+                   '말투 정보 없음';
+        }
+
+        // 🔍 캐릭터 상세 정보 모달 표시 함수
+        function showCharacterDetail(characterId) {
+            console.log('👤 캐릭터 상세 정보 모달 열기:', characterId);
+
+            const character = characters[characterId];
+            if (!character) {
+                console.error('❌ 캐릭터를 찾을 수 없습니다:', characterId);
+                alert('캐릭터 정보를 찾을 수 없습니다.');
+                return;
+            }
+
+            console.log('📋 캐릭터 데이터:', character);
+            console.log('🔧 스키마 버전:', character.basic_info ? 'v2.0' : 'v1.0');
+
+            // 모달 제목 설정
+            const modalTitle = document.getElementById('characterDetailTitle');
+            if (modalTitle) {
+                modalTitle.textContent = `👤 ${getCharacterName(character)} 상세 정보`;
+            }
+
+            // 기본 정보 채우기
+            fillCharacterDetailInfo(character);
+
+            // 현재 편집 중인 캐릭터 ID 저장
+            window.currentDetailCharacterId = characterId;
+
+            // 모달 표시
+            document.getElementById('characterDetailModal').style.display = 'block';
+            console.log('✅ 캐릭터 상세 정보 모달 표시 완료');
+        }
+
+        // 📝 캐릭터 상세 정보 채우기 함수
+        function fillCharacterDetailInfo(character) {
+            console.log('📝 캐릭터 상세 정보 채우는 중...');
+
+            // 기본 정보 섹션
+            safeSetTextContent('detailName', getCharacterName(character));
+            safeSetTextContent('detailAge', getCharacterAge(character));
+            safeSetTextContent('detailMbti', getCharacterMBTI(character));
+            safeSetTextContent('detailGender', getCharacterGender(character));
+            safeSetTextContent('detailOccupation', getCharacterOccupation(character));
+            safeSetTextContent('detailRelationship', getCharacterRelationship(character));
+
+            // 외모 정보 섹션
+            safeSetTextContent('detailHair', getCharacterHair(character));
+            safeSetTextContent('detailEyes', getCharacterEyes(character));
+            safeSetTextContent('detailBody', getCharacterBody(character));
+            safeSetTextContent('detailBust', getCharacterBust(character));
+            safeSetTextContent('detailWaistHip', getCharacterWaistHip(character));
+            safeSetTextContent('detailStyle', getCharacterStyle(character));
+
+            // 성격 및 특성
+            safeSetTextContent('detailPersonality', getCharacterTraits(character));
+            safeSetTextContent('detailHobbies', getCharacterHobbies(character));
+            safeSetTextContent('detailValues', getCharacterValues(character));
+
+            // 대화 스타일
+            safeSetTextContent('detailSpeechStyle', getCharacterSpeechStyle(character));
+            safeSetTextContent('detailSpeechHabit', getCharacterSpeechHabit(character));
+
+            // 배경 정보
+            safeSetTextContent('detailFamily', getCharacterFamily(character));
+            safeSetTextContent('detailHometown', getCharacterHometown(character));
+
+            // 매력 프로필 (v2.0 스키마인 경우만 표시)
+            const isV2Schema = character.basic_info || character.appeal_profile;
+            const appealSection = document.getElementById('appealProfileSection');
+            if (appealSection) {
+                if (isV2Schema) {
+                    appealSection.style.display = 'block';
+                    safeSetTextContent('detailSeductionStyle', getCharacterSeductionStyle(character));
+                    safeSetTextContent('detailEmotionalIntelligence', getCharacterEmotionalIntelligence(character));
+                    safeSetTextContent('detailConfidenceLevel', getCharacterConfidenceLevel(character));
+                    safeSetTextContent('detailMysteryFactor', getCharacterMysteryFactor(character));
+                } else {
+                    appealSection.style.display = 'none';
+                }
+            }
+
+            // 시스템 정보
+            safeSetTextContent('detailSchemaVersion', isV2Schema ? 'v2.0 (고급 스키마)' : 'v1.0 (기본 스키마)');
+            safeSetTextContent('detailCreatedDate', getCharacterCreatedDate(character));
+
+            console.log('✅ 캐릭터 상세 정보 채우기 완료');
+        }
+
+        // 🔧 상세 정보용 헬퍼 함수들
+        function getCharacterAge(character) {
+            const age = character.basic_info?.age || character.age;
+            return age ? `${age}세` : '-';
+        }
+
+        function getCharacterGender(character) {
+            const gender = character.basic_info?.gender || character.gender;
+            return gender === 'female' ? '여성' : gender === 'male' ? '남성' : '-';
+        }
+
+        function getCharacterOccupation(character) {
+            return character.basic_info?.occupation || character.occupation || character.major || '-';
+        }
+
+        function getCharacterRelationship(character) {
+            return character.relationship || '-';
+        }
+
+        function getCharacterHair(character) {
+            return character.physical_allure?.hair || character.appearance?.hair || '-';
+        }
+
+        function getCharacterEyes(character) {
+            return character.physical_allure?.eyes || character.appearance?.eyes || '-';
+        }
+
+        function getCharacterBody(character) {
+            return character.physical_allure?.body || character.appearance?.body || '-';
+        }
+
+        function getCharacterBust(character) {
+            return character.physical_allure?.bust || character.appearance?.bust || '-';
+        }
+
+        function getCharacterWaistHip(character) {
+            return character.physical_allure?.waist_hip || character.appearance?.waist_hip || '-';
+        }
+
+        function getCharacterStyle(character) {
+            return character.physical_allure?.style || character.appearance?.style || '-';
+        }
+
+        function getCharacterHobbies(character) {
+            const hobbies = character.appeal_profile?.hobbies || character.hobbies;
+            if (Array.isArray(hobbies) && hobbies.length > 0) {
+                return hobbies.join(', ');
+            }
+            return '-';
+        }
+
+        function getCharacterValues(character) {
+            return character.psychological_traits?.values || character.values || '-';
+        }
+
+        function getCharacterSpeechHabit(character) {
+            return character.conversation_dynamics?.speech_habit || character.speech_habit || '-';
+        }
+
+        function getCharacterFamily(character) {
+            return character.background?.family || character.family || '-';
+        }
+
+        function getCharacterHometown(character) {
+            return character.background?.hometown || character.hometown || '-';
+        }
+
+        function getCharacterSeductionStyle(character) {
+            return character.appeal_profile?.seduction_style || '-';
+        }
+
+        function getCharacterEmotionalIntelligence(character) {
+            const ei = character.appeal_profile?.emotional_intelligence;
+            return ei ? `${ei}/10` : '-';
+        }
+
+        function getCharacterConfidenceLevel(character) {
+            const cl = character.appeal_profile?.confidence_level;
+            return cl ? `${cl}/10` : '-';
+        }
+
+        function getCharacterMysteryFactor(character) {
+            const mf = character.appeal_profile?.mystery_factor;
+            return mf ? `${mf}/10` : '-';
+        }
+
+        function getCharacterCreatedDate(character) {
+            if (character.created_at) {
+                return new Date(character.created_at).toLocaleString('ko-KR');
+            }
+            return '-';
+        }
+
+        // 🛠️ 안전한 텍스트 설정 함수
+        function safeSetTextContent(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value || '-';
+            } else {
+                console.warn(`⚠️ 요소를 찾을 수 없습니다: ${elementId}`);
+            }
+        }
+
+        // ✏️ 상세 정보 모달에서 편집 버튼 클릭 시
+        function editCurrentCharacter() {
+            if (window.currentDetailCharacterId) {
+                console.log('✏️ 상세 정보에서 편집 모드로 전환:', window.currentDetailCharacterId);
+
+                // 상세 정보 모달 닫기
+                closeModal('characterDetailModal');
+
+                // 편집 모달 열기
+                editCharacter(window.currentDetailCharacterId);
+            } else {
+                console.error('❌ 편집할 캐릭터 ID가 없습니다');
+                alert('편집할 캐릭터를 찾을 수 없습니다.');
+            }
         }
 
         function updateCharacterStats() {
@@ -7471,6 +8008,7 @@
             document.getElementById('characterModal').style.display = 'block';
         }
 
+        // 🔄 캐릭터 편집 함수 v2.0 (새로운 스키마 지원)
         function editCharacter(characterId) {
             const character = characters[characterId];
             if (!character) {
@@ -7478,46 +8016,43 @@
                 return;
             }
 
-            console.log('✏️ 캐릭터 편집 시작:', character.name);
+            const characterName = getCharacterName(character);
+            console.log('✏️ 캐릭터 편집 v2.0 시작:', characterName);
+            console.log('🔍 캐릭터 스키마 타입:', character.basic_info ? 'v2.0 (복잡한 스키마)' : 'v1.0 (기존 스키마)');
+
             currentMode = 'edit';
 
-            // 안전한 요소 설정 함수
-            const safeSetValue = (elementId, value) => {
-                const element = document.getElementById(elementId);
-                if (element && value !== undefined && value !== null) {
-                    element.value = value;
-                    console.log(`✅ ${elementId} 값 설정:`, value);
-                } else if (!element) {
-                    console.warn(`⚠️ 요소를 찾을 수 없음: ${elementId}`);
-                } else {
-                    console.log(`⚠️ ${elementId}에 설정할 값이 없음`);
-                }
-            };
+            // 🎯 새로운 fillCharacterForm 함수 사용 (v2.0 호환)
+            fillCharacterForm(character);
 
-            // 🎭 캐릭터 요약 섹션 표시 및 데이터 채우기
+            // 🆔 편집 모드를 위한 캐릭터 ID 설정
+            const characterIdInput = document.getElementById('characterId');
+            if (characterIdInput) {
+                characterIdInput.value = characterId;
+                console.log('✅ 캐릭터 ID 설정:', characterId);
+            }
+
+            // 🎭 캐릭터 요약 섹션 표시 및 데이터 채우기 (v2.0 호환)
             const summarySection = document.getElementById('characterSummarySection');
             if (summarySection) {
                 summarySection.style.display = 'block';
 
-                // 요약 정보 채우기
-                document.getElementById('summaryName').textContent = character.name || '-';
-                document.getElementById('summaryAge').textContent = character.age ? `${character.age}세` : '-';
-                document.getElementById('summaryMbti').textContent = character.mbti || '-';
-                document.getElementById('summaryGender').textContent = character.gender === 'female' ? '여성' : character.gender === 'male' ? '남성' : '-';
+                // v2.0 스키마 호환 요약 정보 채우기
+                document.getElementById('summaryName').textContent = getCharacterName(character);
+                document.getElementById('summaryAge').textContent = (character.basic_info?.age || character.age) ? `${character.basic_info?.age || character.age}세` : '-';
+                document.getElementById('summaryMbti').textContent = getCharacterMBTI(character);
+                document.getElementById('summaryGender').textContent = (character.basic_info?.gender || character.gender) === 'female' ? '여성' :
+                                                                     (character.basic_info?.gender || character.gender) === 'male' ? '남성' : '-';
 
-                // 성격특성
-                const personalityText = Array.isArray(character.personality_traits) && character.personality_traits.length > 0
-                    ? character.personality_traits.join(', ')
-                    : '-';
-                document.getElementById('summaryPersonality').textContent = personalityText;
+                // 특성 정보 (v2.0 호환)
+                document.getElementById('summaryPersonality').textContent = getCharacterTraits(character);
 
-                // 취미
-                const hobbiesText = Array.isArray(character.hobbies) && character.hobbies.length > 0
-                    ? character.hobbies.join(', ')
-                    : '-';
+                // 취미 정보 (v2.0 호환)
+                const hobbies = character.hobbies || [];
+                const hobbiesText = Array.isArray(hobbies) && hobbies.length > 0 ? hobbies.join(', ') : '-';
                 document.getElementById('summaryHobbies').textContent = hobbiesText;
 
-                // 외모 (hair, eyes, style)
+                // 외모 정보 (v2.0 호환)
                 const appearanceText = character.appearance
                     ? `${character.appearance.hair || ''} / ${character.appearance.eyes || ''} / ${character.appearance.style || ''}`.replace(/\s*\/\s*$/g, '').replace(/^\s*\/\s*/g, '')
                     : '-';
@@ -7533,47 +8068,43 @@
                 console.log('✅ 캐릭터 요약 정보 표시 완료');
             }
 
-            // 모달 제목 설정
-            safeSetValue('characterModalTitle', ''); // textContent로 따로 설정
-            document.getElementById('characterModalTitle').textContent = `🎭 캐릭터 수정: ${character.name}`;
-            
-            // 기본 필드들 설정
-            safeSetValue('characterId', characterId);
-            safeSetValue('charName', character.name);
-            safeSetValue('charMbti', character.mbti);
-            safeSetValue('charAge', character.age);
-            safeSetValue('charType', character.character_type);
-            safeSetValue('charMajor', character.major);
-            safeSetValue('charFamily', character.family);
-            safeSetValue('charHometown', character.hometown);
-            safeSetValue('charRelationship', character.relationship);
-            safeSetValue('charHair', character.appearance?.hair);
-            safeSetValue('charEyes', character.appearance?.eyes);
-            safeSetValue('charBody', character.appearance?.body);
-            safeSetValue('charStyle', character.appearance?.style);
-            safeSetValue('charValues', character.values);
-            safeSetValue('charSpeechStyle', character.speech_style);
-            safeSetValue('charSpeechHabit', character.speech_habit);
-            // charGenre 필드 제거됨
-            // charMainSituation 필드 제거됨
+            // 모달 제목 설정 (v2.0 호환)
+            const modalTitle = document.getElementById('characterModalTitle');
+            if (modalTitle) {
+                modalTitle.textContent = `🎭 캐릭터 수정: ${getCharacterName(character)}`;
+            }
 
-            // 🎯 체크박스 선택 복원 (성격특성, 취미)
-            if (Array.isArray(character.personality_traits)) {
-                character.personality_traits.forEach(trait => {
+            // 🆔 편집용 캐릭터 ID만 별도 설정 (fillCharacterForm에서 처리하지 않는 항목)
+            safeSetValue('characterId', characterId);
+
+            // ✅ 모든 폼 필드는 위의 fillCharacterForm(character) 호출로 이미 처리됨
+            console.log('✅ 편집 모드: fillCharacterForm v2.0으로 모든 데이터 채움 완료');
+
+            // 🎯 체크박스 선택 복원 (성격특성, 취미) - v2.0 스키마 호환
+            // 성격특성 복원 (v1.0: personality_traits, v2.0: psychological_traits.personality)
+            const personalityTraits = character.personality_traits ||
+                                    character.psychological_traits?.personality || [];
+
+            if (Array.isArray(personalityTraits) && personalityTraits.length > 0) {
+                personalityTraits.forEach(trait => {
                     const checkbox = document.querySelector(`input[name="personality"][value="${trait}"]`);
                     if (checkbox) {
                         checkbox.checked = true;
-                        console.log(`✅ 성격특성 체크: ${trait}`);
+                        console.log(`✅ 성격특성 체크 (v2.0 호환): ${trait}`);
                     }
                 });
             }
 
-            if (Array.isArray(character.hobbies)) {
-                character.hobbies.forEach(hobby => {
+            // 취미 복원 (v1.0: hobbies, v2.0: appeal_profile.hobbies)
+            const hobbies = character.hobbies ||
+                           character.appeal_profile?.hobbies || [];
+
+            if (Array.isArray(hobbies) && hobbies.length > 0) {
+                hobbies.forEach(hobby => {
                     const checkbox = document.querySelector(`input[name="hobbies"][value="${hobby}"]`);
                     if (checkbox) {
                         checkbox.checked = true;
-                        console.log(`✅ 취미 체크: ${hobby}`);
+                        console.log(`✅ 취미 체크 (v2.0 호환): ${hobby}`);
                     }
                 });
             }
@@ -8560,6 +9091,11 @@
         window.testAIGeneration = testAIGeneration;
         window.resetAISettings = resetAISettings;
 
+        // 🔍 캐릭터 상세 정보 관련 함수들 전역 할당
+        window.showCharacterDetail = showCharacterDetail;
+        window.editCurrentCharacter = editCurrentCharacter;
+        console.log('✅ 캐릭터 상세 정보 함수 전역 할당 완료:', typeof window.showCharacterDetail);
+
         // AI 관리 시스템 함수들
         function applyAISettings() {
             try {
@@ -9420,12 +9956,16 @@
             }
         };
 
-        // 캐릭터 저장 함수도 온라인 클라이언트로 교체
+        // 🔄 캐릭터 저장 함수 v2.0 (새로운 스키마 지원)
         window.saveCharacter = async function() {
-            console.log('💾 === 온라인 캐릭터 저장 시작 ===');
+            console.log('💾 === 캐릭터 저장 v2.0 시작 ===');
 
-            const name = document.getElementById('charName').value;
-            const mbti = document.getElementById('charMbti').value;
+            // 🎯 새로운 collectCharacterFormData 함수 사용
+            const characterData = collectCharacterFormData();
+
+            // 🔍 필수 필드 검증
+            const name = characterData.basic_info?.name;
+            const mbti = characterData.basic_info?.mbti;
 
             console.log('📝 입력값 확인:');
             console.log('  - 이름:', name || '(비어있음)');
@@ -9438,55 +9978,19 @@
             }
 
             try {
-                // 간단한 캐릭터 데이터 생성 (복잡한 collectCharacterData 대신)
-                const characterId = `${name.toLowerCase().replace(/\s+/g, '_')}_${mbti.toLowerCase()}_${Date.now()}`;
+                // 🆔 ID 생성 (없는 경우)
+                if (!characterData.id) {
+                    characterData.id = `${name.toLowerCase().replace(/\s+/g, '_')}_${mbti.toLowerCase()}_${Date.now()}`;
+                }
 
-                // 💎 실제 사용자 선택값을 모두 수집하여 반영
-                console.log('📝 폼 데이터 수집 중...');
+                // 📅 메타데이터 추가
+                characterData.created_at = new Date().toISOString();
+                characterData.updated_at = new Date().toISOString();
+                characterData.source = 'scenario_admin_v2';
+                characterData.active = true;
+                characterData.version = '2.0';
 
-                // 성격 특성 체크박스에서 선택된 항목들 수집
-                const selectedPersonalities = Array.from(document.querySelectorAll('input[name="personality"]:checked')).map(cb => cb.value);
-                console.log('  - 선택된 성격:', selectedPersonalities);
-
-                // 취미 체크박스에서 선택된 항목들 수집
-                const selectedHobbies = Array.from(document.querySelectorAll('input[name="hobbies"]:checked')).map(cb => cb.value);
-                console.log('  - 선택된 취미:', selectedHobbies);
-
-                const finalCharacterData = {
-                    id: characterId,
-                    name: name,
-                    age: parseInt(document.getElementById('charAge')?.value) || 22,
-                    mbti: mbti,
-                    gender: 'female',
-
-                    // ✨ 실제 사용자 선택값 반영 (기본값 없음)
-                    personality_traits: selectedPersonalities.length > 0 ? selectedPersonalities : [],
-                    major: document.getElementById('charMajor')?.value || 'general',
-                    family: document.getElementById('charFamily')?.value || 'average',
-                    hometown: document.getElementById('charHometown')?.value || 'seoul',
-                    relationship: document.getElementById('charRelationship')?.value || 'friend',
-
-                    appearance: {
-                        hair: document.getElementById('charHair')?.value || '섹시한 긴 생머리',
-                        eyes: document.getElementById('charEyes')?.value || '유혹적인 눈매',
-                        body: document.getElementById('charBody')?.value || '매력적인 평균',
-                        bust: document.getElementById('charBust')?.value || 'medium_balanced',
-                        waist_hip: document.getElementById('charWaistHip')?.value || 'curvy_sexy',
-                        style: document.getElementById('charStyle')?.value || 'sexy_chic'
-                    },
-
-                    // ✨ 취미도 실제 선택값 반영 (기본값 없음)
-                    hobbies: selectedHobbies.length > 0 ? selectedHobbies : [],
-                    values: document.getElementById('charValues')?.value || 'family_oriented',
-                    speech_style: document.getElementById('charSpeechStyle')?.value || '친근한 말투',
-                    speech_habit: document.getElementById('charSpeechHabit')?.value || '자주 미소짓기',
-
-                    created_at: new Date().toISOString(),
-                    source: 'scenario_admin',
-                    active: true
-                };
-
-                console.log('💾 최종 캐릭터 데이터:', finalCharacterData);
+                console.log('💾 최종 캐릭터 데이터 v2.0:', characterData);
 
                 // 저장 버튼 상태 변경
                 const saveButton = document.querySelector('#characterModal .btn-primary') ||
@@ -9494,12 +9998,12 @@
 
                 if (saveButton) {
                     saveButton.disabled = true;
-                    saveButton.textContent = '🌐 온라인 저장 중...';
+                    saveButton.textContent = '🌐 v2.0 저장 중...';
                 }
 
-                console.log('💾 API를 통해 저장할 캐릭터 데이터:', finalCharacterData);
+                console.log('💾 API를 통해 저장할 캐릭터 데이터 v2.0:', characterData);
 
-                // 직접 API 호출로 캐릭터 저장
+                // 🔄 새로운 스키마로 API 호출
                 const response = await fetch('/api/character-ai-generator', {
                     method: 'POST',
                     headers: {
@@ -9507,7 +10011,7 @@
                     },
                     body: JSON.stringify({
                         action: 'save_character',
-                        character: finalCharacterData
+                        character: characterData  // 새로운 스키마 데이터
                     })
                 });
 
@@ -10748,7 +11252,7 @@
         window.initializeEpisodeTab = initializeEpisodeTab;
 
         // 🎯 캐릭터 자동 완성 함수 (새로 추가)
-        async function autoCompleteCharacter() {
+        async function autoCompleteCharacter(event) {
             console.log('🎯 캐릭터 자동 완성 시작');
 
             try {
@@ -10782,6 +11286,18 @@
                 console.log('✅ 자동 완성 결과:', result);
 
                 if (result.success) {
+                    // 🔍 디버깅: 자동완성 데이터 구조 분석
+                    console.log('🔍 자동완성 캐릭터 데이터 분석:');
+                    console.log('- 데이터 타입:', typeof result.character);
+                    console.log('- 최상위 키들:', Object.keys(result.character || {}));
+                    console.log('- basic_info 존재:', !!result.character?.basic_info);
+                    console.log('- appeal_profile 존재:', !!result.character?.appeal_profile);
+                    console.log('- physical_allure 존재:', !!result.character?.physical_allure);
+
+                    if (result.character?.basic_info) {
+                        console.log('- basic_info 내용:', result.character.basic_info);
+                    }
+
                     // 완성된 데이터로 폼 채우기
                     fillCharacterForm(result.character);
                     alert('🎉 캐릭터 정보가 자동으로 완성되었습니다!\n\n누락된 필드들이 AI에 의해 채워졌습니다.');
@@ -10794,14 +11310,16 @@
                 alert(`❌ 자동 완성 실패:\n${error.message}\n\n다시 시도해주세요.`);
             } finally {
                 // 버튼 상태 복원
-                const button = event.target;
-                button.disabled = false;
-                button.textContent = originalText;
+                if (event && event.target) {
+                    const button = event.target;
+                    button.disabled = false;
+                    button.textContent = originalText;
+                }
             }
         }
 
         // 📝 인물 소개 생성 함수 (새로 추가)
-        async function generateCharacterProfile() {
+        async function generateCharacterProfile(event) {
             console.log('📝 인물 소개 생성 시작');
 
             try {
@@ -10851,9 +11369,120 @@
                 alert(`❌ 인물 소개 생성 실패:\n${error.message}\n\n다시 시도해주세요.`);
             } finally {
                 // 버튼 상태 복원
+                if (event && event.target) {
+                    const button = event.target;
+                    button.disabled = false;
+                    button.textContent = originalText;
+                }
+            }
+        }
+
+        // 🤖 통합 AI 캐릭터 생성 함수 (자동완성 + 인물소개)
+        async function generateCompleteCharacter(event) {
+            console.log('🤖 통합 AI 캐릭터 생성 시작');
+
+            try {
+                // 버튼 상태 변경
                 const button = event.target;
-                button.disabled = false;
-                button.textContent = originalText;
+                const originalText = button.textContent;
+                button.disabled = true;
+                button.textContent = '🤖 AI 생성 중...';
+
+                // 현재 폼 데이터 수집
+                const formData = collectCharacterFormData();
+                console.log('📋 현재 폼 데이터:', formData);
+
+                // 1단계: 캐릭터 자동 완성
+                console.log('🎯 1단계: 캐릭터 데이터 자동 완성');
+                button.textContent = '🎯 1/2 데이터 완성 중...';
+
+                const autoCompleteResponse = await fetch('/api/character-ai-generator', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'auto_complete_character',
+                        ...formData
+                    })
+                });
+
+                if (!autoCompleteResponse.ok) {
+                    throw new Error(`자동 완성 API 호출 실패: ${autoCompleteResponse.status}`);
+                }
+
+                const autoCompleteResult = await autoCompleteResponse.json();
+                console.log('✅ 1단계 완료:', autoCompleteResult);
+
+                if (!autoCompleteResult.success) {
+                    throw new Error(autoCompleteResult.message || '캐릭터 자동 완성 실패');
+                }
+
+                // 🔍 디버깅: 완성된 캐릭터 데이터 구조 분석
+                console.log('🔍 완성된 캐릭터 데이터 분석:');
+                console.log('- 데이터 타입:', typeof autoCompleteResult.character);
+                console.log('- 최상위 키들:', Object.keys(autoCompleteResult.character || {}));
+                console.log('- basic_info 존재:', !!autoCompleteResult.character?.basic_info);
+                console.log('- appeal_profile 존재:', !!autoCompleteResult.character?.appeal_profile);
+                console.log('- physical_allure 존재:', !!autoCompleteResult.character?.physical_allure);
+
+                if (autoCompleteResult.character?.basic_info) {
+                    console.log('- basic_info 내용:', autoCompleteResult.character.basic_info);
+                }
+
+                // 완성된 데이터로 폼 채우기
+                fillCharacterForm(autoCompleteResult.character);
+
+                // 2단계: 인물 소개 생성
+                console.log('📝 2단계: 인물 소개 생성');
+                button.textContent = '📝 2/2 인물소개 생성 중...';
+
+                // 완성된 캐릭터 데이터로 인물소개 생성
+                const updatedFormData = collectCharacterFormData();
+
+                const profileResponse = await fetch('/api/character-ai-generator', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'generate_character_profile',
+                        ...updatedFormData
+                    })
+                });
+
+                if (!profileResponse.ok) {
+                    throw new Error(`인물소개 생성 API 호출 실패: ${profileResponse.status}`);
+                }
+
+                const profileResult = await profileResponse.json();
+                console.log('✅ 2단계 완료:', profileResult);
+
+                if (!profileResult.success) {
+                    throw new Error(profileResult.message || '인물 소개 생성 실패');
+                }
+
+                // 성공 메시지 및 결과 표시
+                const characterName = updatedFormData.basic_info?.name || '캐릭터';
+                const successMessage = `🎉 ${characterName} 캐릭터가 완전히 생성되었습니다!\n\n✅ 캐릭터 데이터 자동 완성\n✅ 인물 소개 생성\n\n생성된 인물소개를 확인하시겠습니까?`;
+
+                const showProfile = confirm(successMessage);
+                if (showProfile && profileResult.profile) {
+                    showCharacterProfileModal(profileResult.profile);
+                }
+
+                console.log('🎊 통합 AI 캐릭터 생성 완료!');
+
+            } catch (error) {
+                console.error('❌ 통합 AI 캐릭터 생성 실패:', error);
+                alert(`❌ AI 캐릭터 생성 실패:\n${error.message}\n\n다시 시도해주세요.`);
+            } finally {
+                // 버튼 상태 복원
+                if (event && event.target) {
+                    const button = event.target;
+                    button.disabled = false;
+                    button.textContent = originalText;
+                }
             }
         }
 
@@ -10865,7 +11494,7 @@
                     name: document.getElementById('charName')?.value || '',
                     age: parseInt(document.getElementById('charAge')?.value) || null,
                     mbti: document.getElementById('charMbti')?.value || '',
-                    occupation: document.getElementById('charOccupation')?.value || '',
+                    occupation: document.getElementById('charMajor')?.value || '', // charMajor 사용 (charOccupation 없음)
                     gender: 'female'
                 },
                 appeal_profile: {
@@ -10921,79 +11550,220 @@
             return selected;
         }
 
-        // 캐릭터 폼에 데이터 채우기
+        // 🔄 업그레이드된 캐릭터 폼 데이터 채우기 함수 (v2.0)
         function fillCharacterForm(character) {
-            console.log('📝 폼 데이터 채우기:', character);
+            console.log('📝 폼 데이터 채우기 시작:', character);
+            console.log('🔍 캐릭터 데이터 구조 분석:', Object.keys(character));
 
-            // 기본 정보
-            if (character.basic_info) {
-                if (character.basic_info.name) document.getElementById('charName').value = character.basic_info.name;
-                if (character.basic_info.age) document.getElementById('charAge').value = character.basic_info.age;
-                if (character.basic_info.mbti) document.getElementById('charMbti').value = character.basic_info.mbti;
-                if (character.basic_info.occupation) document.getElementById('charOccupation').value = character.basic_info.occupation;
+            // 🎯 1단계: 기본 정보 처리 (새로운 스키마 + 기존 스키마 호환)
+            fillBasicInfo(character);
+
+            // 🎯 2단계: 매력 프로필 처리
+            fillAppealProfile(character);
+
+            // 🎯 3단계: 외모 정보 처리
+            fillPhysicalAppearance(character);
+
+            // 🎯 4단계: 심리적 특성 처리
+            fillPsychologicalTraits(character);
+
+            // 🎯 5단계: 대화 스타일 처리
+            fillConversationStyle(character);
+
+            console.log('✅ 폼 데이터 채우기 완료');
+        }
+
+        // 🔹 기본 정보 채우기 (새로운 basic_info 스키마 + 기존 직접 필드)
+        function fillBasicInfo(character) {
+            console.log('📋 기본 정보 처리 중...');
+
+            // 이름 처리 (basic_info.name 또는 직접 name)
+            const name = character.basic_info?.name || character.name;
+            const charNameEl = document.getElementById('charName');
+            if (name && charNameEl) {
+                charNameEl.value = name;
+                console.log('✅ 이름 설정:', name);
             }
 
-            // 매력 프로필
-            if (character.appeal_profile) {
-                if (character.appeal_profile.seduction_style) {
-                    const seductionSelect = document.getElementById('seductionStyle');
-                    if (seductionSelect) seductionSelect.value = character.appeal_profile.seduction_style;
-                }
-                if (character.appeal_profile.emotional_intelligence) {
-                    const eiSlider = document.getElementById('emotionalIntelligence');
-                    if (eiSlider) {
-                        eiSlider.value = character.appeal_profile.emotional_intelligence;
-                        // 슬라이더 값 표시 업데이트
-                        const eiValue = document.getElementById('eiValue');
-                        if (eiValue) eiValue.textContent = character.appeal_profile.emotional_intelligence;
-                    }
-                }
-                if (character.appeal_profile.confidence_level) {
-                    const clSlider = document.getElementById('confidenceLevel');
-                    if (clSlider) {
-                        clSlider.value = character.appeal_profile.confidence_level;
-                        const clValue = document.getElementById('clValue');
-                        if (clValue) clValue.textContent = character.appeal_profile.confidence_level;
-                    }
-                }
-                if (character.appeal_profile.mystery_factor) {
-                    const mfSlider = document.getElementById('mysteryFactor');
-                    if (mfSlider) {
-                        mfSlider.value = character.appeal_profile.mystery_factor;
-                        const mfValue = document.getElementById('mfValue');
-                        if (mfValue) mfValue.textContent = character.appeal_profile.mystery_factor;
-                    }
-                }
+            // 나이 처리
+            const age = character.basic_info?.age || character.age;
+            const charAgeEl = document.getElementById('charAge');
+            if (age && charAgeEl) {
+                charAgeEl.value = age;
+                console.log('✅ 나이 설정:', age);
             }
 
-            // 외모
-            if (character.physical_allure?.appearance) {
-                const appearance = character.physical_allure.appearance;
-                if (appearance.hair) document.getElementById('charHair').value = appearance.hair;
-                if (appearance.eyes) document.getElementById('charEyes').value = appearance.eyes;
-                if (appearance.body) document.getElementById('charBody').value = appearance.body;
-                if (appearance.bust) document.getElementById('charBust').value = appearance.bust;
-                if (appearance.waist_hip) document.getElementById('charWaistHip').value = appearance.waist_hip;
-                if (appearance.style) document.getElementById('charStyle').value = appearance.style;
+            // MBTI 처리
+            const mbti = character.basic_info?.mbti || character.mbti;
+            const charMbtiEl = document.getElementById('charMbti');
+            if (mbti && charMbtiEl) {
+                charMbtiEl.value = mbti;
+                console.log('✅ MBTI 설정:', mbti);
             }
 
-            // 심리적 특성
-            if (character.psychological_depth?.boundaries) {
-                const boundaries = character.psychological_depth.boundaries;
-                if (boundaries.comfort_level) {
+            // 직업/전공 처리 (charMajor 필드 사용)
+            const occupation = character.basic_info?.occupation || character.occupation || character.major;
+            const charMajorEl = document.getElementById('charMajor');
+            if (occupation && charMajorEl) {
+                charMajorEl.value = occupation;
+                console.log('✅ 직업/전공 설정:', occupation);
+            }
+        }
+
+        // 🔹 매력 프로필 채우기
+        function fillAppealProfile(character) {
+            console.log('💫 매력 프로필 처리 중...');
+
+            // 유혹 스타일
+            const seductionStyle = character.appeal_profile?.seduction_style;
+            const seductionSelect = document.getElementById('seductionStyle');
+            if (seductionStyle && seductionSelect) {
+                seductionSelect.value = seductionStyle;
+                console.log('✅ 유혹 스타일 설정:', seductionStyle);
+            }
+
+            // 감성 지능
+            const emotionalIntelligence = character.appeal_profile?.emotional_intelligence;
+            const eiSlider = document.getElementById('emotionalIntelligence');
+            if (emotionalIntelligence && eiSlider) {
+                eiSlider.value = emotionalIntelligence;
+                const eiValue = document.getElementById('eiValue');
+                if (eiValue) eiValue.textContent = emotionalIntelligence;
+                console.log('✅ 감성 지능 설정:', emotionalIntelligence);
+            }
+
+            // 자신감 수준
+            const confidenceLevel = character.appeal_profile?.confidence_level;
+            const clSlider = document.getElementById('confidenceLevel');
+            if (confidenceLevel && clSlider) {
+                clSlider.value = confidenceLevel;
+                const clValue = document.getElementById('clValue');
+                if (clValue) clValue.textContent = confidenceLevel;
+                console.log('✅ 자신감 수준 설정:', confidenceLevel);
+            }
+
+            // 신비로움
+            const mysteryFactor = character.appeal_profile?.mystery_factor;
+            const mfSlider = document.getElementById('mysteryFactor');
+            if (mysteryFactor && mfSlider) {
+                mfSlider.value = mysteryFactor;
+                const mfValue = document.getElementById('mfValue');
+                if (mfValue) mfValue.textContent = mysteryFactor;
+                console.log('✅ 신비로움 설정:', mysteryFactor);
+            }
+
+            // 매력 포인트 처리
+            const charmPoints = character.appeal_profile?.charm_points;
+            if (charmPoints && Array.isArray(charmPoints)) {
+                // 체크박스들 초기화
+                const charmCheckboxes = document.querySelectorAll('input[name="charm_points"]');
+                charmCheckboxes.forEach(checkbox => checkbox.checked = false);
+
+                // 해당하는 체크박스들 체크
+                charmPoints.forEach(point => {
+                    const checkbox = document.querySelector(`input[name="charm_points"][value="${point}"]`);
+                    if (checkbox) checkbox.checked = true;
+                });
+                console.log('✅ 매력 포인트 설정:', charmPoints);
+            }
+        }
+
+        // 🔹 외모 정보 채우기
+        function fillPhysicalAppearance(character) {
+            console.log('👀 외모 정보 처리 중...');
+
+            // 새로운 스키마의 physical_allure.appearance 또는 기존 appearance
+            const appearance = character.physical_allure?.appearance || character.appearance;
+
+            if (appearance) {
+                // 머리 스타일
+                const hair = appearance.hair;
+                const charHairEl = document.getElementById('charHair');
+                if (hair && charHairEl) {
+                    charHairEl.value = hair;
+                    console.log('✅ 머리 스타일 설정:', hair);
+                }
+
+                // 눈 특징
+                const eyes = appearance.eyes;
+                const charEyesEl = document.getElementById('charEyes');
+                if (eyes && charEyesEl) {
+                    charEyesEl.value = eyes;
+                    console.log('✅ 눈 특징 설정:', eyes);
+                }
+
+                // 체형
+                const body = appearance.body;
+                const charBodyEl = document.getElementById('charBody');
+                if (body && charBodyEl) {
+                    charBodyEl.value = body;
+                    console.log('✅ 체형 설정:', body);
+                }
+
+                // 가슴
+                const bust = appearance.bust;
+                const charBustEl = document.getElementById('charBust');
+                if (bust && charBustEl) {
+                    charBustEl.value = bust;
+                    console.log('✅ 가슴 설정:', bust);
+                }
+
+                // 허리/엉덩이
+                const waistHip = appearance.waist_hip;
+                const charWaistHipEl = document.getElementById('charWaistHip');
+                if (waistHip && charWaistHipEl) {
+                    charWaistHipEl.value = waistHip;
+                    console.log('✅ 허리/엉덩이 설정:', waistHip);
+                }
+
+                // 스타일
+                const style = appearance.style;
+                const charStyleEl = document.getElementById('charStyle');
+                if (style && charStyleEl) {
+                    charStyleEl.value = style;
+                    console.log('✅ 스타일 설정:', style);
+                }
+            }
+        }
+
+        // 🔹 심리적 특성 채우기
+        function fillPsychologicalTraits(character) {
+            console.log('🧠 심리적 특성 처리 중...');
+
+            const psychological = character.psychological_depth;
+            if (psychological) {
+                // 경계선 설정
+                const boundaries = psychological.boundaries;
+                if (boundaries) {
+                    // 편안함 수준
+                    const comfortLevel = boundaries.comfort_level;
                     const comfortSelect = document.getElementById('comfortLevel');
-                    if (comfortSelect) comfortSelect.value = boundaries.comfort_level;
-                }
-                if (boundaries.escalation_pace) {
+                    if (comfortLevel && comfortSelect) {
+                        comfortSelect.value = comfortLevel;
+                        console.log('✅ 편안함 수준 설정:', comfortLevel);
+                    }
+
+                    // 관계 발전 속도
+                    const escalationPace = boundaries.escalation_pace;
                     const paceSelect = document.getElementById('escalationPace');
-                    if (paceSelect) paceSelect.value = boundaries.escalation_pace;
+                    if (escalationPace && paceSelect) {
+                        paceSelect.value = escalationPace;
+                        console.log('✅ 관계 발전 속도 설정:', escalationPace);
+                    }
                 }
             }
+        }
 
-            // 대화 스타일
-            if (character.conversation_dynamics?.speech_style) {
-                const speechInput = document.getElementById('charSpeechStyle');
-                if (speechInput) speechInput.value = character.conversation_dynamics.speech_style;
+        // 🔹 대화 스타일 채우기
+        function fillConversationStyle(character) {
+            console.log('💬 대화 스타일 처리 중...');
+
+            // 새로운 스키마의 conversation_dynamics.speech_style 또는 기존 speech_style
+            const speechStyle = character.conversation_dynamics?.speech_style || character.speech_style;
+            const speechInput = document.getElementById('charSpeechStyle');
+            if (speechStyle && speechInput) {
+                speechInput.value = speechStyle;
+                console.log('✅ 말투 스타일 설정:', speechStyle);
             }
         }
 
