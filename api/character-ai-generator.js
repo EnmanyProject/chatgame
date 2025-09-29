@@ -1404,10 +1404,14 @@ ${getPsychologicalDescription(characterData)} 이런 특성들이 ${name}의 독
 
 // ✨ 빈 값 처리 헬퍼 함수 (빈 문자열, null, undefined 모두 처리)
 function getValueOrDefault(value, defaultValue) {
+  console.log(`🔍 getValueOrDefault 검사: "${value}" (${typeof value}) -> ${!value || value === '' || (Array.isArray(value) && value.length === 0) ? '기본값 사용' : '입력값 사용'}`);
+
   // 빈 문자열(""), null, undefined, 빈 배열 모두 falsy로 처리
-  if (!value || (Array.isArray(value) && value.length === 0) || value === '') {
+  if (!value || value === '' || (Array.isArray(value) && value.length === 0)) {
+    console.log(`  → 기본값 적용: "${defaultValue}"`);
     return defaultValue;
   }
+  console.log(`  → 입력값 사용: "${value}"`);
   return value;
 }
 
