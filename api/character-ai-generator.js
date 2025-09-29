@@ -346,25 +346,54 @@ module.exports = async function handler(req, res) {
         console.log('✅ 필수 필드 검증 완료:', { name, age, mbti });
         console.log('📋 받은 전체 데이터:', req.body);
 
-        // 2️⃣ 프론트엔드 데이터를 v2.0 스키마로 변환
-        const characterData = convertToV2Schema(req.body);
-        console.log('🔄 v2.0 스키마로 변환 완료:', characterData);
+        // 2️⃣ AI를 사용한 캐릭터 생성 시도
+        try {
+          console.log('🤖 AI 캐릭터 생성 시작...');
+          const aiCharacter = await generateCharacterWithAI(req.body);
+          console.log('✅ AI 캐릭터 생성 성공:', aiCharacter);
 
-        // 3️⃣ 인물소개 프롬프트 생성
-        const characterProfile = generateSimpleProfile(characterData);
+          // 3️⃣ 인물소개 프롬프트 생성
+          const characterProfile = generateSimpleProfile(aiCharacter);
 
-        console.log('🎉 통합 캐릭터 생성 완료:', {
-          character_name: characterData.basic_info.name,
-          has_profile: !!characterProfile.profile_text
-        });
+          console.log('🎉 AI 통합 캐릭터 생성 완료:', {
+            character_name: aiCharacter.basic_info.name,
+            has_profile: !!characterProfile.profile_text
+          });
 
-        return res.json({
-          success: true,
-          character: characterData,
-          character_profile: characterProfile,
-          message: `${characterData.basic_info.name} 캐릭터가 완전히 생성되었습니다!`,
-          workflow: 'unified_generation'
-        });
+          return res.json({
+            success: true,
+            character: aiCharacter,
+            character_profile: characterProfile,
+            message: `${aiCharacter.basic_info.name} 캐릭터가 AI로 완전히 생성되었습니다!`,
+            workflow: 'ai_generation',
+            ai_powered: true
+          });
+
+        } catch (aiError) {
+          console.error('❌ AI 생성 실패:', aiError);
+          console.log('🔄 Fallback: 기본 생성으로 전환');
+
+          // AI 실패 시 fallback으로 기본 생성 사용
+          const characterData = convertToV2Schema(req.body);
+          console.log('🔄 v2.0 스키마로 변환 완료:', characterData);
+
+          const characterProfile = generateSimpleProfile(characterData);
+
+          console.log('🎉 Fallback 캐릭터 생성 완료:', {
+            character_name: characterData.basic_info.name,
+            has_profile: !!characterProfile.profile_text
+          });
+
+          return res.json({
+            success: true,
+            character: characterData,
+            character_profile: characterProfile,
+            message: `${characterData.basic_info.name} 캐릭터가 생성되었습니다 (AI 오류로 인한 기본 생성)`,
+            workflow: 'fallback_generation',
+            ai_powered: false,
+            fallback: true
+          });
+        }
 
       } catch (error) {
         console.error('❌ 통합 캐릭터 생성 실패:', error);
@@ -1403,25 +1432,65 @@ ${getPsychologicalDescription(characterData)} 이런 특성들이 ${name}의 독
 }
 
 // ✨ 빈 값 처리 헬퍼 함수 (강화된 버전)
-function getValueOrDefault(value, defaultValue) {
-  console.log(`🔍 getValueOrDefault 검사: "${JSON.stringify(value)}" (${typeof value})`);
+function getValueOrDefault(value, defaultValue, fieldName = 'unknown') {
+  console.log(`🔍 [${fieldName}] getValueOrDefault 검사: "${JSON.stringify(value)}" (${typeof value})`);
 
-  // 강화된 빈 값 감지
+  // 더욱 강화된 빈 값 감지
   const isEmpty = (
     value === null ||
     value === undefined ||
     value === '' ||
+    value === 'undefined' ||
+    value === 'null' ||
     (Array.isArray(value) && value.length === 0) ||
-    (typeof value === 'string' && value.trim() === '')
+    (typeof value === 'string' && value.trim() === '') ||
+    (typeof value === 'string' && value.trim() === '정보 없음') ||
+    (typeof value === 'object' && value !== null && Object.keys(value).length === 0)
   );
 
   if (isEmpty) {
-    console.log(`  → 기본값 적용: ${JSON.stringify(defaultValue)}`);
-    return defaultValue;
+    const finalDefault = Array.isArray(defaultValue) ? [...defaultValue] : defaultValue;
+    console.log(`  → [${fieldName}] 빈 값 감지! 기본값 적용: ${JSON.stringify(finalDefault)}`);
+    return finalDefault;
   }
 
-  console.log(`  → 입력값 사용: ${JSON.stringify(value)}`);
+  console.log(`  → [${fieldName}] 입력값 사용: ${JSON.stringify(value)}`);
   return value;
+}
+
+// 🎯 MBTI별 개성있는 기본값 생성 시스템
+function generateMBTIDefaults(mbti) {
+  const mbtiMap = {
+    'INFP': {
+      charm_points: ['순수한 미소', '깊은 눈빛', '감성적인 표현'],
+      core_desires: ['진정한 이해', '창의적 표현', '의미있는 연결'],
+      speech_style: 'INFP 유형의 감성적이고 따뜻한 말투'
+    },
+    'ENFP': {
+      charm_points: ['밝은 에너지', '재치있는 유머', '감염력있는 웃음'],
+      core_desires: ['새로운 경험', '사람들과의 연결', '자유로운 표현'],
+      speech_style: 'ENFP 유형의 활발하고 친근한 말투'
+    },
+    'INTJ': {
+      charm_points: ['신비로운 아우라', '날카로운 통찰력', '차분한 자신감'],
+      core_desires: ['지적 자극', '체계적 성장', '깊이있는 관계'],
+      speech_style: 'INTJ 유형의 논리적이고 간결한 말투'
+    },
+    'ESFJ': {
+      charm_points: ['따뜻한 배려', '세심한 관심', '포근한 미소'],
+      core_desires: ['타인 돕기', '조화로운 관계', '안정적 연결'],
+      speech_style: 'ESFJ 유형의 다정하고 배려깊은 말투'
+    },
+    'ISTP': {
+      charm_points: ['쿨한 매력', '자연스러운 여유', '실용적 센스'],
+      core_desires: ['개인적 자유', '실용적 성취', '독립적 생활'],
+      speech_style: 'ISTP 유형의 간결하고 직설적인 말투'
+    }
+  };
+
+  const defaults = mbtiMap[mbti] || mbtiMap['ENFP']; // 기본값 fallback
+  console.log(`🎯 [${mbti}] MBTI 기본값 생성:`, defaults);
+  return defaults;
 }
 
 // 🔄 프론트엔드 데이터를 v2.0 스키마로 변환 (강화된 기본값 로직)
@@ -1431,6 +1500,9 @@ function convertToV2Schema(frontendData) {
   console.log('  - frontendData.charm_points:', frontendData.charm_points);
   console.log('  - frontendData.core_desires:', frontendData.core_desires);
   console.log('  - frontendData.speech_style:', frontendData.speech_style);
+
+  // MBTI별 개성있는 기본값 생성
+  const mbtiDefaults = generateMBTIDefaults(frontendData.mbti);
 
   // 기본 ID 생성
   const characterId = `${frontendData.name.toLowerCase().replace(/\s+/g, '_')}_${frontendData.mbti.toLowerCase()}_${Date.now()}`;
@@ -1453,8 +1525,8 @@ function convertToV2Schema(frontendData) {
       gender: 'female'
     },
     appeal_profile: {
-      seduction_style: getValueOrDefault(frontendData.seduction_style, 'playful_confident'),
-      charm_points: getValueOrDefault(frontendData.charm_points, randomSelect(charmOptions, 3)),
+      seduction_style: getValueOrDefault(frontendData.seduction_style, 'playful_confident', 'seduction_style'),
+      charm_points: getValueOrDefault(frontendData.charm_points, mbtiDefaults.charm_points, 'charm_points'),
       emotional_intelligence: frontendData.emotional_intelligence || randomRange(6, 9),
       confidence_level: frontendData.confidence_level || randomRange(6, 9),
       mystery_factor: frontendData.mystery_factor || randomRange(4, 8)
@@ -1470,14 +1542,14 @@ function convertToV2Schema(frontendData) {
       }
     },
     psychological_depth: {
-      core_desires: getValueOrDefault(frontendData.core_desires, randomSelect(desireOptions, 2)),
+      core_desires: getValueOrDefault(frontendData.core_desires, mbtiDefaults.core_desires, 'core_desires'),
       boundaries: {
-        comfort_level: getValueOrDefault(frontendData.comfort_level, 'light_flirtation'),
-        escalation_pace: getValueOrDefault(frontendData.escalation_pace, 'very_gradual')
+        comfort_level: getValueOrDefault(frontendData.comfort_level, 'light_flirtation', 'comfort_level'),
+        escalation_pace: getValueOrDefault(frontendData.escalation_pace, 'very_gradual', 'escalation_pace')
       }
     },
     conversation_dynamics: {
-      speech_style: getValueOrDefault(frontendData.speech_style, `${frontendData.mbti} 유형의 따뜻하고 자연스러운 말투`)
+      speech_style: getValueOrDefault(frontendData.speech_style, mbtiDefaults.speech_style, 'speech_style')
     },
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
