@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 에피소드 플레이어 - 채팅 기술 훈련</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.8;
+            font-size: 14px;
+        }
+
+        /* 에피소드 선택 화면 */
+        .episode-selection {
+            display: block;
+        }
+
+        .scenario-selector {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .scenario-selector h3 {
+            margin-bottom: 15px;
+            color: #ffd700;
+        }
+
+        .scenario-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .scenario-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .scenario-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #667eea;
+        }
+
+        .scenario-card.selected {
+            background: rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+
+        .scenario-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .scenario-description {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .episode-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .episode-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .episode-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .episode-card.completed {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: #4caf50;
+        }
+
+        .episode-card.locked {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .episode-number {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .episode-title {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .episode-difficulty {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-top: 5px;
+            display: inline-block;
+        }
+
+        .difficulty-easy { background: rgba(76, 175, 80, 0.3); }
+        .difficulty-medium { background: rgba(255, 193, 7, 0.3); }
+        .difficulty-hard { background: rgba(255, 87, 34, 0.3); }
+        .difficulty-expert { background: rgba(156, 39, 176, 0.3); }
+
+        /* 게임 플레이 화면 */
+        .game-screen {
+            display: none;
+        }
+
+        .game-header {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .episode-info {
+            text-align: center;
+        }
+
+        .episode-info h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .episode-info p {
+            margin: 0;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .chat-container {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 400px;
+            margin-bottom: 20px;
+        }
+
+        .character-message {
+            background: rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .narration {
+            background: rgba(255, 193, 7, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-style: italic;
+            border-left: 4px solid #ffc107;
+        }
+
+        .choices-container {
+            display: grid;
+            gap: 10px;
+        }
+
+        .choice-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .choice-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #667eea;
+        }
+
+        .choice-text {
+            margin-bottom: 5px;
+        }
+
+        .choice-impact {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .choice-impact.positive { color: #4caf50; }
+        .choice-impact.negative { color: #f44336; }
+        .choice-impact.neutral { color: #ffc107; }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 에피소드 플레이어</h1>
+            <p>원하는 에피소드를 선택해서 바로 플레이하세요</p>
+        </div>
+
+        <!-- 에피소드 선택 화면 -->
+        <div class="episode-selection" id="episodeSelection">
+            <div class="scenario-selector">
+                <h3>📚 시나리오 선택</h3>
+                <div class="scenario-grid" id="scenarioGrid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scenario-selector" id="episodeSelector" style="display: none;">
+                <h3>🎯 에피소드 선택</h3>
+                <div class="episode-grid" id="episodeGrid">
+                </div>
+            </div>
+        </div>
+
+        <!-- 게임 플레이 화면 -->
+        <div class="game-screen" id="gameScreen">
+            <div class="game-header">
+                <button class="back-button" onclick="goBackToSelection()">← 돌아가기</button>
+                <div class="episode-info">
+                    <h3 id="currentEpisodeTitle">에피소드 #1</h3>
+                    <p id="currentEpisodeDetails">캐릭터 이름 · 난이도</p>
+                </div>
+            </div>
+
+            <div class="chat-container" id="chatContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 게임 상태 관리
+        const gameState = {
+            scenarios: [],
+            episodes: {},
+            currentScenario: null,
+            currentEpisode: null,
+            isPlaying: false
+        };
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadScenarios();
+        });
+
+        // 시나리오 로드
+        async function loadScenarios() {
+            try {
+                console.log('📚 시나리오 로딩 시작...');
+                const response = await fetch('/api/scenario-manager?action=list');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('📊 시나리오 API 응답:', data);
+
+                if (data.success && data.scenarios) {
+                    gameState.scenarios = Object.values(data.scenarios).filter(s => s && s.active_status !== false);
+                    console.log(`✅ 시나리오 ${gameState.scenarios.length}개 로드됨`);
+                    displayScenarios();
+                } else {
+                    throw new Error(data.message || '시나리오 데이터를 불러올 수 없습니다');
+                }
+            } catch (error) {
+                console.error('❌ 시나리오 로드 실패:', error);
+                document.getElementById('scenarioGrid').innerHTML =
+                    `<div style="text-align: center; color: #f44336; padding: 20px;">
+                        시나리오를 불러올 수 없습니다<br>
+                        <small>${error.message}</small>
+                    </div>`;
+            }
+        }
+
+        // 시나리오 표시
+        function displayScenarios() {
+            const grid = document.getElementById('scenarioGrid');
+
+            if (gameState.scenarios.length === 0) {
+                grid.innerHTML = '<div style="text-align: center; opacity: 0.7;">등록된 시나리오가 없습니다</div>';
+                return;
+            }
+
+            grid.innerHTML = gameState.scenarios.map(scenario => `
+                <div class="scenario-card" onclick="selectScenario('${scenario.scenario_id}')">
+                    <div class="scenario-title">${scenario.title}</div>
+                    <div class="scenario-description">${scenario.description}</div>
+                </div>
+            `).join('');
+        }
+
+        // 시나리오 선택
+        async function selectScenario(scenarioId) {
+            console.log('🎯 시나리오 선택:', scenarioId);
+            gameState.currentScenario = scenarioId;
+
+            // 선택된 시나리오 하이라이트
+            document.querySelectorAll('.scenario-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.scenario-card').classList.add('selected');
+
+            // 에피소드 로드
+            await loadEpisodes(scenarioId);
+        }
+
+        // 에피소드 로드
+        async function loadEpisodes(scenarioId) {
+            try {
+                console.log('📖 에피소드 로딩 시작:', scenarioId);
+                const response = await fetch(`/api/episode-manager?action=list&scenario_id=${scenarioId}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('📊 에피소드 API 응답:', data);
+
+                if (data.success && data.episodes) {
+                    gameState.episodes = {};
+                    data.episodes.forEach(episode => {
+                        gameState.episodes[episode.episode_number] = episode;
+                    });
+                    console.log(`✅ 에피소드 ${data.episodes.length}개 로드됨`);
+                    displayEpisodes();
+                } else {
+                    console.log('📭 해당 시나리오에 생성된 에피소드가 없습니다.');
+                    displayEpisodes(); // 빈 에피소드 그리드 표시
+                }
+            } catch (error) {
+                console.error('❌ 에피소드 로드 실패:', error);
+                document.getElementById('episodeGrid').innerHTML =
+                    `<div style="text-align: center; color: #f44336; padding: 20px; grid-column: 1/-1;">
+                        에피소드를 불러올 수 없습니다<br>
+                        <small>${error.message}</small>
+                    </div>`;
+            }
+
+            // 에피소드 선택 영역 표시
+            document.getElementById('episodeSelector').style.display = 'block';
+        }
+
+        // 에피소드 표시
+        function displayEpisodes() {
+            const grid = document.getElementById('episodeGrid');
+            const availableEpisodes = Object.keys(gameState.episodes);
+
+            if (availableEpisodes.length === 0) {
+                grid.innerHTML = '<div style="text-align: center; opacity: 0.7; grid-column: 1/-1;">이 시나리오에는 아직 에피소드가 없습니다</div>';
+                return;
+            }
+
+            // 1-36 슬롯 생성
+            let html = '';
+            for (let i = 1; i <= 36; i++) {
+                const episode = gameState.episodes[i];
+                const difficulty = getDifficultyByNumber(i);
+
+                if (episode) {
+                    html += `
+                        <div class="episode-card completed" onclick="playEpisode(${i})">
+                            <div class="episode-number">#${i}</div>
+                            <div class="episode-title">${episode.title}</div>
+                            <span class="episode-difficulty difficulty-${difficulty.toLowerCase()}">${difficulty}</span>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="episode-card locked">
+                            <div class="episode-number">#${i}</div>
+                            <div class="episode-title">미생성</div>
+                            <span class="episode-difficulty difficulty-${difficulty.toLowerCase()}">${difficulty}</span>
+                        </div>
+                    `;
+                }
+            }
+
+            grid.innerHTML = html;
+        }
+
+        // 난이도 계산
+        function getDifficultyByNumber(episodeNumber) {
+            if (episodeNumber <= 9) return 'Easy';
+            if (episodeNumber <= 18) return 'Medium';
+            if (episodeNumber <= 27) return 'Hard';
+            return 'Expert';
+        }
+
+        // 에피소드 플레이
+        function playEpisode(episodeNumber) {
+            const episode = gameState.episodes[episodeNumber];
+            if (!episode) {
+                alert('이 에피소드는 아직 생성되지 않았습니다.');
+                return;
+            }
+
+            console.log('🎮 에피소드 플레이 시작:', episodeNumber, episode);
+            gameState.currentEpisode = episode;
+            gameState.isPlaying = true;
+
+            // 화면 전환
+            document.getElementById('episodeSelection').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+
+            // 에피소드 정보 업데이트
+            document.getElementById('currentEpisodeTitle').textContent = episode.title;
+            document.getElementById('currentEpisodeDetails').textContent =
+                `${episode.character_name} · ${episode.difficulty}`;
+
+            // 대화 표시
+            displayEpisodeDialogue(episode);
+        }
+
+        // 에피소드 대화 표시
+        function displayEpisodeDialogue(episode) {
+            const container = document.getElementById('chatContainer');
+            const dialogue = episode.dialogue;
+
+            if (!dialogue) {
+                container.innerHTML = '<div style="text-align: center; color: #f44336;">대화 데이터가 없습니다.</div>';
+                return;
+            }
+
+            let html = '';
+
+            // 캐릭터 메시지
+            if (dialogue.dialogue) {
+                html += `
+                    <div class="character-message">
+                        <strong>${episode.character_name}:</strong><br>
+                        ${dialogue.dialogue}
+                    </div>
+                `;
+            }
+
+            // 나레이션
+            if (dialogue.narration) {
+                html += `
+                    <div class="narration">
+                        ${dialogue.narration}
+                    </div>
+                `;
+            }
+
+            // 선택지
+            if (dialogue.choices && dialogue.choices.length > 0) {
+                html += '<div class="choices-container">';
+                dialogue.choices.forEach((choice, index) => {
+                    const impact = choice.affection_impact || 0;
+                    const impactClass = impact > 0 ? 'positive' : impact < 0 ? 'negative' : 'neutral';
+                    const impactText = impact > 0 ? `+${impact}` : impact < 0 ? `${impact}` : '0';
+
+                    html += `
+                        <button class="choice-button" onclick="selectChoice(${index})">
+                            <div class="choice-text">${choice.text}</div>
+                            <div class="choice-impact ${impactClass}">호감도 ${impactText}</div>
+                        </button>
+                    `;
+                });
+                html += '</div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        // 선택지 선택
+        function selectChoice(choiceIndex) {
+            const episode = gameState.currentEpisode;
+            const choice = episode.dialogue.choices[choiceIndex];
+
+            console.log('🎯 선택지 선택:', choice);
+
+            // 선택 완료 메시지 표시
+            const container = document.getElementById('chatContainer');
+            container.innerHTML += `
+                <div style="margin-top: 20px; padding: 20px; background: rgba(76, 175, 80, 0.3); border-radius: 8px; text-align: center;">
+                    <h4>✅ 에피소드 완료!</h4>
+                    <p>선택: "${choice.text}"</p>
+                    <p>호감도 변화: ${choice.affection_impact > 0 ? '+' : ''}${choice.affection_impact}</p>
+                    <button class="back-button" onclick="goBackToSelection()" style="margin-top: 15px;">다른 에피소드 플레이</button>
+                </div>
+            `;
+
+            // 선택지 버튼 비활성화
+            document.querySelectorAll('.choice-button').forEach(btn => {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+            });
+        }
+
+        // 선택 화면으로 돌아가기
+        function goBackToSelection() {
+            gameState.isPlaying = false;
+            gameState.currentEpisode = null;
+
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('episodeSelection').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
