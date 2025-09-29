@@ -5252,9 +5252,8 @@
         function populateDialogueScenarioSelect() {
             const select = document.getElementById('dialogueScenarioSelect');
 
-            // DOM 요소가 존재하지 않으면 경고 후 리턴
+            // DOM 요소가 존재하지 않으면 조용히 리턴 (카드 기반 UI 사용)
             if (!select) {
-                console.warn('⚠️ dialogueScenarioSelect 요소가 존재하지 않습니다. 카드 기반 UI를 사용합니다.');
                 return;
             }
 
