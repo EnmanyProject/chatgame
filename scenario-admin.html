@@ -11144,6 +11144,312 @@
         window.generateCharacterProfile = generateCharacterProfile;
         window.showPromptTab = showPromptTab;
         window.copyToClipboard = copyToClipboard;
+
+        // ⚡ 개발자 모드 빠른 접속 시스템 (새로 추가)
+        function initializeDeveloperMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const devMode = urlParams.get('dev');
+            const savedDevMode = localStorage.getItem('chatgame_dev_mode');
+
+            // URL 파라미터로 개발자 모드 활성화
+            if (devMode === 'true') {
+                localStorage.setItem('chatgame_dev_mode', 'true');
+                enableDeveloperMode();
+                console.log('🔧 개발자 모드 활성화됨 (URL 파라미터)');
+            }
+            // 저장된 개발자 모드 상태 확인
+            else if (savedDevMode === 'true') {
+                enableDeveloperMode();
+                console.log('🔧 개발자 모드 활성화됨 (저장된 설정)');
+            }
+        }
+
+        function enableDeveloperMode() {
+            // 개발자 모드 표시
+            addDeveloperModeIndicator();
+
+            // 빠른 액션 패널 추가
+            addQuickActionPanel();
+
+            // 콘솔에 개발자 정보 표시
+            showDeveloperInfo();
+        }
+
+        function addDeveloperModeIndicator() {
+            // 페이지 상단에 개발자 모드 표시
+            const indicator = document.createElement('div');
+            indicator.id = 'devModeIndicator';
+            indicator.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    background: linear-gradient(45deg, #ff6b6b, #feca57);
+                    color: white;
+                    text-align: center;
+                    padding: 5px;
+                    font-weight: bold;
+                    z-index: 10000;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                ">
+                    ⚡ 개발자 모드 활성화 ⚡
+                    <button onclick="disableDeveloperMode()" style="
+                        background: rgba(255,255,255,0.2);
+                        border: none;
+                        color: white;
+                        padding: 2px 8px;
+                        margin-left: 10px;
+                        border-radius: 3px;
+                        cursor: pointer;
+                    ">비활성화</button>
+                </div>
+            `;
+
+            document.body.appendChild(indicator);
+
+            // 페이지 컨텐츠를 아래로 밀어냄
+            document.body.style.paddingTop = '35px';
+        }
+
+        function addQuickActionPanel() {
+            // 빠른 액션 플로팅 패널 추가
+            const panel = document.createElement('div');
+            panel.id = 'quickActionPanel';
+            panel.innerHTML = `
+                <div style="
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    background: #2c3e50;
+                    color: white;
+                    padding: 15px;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                    z-index: 9999;
+                    min-width: 200px;
+                ">
+                    <h4 style="margin: 0 0 10px 0; color: #ecf0f1;">⚡ 빠른 액션</h4>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <button onclick="quickCreateTestCharacter()" class="dev-quick-btn">
+                            🎭 테스트 캐릭터 생성
+                        </button>
+                        <button onclick="quickCreateTestScenario()" class="dev-quick-btn">
+                            📖 테스트 시나리오 생성
+                        </button>
+                        <button onclick="clearAllData()" class="dev-quick-btn dev-danger">
+                            🗑️ 모든 데이터 초기화
+                        </button>
+                        <button onclick="toggleQuickPanel()" class="dev-quick-btn">
+                            📌 패널 숨기기
+                        </button>
+                    </div>
+                </div>
+
+                <style>
+                .dev-quick-btn {
+                    background: #3498db;
+                    color: white;
+                    border: none;
+                    padding: 8px 12px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    transition: background 0.3s;
+                }
+
+                .dev-quick-btn:hover {
+                    background: #2980b9;
+                }
+
+                .dev-danger {
+                    background: #e74c3c !important;
+                }
+
+                .dev-danger:hover {
+                    background: #c0392b !important;
+                }
+                </style>
+            `;
+
+            document.body.appendChild(panel);
+        }
+
+        function showDeveloperInfo() {
+            console.log(`
+🔧 === 개발자 모드 활성화 ===
+📝 빠른 명령어:
+- quickCreateTestCharacter() : 테스트 캐릭터 생성
+- quickCreateTestScenario() : 테스트 시나리오 생성
+- clearAllData() : 모든 데이터 초기화
+- disableDeveloperMode() : 개발자 모드 비활성화
+
+🎯 URL 접속:
+- ${window.location.origin}/scenario-admin.html?dev=true
+
+⚡ 빠른 액션 패널이 우하단에 추가되었습니다.
+            `);
+        }
+
+        // 개발자 모드 비활성화
+        function disableDeveloperMode() {
+            localStorage.removeItem('chatgame_dev_mode');
+
+            // 개발자 모드 요소들 제거
+            const indicator = document.getElementById('devModeIndicator');
+            const panel = document.getElementById('quickActionPanel');
+
+            if (indicator) indicator.remove();
+            if (panel) panel.remove();
+
+            // 페이지 패딩 복원
+            document.body.style.paddingTop = '';
+
+            console.log('🔧 개발자 모드가 비활성화되었습니다.');
+            alert('🔧 개발자 모드가 비활성화되었습니다.\n페이지를 새로고침합니다.');
+
+            // URL에서 dev 파라미터 제거하고 새로고침
+            const url = new URL(window.location);
+            url.searchParams.delete('dev');
+            window.location.href = url.toString();
+        }
+
+        // 빠른 액션 함수들
+        async function quickCreateTestCharacter() {
+            console.log('🎭 테스트 캐릭터 생성 중...');
+
+            try {
+                const testCharacterData = {
+                    basic_info: {
+                        name: `테스트${Date.now().toString().slice(-4)}`,
+                        age: 23,
+                        mbti: 'ENFP',
+                        occupation: '대학생',
+                        gender: 'female'
+                    }
+                };
+
+                const response = await fetch('/api/character-ai-generator', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'auto_complete_character',
+                        ...testCharacterData
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log('✅ 테스트 캐릭터 생성 완료:', result.character.basic_info.name);
+
+                    // 캐릭터 탭으로 이동하고 폼에 채우기
+                    showTab('characters');
+                    openCharacterModal();
+                    setTimeout(() => {
+                        fillCharacterForm(result.character);
+                    }, 500);
+
+                    alert(`✅ 테스트 캐릭터 "${result.character.basic_info.name}" 생성 완료!\n캐릭터 폼에 자동으로 채워졌습니다.`);
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('❌ 테스트 캐릭터 생성 실패:', error);
+                alert(`❌ 테스트 캐릭터 생성 실패:\n${error.message}`);
+            }
+        }
+
+        async function quickCreateTestScenario() {
+            console.log('📖 테스트 시나리오 생성 중...');
+
+            try {
+                // 시나리오 탭으로 이동
+                showTab('scenarios');
+
+                // 새 시나리오 모달 열기
+                openScenarioModal();
+
+                // 테스트 데이터 채우기
+                setTimeout(() => {
+                    document.getElementById('scenarioTitle').value = `테스트 시나리오 ${Date.now().toString().slice(-4)}`;
+                    document.getElementById('scenarioDescription').value = '개발자 모드에서 생성된 테스트 시나리오입니다.';
+                    document.getElementById('scenarioSetting').value = '테스트 환경';
+
+                    console.log('✅ 테스트 시나리오 데이터 채움 완료');
+                    alert('✅ 테스트 시나리오 데이터가 채워졌습니다!\n"시나리오 저장" 버튼을 클릭하세요.');
+                }, 500);
+
+            } catch (error) {
+                console.error('❌ 테스트 시나리오 생성 실패:', error);
+                alert(`❌ 테스트 시나리오 생성 실패:\n${error.message}`);
+            }
+        }
+
+        async function clearAllData() {
+            const confirmed = confirm('⚠️ 정말로 모든 데이터를 초기화하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다:\n- 모든 캐릭터 삭제\n- 모든 시나리오 삭제\n- 모든 에피소드 삭제');
+
+            if (!confirmed) return;
+
+            const doubleConfirm = confirm('🚨 마지막 확인:\n\n정말로 모든 데이터를 삭제하시겠습니까?\n\n"확인"을 누르면 즉시 실행됩니다.');
+
+            if (!doubleConfirm) return;
+
+            try {
+                console.log('🗑️ 모든 데이터 초기화 시작...');
+
+                // 캐릭터 초기화
+                const charResponse = await fetch('/api/character-ai-generator', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'reset_all_characters' })
+                });
+
+                // 에피소드 초기화
+                const episodeResponse = await fetch('/api/dialogue-manager', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'reset_all_episodes' })
+                });
+
+                console.log('✅ 모든 데이터 초기화 완료');
+                alert('✅ 모든 데이터가 성공적으로 초기화되었습니다!\n페이지를 새로고침합니다.');
+
+                window.location.reload();
+
+            } catch (error) {
+                console.error('❌ 데이터 초기화 실패:', error);
+                alert(`❌ 데이터 초기화 실패:\n${error.message}`);
+            }
+        }
+
+        function toggleQuickPanel() {
+            const panel = document.getElementById('quickActionPanel');
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+
+        // 전역 함수 등록
+        window.disableDeveloperMode = disableDeveloperMode;
+        window.quickCreateTestCharacter = quickCreateTestCharacter;
+        window.quickCreateTestScenario = quickCreateTestScenario;
+        window.clearAllData = clearAllData;
+        window.toggleQuickPanel = toggleQuickPanel;
+
+        // 페이지 로드 시 개발자 모드 초기화
+        document.addEventListener('DOMContentLoaded', initializeDeveloperMode);
+
+        // 즉시 초기화 (DOMContentLoaded 이미 발생한 경우 대비)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeDeveloperMode);
+        } else {
+            initializeDeveloperMode();
+        }
     </script>
 </body>
 </html>
