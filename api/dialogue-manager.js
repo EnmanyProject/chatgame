@@ -11,13 +11,15 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    // POST 요청과 GET 요청에서 action 가져오는 방식이 다름
+    const action = req.method === 'POST' ? req.body?.action : req.query.action;
+
     console.log('🔧 Dialogue Manager API 호출:', {
       method: req.method,
-      action: req.query.action,
-      scenario_id: req.query.scenario_id
+      action: action,
+      scenario_id: req.query.scenario_id,
+      body: req.method === 'POST' ? req.body : null
     });
-
-    const action = req.query.action;
 
     // API 테스트
     if (action === 'test') {
