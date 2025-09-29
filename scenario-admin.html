@@ -5481,8 +5481,8 @@
                 const response = await fetch('/api/test-openai-connection', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-OpenAI-Key': sessionApiKey || '' // 헤더로 API 키 전달
+                        'Content-Type': 'application/json'
+                        // OpenAI 키는 서버사이드에서 환경변수로 처리
                     },
                     body: JSON.stringify({
                         useSessionKey: true
@@ -8634,9 +8634,9 @@
                 // AI API 호출 (character-ai-generator.js 사용)
                 const response = await fetch('/api/character-ai-generator', {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'X-OpenAI-Key': sessionApiKey || '' // API 키 헤더 추가
+                    headers: {
+                        'Content-Type': 'application/json'
+                        // OpenAI 키는 서버사이드에서 환경변수로 처리
                     },
                     body: JSON.stringify({
                         action: 'generate_complete_character_with_profile',
