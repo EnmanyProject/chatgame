@@ -5834,13 +5834,18 @@
         }
 
         function updateSelectedScenarioInfo() {
-            const scenario = window.scenarios?.[currentScenarioId];
+            // 시나리오 정보 조회 (window.scenarios 또는 전역 scenarios 사용)
+            const scenariosData = window.scenarios || scenarios || {};
+            const scenario = scenariosData[currentScenarioId];
             const infoContainer = document.getElementById('selectedScenarioInfo');
 
             if (scenario && infoContainer) {
                 // 시나리오에 연결된 캐릭터 정보 가져오기
                 const characterId = scenario.available_characters?.[0];
-                const character = window.characters?.[characterId];
+
+                // 캐릭터 정보 조회 (window.characters 또는 전역 characters 사용)
+                const charactersData = window.characters || characters || {};
+                const character = charactersData[characterId];
 
                 infoContainer.innerHTML = `
                     <div class="info-title">${scenario.title}</div>
@@ -6249,9 +6254,17 @@
                 return;
             }
 
-            const selectedScenario = window.scenarios?.[currentScenarioId];
+            // 시나리오 정보 조회 (window.scenarios 또는 전역 scenarios 사용)
+            const scenariosData = window.scenarios || scenarios || {};
+            const selectedScenario = scenariosData[currentScenarioId];
+
+            console.log('🔍 시나리오 데이터 소스:', window.scenarios ? 'window.scenarios' : 'scenarios');
+            console.log('🔍 전체 시나리오 목록:', Object.keys(scenariosData));
+            console.log('🔍 찾는 시나리오 ID:', currentScenarioId);
+            console.log('🔍 찾은 시나리오:', selectedScenario);
+
             if (!selectedScenario) {
-                alert('선택된 시나리오 정보를 찾을 수 없습니다.');
+                alert(`선택된 시나리오 정보를 찾을 수 없습니다.\n\n시나리오 ID: ${currentScenarioId}\n사용 가능한 시나리오: ${Object.keys(scenariosData).join(', ')}`);
                 return;
             }
 
@@ -6259,10 +6272,18 @@
 
             // 시나리오에 연결된 캐릭터 자동 사용
             const characterId = selectedScenario.available_characters?.[0] || selectedScenario.character_id;
-            const character = window.characters?.[characterId];
+
+            // 캐릭터 정보 조회 (window.characters 또는 전역 characters 사용)
+            const charactersData = window.characters || characters || {};
+            const character = charactersData[characterId];
+
+            console.log('🔍 캐릭터 데이터 소스:', window.characters ? 'window.characters' : 'characters');
+            console.log('🔍 찾는 캐릭터 ID:', characterId);
+            console.log('🔍 전체 캐릭터 목록:', Object.keys(charactersData));
+            console.log('🔍 찾은 캐릭터:', character);
 
             if (!character) {
-                alert('시나리오에 연결된 캐릭터 정보를 찾을 수 없습니다.');
+                alert(`시나리오에 연결된 캐릭터 정보를 찾을 수 없습니다.\n\n캐릭터 ID: ${characterId}\n사용 가능한 캐릭터: ${Object.keys(charactersData).join(', ')}`);
                 return;
             }
 
