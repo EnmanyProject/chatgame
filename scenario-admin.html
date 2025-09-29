@@ -8639,8 +8639,8 @@
                         'X-OpenAI-Key': sessionApiKey || '' // API 키 헤더 추가
                     },
                     body: JSON.stringify({
-                        action: 'generate_character',
-                        answers: currentData
+                        action: 'generate_complete_character_with_profile',
+                        ...currentData  // 통합 API 사용: answers 객체를 벗결고 직접 전송
                     })
                 });
 
