@@ -192,23 +192,16 @@ async function createNewScenario(data) {
     available_characters
   });
 
-  // AI를 이용한 소설풍 컨텍스트 생성 (오류 시 기본값 사용)
-  let aiContext = '';
-  try {
-    console.log('🤖 AI 컨텍스트 생성 시도...');
-    aiContext = await generateAIContext({
-      title,
-      description,
-      background_setting,
-      mood,
-      available_characters // 캐릭터 정보 전달
-    });
-    console.log('✅ AI 컨텍스트 생성 성공');
-  } catch (error) {
-    console.error('⚠️ AI 컨텍스트 생성 실패:', error.message);
-    console.log('📝 기본 컨텍스트로 대체');
-    aiContext = `**${title}**\n\n${description}\n\n설정: ${background_setting}\n분위기: ${mood}\n\n기본 컨텍스트로 생성되었습니다. AI 컨텍스트 재생성을 원하시면 '재생성' 버튼을 클릭하세요.`;
-  }
+  // AI를 이용한 소설풍 컨텍스트 생성 (필수)
+  console.log('🤖 AI 컨텍스트 생성 시도...');
+  const aiContext = await generateAIContext({
+    title,
+    description,
+    background_setting,
+    mood,
+    available_characters // 캐릭터 정보 전달
+  });
+  console.log('✅ AI 컨텍스트 생성 성공');
   
   const newScenario = {
     id: scenario_id,
