@@ -2,9 +2,9 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-09-28",
-    "total_episodes": 7,
+    "total_episodes": 11,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-09-28T16:19:26.169Z",
+    "last_updated": "2025-09-29T00:35:30.068Z",
     "data_source": "episode_manager_api"
   },
   "episodes": {
@@ -229,6 +229,134 @@
         ],
         "difficulty": "Easy",
         "generated_at": "2025-09-28T16:19:25.512Z",
+        "source": "chat_training_api"
+      }
+    },
+    "episode_scenario_1759074626974_1759106099428": {
+      "id": "episode_scenario_1759074626974_1759106099428",
+      "scenario_id": "scenario_1759074626974",
+      "episode_number": 1,
+      "title": "에피소드 1번",
+      "character_id": "미화_esfp_1759064886354",
+      "character_name": "미화",
+      "difficulty": "Easy",
+      "user_input_prompt": "우연히 마주친 상황에서 서로를 의식하며",
+      "created_at": "2025-09-29T00:34:59.428Z",
+      "dialogue": {
+        "dialogue": "안녕하세요! 이렇게 우연히 마주치다니, 정말 신기해요 😊 요즘 어떻게 지내고 있어요?",
+        "narration": "윤아는 따뜻한 미소를 지으며 상대방을 바라본다. 그녀의 눈빛은 호기심과 따뜻함으로 가득 차 있다. 이 순간이 특별하게 느껴져서 마음이 두근거린다.",
+        "choices": [
+          {
+            "text": "잘 지내고 있어! 너는?",
+            "affection_impact": 3
+          },
+          {
+            "text": "그냥 그래, 너는?",
+            "affection_impact": 1
+          },
+          {
+            "text": "그냥 바쁘게 지내고 있어.",
+            "affection_impact": -1
+          }
+        ],
+        "difficulty": "Easy",
+        "generated_at": "2025-09-29T00:34:58.716Z",
+        "source": "chat_training_api"
+      }
+    },
+    "episode_scenario_1759074626974_1759106109373": {
+      "id": "episode_scenario_1759074626974_1759106109373",
+      "scenario_id": "scenario_1759074626974",
+      "episode_number": 2,
+      "title": "에피소드 2번",
+      "character_id": "미화_esfp_1759064886354",
+      "character_name": "미화",
+      "difficulty": "Easy",
+      "user_input_prompt": "함께 과제를 하면서 가까워지는 순간",
+      "created_at": "2025-09-29T00:35:09.373Z",
+      "dialogue": {
+        "dialogue": "윤아: 죄송해요, 지금 제대로 대답하기 어려워요 😅",
+        "narration": "윤아가 잠시 당황한 표정을 짓는다.",
+        "choices": [
+          {
+            "text": "괜찮다고 말하며 다른 화제로 넘어간다",
+            "affection_impact": 1
+          },
+          {
+            "text": "무슨 일인지 걱정스럽게 물어본다",
+            "affection_impact": 2
+          },
+          {
+            "text": "시간을 두고 천천히 이야기하자고 한다",
+            "affection_impact": 3
+          }
+        ],
+        "difficulty": "Easy",
+        "generated_at": "2025-09-29T00:35:08.689Z",
+        "source": "chat_training_api"
+      }
+    },
+    "episode_scenario_1759074626974_1759106119177": {
+      "id": "episode_scenario_1759074626974_1759106119177",
+      "scenario_id": "scenario_1759074626974",
+      "episode_number": 3,
+      "title": "에피소드 3번",
+      "character_id": "미화_esfp_1759064886354",
+      "character_name": "미화",
+      "difficulty": "Easy",
+      "user_input_prompt": "비 내리는 날 같은 우산을 쓰게 되어",
+      "created_at": "2025-09-29T00:35:19.177Z",
+      "dialogue": {
+        "dialogue": "우와, 비가 이렇게 오네요... ☔️ 함께 우산을 쓰니까 조금은 따뜻한 기분이 들어요. 당신과 이 순간을 공유할 수 있어서 정말 좋아요. 감정이 풍부해지는 것 같아요. 😊",
+        "narration": "윤아는 부드러운 미소를 지으며 우산 아래에서 당신을 바라본다. 비가 내리는 소리를 들으며, 이 특별한 순간이 오래 기억에 남을 것 같다는 생각에 가슴이 두근거린다.",
+        "choices": [
+          {
+            "text": "같이 비를 맞으며 걸어가자!",
+            "affection_impact": 3
+          },
+          {
+            "text": "우산을 더 가까이 대줄게.",
+            "affection_impact": 4
+          },
+          {
+            "text": "우산을 쓰고 조용히 걷자.",
+            "affection_impact": 2
+          }
+        ],
+        "difficulty": "Easy",
+        "generated_at": "2025-09-29T00:35:18.488Z",
+        "source": "chat_training_api"
+      }
+    },
+    "episode_scenario_1759074626974_1759106129848": {
+      "id": "episode_scenario_1759074626974_1759106129848",
+      "scenario_id": "scenario_1759074626974",
+      "episode_number": 4,
+      "title": "에피소드 4번",
+      "character_id": "미화_esfp_1759064886354",
+      "character_name": "미화",
+      "difficulty": "Easy",
+      "user_input_prompt": "축제에서 함께 즐거운 시간을 보내며",
+      "created_at": "2025-09-29T00:35:29.848Z",
+      "dialogue": {
+        "dialogue": "윤아: 죄송해요, 지금 제대로 대답하기 어려워요 😅",
+        "narration": "윤아가 잠시 당황한 표정을 짓는다.",
+        "choices": [
+          {
+            "text": "괜찮다고 말하며 다른 화제로 넘어간다",
+            "affection_impact": 1
+          },
+          {
+            "text": "무슨 일인지 걱정스럽게 물어본다",
+            "affection_impact": 2
+          },
+          {
+            "text": "시간을 두고 천천히 이야기하자고 한다",
+            "affection_impact": 3
+          }
+        ],
+        "difficulty": "Easy",
+        "generated_at": "2025-09-29T00:35:28.655Z",
         "source": "chat_training_api"
       }
     }
