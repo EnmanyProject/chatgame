@@ -3849,11 +3849,11 @@
         // 에피소드 섹션에 시나리오 목록 표시
         function displayAvailableScenarios() {
             console.log('📋 에피소드 섹션에 시나리오 목록 표시...');
-            
+
             try {
                 // 시나리오 데이터 로딩
                 let scenariosData = window.scenarios || {};
-                
+
                 // LocalStorage에서도 확인
                 if (Object.keys(scenariosData).length === 0) {
                     const localScenarios = localStorage.getItem('scenarios');
@@ -3862,49 +3862,60 @@
                         window.scenarios = scenariosData;
                     }
                 }
-                
+
                 const scenarioKeys = Object.keys(scenariosData);
-                const scenariosListDiv = document.getElementById('scenariosList');
+                const scenariosListDiv = document.getElementById('scenarioCardsContainer');
+
+                // DOM 요소가 존재하지 않으면 에러 방지
+                if (!scenariosListDiv) {
+                    console.warn('⚠️ scenarioCardsContainer 요소를 찾을 수 없습니다.');
+                    return;
+                }
                 
                 if (scenarioKeys.length === 0) {
                     scenariosListDiv.innerHTML = `
-                        <div class="empty-state">
+                        <div class="loading-card">
                             <p>❌ 생성된 시나리오가 없습니다.</p>
                             <p><small>먼저 시나리오 탭에서 시나리오를 생성해주세요.</small></p>
                         </div>
                     `;
                     return;
                 }
-                
-                let html = `<div class="scenarios-grid">`;
+
+                let html = '';
                 scenarioKeys.forEach(scenarioId => {
                     const scenario = scenariosData[scenarioId];
                     if (scenario) {
                         html += `
-                            <div class="scenario-item" onclick="selectScenarioForEpisode('${scenarioId}')">
-                                <h5>${scenario.title || '제목 없음'}</h5>
-                                <p>${(scenario.description || '').substring(0, 100)}${scenario.description && scenario.description.length > 100 ? '...' : ''}</p>
-                                <div class="scenario-meta">
-                                    <span class="episode-count">${scenario.episode_count || 0}/36 에피소드</span>
-                                    <span class="character-count">${scenario.available_characters ? scenario.available_characters.length : 0} 캐릭터</span>
+                            <div class="scenario-selection-card" onclick="selectScenarioCard('${scenarioId}')" data-scenario-id="${scenarioId}">
+                                <div class="scenario-header">
+                                    <h5>${scenario.title || '제목 없음'}</h5>
+                                    <span class="scenario-mood">${scenario.mood || '일반'}</span>
+                                </div>
+                                <p class="scenario-description">${(scenario.description || '').substring(0, 100)}${scenario.description && scenario.description.length > 100 ? '...' : ''}</p>
+                                <div class="scenario-stats">
+                                    <span class="stat-item">📚 ${scenario.episode_count || 0}/36 에피소드</span>
+                                    <span class="stat-item">👥 ${scenario.available_characters ? scenario.available_characters.length : 0} 캐릭터</span>
                                 </div>
                             </div>
                         `;
                     }
                 });
-                html += `</div>`;
-                
+
                 scenariosListDiv.innerHTML = html;
                 console.log('✅ 시나리오 목록 표시 완료:', scenarioKeys.length, '개');
                 
             } catch (error) {
                 console.error('❌ 시나리오 목록 표시 실패:', error);
-                document.getElementById('scenariosList').innerHTML = `
-                    <div class="error-state">
-                        <p>❌ 시나리오 목록 로딩 중 오류가 발생했습니다.</p>
-                        <p><small>콘솔을 확인하거나 페이지를 새로고침해보세요.</small></p>
-                    </div>
-                `;
+                const errorContainer = document.getElementById('scenarioCardsContainer');
+                if (errorContainer) {
+                    errorContainer.innerHTML = `
+                        <div class="loading-card">
+                            <p>❌ 시나리오 목록 로딩 중 오류가 발생했습니다.</p>
+                            <p><small>콘솔을 확인하거나 페이지를 새로고침해보세요.</small></p>
+                        </div>
+                    `;
+                }
             }
         }
 
