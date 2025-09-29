@@ -296,15 +296,15 @@
             font-size: 0.9em;
         }
 
-        /* 에피소드 그리드 */
-        .episodes-grid {
+        /* 대화 그리드 */
+        .dialogues-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
             gap: 15px;
             margin-bottom: 30px;
         }
 
-        .episode-card {
+        .dialogue-card {
             background: white;
             border-radius: 10px;
             padding: 20px;
@@ -320,35 +320,35 @@
             border: 2px solid transparent;
         }
 
-        .episode-card:hover {
+        .dialogue-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             border-color: #667eea;
         }
 
-        .episode-card.empty {
+        .dialogue-card.empty {
             border: 2px dashed #e0e0e0;
             background: #fafafa;
         }
 
-        .episode-card.empty:hover {
+        .dialogue-card.empty:hover {
             border-color: #667eea;
             background: white;
         }
 
-        .episode-card .episode-number {
+        .dialogue-card .dialogue-number {
             font-size: 1.5em;
             font-weight: bold;
             color: #667eea;
             margin-bottom: 5px;
         }
 
-        .episode-card.completed {
+        .dialogue-card.completed {
             background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
             color: white;
         }
 
-        .episode-card.completed .episode-number {
+        .dialogue-card.completed .dialogue-number {
             color: white;
         }
 
@@ -794,7 +794,7 @@
 
         /* 반응형 */
         @media (max-width: 768px) {
-            .episodes-grid {
+            .dialogues-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
             
@@ -1353,7 +1353,7 @@
             }
         }
 
-        /* Episode Preview Modal Styles */
+        /* Dialogue Preview Modal Styles */
         .preview-section {
             margin-bottom: 30px;
             padding: 20px;
@@ -2050,8 +2050,8 @@
                 📚 시나리오 관리
                 <span class="badge" id="scenarioCount">0</span>
             </button>
-            <button class="nav-tab" onclick="switchTab('episodes')">
-                💬 대화 관리
+            <button class="nav-tab" onclick="switchTab('dialogues')">
+                📝 에피소드 관리
                 <span class="badge" id="episodeCount">0</span>
             </button>
             <button class="nav-tab" onclick="switchTab('ai-management')">
@@ -2103,12 +2103,12 @@
         </div>
 
         <!-- 대화 관리 섹션 -->
-        <div id="episodes-section" class="content-section">
+        <div id="dialogues-section" class="content-section">
             <!-- 시나리오 선택 카드 -->
             <div class="scenario-selection-container">
                 <div class="section-header">
                     <h4>📚 시나리오 선택</h4>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="refreshEpisodeScenarioList()">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="refreshDialogueScenarioList()">
                         🔄 새로고침
                     </button>
                 </div>
@@ -2130,11 +2130,11 @@
                 </div>
             </div>
 
-            <div id="episodeInfo" style="display: none;">
+            <div id="dialogueInfo" style="display: none;">
                 <div class="stats-row">
                     <div class="stat-card">
-                        <h3>전체 에피소드</h3>
-                        <div class="value" id="totalEpisodes">0/36</div>
+                        <h3>전체 대화</h3>
+                        <div class="value" id="totalDialogues">0/36</div>
                         <div class="progress-bar">
                             <div class="progress-fill" id="progressBar" style="width: 0%"></div>
                         </div>
@@ -2158,13 +2158,13 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="openEpisodeModal('create')">
+                    <button class="btn btn-primary" onclick="openDialogueModal('create')">
                         ✨ 새 대화 생성
                     </button>
-                    <button class="btn btn-secondary" onclick="generateBulkEpisodes()">
+                    <button class="btn btn-secondary" onclick="generateBulkDialogues()">
                         🚀 일괄 생성 (AI)
                     </button>
-                    <button class="btn btn-secondary" onclick="loadEpisodes()">
+                    <button class="btn btn-secondary" onclick="loadDialogues()">
                         🔄 새로고침
                     </button>
                 </div>
@@ -2187,8 +2187,8 @@
                     </div>
                 </div>
 
-                <div id="episodesGrid" class="episodes-grid">
-                    <!-- 36개의 에피소드 카드가 여기에 표시됩니다 -->
+                <div id="dialoguesGrid" class="dialogues-grid">
+                    <!-- 36개의 대화 카드가 여기에 표시됩니다 -->
                 </div>
             </div>
         </div>
@@ -2568,7 +2568,7 @@
                     <div class="value" id="aiGeneratedScenarios">0</div>
                 </div>
                 <div class="stat-card">
-                    <h3>에피소드 수</h3>
+                    <h3>대화 수</h3>
                     <div class="value" id="totalDialogues">0</div>
                 </div>
             </div>
@@ -2718,17 +2718,17 @@
         </div>
     </div>
 
-    <!-- 에피소드 모달 -->
-    <div id="episodeModal" class="modal">
+    <!-- 대화 모달 -->
+    <div id="dialogueModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <span class="close" onclick="closeModal('episodeModal')">&times;</span>
-                <h2 id="episodeModalTitle">새 대화 생성</h2>
+                <span class="close" onclick="closeModal('dialogueModal')">&times;</span>
+                <h2 id="dialogueModalTitle">새 대화 생성</h2>
             </div>
             <div class="modal-body">
-                <form id="episodeForm">
-                    <input type="hidden" id="episodeId" />
-                    <input type="hidden" id="episodeScenarioId" />
+                <form id="dialogueForm">
+                    <input type="hidden" id="dialogueId" />
+                    <input type="hidden" id="dialogueScenarioId" />
 
                     <!-- 선택된 시나리오 정보 표시 -->
                     <div class="form-group">
@@ -2741,8 +2741,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="episodeNumber">대화 번호 (1-36) *</label>
-                        <input type="number" id="episodeNumber" min="1" max="36" required readonly />
+                        <label for="dialogueNumber">대화 번호 (1-36) *</label>
+                        <input type="number" id="dialogueNumber" min="1" max="36" required readonly />
                         <small class="form-text">선택한 빈 대화 번호가 자동으로 설정됩니다.</small>
                     </div>
 
@@ -2787,8 +2787,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('episodeModal')">취소</button>
-                <button type="button" class="btn btn-primary" onclick="saveEpisode()">저장</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('dialogueModal')">취소</button>
+                <button type="button" class="btn btn-primary" onclick="saveDialogue()">저장</button>
             </div>
         </div>
     </div>
@@ -3139,19 +3139,19 @@
         </div>
     </div>
 
-    <!-- Episode Preview Modal -->
-    <div id="episodePreviewModal" class="modal">
+    <!-- Dialogue Preview Modal -->
+    <div id="dialoguePreviewModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <span class="close" onclick="closeModal('episodePreviewModal')">&times;</span>
-                <h2 id="episodePreviewTitle">📖 에피소드 미리보기</h2>
+                <span class="close" onclick="closeModal('dialoguePreviewModal')">&times;</span>
+                <h2 id="dialoguePreviewTitle">📖 대화 미리보기</h2>
             </div>
             <div class="modal-body">
-                <div id="episodePreviewContent">
+                <div id="dialoguePreviewContent">
                     <div class="preview-section">
-                        <h3>📋 에피소드 정보</h3>
-                        <div id="episodeMetadata" class="metadata-grid">
-                            <!-- Episode metadata will be inserted here -->
+                        <h3>📋 대화 정보</h3>
+                        <div id="dialogueMetadata" class="metadata-grid">
+                            <!-- Dialogue metadata will be inserted here -->
                         </div>
                     </div>
                     
@@ -3176,8 +3176,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('episodePreviewModal')">닫기</button>
-                <button type="button" class="btn btn-primary" onclick="editEpisodeFromPreview()">수정하기</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('dialoguePreviewModal')">닫기</button>
+                <button type="button" class="btn btn-primary" onclick="editDialogueFromPreview()">수정하기</button>
             </div>
         </div>
     </div>
@@ -3190,7 +3190,7 @@
 
         // 전역 변수
         let scenarios = {};
-        let episodes = {};
+        let dialogues = {};
         let characters = {};
         let currentScenarioId = null;
         let currentDifficultyFilter = 'all';
@@ -3806,7 +3806,7 @@
         }
         
         // 에피소드 시나리오 선택기 로딩
-        async function loadEpisodeScenarioSelector() {
+        async function loadDialogueScenarioSelector() {
             console.log('🔄 에피소드 시나리오 선택기 로딩 시작...');
             
             try {
@@ -3841,9 +3841,9 @@
                 console.log('📊 최종 로드된 시나리오:', scenarioKeys.length, '개');
                 console.log('📋 시나리오 목록:', scenarioKeys.map(id => `${id}: ${scenariosData[id]?.title || '제목없음'}`));
                 
-                const selector = document.getElementById('episodeScenarioSelect');
+                const selector = document.getElementById('dialogueScenarioSelect');
                 if (!selector) {
-                    console.error('❌ episodeScenarioSelect 요소를 찾을 수 없습니다');
+                    console.error('❌ dialogueScenarioSelect 요소를 찾을 수 없습니다');
                     return;
                 }
                 
@@ -3871,7 +3871,7 @@
             } catch (error) {
                 console.error('❌ 에피소드 시나리오 선택기 로딩 실패:', error);
                 // 에러 발생 시에도 기본 선택지는 제공
-                const selector = document.getElementById('episodeScenarioSelect');
+                const selector = document.getElementById('dialogueScenarioSelect');
                 if (selector) {
                     selector.innerHTML = '<option value="">시나리오 로딩 오류</option>';
                 }
@@ -3880,7 +3880,7 @@
         
         // 시나리오 변경 시 캐릭터 목록 업데이트
         function onScenarioChange() {
-            const scenarioId = document.getElementById('episodeScenarioSelect').value;
+            const scenarioId = document.getElementById('dialogueScenarioSelect').value;
             console.log('🔄 선택된 시나리오:', scenarioId);
             
             const characterSelect = document.getElementById('characterSelect');
@@ -3922,7 +3922,7 @@
                 characterSelect.innerHTML = html;
                 
                 // 숨겨진 필드에도 시나리오 ID 설정
-                document.getElementById('episodeScenarioId').value = scenarioId;
+                document.getElementById('dialogueScenarioId').value = scenarioId;
                 
                 console.log('✅ 캐릭터 목록 업데이트 완료');
                 
@@ -3945,22 +3945,22 @@
         }
 
         // 대화 섹션의 시나리오 목록 새로고침
-        function refreshEpisodeScenarioList() {
+        function refreshDialogueScenarioList() {
             console.log('🔄 대화 시나리오 목록 새로고침...');
             
             // 두 곳 모두 업데이트
-            loadEpisodeScenarioCards(); // 새로운 카드 형태
-            loadEpisodeScenarioSelector(); // 모달용
+            loadDialogueScenarioCards(); // 새로운 카드 형태
+            loadDialogueScenarioSelector(); // 모달용
             displayAvailableScenarios(); // 에피소드 섹션용
             
             // 에피소드 섹션의 시나리오 선택 드롭다운도 업데이트
-            const episodeSelect = document.getElementById('episodeScenarioSelect');
-            if (episodeSelect) {
-                loadEpisodeScenarioSelector().then(() => {
+            const dialogueSelect = document.getElementById('dialogueScenarioSelect');
+            if (dialogueSelect) {
+                loadDialogueScenarioSelector().then(() => {
                     // 모달용 선택기의 내용을 에피소드 섹션으로 복사
-                    const modalSelect = document.getElementById('episodeScenarioSelect');
+                    const modalSelect = document.getElementById('dialogueScenarioSelect');
                     if (modalSelect) {
-                        episodeSelect.innerHTML = modalSelect.innerHTML;
+                        dialogueSelect.innerHTML = modalSelect.innerHTML;
                     }
                 });
             }
@@ -4014,7 +4014,7 @@
                                 </div>
                                 <p class="scenario-description">${(scenario.description || '').substring(0, 100)}${scenario.description && scenario.description.length > 100 ? '...' : ''}</p>
                                 <div class="scenario-stats">
-                                    <span class="stat-item">📚 ${scenario.episode_count || 0}/36 에피소드</span>
+                                    <span class="stat-item">📚 ${scenario.dialogue_count || 0}/36 에피소드</span>
                                     <span class="stat-item">👥 ${scenario.available_characters ? scenario.available_characters.length : 0} 캐릭터</span>
                                 </div>
                             </div>
@@ -4040,7 +4040,7 @@
         }
 
         // 에피소드 시나리오 카드 로딩 (새로운 카드 형태)
-        async function loadEpisodeScenarioCards() {
+        async function loadDialogueScenarioCards() {
             console.log('🔄 에피소드 시나리오 카드 로딩 시작...');
 
             try {
@@ -4151,7 +4151,7 @@
             showSelectedScenarioInfo(scenarioId);
 
             // 에피소드 로드
-            loadEpisodes();
+            loadDialogues();
         }
 
         // 선택된 시나리오 정보 표시
@@ -4187,29 +4187,29 @@
             document.getElementById('selectedScenarioDisplay').style.display = 'none';
 
             // 에피소드 정보 숨기기
-            const episodeInfo = document.getElementById('episodeInfo');
-            if (episodeInfo) {
-                episodeInfo.style.display = 'none';
+            const dialogueInfo = document.getElementById('dialogueInfo');
+            if (dialogueInfo) {
+                dialogueInfo.style.display = 'none';
             }
 
             console.log('✅ 시나리오 선택 해제됨');
         }
 
         // 시나리오 선택 (에피소드 섹션에서)
-        function selectScenarioForEpisode(scenarioId) {
+        function selectScenarioForDialogue(scenarioId) {
             console.log('🎯 시나리오 선택됨:', scenarioId);
 
             // 전역 변수에 현재 시나리오 ID 설정
             currentScenarioId = scenarioId;
             console.log('✅ currentScenarioId 설정됨:', currentScenarioId);
 
-            const episodeSelect = document.getElementById('episodeScenarioSelect');
-            if (episodeSelect) {
-                episodeSelect.value = scenarioId;
+            const dialogueSelect = document.getElementById('dialogueScenarioSelect');
+            if (dialogueSelect) {
+                dialogueSelect.value = scenarioId;
             }
 
             // 에피소드 로딩
-            loadEpisodes();
+            loadDialogues();
 
             // 선택된 시나리오 하이라이트
             document.querySelectorAll('.scenario-item').forEach(item => {
@@ -4229,8 +4229,8 @@
             document.getElementById(`${tabName}-section`).classList.add('active');
 
             // 에피소드 탭 선택 시 시나리오 목록 업데이트
-            if (tabName === 'episodes') {
-                populateEpisodeScenarioSelect();
+            if (tabName === 'dialogues') {
+                populateDialogueScenarioSelect();
             }
             
             // API 설정 탭 선택 시 상태 확인
@@ -4707,11 +4707,11 @@
                             <span class="tag">분위기: ${scenario.mood || 'unknown'}</span>
                             ${scenario.tags ? scenario.tags.slice(0, 3).map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
                             <span class="tag">캐릭터: ${scenario.available_characters && scenario.available_characters.length > 0 ? scenario.available_characters.length + '명' : '없음'}</span>
-                            <span class="tag">에피소드: ${scenario.episode_count || 0}개</span>
+                            <span class="tag">에피소드: ${scenario.dialogue_count || 0}개</span>
                         </div>
                         <div class="actions">
                             <button class="btn btn-success" onclick="editScenario('${scenarioId}')">수정</button>
-                            <button class="btn btn-primary" onclick="manageEpisodes('${scenarioId}')">에피소드</button>
+                            <button class="btn btn-primary" onclick="manageDialogues('${scenarioId}')">에피소드</button>
                             <button class="btn btn-danger" onclick="deleteScenario('${scenarioId}')">삭제</button>
                         </div>
                     </div>
@@ -4751,7 +4751,7 @@
             safeUpdateElement('aiGeneratedScenarios', aiGeneratedCount);
             
             // 대화/에피소드 수 (시나리오 섹션에는 totalDialogues 사용)
-            const totalEpisodes = scenarioArray.reduce((sum, s) => sum + (s.episode_count || 0), 0);
+            const totalEpisodes = scenarioArray.reduce((sum, s) => sum + (s.dialogue_count || 0), 0);
             safeUpdateElement('totalDialogues', totalEpisodes);
             
             console.log('✅ 시나리오 통계 업데이트 완료');
@@ -4896,7 +4896,7 @@
                     id: scenarioId,
                     ...scenarioData,
                     created_date: new Date().toISOString().split('T')[0],
-                    episode_count: 0,
+                    dialogue_count: 0,
                     tags: [scenarioData.mood]
                 };
                 window.scenarios = globalScenarios;
@@ -5234,14 +5234,30 @@
         }
 
         // === 에피소드 관리 함수들 ===
-        function manageEpisodes(scenarioId) {
-            switchTab('episodes');
-            document.getElementById('episodeScenarioSelect').value = scenarioId;
-            loadEpisodes();
+        function manageDialogues(scenarioId) {
+            switchTab('dialogues');
+
+            // select 요소가 있으면 값 설정
+            const dialogueSelect = document.getElementById('dialogueScenarioSelect');
+            if (dialogueSelect) {
+                dialogueSelect.value = scenarioId;
+            }
+
+            // currentScenarioId로도 설정 (카드 기반 UI에서 사용)
+            currentScenarioId = scenarioId;
+
+            loadDialogues();
         }
 
-        function populateEpisodeScenarioSelect() {
-            const select = document.getElementById('episodeScenarioSelect');
+        function populateDialogueScenarioSelect() {
+            const select = document.getElementById('dialogueScenarioSelect');
+
+            // DOM 요소가 존재하지 않으면 경고 후 리턴
+            if (!select) {
+                console.warn('⚠️ dialogueScenarioSelect 요소가 존재하지 않습니다. 카드 기반 UI를 사용합니다.');
+                return;
+            }
+
             select.innerHTML = '<option value="">시나리오를 선택하세요</option>';
 
             Object.values(scenarios).forEach(scenario => {
@@ -5252,34 +5268,34 @@
             });
         }
 
-        async function loadEpisodes() {
-            // 우선순위: currentScenarioId → episodeScenarioSelect 값
+        async function loadDialogues() {
+            // 우선순위: currentScenarioId → dialogueScenarioSelect 값
             let scenarioId = currentScenarioId;
 
-            const episodeSelect = document.getElementById('episodeScenarioSelect');
-            if (episodeSelect && episodeSelect.value) {
-                scenarioId = episodeSelect.value;
+            const dialogueSelect = document.getElementById('dialogueScenarioSelect');
+            if (dialogueSelect && dialogueSelect.value) {
+                scenarioId = dialogueSelect.value;
             }
 
             if (!scenarioId) {
-                document.getElementById('episodeInfo').style.display = 'none';
+                document.getElementById('dialogueInfo').style.display = 'none';
                 console.log('⚠️ 시나리오 ID가 없어서 에피소드 로딩을 건너뜁니다.');
                 console.log('🔍 디버그 정보:', {
                     currentScenarioId: currentScenarioId,
-                    episodeSelectValue: episodeSelect ? episodeSelect.value : 'element not found'
+                    dialogueSelectValue: dialogueSelect ? dialogueSelect.value : 'element not found'
                 });
                 return;
             }
 
             currentScenarioId = scenarioId;
-            document.getElementById('episodeInfo').style.display = 'block';
+            document.getElementById('dialogueInfo').style.display = 'block';
             console.log('📚 에피소드 로딩 시작 - 시나리오:', scenarioId);
 
             try {
                 // API에서 에피소드 로딩
-                console.log('🔗 Episode Manager API 호출:', `/api/episode-manager?action=list&scenario_id=${scenarioId}`);
+                console.log('🔗 Dialogue Manager API 호출:', `/api/dialogue-manager?action=list&scenario_id=${scenarioId}`);
 
-                const response = await fetch(`/api/episode-manager?action=list&scenario_id=${scenarioId}`);
+                const response = await fetch(`/api/dialogue-manager?action=list&scenario_id=${scenarioId}`);
 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -5289,54 +5305,54 @@
                 console.log('📊 API 응답:', result);
                 console.log('🔍 상세 디버깅:', {
                     success: result.success,
-                    episodes_count: result.episodes ? result.episodes.length : 0,
+                    dialogues_count: result.dialogues ? result.dialogues.length : 0,
                     scenario_id: result.scenario_id,
                     requested_scenario_id: scenarioId,
-                    first_episode: result.episodes && result.episodes[0] ? result.episodes[0] : 'none'
+                    first_dialogue: result.dialogues && result.dialogues[0] ? result.dialogues[0] : 'none'
                 });
 
-                let episodesData = {};
+                let dialoguesData = {};
 
-                if (result.success && result.episodes) {
-                    // API에서 받은 에피소드를 episode_number를 키로 하는 객체로 변환
-                    result.episodes.forEach(episode => {
-                        episodesData[episode.episode_number] = episode;
+                if (result.success && result.dialogues) {
+                    // API에서 받은 대화를 dialogue_number를 키로 하는 객체로 변환
+                    result.dialogues.forEach(dialogue => {
+                        dialoguesData[dialogue.dialogue_number] = dialogue;
                     });
 
-                    console.log(`✅ 시나리오 ${scenarioId}의 에피소드:`, Object.keys(episodesData).length, '개');
-                    console.log('📋 에피소드 번호 목록:', Object.keys(episodesData));
-                    console.log('📄 첫 번째 에피소드 상세:', episodesData[Object.keys(episodesData)[0]]);
+                    console.log(`✅ 시나리오 ${scenarioId}의 대화:`, Object.keys(dialoguesData).length, '개');
+                    console.log('📋 대화 번호 목록:', Object.keys(dialoguesData));
+                    console.log('📄 첫 번째 대화 상세:', dialoguesData[Object.keys(dialoguesData)[0]]);
                 } else {
-                    console.log('📭 해당 시나리오에 생성된 에피소드가 없습니다.');
+                    console.log('📭 해당 시나리오에 생성된 대화가 없습니다.');
                 }
 
                 // 전역 변수 업데이트
-                episodes = episodesData;
-                window.episodes = episodesData;
+                dialogues = dialoguesData;
+                window.dialogues = dialoguesData;
 
                 // UI 업데이트
-                displayEpisodes();
-                updateEpisodeStats();
+                displayDialogues();
+                updateDialogueStats();
 
             } catch (error) {
                 console.error('❌ 에피소드 API 로드 오류:', error);
                 // API 실패 시 빈 객체로 초기화
-                episodes = {};
-                window.episodes = {};
-                displayEpisodes();
-                updateEpisodeStats();
+                dialogues = {};
+                window.dialogues = {};
+                displayDialogues();
+                updateDialogueStats();
 
                 showNotification(`에피소드 로드 실패: ${error.message}`, 'error');
             }
         }
 
-        function displayEpisodes() {
-            const grid = document.getElementById('episodesGrid');
+        function displayDialogues() {
+            const grid = document.getElementById('dialoguesGrid');
             grid.innerHTML = '';
 
             console.log('🎨 에피소드 표시 시작:', {
-                episodes_object: episodes,
-                episodes_keys: Object.keys(episodes),
+                dialogues_object: dialogues,
+                dialogues_keys: Object.keys(dialogues),
                 currentDifficultyFilter: currentDifficultyFilter
             });
 
@@ -5344,31 +5360,31 @@
             let completedCount = 0;
 
             for (let i = 1; i <= 36; i++) {
-                const episode = episodes[i];
+                const dialogue = dialogues[i];
                 const difficulty = getDifficultyByNumber(i);
 
                 if (currentDifficultyFilter !== 'all' && difficulty !== currentDifficultyFilter) {
                     continue;
                 }
 
-                if (episode) {
+                if (dialogue) {
                     completedCount++;
-                    console.log(`✅ 에피소드 ${i}번 표시:`, episode.title || episode.id);
+                    console.log(`✅ 에피소드 ${i}번 표시:`, dialogue.title || dialogue.id);
                 }
 
-                const card = createEpisodeCard(i, episode, difficulty);
+                const card = createDialogueCard(i, dialogue, difficulty);
                 grid.innerHTML += card;
                 displayedCount++;
             }
 
-            console.log(`🎨 에피소드 표시 완료: 표시됨 ${displayedCount}개, 완료됨 ${completedCount}개`);
+            console.log(`🎨 대화 표시 완료: 표시됨 ${displayedCount}개, 완료됨 ${completedCount}개`);
         }
 
-        function createEpisodeCard(number, episode, difficulty) {
-            if (episode) {
-                const characterName = getCharacterName(episode.character_id);
+        function createDialogueCard(number, dialogue, difficulty) {
+            if (dialogue) {
+                const characterName = getCharacterName(dialogue.character_id);
                 return `
-                    <div class="episode-card completed" onclick="previewEpisode(${number})">
+                    <div class="episode-card completed" onclick="previewDialogue(${number})">
                         <div class="episode-number">#${number}</div>
                         <div style="font-size: 0.9em; color: white;">${characterName}</div>
                         <div style="font-size: 0.8em; opacity: 0.9;">${difficulty.toUpperCase()}</div>
@@ -5376,7 +5392,7 @@
                 `;
             } else {
                 return `
-                    <div class="episode-card empty" onclick="createEpisode(${number})">
+                    <div class="episode-card empty" onclick="createDialogue(${number})">
                         <div class="episode-number">#${number}</div>
                         <div style="color: #999; font-size: 0.9em;">비어있음</div>
                         <div style="color: #ccc; font-size: 0.8em;">${difficulty.toUpperCase()}</div>
@@ -5403,18 +5419,34 @@
             return names[characterId] || '알 수 없음';
         }
 
-        function updateEpisodeStats() {
-            const episodeArray = Object.values(episodes);
-            const total = episodeArray.length;
-            
-            document.getElementById('totalEpisodes').textContent = `${total}/36`;
-            document.getElementById('progressBar').style.width = `${(total/36)*100}%`;
-            document.getElementById('episodeCount').textContent = total;
+        function updateDialogueStats() {
+            const dialogueArray = Object.values(dialogues);
+
+            // 에피소드 개수 계산: 시나리오 + 캐릭터 조합별로 그룹화
+            const episodeGroups = new Set();
+            dialogueArray.forEach(dialogue => {
+                if (dialogue.scenario_id && dialogue.character_id) {
+                    episodeGroups.add(`${dialogue.scenario_id}_${dialogue.character_id}`);
+                }
+            });
+
+            const episodeCount = episodeGroups.size;
+            const totalDialogues = dialogueArray.length;
+
+            console.log('📊 통계 업데이트:', {
+                총_대화수: totalDialogues,
+                에피소드_조합: Array.from(episodeGroups),
+                에피소드_개수: episodeCount
+            });
+
+            document.getElementById('totalDialogues').textContent = `${totalDialogues}/36`;
+            document.getElementById('progressBar').style.width = `${(totalDialogues/36)*100}%`;
+            document.getElementById('episodeCount').textContent = episodeCount;
             
             // 난이도별 카운트
             let counts = { easy: 0, medium: 0, hard: 0, expert: 0 };
-            episodeArray.forEach(ep => {
-                const difficulty = getDifficultyByNumber(ep.episode_number);
+            dialogueArray.forEach(ep => {
+                const difficulty = getDifficultyByNumber(ep.dialogue_number);
                 counts[difficulty]++;
             });
             
@@ -5440,10 +5472,10 @@
             });
             event.target.closest('.difficulty-tab').classList.add('active');
             
-            displayEpisodes();
+            displayDialogues();
         }
 
-        function openEpisodeModal(mode) {
+        function openDialogueModal(mode) {
             currentMode = mode;
 
             // 현재 선택된 시나리오가 없으면 경고
@@ -5452,8 +5484,8 @@
                 return;
             }
 
-            document.getElementById('episodeModalTitle').textContent = '새 에피소드 생성';
-            document.getElementById('episodeForm').reset();
+            document.getElementById('dialogueModalTitle').textContent = '새 에피소드 생성';
+            document.getElementById('dialogueForm').reset();
             document.getElementById('dialoguePreview').style.display = 'none';
             generatedDialogue = null;
 
@@ -5461,21 +5493,21 @@
             updateSelectedScenarioInfo();
 
             // 에피소드 번호는 사용자가 직접 입력하도록 함
-            document.getElementById('episodeNumber').value = '';
+            document.getElementById('dialogueNumber').value = '';
             document.getElementById('difficulty').value = 'easy';
 
-            document.getElementById('episodeModal').style.display = 'block';
+            document.getElementById('dialogueModal').style.display = 'block';
         }
 
-        function createEpisode(number) {
+        function createDialogue(number) {
             // 현재 선택된 시나리오가 없으면 에러
             if (!currentScenarioId) {
                 alert('먼저 시나리오를 선택해주세요.');
                 return;
             }
 
-            openEpisodeModal('create');
-            document.getElementById('episodeNumber').value = number;
+            openDialogueModal('create');
+            document.getElementById('dialogueNumber').value = number;
 
             // 난이도 자동 설정
             const difficulty = getDifficultyByNumber(number);
@@ -5501,7 +5533,7 @@
                 `;
 
                 // hidden input에 시나리오 ID 설정
-                document.getElementById('episodeScenarioId').value = currentScenarioId;
+                document.getElementById('dialogueScenarioId').value = currentScenarioId;
             } else {
                 infoContainer.innerHTML = `
                     <div class="info-title">시나리오 정보를 불러올 수 없습니다</div>
@@ -5511,23 +5543,23 @@
         }
 
         // Episode Preview Functions
-        let currentPreviewEpisodeNumber = null;
+        let currentPreviewDialogueNumber = null;
 
-        function previewEpisode(number) {
-            const episode = episodes[number];
+        function previewDialogue(number) {
+            const episode = dialogues[number];
             if (!episode) {
                 alert('에피소드 데이터를 찾을 수 없습니다.');
                 return;
             }
 
-            currentPreviewEpisodeNumber = number;
+            currentPreviewDialogueNumber = number;
             console.log('📖 에피소드 미리보기:', number, episode);
 
             // Update modal title
             document.getElementById('episodePreviewTitle').textContent = `📖 에피소드 #${number} 미리보기`;
 
             // Display episode metadata
-            displayEpisodeMetadata(episode, number);
+            displayDialogueMetadata(episode, number);
 
             // Display dialogue content
             displayDialogueContent(episode);
@@ -5536,10 +5568,10 @@
             document.getElementById('episodePreviewModal').style.display = 'block';
         }
 
-        function displayEpisodeMetadata(episode, number) {
+        function displayDialogueMetadata(episode, number) {
             const metadata = document.getElementById('episodeMetadata');
             const difficulty = getDifficultyByNumber(number);
-            const characterName = getCharacterName(episode.character_id);
+            const characterName = getCharacterName(dialogue.character_id);
 
             metadata.innerHTML = `
                 <div class="metadata-item">
@@ -5552,19 +5584,19 @@
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">캐릭터</div>
-                    <div class="metadata-value">${characterName} (${episode.character_id})</div>
+                    <div class="metadata-value">${characterName} (${dialogue.character_id})</div>
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">시나리오</div>
-                    <div class="metadata-value">${episode.scenario_id}</div>
+                    <div class="metadata-value">${dialogue.scenario_id}</div>
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">생성일</div>
-                    <div class="metadata-value">${episode.created_at ? new Date(episode.created_at).toLocaleString() : '알 수 없음'}</div>
+                    <div class="metadata-value">${dialogue.created_at ? new Date(dialogue.created_at).toLocaleString() : '알 수 없음'}</div>
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">상황 프롬프트</div>
-                    <div class="metadata-value">${episode.user_input_prompt || '없음'}</div>
+                    <div class="metadata-value">${dialogue.user_input_prompt || '없음'}</div>
                 </div>
             `;
         }
@@ -5575,7 +5607,7 @@
             const choicesDisplay = document.getElementById('choicesDisplay');
 
             // Get dialogue data - check all possible field names and structures
-            let dialogueData = episode.dialogue || episode.generated_dialogue || episode.ai_generated_dialogue;
+            let dialogueData = dialogue.dialogue || dialogue.generated_dialogue || dialogue.ai_generated_dialogue;
 
             console.log('💬 에피소드 전체 데이터:', episode);
             console.log('💬 대화 데이터:', dialogueData);
@@ -5652,39 +5684,39 @@
             }
         }
 
-        function editEpisodeFromPreview() {
-            if (currentPreviewEpisodeNumber !== null) {
+        function editDialogueFromPreview() {
+            if (currentPreviewDialogueNumber !== null) {
                 closeModal('episodePreviewModal');
-                editEpisode(currentPreviewEpisodeNumber);
+                editDialogue(currentPreviewDialogueNumber);
             }
         }
 
-        function editEpisode(number) {
-            const episode = episodes[number];
+        function editDialogue(number) {
+            const episode = dialogues[number];
             if (!episode) return;
             
             currentMode = 'edit';
-            document.getElementById('episodeModalTitle').textContent = '에피소드 수정';
-            document.getElementById('episodeId').value = episode.id;
-            document.getElementById('episodeScenarioId').value = episode.scenario_id;
-            document.getElementById('episodeNumber').value = episode.episode_number;
-            document.getElementById('characterSelect').value = episode.character_id;
-            document.getElementById('difficulty').value = episode.difficulty;
-            document.getElementById('userPrompt').value = episode.user_input_prompt;
+            document.getElementById('dialogueModalTitle').textContent = '에피소드 수정';
+            document.getElementById('dialogueId').value = dialogue.id;
+            document.getElementById('dialogueScenarioId').value = dialogue.scenario_id;
+            document.getElementById('dialogueNumber').value = dialogue.dialogue_number;
+            document.getElementById('characterSelect').value = dialogue.character_id;
+            document.getElementById('difficulty').value = dialogue.difficulty;
+            document.getElementById('userPrompt').value = dialogue.user_input_prompt;
             
             // AI 생성 대화 표시
-            if (episode.ai_generated_dialogue) {
-                generatedDialogue = episode.ai_generated_dialogue;
+            if (dialogue.ai_generated_dialogue) {
+                generatedDialogue = dialogue.ai_generated_dialogue;
                 displayDialoguePreview(generatedDialogue);
             }
             
-            if (episode.custom_dialogue) {
-                const custom = JSON.parse(episode.custom_dialogue);
+            if (dialogue.custom_dialogue) {
+                const custom = JSON.parse(dialogue.custom_dialogue);
                 document.getElementById('customDialogue').value = custom.dialogue || '';
                 document.getElementById('customNarration').value = custom.narration || '';
             }
             
-            document.getElementById('episodeModal').style.display = 'block';
+            document.getElementById('dialogueModal').style.display = 'block';
         }
 
         async function generateDialogue() {
@@ -5777,14 +5809,14 @@
             });
         }
 
-        async function saveEpisode() {
+        async function saveDialogue() {
             // 현재 선택된 시나리오 정보 사용
             const scenarioId = currentScenarioId;
-            const episodeNumber = parseInt(document.getElementById('episodeNumber').value);
+            const dialogueNumber = parseInt(document.getElementById('dialogueNumber').value);
             const difficulty = document.getElementById('difficulty').value;
             const userPrompt = document.getElementById('userPrompt').value;
 
-            if (!scenarioId || !episodeNumber || !userPrompt) {
+            if (!scenarioId || !dialogueNumber || !userPrompt) {
                 alert('모든 필수 항목을 입력해주세요.\n\n- 대화 번호\n- 난이도 설정\n- 상황 프롬프트');
                 return;
             }
@@ -5800,29 +5832,29 @@
             const characterId = currentScenario.available_characters?.[0] || currentScenario.character_id;
             const characterName = currentScenario.character_name || characterId;
             
-            const episodeData = {
+            const dialogueData = {
                 scenario_id: scenarioId,
-                episode_number: episodeNumber,
+                dialogue_number: dialogueNumber,
                 character_id: characterId,
                 character_name: characterName,
                 difficulty: difficulty,
                 user_input_prompt: userPrompt,
                 created_at: new Date().toISOString(),
-                id: currentMode === 'create' ? `episode_${scenarioId}_${episodeNumber}_${Date.now()}` : document.getElementById('episodeId').value
+                id: currentMode === 'create' ? `dialogue_${scenarioId}_${dialogueNumber}_${Date.now()}` : document.getElementById('dialogueId').value
             };
             
             if (currentMode === 'create') {
-                episodeData.action = 'create';
+                dialogueData.action = 'create';
             } else {
-                episodeData.action = 'update';
-                episodeData.id = document.getElementById('episodeId').value;
+                dialogueData.action = 'update';
+                dialogueData.id = document.getElementById('dialogueId').value;
             }
             
             // 커스텀 대화가 있으면 추가
             const customDialogue = document.getElementById('customDialogue').value;
             const customNarration = document.getElementById('customNarration').value;
             if (customDialogue || customNarration) {
-                episodeData.custom_dialogue = {
+                dialogueData.custom_dialogue = {
                     dialogue: customDialogue,
                     narration: customNarration
                 };
@@ -5830,23 +5862,23 @@
             
             // 생성된 대화가 있으면 추가
             if (generatedDialogue) {
-                episodeData.generated_dialogue = generatedDialogue;
+                dialogueData.generated_dialogue = generatedDialogue;
             }
             
             try {
                 console.log('💾 === 에피소드 저장 시작 ===');
-                console.log('📊 에피소드 데이터:', episodeData);
+                console.log('📊 에피소드 데이터:', dialogueData);
 
-                // Episode Manager API 호출
-                console.log('🔗 Episode Manager API 호출...');
+                // Dialogue Manager API 호출
+                console.log('🔗 Dialogue Manager API 호출...');
 
-                const apiUrl = '/api/episode-manager';
+                const apiUrl = '/api/dialogue-manager';
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(episodeData)
+                    body: JSON.stringify(dialogueData)
                 });
 
                 if (!response.ok) {
@@ -5857,19 +5889,19 @@
                 console.log('📊 API 응답:', result);
 
                 if (result.success) {
-                    console.log('✅ Episode Manager API 저장 성공!');
+                    console.log('✅ Dialogue Manager API 저장 성공!');
 
                     // 성공 메시지
                     const successMessage = currentMode === 'create' ?
-                        `💖 새로운 대화 ${episodeNumber}번이 생성되었습니다!\n시나리오: ${window.scenarios?.[scenarioId]?.title || scenarioId}\n캐릭터: ${characterName}` :
-                        `✨대화 ${episodeNumber}번이 수정되었습니다!`;
+                        `💖 새로운 대화 ${dialogueNumber}번이 생성되었습니다!\n시나리오: ${window.scenarios?.[scenarioId]?.title || scenarioId}\n캐릭터: ${characterName}` :
+                        `✨대화 ${dialogueNumber}번이 수정되었습니다!`;
 
                     showNotification(successMessage, 'success');
-                    closeModal('episodeModal');
+                    closeModal('dialogueModal');
 
                     // UI 최종 업데이트
                     console.log('🔄 저장 후 최종 UI 동기화...');
-                    await loadEpisodes(); // 에피소드 목록 새로고침
+                    await loadDialogues(); // 에피소드 목록 새로고침
                     updateScenarioStats();
                 } else {
                     throw new Error(result.message || 'API 응답에서 success: false');
@@ -5880,10 +5912,10 @@
             } catch (error) {
                 await ErrorLogger.error('Episode Save Failed', error, {
                     action: 'save_episode',
-                    component: 'episode_manager',
+                    component: 'dialogue_manager',
                     data: {
                         scenarioId: currentScenarioId,
-                        episodeNumber: document.getElementById('episodeNumber').value,
+                        dialogueNumber: document.getElementById('dialogueNumber').value,
                         difficulty: document.getElementById('difficulty').value
                     }
                 });
@@ -5891,7 +5923,7 @@
             }
         }
 
-        async function generateBulkEpisodes() {
+        async function generateBulkDialogues() {
             console.log('🚀 대화 일괄 생성 시작...');
 
             // 현재 선택된 시나리오 확인
@@ -5928,16 +5960,16 @@
                 return;
             }
             
-            const episodeCount = endNum - startNum + 1;
+            const dialogueCount = endNum - startNum + 1;
             
             // 4. 확인 및 생성
-            if (confirm(`📋 일괄 생성 설정:\n\n시나리오: ${selectedScenario.title}\n캐릭터: ${character.name} (${character.mbti})\n범위: ${startNum}번 ~ ${endNum}번 (총 ${episodeCount}개)\n\n⚠️ 주의: AI API 연결이 실패하면 전체 생성이 중단됩니다.\n\n생성하시겠습니까?`)) {
+            if (confirm(`📋 일괄 생성 설정:\n\n시나리오: ${selectedScenario.title}\n캐릭터: ${character.name} (${character.mbti})\n범위: ${startNum}번 ~ ${endNum}번 (총 ${dialogueCount}개)\n\n⚠️ 주의: AI API 연결이 실패하면 전체 생성이 중단됩니다.\n\n생성하시겠습니까?`)) {
                 
                 console.log('🔄 대화 일괄 생성 진행...');
                 let successCount = 0;
                 let failCount = 0;
                 
-                for (let episodeNum = startNum; episodeNum <= endNum; episodeNum++) {
+                for (let dialogueNum = startNum; dialogueNum <= endNum; dialogueNum++) {
                     try {
                         // 각 에피소드별 상황 프롬프트 자동 생성
                         const situationPrompts = [
@@ -5953,28 +5985,28 @@
                             "추운 겨울 따뜻한 마음을 나누는"
                         ];
                         
-                        const promptIndex = (episodeNum - 1) % situationPrompts.length;
+                        const promptIndex = (dialogueNum - 1) % situationPrompts.length;
                         const userPrompt = situationPrompts[promptIndex];
                         
                         // 난이도 설정 (1-9: Easy, 10-18: Medium, 19-27: Hard, 28-36: Expert)
                         let difficulty = 'Easy';
-                        if (episodeNum >= 10 && episodeNum <= 18) difficulty = 'Medium';
-                        else if (episodeNum >= 19 && episodeNum <= 27) difficulty = 'Hard';
-                        else if (episodeNum >= 28 && episodeNum <= 36) difficulty = 'Expert';
+                        if (dialogueNum >= 10 && dialogueNum <= 18) difficulty = 'Medium';
+                        else if (dialogueNum >= 19 && dialogueNum <= 27) difficulty = 'Hard';
+                        else if (dialogueNum >= 28 && dialogueNum <= 36) difficulty = 'Expert';
                         
                         // OpenAI API Rate Limiting 방지를 위한 지연 (2번째 요청부터)
-                        if (episodeNum > startNum) {
-                            console.log(`⏳ Rate Limiting 방지 대기 중... (${episodeNum}번째 요청)`);
+                        if (dialogueNum > startNum) {
+                            console.log(`⏳ Rate Limiting 방지 대기 중... (${dialogueNum}번째 요청)`);
                             await new Promise(resolve => setTimeout(resolve, 2000)); // 2초 대기
                         }
 
                         // 채팅 훈련 API를 사용한 대화 생성 (폴백 없음)
-                        console.log(`🎯 대화 ${episodeNum}번 생성 시작...`);
+                        console.log(`🎯 대화 ${dialogueNum}번 생성 시작...`);
                         const generatedDialogue = await generateLocalDialogue(characterId, character.name, userPrompt, difficulty);
                         
                         // 에피소드 데이터 생성
-                        const episodeData = {
-                            episode_number: episodeNum,
+                        const dialogueData = {
+                            dialogue_number: dialogueNum,
                             scenario_id: currentScenarioId,
                             character_id: characterId,
                             character_name: character.name,
@@ -5985,14 +6017,14 @@
                             created_at: new Date().toISOString()
                         };
                         
-                        // Episode Manager API 호출
-                        const response = await fetch('/api/episode-manager', {
+                        // Dialogue Manager API 호출
+                        const response = await fetch('/api/dialogue-manager', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({
-                                ...episodeData,
+                                ...dialogueData,
                                 action: 'create'
                             })
                         });
@@ -6007,13 +6039,13 @@
                         }
                         
                         successCount++;
-                        console.log(`✅ 대화 ${episodeNum}번 생성 완료`);
+                        console.log(`✅ 대화 ${dialogueNum}번 생성 완료`);
                         
                     } catch (error) {
-                        console.error(`❌ 대화 ${episodeNum}번 생성 실패:`, error);
+                        console.error(`❌ 대화 ${dialogueNum}번 생성 실패:`, error);
 
                         // AI API 에러 시 즉시 중단하고 사용자에게 알림
-                        const errorMessage = `❌ AI 대화 생성 실패\n\n대화 ${episodeNum}번에서 오류 발생:\n${error.message}\n\n성공: ${successCount}개\n실패: ${episodeNum - startNum + 1}번부터 중단\n\n해결 방법:\n1. OpenAI API 키 환경변수 확인\n2. Vercel 대시보드에서 환경변수 설정\n3. API 크레딧 잔액 확인\n4. 잠시 후 다시 시도`;
+                        const errorMessage = `❌ AI 대화 생성 실패\n\n대화 ${dialogueNum}번에서 오류 발생:\n${error.message}\n\n성공: ${successCount}개\n실패: ${dialogueNum - startNum + 1}번부터 중단\n\n해결 방법:\n1. OpenAI API 키 환경변수 확인\n2. Vercel 대시보드에서 환경변수 설정\n3. API 크레딧 잔액 확인\n4. 잠시 후 다시 시도`;
 
                         alert(errorMessage);
 
@@ -6026,7 +6058,7 @@
                 alert(`🎉 일괄 생성 완료!\n\n✅ 성공: ${successCount}개 대화 생성\n\n대화 목록을 새로고침합니다.`);
                 
                 // UI 업데이트 (currentScenarioId는 이미 설정되어 있음)
-                loadEpisodes();
+                loadDialogues();
             }
         }
 
@@ -6510,7 +6542,7 @@
                         console.log('✅ Story Flow 구조로 AI 대화 생성됨');
                         return {
                             story_flow: data.data.story_flow,
-                            episode_summary: data.data.episode_summary,
+                            dialogue_summary: data.data.dialogue_summary,
                             difficulty: difficulty,
                             generated_at: new Date().toISOString(),
                             source: 'openai_gpt4o_mini'
@@ -7210,8 +7242,8 @@
                 document.getElementById('scenarioForm').reset();
                 selectedCharacters.clear();
                 document.querySelectorAll('.character-option').forEach(opt => opt.classList.remove('selected'));
-            } else if (modalId === 'episodeModal') {
-                document.getElementById('episodeForm').reset();
+            } else if (modalId === 'dialogueModal') {
+                document.getElementById('dialogueForm').reset();
                 document.getElementById('dialoguePreview').style.display = 'none';
                 generatedDialogue = null;
             } else if (modalId === 'characterModal') {
@@ -7973,7 +8005,7 @@
                     mood,
                     available_characters: Array.from(selectedCharacters || []),
                     created_date: new Date().toISOString().split('T')[0],
-                    episode_count: 0,
+                    dialogue_count: 0,
                     tags: [mood],
                     source: 'scenario_admin',
                     active: true,
