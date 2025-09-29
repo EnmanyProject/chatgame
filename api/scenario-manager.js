@@ -54,12 +54,32 @@ module.exports = async function handler(req, res) {
 
     // 새 시나리오 생성 (AI 컨텍스트 자동 생성)
     if (action === 'create') {
-      const newScenario = await createNewScenario(req.body);
-      return res.json({
-        success: true,
-        scenario: newScenario,
-        message: 'AI 컨텍스트가 자동 생성된 시나리오가 생성되었습니다'
-      });
+      try {
+        console.log('🚀 시나리오 생성 시작...');
+        console.log('📥 받은 데이터:', JSON.stringify(req.body, null, 2));
+        const newScenario = await createNewScenario(req.body);
+        console.log('✅ 시나리오 생성 완료:', newScenario.id);
+        return res.json({
+          success: true,
+          scenario: newScenario,
+          message: 'AI 컨텍스트가 자동 생성된 시나리오가 생성되었습니다'
+        });
+      } catch (error) {
+        console.error('❌ 시나리오 생성 실패:', error);
+        console.error('❌ 오류 스택:', error.stack);
+        return res.status(500).json({
+          success: false,
+          message: `시나리오 생성 실패: ${error.message}`,
+          error_type: 'SCENARIO_CREATE_ERROR',
+          error_details: error.stack,
+          troubleshooting: [
+            'OpenAI API 키 확인',
+            'GitHub API 연결 확인',
+            'JSON 데이터 형식 확인',
+            'Vercel 환경변수 설정 확인'
+          ]
+        });
+      }
     }
 
     // 시나리오 상세 조회
@@ -172,14 +192,23 @@ async function createNewScenario(data) {
     available_characters
   });
 
-  // AI를 이용한 소설풍 컨텍스트 생성
-  const aiContext = await generateAIContext({
-    title,
-    description,
-    background_setting,
-    mood,
-    available_characters // 캐릭터 정보 전달
-  });
+  // AI를 이용한 소설풍 컨텍스트 생성 (오류 시 기본값 사용)
+  let aiContext = '';
+  try {
+    console.log('🤖 AI 컨텍스트 생성 시도...');
+    aiContext = await generateAIContext({
+      title,
+      description,
+      background_setting,
+      mood,
+      available_characters // 캐릭터 정보 전달
+    });
+    console.log('✅ AI 컨텍스트 생성 성공');
+  } catch (error) {
+    console.error('⚠️ AI 컨텍스트 생성 실패:', error.message);
+    console.log('📝 기본 컨텍스트로 대체');
+    aiContext = `**${title}**\n\n${description}\n\n설정: ${background_setting}\n분위기: ${mood}\n\n기본 컨텍스트로 생성되었습니다. AI 컨텍스트 재생성을 원하시면 '재생성' 버튼을 클릭하세요.`;
+  }
   
   const newScenario = {
     id: scenario_id,
@@ -200,15 +229,20 @@ async function createNewScenario(data) {
     updated_by: 'scenario_manager_github_only'
   };
 
-  // 데이터베이스에 저장 (실제로는 파일 시스템 사용)
-  console.log('💾 시나리오 저장 시작:', newScenario.id);
-  const saveResult = await saveScenarioToDatabase(newScenario);
-  console.log('💾 저장 결과:', saveResult);
-  
-  // 저장 후 검증
-  const updatedDb = await loadScenarioDatabase();
-  console.log('🔍 저장 검증 - 전체 시나리오 수:', Object.keys(updatedDb.scenarios).length);
-  console.log('🔍 저장된 시나리오 존재 확인:', !!updatedDb.scenarios[newScenario.id]);
+  // 데이터베이스에 저장
+  try {
+    console.log('💾 시나리오 저장 시작:', newScenario.id);
+    const saveResult = await saveScenarioToDatabase(newScenario);
+    console.log('💾 저장 결과:', saveResult);
+
+    // 저장 후 검증
+    const updatedDb = await loadScenarioDatabase();
+    console.log('🔍 저장 검증 - 전체 시나리오 수:', Object.keys(updatedDb.scenarios).length);
+    console.log('🔍 저장된 시나리오 존재 확인:', !!updatedDb.scenarios[newScenario.id]);
+  } catch (error) {
+    console.error('❌ 시나리오 저장 중 오류:', error);
+    throw new Error(`시나리오 저장 실패: ${error.message}`);
+  }
   
   return newScenario;
 }
