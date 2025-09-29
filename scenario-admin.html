@@ -9278,9 +9278,10 @@
             document.querySelector('.episodes-list-section').style.display = 'none';
             document.getElementById('selectedEpisodeDialogues').style.display = 'block';
 
-            // 현재 선택된 그룹의 시나리오 ID 설정 (첫 번째 언더스코어까지만 사용)
-            const parts = groupKey.split('_');
-            currentScenarioId = `${parts[0]}_${parts[1]}_${parts[2]}`;
+            // 현재 선택된 그룹의 시나리오 ID를 episodeGroups에서 가져오기
+            // groupKey는 "scenario_id_character_id" 형식이므로 직접 파싱하기 어려움
+            // 따라서 API에서 에피소드 데이터를 로드해서 scenario_id를 찾는 것이 더 안전함
+            console.log('🔑 GroupKey로 scenario_id 찾기:', groupKey);
 
             // 해당 에피소드의 실제 대화들만 표시 (빈 카드 대신)
             displayEpisodeSpecificDialogues(groupKey, scenarioTitle, characterName);
@@ -9308,12 +9309,28 @@
                     throw new Error(data.message || '에피소드 데이터 로드 실패');
                 }
 
-                // 선택된 그룹(시나리오+캐릭터)의 에피소드들 필터링
-                const [scenarioId, characterId] = groupKey.split('_').slice(0, 2);
-                const episodeDialogues = Object.values(data.episodes || {}).filter(episode =>
-                    episode.scenario_id === `${scenarioId}_${characterId.split('_')[0]}_${characterId.split('_')[1]}` &&
-                    episode.character_id === characterId
-                );
+                // groupKey에서 scenario_id와 character_id를 올바르게 추출
+                // groupKey 형식: "scenario_id_character_id"에서 실제 값들을 찾아야 함
+                console.log('🔑 GroupKey 분석:', groupKey);
+
+                // 모든 에피소드를 확인해서 해당 groupKey와 매치되는 것들을 찾기
+                const episodeDialogues = Object.values(data.episodes || {}).filter(episode => {
+                    if (!episode.scenario_id || !episode.character_id) return false;
+
+                    const episodeGroupKey = `${episode.scenario_id}_${episode.character_id}`;
+                    const isMatch = episodeGroupKey === groupKey;
+
+                    if (isMatch) {
+                        console.log('✅ 매치된 에피소드:', {
+                            episode_id: episode.id,
+                            scenario_id: episode.scenario_id,
+                            character_id: episode.character_id,
+                            character_name: episode.character_name
+                        });
+                    }
+
+                    return isMatch;
+                });
 
                 console.log('🔍 필터링된 에피소드 대화:', episodeDialogues.length, '개');
 
@@ -9376,18 +9393,46 @@
         }
 
         // 에피소드에 새 대화 추가 (새로 추가)
-        function addNewDialogueToEpisode(groupKey, scenarioTitle, characterName) {
+        async function addNewDialogueToEpisode(groupKey, scenarioTitle, characterName) {
             console.log('✨ 새 대화 추가:', groupKey, scenarioTitle, characterName);
 
-            // 시나리오 ID 설정
-            const parts = groupKey.split('_');
-            currentScenarioId = `${parts[0]}_${parts[1]}_${parts[2]}`;
+            try {
+                // API에서 에피소드 데이터 로드해서 실제 scenario_id 찾기
+                const response = await fetch('/api/dialogue-manager?action=get_all_episodes');
+                const data = await response.json();
 
-            // 대화 생성 모달 열기
-            openDialogueModal('create');
+                if (data.success && data.episodes) {
+                    // 해당 groupKey와 매치되는 에피소드 찾기
+                    const matchingEpisode = Object.values(data.episodes).find(episode => {
+                        if (!episode.scenario_id || !episode.character_id) return false;
+                        const episodeGroupKey = `${episode.scenario_id}_${episode.character_id}`;
+                        return episodeGroupKey === groupKey;
+                    });
 
-            // 자동으로 다음 에피소드 번호 설정 (향후 구현)
-            // 현재는 사용자가 직접 번호 입력
+                    if (matchingEpisode) {
+                        currentScenarioId = matchingEpisode.scenario_id;
+                        console.log('✅ Scenario ID 설정:', currentScenarioId);
+                    } else {
+                        console.warn('⚠️ 매치되는 에피소드를 찾을 수 없습니다');
+                        // Fallback: groupKey에서 추측해보기
+                        const lastUnderscoreIndex = groupKey.lastIndexOf('_');
+                        if (lastUnderscoreIndex > 0) {
+                            currentScenarioId = groupKey.substring(0, lastUnderscoreIndex);
+                        }
+                    }
+                }
+
+                // 대화 생성 모달 열기
+                openDialogueModal('create');
+
+                // 자동으로 다음 에피소드 번호 설정 (향후 구현)
+                // 현재는 사용자가 직접 번호 입력
+
+            } catch (error) {
+                console.error('❌ Scenario ID 찾기 실패:', error);
+                // 대화 생성 모달은 여전히 열기
+                openDialogueModal('create');
+            }
         }
 
         // 에피소드 대화 미리보기 (새로 추가)
