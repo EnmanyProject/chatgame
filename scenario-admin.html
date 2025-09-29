@@ -3198,6 +3198,104 @@
         let selectedCharacters = new Set();
         let generatedDialogue = null;
 
+        // 🚨 에러 로깅 시스템
+        class ErrorLogger {
+            static async logError(level, message, error, context = {}) {
+                try {
+                    const errorData = {
+                        level: level, // 'critical', 'error', 'warning', 'info'
+                        message: message,
+                        stack: error?.stack || null,
+                        url: window.location.href,
+                        timestamp: new Date().toISOString(),
+                        userId: currentUser?.id || 'anonymous',
+                        sessionId: sessionStorage.getItem('sessionId') || null,
+                        action: context.action || null,
+                        component: context.component || null,
+                        additionalData: {
+                            userAgent: navigator.userAgent,
+                            screenSize: `${screen.width}x${screen.height}`,
+                            viewportSize: `${window.innerWidth}x${window.innerHeight}`,
+                            ...context.data
+                        }
+                    };
+
+                    // 로컬 콘솔에도 출력
+                    const logMethod = level === 'critical' || level === 'error' ? console.error :
+                                    level === 'warning' ? console.warn : console.log;
+                    logMethod(`🚨 ${level.toUpperCase()}:`, message, error);
+
+                    // 서버로 전송
+                    await fetch('/api/error-logger', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(errorData)
+                    });
+
+                } catch (logError) {
+                    console.error('❌ Failed to log error to server:', logError);
+                }
+            }
+
+            static critical(message, error, context = {}) {
+                return this.logError('critical', message, error, context);
+            }
+
+            static error(message, error, context = {}) {
+                return this.logError('error', message, error, context);
+            }
+
+            static warning(message, error, context = {}) {
+                return this.logError('warning', message, error, context);
+            }
+
+            static info(message, error, context = {}) {
+                return this.logError('info', message, error, context);
+            }
+        }
+
+        // 전역 에러 핸들러 설정
+        window.addEventListener('error', (event) => {
+            ErrorLogger.critical('Uncaught JavaScript Error', event.error, {
+                action: 'global_error_handler',
+                component: 'window',
+                data: {
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno
+                }
+            });
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            ErrorLogger.critical('Unhandled Promise Rejection', event.reason, {
+                action: 'promise_rejection',
+                component: 'window'
+            });
+        });
+
+        // 🔍 API 상태 확인 함수
+        async function checkAPIStatus() {
+            try {
+                const response = await fetch('/api/error-logger');
+                const data = await response.json();
+
+                if (data.success) {
+                    console.log('✅ Error Logger API 상태:', data.message);
+                    ErrorLogger.info('API Status Check Successful', null, {
+                        action: 'api_health_check',
+                        component: 'error_logger',
+                        data: { status: 'healthy' }
+                    });
+                }
+            } catch (error) {
+                console.error('❌ Error Logger API 상태 확인 실패:', error);
+                // 에러 로거 자체에 문제가 있으므로 일반 콘솔 로그 사용
+            }
+        }
+
         // 🔄 새로고침 알림 표시 함수
         function showRefreshNotification(message, isSuccess = false) {
             // 기존 알림이 있으면 제거
@@ -3339,7 +3437,11 @@
                 }
 
             } catch (error) {
-                console.error('❌ 로그인 오류:', error);
+                await ErrorLogger.error('Login API Error', error, {
+                    action: 'user_login',
+                    component: 'auth_system',
+                    data: { username: document.getElementById('username').value }
+                });
                 showLoginStatus('로그인 중 오류가 발생했습니다: ' + error.message, 'error');
             }
         }
@@ -3379,7 +3481,10 @@
                     showLoginModal();
                 }
             } catch (error) {
-                console.error('❌ 세션 확인 오류:', error);
+                await ErrorLogger.error('Session Check Error', error, {
+                    action: 'check_auth_token',
+                    component: 'auth_system'
+                });
                 showLoginModal();
             }
         }
@@ -3481,6 +3586,9 @@
         // 메인 시스템 초기화 (로그인 후 실행)
         function initializeMainSystem() {
             console.log('🚀 메인 시스템 초기화 시작...');
+
+            // API 상태 확인
+            checkAPIStatus();
 
             // 기존 초기화 코드들
             initializeEventListeners();
@@ -5770,8 +5878,16 @@
                 console.log('✅ 에피소드 저장 프로세스 완료!');
 
             } catch (error) {
-                console.error('❌ 에피소드 저장 실패:', error);
-                alert('에피소드 저장 중 오류가 발생했습니다: ' + error.message);
+                await ErrorLogger.error('Episode Save Failed', error, {
+                    action: 'save_episode',
+                    component: 'episode_manager',
+                    data: {
+                        scenarioId: currentScenarioId,
+                        episodeNumber: document.getElementById('episodeNumber').value,
+                        difficulty: document.getElementById('difficulty').value
+                    }
+                });
+                alert('대화 저장 중 오류가 발생했습니다: ' + error.message);
             }
         }
 
@@ -7985,7 +8101,14 @@
                 }
 
             } catch (error) {
-                console.error('❌ 온라인 시나리오 저장 실패:', error);
+                await ErrorLogger.error('Scenario Save Failed', error, {
+                    action: 'save_scenario_online',
+                    component: 'scenario_manager',
+                    data: {
+                        title: document.getElementById('scenarioTitle').value,
+                        description: document.getElementById('scenarioDescription').value
+                    }
+                });
 
                 let errorMessage = '온라인 저장 중 오류가 발생했습니다:\n' + error.message;
 
