@@ -11378,10 +11378,11 @@
         }
 
         // 🤖 통합 AI 캐릭터 생성 함수 (자동완성 + 인물소개)
+        // 🎯 새로운 통합 AI 캐릭터 생성기 (한번에 완전 생성)
         async function generateCompleteCharacter(event) {
-            console.log('🤖 통합 AI 캐릭터 생성 시작');
+            console.log('🎯 새로운 통합 AI 캐릭터 생성기 시작');
 
-            // 버튼 상태 관리를 위한 변수들을 함수 스코프로 이동
+            // 버튼 상태 관리
             let button = null;
             let originalText = '';
 
@@ -11390,95 +11391,82 @@
                 button = event.target;
                 originalText = button.textContent;
                 button.disabled = true;
-                button.textContent = '🤖 AI 생성 중...';
+                button.textContent = '🎯 AI 캐릭터 생성 중...';
 
-                // 현재 폼 데이터 수집
-                const formData = collectCharacterFormData();
-                console.log('📋 현재 폼 데이터:', formData);
+                // 1️⃣ 필수 필드 검증
+                const name = document.getElementById('charName')?.value?.trim();
+                const age = document.getElementById('charAge')?.value;
+                const mbti = document.getElementById('charMbti')?.value;
 
-                // 1단계: 캐릭터 자동 완성
-                console.log('🎯 1단계: 캐릭터 데이터 자동 완성');
-                button.textContent = '🎯 1/2 데이터 완성 중...';
+                if (!name || !age || !mbti) {
+                    alert('⚠️ 필수 정보를 입력해주세요!\n\n✅ 이름: ' + (name || '❌ 필수') + '\n✅ 나이: ' + (age || '❌ 필수') + '\n✅ MBTI: ' + (mbti || '❌ 필수'));
+                    return;
+                }
 
-                const autoCompleteResponse = await fetch('/api/character-ai-generator', {
+                console.log('✅ 필수 필드 검증 완료:', { name, age, mbti });
+
+                // 2️⃣ 입력된 선택적 필드 수집
+                const inputData = collectInputData();
+                console.log('📋 입력된 데이터:', inputData);
+
+                // 3️⃣ 빈 필드들을 랜덤으로 채우기
+                const completeData = fillMissingFieldsRandomly(inputData);
+                console.log('🎲 랜덤 완성된 데이터:', completeData);
+
+                // 4️⃣ AI API 호출하여 최종 캐릭터 생성 (인물소개 포함)
+                console.log('🤖 AI API 호출: 캐릭터 완전 생성');
+                button.textContent = '🤖 AI가 캐릭터 생성 중...';
+
+                const response = await fetch('/api/character-ai-generator', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        action: 'auto_complete_character',
-                        ...formData
+                        action: 'generate_complete_character_with_profile',
+                        character_data: completeData
                     })
                 });
 
-                if (!autoCompleteResponse.ok) {
-                    throw new Error(`자동 완성 API 호출 실패: ${autoCompleteResponse.status}`);
+                if (!response.ok) {
+                    throw new Error(`API 오류: ${response.status}`);
                 }
 
-                const autoCompleteResult = await autoCompleteResponse.json();
-                console.log('✅ 1단계 완료:', autoCompleteResult);
+                const result = await response.json();
+                console.log('✅ AI 캐릭터 생성 완료:', result);
 
-                if (!autoCompleteResult.success) {
-                    throw new Error(autoCompleteResult.message || '캐릭터 자동 완성 실패');
+                if (!result.success) {
+                    throw new Error(result.message || '캐릭터 생성 실패');
                 }
 
-                // 🔍 디버깅: 완성된 캐릭터 데이터 구조 분석
-                console.log('🔍 완성된 캐릭터 데이터 분석:');
-                console.log('- 데이터 타입:', typeof autoCompleteResult.character);
-                console.log('- 최상위 키들:', Object.keys(autoCompleteResult.character || {}));
-                console.log('- basic_info 존재:', !!autoCompleteResult.character?.basic_info);
-                console.log('- appeal_profile 존재:', !!autoCompleteResult.character?.appeal_profile);
-                console.log('- physical_allure 존재:', !!autoCompleteResult.character?.physical_allure);
-
-                if (autoCompleteResult.character?.basic_info) {
-                    console.log('- basic_info 내용:', autoCompleteResult.character.basic_info);
+                // 5️⃣ 생성된 캐릭터 데이터를 폼에 적용
+                if (result.character) {
+                    console.log('📝 생성된 캐릭터를 폼에 적용 중...');
+                    fillCharacterForm(result.character);
+                    console.log('✅ 폼 적용 완료');
                 }
 
-                // 완성된 데이터로 폼 채우기
-                fillCharacterForm(autoCompleteResult.character);
-
-                // 2단계: 인물 소개 생성
-                console.log('📝 2단계: 인물 소개 생성');
-                button.textContent = '📝 2/2 인물소개 생성 중...';
-
-                // 완성된 캐릭터 데이터로 인물소개 생성
-                const updatedFormData = collectCharacterFormData();
-
-                const profileResponse = await fetch('/api/character-ai-generator', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        action: 'generate_character_profile',
-                        ...updatedFormData
-                    })
-                });
-
-                if (!profileResponse.ok) {
-                    throw new Error(`인물소개 생성 API 호출 실패: ${profileResponse.status}`);
+                // 6️⃣ 인물소개를 프롬프트로 표시 (별도 프로필 생성 없음)
+                if (result.character_profile) {
+                    console.log('📜 인물소개(프롬프트) 표시');
+                    showCharacterPromptModal(result.character_profile, result.character);
                 }
 
-                const profileResult = await profileResponse.json();
-                console.log('✅ 2단계 완료:', profileResult);
+                // 7️⃣ 성공 메시지 및 자동 저장 여부 확인
+                const characterName = result.character?.basic_info?.name || result.character?.name || name;
+                const autoSave = confirm(`🎉 ${characterName} 캐릭터가 완전히 생성되었습니다!\n\n바로 저장하시겠습니까?\n\n• 확인: 바로 저장\n• 취소: 수정 후 저장`);
 
-                if (!profileResult.success) {
-                    throw new Error(profileResult.message || '인물 소개 생성 실패');
+                if (autoSave) {
+                    console.log('🚀 자동 저장 시작...');
+                    await window.saveCharacter();
+                } else {
+                    alert(`✅ ${characterName} 캐릭터 생성이 완료되었습니다!\n필요시 수정한 후 "저장" 버튼을 눌러주세요.`);
                 }
 
-                // 성공 메시지 및 결과 표시
-                const characterName = updatedFormData.basic_info?.name || '캐릭터';
-                const successMessage = `🎉 ${characterName} 캐릭터가 완전히 생성되었습니다!\n\n✅ 캐릭터 데이터 자동 완성\n✅ 인물 소개 생성\n\n생성된 인물소개를 확인하시겠습니까?`;
-
-                const showProfile = confirm(successMessage);
-                if (showProfile && profileResult.profile) {
-                    showCharacterProfileModal(profileResult.profile);
-                }
-
-                console.log('🎊 통합 AI 캐릭터 생성 완료!');
+                console.log('🎊 새로운 통합 AI 캐릭터 생성기 완료!');
 
             } catch (error) {
-                console.error('❌ 통합 AI 캐릭터 생성 실패:', error);
+                console.error('❌ AI 캐릭터 생성 실패:', error);
                 alert(`❌ AI 캐릭터 생성 실패:\n${error.message}\n\n다시 시도해주세요.`);
             } finally {
                 // 버튼 상태 복원
@@ -11489,7 +11477,200 @@
             }
         }
 
-        // 현재 폼 데이터 수집 함수
+        // 🔍 입력된 데이터만 수집하는 함수 (새로운 캐릭터 생성기용)
+        function collectInputData() {
+            const inputData = {
+                // 필수 필드들
+                name: document.getElementById('charName')?.value?.trim(),
+                age: parseInt(document.getElementById('charAge')?.value) || null,
+                mbti: document.getElementById('charMbti')?.value,
+
+                // 선택적 필드들 (입력된 것만 수집)
+                character_type: document.getElementById('charType')?.value || null,
+                major: document.getElementById('charMajor')?.value || null,
+                family: document.getElementById('charFamily')?.value || null,
+                hometown: document.getElementById('charHometown')?.value || null,
+                relationship: document.getElementById('charRelationship')?.value || null,
+
+                // 외모 정보
+                appearance: {
+                    hair: document.getElementById('charHair')?.value || null,
+                    eyes: document.getElementById('charEyes')?.value || null,
+                    body: document.getElementById('charBody')?.value || null,
+                    bust: document.getElementById('charBust')?.value || null,
+                    waist_hip: document.getElementById('charWaistHip')?.value || null,
+                    style: document.getElementById('charStyle')?.value || null
+                },
+
+                // 대화 스타일
+                speech_style: document.getElementById('charSpeechStyle')?.value || null,
+                speech_habit: document.getElementById('charSpeechHabit')?.value || null,
+                values: document.getElementById('charValues')?.value || null,
+
+                // 선택된 성격특성과 취미
+                personality_traits: getSelectedPersonalityTraits(),
+                hobbies: getSelectedHobbies(),
+
+                // 매력 프로필
+                seduction_style: document.getElementById('seductionStyle')?.value || null,
+                emotional_intelligence: parseInt(document.getElementById('emotionalIntelligence')?.value) || null,
+                confidence_level: parseInt(document.getElementById('confidenceLevel')?.value) || null,
+                mystery_factor: parseInt(document.getElementById('mysteryFactor')?.value) || null,
+                comfort_level: document.getElementById('comfortLevel')?.value || null,
+                escalation_pace: document.getElementById('escalationPace')?.value || null
+            };
+
+            console.log('📋 입력 데이터 수집 완료:', inputData);
+            return inputData;
+        }
+
+        // 🎲 빈 필드들을 랜덤으로 채우는 함수
+        function fillMissingFieldsRandomly(inputData) {
+            const randomSelections = {
+                character_type: ['romance_junior', 'seductive_junior', 'cute_junior', 'elegant_senior'],
+                major: ['art', 'music', 'literature', 'psychology', 'business', 'design'],
+                family: ['only_child', 'older_sister', 'younger_sister', 'middle_child'],
+                hometown: ['seoul', 'busan', 'incheon', 'daegu', 'gwangju'],
+                relationship: ['secret_crush', 'childhood_friend', 'senior_friend', 'classmate'],
+
+                hair: ['long_straight', 'long_wavy', 'medium_bob', 'short_cute'],
+                eyes: ['round_cute', 'seductive_eyes', 'innocent_eyes', 'mysterious_eyes'],
+                body: ['petite', 'petite_sexy', 'average_height', 'tall_elegant'],
+                bust: ['small_cute', 'average', 'medium', 'large'],
+                waist_hip: ['slim_tight', 'balanced', 'curvy'],
+                style: ['cute_casual', 'sexy_chic', 'innocent_style', 'elegant_fashion'],
+
+                values: ['love_family', 'pursue_dreams', 'value_friendship', 'seek_stability'],
+
+                seduction_style: ['playful_confident', 'innocent_charming', 'mysterious_alluring', 'direct_passionate'],
+                comfort_level: ['light_flirtation', 'moderate_flirtation', 'intimate_conversation'],
+                escalation_pace: ['very_gradual', 'gradual_building', 'moderate_pace', 'quick_escalation'],
+
+                personality_traits: [
+                    ['친화적', '활발한', '낙관적'],
+                    ['내향적', '신중한', '예술적'],
+                    ['논리적', '독립적', '야심찬'],
+                    ['배려심 많은', '협력적', '따뜻한'],
+                    ['실용적', '융통성 있는', '모험적']
+                ],
+
+                hobbies: [
+                    ['독서', '영화감상', '카페투어'],
+                    ['요리', '베이킹', '맛집탐방'],
+                    ['운동', '요가', '산책'],
+                    ['쇼핑', '패션', '뷰티'],
+                    ['여행', '사진', '드라이브']
+                ]
+            };
+
+            // 랜덤으로 빈 필드 채우기
+            const completeData = { ...inputData };
+
+            // 기본 정보
+            if (!completeData.character_type) completeData.character_type = randomChoice(randomSelections.character_type);
+            if (!completeData.major) completeData.major = randomChoice(randomSelections.major);
+            if (!completeData.family) completeData.family = randomChoice(randomSelections.family);
+            if (!completeData.hometown) completeData.hometown = randomChoice(randomSelections.hometown);
+            if (!completeData.relationship) completeData.relationship = randomChoice(randomSelections.relationship);
+
+            // 외모 정보
+            if (!completeData.appearance.hair) completeData.appearance.hair = randomChoice(randomSelections.hair);
+            if (!completeData.appearance.eyes) completeData.appearance.eyes = randomChoice(randomSelections.eyes);
+            if (!completeData.appearance.body) completeData.appearance.body = randomChoice(randomSelections.body);
+            if (!completeData.appearance.bust) completeData.appearance.bust = randomChoice(randomSelections.bust);
+            if (!completeData.appearance.waist_hip) completeData.appearance.waist_hip = randomChoice(randomSelections.waist_hip);
+            if (!completeData.appearance.style) completeData.appearance.style = randomChoice(randomSelections.style);
+
+            // 기타 정보
+            if (!completeData.values) completeData.values = randomChoice(randomSelections.values);
+            if (!completeData.seduction_style) completeData.seduction_style = randomChoice(randomSelections.seduction_style);
+            if (!completeData.comfort_level) completeData.comfort_level = randomChoice(randomSelections.comfort_level);
+            if (!completeData.escalation_pace) completeData.escalation_pace = randomChoice(randomSelections.escalation_pace);
+
+            // 슬라이더 값들 (기본값 설정)
+            if (!completeData.emotional_intelligence) completeData.emotional_intelligence = randomRange(6, 9);
+            if (!completeData.confidence_level) completeData.confidence_level = randomRange(6, 9);
+            if (!completeData.mystery_factor) completeData.mystery_factor = randomRange(4, 8);
+
+            // 성격특성과 취미 (빈 배열이면 랜덤 선택)
+            if (!completeData.personality_traits || completeData.personality_traits.length === 0) {
+                completeData.personality_traits = randomChoice(randomSelections.personality_traits);
+            }
+            if (!completeData.hobbies || completeData.hobbies.length === 0) {
+                completeData.hobbies = randomChoice(randomSelections.hobbies);
+            }
+
+            console.log('🎲 랜덤 완성 결과:', completeData);
+            return completeData;
+        }
+
+        // 랜덤 선택 헬퍼 함수
+        function randomChoice(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        // 랜덤 범위 헬퍼 함수
+        function randomRange(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // 선택된 성격특성 수집 함수
+        function getSelectedPersonalityTraits() {
+            const selected = [];
+            document.querySelectorAll('input[name="personality"]:checked').forEach(checkbox => {
+                selected.push(checkbox.value);
+            });
+            return selected;
+        }
+
+        // 선택된 취미 수집 함수
+        function getSelectedHobbies() {
+            const selected = [];
+            document.querySelectorAll('input[name="hobbies"]:checked').forEach(checkbox => {
+                selected.push(checkbox.value);
+            });
+            return selected;
+        }
+
+        // 📜 인물소개를 프롬프트로 표시하는 모달 함수
+        function showCharacterPromptModal(profile, character) {
+            console.log('📜 인물소개(프롬프트) 모달 표시');
+
+            const characterName = character?.basic_info?.name || character?.name || '캐릭터';
+
+            // 기존 프로필 모달이 있다면 제목과 내용만 변경
+            let modal = document.getElementById('characterProfileModal');
+            if (!modal) {
+                // 모달이 없으면 동적 생성
+                modal = document.createElement('div');
+                modal.id = 'characterProfileModal';
+                modal.className = 'modal';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <span class="close" onclick="closeModal('characterProfileModal')">&times;</span>
+                            <h2 id="profileCharacterName">${characterName} 인물소개</h2>
+                        </div>
+                        <div class="modal-body">
+                            <div id="profileContent" style="white-space: pre-wrap; line-height: 1.6;"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('characterProfileModal')">닫기</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            // 내용 업데이트
+            document.getElementById('profileCharacterName').textContent = `${characterName} 인물소개`;
+            document.getElementById('profileContent').textContent = profile.profile_text || profile.text || profile;
+
+            // 모달 표시
+            modal.style.display = 'block';
+        }
+
+        // 현재 폼 데이터 수집 함수 (기존)
         function collectCharacterFormData() {
             const formData = {
                 id: document.getElementById('characterId')?.value || null,

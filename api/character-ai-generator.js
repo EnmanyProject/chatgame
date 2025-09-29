@@ -328,9 +328,53 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // 🚀 통합된 캐릭터 생성 + 프로필 생성 (새로운 워크플로우)
+    if (action === 'generate_complete_character_with_profile') {
+      console.log('🚀 통합 캐릭터 생성 시작:', req.body);
+
+      try {
+        // 1️⃣ 필수 필드 검증
+        const { name, age, mbti } = req.body;
+        if (!name || !age || !mbti) {
+          return res.status(400).json({
+            success: false,
+            message: '이름, 나이, MBTI는 필수 입력 사항입니다.',
+            required_fields: ['name', 'age', 'mbti']
+          });
+        }
+
+        // 2️⃣ 캐릭터 완전 생성 (AI 또는 템플릿 기반)
+        const completeCharacterData = await generateCompleteCharacterFromPartialInput(req.body);
+
+        // 3️⃣ 생성된 캐릭터로 프로필(프롬프트) 생성
+        const characterProfile = await generateCharacterProfile(completeCharacterData);
+
+        console.log('🎉 통합 캐릭터 생성 완료:', {
+          character_name: completeCharacterData.basic_info?.name || completeCharacterData.name,
+          has_profile: !!characterProfile.profile_text
+        });
+
+        return res.json({
+          success: true,
+          character: completeCharacterData,
+          profile: characterProfile,
+          message: `${completeCharacterData.basic_info?.name || completeCharacterData.name} 캐릭터가 완전히 생성되었습니다!`,
+          workflow: 'unified_generation'
+        });
+
+      } catch (error) {
+        console.error('❌ 통합 캐릭터 생성 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: '통합 캐릭터 생성 실패: ' + error.message,
+          error_type: 'unified_generation_error'
+        });
+      }
+    }
+
     return res.status(400).json({
       success: false,
-      message: 'Unknown action. Available: list_characters, save_character, delete_character, reset_all_characters, generate_character, auto_complete_character, generate_character_profile'
+      message: 'Unknown action. Available: list_characters, save_character, delete_character, reset_all_characters, generate_character, auto_complete_character, generate_character_profile, generate_complete_character_with_profile'
     });
 
   } catch (error) {
@@ -1352,6 +1396,25 @@ ${getPsychologicalDescription(characterData)} 이런 특성들이 ${name}의 독
 
   console.log('✅ 템플릿 기반 인물 소개 생성 완료');
   return profileData;
+}
+
+// 🚀 통합된 캐릭터 생성 함수 (부분 입력 → 완전한 캐릭터)
+async function generateCompleteCharacterFromPartialInput(inputData) {
+  console.log('🚀 통합 캐릭터 생성 시작:', {
+    name: inputData.name,
+    age: inputData.age,
+    mbti: inputData.mbti,
+    additional_fields: Object.keys(inputData).filter(key => !['name', 'age', 'mbti'].includes(key)).length
+  });
+
+  try {
+    // OpenAI를 사용한 고품질 생성 시도
+    return await generateCharacterWithAI(inputData);
+  } catch (error) {
+    console.warn('⚠️ OpenAI 생성 실패, 랜덤 생성으로 대체:', error.message);
+    // 실패 시 랜덤 생성 사용
+    return generateRandomCharacterFromInput(inputData);
+  }
 }
 
 // 헬퍼 함수들
