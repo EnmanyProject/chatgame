@@ -99,55 +99,92 @@
 
         .episode-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
+            gap: 15px;
             margin-top: 20px;
         }
 
         .episode-card {
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            padding: 15px;
-            text-align: center;
+            border-radius: 12px;
+            padding: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .episode-card:hover {
             background: rgba(255, 255, 255, 0.2);
             transform: translateY(-2px);
+            border-color: #667eea;
         }
 
         .episode-card.completed {
-            background: rgba(76, 175, 80, 0.3);
+            background: rgba(76, 175, 80, 0.15);
             border-color: #4caf50;
         }
 
-        .episode-card.locked {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.1);
-            opacity: 0.5;
-            cursor: not-allowed;
+        .episode-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
         }
 
-        .episode-number {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 5px;
+        .episode-info {
+            flex: 1;
         }
 
         .episode-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .episode-meta {
+            display: flex;
+            gap: 10px;
             font-size: 12px;
             opacity: 0.8;
+            margin-bottom: 8px;
+        }
+
+        .scenario-name {
+            color: #ffd700;
+        }
+
+        .character-name {
+            color: #87ceeb;
+        }
+
+        .episode-prompt {
+            font-size: 13px;
+            opacity: 0.9;
+            line-height: 1.4;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        .episode-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .episode-number {
+            font-size: 14px;
+            font-weight: bold;
+            color: #667eea;
         }
 
         .episode-difficulty {
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            margin-top: 5px;
-            display: inline-block;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
         }
 
         .difficulty-easy { background: rgba(76, 175, 80, 0.3); }
@@ -437,40 +474,53 @@
             document.getElementById('episodeSelector').style.display = 'block';
         }
 
-        // 에피소드 표시
+        // 에피소드 표시 (카드 리스트 형태)
         function displayEpisodes() {
             const grid = document.getElementById('episodeGrid');
-            const availableEpisodes = Object.keys(gameState.episodes);
+            const availableEpisodes = Object.values(gameState.episodes);
 
             if (availableEpisodes.length === 0) {
-                grid.innerHTML = '<div style="text-align: center; opacity: 0.7; grid-column: 1/-1;">이 시나리오에는 아직 에피소드가 없습니다</div>';
+                grid.innerHTML = '<div style="text-align: center; opacity: 0.7; padding: 40px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 12px;">이 시나리오에는 아직 에피소드가 없습니다<br><small>어드민에서 에피소드를 생성해주세요</small></div>';
                 return;
             }
 
-            // 1-36 슬롯 생성
-            let html = '';
-            for (let i = 1; i <= 36; i++) {
-                const episode = gameState.episodes[i];
-                const difficulty = getDifficultyByNumber(i);
+            // 현재 시나리오 정보 가져오기
+            const currentScenario = gameState.scenarios.find(s => s.scenario_id === gameState.currentScenario) || {};
 
-                if (episode) {
-                    html += `
-                        <div class="episode-card completed" onclick="playEpisode(${i})">
-                            <div class="episode-number">#${i}</div>
-                            <div class="episode-title">${episode.title}</div>
-                            <span class="episode-difficulty difficulty-${difficulty.toLowerCase()}">${difficulty}</span>
+            // 에피소드 번호순으로 정렬
+            availableEpisodes.sort((a, b) => a.episode_number - b.episode_number);
+
+            let html = '';
+            availableEpisodes.forEach(episode => {
+                const createdDate = new Date(episode.created_at).toLocaleDateString('ko-KR');
+
+                html += `
+                    <div class="episode-card completed" onclick="playEpisode(${episode.episode_number})" data-episode-id="${episode.id}">
+                        <div class="episode-header">
+                            <div class="episode-info">
+                                <div class="episode-title">${episode.title}</div>
+                                <div class="episode-meta">
+                                    <span class="scenario-name">📚 ${currentScenario.title || '알 수 없는 시나리오'}</span>
+                                    <span class="character-name">👤 ${episode.character_name}</span>
+                                </div>
+                            </div>
+                            <div class="episode-number">EP.${episode.episode_number}</div>
                         </div>
-                    `;
-                } else {
-                    html += `
-                        <div class="episode-card locked">
-                            <div class="episode-number">#${i}</div>
-                            <div class="episode-title">미생성</div>
-                            <span class="episode-difficulty difficulty-${difficulty.toLowerCase()}">${difficulty}</span>
+
+                        <div class="episode-prompt">"${episode.user_input_prompt}"</div>
+
+                        <div class="episode-footer">
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <span class="episode-difficulty difficulty-${episode.difficulty.toLowerCase()}">${episode.difficulty}</span>
+                                <span style="font-size: 11px; opacity: 0.6;">${createdDate}</span>
+                            </div>
+                            <div style="font-size: 11px; opacity: 0.6;">
+                                ${getChoiceCount(episode)}개 선택지
+                            </div>
                         </div>
-                    `;
-                }
-            }
+                    </div>
+                `;
+            });
 
             grid.innerHTML = html;
         }
@@ -481,6 +531,25 @@
             if (episodeNumber <= 18) return 'Medium';
             if (episodeNumber <= 27) return 'Hard';
             return 'Expert';
+        }
+
+        // 에피소드의 선택지 개수 계산 (story_flow와 기존 구조 모두 지원)
+        function getChoiceCount(episode) {
+            if (!episode.dialogue) return 0;
+
+            // 새로운 story_flow 구조
+            if (episode.dialogue.story_flow && Array.isArray(episode.dialogue.story_flow)) {
+                let totalChoices = 0;
+                episode.dialogue.story_flow.forEach(item => {
+                    if (item.type === 'choice_point' && item.choices) {
+                        totalChoices += item.choices.length;
+                    }
+                });
+                return totalChoices;
+            }
+
+            // 기존 구조
+            return episode.dialogue.choices?.length || 0;
         }
 
         // 에피소드 플레이
@@ -508,7 +577,7 @@
             displayEpisodeDialogue(episode);
         }
 
-        // 에피소드 대화 표시
+        // 에피소드 대화 표시 (새로운 story_flow 구조 지원)
         function displayEpisodeDialogue(episode) {
             const container = document.getElementById('chatContainer');
             const dialogue = episode.dialogue;
@@ -520,47 +589,143 @@
 
             let html = '';
 
-            // 캐릭터 메시지
-            if (dialogue.dialogue) {
-                html += `
-                    <div class="character-message">
-                        <strong>${episode.character_name}:</strong><br>
-                        ${dialogue.dialogue}
-                    </div>
-                `;
-            }
+            // 새로운 story_flow 구조 지원
+            if (dialogue.story_flow && Array.isArray(dialogue.story_flow)) {
+                console.log('📖 Story Flow 구조로 에피소드 표시:', dialogue.story_flow);
 
-            // 나레이션
-            if (dialogue.narration) {
-                html += `
-                    <div class="narration">
-                        ${dialogue.narration}
-                    </div>
-                `;
-            }
+                dialogue.story_flow.forEach((item, index) => {
+                    if (item.type === 'dialogue') {
+                        // 캐릭터 대화
+                        html += `
+                            <div class="character-message">
+                                <strong>${item.speaker || episode.character_name}:</strong><br>
+                                ${item.text}
+                                ${item.emotion ? `<div style="font-size: 11px; opacity: 0.7; margin-top: 5px;">💭 ${item.emotion}</div>` : ''}
+                            </div>
+                        `;
 
-            // 선택지
-            if (dialogue.choices && dialogue.choices.length > 0) {
-                html += '<div class="choices-container">';
-                dialogue.choices.forEach((choice, index) => {
-                    const impact = choice.affection_impact || 0;
-                    const impactClass = impact > 0 ? 'positive' : impact < 0 ? 'negative' : 'neutral';
-                    const impactText = impact > 0 ? `+${impact}` : impact < 0 ? `${impact}` : '0';
+                        // 나레이션이 있으면 표시
+                        if (item.narration) {
+                            html += `
+                                <div class="narration">
+                                    ${item.narration}
+                                </div>
+                            `;
+                        }
+                    }
+                    else if (item.type === 'choice_point') {
+                        // 선택지 포인트
+                        if (item.situation) {
+                            html += `
+                                <div class="narration" style="border-left-color: #667eea;">
+                                    🤔 ${item.situation}
+                                </div>
+                            `;
+                        }
 
-                    html += `
-                        <button class="choice-button" onclick="selectChoice(${index})">
-                            <div class="choice-text">${choice.text}</div>
-                            <div class="choice-impact ${impactClass}">호감도 ${impactText}</div>
-                        </button>
-                    `;
+                        if (item.choices && item.choices.length > 0) {
+                            html += '<div class="choices-container">';
+                            item.choices.forEach((choice, choiceIndex) => {
+                                const impact = choice.affection_impact || 0;
+                                const impactClass = impact > 0 ? 'positive' : impact < 0 ? 'negative' : 'neutral';
+                                const impactText = impact > 0 ? `+${impact}` : impact < 0 ? `${impact}` : '0';
+
+                                html += `
+                                    <button class="choice-button" onclick="selectStoryChoice(${index}, ${choiceIndex})">
+                                        <div class="choice-text">${choice.text}</div>
+                                        <div class="choice-impact ${impactClass}">호감도 ${impactText}</div>
+                                        ${choice.consequence ? `<div style="font-size: 11px; opacity: 0.6; margin-top: 3px;">→ ${choice.consequence}</div>` : ''}
+                                    </button>
+                                `;
+                            });
+                            html += '</div>';
+                        }
+                    }
                 });
-                html += '</div>';
+
+                // 에피소드 요약 표시
+                if (dialogue.episode_summary) {
+                    html += `
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(255, 215, 0, 0.1); border-radius: 8px; border-left: 4px solid #ffd700;">
+                            <strong>📝 에피소드 요약:</strong><br>
+                            ${dialogue.episode_summary}
+                        </div>
+                    `;
+                }
+            }
+            // 기존 단순 대화 구조 지원 (하위 호환성)
+            else {
+                console.log('📖 기존 구조로 에피소드 표시:', dialogue);
+
+                // 캐릭터 메시지
+                if (dialogue.dialogue) {
+                    html += `
+                        <div class="character-message">
+                            <strong>${episode.character_name}:</strong><br>
+                            ${dialogue.dialogue}
+                        </div>
+                    `;
+                }
+
+                // 나레이션
+                if (dialogue.narration) {
+                    html += `
+                        <div class="narration">
+                            ${dialogue.narration}
+                        </div>
+                    `;
+                }
+
+                // 선택지
+                if (dialogue.choices && dialogue.choices.length > 0) {
+                    html += '<div class="choices-container">';
+                    dialogue.choices.forEach((choice, index) => {
+                        const impact = choice.affection_impact || 0;
+                        const impactClass = impact > 0 ? 'positive' : impact < 0 ? 'negative' : 'neutral';
+                        const impactText = impact > 0 ? `+${impact}` : impact < 0 ? `${impact}` : '0';
+
+                        html += `
+                            <button class="choice-button" onclick="selectChoice(${index})">
+                                <div class="choice-text">${choice.text}</div>
+                                <div class="choice-impact ${impactClass}">호감도 ${impactText}</div>
+                            </button>
+                        `;
+                    });
+                    html += '</div>';
+                }
             }
 
             container.innerHTML = html;
         }
 
-        // 선택지 선택
+        // Story Flow 구조의 선택지 선택
+        function selectStoryChoice(flowIndex, choiceIndex) {
+            const episode = gameState.currentEpisode;
+            const flowItem = episode.dialogue.story_flow[flowIndex];
+            const choice = flowItem.choices[choiceIndex];
+
+            console.log('🎯 Story Flow 선택지 선택:', choice);
+
+            // 선택 완료 메시지 표시
+            const container = document.getElementById('chatContainer');
+            container.innerHTML += `
+                <div style="margin-top: 20px; padding: 20px; background: rgba(76, 175, 80, 0.3); border-radius: 8px; text-align: center;">
+                    <h4>✅ 에피소드 완료!</h4>
+                    <p>선택: "${choice.text}"</p>
+                    <p>호감도 변화: ${choice.affection_impact > 0 ? '+' : ''}${choice.affection_impact}</p>
+                    ${choice.consequence ? `<p style="font-style: italic; opacity: 0.8;">${choice.consequence}</p>` : ''}
+                    <button class="back-button" onclick="goBackToSelection()" style="margin-top: 15px;">다른 에피소드 플레이</button>
+                </div>
+            `;
+
+            // 선택지 버튼 비활성화
+            document.querySelectorAll('.choice-button').forEach(btn => {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+            });
+        }
+
+        // 기존 구조의 선택지 선택 (하위 호환성)
         function selectChoice(choiceIndex) {
             const episode = gameState.currentEpisode;
             const choice = episode.dialogue.choices[choiceIndex];
