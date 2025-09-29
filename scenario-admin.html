@@ -2460,6 +2460,9 @@
                     <button class="btn btn-secondary" onclick="loadDialogues()">
                         🔄 새로고침
                     </button>
+                    <button class="btn btn-warning" onclick="resetAllEpisodes()" style="background: #ff9800; color: white;">
+                        🗑️ 모든 에피소드 삭제
+                    </button>
                 </div>
 
                 <div class="difficulty-tabs">
@@ -9166,6 +9169,122 @@
         window.loadEpisodesList = loadEpisodesList;
         window.viewEpisodeDialogues = viewEpisodeDialogues;
         window.closeEpisodeDialogues = closeEpisodeDialogues;
+
+        // ✨ 모든 에피소드 삭제 기능 (새로 추가)
+        async function resetAllEpisodes() {
+            console.log('🗑️ 모든 에피소드 삭제 요청...');
+
+            // 2단계 확인 (캐릭터 삭제와 동일한 방식)
+            const firstConfirm = confirm(
+                '⚠️ 경고: 모든 에피소드를 삭제하시겠습니까?\n\n' +
+                '이 작업은 다음을 삭제합니다:\n' +
+                '• 모든 시나리오+캐릭터 조합의 에피소드\n' +
+                '• 각 에피소드의 1~36번 대화 내용\n' +
+                '• 생성된 모든 AI 대화 데이터\n\n' +
+                '⚠️ 이 작업은 되돌릴 수 없습니다!'
+            );
+
+            if (!firstConfirm) {
+                console.log('✅ 에피소드 삭제 취소됨');
+                return;
+            }
+
+            const secondConfirm = confirm(
+                '🚨 최종 확인\n\n' +
+                '정말로 모든 에피소드 데이터를 삭제하시겠습니까?\n\n' +
+                '삭제할 경우:\n' +
+                '• 모든 AI 생성 대화가 사라집니다\n' +
+                '• 에피소드 목록이 비워집니다\n' +
+                '• GitHub에서도 완전히 삭제됩니다\n\n' +
+                '정말 삭제하시겠습니까?'
+            );
+
+            if (!secondConfirm) {
+                console.log('✅ 에피소드 삭제 최종 취소됨');
+                return;
+            }
+
+            try {
+                // 로딩 표시
+                const container = document.getElementById('episodesListContainer');
+                container.innerHTML = `
+                    <div class="loading-card" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <div class="spinner"></div>
+                        <h4>🗑️ 모든 에피소드 삭제 중...</h4>
+                        <p>잠시만 기다려주세요...</p>
+                    </div>
+                `;
+
+                console.log('🔄 dialogue-manager API 호출: 모든 에피소드 삭제');
+
+                // dialogue-manager API를 통해 모든 에피소드 삭제
+                const response = await fetch('/api/dialogue-manager', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'reset_all_episodes'
+                    })
+                });
+
+                console.log('📶 API 응답 상태:', response.status);
+
+                if (!response.ok) {
+                    throw new Error(`API 호출 실패: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('📊 삭제 결과:', result);
+
+                if (result.success) {
+                    // 성공 메시지
+                    alert(
+                        '✅ 모든 에피소드가 성공적으로 삭제되었습니다!\n\n' +
+                        '• GitHub에서 완전히 제거됨\n' +
+                        '• 모든 AI 대화 데이터 삭제됨\n' +
+                        '• 깨끗한 상태로 초기화됨\n\n' +
+                        '이제 새로운 에피소드를 생성할 수 있습니다!'
+                    );
+
+                    // 에피소드 목록 새로고침
+                    await loadEpisodesList();
+
+                    // 대화 목록도 새로고침 (빈 상태)
+                    displayDialogues();
+
+                    // 통계 업데이트
+                    updateDialogueStats();
+
+                    console.log('✅ 에피소드 삭제 및 새로고침 완료');
+
+                } else {
+                    throw new Error(result.message || '에피소드 삭제 실패');
+                }
+
+            } catch (error) {
+                console.error('❌ 에피소드 삭제 실패:', error);
+
+                // 오류 표시
+                const container = document.getElementById('episodesListContainer');
+                container.innerHTML = `
+                    <div class="error-card" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <h4>❌ 에피소드 삭제 실패</h4>
+                        <p>${error.message}</p>
+                        <button class="btn btn-primary" onclick="loadEpisodesList()">🔄 다시 로드</button>
+                    </div>
+                `;
+
+                alert(
+                    '❌ 에피소드 삭제 중 오류가 발생했습니다.\n\n' +
+                    `오류: ${error.message}\n\n` +
+                    '다시 시도해주세요.'
+                );
+            }
+        }
+
+        // 전역 함수로 등록
+        window.resetAllEpisodes = resetAllEpisodes;
     </script>
 </body>
 </html>

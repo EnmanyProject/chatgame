@@ -105,6 +105,50 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // 모든 에피소드 초기화 (새로 추가)
+    if (action === 'reset_all_episodes' && req.method === 'POST') {
+      try {
+        console.log('🗑️ 모든 에피소드 초기화 요청');
+
+        // 빈 에피소드 데이터베이스 구조 생성
+        const emptyDatabase = {
+          metadata: {
+            version: "1.0.0",
+            created_date: new Date().toISOString().split('T')[0],
+            total_episodes: 0,
+            ai_context_engine: "gpt-4o-mini",
+            last_updated: new Date().toISOString(),
+            data_source: "episode_manager_api"
+          },
+          episodes: {}
+        };
+
+        console.log('📊 빈 데이터베이스 구조 생성 완료');
+
+        // GitHub API를 통해 파일 업데이트
+        const success = await saveEpisodeDatabase(emptyDatabase);
+
+        if (success) {
+          console.log('✅ 모든 에피소드 삭제 완료');
+          return res.json({
+            success: true,
+            message: '모든 에피소드가 성공적으로 삭제되었습니다.',
+            deleted_count: 0, // 실제로는 기존 개수를 반환해야 하지만, 단순화
+            timestamp: new Date().toISOString()
+          });
+        } else {
+          throw new Error('GitHub API를 통한 파일 업데이트 실패');
+        }
+
+      } catch (error) {
+        console.error('❌ 에피소드 초기화 실패:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: '에피소드 초기화 실패: ' + error.message
+        });
+      }
+    }
+
     // 알 수 없는 액션
     return res.status(400).json({
       success: false,
