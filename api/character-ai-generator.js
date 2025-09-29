@@ -1524,6 +1524,11 @@ function generateMBTIDefaults(mbti) {
       core_desires: ['새로운 경험', '사람들과의 연결', '자유로운 표현'],
       speech_style: 'ENFP 유형의 활발하고 친근한 말투'
     },
+    'ENFJ': {
+      charm_points: ['따뜻한 카리스마', '공감하는 눈빛', '격려하는 미소'],
+      core_desires: ['타인의 성장 돕기', '의미있는 관계', '긍정적 영향력'],
+      speech_style: 'ENFJ 유형의 따뜻하고 격려적인 말투'
+    },
     'INTJ': {
       charm_points: ['신비로운 아우라', '날카로운 통찰력', '차분한 자신감'],
       core_desires: ['지적 자극', '체계적 성장', '깊이있는 관계'],
@@ -1579,7 +1584,7 @@ function convertToV2Schema(frontendData) {
     },
     appeal_profile: {
       seduction_style: getValueOrDefault(frontendData.seduction_style, 'playful_confident', 'seduction_style'),
-      charm_points: getValueOrDefault(frontendData.charm_points, mbtiDefaults.charm_points, 'charm_points'),
+      charm_points: getValueOrDefault(frontendData.charm_points, [...mbtiDefaults.charm_points], 'charm_points'),
       emotional_intelligence: frontendData.emotional_intelligence || randomRange(6, 9),
       confidence_level: frontendData.confidence_level || randomRange(6, 9),
       mystery_factor: frontendData.mystery_factor || randomRange(4, 8)
@@ -1595,7 +1600,7 @@ function convertToV2Schema(frontendData) {
       }
     },
     psychological_depth: {
-      core_desires: getValueOrDefault(frontendData.core_desires, mbtiDefaults.core_desires, 'core_desires'),
+      core_desires: getValueOrDefault(frontendData.core_desires, [...mbtiDefaults.core_desires], 'core_desires'),
       boundaries: {
         comfort_level: getValueOrDefault(frontendData.comfort_level, 'light_flirtation', 'comfort_level'),
         escalation_pace: getValueOrDefault(frontendData.escalation_pace, 'very_gradual', 'escalation_pace')

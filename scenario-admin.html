@@ -8465,7 +8465,7 @@
                 // 내면/취미
                 hobbies: getSelectedHobbies(),
                 values: document.getElementById('charValues').value || 'love_family',
-                speech_style: document.getElementById('charSpeechStyle').value,
+                speech_style: document.getElementById('charSpeechStyle').value || null, // 🚨 빈 문자열이면 null
                 speech_habit: document.getElementById('charSpeechHabit').value || '',
 
                 // 💫 새로운 매력 프로필 필드들
@@ -8515,24 +8515,26 @@
             return selectedHobbies.slice(0, 5); // 최대 5개로 증가
         }
 
-        // 선택된 매력 포인트들 가져오기
+        // 선택된 매력 포인트들 가져오기 (빈 배열이면 null 반환)
         function getSelectedCharms() {
             const selectedCharms = [];
             document.querySelectorAll('.charm-btn.selected').forEach(btn => {
                 selectedCharms.push(btn.dataset.charm);
             });
             console.log('🎯 선택된 매력 포인트:', selectedCharms);
-            return selectedCharms.slice(0, 3); // 최대 3개
+            const result = selectedCharms.slice(0, 3); // 최대 3개
+            return result.length === 0 ? null : result; // 🚨 빈 배열이면 null 반환
         }
 
-        // 선택된 핵심 욕구들 가져오기
+        // 선택된 핵심 욕구들 가져오기 (빈 배열이면 null 반환)
         function getSelectedDesires() {
             const selectedDesires = [];
             document.querySelectorAll('.desire-btn.selected').forEach(btn => {
                 selectedDesires.push(btn.dataset.desire);
             });
             console.log('🎯 선택된 핵심 욕구:', selectedDesires);
-            return selectedDesires.slice(0, 3); // 최대 3개
+            const result = selectedDesires.slice(0, 3); // 최대 3개
+            return result.length === 0 ? null : result; // 🚨 빈 배열이면 null 반환
         }
 
         // === AI 캐릭터 생성기 이벤트 리스너 초기화 ===
@@ -11493,7 +11495,7 @@
                 },
 
                 // 대화 스타일
-                speech_style: document.getElementById('charSpeechStyle')?.value || null,
+                speech_style: document.getElementById('charSpeechStyle')?.value || null, // 🚨 빈 문자열이면 null
                 speech_habit: document.getElementById('charSpeechHabit')?.value || null,
                 values: document.getElementById('charValues')?.value || null,
 
@@ -11706,7 +11708,7 @@
                     }
                 },
                 conversation_dynamics: {
-                    speech_style: document.getElementById('charSpeechStyle')?.value || ''
+                    speech_style: document.getElementById('charSpeechStyle')?.value || null // 🚨 빈 문자열이면 null
                 }
             };
 
@@ -11714,15 +11716,15 @@
             return formData;
         }
 
-        // 선택된 매력 포인트 수집
+        // 선택된 매력 포인트 수집 (빈 배열이면 null 반환)
         function getSelectedCharmPoints() {
             const selected = [];
             const checkboxes = document.querySelectorAll('input[name="charm_points"]:checked');
             checkboxes.forEach(cb => selected.push(cb.value));
-            return selected;
+            return selected.length === 0 ? null : selected; // 🚨 빈 배열이면 null 반환
         }
 
-        // 선택된 핵심 욕구 수집
+        // 선택된 핵심 욕구 수집 (빈 배열이면 null 반환)
         function getSelectedCoreDesires() {
             const selected = [];
             const select = document.getElementById('coreDesires');
@@ -11731,7 +11733,7 @@
                     selected.push(option.value);
                 }
             }
-            return selected;
+            return selected.length === 0 ? null : selected; // 🚨 빈 배열이면 null 반환
         }
 
         // 🔄 업그레이드된 캐릭터 폼 데이터 채우기 함수 (v2.0)
