@@ -1543,6 +1543,57 @@ function generateMBTIDefaults(mbti) {
       charm_points: ['쿨한 매력', '자연스러운 여유', '실용적 센스'],
       core_desires: ['개인적 자유', '실용적 성취', '독립적 생활'],
       speech_style: 'ISTP 유형의 간결하고 직설적인 말투'
+    },
+    // 🔥 추가된 10개 MBTI 타입
+    'INFJ': {
+      charm_points: ['신비로운 깊이', '따뜻한 직감', '조용한 카리스마'],
+      core_desires: ['깊은 유대감', '의미있는 목적', '타인의 진정한 이해'],
+      speech_style: 'INFJ 유형의 신중하고 깊이있는 말투'
+    },
+    'INTP': {
+      charm_points: ['독특한 관점', '지적인 호기심', '창의적 사고'],
+      core_desires: ['지적 탐구', '독립적 사고', '창의적 자유'],
+      speech_style: 'INTP 유형의 논리적이고 탐구적인 말투'
+    },
+    'ENTJ': {
+      charm_points: ['강한 리더십', '확고한 자신감', '추진력있는 매력'],
+      core_desires: ['목표 달성', '조직적 성공', '효율적 성장'],
+      speech_style: 'ENTJ 유형의 단호하고 리더십있는 말투'
+    },
+    'ENTP': {
+      charm_points: ['재치있는 유머', '창의적 아이디어', '활발한 토론'],
+      core_desires: ['새로운 가능성', '창의적 도전', '지적 자극'],
+      speech_style: 'ENTP 유형의 활발하고 창의적인 말투'
+    },
+    'ISFP': {
+      charm_points: ['온화한 미소', '예술적 감성', '자연스러운 매력'],
+      core_desires: ['개인적 가치', '예술적 표현', '조화로운 관계'],
+      speech_style: 'ISFP 유형의 부드럽고 감성적인 말투'
+    },
+    'ISFJ': {
+      charm_points: ['따뜻한 보살핌', '세심한 배려', '안정감주는 존재감'],
+      core_desires: ['타인 보호', '안정적 관계', '봉사와 도움'],
+      speech_style: 'ISFJ 유형의 친절하고 배려깊은 말투'
+    },
+    'ESFP': {
+      charm_points: ['밝은 에너지', '순수한 즐거움', '사교적 매력'],
+      core_desires: ['즐거운 경험', '사람들과의 연결', '자유로운 표현'],
+      speech_style: 'ESFP 유형의 밝고 친근한 말투'
+    },
+    'ESTJ': {
+      charm_points: ['안정감있는 리더십', '책임감있는 모습', '실용적 매력'],
+      core_desires: ['질서와 안정', '체계적 성취', '책임있는 역할'],
+      speech_style: 'ESTJ 유형의 체계적이고 확실한 말투'
+    },
+    'ESTP': {
+      charm_points: ['역동적 에너지', '순발력있는 재치', '모험적 매력'],
+      core_desires: ['즉석 모험', '실용적 경험', '활동적 생활'],
+      speech_style: 'ESTP 유형의 활발하고 직설적인 말투'
+    },
+    'ISTJ': {
+      charm_points: ['신뢰할수있는 안정감', '차분한 매력', '성실한 모습'],
+      core_desires: ['안정과 질서', '신뢰관계', '체계적 생활'],
+      speech_style: 'ISTJ 유형의 신중하고 성실한 말투'
     }
   };
 
