@@ -2,9 +2,9 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-09-28",
-    "total_episodes": 8,
+    "total_episodes": 9,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-09-29T00:34:59.516Z",
+    "last_updated": "2025-09-29T00:35:09.520Z",
     "data_source": "episode_manager_api"
   },
   "episodes": {
@@ -261,6 +261,38 @@
         ],
         "difficulty": "Easy",
         "generated_at": "2025-09-29T00:34:58.716Z",
+        "source": "chat_training_api"
+      }
+    },
+    "episode_scenario_1759074626974_1759106109373": {
+      "id": "episode_scenario_1759074626974_1759106109373",
+      "scenario_id": "scenario_1759074626974",
+      "episode_number": 2,
+      "title": "에피소드 2번",
+      "character_id": "미화_esfp_1759064886354",
+      "character_name": "미화",
+      "difficulty": "Easy",
+      "user_input_prompt": "함께 과제를 하면서 가까워지는 순간",
+      "created_at": "2025-09-29T00:35:09.373Z",
+      "dialogue": {
+        "dialogue": "윤아: 죄송해요, 지금 제대로 대답하기 어려워요 😅",
+        "narration": "윤아가 잠시 당황한 표정을 짓는다.",
+        "choices": [
+          {
+            "text": "괜찮다고 말하며 다른 화제로 넘어간다",
+            "affection_impact": 1
+          },
+          {
+            "text": "무슨 일인지 걱정스럽게 물어본다",
+            "affection_impact": 2
+          },
+          {
+            "text": "시간을 두고 천천히 이야기하자고 한다",
+            "affection_impact": 3
+          }
+        ],
+        "difficulty": "Easy",
+        "generated_at": "2025-09-29T00:35:08.689Z",
         "source": "chat_training_api"
       }
     }
