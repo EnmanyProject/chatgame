@@ -106,12 +106,31 @@ module.exports = async function handler(req, res) {
 
     // AI 컨텍스트 재생성
     if (action === 'regenerate_context') {
-      const scenario = await regenerateAIContext(req.body);
-      return res.json({
-        success: true,
-        scenario,
-        message: 'AI 컨텍스트가 재생성되었습니다'
-      });
+      try {
+        console.log('🎯 AI 컨텍스트 재생성 요청 받음:', {
+          bodyKeys: Object.keys(req.body),
+          scenario_id: req.body.scenario_id,
+          title: req.body.title,
+          characterCount: req.body.available_characters ? req.body.available_characters.length : 0
+        });
+
+        const scenario = await regenerateAIContext(req.body);
+
+        console.log('✅ AI 컨텍스트 재생성 완료');
+        return res.json({
+          success: true,
+          scenario,
+          message: 'AI 컨텍스트가 재생성되었습니다'
+        });
+      } catch (error) {
+        console.error('❌ AI 컨텍스트 재생성 실패:', error);
+        console.error('❌ 오류 상세:', error.stack);
+        return res.status(500).json({
+          success: false,
+          message: `AI 컨텍스트 재생성 실패: ${error.message}`,
+          error_details: error.stack?.split('\n').slice(0, 5).join('\n')
+        });
+      }
     }
 
     // 시나리오 삭제 (DELETE 요청 또는 action=delete)
@@ -573,7 +592,8 @@ async function loadCharacterDatabase() {
     console.log('🔄 캐릭터 API에서 데이터 로드 시도...');
 
     // 내부 API 호출 (같은 서버 내에서)
-    const response = await fetch('https://chatgame-seven.vercel.app/api/character-ai-generator?action=list_characters');
+    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://chatgame-seven.vercel.app';
+    const response = await fetch(`${baseUrl}/api/character-ai-generator?action=list_characters`);
 
     console.log('📡 캐릭터 API 응답 상태:', response.status, response.statusText);
 
