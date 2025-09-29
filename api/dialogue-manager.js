@@ -159,6 +159,79 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // 개별 에피소드 삭제
+    if (action === 'delete_episode' && req.method === 'POST') {
+      try {
+        const { episode_id } = req.body;
+
+        if (!episode_id) {
+          return res.status(400).json({
+            success: false,
+            message: 'episode_id 파라미터가 필요합니다.'
+          });
+        }
+
+        console.log('🗑️ 에피소드 삭제 요청:', episode_id);
+
+        // 기존 에피소드 데이터 로드
+        const database = await loadEpisodeDatabase();
+
+        // 삭제할 에피소드가 존재하는지 확인
+        if (!database.episodes || !database.episodes[episode_id]) {
+          return res.status(404).json({
+            success: false,
+            message: `에피소드를 찾을 수 없습니다: ${episode_id}`
+          });
+        }
+
+        // 삭제할 에피소드 정보 보존
+        const deletedEpisode = database.episodes[episode_id];
+        console.log('🎯 삭제 대상 에피소드:', {
+          id: deletedEpisode.id,
+          title: deletedEpisode.title,
+          character_name: deletedEpisode.character_name,
+          difficulty: deletedEpisode.difficulty
+        });
+
+        // 해당 에피소드 삭제
+        delete database.episodes[episode_id];
+
+        // 메타데이터 업데이트
+        const remainingCount = Object.keys(database.episodes).length;
+        database.metadata.total_episodes = remainingCount;
+        database.metadata.last_updated = new Date().toISOString();
+
+        console.log('📊 삭제 후 남은 에피소드 개수:', remainingCount);
+
+        // GitHub API를 통해 파일 업데이트
+        const success = await saveEpisodeDatabase(database);
+
+        if (success) {
+          console.log('✅ 에피소드 삭제 완료:', episode_id);
+          return res.json({
+            success: true,
+            message: `에피소드가 성공적으로 삭제되었습니다.`,
+            deleted_episode: {
+              id: deletedEpisode.id,
+              title: deletedEpisode.title || '제목 없음',
+              character_name: deletedEpisode.character_name || '캐릭터 없음'
+            },
+            remaining_count: remainingCount,
+            timestamp: new Date().toISOString()
+          });
+        } else {
+          throw new Error('GitHub API를 통한 파일 업데이트 실패');
+        }
+
+      } catch (error) {
+        console.error('❌ 에피소드 삭제 실패:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: '에피소드 삭제 실패: ' + error.message
+        });
+      }
+    }
+
     // 알 수 없는 액션
     return res.status(400).json({
       success: false,
