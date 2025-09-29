@@ -18,9 +18,20 @@ module.exports = async function handler(req, res) {
     });
 
     if (req.method === 'POST' && req.body?.action === 'generate') {
-      const { character_id, user_prompt, difficulty } = req.body;
+      const {
+        character_id,
+        user_prompt,
+        difficulty,
+        scenario_id,
+        scenario_title,
+        scenario_description,
+        scenario_context,
+        scenario_mood,
+        scenario_setting
+      } = req.body;
 
       console.log(`🎭 ${character_id}의 ${difficulty} 난이도 대화 생성:`, user_prompt);
+      console.log(`📚 시나리오 컨텍스트:`, scenario_title || '없음');
 
       // OpenAI API 키 확인
       const openaiApiKey = process.env.OPENAI_API_KEY;
@@ -35,8 +46,16 @@ module.exports = async function handler(req, res) {
       }
 
       try {
-        // OpenAI API 호출로 대화 생성
-        const aiResponse = await generateDialogueWithOpenAI(character_id, user_prompt, difficulty, openaiApiKey);
+        // OpenAI API 호출로 대화 생성 (시나리오 정보 포함)
+        const scenarioInfo = {
+          id: scenario_id,
+          title: scenario_title,
+          description: scenario_description,
+          context: scenario_context,
+          mood: scenario_mood,
+          setting: scenario_setting
+        };
+        const aiResponse = await generateDialogueWithOpenAI(character_id, user_prompt, difficulty, openaiApiKey, scenarioInfo);
 
         return res.status(200).json({
           success: true,
@@ -75,8 +94,9 @@ module.exports = async function handler(req, res) {
 };
 
 // OpenAI API를 사용한 대화 생성 함수
-async function generateDialogueWithOpenAI(characterId, userPrompt, difficulty, apiKey) {
+async function generateDialogueWithOpenAI(characterId, userPrompt, difficulty, apiKey, scenarioInfo = {}) {
   console.log('🤖 OpenAI API 호출 시작...');
+  console.log('📚 시나리오 정보:', scenarioInfo.title || '시나리오 정보 없음');
 
   // 캐릭터별 성격 설정
   const characterProfiles = {
@@ -263,11 +283,22 @@ ${userPrompt}
 🎯 MISSION: 자연스러운 대화 흐름을 가진 에피소드 생성
 - 반드시 올바른 JSON 형식으로만 응답하세요
 - 추가 텍스트나 설명 없이 JSON만 출력하세요
-- "어젯밤의 기억" 같은 몰입감 있는 스토리텔링
+- "${scenarioInfo.title || '로맨스 상황'}" 시나리오에 맞는 몰입감 있는 스토리텔링
 - 여러 대화 턴이 자연스럽게 이어지는 구조
 - 감정적 깊이와 로맨스 요소 포함
 - 캐릭터의 MBTI 성격이 자연스럽게 드러나는 대화
 - 한국 대학생들의 현실적인 대화 톤
+
+📚 시나리오 배경:
+제목: ${scenarioInfo.title || '제목 없음'}
+설명: ${scenarioInfo.description || '일반적인 로맨스 상황'}
+분위기: ${scenarioInfo.mood || '설렘'}
+배경: ${scenarioInfo.setting || '일상'}
+
+${scenarioInfo.context ? `📖 상세 컨텍스트:
+${scenarioInfo.context.substring(0, 500)}...
+
+위 시나리오 배경을 바탕으로 대화를 생성해야 합니다.` : ''}
 
 🚨 CRITICAL: story_flow 배열에 dialogue와 choice_point가 적절히 배치되어야 함
 

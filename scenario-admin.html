@@ -6409,8 +6409,8 @@
                 console.log(`📝 프롬프트: ${userPrompt}`);
                 console.log(`⚡ 난이도: ${difficulty}`);
 
-                // 채팅 훈련 API를 사용한 대화 생성
-                generatedDialogue = await generateLocalDialogue(characterId, characterName, userPrompt, difficulty);
+                // 채팅 훈련 API를 사용한 대화 생성 (시나리오 컨텍스트 포함)
+                generatedDialogue = await generateLocalDialogue(characterId, characterName, userPrompt, difficulty, currentScenario);
 
                 // 짧은 지연으로 로딩 효과 제공
                 setTimeout(() => {
@@ -7175,11 +7175,12 @@
 
 
         // 채팅 훈련 API를 사용한 대화 생성 함수 (개선된 버전)
-        async function generateLocalDialogue(characterId, characterName, userPrompt, difficulty) {
+        async function generateLocalDialogue(characterId, characterName, userPrompt, difficulty, scenario) {
             console.log(`🎯 ${characterName}의 ${difficulty} 난이도 채팅 훈련 대화 생성:`, userPrompt);
+            console.log(`📚 시나리오 컨텍스트:`, scenario?.title || '없음');
 
             try {
-                // 채팅 훈련 API 호출
+                // 채팅 훈련 API 호출 (시나리오 정보 포함)
                 const response = await fetch('/api/episode-test', {
                     method: 'POST',
                     headers: {
@@ -7189,7 +7190,13 @@
                         action: 'generate',
                         character_id: characterId,
                         user_prompt: userPrompt,
-                        difficulty: difficulty
+                        difficulty: difficulty,
+                        scenario_id: scenario?.id || scenario?.scenario_id,
+                        scenario_title: scenario?.title,
+                        scenario_description: scenario?.description,
+                        scenario_context: scenario?.ai_generated_context || scenario?.custom_context,
+                        scenario_mood: scenario?.mood,
+                        scenario_setting: scenario?.background_setting
                     })
                 });
 
