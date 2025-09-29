@@ -232,6 +232,181 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // 에피소드 생성
+    if (action === 'create_episode' && req.method === 'POST') {
+      try {
+        const { scenario_id, episode_title, dialogue_count, difficulty } = req.body;
+
+        if (!scenario_id || !episode_title || !dialogue_count || !difficulty) {
+          return res.status(400).json({
+            success: false,
+            message: '필수 파라미터가 누락되었습니다: scenario_id, episode_title, dialogue_count, difficulty'
+          });
+        }
+
+        console.log('✨ 새 에피소드 생성 요청:', {
+          scenario_id,
+          episode_title,
+          dialogue_count,
+          difficulty
+        });
+
+        // 기존 에피소드 데이터 로드
+        const database = await loadEpisodeDatabase();
+
+        // 새 에피소드 ID 생성
+        const episodeId = generateEpisodeId();
+
+        // 새 에피소드 객체 생성
+        const newEpisode = {
+          id: episodeId,
+          scenario_id: scenario_id,
+          title: episode_title,
+          difficulty: difficulty,
+          dialogue_count: parseInt(dialogue_count),
+          created_at: new Date().toISOString(),
+          character_id: null, // 나중에 시나리오에서 가져올 수 있음
+          character_name: null,
+          dialogues: [] // 실제 대화 내용은 별도 생성
+        };
+
+        // 데이터베이스에 추가
+        database.episodes[episodeId] = newEpisode;
+
+        // 메타데이터 업데이트
+        const totalCount = Object.keys(database.episodes).length;
+        database.metadata.total_episodes = totalCount;
+        database.metadata.last_updated = new Date().toISOString();
+
+        console.log('📊 에피소드 생성 후 총 개수:', totalCount);
+
+        // GitHub API를 통해 저장
+        const success = await saveEpisodeDatabase(database);
+
+        if (success) {
+          console.log('✅ 새 에피소드 생성 완료:', episodeId);
+          return res.json({
+            success: true,
+            message: `에피소드 "${episode_title}"가 성공적으로 생성되었습니다.`,
+            episode: newEpisode,
+            total_episodes: totalCount,
+            timestamp: new Date().toISOString()
+          });
+        } else {
+          throw new Error('GitHub API를 통한 파일 저장 실패');
+        }
+
+      } catch (error) {
+        console.error('❌ 에피소드 생성 실패:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: '에피소드 생성 실패: ' + error.message
+        });
+      }
+    }
+
+    // 시나리오별 에피소드 목록 조회
+    if (action === 'list_episodes' && req.query.scenario_id) {
+      try {
+        console.log('📋 시나리오별 에피소드 목록 조회:', req.query.scenario_id);
+
+        const database = await loadEpisodeDatabase();
+        const scenarioEpisodes = filterEpisodesByScenario(database, req.query.scenario_id);
+
+        console.log('✅ 시나리오 에피소드 조회 완료:', scenarioEpisodes.length, '개');
+
+        return res.json({
+          success: true,
+          episodes: scenarioEpisodes,
+          scenario_id: req.query.scenario_id,
+          total: scenarioEpisodes.length,
+          timestamp: new Date().toISOString()
+        });
+
+      } catch (error) {
+        console.error('❌ 시나리오 에피소드 목록 조회 실패:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: '에피소드 목록 조회 실패: ' + error.message
+        });
+      }
+    }
+
+    // 에피소드의 대화 목록 조회
+    if (action === 'get_episode_dialogues' && req.query.episode_id) {
+      try {
+        console.log('💬 에피소드 대화 목록 조회:', req.query.episode_id);
+
+        const database = await loadEpisodeDatabase();
+        const episode = database.episodes[req.query.episode_id];
+
+        if (!episode) {
+          return res.status(404).json({
+            success: false,
+            message: '에피소드를 찾을 수 없습니다: ' + req.query.episode_id
+          });
+        }
+
+        // 에피소드의 대화 목록 반환 (실제로는 dialogues 배열 또는 별도 생성 필요)
+        const dialogues = episode.dialogues || [];
+
+        return res.json({
+          success: true,
+          dialogues: dialogues,
+          episode_id: req.query.episode_id,
+          episode_title: episode.title,
+          total: dialogues.length,
+          timestamp: new Date().toISOString()
+        });
+
+      } catch (error) {
+        console.error('❌ 에피소드 대화 목록 조회 실패:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: '대화 목록 조회 실패: ' + error.message
+        });
+      }
+    }
+
+    // 대화 내용 조회
+    if (action === 'get_dialogue_content' && req.query.dialogue_id) {
+      try {
+        console.log('📝 대화 내용 조회:', req.query.dialogue_id);
+
+        // 실제 구현에서는 dialogue_id로 특정 대화 내용을 찾아야 함
+        // 현재는 더미 데이터 반환
+        return res.json({
+          success: true,
+          dialogue: {
+            id: req.query.dialogue_id,
+            dialogue: "이는 예시 대화 내용입니다. 실제 대화 생성 시스템과 연결이 필요합니다.",
+            choices: [
+              {
+                text: "선택지 1: 공감하며 대답한다",
+                affection_change: "+2"
+              },
+              {
+                text: "선택지 2: 농담으로 분위기를 바꾼다",
+                affection_change: "+1"
+              },
+              {
+                text: "선택지 3: 진지하게 조언한다",
+                affection_change: "+1"
+              }
+            ]
+          },
+          timestamp: new Date().toISOString()
+        });
+
+      } catch (error) {
+        console.error('❌ 대화 내용 조회 실패:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: '대화 내용 조회 실패: ' + error.message
+        });
+      }
+    }
+
     // 알 수 없는 액션
     return res.status(400).json({
       success: false,
@@ -533,4 +708,11 @@ async function saveToGitHub(filePath, data) {
     console.error('❌ GitHub API 저장 실패:', error);
     return { success: false, error: error.message };
   }
+}
+
+// 에피소드 ID 생성 유틸리티 함수
+function generateEpisodeId() {
+  const timestamp = Date.now().toString(36);
+  const randomStr = Math.random().toString(36).substring(2, 8);
+  return `ep_${timestamp}_${randomStr}`;
 }
