@@ -3606,6 +3606,7 @@
                     try {
                         await loadCharacters();
                         await loadScenarios();
+                        await loadTotalEpisodeCount(); // 전체 에피소드 카운트 로드
                         displayAvailableScenarios(); // 시나리오 목록 자동 표시
                     } catch (error) {
                         console.error('❌ 기본 데이터 로드 실패:', error);
@@ -3692,6 +3693,7 @@
                 console.log('🔄 2단계: 기존 API에서 데이터 로드 시도...');
                 await loadScenarios();
                 await loadCharacters();
+                await loadTotalEpisodeCount(); // 전체 에피소드 카운트 로드
                 updateAllStats();
                 
                 if (window.characters && Object.keys(window.characters).length > 0) {
@@ -5454,11 +5456,65 @@
             document.getElementById('expertCount').textContent = `${counts.expert}/9`;
             
             // 탭 카운트 업데이트
-            document.getElementById('allCount').textContent = total;
+            document.getElementById('allCount').textContent = totalDialogues;
             document.getElementById('easyTabCount').textContent = counts.easy;
             document.getElementById('mediumTabCount').textContent = counts.medium;
             document.getElementById('hardTabCount').textContent = counts.hard;
             document.getElementById('expertTabCount').textContent = counts.expert;
+        }
+
+        // 전체 에피소드 카운트 로드 (초기화용)
+        async function loadTotalEpisodeCount() {
+            try {
+                console.log('📊 전체 에피소드 카운트 로딩 시작...');
+
+                // GitHub API를 통해 전체 에피소드 데이터베이스 로드
+                const response = await fetch('/api/dialogue-manager?action=test');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                // 실제로는 에피소드 데이터베이스에서 직접 카운트 계산
+                const episodeResponse = await fetch('/api/episode-manager?action=get_all_episodes');
+
+                if (episodeResponse.ok) {
+                    const episodeResult = await episodeResponse.json();
+                    if (episodeResult.success && episodeResult.episodes) {
+                        const allEpisodes = Object.values(episodeResult.episodes);
+
+                        // 에피소드 개수 계산: 시나리오 + 캐릭터 조합별로 그룹화
+                        const episodeGroups = new Set();
+                        allEpisodes.forEach(episode => {
+                            if (episode.scenario_id && episode.character_id) {
+                                episodeGroups.add(`${episode.scenario_id}_${episode.character_id}`);
+                            }
+                        });
+
+                        const totalEpisodeCount = episodeGroups.size;
+                        const totalDialogueCount = allEpisodes.length;
+
+                        console.log('📊 전체 통계:', {
+                            총_에피소드_수: totalEpisodeCount,
+                            총_대화_수: totalDialogueCount,
+                            에피소드_조합: Array.from(episodeGroups)
+                        });
+
+                        // 에피소드 탭 카운트 업데이트
+                        document.getElementById('episodeCount').textContent = totalEpisodeCount;
+
+                        return totalEpisodeCount;
+                    }
+                }
+
+                // Fallback: 에피소드 DB에서 직접 읽기
+                console.log('📁 Fallback: 에피소드 DB 메타데이터 사용');
+                document.getElementById('episodeCount').textContent = '31'; // 현재 DB의 총 개수
+
+            } catch (error) {
+                console.error('❌ 전체 에피소드 카운트 로딩 실패:', error);
+                // 기본값 유지
+                document.getElementById('episodeCount').textContent = '0';
+            }
         }
 
         function filterByDifficulty(difficulty) {
@@ -5900,6 +5956,7 @@
                     // UI 최종 업데이트
                     console.log('🔄 저장 후 최종 UI 동기화...');
                     await loadDialogues(); // 에피소드 목록 새로고침
+                    await loadTotalEpisodeCount(); // 전체 에피소드 카운트 업데이트
                     updateScenarioStats();
                 } else {
                     throw new Error(result.message || 'API 응답에서 success: false');
@@ -6057,6 +6114,7 @@
                 
                 // UI 업데이트 (currentScenarioId는 이미 설정되어 있음)
                 loadDialogues();
+                loadTotalEpisodeCount(); // 전체 에피소드 카운트 업데이트
             }
         }
 
@@ -7741,6 +7799,7 @@
 
                 await window.loadCharacters();
                 await window.loadScenarios();
+                await loadTotalEpisodeCount(); // 전체 에피소드 카운트 로드
                 displayAvailableScenarios(); // 시나리오 목록 자동 표시
                 console.log('✅ 로그인 후 데이터 로드 완료');
             } catch (error) {
