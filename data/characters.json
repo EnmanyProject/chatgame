@@ -1,11 +1,40 @@
 {
-  "characters": {},
+  "characters": {
+    "미화__enfp_1759143713059": {
+      "id": "미화__enfp_1759143713059",
+      "name": "미화 ",
+      "age": 25,
+      "mbti": "ENFP",
+      "gender": "female",
+      "personality_traits": [],
+      "major": "general",
+      "family": "average",
+      "hometown": "seoul",
+      "relationship": "후배",
+      "appearance": {
+        "hair": "섹시한 긴 생머리",
+        "eyes": "유혹적인 눈매",
+        "body": "petite_sexy",
+        "bust": "small_cute",
+        "waist_hip": "slim_tight",
+        "style": "sexy_chic"
+      },
+      "hobbies": [],
+      "values": "family_oriented",
+      "speech_style": "직설적인 말투",
+      "speech_habit": "손짓을 많이 함",
+      "created_at": "2025-09-29T11:01:53.060Z",
+      "source": "api_save",
+      "active": true,
+      "updated_at": "2025-09-29T11:01:54.970Z"
+    }
+  },
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 0,
+    "total_characters": 1,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-29T10:59:48.765Z",
-    "last_accessed": "2025-09-29T10:59:48.765Z"
+    "last_updated": "2025-09-29T11:01:54.970Z",
+    "last_accessed": "2025-09-29T11:01:54.969Z"
   }
 }
