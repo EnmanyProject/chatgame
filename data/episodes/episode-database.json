@@ -2,9 +2,9 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-09-28",
-    "total_episodes": 14,
+    "total_episodes": 17,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-09-29T00:58:45.926Z",
+    "last_updated": "2025-09-29T01:23:11.398Z",
     "data_source": "episode_manager_api"
   },
   "episodes": {
@@ -453,6 +453,54 @@
         ],
         "difficulty": "Easy",
         "generated_at": "2025-09-29T00:58:44.751Z",
+        "source": "chat_training_api"
+      }
+    },
+    "episode_scenario_갑작스러운_키스_이후_1759108852731_1759108953225": {
+      "id": "episode_scenario_갑작스러운_키스_이후_1759108852731_1759108953225",
+      "scenario_id": "scenario_갑작스러운_키스_이후_1759108852731",
+      "episode_number": 1,
+      "title": "에피소드 1번",
+      "character_id": "미화_enfp_1759108771093",
+      "character_name": "미화",
+      "difficulty": "Easy",
+      "user_input_prompt": "우연히 마주친 상황에서 서로를 의식하며",
+      "created_at": "2025-09-29T01:22:33.226Z",
+      "dialogue": {
+        "difficulty": "Easy",
+        "generated_at": "2025-09-29T01:22:32.743Z",
+        "source": "chat_training_api"
+      }
+    },
+    "episode_scenario_갑작스러운_키스_이후_1759108852731_1759108971972": {
+      "id": "episode_scenario_갑작스러운_키스_이후_1759108852731_1759108971972",
+      "scenario_id": "scenario_갑작스러운_키스_이후_1759108852731",
+      "episode_number": 2,
+      "title": "에피소드 2번",
+      "character_id": "미화_enfp_1759108771093",
+      "character_name": "미화",
+      "difficulty": "Easy",
+      "user_input_prompt": "함께 과제를 하면서 가까워지는 순간",
+      "created_at": "2025-09-29T01:22:51.972Z",
+      "dialogue": {
+        "difficulty": "Easy",
+        "generated_at": "2025-09-29T01:22:51.135Z",
+        "source": "chat_training_api"
+      }
+    },
+    "episode_scenario_갑작스러운_키스_이후_1759108852731_1759108991179": {
+      "id": "episode_scenario_갑작스러운_키스_이후_1759108852731_1759108991179",
+      "scenario_id": "scenario_갑작스러운_키스_이후_1759108852731",
+      "episode_number": 3,
+      "title": "에피소드 3번",
+      "character_id": "미화_enfp_1759108771093",
+      "character_name": "미화",
+      "difficulty": "Easy",
+      "user_input_prompt": "비 내리는 날 같은 우산을 쓰게 되어",
+      "created_at": "2025-09-29T01:23:11.179Z",
+      "dialogue": {
+        "difficulty": "Easy",
+        "generated_at": "2025-09-29T01:23:10.315Z",
         "source": "chat_training_api"
       }
     }
