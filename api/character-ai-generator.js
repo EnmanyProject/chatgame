@@ -31,6 +31,18 @@ module.exports = async function handler(req, res) {
 
   const action = req.query.action || req.body?.action;
 
+  // 디버깅 정보를 클라이언트로 전송하기 위해 저장
+  const debugInfo = {
+    timestamp: new Date().toISOString(),
+    method: req.method,
+    detected_action: action,
+    action_type: typeof action,
+    query_action: req.query.action,
+    body_action: req.body?.action,
+    body_keys: req.body ? Object.keys(req.body) : [],
+    request_body_sample: req.body ? JSON.stringify(req.body).substring(0, 500) : null
+  };
+
   console.log('🎯🎯🎯 액션 식별 완료 🎯🎯🎯');
   console.log('📌 감지된 액션:', action);
   console.log('📌 액션 타입:', typeof action);
@@ -385,7 +397,9 @@ module.exports = async function handler(req, res) {
             character_profile: characterProfile,
             message: `${aiCharacter.basic_info.name} 캐릭터가 AI로 완전히 생성되었습니다!`,
             workflow: 'ai_generation',
-            ai_powered: true
+            ai_powered: true,
+            debug_info: debugInfo,
+            execution_path: 'AI_GENERATION_SUCCESS'
           });
 
         } catch (aiError) {
@@ -410,7 +424,10 @@ module.exports = async function handler(req, res) {
             message: `${characterData.basic_info.name} 캐릭터가 생성되었습니다 (AI 오류로 인한 기본 생성)`,
             workflow: 'fallback_generation',
             ai_powered: false,
-            fallback: true
+            fallback: true,
+            debug_info: debugInfo,
+            execution_path: 'FALLBACK_GENERATION',
+            ai_error: aiError.message
           });
         }
 
@@ -441,7 +458,9 @@ module.exports = async function handler(req, res) {
       success: false,
       message: 'Unknown action. Available: list_characters, save_character, delete_character, reset_all_characters, generate_character, auto_complete_character, generate_character_profile, generate_complete_character_with_profile',
       received_action: action,
-      action_type: typeof action
+      action_type: typeof action,
+      debug_info: debugInfo,
+      error_type: 'ACTION_NOT_MATCHED'
     });
 
   } catch (error) {
