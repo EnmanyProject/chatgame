@@ -645,6 +645,134 @@
             100% { transform: translateX(100%) translateY(100%) rotate(45deg); opacity: 0; }
         }
 
+        /* 에피소드 대화 카드 스타일 (생성된 대화 표시용) */
+        .episode-dialogue-card {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border: 2px solid #5ee7df;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(94, 231, 223, 0.2);
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .episode-dialogue-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(94, 231, 223, 0.3);
+            border-color: #4dd5cb;
+        }
+
+        .episode-dialogue-card .dialogue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .episode-dialogue-card .dialogue-number {
+            background: rgba(255, 255, 255, 0.9);
+            color: #20a39e;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .episode-dialogue-card .difficulty-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: white;
+        }
+
+        .episode-dialogue-card .dialogue-content {
+            flex: 1;
+            margin-bottom: 12px;
+        }
+
+        .episode-dialogue-card .dialogue-preview {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            line-height: 1.4;
+            color: #333;
+            margin-bottom: 10px;
+            min-height: 60px;
+        }
+
+        .episode-dialogue-card .dialogue-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .episode-dialogue-card .dialogue-actions {
+            display: flex;
+            justify-content: center;
+        }
+
+        .episode-dialogue-card .action-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: #20a39e;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .episode-dialogue-card .action-btn:hover {
+            background: white;
+            border-color: #20a39e;
+            transform: scale(1.05);
+        }
+
+        /* + 버튼 카드 스타일 */
+        .add-dialogue-card {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            border: 3px dashed #ff6b9d;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .add-dialogue-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
+            border-color: #ff4081;
+            background: linear-gradient(135deg, #ff8a95 0%, #ffc3ee 100%);
+        }
+
+        .add-dialogue-card .add-icon {
+            font-size: 3em;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .add-dialogue-card .add-text {
+            color: white;
+            font-weight: 600;
+            font-size: 1.1em;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
         /* 난이도 탭 */
         .difficulty-tabs {
             display: flex;
@@ -9154,8 +9282,120 @@
             const parts = groupKey.split('_');
             currentScenarioId = `${parts[0]}_${parts[1]}_${parts[2]}`;
 
-            // 해당 에피소드의 대화들 로드
-            loadDialogues();
+            // 해당 에피소드의 실제 대화들만 표시 (빈 카드 대신)
+            displayEpisodeSpecificDialogues(groupKey, scenarioTitle, characterName);
+        }
+
+        // 특정 에피소드의 대화만 표시 (새로 추가)
+        async function displayEpisodeSpecificDialogues(groupKey, scenarioTitle, characterName) {
+            console.log('🎯 특정 에피소드 대화 표시:', groupKey);
+            const grid = document.getElementById('dialoguesGrid');
+
+            try {
+                // 로딩 표시
+                grid.innerHTML = `
+                    <div class="loading-card" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <div class="spinner"></div>
+                        <h4>📖 대화 로딩 중...</h4>
+                    </div>
+                `;
+
+                // dialogue-manager API를 통해 전체 에피소드 데이터 로드
+                const response = await fetch('/api/dialogue-manager?action=get_all_episodes');
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || '에피소드 데이터 로드 실패');
+                }
+
+                // 선택된 그룹(시나리오+캐릭터)의 에피소드들 필터링
+                const [scenarioId, characterId] = groupKey.split('_').slice(0, 2);
+                const episodeDialogues = Object.values(data.episodes || {}).filter(episode =>
+                    episode.scenario_id === `${scenarioId}_${characterId.split('_')[0]}_${characterId.split('_')[1]}` &&
+                    episode.character_id === characterId
+                );
+
+                console.log('🔍 필터링된 에피소드 대화:', episodeDialogues.length, '개');
+
+                if (episodeDialogues.length === 0) {
+                    // 대화가 없는 경우
+                    grid.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                            <h3>📭 생성된 대화가 없습니다</h3>
+                            <p>+ 버튼을 클릭해서 새로운 대화를 추가해보세요!</p>
+                            <button class="btn btn-primary" onclick="addNewDialogueToEpisode('${groupKey}', '${scenarioTitle}', '${characterName}')" style="margin-top: 20px;">
+                                ✨ 첫 번째 대화 만들기
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // 실제 대화들을 카드로 표시 + 추가 버튼
+                const dialogueCards = episodeDialogues.map((episode, index) => `
+                    <div class="episode-dialogue-card" onclick="previewEpisodeDialogue('${episode.id}')">
+                        <div class="dialogue-header">
+                            <div class="dialogue-number">#${episode.episode_number || index + 1}</div>
+                            <div class="difficulty-badge ${(episode.difficulty || 'Easy').toLowerCase()}">${(episode.difficulty || 'Easy').toUpperCase()}</div>
+                        </div>
+                        <div class="dialogue-content">
+                            <div class="dialogue-preview">
+                                ${episode.dialogue?.dialogue ? episode.dialogue.dialogue.substring(0, 100) + '...' : '대화 내용 없음'}
+                            </div>
+                            <div class="dialogue-info">
+                                <span class="dialogue-choices">선택지 ${episode.dialogue?.choices?.length || 0}개</span>
+                                <span class="dialogue-date">${new Date(episode.created_at).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                        <div class="dialogue-actions">
+                            <span class="action-btn">📖 보기</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                // + 버튼 카드 추가
+                const addButtonCard = `
+                    <div class="add-dialogue-card" onclick="addNewDialogueToEpisode('${groupKey}', '${scenarioTitle}', '${characterName}')">
+                        <div class="add-icon">+</div>
+                        <div class="add-text">새 대화 추가</div>
+                    </div>
+                `;
+
+                grid.innerHTML = dialogueCards + addButtonCard;
+
+            } catch (error) {
+                console.error('❌ 에피소드 대화 표시 실패:', error);
+                grid.innerHTML = `
+                    <div class="error-card" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <h4>❌ 대화 로드 실패</h4>
+                        <p>${error.message}</p>
+                        <button class="btn btn-primary" onclick="displayEpisodeSpecificDialogues('${groupKey}', '${scenarioTitle}', '${characterName}')">🔄 다시 시도</button>
+                    </div>
+                `;
+            }
+        }
+
+        // 에피소드에 새 대화 추가 (새로 추가)
+        function addNewDialogueToEpisode(groupKey, scenarioTitle, characterName) {
+            console.log('✨ 새 대화 추가:', groupKey, scenarioTitle, characterName);
+
+            // 시나리오 ID 설정
+            const parts = groupKey.split('_');
+            currentScenarioId = `${parts[0]}_${parts[1]}_${parts[2]}`;
+
+            // 대화 생성 모달 열기
+            openDialogueModal('create');
+
+            // 자동으로 다음 에피소드 번호 설정 (향후 구현)
+            // 현재는 사용자가 직접 번호 입력
+        }
+
+        // 에피소드 대화 미리보기 (새로 추가)
+        function previewEpisodeDialogue(episodeId) {
+            console.log('📖 에피소드 대화 미리보기:', episodeId);
+            // 기존 previewDialogue 함수 활용하거나 새로운 미리보기 구현
+            // 일단 기존 함수 사용
+            previewDialogue(episodeId);
         }
 
         // 에피소드 대화 보기 닫기
@@ -9301,6 +9541,9 @@
 
         // 전역 함수로 등록
         window.resetAllEpisodes = resetAllEpisodes;
+        window.displayEpisodeSpecificDialogues = displayEpisodeSpecificDialogues;
+        window.addNewDialogueToEpisode = addNewDialogueToEpisode;
+        window.previewEpisodeDialogue = previewEpisodeDialogue;
     </script>
 </body>
 </html>
