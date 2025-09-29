@@ -7742,7 +7742,9 @@
 
         // 새로운 캐릭터 데이터 수집 함수
         function collectCharacterData() {
-            return {
+            console.log('📋 캐릭터 데이터 수집 시작...');
+
+            const data = {
                 name: document.getElementById('charName').value || '미지의 소녀',
                 age: document.getElementById('charAge').value || '20',
                 mbti: document.getElementById('charMbti').value,
@@ -7756,32 +7758,44 @@
                 hair: document.getElementById('charHair').value || 'long_straight',
                 eyes: document.getElementById('charEyes').value || 'round_cute',
                 body: document.getElementById('charBody').value || 'petite',
+                bust: document.getElementById('charBust')?.value || 'average',
+                waist_hip: document.getElementById('charWaistHip')?.value || 'balanced',
                 style: document.getElementById('charStyle').value || 'cute_casual',
                 hobbies: getSelectedHobbies(),
                 values: document.getElementById('charValues').value || 'love_family',
                 speech_style: document.getElementById('charSpeechStyle').value,
                 speech_habit: document.getElementById('charSpeechHabit').value || '',
-                // genre 필드 제거됨
-                // main_situation 필드 제거됨
             };
+
+            console.log('📋 수집된 데이터:', data);
+            console.log('  - 선택된 성격특성:', data.personality_traits);
+            console.log('  - 선택된 취미:', data.hobbies);
+            console.log('  - MBTI:', data.mbti);
+            console.log('  - 말투스타일:', data.speech_style);
+
+            return data;
         }
 
         // 선택된 성격 특성들 가져오기
         function getSelectedTraits() {
             const selectedTraits = [];
-            document.querySelectorAll('.trait-btn.selected').forEach(btn => {
-                selectedTraits.push(btn.dataset.trait);
+            // 실제 체크박스에서 선택된 성격 특성 수집
+            document.querySelectorAll('input[name="personality"]:checked').forEach(input => {
+                selectedTraits.push(input.value);
             });
-            return selectedTraits.slice(0, 3); // 최대 3개만
+            console.log('🎯 선택된 성격 특성:', selectedTraits);
+            return selectedTraits.slice(0, 5); // 최대 5개로 증가
         }
 
         // 선택된 취미들 가져오기
         function getSelectedHobbies() {
             const selectedHobbies = [];
-            document.querySelectorAll('.hobby-btn.selected').forEach(btn => {
-                selectedHobbies.push(btn.dataset.hobby);
+            // 실제 체크박스에서 선택된 취미 수집
+            document.querySelectorAll('input[name="hobbies"]:checked').forEach(input => {
+                selectedHobbies.push(input.value);
             });
-            return selectedHobbies.slice(0, 3); // 최대 3개만
+            console.log('🎯 선택된 취미:', selectedHobbies);
+            return selectedHobbies.slice(0, 5); // 최대 5개로 증가
         }
 
         // === AI 캐릭터 생성기 이벤트 리스너 초기화 ===
