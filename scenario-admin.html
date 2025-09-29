@@ -5606,7 +5606,7 @@
             console.log('📖 에피소드 미리보기:', number, episode);
 
             // Update modal title
-            document.getElementById('episodePreviewTitle').textContent = `📖 에피소드 #${number} 미리보기`;
+            document.getElementById('dialoguePreviewTitle').textContent = `📖 에피소드 #${number} 미리보기`;
 
             // Display episode metadata
             displayDialogueMetadata(episode, number);
@@ -5615,13 +5615,13 @@
             displayDialogueContent(episode);
 
             // Show modal
-            document.getElementById('episodePreviewModal').style.display = 'block';
+            document.getElementById('dialoguePreviewModal').style.display = 'block';
         }
 
         function displayDialogueMetadata(episode, number) {
-            const metadata = document.getElementById('episodeMetadata');
+            const metadata = document.getElementById('dialogueMetadata');
             const difficulty = getDifficultyByNumber(number);
-            const characterName = getCharacterName(dialogue.character_id);
+            const characterName = getCharacterName(episode.character_id);
 
             metadata.innerHTML = `
                 <div class="metadata-item">
@@ -5634,19 +5634,19 @@
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">캐릭터</div>
-                    <div class="metadata-value">${characterName} (${dialogue.character_id})</div>
+                    <div class="metadata-value">${characterName} (${episode.character_id})</div>
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">시나리오</div>
-                    <div class="metadata-value">${dialogue.scenario_id}</div>
+                    <div class="metadata-value">${episode.scenario_id}</div>
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">생성일</div>
-                    <div class="metadata-value">${dialogue.created_at ? new Date(dialogue.created_at).toLocaleString() : '알 수 없음'}</div>
+                    <div class="metadata-value">${episode.created_at ? new Date(episode.created_at).toLocaleString() : '알 수 없음'}</div>
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">상황 프롬프트</div>
-                    <div class="metadata-value">${dialogue.user_input_prompt || '없음'}</div>
+                    <div class="metadata-value">${episode.user_input_prompt || '없음'}</div>
                 </div>
             `;
         }
@@ -5657,7 +5657,7 @@
             const choicesDisplay = document.getElementById('choicesDisplay');
 
             // Get dialogue data - check all possible field names and structures
-            let dialogueData = dialogue.dialogue || dialogue.generated_dialogue || dialogue.ai_generated_dialogue;
+            let dialogueData = episode.dialogue || episode.generated_dialogue || episode.ai_generated_dialogue;
 
             console.log('💬 에피소드 전체 데이터:', episode);
             console.log('💬 대화 데이터:', dialogueData);
@@ -5736,7 +5736,7 @@
 
         function editDialogueFromPreview() {
             if (currentPreviewDialogueNumber !== null) {
-                closeModal('episodePreviewModal');
+                closeModal('dialoguePreviewModal');
                 editDialogue(currentPreviewDialogueNumber);
             }
         }
