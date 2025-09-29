@@ -1,32 +1,32 @@
 {
   "characters": {
-    "미화_esfp_1759064886354": {
-      "id": "미화_esfp_1759064886354",
-      "name": "미화",
+    "미진_infj_1759066440634": {
+      "id": "미진_infj_1759066440634",
+      "name": "미진",
       "age": 20,
-      "mbti": "ESFP",
+      "mbti": "INFJ",
       "gender": "female",
       "personality_traits": [],
       "major": "general",
       "family": "only_child",
       "hometown": "seoul",
-      "relationship": "현재는 연인이 없지만, 애정 가득한 관계를 선호해요.",
+      "relationship": "독립적이며 자신이 원하는 사람과의 관계를 추구",
       "appearance": {
         "hair": "섹시한 긴 생머리",
         "eyes": "유혹적인 눈매",
         "body": "petite_sexy",
-        "bust": "medium_balanced",
-        "waist_hip": "curvy_sexy",
+        "bust": "small_cute",
+        "waist_hip": "slim_tight",
         "style": "sexy_chic"
       },
       "hobbies": [],
       "values": "love_family",
-      "speech_style": "자신감 넘치는 말투와 때론 섹시함을 더하는 목소리 톤",
-      "speech_habit": "말을 할 때마다 상대를 유혹하는 듯한 미소를 지으며, 상대의 반응을 살피는 것을 즐김",
-      "created_at": "2025-09-28T13:08:06.354Z",
+      "speech_style": "타인의 진심을 느끼게 하는 말투",
+      "speech_habit": "상대에게 진심을 전달하는 동시에 섹시하게 목소리를 낮추며 말하는 습관, 가끔씩 입술을 살짝 베며 말하는 습관",
+      "created_at": "2025-09-28T13:34:00.634Z",
       "source": "api_save",
       "active": true,
-      "updated_at": "2025-09-28T13:08:07.016Z"
+      "updated_at": "2025-09-28T13:34:01.031Z"
     },
     "소희_enfj_1759066523475": {
       "id": "소희_enfj_1759066523475",
@@ -62,7 +62,7 @@
     "total_characters": 2,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-29T01:17:38.768Z",
-    "last_accessed": "2025-09-29T01:17:38.768Z"
+    "last_updated": "2025-09-29T01:17:43.412Z",
+    "last_accessed": "2025-09-29T01:17:43.412Z"
   }
 }
