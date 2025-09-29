@@ -407,6 +407,32 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // 전체 에피소드 조회 (카운트용)
+    if (action === 'get_all_episodes') {
+      try {
+        console.log('📊 전체 에피소드 조회 (카운트용)');
+
+        const database = await loadEpisodeDatabase();
+        const allEpisodes = Object.values(database.episodes || {});
+
+        console.log('📊 전체 에피소드 조회 완료:', allEpisodes.length, '개');
+
+        return res.json({
+          success: true,
+          episodes: database.episodes || {},
+          total: allEpisodes.length,
+          timestamp: new Date().toISOString()
+        });
+
+      } catch (error) {
+        console.error('❌ 전체 에피소드 조회 실패:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: '전체 에피소드 조회 실패: ' + error.message
+        });
+      }
+    }
+
     // 알 수 없는 액션
     return res.status(400).json({
       success: false,
