@@ -97,10 +97,77 @@
             opacity: 0.8;
         }
 
+        .episode-combination-grid {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
         .episode-grid {
             display: grid;
             gap: 15px;
             margin-top: 20px;
+        }
+
+        .sub-episodes-screen {
+            display: none;
+        }
+
+        .combination-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .combination-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            border-color: #667eea;
+        }
+
+        .combination-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .combination-info {
+            flex: 1;
+        }
+
+        .combination-scenario {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+
+        .combination-character {
+            font-size: 14px;
+            color: #87ceeb;
+            margin-bottom: 8px;
+        }
+
+        .combination-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .combination-badge {
+            background: rgba(102, 126, 234, 0.3);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
         }
 
         .episode-card {
@@ -324,20 +391,26 @@
             <p>원하는 에피소드를 선택해서 바로 플레이하세요</p>
         </div>
 
-        <!-- 에피소드 선택 화면 -->
+        <!-- 에피소드 조합 선택 화면 -->
         <div class="episode-selection" id="episodeSelection">
             <div class="scenario-selector">
-                <h3>📚 시나리오 선택</h3>
-                <div class="scenario-grid" id="scenarioGrid">
+                <h3>🎮 에피소드 카드 (시나리오 + 캐릭터 조합)</h3>
+                <div class="episode-combination-grid" id="episodeCombinationGrid">
                     <div class="loading">
                         <div class="spinner"></div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="scenario-selector" id="episodeSelector" style="display: none;">
-                <h3>🎯 에피소드 선택</h3>
-                <div class="episode-grid" id="episodeGrid">
+        <!-- 하위 에피소드 목록 화면 -->
+        <div class="sub-episodes-screen" id="subEpisodesScreen" style="display: none;">
+            <div class="scenario-selector">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 id="combinationTitle">📚 하위 에피소드 목록</h3>
+                    <button class="back-button" onclick="goBackToCombinations()">← 뒤로가기</button>
+                </div>
+                <div class="episode-grid" id="subEpisodeGrid">
                 </div>
             </div>
         </div>
@@ -365,113 +438,214 @@
         const gameState = {
             scenarios: [],
             episodes: {},
-            currentScenario: null,
+            episodeCombinations: {},
+            currentCombination: null,
             currentEpisode: null,
-            isPlaying: false
+            isPlaying: false,
+            viewMode: 'combinations' // 'combinations', 'sub-episodes', 'playing'
         };
 
         // 초기화
         document.addEventListener('DOMContentLoaded', async () => {
-            await loadScenarios();
+            await loadEpisodeCombinations();
         });
 
-        // 시나리오 로드
-        async function loadScenarios() {
+        // 에피소드 조합 로드 (시나리오 + 캐릭터 조합별로 그룹핑)
+        async function loadEpisodeCombinations() {
             try {
-                console.log('📚 시나리오 로딩 시작...');
-                const response = await fetch('/api/scenario-manager?action=list');
+                console.log('🎮 에피소드 조합 로딩 시작...');
 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                // 1. 시나리오 로드
+                const scenarioResponse = await fetch('/api/scenario-manager?action=list');
+                if (!scenarioResponse.ok) {
+                    throw new Error(`시나리오 로드 실패: ${scenarioResponse.status}`);
                 }
+                const scenarioData = await scenarioResponse.json();
 
-                const data = await response.json();
-                console.log('📊 시나리오 API 응답:', data);
-
-                if (data.success && data.scenarios) {
-                    gameState.scenarios = Object.values(data.scenarios).filter(s => s && s.active_status !== false);
+                if (scenarioData.success && scenarioData.scenarios) {
+                    gameState.scenarios = Object.values(scenarioData.scenarios).filter(s => s && s.active_status !== false);
                     console.log(`✅ 시나리오 ${gameState.scenarios.length}개 로드됨`);
-                    displayScenarios();
                 } else {
-                    throw new Error(data.message || '시나리오 데이터를 불러올 수 없습니다');
+                    throw new Error('시나리오 데이터가 없습니다');
                 }
+
+                // 2. 모든 시나리오의 에피소드 로드 및 조합별 그룹핑
+                gameState.episodeCombinations = {};
+
+                for (const scenario of gameState.scenarios) {
+                    try {
+                        const episodeResponse = await fetch(`/api/episode-manager?action=list&scenario_id=${scenario.scenario_id}`);
+                        if (episodeResponse.ok) {
+                            const episodeData = await episodeResponse.json();
+                            if (episodeData.success && episodeData.episodes && episodeData.episodes.length > 0) {
+
+                                // 캐릭터별로 그룹핑
+                                const characterGroups = {};
+                                episodeData.episodes.forEach(episode => {
+                                    const characterId = episode.character_id;
+                                    const characterName = episode.character_name;
+
+                                    if (!characterGroups[characterId]) {
+                                        characterGroups[characterId] = {
+                                            scenario_id: scenario.scenario_id,
+                                            scenario_title: scenario.title,
+                                            scenario_description: scenario.description,
+                                            character_id: characterId,
+                                            character_name: characterName,
+                                            episodes: []
+                                        };
+                                    }
+                                    characterGroups[characterId].episodes.push(episode);
+                                });
+
+                                // 조합 키 생성 및 저장
+                                Object.values(characterGroups).forEach(group => {
+                                    const combinationKey = `${group.scenario_id}_${group.character_id}`;
+                                    gameState.episodeCombinations[combinationKey] = group;
+                                });
+                            }
+                        }
+                    } catch (episodeError) {
+                        console.log(`📭 ${scenario.title} 시나리오에 에피소드 없음:`, episodeError.message);
+                    }
+                }
+
+                console.log('🎯 에피소드 조합 로드 완료:', gameState.episodeCombinations);
+                displayEpisodeCombinations();
+
             } catch (error) {
-                console.error('❌ 시나리오 로드 실패:', error);
-                document.getElementById('scenarioGrid').innerHTML =
+                console.error('❌ 에피소드 조합 로드 실패:', error);
+                document.getElementById('episodeCombinationGrid').innerHTML =
                     `<div style="text-align: center; color: #f44336; padding: 20px;">
-                        시나리오를 불러올 수 없습니다<br>
-                        <small>${error.message}</small>
-                    </div>`;
-            }
-        }
-
-        // 시나리오 표시
-        function displayScenarios() {
-            const grid = document.getElementById('scenarioGrid');
-
-            if (gameState.scenarios.length === 0) {
-                grid.innerHTML = '<div style="text-align: center; opacity: 0.7;">등록된 시나리오가 없습니다</div>';
-                return;
-            }
-
-            grid.innerHTML = gameState.scenarios.map(scenario => `
-                <div class="scenario-card" onclick="selectScenario('${scenario.scenario_id}')">
-                    <div class="scenario-title">${scenario.title}</div>
-                    <div class="scenario-description">${scenario.description}</div>
-                </div>
-            `).join('');
-        }
-
-        // 시나리오 선택
-        async function selectScenario(scenarioId) {
-            console.log('🎯 시나리오 선택:', scenarioId);
-            gameState.currentScenario = scenarioId;
-
-            // 선택된 시나리오 하이라이트
-            document.querySelectorAll('.scenario-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            event.target.closest('.scenario-card').classList.add('selected');
-
-            // 에피소드 로드
-            await loadEpisodes(scenarioId);
-        }
-
-        // 에피소드 로드
-        async function loadEpisodes(scenarioId) {
-            try {
-                console.log('📖 에피소드 로딩 시작:', scenarioId);
-                const response = await fetch(`/api/episode-manager?action=list&scenario_id=${scenarioId}`);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                console.log('📊 에피소드 API 응답:', data);
-
-                if (data.success && data.episodes) {
-                    gameState.episodes = {};
-                    data.episodes.forEach(episode => {
-                        gameState.episodes[episode.episode_number] = episode;
-                    });
-                    console.log(`✅ 에피소드 ${data.episodes.length}개 로드됨`);
-                    displayEpisodes();
-                } else {
-                    console.log('📭 해당 시나리오에 생성된 에피소드가 없습니다.');
-                    displayEpisodes(); // 빈 에피소드 그리드 표시
-                }
-            } catch (error) {
-                console.error('❌ 에피소드 로드 실패:', error);
-                document.getElementById('episodeGrid').innerHTML =
-                    `<div style="text-align: center; color: #f44336; padding: 20px; grid-column: 1/-1;">
                         에피소드를 불러올 수 없습니다<br>
                         <small>${error.message}</small>
                     </div>`;
             }
+        }
 
-            // 에피소드 선택 영역 표시
-            document.getElementById('episodeSelector').style.display = 'block';
+        // 에피소드 조합 카드 표시 (시나리오 + 캐릭터)
+        function displayEpisodeCombinations() {
+            const grid = document.getElementById('episodeCombinationGrid');
+            const combinations = Object.values(gameState.episodeCombinations);
+
+            if (combinations.length === 0) {
+                grid.innerHTML = `
+                    <div style="text-align: center; opacity: 0.7; padding: 40px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 12px;">
+                        생성된 에피소드가 없습니다<br>
+                        <small>관리자에서 에피소드를 생성해주세요</small>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = combinations.map(combination => {
+                const episodeCount = combination.episodes.length;
+                const latestEpisode = combination.episodes.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+                const lastUpdated = new Date(latestEpisode.created_at).toLocaleDateString('ko-KR');
+
+                return `
+                    <div class="combination-card" onclick="selectCombination('${combination.scenario_id}_${combination.character_id}')">
+                        <div class="combination-header">
+                            <div class="combination-info">
+                                <div class="combination-scenario">📚 ${combination.scenario_title}</div>
+                                <div class="combination-character">👤 ${combination.character_name}</div>
+                                <div class="combination-stats">
+                                    <span>📝 ${episodeCount}개 에피소드</span>
+                                    <span>📅 ${lastUpdated}</span>
+                                </div>
+                            </div>
+                            <div class="combination-badge">${episodeCount}</div>
+                        </div>
+                        <div style="font-size: 12px; opacity: 0.8; margin-top: 8px;">
+                            ${combination.scenario_description}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 에피소드 조합 선택 (시나리오 + 캐릭터)
+        function selectCombination(combinationKey) {
+            console.log('🎯 조합 선택:', combinationKey);
+            gameState.currentCombination = combinationKey;
+            gameState.viewMode = 'sub-episodes';
+
+            const combination = gameState.episodeCombinations[combinationKey];
+            if (!combination) {
+                alert('조합 데이터를 찾을 수 없습니다.');
+                return;
+            }
+
+            // 화면 전환
+            document.getElementById('episodeSelection').style.display = 'none';
+            document.getElementById('subEpisodesScreen').style.display = 'block';
+
+            // 타이틀 업데이트
+            document.getElementById('combinationTitle').textContent =
+                `📚 ${combination.scenario_title} × 👤 ${combination.character_name}`;
+
+            // 하위 에피소드들 표시
+            displaySubEpisodes(combination.episodes);
+        }
+
+        // 하위 에피소드들 표시
+        function displaySubEpisodes(episodes) {
+            const grid = document.getElementById('subEpisodeGrid');
+
+            if (!episodes || episodes.length === 0) {
+                grid.innerHTML = `
+                    <div style="text-align: center; opacity: 0.7; padding: 40px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 12px;">
+                        이 조합에는 아직 에피소드가 없습니다<br>
+                        <small>관리자에서 에피소드를 생성해주세요</small>
+                    </div>
+                `;
+                return;
+            }
+
+            // 에피소드 번호순으로 정렬
+            const sortedEpisodes = [...episodes].sort((a, b) => a.episode_number - b.episode_number);
+
+            let html = '';
+            sortedEpisodes.forEach(episode => {
+                const createdDate = new Date(episode.created_at).toLocaleDateString('ko-KR');
+
+                html += `
+                    <div class="episode-card completed" onclick="playSubEpisode('${episode.id}')" data-episode-id="${episode.id}">
+                        <div class="episode-header">
+                            <div class="episode-info">
+                                <div class="episode-title">${episode.title}</div>
+                                <div class="episode-meta">
+                                    <span class="episode-number">EP.${episode.episode_number}</span>
+                                    <span class="character-name">💬 ${episode.difficulty}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="episode-prompt">"${episode.user_input_prompt}"</div>
+
+                        <div class="episode-footer">
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <span class="episode-difficulty difficulty-${episode.difficulty.toLowerCase()}">${episode.difficulty}</span>
+                                <span style="font-size: 11px; opacity: 0.6;">${createdDate}</span>
+                            </div>
+                            <div style="font-size: 11px; opacity: 0.6;">
+                                ${getChoiceCount(episode)}개 선택지
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        // 조합 화면으로 돌아가기
+        function goBackToCombinations() {
+            gameState.viewMode = 'combinations';
+            gameState.currentCombination = null;
+
+            document.getElementById('subEpisodesScreen').style.display = 'none';
+            document.getElementById('episodeSelection').style.display = 'block';
         }
 
         // 에피소드 표시 (카드 리스트 형태)
@@ -552,20 +726,27 @@
             return episode.dialogue.choices?.length || 0;
         }
 
-        // 에피소드 플레이
-        function playEpisode(episodeNumber) {
-            const episode = gameState.episodes[episodeNumber];
-            if (!episode) {
-                alert('이 에피소드는 아직 생성되지 않았습니다.');
+        // 하위 에피소드 플레이
+        function playSubEpisode(episodeId) {
+            // 현재 조합에서 해당 에피소드 찾기
+            const combination = gameState.episodeCombinations[gameState.currentCombination];
+            if (!combination) {
+                alert('조합 정보를 찾을 수 없습니다.');
                 return;
             }
 
-            console.log('🎮 에피소드 플레이 시작:', episodeNumber, episode);
+            const episode = combination.episodes.find(ep => ep.id === episodeId);
+            if (!episode) {
+                alert('에피소드를 찾을 수 없습니다.');
+                return;
+            }
+
+            console.log('🎮 에피소드 플레이 시작:', episodeId, episode);
             gameState.currentEpisode = episode;
-            gameState.isPlaying = true;
+            gameState.viewMode = 'playing';
 
             // 화면 전환
-            document.getElementById('episodeSelection').style.display = 'none';
+            document.getElementById('subEpisodesScreen').style.display = 'none';
             document.getElementById('gameScreen').style.display = 'block';
 
             // 에피소드 정보 업데이트
@@ -752,11 +933,21 @@
 
         // 선택 화면으로 돌아가기
         function goBackToSelection() {
-            gameState.isPlaying = false;
             gameState.currentEpisode = null;
 
             document.getElementById('gameScreen').style.display = 'none';
-            document.getElementById('episodeSelection').style.display = 'block';
+
+            // 현재 view mode에 따라 적절한 화면으로 돌아가기
+            if (gameState.viewMode === 'playing' && gameState.currentCombination) {
+                // 하위 에피소드 목록으로 돌아가기
+                gameState.viewMode = 'sub-episodes';
+                document.getElementById('subEpisodesScreen').style.display = 'block';
+            } else {
+                // 조합 선택 화면으로 돌아가기
+                gameState.viewMode = 'combinations';
+                gameState.currentCombination = null;
+                document.getElementById('episodeSelection').style.display = 'block';
+            }
         }
     </script>
 </body>
