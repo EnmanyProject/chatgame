@@ -3198,6 +3198,14 @@
         let selectedCharacters = new Set();
         let generatedDialogue = null;
 
+        // 중복 처리 방지를 위한 상태 관리
+        const processingState = {
+            loadingEpisodes: false,
+            loadingTotal: false,
+            lastUpdate: null,
+            updateInterval: 5000 // 5초 간격으로 업데이트 제한
+        };
+
         // 🚨 에러 로깅 시스템
         class ErrorLogger {
             static async logError(level, message, error, context = {}) {
@@ -5269,8 +5277,17 @@
         }
 
         async function loadDialogues() {
-            // 우선순위: currentScenarioId → dialogueScenarioSelect 값
-            let scenarioId = currentScenarioId;
+            // 중복 호출 방지
+            if (processingState.loadingEpisodes) {
+                console.log('⏳ 에피소드 로딩 이미 진행 중 - 건너뜀');
+                return;
+            }
+
+            processingState.loadingEpisodes = true;
+
+            try {
+                // 우선순위: currentScenarioId → dialogueScenarioSelect 값
+                let scenarioId = currentScenarioId;
 
             const dialogueSelect = document.getElementById('dialogueScenarioSelect');
             if (dialogueSelect && dialogueSelect.value) {
@@ -5343,6 +5360,10 @@
                 updateDialogueStats();
 
                 showNotification(`에피소드 로드 실패: ${error.message}`, 'error');
+            } finally {
+                // 로딩 상태 해제
+                processingState.loadingEpisodes = false;
+                console.log('🔓 에피소드 로딩 상태 해제');
             }
         }
 
@@ -5384,18 +5405,20 @@
             if (dialogue) {
                 const characterName = getCharacterName(dialogue.character_id);
                 return `
-                    <div class="episode-card completed" onclick="previewDialogue(${number})">
+                    <div class="episode-card completed" onclick="previewDialogue(${number})" title="클릭하여 에피소드 #${number} 미리보기">
                         <div class="episode-number">#${number}</div>
-                        <div style="font-size: 0.9em; color: white;">${characterName}</div>
-                        <div style="font-size: 0.8em; opacity: 0.9;">${difficulty.toUpperCase()}</div>
+                        <div style="font-size: 0.9em; color: white; margin: 2px 0;">${characterName}</div>
+                        <div style="font-size: 0.8em; opacity: 0.9; margin: 2px 0;">${difficulty.toUpperCase()}</div>
+                        <div style="font-size: 0.7em; opacity: 0.8; color: #90EE90;">📖 미리보기</div>
                     </div>
                 `;
             } else {
                 return `
-                    <div class="episode-card empty" onclick="createDialogue(${number})">
+                    <div class="episode-card empty" onclick="createDialogue(${number})" title="클릭하여 에피소드 #${number} 새로 생성">
                         <div class="episode-number">#${number}</div>
-                        <div style="color: #999; font-size: 0.9em;">비어있음</div>
-                        <div style="color: #ccc; font-size: 0.8em;">${difficulty.toUpperCase()}</div>
+                        <div style="color: #999; font-size: 0.9em; margin: 2px 0;">비어있음</div>
+                        <div style="color: #ccc; font-size: 0.8em; margin: 2px 0;">${difficulty.toUpperCase()}</div>
+                        <div style="color: #FFA500; font-size: 0.7em; opacity: 0.8;">✨ 생성하기</div>
                     </div>
                 `;
             }
@@ -5463,8 +5486,65 @@
             document.getElementById('expertTabCount').textContent = counts.expert;
         }
 
+        // 서버 연결 상태 확인 및 데이터 동기화
+        async function checkServerConnection() {
+            try {
+                console.log('🔗 서버 연결 상태 확인 중...');
+
+                // API 엔드포인트별 상태 확인
+                const checks = [
+                    { name: 'Dialogue Manager', url: '/api/dialogue-manager?action=test' },
+                    { name: 'Scenario Manager', url: '/api/scenario-manager?action=list' },
+                    { name: 'Character Manager', url: '/api/character-ai-generator?action=list_characters' }
+                ];
+
+                const results = [];
+                for (const check of checks) {
+                    try {
+                        const response = await fetch(check.url);
+                        const isOk = response.ok;
+                        results.push({ name: check.name, status: isOk ? '✅' : '❌', code: response.status });
+                        console.log(`${isOk ? '✅' : '❌'} ${check.name}: ${response.status}`);
+                    } catch (error) {
+                        results.push({ name: check.name, status: '❌', error: error.message });
+                        console.error(`❌ ${check.name}: ${error.message}`);
+                    }
+                }
+
+                // 연결 상태 UI 업데이트
+                const statusElement = document.getElementById('serverStatus');
+                if (statusElement) {
+                    const allOk = results.every(r => r.status === '✅');
+                    statusElement.innerHTML = allOk ?
+                        '🟢 서버 연결 정상' :
+                        '🔴 일부 서버 연결 불안정';
+                    statusElement.className = allOk ? 'server-status online' : 'server-status offline';
+                }
+
+                return results;
+            } catch (error) {
+                console.error('❌ 서버 연결 확인 실패:', error);
+                return [];
+            }
+        }
+
         // 전체 에피소드 카운트 로드 (초기화용)
         async function loadTotalEpisodeCount() {
+            // 중복 호출 방지
+            if (processingState.loadingTotal) {
+                console.log('⏳ 전체 에피소드 카운트 로딩 이미 진행 중 - 건너뜀');
+                return;
+            }
+
+            const now = Date.now();
+            if (processingState.lastUpdate && (now - processingState.lastUpdate) < processingState.updateInterval) {
+                console.log('⏰ 업데이트 간격 제한 - 건너뜀 (최근 업데이트:', new Date(processingState.lastUpdate).toLocaleTimeString(), ')');
+                return;
+            }
+
+            processingState.loadingTotal = true;
+            processingState.lastUpdate = now;
+
             try {
                 console.log('📊 전체 에피소드 카운트 로딩 시작...');
 
@@ -5510,6 +5590,10 @@
 
                 // 에러 발생 시 기본값 표시
                 document.getElementById('episodeCount').textContent = 'ERROR';
+            } finally {
+                // 로딩 상태 해제
+                processingState.loadingTotal = false;
+                console.log('🔓 전체 에피소드 카운트 로딩 상태 해제');
             }
         }
 
