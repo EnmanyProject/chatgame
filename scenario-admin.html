@@ -7681,8 +7681,8 @@
                 <div class="character-card" onclick="showCharacterDetail('${character.id}')">
                     <div class="character-image">
                         ${character.image ?
-                            `<img src="${character.image}" alt="${character.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 100 100\\"><rect width=\\"100\\" height=\\"100\\" fill=\\"%23f0f0f0\\"/><text x=\\"50\\" y=\\"50\\" text-anchor=\\"middle\\" dy=\\".3em\\" fill=\\"%23999\\">${character.name.charAt(0)}</text></svg>'"/>` :
-                            `<div class="no-image">${character.name.charAt(0)}</div>`
+                            `<img src="${character.image}" alt="${getCharacterName(character)}" onerror="this.src='data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 100 100\\"><rect width=\\"100\\" height=\\"100\\" fill=\\"%23f0f0f0\\"/><text x=\\"50\\" y=\\"50\\" text-anchor=\\"middle\\" dy=\\".3em\\" fill=\\"%23999\\">${getCharacterName(character).charAt(0)}</text></svg>'"/>` :
+                            `<div class="no-image">${getCharacterName(character).charAt(0)}</div>`
                         }
                     </div>
                     <div class="character-info">
@@ -11381,10 +11381,14 @@
         async function generateCompleteCharacter(event) {
             console.log('🤖 통합 AI 캐릭터 생성 시작');
 
+            // 버튼 상태 관리를 위한 변수들을 함수 스코프로 이동
+            let button = null;
+            let originalText = '';
+
             try {
                 // 버튼 상태 변경
-                const button = event.target;
-                const originalText = button.textContent;
+                button = event.target;
+                originalText = button.textContent;
                 button.disabled = true;
                 button.textContent = '🤖 AI 생성 중...';
 
@@ -11478,8 +11482,7 @@
                 alert(`❌ AI 캐릭터 생성 실패:\n${error.message}\n\n다시 시도해주세요.`);
             } finally {
                 // 버튼 상태 복원
-                if (event && event.target) {
-                    const button = event.target;
+                if (button && originalText) {
                     button.disabled = false;
                     button.textContent = originalText;
                 }
