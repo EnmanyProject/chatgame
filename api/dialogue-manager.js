@@ -1,4 +1,121 @@
-// 대화 관리 API - GitHub API 전용 버전
+// 대화 관리 API - GitHub API 전용 버전 (캐릭터 인식 기능 추가)
+
+// 캐릭터 데이터를 로드하는 함수 (새로 추가)
+async function loadCharacterDatabase() {
+  try {
+    const response = await fetch('https://api.github.com/repos/EnmanyProject/chatgame/contents/data/characters.json', {
+      headers: {
+        'Authorization': `token ${process.env.GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3.raw'
+      }
+    });
+
+    if (response.ok) {
+      const text = await response.text();
+      return text ? JSON.parse(text) : { characters: {}, metadata: {} };
+    }
+    return { characters: {}, metadata: {} };
+  } catch (error) {
+    console.error('⚠️ 캐릭터 데이터베이스 로드 실패:', error.message);
+    return { characters: {}, metadata: {} };
+  }
+}
+
+// 캐릭터 ID로 캐릭터 데이터 가져오기 (새로 추가)
+async function getCharacterById(characterId) {
+  try {
+    const characterDb = await loadCharacterDatabase();
+    const character = characterDb.characters[characterId];
+
+    if (character) {
+      console.log('✅ 캐릭터 발견:', character.basic_info?.name || character.name || characterId);
+      return character;
+    } else {
+      console.log('⚠️ 캐릭터를 찾을 수 없음:', characterId);
+      return null;
+    }
+  } catch (error) {
+    console.error('❌ 캐릭터 조회 실패:', error.message);
+    return null;
+  }
+}
+
+// 관계 단계 판정 함수 (새로 추가)
+function getRelationshipStage(affection, character) {
+  if (!character?.relationship_progression?.stages) {
+    // 기본 단계 설정
+    if (affection <= 25) return 'initial_attraction';
+    if (affection <= 60) return 'building_tension';
+    return 'intimate_connection';
+  }
+
+  const stages = character.relationship_progression.stages;
+  for (const [stageName, config] of Object.entries(stages)) {
+    if (affection >= config.affection_range[0] && affection <= config.affection_range[1]) {
+      return stageName;
+    }
+  }
+  return 'initial_attraction';
+}
+
+// 호감도 영향도 계산 개선 함수 (새로 추가)
+function calculateEnhancedAffectionImpact(baseImpact, userChoice, character, currentAffection) {
+  let adjustedImpact = baseImpact;
+
+  if (!character) return adjustedImpact;
+
+  // 1. 캐릭터의 감정 트리거 확인
+  const triggers = character.psychological_depth?.emotional_triggers;
+  if (triggers) {
+    // 긍정적 트리거에 맞는 선택
+    if (triggers.positive && userChoice.tags) {
+      const hasPositiveTrigger = triggers.positive.some(trigger =>
+        userChoice.tags.includes(trigger) || userChoice.text?.toLowerCase().includes(trigger)
+      );
+      if (hasPositiveTrigger) {
+        adjustedImpact += 2;
+        console.log('💖 긍정적 감정 트리거 활성화 +2');
+      }
+    }
+
+    // 부정적 트리거에 맞는 선택
+    if (triggers.negative && userChoice.tags) {
+      const hasNegativeTrigger = triggers.negative.some(trigger =>
+        userChoice.tags.includes(trigger) || userChoice.text?.toLowerCase().includes(trigger)
+      );
+      if (hasNegativeTrigger) {
+        adjustedImpact -= 3;
+        console.log('💔 부정적 감정 트리거 활성화 -3');
+      }
+    }
+  }
+
+  // 2. 관계 단계별 민감도 적용
+  const stage = getRelationshipStage(currentAffection, character);
+  let stageSensitivity = 1.0;
+
+  switch(stage) {
+    case 'initial_attraction':
+      stageSensitivity = 1.2; // 초기에는 더 민감하게 반응
+      break;
+    case 'building_tension':
+      stageSensitivity = 1.0; // 표준 반응
+      break;
+    case 'intimate_connection':
+      stageSensitivity = 0.8; // 친밀해지면 덜 민감하게
+      break;
+  }
+
+  // 3. 캐릭터의 감성 지능에 따른 반응 세밀함
+  const emotionalIntelligence = character.appeal_profile?.emotional_intelligence || 7;
+  const intelligenceFactor = 0.8 + (emotionalIntelligence / 50); // 0.8 ~ 1.0
+
+  adjustedImpact = Math.round(adjustedImpact * stageSensitivity * intelligenceFactor);
+
+  console.log(`🎯 호감도 계산: 기본=${baseImpact} → 조정=${adjustedImpact} (단계=${stage}, 민감도=${stageSensitivity}, 감성지능=${emotionalIntelligence})`);
+
+  return adjustedImpact;
+}
 
 module.exports = async function handler(req, res) {
   // CORS 헤더 설정
@@ -565,7 +682,330 @@ function filterEpisodesByScenario(database, scenario_id) {
   }
 }
 
-// 새 에피소드 생성 및 저장 (GitHub API 활용)
+// 캐릭터 특성으로 기존 대화 향상 (새로 추가)
+function enhanceDialogueWithCharacterTraits(dialogue, character, relationshipStage) {
+  try {
+    if (!dialogue.story_flow || !character) return dialogue;
+
+    // 캐릭터 특성 정보 추출
+    const appealProfile = character.appeal_profile || {};
+    const psychoDepth = character.psychological_depth || {};
+
+    // 대화 흐름의 각 요소에 캐릭터 특성 반영
+    const enhancedStoryFlow = dialogue.story_flow.map(item => {
+      if (item.type === 'dialogue') {
+        // 대화 스타일 향상
+        const enhancedItem = { ...item };
+
+        // 유혹 스타일에 따른 말투 조정
+        if (appealProfile.seduction_style) {
+          enhancedItem.seduction_style = appealProfile.seduction_style;
+          enhancedItem.charm_points = appealProfile.charm_points;
+        }
+
+        // 관계 단계에 따른 친밀도 조정
+        enhancedItem.relationship_stage = relationshipStage;
+        return enhancedItem;
+      } else if (item.type === 'choice_point') {
+        // 선택지에 캐릭터 감정 트리거 정보 추가
+        const enhancedChoices = item.choices.map(choice => ({
+          ...choice,
+          character_triggers: {
+            positive: psychoDepth.emotional_triggers?.positive || [],
+            negative: psychoDepth.emotional_triggers?.negative || []
+          },
+          relationship_stage: relationshipStage
+        }));
+
+        return {
+          ...item,
+          choices: enhancedChoices,
+          character_context: {
+            seduction_style: appealProfile.seduction_style,
+            emotional_intelligence: appealProfile.emotional_intelligence,
+            relationship_stage: relationshipStage
+          }
+        };
+      }
+      return item;
+    });
+
+    console.log('✨ 대화에 캐릭터 특성 반영 완료:', {
+      seduction_style: appealProfile.seduction_style,
+      relationship_stage: relationshipStage,
+      dialogue_items: enhancedStoryFlow.length
+    });
+
+    return {
+      ...dialogue,
+      story_flow: enhancedStoryFlow,
+      character_awareness: {
+        character_id: character.id,
+        appeal_profile: appealProfile,
+        relationship_stage: relationshipStage,
+        enhanced_at: new Date().toISOString()
+      }
+    };
+
+  } catch (error) {
+    console.error('❌ 대화 캐릭터 특성 반영 실패:', error.message);
+    return dialogue; // 오류 시 원본 반환
+  }
+}
+
+// 캐릭터 인식 새 대화 생성 (새로 추가)
+async function generateCharacterAwareDialogue(data, character, relationshipStage, currentAffection) {
+  try {
+    console.log('🎭 캐릭터 인식 대화 생성 시작:', {
+      character_name: character?.basic_info?.name || character?.name || '알 수 없음',
+      relationship_stage: relationshipStage,
+      current_affection: currentAffection
+    });
+
+    if (!character) {
+      return generateFallbackDialogue(data);
+    }
+
+    // 캐릭터 특성 기반 대화 템플릿 생성
+    const appealProfile = character.appeal_profile || {};
+    const psychoDepth = character.psychological_depth || {};
+
+    // 관계 단계별 대화 스타일 결정
+    const stageConfig = character.relationship_progression?.stages?.[relationshipStage] || {
+      behaviors: ['friendly_conversation'],
+      dialogue_style: 'warm_and_approachable'
+    };
+
+    // 유혹 스타일에 따른 대화 생성
+    const seductionStyle = appealProfile.seduction_style || 'warm_nurturing';
+    const characterName = character.basic_info?.name || character.name || '캐릭터';
+
+    // 대화 생성 (캐릭터 특성 반영)
+    const generatedDialogue = {
+      story_flow: [
+        {
+          type: "dialogue",
+          speaker: characterName,
+          text: generateCharacterSpecificDialogue(character, relationshipStage, data.user_input_prompt),
+          emotion: getEmotionForStage(relationshipStage, seductionStyle),
+          narration: generateCharacterSpecificNarration(character, relationshipStage),
+          seduction_style: seductionStyle,
+          relationship_stage: relationshipStage
+        },
+        {
+          type: "choice_point",
+          situation: generateSituationForStage(relationshipStage, characterName),
+          choices: generateCharacterSpecificChoices(character, relationshipStage, currentAffection),
+          character_context: {
+            seduction_style: seductionStyle,
+            emotional_intelligence: appealProfile.emotional_intelligence || 7,
+            charm_points: appealProfile.charm_points || [],
+            relationship_stage: relationshipStage
+          }
+        }
+      ],
+      episode_summary: `${characterName}와의 ${relationshipStage} 단계 대화 (${seductionStyle} 스타일)`,
+      character_awareness: {
+        character_id: character.id,
+        appeal_profile: appealProfile,
+        psychological_depth: psychoDepth,
+        relationship_stage: relationshipStage,
+        generated_at: new Date().toISOString()
+      }
+    };
+
+    console.log('✅ 캐릭터 인식 대화 생성 완료');
+    return generatedDialogue;
+
+  } catch (error) {
+    console.error('❌ 캐릭터 인식 대화 생성 실패:', error.message);
+    return generateFallbackDialogue(data);
+  }
+}
+
+// 캐릭터별 맞춤 대화 생성 헬퍼 함수들
+function generateCharacterSpecificDialogue(character, relationshipStage, userPrompt) {
+  const characterName = character.basic_info?.name || character.name || '캐릭터';
+  const seductionStyle = character.appeal_profile?.seduction_style || 'warm_nurturing';
+
+  // 유혹 스타일별 대화 패턴
+  const dialoguePatterns = {
+    playful_confident: {
+      initial_attraction: `오빠~ 혹시 ${userPrompt || '그런 얘기'} 진짜야? 😏 나도 그런 거 좋아하는데... 어떻게 알았지?`,
+      building_tension: `정말? 오빠 생각보다 센스 있네~ 💕 이런 식으로 나랑 놀아줄 거야?`,
+      intimate_connection: `오빠... 이제 진짜 나한테 마음이 있는 거 맞지? 😳 솔직히 말해봐~`
+    },
+    mysterious_elegant: {
+      initial_attraction: `흥미롭네요... ${userPrompt || '그런 이야기'}는 처음 들어보는 관점이에요. 더 자세히 말해주실래요?`,
+      building_tension: `당신에 대해 궁금한 게 많아지고 있어요... 🌙 그렇게 깊은 생각을 하는 사람이었군요.`,
+      intimate_connection: `이제야 당신의 진짜 모습을 보는 것 같아요... ✨ 마음이 두근거려요.`
+    },
+    warm_nurturing: {
+      initial_attraction: `와~ 정말요? 그런 생각을 하고 계셨구나요! 😊 저도 그런 걸 좋아해요. 함께 이야기해 봐요.`,
+      building_tension: `오빠와 이렇게 대화하니까 정말 편해요... 💕 마음이 따뜻해져요.`,
+      intimate_connection: `오빠 정말 소중해요... 🥺 이런 마음 처음이에요. 계속 옆에 있어 주실 거죠?`
+    },
+    intellectually_stimulating: {
+      initial_attraction: `정말 흥미로운 관점이네요. ${userPrompt || '그 주제'}에 대해 저는 다른 생각을 갖고 있는데, 토론해 볼까요?`,
+      building_tension: `당신의 지적 호기심이 매력적이에요... 📚 더 깊은 대화를 나눠보고 싶어요.`,
+      intimate_connection: `당신과의 대화는 언제나 새로운 발견이에요... 💭 평생 이런 지적 교감을 나누고 싶어요.`
+    }
+  };
+
+  const pattern = dialoguePatterns[seductionStyle] || dialoguePatterns.warm_nurturing;
+  return pattern[relationshipStage] || pattern.initial_attraction;
+}
+
+function getEmotionForStage(relationshipStage, seductionStyle) {
+  const emotionMap = {
+    initial_attraction: {
+      playful_confident: '장난스러움',
+      mysterious_elegant: '신비로움',
+      warm_nurturing: '따뜻함',
+      intellectually_stimulating: '호기심'
+    },
+    building_tension: {
+      playful_confident: '유혹적',
+      mysterious_elegant: '은밀함',
+      warm_nurturing: '애정어림',
+      intellectually_stimulating: '지적 흥미'
+    },
+    intimate_connection: {
+      playful_confident: '애교',
+      mysterious_elegant: '깊은 신뢰',
+      warm_nurturing: '사랑',
+      intellectually_stimulating: '깊은 유대감'
+    }
+  };
+
+  return emotionMap[relationshipStage]?.[seductionStyle] || '따뜻함';
+}
+
+function generateCharacterSpecificNarration(character, relationshipStage) {
+  const characterName = character.basic_info?.name || character.name || '그녀';
+  const charmPoints = character.appeal_profile?.charm_points || ['infectious_smile'];
+
+  const narrativeElements = {
+    infectious_smile: '환한 미소를 지으며',
+    witty_banter: '재치있는 표정으로',
+    confident_touch: '자신감 있는 몸짓으로',
+    mysterious_aura: '신비로운 눈빛으로',
+    graceful_movements: '우아한 몸짓으로',
+    expressive_eyes: '표현력 있는 눈으로'
+  };
+
+  const primaryCharm = charmPoints[0] || 'infectious_smile';
+  const charmAction = narrativeElements[primaryCharm] || '미소를 지으며';
+
+  const stageNarrations = {
+    initial_attraction: `${characterName}가 ${charmAction} 호기심 어린 표정을 짓는다.`,
+    building_tension: `${characterName}가 ${charmAction} 당신을 바라보며 약간 볼이 붉어진다.`,
+    intimate_connection: `${characterName}가 ${charmAction} 당신에게 더 가까이 다가온다.`
+  };
+
+  return stageNarrations[relationshipStage] || stageNarrations.initial_attraction;
+}
+
+function generateSituationForStage(relationshipStage, characterName) {
+  const situations = {
+    initial_attraction: `${characterName}가 당신에게 관심을 보이기 시작합니다. 어떻게 반응하시겠습니까?`,
+    building_tension: `${characterName}와의 관계가 발전하고 있습니다. 다음 단계로 나아가고 싶습니다.`,
+    intimate_connection: `${characterName}와 깊은 유대감을 형성했습니다. 이 특별한 순간을 어떻게 할까요?`
+  };
+
+  return situations[relationshipStage] || situations.initial_attraction;
+}
+
+function generateCharacterSpecificChoices(character, relationshipStage, currentAffection) {
+  const emotionalTriggers = character.psychological_depth?.emotional_triggers || {};
+  const seductionStyle = character.appeal_profile?.seduction_style || 'warm_nurturing';
+
+  // 기본 선택지 템플릿
+  const baseChoices = {
+    initial_attraction: [
+      { text: "진심으로 공감하며 대답한다", affection_impact: 2, tags: ["genuine_compliments", "emotional_connection"] },
+      { text: "유머러스하게 분위기를 바꾼다", affection_impact: 1, tags: ["humor", "light_mood"] },
+      { text: "더 깊은 질문을 던진다", affection_impact: 1, tags: ["intellectual_stimulation", "curiosity"] }
+    ],
+    building_tension: [
+      { text: "그녀의 마음을 진지하게 들어준다", affection_impact: 3, tags: ["emotional_support", "genuine_interest"] },
+      { text: "은근히 칭찬을 건넨다", affection_impact: 2, tags: ["genuine_compliments", "confidence_boost"] },
+      { text: "자신의 진솔한 이야기를 나눈다", affection_impact: 2, tags: ["vulnerability", "trust_building"] }
+    ],
+    intimate_connection: [
+      { text: "솔직한 마음을 고백한다", affection_impact: 4, tags: ["emotional_honesty", "vulnerability"] },
+      { text: "따뜻하게 안아준다", affection_impact: 3, tags: ["physical_affection", "comfort"] },
+      { text: "미래에 대한 이야기를 꺼낸다", affection_impact: 3, tags: ["future_planning", "commitment"] }
+    ]
+  };
+
+  const choices = baseChoices[relationshipStage] || baseChoices.initial_attraction;
+
+  // 캐릭터 감정 트리거에 따른 선택지 조정
+  return choices.map(choice => {
+    let adjustedImpact = choice.affection_impact;
+
+    // 긍정적 트리거 매칭 시 보너스
+    if (emotionalTriggers.positive) {
+      const hasPositiveTrigger = choice.tags.some(tag =>
+        emotionalTriggers.positive.includes(tag)
+      );
+      if (hasPositiveTrigger) {
+        adjustedImpact += 1;
+      }
+    }
+
+    // 부정적 트리거 매칭 시 페널티
+    if (emotionalTriggers.negative) {
+      const hasNegativeTrigger = choice.tags.some(tag =>
+        emotionalTriggers.negative.includes(tag)
+      );
+      if (hasNegativeTrigger) {
+        adjustedImpact -= 1;
+      }
+    }
+
+    return {
+      ...choice,
+      affection_impact: Math.max(0, adjustedImpact), // 최소 0
+      consequence: `캐릭터의 ${seductionStyle} 스타일에 맞는 반응을 보입니다.`,
+      character_triggers: {
+        positive: emotionalTriggers.positive || [],
+        negative: emotionalTriggers.negative || []
+      }
+    };
+  });
+}
+
+function generateFallbackDialogue(data) {
+  return {
+    story_flow: [
+      {
+        type: "dialogue",
+        speaker: data.character_name || "캐릭터",
+        text: "안녕하세요! 오늘 기분이 어떠세요? 😊",
+        emotion: "친근함",
+        narration: "그녀가 밝은 미소로 당신을 바라본다."
+      },
+      {
+        type: "choice_point",
+        situation: "새로운 대화가 시작되었습니다. 어떻게 반응하시겠습니까?",
+        choices: [
+          { text: "기분 좋다고 답한다", affection_impact: 1, consequence: "긍정적인 분위기로 대화가 이어집니다" },
+          { text: "그저 그렇다고 답한다", affection_impact: 0, consequence: "평범한 대화가 계속됩니다" },
+          { text: "당신은 어떤지 되물어본다", affection_impact: 1, consequence: "서로에 대한 관심을 표현합니다" }
+        ]
+      }
+    ],
+    episode_summary: "기본 대화 템플릿이 사용되었습니다.",
+    character_awareness: {
+      status: "fallback_mode",
+      reason: "character_data_not_available"
+    }
+  };
+}
+
+// 새 에피소드 생성 및 저장 (캐릭터 인식 기능 통합)
 async function createEpisode(data) {
   try {
     console.log('🎯 에피소드 생성 데이터 확인:', {
@@ -576,32 +1016,43 @@ async function createEpisode(data) {
       scenario_id: data.scenario_id
     });
 
-    // AI 생성된 대화 확인 (generated_dialogue를 우선으로)
-    const dialogue = data.generated_dialogue || data.ai_generated_dialogue || {
-      story_flow: [
-        {
-          type: "dialogue",
-          speaker: data.character_name || "캐릭터",
-          text: "죄송해요, AI 대화 생성에 실패했습니다. 다시 시도해주세요.",
-          emotion: "당황",
-          narration: "시스템 오류로 인해 대화가 제대로 생성되지 않았습니다."
-        },
-        {
-          type: "choice_point",
-          situation: "시스템 오류가 발생했습니다. 어떻게 하시겠습니까?",
-          choices: [
-            { text: "다시 시도하기", affection_impact: 0, consequence: "새로운 대화를 생성합니다" },
-            { text: "나중에 다시 오기", affection_impact: 0, consequence: "에피소드를 종료합니다" }
-          ]
-        }
-      ],
-      episode_summary: "AI 대화 생성 실패로 기본 대화가 제공되었습니다."
-    };
+    // 캐릭터 데이터 로드 및 관계 단계 확인
+    let character = null;
+    let currentAffection = data.current_affection || 0;
+    let relationshipStage = 'initial_attraction';
 
-    if (data.generated_dialogue) {
-      console.log('✅ AI 생성된 대화 사용됨');
+    if (data.character_id) {
+      console.log('📚 캐릭터 데이터 로드 시작:', data.character_id);
+      character = await getCharacterById(data.character_id);
+
+      if (character) {
+        relationshipStage = getRelationshipStage(currentAffection, character);
+        console.log('✅ 캐릭터 로드 완료:', {
+          name: character.basic_info?.name || character.name,
+          seduction_style: character.appeal_profile?.seduction_style,
+          relationship_stage: relationshipStage,
+          current_affection: currentAffection
+        });
+      }
+    }
+
+    // 캐릭터 기반 대화 생성 또는 기존 대화 사용
+    let dialogue;
+
+    if (data.generated_dialogue || data.ai_generated_dialogue) {
+      // 기존 AI 생성 대화 사용 (캐릭터 특성 반영 향상)
+      dialogue = data.generated_dialogue || data.ai_generated_dialogue;
+
+      // 캐릭터 특성을 대화에 추가 반영
+      if (character && dialogue.story_flow) {
+        dialogue = enhanceDialogueWithCharacterTraits(dialogue, character, relationshipStage);
+      }
+
+      console.log('✅ AI 생성된 대화 사용됨 (캐릭터 특성 반영)');
     } else {
-      console.log('⚠️ AI 생성 실패, 기본 대화 사용됨');
+      // 캐릭터 기반 새 대화 생성
+      dialogue = await generateCharacterAwareDialogue(data, character, relationshipStage, currentAffection);
+      console.log('✨ 캐릭터 인식 대화 새로 생성됨');
     }
 
     const newEpisode = {
