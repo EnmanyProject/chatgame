@@ -80,6 +80,31 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // 전체 에피소드 조회 (새로 추가)
+    if (action === 'get_all_episodes') {
+      try {
+        console.log('📊 전체 에피소드 조회 요청');
+
+        // 에피소드 데이터베이스 로드
+        const database = await loadEpisodeDatabase();
+        console.log('📊 전체 에피소드 DB 로드 완료');
+
+        return res.json({
+          success: true,
+          episodes: database.episodes || {},
+          metadata: database.metadata || {},
+          total: Object.keys(database.episodes || {}).length
+        });
+
+      } catch (error) {
+        console.error('❌ 전체 에피소드 조회 실패:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: '전체 에피소드 조회 실패: ' + error.message
+        });
+      }
+    }
+
     // 알 수 없는 액션
     return res.status(400).json({
       success: false,

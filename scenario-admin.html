@@ -5468,19 +5468,13 @@
             try {
                 console.log('📊 전체 에피소드 카운트 로딩 시작...');
 
-                // GitHub API를 통해 전체 에피소드 데이터베이스 로드
-                const response = await fetch('/api/dialogue-manager?action=test');
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
+                // dialogue-manager API를 통해 전체 에피소드 조회 시도
+                const response = await fetch('/api/dialogue-manager?action=get_all_episodes');
 
-                // 실제로는 에피소드 데이터베이스에서 직접 카운트 계산
-                const episodeResponse = await fetch('/api/episode-manager?action=get_all_episodes');
-
-                if (episodeResponse.ok) {
-                    const episodeResult = await episodeResponse.json();
-                    if (episodeResult.success && episodeResult.episodes) {
-                        const allEpisodes = Object.values(episodeResult.episodes);
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success && result.episodes) {
+                        const allEpisodes = Object.values(result.episodes);
 
                         // 에피소드 개수 계산: 시나리오 + 캐릭터 조합별로 그룹화
                         const episodeGroups = new Set();
@@ -5506,14 +5500,16 @@
                     }
                 }
 
-                // Fallback: 에피소드 DB에서 직접 읽기
-                console.log('📁 Fallback: 에피소드 DB 메타데이터 사용');
-                document.getElementById('episodeCount').textContent = '31'; // 현재 DB의 총 개수
+                // API 응답이 실패한 경우 에러 출력
+                const errorText = await response.text();
+                throw new Error(`API 오류 (${response.status}): ${errorText}`);
 
             } catch (error) {
-                console.error('❌ 전체 에피소드 카운트 로딩 실패:', error);
-                // 기본값 유지
-                document.getElementById('episodeCount').textContent = '0';
+                console.error('❌ 전체 에피소드 카운트 로딩 실패:', error.message);
+                showNotification(`전체 에피소드 카운트 로딩 실패: ${error.message}`, 'error');
+
+                // 에러 발생 시 기본값 표시
+                document.getElementById('episodeCount').textContent = 'ERROR';
             }
         }
 
