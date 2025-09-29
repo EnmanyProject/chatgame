@@ -2,9 +2,9 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-09-29",
-    "total_episodes": 3,
+    "total_episodes": 4,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-09-29T06:29:16.741Z",
+    "last_updated": "2025-09-29T07:10:57.381Z",
     "data_source": "episode_manager_api",
     "deleted_episodes_count": 41
   },
@@ -193,6 +193,59 @@
         ],
         "difficulty": "Easy",
         "generated_at": "2025-09-29T06:29:15.550Z",
+        "source": "openai_gpt4o_mini"
+      }
+    },
+    "dialogue_scenario_어제_술자리_이후_1759122112685_1759129857295": {
+      "id": "dialogue_scenario_어제_술자리_이후_1759122112685_1759129857295",
+      "scenario_id": "scenario_어제_술자리_이후_1759122112685",
+      "dialogue_number": 1,
+      "title": "대화 1번",
+      "character_id": "미화_enfp_1759108771093",
+      "character_name": "미화",
+      "difficulty": "Easy",
+      "user_input_prompt": "우연히 마주친 상황에서 서로를 의식하며",
+      "created_at": "2025-09-29T07:10:57.295Z",
+      "dialogue": {
+        "story_flow": [
+          {
+            "type": "dialogue",
+            "speaker": "미화",
+            "text": "죄송해요, 지금 제대로 대답하기 어려워요 😅",
+            "emotion": "당황",
+            "narration": "미화가 잠시 당황한 표정을 짓는다."
+          },
+          {
+            "type": "choice_point",
+            "situation": "이런 상황에서 어떻게 반응하실 건가요?",
+            "choices": [
+              {
+                "text": "괜찮다고 말하며 다른 화제로 넘어간다",
+                "affection_impact": 1,
+                "consequence": "자연스럽게 화제를 전환한다"
+              },
+              {
+                "text": "무슨 일인지 걱정스럽게 물어본다",
+                "affection_impact": 2,
+                "consequence": "그녀의 속마음을 알고 싶어한다는 것을 보여준다"
+              },
+              {
+                "text": "시간을 두고 천천히 이야기하자고 한다",
+                "affection_impact": 3,
+                "consequence": "그녀를 배려하는 마음을 전달한다"
+              }
+            ]
+          },
+          {
+            "type": "dialogue",
+            "speaker": "미화",
+            "text": "고마워요... 사실 조금 복잡한 기분이었어요.",
+            "emotion": "안도",
+            "narration": "미화가 작은 미소를 지으며 마음을 열기 시작한다."
+          }
+        ],
+        "difficulty": "Easy",
+        "generated_at": "2025-09-29T07:10:56.766Z",
         "source": "openai_gpt4o_mini"
       }
     }
