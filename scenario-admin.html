@@ -4803,236 +4803,60 @@
         }
 
         // 대화 섹션의 시나리오 목록 새로고침
+        // 구 시스템 새로고침 함수 - 새 시스템으로 대체
         async function refreshDialogueScenarioList() {
-            console.log('🔄 대화 시나리오 목록 새로고침...');
+            console.log('🔄 [구 시스템] 대화 시나리오 목록 새로고침 - 새 시스템으로 대체됨');
 
             try {
-                // 로딩 상태 표시
-                const container = document.getElementById('scenarioCardsContainer');
-                if (container) {
-                    container.innerHTML = `
-                        <div class="loading-card">
-                            <div class="spinner"></div>
-                            <p>새로고침 중...</p>
-                        </div>
-                    `;
+                // 새 시스템의 새로고침 함수 호출
+                if (typeof refreshEpisodeScenarioList === 'function') {
+                    await refreshEpisodeScenarioList();
+                } else {
+                    console.warn('⚠️ refreshEpisodeScenarioList 함수를 찾을 수 없습니다.');
                 }
-
-                // 순차적으로 업데이트하여 깜빡임 방지
-                await loadDialogueScenarioCards(); // 새로운 카드 형태 (메인)
-                await loadDialogueScenarioSelector(); // 모달용
-
-                // 에피소드 목록도 새로고침
-                await loadEpisodesList();
-                await loadTotalEpisodeCount();
-
-                console.log('✅ 대화 시나리오 목록 새로고침 완료');
             } catch (error) {
-                console.error('❌ 시나리오 목록 새로고침 실패:', error);
+                console.error('❌ 에피소드 시나리오 새로고침 실패:', error);
             }
         }
         
-        // 에피소드 섹션에 시나리오 목록 표시
+        // 에피소드 섹션에 시나리오 목록 표시 (구 시스템 - 새 시스템으로 대체됨)
         function displayAvailableScenarios() {
-            console.log('📋 에피소드 섹션에 시나리오 목록 표시...');
+            console.log('📋 [구 시스템] displayAvailableScenarios 호출됨 - 새 시스템으로 대체됨');
 
-            try {
-                // 시나리오 데이터 로딩
-                let scenariosData = window.scenarios || {};
-
-                // LocalStorage에서도 확인
-                if (Object.keys(scenariosData).length === 0) {
-                    const localScenarios = localStorage.getItem('scenarios');
-                    if (localScenarios) {
-                        scenariosData = JSON.parse(localScenarios);
-                        window.scenarios = scenariosData;
-                    }
-                }
-
-                const scenarioKeys = Object.keys(scenariosData);
-                const scenariosListDiv = document.getElementById('scenarioCardsContainer');
-
-                // DOM 요소가 존재하지 않으면 에러 방지
-                if (!scenariosListDiv) {
-                    console.warn('⚠️ scenarioCardsContainer 요소를 찾을 수 없습니다.');
-                    return;
-                }
-                
-                if (scenarioKeys.length === 0) {
-                    scenariosListDiv.innerHTML = `
-                        <div class="loading-card">
-                            <p>❌ 생성된 시나리오가 없습니다.</p>
-                            <p><small>먼저 시나리오 탭에서 시나리오를 생성해주세요.</small></p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                let html = '';
-                scenarioKeys.forEach(scenarioId => {
-                    const scenario = scenariosData[scenarioId];
-                    if (scenario) {
-                        html += `
-                            <div class="scenario-selection-card" onclick="selectScenarioCard('${scenarioId}')" data-scenario-id="${scenarioId}">
-                                <div class="scenario-header">
-                                    <h5>${scenario.title || '제목 없음'}</h5>
-                                    <span class="scenario-mood">${scenario.mood || '일반'}</span>
-                                </div>
-                                <p class="scenario-description">${(scenario.description || '').substring(0, 100)}${scenario.description && scenario.description.length > 100 ? '...' : ''}</p>
-                                <div class="scenario-stats">
-                                    <span class="stat-item">📚 ${scenario.dialogue_count || 0}/36 에피소드</span>
-                                    <span class="stat-item">👥 ${scenario.available_characters ? scenario.available_characters.length : 0} 캐릭터</span>
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-
-                scenariosListDiv.innerHTML = html;
-                console.log('✅ 시나리오 목록 표시 완료:', scenarioKeys.length, '개');
-                
-            } catch (error) {
-                console.error('❌ 시나리오 목록 표시 실패:', error);
-                const errorContainer = document.getElementById('scenarioCardsContainer');
-                if (errorContainer) {
-                    errorContainer.innerHTML = `
-                        <div class="loading-card">
-                            <p>❌ 시나리오 목록 로딩 중 오류가 발생했습니다.</p>
-                            <p><small>콘솔을 확인하거나 페이지를 새로고침해보세요.</small></p>
-                        </div>
-                    `;
-                }
+            // 새 시스템의 에피소드 시나리오 표시 함수 호출
+            if (typeof displayEpisodeScenarios === 'function') {
+                displayEpisodeScenarios();
+            } else {
+                console.warn('⚠️ displayEpisodeScenarios 함수를 찾을 수 없습니다.');
             }
         }
 
-        // 에피소드 시나리오 카드 로딩 (새로운 카드 형태)
+        // 구 시스템 에피소드 시나리오 카드 로딩 - 새 시스템으로 대체
         async function loadDialogueScenarioCards() {
-            console.log('🔄 에피소드 시나리오 카드 로딩 시작...');
+            console.log('🔄 [구 시스템] 에피소드 시나리오 카드 로딩 - 새 시스템으로 대체됨');
 
             try {
-                // 모든 소스에서 시나리오 데이터 통합 로딩
-                let scenariosData = {};
-
-                // 1. 시나리오 메니저에서 최신 데이터 가져오기
-                try {
-                    const response = await fetch('/api/scenario-manager?action=list');
-                    if (response.ok) {
-                        const result = await response.json();
-                        console.log('📊 시나리오 매니저 응답:', result);
-
-                        if (result.success && result.scenarios) {
-                            scenariosData = { ...scenariosData, ...result.scenarios };
-                            console.log('✅ 시나리오 매니저에서 데이터 로드됨');
-                        }
-                    }
-                } catch (err) {
-                    console.log('⚠️ 시나리오 매니저 접근 실패:', err.message);
-                }
-
-                console.log('🔍 통합된 시나리오 데이터:', scenariosData);
-
-                // 2. 시나리오 카드 생성
-                const container = document.getElementById('scenarioCardsContainer');
-
-                // 활성 시나리오들만 필터링
-                const activeScenarios = Object.values(scenariosData).filter(scenario =>
-                    scenario && scenario.active_status !== false
-                );
-
-                console.log('🎯 활성 시나리오:', activeScenarios);
-
-                if (activeScenarios.length > 0) {
-                    let cardsHTML = '';
-
-                    activeScenarios.forEach(scenario => {
-                        const characterName = scenario.available_characters && scenario.available_characters.length > 0 ?
-                            scenario.available_characters[0] : '캐릭터 없음';
-
-                        const createdDate = scenario.created_date ?
-                            new Date(scenario.created_date).toLocaleDateString('ko-KR') : '날짜 정보 없음';
-
-                        cardsHTML += `
-                            <div class="scenario-selection-card" onclick="selectScenarioCard('${scenario.scenario_id}')" data-scenario-id="${scenario.scenario_id}">
-                                <div class="scenario-card-header">
-                                    <h6 class="scenario-card-title">${scenario.title}</h6>
-                                    <span class="scenario-card-badge">${scenario.mood || '일반'}</span>
-                                </div>
-                                <div class="scenario-card-description">
-                                    ${scenario.description || '설명이 없습니다.'}
-                                </div>
-                                <div class="scenario-card-meta">
-                                    <span class="scenario-card-character">👤 ${characterName}</span>
-                                    <span>📅 ${createdDate}</span>
-                                </div>
-                            </div>
-                        `;
-                    });
-
-                    container.innerHTML = cardsHTML;
-
-                    // CSS 스타일 즉시 적용 보장
-                    container.offsetHeight; // 강제 리플로우
-
-                    // 카드 스타일 클래스 명시적 적용
-                    setTimeout(() => {
-                        const cards = container.querySelectorAll('.scenario-selection-card');
-                        cards.forEach(card => {
-                            card.classList.add('scenario-selection-card'); // 스타일 재적용
-                        });
-                    }, 0);
+                // 새 시스템의 시나리오 표시 함수 호출
+                if (typeof displayEpisodeScenarios === 'function') {
+                    await displayEpisodeScenarios();
                 } else {
-                    container.innerHTML = `
-                        <div class="loading-card">
-                            <p style="margin: 0;">등록된 시나리오가 없습니다</p>
-                            <small>시나리오를 먼저 생성해주세요</small>
-                        </div>
-                    `;
+                    console.warn('⚠️ displayEpisodeScenarios 함수를 찾을 수 없습니다.');
                 }
-
-                console.log('✅ 에피소드 시나리오 카드 로딩 완료');
-
             } catch (error) {
-                console.error('❌ 에피소드 시나리오 카드 로딩 실패:', error);
-                const container = document.getElementById('scenarioCardsContainer');
-                if (container) {
-                    container.innerHTML = `
-                        <div class="loading-card">
-                            <p style="margin: 0; color: #dc3545;">시나리오 로딩 오류</p>
-                            <small>${error.message}</small>
-                        </div>
-                    `;
-                }
+                console.error('❌ 에피소드 시나리오 표시 실패:', error);
             }
         }
 
-        // 시나리오 카드 선택
+        // 시나리오 카드 선택 (구 시스템 - 새 시스템으로 대체)
         function selectScenarioCard(scenarioId) {
-            console.log('🎯 시나리오 카드 선택됨:', scenarioId);
+            console.log('🎯 [구 시스템] 시나리오 카드 선택됨 - 새 시스템으로 대체:', scenarioId);
 
-            // 기존 선택 해제
-            document.querySelectorAll('.scenario-selection-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-
-            // 새로운 카드 선택
-            const selectedCard = document.querySelector(`[data-scenario-id="${scenarioId}"]`);
-            if (selectedCard) {
-                selectedCard.classList.add('selected');
+            // 새 시스템의 시나리오 선택 함수 호출
+            if (typeof selectEpisodeScenario === 'function') {
+                selectEpisodeScenario(scenarioId);
+            } else {
+                console.warn('⚠️ selectEpisodeScenario 함수를 찾을 수 없습니다.');
             }
-
-            // 전역 변수에 현재 시나리오 ID 설정
-            currentScenarioId = scenarioId;
-            window.currentScenarioFilter = scenarioId; // 필터 상태도 저장
-            console.log('✅ currentScenarioId 설정됨:', currentScenarioId);
-
-            // 선택된 시나리오 정보 표시
-            showSelectedScenarioInfo(scenarioId);
-
-            // 해당 시나리오의 에피소드만 필터링해서 표시
-            loadEpisodesList(scenarioId);
-
-            // 기존 에피소드 로드 (36개 카드 방식)
-            loadDialogues();
         }
 
         // 선택된 시나리오 정보 표시
