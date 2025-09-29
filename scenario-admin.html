@@ -7916,59 +7916,63 @@
         function displayAIGeneratedCharacter(character) {
             // 글로벌 변수에 저장
             generatedCharacter = character;
-            
+
+            console.log('🎭 생성된 캐릭터 전체 정보:', character);
+
             const previewDiv = document.getElementById('characterPreview');
             previewDiv.innerHTML = `
                 <h4>🎭 AI 생성결과보기</h4>
                 <div class="character-preview-content">
                     <div class="preview-section">
                         <h5>👤 기본 정보</h5>
-                        <p><strong>이름:</strong> ${character.name}</p>
-                        <p><strong>나이:</strong> ${character.age}세</p>
-                        <p><strong>성별:</strong> ${character.gender === 'female' ? '여성' : '남성'}</p>
-                        <p><strong>MBTI:</strong> ${character.mbti}</p>
+                        <p><strong>이름:</strong> ${character.name || '이름 없음'}</p>
+                        <p><strong>나이:</strong> ${character.age || '나이 정보 없음'}세</p>
+                        <p><strong>성별:</strong> ${character.gender === 'female' ? '여성' : character.gender === 'male' ? '남성' : '성별 정보 없음'}</p>
+                        <p><strong>MBTI:</strong> ${character.mbti || 'MBTI 정보 없음'}</p>
+                        <p><strong>전공:</strong> ${character.major || '전공 정보 없음'}</p>
                     </div>
 
                     <div class="preview-section">
                         <h5>🌟 성격 & 특성</h5>
-                        <p><strong>성격 특성:</strong> ${Array.isArray(character.personality_traits) ? character.personality_traits.join(', ') : character.personality_traits || '감성적, 내향적'}</p>
-                        <p><strong>전공:</strong> ${character.major || '일반 전공'}</p>
-                        <p><strong>관계:</strong> ${character.relationship || '친구'}</p>
-                        <p><strong>가치관:</strong> ${character.values || '가족 중심'}</p>
+                        <p><strong>성격 특성:</strong> ${Array.isArray(character.personality_traits) ? character.personality_traits.join(', ') : character.personality_traits || '성격 정보 없음'}</p>
+                        <p><strong>관계:</strong> ${character.relationship || '관계 정보 없음'}</p>
+                        <p><strong>가치관:</strong> ${character.values || '가치관 정보 없음'}</p>
                     </div>
 
                     <div class="preview-section">
                         <h5>👀 외모 & 스타일</h5>
-                        <p><strong>헤어스타일:</strong> ${character.appearance?.hair || character.hair || '긴 생머리'}</p>
-                        <p><strong>눈:</strong> ${character.appearance?.eyes || character.eyes || '큰 눈'}</p>
-                        <p><strong>스타일:</strong> ${character.appearance?.style || character.style || '캐주얼'}</p>
+                        <p><strong>헤어스타일:</strong> ${character.appearance?.hair || character.hair || '헤어 정보 없음'}</p>
+                        <p><strong>눈:</strong> ${character.appearance?.eyes || character.eyes || '눈 정보 없음'}</p>
+                        <p><strong>체형:</strong> ${character.appearance?.body || character.body || '체형 정보 없음'}</p>
+                        <p><strong>가슴:</strong> ${character.appearance?.bust || character.bust || '정보 없음'}</p>
+                        <p><strong>허리/엉덩이:</strong> ${character.appearance?.waist_hip || character.waist_hip || '정보 없음'}</p>
+                        <p><strong>스타일:</strong> ${character.appearance?.style || character.style || '스타일 정보 없음'}</p>
                     </div>
 
                     <div class="preview-section">
                         <h5>🏠 배경 정보</h5>
-                        <p><strong>가족:</strong> ${character.family || character.background?.family || '정보 없음'}</p>
-                        <p><strong>고향:</strong> ${character.hometown || character.background?.hometown || '정보 없음'}</p>
-                        <p><strong>직업:</strong> ${character.background?.occupation || '대학생'}</p>
+                        <p><strong>가족:</strong> ${character.family || character.background?.family || '가족 정보 없음'}</p>
+                        <p><strong>고향:</strong> ${character.hometown || character.background?.hometown || '고향 정보 없음'}</p>
+                        <p><strong>직업:</strong> ${character.background?.occupation || character.occupation || '직업 정보 없음'}</p>
                     </div>
 
                     <div class="preview-section">
                         <h5>💬 말투 & 습관</h5>
-                        <p><strong>말투:</strong> ${character.speech_style || '친근한 말투'}</p>
-                        <p><strong>말버릇:</strong> ${character.speech_habit || '이모티콘을 자주 사용함'}</p>
+                        <p><strong>말투:</strong> ${character.speech_style || '말투 정보 없음'}</p>
+                        <p><strong>말버릇:</strong> ${character.speech_habit || '말버릇 정보 없음'}</p>
                     </div>
 
                     <div class="preview-section">
                         <h5>🎯 취미 & 관심사</h5>
-                        <p><strong>취미:</strong> ${Array.isArray(character.hobbies) ? character.hobbies.join(', ') : character.hobbies || '독서, 음악감상'}</p>
-                        <p><strong>두려움:</strong> ${character.personality?.fears || character.fears || '거절당하는 것'}</p>
+                        <p><strong>취미:</strong> ${Array.isArray(character.hobbies) ? character.hobbies.join(', ') : character.hobbies || '취미 정보 없음'}</p>
+                        <p><strong>특별한 점:</strong> ${character.personality?.fears || character.fears || character.special_notes || '추가 정보 없음'}</p>
                     </div>
-
 
                     <div class="preview-actions">
                         <button class="btn btn-primary" onclick="applyAIGeneratedData()">
                             💖 이 캐릭터 적용하기
                         </button>
-                        <button class="btn btn-secondary" onclick="generateRandomCharacter()" style="margin-left: 10px;">
+                        <button class="btn btn-secondary" onclick="generateAICharacter()" style="margin-left: 10px;">
                             🎲 다시 생성하기
                         </button>
                     </div>

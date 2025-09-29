@@ -318,18 +318,31 @@ async function generateCharacterWithAI(inputData) {
   const selectedTraits = Array.isArray(userData.personality_traits) ? userData.personality_traits.join(', ') : '';
   const selectedHobbies = Array.isArray(userData.hobbies) ? userData.hobbies.join(', ') : '';
 
-  const prompt = `다음 정보를 바탕으로 매력적이고 섹시한 성인 여성 캐릭터를 완성해주세요:
+  const prompt = `다음 사용자가 직접 선택한 정보를 바탕으로 매력적이고 섹시한 성인 여성 캐릭터를 완성해주세요:
 
-기본 정보:
-- 이름: ${userData.name || '랜덤으로 생성'}
+🔥 사용자 선택 정보 (반드시 반영):
+- 이름: ${userData.name || '사용자가 지정하지 않음'}
 - 나이: ${userData.age || '20-30세 사이'} (성인 여성)
 - MBTI: ${userData.mbti || '적절한 MBTI 선택'}
+- 전공: ${userData.major || '일반 전공'}
+- 가족배경: ${userData.family || '일반 가정'}
+- 고향: ${userData.hometown || '서울'}
+- 관계설정: ${userData.relationship || '친구'}
+- 헤어스타일: ${userData.hair || '긴 생머리'}
+- 눈모양: ${userData.eyes || '큰 눈'}
+- 체형: ${userData.body || '보통 체형'}
+- 가슴사이즈: ${userData.bust || '보통 사이즈'}
+- 허리/엉덩이: ${userData.waist_hip || '균형잡힌 라인'}
+- 패션스타일: ${userData.style || '캐주얼'}
+- 가치관: ${userData.values || '가족중심'}
 
-선택된 특성들:
-- 성격 특성: ${selectedTraits || '섹시하고 매력적인 성격 특성들'}
-- 취미: ${selectedHobbies || '성인 여성의 흥미로운 취미들'}
-- 말투 스타일: ${userData.speech_style || '매혹적이고 성인 매력이 넘치는 말투'}
-- 몸매 특성: ${userData.bust || '매력적인 가슴 사이즈'}, ${userData.waist_hip || '섹시한 허리/엉덩이 라인'}
+🎯 사용자가 선택한 성격 특성들:
+${selectedTraits && selectedTraits.length > 0 ? selectedTraits.map(trait => `- ${trait}`).join('\n') : '- 사용자가 선택하지 않음 (기본 성격 적용)'}
+
+🎨 사용자가 선택한 취미들:
+${selectedHobbies && selectedHobbies.length > 0 ? selectedHobbies.map(hobby => `- ${hobby}`).join('\n') : '- 사용자가 선택하지 않음 (기본 취미 적용)'}
+
+💬 말투 스타일: ${userData.speech_style || '매혹적이고 성인 매력이 넘치는 말투'}
 
 요구사항:
 1. 🔥 성인 매력: 성숙하고 섹시한 성인 여성의 매력을 강조해주세요
