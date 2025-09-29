@@ -486,6 +486,144 @@
             margin-top: 20px;
         }
 
+        /* 개별 에피소드 카드 스타일 (새로 추가) */
+        .individual-episode-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            position: relative;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .individual-episode-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .episode-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .episode-info .episode-title {
+            margin: 0 0 8px 0;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: white;
+        }
+
+        .episode-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .episode-meta .scenario-name,
+        .episode-meta .character-name {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        .episode-badges {
+            display: flex;
+            gap: 8px;
+        }
+
+        .individual-episode-card .difficulty-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .episode-card-content {
+            flex: 1;
+            margin-bottom: 15px;
+        }
+
+        .dialogue-preview-text {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            line-height: 1.4;
+            margin-bottom: 10px;
+            opacity: 0.95;
+        }
+
+        .episode-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+
+        .episode-card-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .individual-episode-card .action-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .individual-episode-card .action-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .individual-episode-card .delete-episode-btn {
+            background: rgba(255, 77, 77, 0.2);
+            border: 1px solid rgba(255, 77, 77, 0.5);
+            color: #ff6b6b;
+            padding: 6px 10px;
+            border-radius: 50%;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: 8px;
+        }
+
+        .individual-episode-card .delete-episode-btn:hover {
+            background: #ff4d4d;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* 필터 정보 표시 */
+        .filter-info {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .filter-info .filter-label {
+            font-size: 1em;
+        }
+
         /* 에피소드 리스트 카드 스타일 (시나리오+캐릭터 조합) */
         .episodes-cards-grid {
             display: grid;
@@ -4642,12 +4780,16 @@
 
             // 전역 변수에 현재 시나리오 ID 설정
             currentScenarioId = scenarioId;
+            window.currentScenarioFilter = scenarioId; // 필터 상태도 저장
             console.log('✅ currentScenarioId 설정됨:', currentScenarioId);
 
             // 선택된 시나리오 정보 표시
             showSelectedScenarioInfo(scenarioId);
 
-            // 에피소드 로드
+            // 해당 시나리오의 에피소드만 필터링해서 표시
+            loadEpisodesList(scenarioId);
+
+            // 기존 에피소드 로드 (36개 카드 방식)
             loadDialogues();
         }
 
@@ -9173,8 +9315,9 @@
         // ✨ 에피소드 목록 관리 함수들 (새로 추가)
 
         // 에피소드 목록 로드
-        async function loadEpisodesList() {
+        async function loadEpisodesList(filterScenarioId = null) {
             console.log('📚 에피소드 목록 로드 시작...');
+            console.log('🔍 필터 시나리오 ID:', filterScenarioId || '전체 표시');
             const container = document.getElementById('episodesListContainer');
 
             try {
@@ -9191,11 +9334,17 @@
                     throw new Error(data.message || '에피소드 데이터 로드 실패');
                 }
 
-                // 에피소드 데이터를 시나리오+캐릭터 조합으로 그룹화
-                const episodeGroups = groupEpisodesByScenarioCharacter(data.episodes || {});
-                console.log('📊 그룹화된 에피소드:', episodeGroups);
+                // 에피소드 데이터 가져오기
+                const episodes = Object.values(data.episodes || {});
 
-                displayEpisodesList(episodeGroups);
+                // 필터링 (시나리오 ID가 제공된 경우)
+                const filteredEpisodes = filterScenarioId
+                    ? episodes.filter(episode => episode.scenario_id === filterScenarioId)
+                    : episodes;
+
+                console.log('📊 로드된 에피소드:', filteredEpisodes.length, '개');
+
+                displayEpisodesAsCards(filteredEpisodes, filterScenarioId);
 
             } catch (error) {
                 console.error('❌ 에피소드 목록 로드 실패:', error);
@@ -9207,6 +9356,157 @@
                     </div>
                 `;
             }
+        }
+
+        // 에피소드를 개별 카드로 표시하는 함수 (새로 추가)
+        function displayEpisodesAsCards(episodes, filterScenarioId = null) {
+            const container = document.getElementById('episodesListContainer');
+
+            if (episodes.length === 0) {
+                const message = filterScenarioId
+                    ? '선택된 시나리오에 생성된 에피소드가 없습니다'
+                    : '생성된 에피소드가 없습니다';
+
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <h3>📭 ${message}</h3>
+                        <p>시나리오를 선택하고 새로운 에피소드를 생성해보세요!</p>
+                        ${filterScenarioId ? `<button class="btn btn-secondary" onclick="loadEpisodesList()">🔄 전체 에피소드 보기</button>` : ''}
+                    </div>
+                `;
+                return;
+            }
+
+            // 에피소드를 최신순으로 정렬
+            const sortedEpisodes = episodes.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            // 시나리오와 캐릭터 정보 가져오기
+            const scenariosData = window.scenarios || {};
+            const charactersData = window.characters || {};
+
+            const episodeCards = sortedEpisodes.map(episode => {
+                // 시나리오 정보
+                const scenario = scenariosData[episode.scenario_id];
+                const scenarioTitle = scenario ? scenario.title : episode.scenario_id;
+
+                // 캐릭터 정보
+                const character = charactersData[episode.character_id];
+                const characterName = episode.character_name || (character ? character.name : episode.character_id);
+
+                // 날짜 포맷
+                const createdDate = new Date(episode.created_at).toLocaleDateString('ko-KR');
+
+                // 대화 내용 미리보기
+                const dialoguePreview = episode.dialogue?.dialogue
+                    ? episode.dialogue.dialogue.substring(0, 80) + '...'
+                    : episode.dialogue?.story_flow?.[0]?.text?.substring(0, 80) + '...'
+                    || '대화 내용 없음';
+
+                // 선택지 개수
+                const choiceCount = episode.dialogue?.choices?.length
+                    || episode.dialogue?.story_flow?.filter(item => item.type === 'choice_point')?.[0]?.choices?.length
+                    || 0;
+
+                return `
+                    <div class="individual-episode-card" onclick="previewEpisodeDialogue('${episode.id}')">
+                        <div class="episode-card-header">
+                            <div class="episode-info">
+                                <h6 class="episode-title">${episode.title || `대화 ${episode.dialogue_number || 1}번`}</h6>
+                                <div class="episode-meta">
+                                    <span class="scenario-name">📚 ${scenarioTitle}</span>
+                                    <span class="character-name">👤 ${characterName}</span>
+                                </div>
+                            </div>
+                            <div class="episode-badges">
+                                <span class="difficulty-badge ${(episode.difficulty || 'Easy').toLowerCase()}">${(episode.difficulty || 'Easy').toUpperCase()}</span>
+                            </div>
+                        </div>
+
+                        <div class="episode-card-content">
+                            <div class="dialogue-preview-text">
+                                ${dialoguePreview}
+                            </div>
+                            <div class="episode-stats">
+                                <span class="stat-item">💬 선택지 ${choiceCount}개</span>
+                                <span class="stat-item">📅 ${createdDate}</span>
+                            </div>
+                        </div>
+
+                        <div class="episode-card-actions">
+                            <span class="action-btn">📖 대화 보기</span>
+                            <button class="delete-episode-btn" onclick="event.stopPropagation(); deleteIndividualEpisode('${episode.id}')" title="에피소드 삭제">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // 필터링 상태 표시
+            const filterInfo = filterScenarioId
+                ? `<div class="filter-info" style="grid-column: 1 / -1; text-align: center; margin-bottom: 20px;">
+                     <span class="filter-label">🔍 "${scenariosData[filterScenarioId]?.title || filterScenarioId}" 시나리오의 에피소드 표시 중</span>
+                     <button class="btn btn-sm btn-secondary" onclick="loadEpisodesList()" style="margin-left: 10px;">전체 보기</button>
+                   </div>`
+                : '';
+
+            container.innerHTML = filterInfo + episodeCards;
+        }
+
+        // 개별 에피소드 삭제 함수 (새로 추가)
+        async function deleteIndividualEpisode(episodeId) {
+            console.log('🗑️ 개별 에피소드 삭제:', episodeId);
+
+            // 사용자 확인
+            if (!confirm(`정말로 이 에피소드를 삭제하시겠습니까?\n\n에피소드 ID: ${episodeId}\n\n⚠️ 이 작업은 되돌릴 수 없습니다.`)) {
+                return;
+            }
+
+            try {
+                // API로 에피소드 삭제 요청
+                const response = await fetch('/api/dialogue-manager', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'delete_episode',
+                        episode_id: episodeId
+                    })
+                });
+
+                const result = await response.json();
+                console.log('🗑️ 삭제 API 응답:', result);
+
+                if (result.success) {
+                    alert('✅ 에피소드가 성공적으로 삭제되었습니다.');
+
+                    // 현재 필터 상태 유지하면서 목록 새로고침
+                    const currentFilter = getCurrentScenarioFilter();
+                    await loadEpisodesList(currentFilter);
+
+                    // 에피소드 카운트 업데이트
+                    await loadTotalEpisodeCount();
+
+                } else {
+                    throw new Error(result.message || '에피소드 삭제 실패');
+                }
+
+            } catch (error) {
+                console.error('❌ 에피소드 삭제 실패:', error);
+                alert(`❌ 에피소드 삭제 실패:\n${error.message}`);
+            }
+        }
+
+        // 현재 시나리오 필터 상태 가져오기
+        function getCurrentScenarioFilter() {
+            const filterInfo = document.querySelector('.filter-info .filter-label');
+            if (filterInfo && filterInfo.textContent.includes('시나리오의 에피소드 표시 중')) {
+                // 현재 필터가 적용된 상태라면 해당 시나리오 ID 반환
+                // 이 부분은 전역 변수로 관리하는 것이 더 좋지만, 일단 간단하게 구현
+                return window.currentScenarioFilter || null;
+            }
+            return null;
         }
 
         // 에피소드를 시나리오+캐릭터 조합으로 그룹화
