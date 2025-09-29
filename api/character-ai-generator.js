@@ -11,15 +11,31 @@ const DEFAULT_METADATA = {
 };
 
 module.exports = async function handler(req, res) {
+  // 🚨 강력한 디버깅: API 호출 시작
+  console.log('🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨');
+  console.log('🚨 API CHARACTER-AI-GENERATOR 호출 시작 🚨');
+  console.log('🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨');
+  console.log('📅 타임스탬프:', new Date().toISOString());
+  console.log('🌐 메소드:', req.method);
+  console.log('📋 Query Params:', req.query);
+  console.log('📋 Request Body:', JSON.stringify(req.body, null, 2));
+
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
+    console.log('✅ OPTIONS 요청 처리됨');
     return res.status(200).end();
   }
 
   const action = req.query.action || req.body?.action;
+
+  console.log('🎯🎯🎯 액션 식별 완료 🎯🎯🎯');
+  console.log('📌 감지된 액션:', action);
+  console.log('📌 액션 타입:', typeof action);
+  console.log('📌 Query에서 추출:', req.query.action);
+  console.log('📌 Body에서 추출:', req.body?.action);
 
   console.log('🎭 새로운 캐릭터 생성 AI 요청:', {
     method: req.method,
@@ -30,6 +46,7 @@ module.exports = async function handler(req, res) {
   try {
     // 캐릭터 리스트 조회 (GitHub 동기화 포함)
     if (action === 'list_characters') {
+      console.log('✅ 🔍 액션 매칭: list_characters');
       console.log('🐙 GitHub API 전용 캐릭터 리스트 조회...');
 
       // GitHub API에서 직접 데이터 로드 (메모리 저장소 제거)
@@ -111,6 +128,7 @@ module.exports = async function handler(req, res) {
 
     // 캐릭터 저장 (GitHub API + 메모리 저장소)
     if (action === 'save_character') {
+      console.log('✅ 💾 액션 매칭: save_character');
       console.log('🐙 GitHub API 전용 캐릭터 저장 시작...');
 
       // GitHub에서 최신 데이터 로드 (기존 캐릭터 보존)
@@ -406,9 +424,24 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    console.log('❌❌❌ 액션 매칭 실패 ❌❌❌');
+    console.log('❌ 요청된 액션:', action);
+    console.log('❌ 액션 타입:', typeof action);
+    console.log('❌ 사용 가능한 액션들:');
+    console.log('  - list_characters');
+    console.log('  - save_character');
+    console.log('  - delete_character');
+    console.log('  - reset_all_characters');
+    console.log('  - generate_character');
+    console.log('  - auto_complete_character');
+    console.log('  - generate_character_profile');
+    console.log('  - generate_complete_character_with_profile');
+
     return res.status(400).json({
       success: false,
-      message: 'Unknown action. Available: list_characters, save_character, delete_character, reset_all_characters, generate_character, auto_complete_character, generate_character_profile, generate_complete_character_with_profile'
+      message: 'Unknown action. Available: list_characters, save_character, delete_character, reset_all_characters, generate_character, auto_complete_character, generate_character_profile, generate_complete_character_with_profile',
+      received_action: action,
+      action_type: typeof action
     });
 
   } catch (error) {
