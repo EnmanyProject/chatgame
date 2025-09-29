@@ -170,6 +170,101 @@
             font-weight: 500;
         }
 
+        /* 보기 모드 선택 */
+        .view-mode-selector {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .mode-buttons {
+            display: inline-flex;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 25px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .mode-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .mode-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .mode-btn.active {
+            background: #667eea;
+            color: #fff;
+        }
+
+        /* 전체 에피소드 그리드 */
+        .all-episodes-grid {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .independent-episode-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .independent-episode-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            border-color: #667eea;
+        }
+
+        .episode-full-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .episode-main-info {
+            flex: 1;
+        }
+
+        .episode-scenario-character {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .scenario-tag {
+            background: rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .character-tag {
+            background: rgba(135, 206, 235, 0.2);
+            color: #87ceeb;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
         .episode-card {
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -391,13 +486,40 @@
             <p>원하는 에피소드를 선택해서 바로 플레이하세요</p>
         </div>
 
-        <!-- 에피소드 조합 선택 화면 -->
+        <!-- 에피소드 선택 모드 -->
         <div class="episode-selection" id="episodeSelection">
-            <div class="scenario-selector">
-                <h3>🎮 에피소드 카드 (시나리오 + 캐릭터 조합)</h3>
-                <div class="episode-combination-grid" id="episodeCombinationGrid">
-                    <div class="loading">
-                        <div class="spinner"></div>
+            <!-- 보기 모드 선택 -->
+            <div class="view-mode-selector">
+                <div class="mode-buttons">
+                    <button class="mode-btn active" onclick="switchViewMode('combinations')" id="combinationsBtn">
+                        🎮 조합별 보기
+                    </button>
+                    <button class="mode-btn" onclick="switchViewMode('all')" id="allBtn">
+                        📝 전체 에피소드
+                    </button>
+                </div>
+            </div>
+
+            <!-- 조합별 보기 -->
+            <div class="combination-view" id="combinationView">
+                <div class="scenario-selector">
+                    <h3>🎮 에피소드 카드 (시나리오 + 캐릭터 조합)</h3>
+                    <div class="episode-combination-grid" id="episodeCombinationGrid">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 전체 에피소드 보기 -->
+            <div class="all-episodes-view" id="allEpisodesView" style="display: none;">
+                <div class="scenario-selector">
+                    <h3>📝 모든 에피소드 (독립적 리스팅)</h3>
+                    <div class="all-episodes-grid" id="allEpisodesGrid">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -439,15 +561,18 @@
             scenarios: [],
             episodes: {},
             episodeCombinations: {},
+            allEpisodes: [], // 전체 에피소드 목록
             currentCombination: null,
             currentEpisode: null,
             isPlaying: false,
-            viewMode: 'combinations' // 'combinations', 'sub-episodes', 'playing'
+            viewMode: 'combinations', // 'combinations', 'all', 'sub-episodes', 'playing'
+            displayMode: 'combinations' // 'combinations' or 'all'
         };
 
         // 초기화
         document.addEventListener('DOMContentLoaded', async () => {
             await loadEpisodeCombinations();
+            await loadAllEpisodes();
         });
 
         // 에피소드 조합 로드 (시나리오 + 캐릭터 조합별로 그룹핑)
@@ -637,6 +762,139 @@
             });
 
             grid.innerHTML = html;
+        }
+
+        // 보기 모드 전환
+        function switchViewMode(mode) {
+            gameState.displayMode = mode;
+
+            // 버튼 스타일 업데이트
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            if (mode === 'combinations') {
+                document.getElementById('combinationsBtn').classList.add('active');
+                document.getElementById('combinationView').style.display = 'block';
+                document.getElementById('allEpisodesView').style.display = 'none';
+            } else if (mode === 'all') {
+                document.getElementById('allBtn').classList.add('active');
+                document.getElementById('combinationView').style.display = 'none';
+                document.getElementById('allEpisodesView').style.display = 'block';
+                displayAllEpisodes(); // 전체 에피소드 표시
+            }
+        }
+
+        // 전체 에피소드 로드
+        async function loadAllEpisodes() {
+            try {
+                console.log('📝 전체 에피소드 로딩 시작...');
+                gameState.allEpisodes = [];
+
+                // 모든 시나리오의 에피소드 수집
+                for (const scenario of gameState.scenarios) {
+                    try {
+                        const episodeResponse = await fetch(`/api/episode-manager?action=list&scenario_id=${scenario.scenario_id}`);
+                        if (episodeResponse.ok) {
+                            const episodeData = await episodeResponse.json();
+                            if (episodeData.success && episodeData.episodes && episodeData.episodes.length > 0) {
+                                // 시나리오 정보를 에피소드에 추가
+                                const episodesWithScenario = episodeData.episodes.map(episode => ({
+                                    ...episode,
+                                    scenario_title: scenario.title,
+                                    scenario_description: scenario.description
+                                }));
+                                gameState.allEpisodes = gameState.allEpisodes.concat(episodesWithScenario);
+                            }
+                        }
+                    } catch (episodeError) {
+                        console.log(`📭 ${scenario.title} 시나리오에 에피소드 없음:`, episodeError.message);
+                    }
+                }
+
+                // 에피소드 번호와 생성일 기준으로 정렬
+                gameState.allEpisodes.sort((a, b) => {
+                    // 시나리오별로 먼저 정렬
+                    if (a.scenario_id !== b.scenario_id) {
+                        return a.scenario_title.localeCompare(b.scenario_title);
+                    }
+                    // 같은 시나리오 내에서는 에피소드 번호로 정렬
+                    return a.episode_number - b.episode_number;
+                });
+
+                console.log(`✅ 전체 에피소드 ${gameState.allEpisodes.length}개 로드 완료`);
+
+            } catch (error) {
+                console.error('❌ 전체 에피소드 로드 실패:', error);
+            }
+        }
+
+        // 전체 에피소드 표시
+        function displayAllEpisodes() {
+            const grid = document.getElementById('allEpisodesGrid');
+
+            if (gameState.allEpisodes.length === 0) {
+                grid.innerHTML = `
+                    <div style="text-align: center; opacity: 0.7; padding: 40px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 12px;">
+                        생성된 에피소드가 없습니다<br>
+                        <small>관리자에서 에피소드를 생성해주세요</small>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = gameState.allEpisodes.map(episode => {
+                const createdDate = new Date(episode.created_at).toLocaleDateString('ko-KR');
+
+                return `
+                    <div class="independent-episode-card" onclick="playIndependentEpisode('${episode.id}')">
+                        <div class="episode-full-info">
+                            <div class="episode-main-info">
+                                <div class="episode-scenario-character">
+                                    <span class="scenario-tag">📚 ${episode.scenario_title}</span>
+                                    <span class="character-tag">👤 ${episode.character_name}</span>
+                                </div>
+                                <div class="episode-title">${episode.title}</div>
+                            </div>
+                            <div class="episode-number">EP.${episode.episode_number}</div>
+                        </div>
+
+                        <div class="episode-prompt">"${episode.user_input_prompt}"</div>
+
+                        <div class="episode-footer">
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <span class="episode-difficulty difficulty-${episode.difficulty.toLowerCase()}">${episode.difficulty}</span>
+                                <span style="font-size: 11px; opacity: 0.6;">${createdDate}</span>
+                            </div>
+                            <div style="font-size: 11px; opacity: 0.6;">
+                                ${getChoiceCount(episode)}개 선택지
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 독립 에피소드 플레이
+        function playIndependentEpisode(episodeId) {
+            const episode = gameState.allEpisodes.find(ep => ep.id === episodeId);
+            if (!episode) {
+                alert('에피소드를 찾을 수 없습니다.');
+                return;
+            }
+
+            console.log('🎮 독립 에피소드 플레이 시작:', episodeId, episode);
+            gameState.currentEpisode = episode;
+            gameState.viewMode = 'playing';
+
+            // 화면 전환
+            document.getElementById('episodeSelection').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+
+            // 에피소드 정보 업데이트
+            document.getElementById('currentEpisodeTitle').textContent = episode.title;
+            document.getElementById('currentEpisodeDetails').textContent =
+                `${episode.character_name} · ${episode.difficulty}`;
+
+            // 대화 표시
+            displayEpisodeDialogue(episode);
         }
 
         // 조합 화면으로 돌아가기
@@ -939,14 +1197,21 @@
 
             // 현재 view mode에 따라 적절한 화면으로 돌아가기
             if (gameState.viewMode === 'playing' && gameState.currentCombination) {
-                // 하위 에피소드 목록으로 돌아가기
+                // 하위 에피소드 목록으로 돌아가기 (조합별 보기에서 온 경우)
                 gameState.viewMode = 'sub-episodes';
                 document.getElementById('subEpisodesScreen').style.display = 'block';
             } else {
-                // 조합 선택 화면으로 돌아가기
-                gameState.viewMode = 'combinations';
+                // 메인 선택 화면으로 돌아가기
+                gameState.viewMode = gameState.displayMode; // 'combinations' 또는 'all'
                 gameState.currentCombination = null;
                 document.getElementById('episodeSelection').style.display = 'block';
+
+                // 현재 표시 모드에 맞게 화면 설정
+                if (gameState.displayMode === 'all') {
+                    switchViewMode('all');
+                } else {
+                    switchViewMode('combinations');
+                }
             }
         }
     </script>

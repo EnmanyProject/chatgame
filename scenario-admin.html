@@ -1826,6 +1826,160 @@
             margin-left: 10px;
             font-size: 12px;
         }
+
+        /* 시나리오 선택 카드 스타일 */
+        .scenario-selection-container {
+            margin-bottom: 25px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-header h4 {
+            margin: 0;
+            color: #333;
+        }
+
+        .scenario-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .scenario-selection-card {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .scenario-selection-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .scenario-selection-card.selected {
+            border-color: #667eea;
+            background: #f8f9ff;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .scenario-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .scenario-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .scenario-card-badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .scenario-card-description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+
+        .scenario-card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .scenario-card-character {
+            background: #f0f2f5;
+            padding: 4px 8px;
+            border-radius: 8px;
+            color: #555;
+        }
+
+        .loading-card {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .loading-card .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #e9ecef;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        /* 선택된 시나리오 표시 */
+        .selected-scenario-display {
+            background: #f8f9ff;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .selected-scenario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .selected-scenario-header h5 {
+            margin: 0;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .selected-scenario-info {
+            color: #555;
+        }
+
+        .selected-scenario-info .info-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .selected-scenario-info .info-character {
+            color: #667eea;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .selected-scenario-info .info-description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
@@ -1950,21 +2104,29 @@
 
         <!-- 에피소드 관리 섹션 -->
         <div id="episodes-section" class="content-section">
-            <div class="form-group">
-                <label for="episodeScenarioSelect">시나리오 선택:</label>
-                <select id="episodeScenarioSelect" onchange="loadEpisodes()">
-                    <option value="">시나리오를 선택하세요</option>
-                </select>
-                <button type="button" class="btn btn-secondary" onclick="refreshEpisodeScenarioList()" style="margin-left: 10px;">
-                    🔄 시나리오 목록 새로고침
-                </button>
-            </div>
-            
-            <!-- 시나리오 목록 표시 -->
-            <div id="availableScenariosList" class="scenarios-list" style="margin-bottom: 20px;">
-                <h4>📋 사용 가능한 시나리오 목록</h4>
-                <div id="scenariosList">
-                    <p class="loading-text">시나리오 목록을 로딩 중...</p>
+            <!-- 시나리오 선택 카드 -->
+            <div class="scenario-selection-container">
+                <div class="section-header">
+                    <h4>📚 시나리오 선택</h4>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="refreshEpisodeScenarioList()">
+                        🔄 새로고침
+                    </button>
+                </div>
+                <div id="scenarioCardsContainer" class="scenario-cards-grid">
+                    <div class="loading-card">
+                        <div class="spinner"></div>
+                        <p>시나리오 로딩 중...</p>
+                    </div>
+                </div>
+
+                <!-- 선택된 시나리오 정보 -->
+                <div id="selectedScenarioDisplay" class="selected-scenario-display" style="display: none;">
+                    <div class="selected-scenario-header">
+                        <h5>✅ 선택된 시나리오</h5>
+                        <button type="button" class="btn btn-link btn-sm" onclick="clearScenarioSelection()">선택 해제</button>
+                    </div>
+                    <div id="selectedScenarioInfo" class="selected-scenario-info">
+                    </div>
                 </div>
             </div>
 
@@ -3667,6 +3829,7 @@
             console.log('🔄 에피소드 시나리오 목록 새로고침...');
             
             // 두 곳 모두 업데이트
+            loadEpisodeScenarioCards(); // 새로운 카드 형태
             loadEpisodeScenarioSelector(); // 모달용
             displayAvailableScenarios(); // 에피소드 섹션용
             
@@ -3744,7 +3907,163 @@
                 `;
             }
         }
-        
+
+        // 에피소드 시나리오 카드 로딩 (새로운 카드 형태)
+        async function loadEpisodeScenarioCards() {
+            console.log('🔄 에피소드 시나리오 카드 로딩 시작...');
+
+            try {
+                // 모든 소스에서 시나리오 데이터 통합 로딩
+                let scenariosData = {};
+
+                // 1. 시나리오 메니저에서 최신 데이터 가져오기
+                try {
+                    const response = await fetch('/api/scenario-manager?action=list');
+                    if (response.ok) {
+                        const result = await response.json();
+                        console.log('📊 시나리오 매니저 응답:', result);
+
+                        if (result.success && result.scenarios) {
+                            scenariosData = { ...scenariosData, ...result.scenarios };
+                            console.log('✅ 시나리오 매니저에서 데이터 로드됨');
+                        }
+                    }
+                } catch (err) {
+                    console.log('⚠️ 시나리오 매니저 접근 실패:', err.message);
+                }
+
+                console.log('🔍 통합된 시나리오 데이터:', scenariosData);
+
+                // 2. 시나리오 카드 생성
+                const container = document.getElementById('scenarioCardsContainer');
+
+                // 활성 시나리오들만 필터링
+                const activeScenarios = Object.values(scenariosData).filter(scenario =>
+                    scenario && scenario.active_status !== false
+                );
+
+                console.log('🎯 활성 시나리오:', activeScenarios);
+
+                if (activeScenarios.length > 0) {
+                    let cardsHTML = '';
+
+                    activeScenarios.forEach(scenario => {
+                        const characterName = scenario.available_characters && scenario.available_characters.length > 0 ?
+                            scenario.available_characters[0] : '캐릭터 없음';
+
+                        const createdDate = scenario.created_date ?
+                            new Date(scenario.created_date).toLocaleDateString('ko-KR') : '날짜 정보 없음';
+
+                        cardsHTML += `
+                            <div class="scenario-selection-card" onclick="selectScenarioCard('${scenario.scenario_id}')" data-scenario-id="${scenario.scenario_id}">
+                                <div class="scenario-card-header">
+                                    <h6 class="scenario-card-title">${scenario.title}</h6>
+                                    <span class="scenario-card-badge">${scenario.mood || '일반'}</span>
+                                </div>
+                                <div class="scenario-card-description">
+                                    ${scenario.description || '설명이 없습니다.'}
+                                </div>
+                                <div class="scenario-card-meta">
+                                    <span class="scenario-card-character">👤 ${characterName}</span>
+                                    <span>📅 ${createdDate}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    container.innerHTML = cardsHTML;
+                } else {
+                    container.innerHTML = `
+                        <div class="loading-card">
+                            <p style="margin: 0;">등록된 시나리오가 없습니다</p>
+                            <small>시나리오를 먼저 생성해주세요</small>
+                        </div>
+                    `;
+                }
+
+                console.log('✅ 에피소드 시나리오 카드 로딩 완료');
+
+            } catch (error) {
+                console.error('❌ 에피소드 시나리오 카드 로딩 실패:', error);
+                const container = document.getElementById('scenarioCardsContainer');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="loading-card">
+                            <p style="margin: 0; color: #dc3545;">시나리오 로딩 오류</p>
+                            <small>${error.message}</small>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // 시나리오 카드 선택
+        function selectScenarioCard(scenarioId) {
+            console.log('🎯 시나리오 카드 선택됨:', scenarioId);
+
+            // 기존 선택 해제
+            document.querySelectorAll('.scenario-selection-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // 새로운 카드 선택
+            const selectedCard = document.querySelector(`[data-scenario-id="${scenarioId}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+            }
+
+            // 전역 변수에 현재 시나리오 ID 설정
+            currentScenarioId = scenarioId;
+            console.log('✅ currentScenarioId 설정됨:', currentScenarioId);
+
+            // 선택된 시나리오 정보 표시
+            showSelectedScenarioInfo(scenarioId);
+
+            // 에피소드 로드
+            loadEpisodes();
+        }
+
+        // 선택된 시나리오 정보 표시
+        function showSelectedScenarioInfo(scenarioId) {
+            const scenario = window.scenarios?.[scenarioId];
+            const display = document.getElementById('selectedScenarioDisplay');
+            const info = document.getElementById('selectedScenarioInfo');
+
+            if (scenario && display && info) {
+                const characterId = scenario.available_characters?.[0];
+                const character = window.characters?.[characterId];
+
+                info.innerHTML = `
+                    <div class="info-title">${scenario.title}</div>
+                    <div class="info-character">캐릭터: ${character ? character.name : characterId || '캐릭터 정보 없음'}</div>
+                    <div class="info-description">${scenario.description}</div>
+                `;
+
+                display.style.display = 'block';
+            }
+        }
+
+        // 시나리오 선택 해제
+        function clearScenarioSelection() {
+            currentScenarioId = null;
+
+            // 카드 선택 해제
+            document.querySelectorAll('.scenario-selection-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // 선택된 시나리오 정보 숨기기
+            document.getElementById('selectedScenarioDisplay').style.display = 'none';
+
+            // 에피소드 정보 숨기기
+            const episodeInfo = document.getElementById('episodeInfo');
+            if (episodeInfo) {
+                episodeInfo.style.display = 'none';
+            }
+
+            console.log('✅ 시나리오 선택 해제됨');
+        }
+
         // 시나리오 선택 (에피소드 섹션에서)
         function selectScenarioForEpisode(scenarioId) {
             console.log('🎯 시나리오 선택됨:', scenarioId);
@@ -6025,16 +6344,35 @@
                     throw new Error(errorMessage);
                 }
 
-                // 성공한 경우 데이터 반환
+                // 성공한 경우 데이터 반환 (새로운 story_flow 구조 지원)
                 if (data.data) {
-                    return {
-                        dialogue: data.data.character_message,
-                        narration: data.data.context,
-                        choices: data.data.choices,
-                        difficulty: difficulty,
-                        generated_at: new Date().toISOString(),
-                        source: 'chat_training_api'
-                    };
+                    console.log('🎯 AI 응답 데이터 구조 확인:', data.data);
+
+                    // story_flow 구조인지 확인
+                    if (data.data.story_flow && Array.isArray(data.data.story_flow)) {
+                        console.log('✅ Story Flow 구조로 AI 대화 생성됨');
+                        return {
+                            story_flow: data.data.story_flow,
+                            episode_summary: data.data.episode_summary,
+                            difficulty: difficulty,
+                            generated_at: new Date().toISOString(),
+                            source: 'openai_gpt4o_mini'
+                        };
+                    }
+                    // 기존 구조 지원 (하위 호환성)
+                    else if (data.data.character_message || data.data.dialogue) {
+                        console.log('📝 기존 구조로 AI 대화 생성됨');
+                        return {
+                            dialogue: data.data.character_message || data.data.dialogue,
+                            narration: data.data.context || data.data.narration,
+                            choices: data.data.choices || [],
+                            difficulty: difficulty,
+                            generated_at: new Date().toISOString(),
+                            source: 'legacy_api'
+                        };
+                    } else {
+                        throw new Error('AI 응답 데이터 형식을 인식할 수 없습니다.');
+                    }
                 } else {
                     throw new Error('API 응답에 데이터가 없습니다.');
                 }

@@ -215,16 +215,41 @@ function filterEpisodesByScenario(database, scenario_id) {
 // 새 에피소드 생성 및 저장 (GitHub API 활용)
 async function createEpisode(data) {
   try {
-    // 실제 AI 생성된 대화가 있다면 사용, 없으면 기본값
-    const dialogue = data.ai_generated_dialogue || data.generated_dialogue || {
-      character_message: "대화 내용이 여기에 표시됩니다.",
-      context: "상황 설명이 여기에 표시됩니다.",
-      choices: [
-        { text: "선택지 1", affection_impact: 1 },
-        { text: "선택지 2", affection_impact: 0 },
-        { text: "선택지 3", affection_impact: -1 }
-      ]
+    console.log('🎯 에피소드 생성 데이터 확인:', {
+      has_generated_dialogue: !!data.generated_dialogue,
+      has_ai_generated_dialogue: !!data.ai_generated_dialogue,
+      user_prompt: data.user_input_prompt,
+      character_id: data.character_id,
+      scenario_id: data.scenario_id
+    });
+
+    // AI 생성된 대화 확인 (generated_dialogue를 우선으로)
+    const dialogue = data.generated_dialogue || data.ai_generated_dialogue || {
+      story_flow: [
+        {
+          type: "dialogue",
+          speaker: data.character_name || "캐릭터",
+          text: "죄송해요, AI 대화 생성에 실패했습니다. 다시 시도해주세요.",
+          emotion: "당황",
+          narration: "시스템 오류로 인해 대화가 제대로 생성되지 않았습니다."
+        },
+        {
+          type: "choice_point",
+          situation: "시스템 오류가 발생했습니다. 어떻게 하시겠습니까?",
+          choices: [
+            { text: "다시 시도하기", affection_impact: 0, consequence: "새로운 대화를 생성합니다" },
+            { text: "나중에 다시 오기", affection_impact: 0, consequence: "에피소드를 종료합니다" }
+          ]
+        }
+      ],
+      episode_summary: "AI 대화 생성 실패로 기본 대화가 제공되었습니다."
     };
+
+    if (data.generated_dialogue) {
+      console.log('✅ AI 생성된 대화 사용됨');
+    } else {
+      console.log('⚠️ AI 생성 실패, 기본 대화 사용됨');
+    }
 
     const newEpisode = {
       id: `episode_${data.scenario_id}_${Date.now()}`,
