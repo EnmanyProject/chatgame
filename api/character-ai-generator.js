@@ -330,7 +330,8 @@ module.exports = async function handler(req, res) {
 
     // 🚀 통합된 캐릭터 생성 + 프로필 생성 (새로운 워크플로우)
     if (action === 'generate_complete_character_with_profile') {
-      console.log('🚀 통합 캐릭터 생성 시작:', req.body);
+      console.log('🚀🚀🚀 === 통합 캐릭터 생성 시작 === 🚀🚀🚀');
+      console.log('📋 요청 바디:', JSON.stringify(req.body, null, 2));
 
       try {
         // 1️⃣ 필수 필드 검증
