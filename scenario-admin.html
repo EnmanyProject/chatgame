@@ -4706,24 +4706,34 @@
             event.target.classList.add('active');
             document.getElementById(`${tabName}-section`).classList.add('active');
 
-            // 시나리오 탭 선택 시 CSS 적용 보장을 위한 재표시
-            if (tabName === 'scenarios') {
+            // 캐릭터 탭 선택 시 데이터 새로고침
+            if (tabName === 'characters') {
                 setTimeout(() => {
-                    if (window.scenarios && Object.keys(window.scenarios).length > 0) {
-                        console.log('🔄 시나리오 탭 전환 - CSS 적용 보장을 위한 재표시');
-                        displayScenarios();
-                    }
+                    console.log('🔄 캐릭터 탭 전환 - 데이터 새로고침');
+                    loadCharacters();
                 }, 50);
             }
 
-            // 에피소드 탭 선택 시 시나리오 목록 업데이트 및 에피소드 목록 로드
-            if (tabName === 'dialogues') {
-                populateDialogueScenarioSelect();
-                // 에피소드 목록 자동 로드
+            // 시나리오 탭 선택 시 데이터 새로고침 및 CSS 적용 보장
+            if (tabName === 'scenarios') {
                 setTimeout(() => {
+                    console.log('🔄 시나리오 탭 전환 - 데이터 새로고침');
+                    loadScenarios();
+                }, 50);
+            }
+
+            // 에피소드 탭 선택 시 데이터 새로고침 및 목록 업데이트
+            if (tabName === 'dialogues') {
+                setTimeout(() => {
+                    console.log('🔄 에피소드 탭 전환 - 데이터 새로고침');
+                    // 시나리오 목록 업데이트
+                    populateDialogueScenarioSelect();
+                    // 에피소드 목록 새로고침
                     loadEpisodesList();
+                    // 에피소드 카운트 새로고침
+                    loadTotalEpisodeCount();
+                    // 기존 대화 목록도 새로고침
                     if (dialogues && Object.keys(dialogues).length > 0) {
-                        console.log('🔄 에피소드 탭 전환 - CSS 적용 보장을 위한 재표시');
                         displayDialogues();
                     }
                 }, 100);
