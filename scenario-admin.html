@@ -5304,11 +5304,10 @@
                 return;
             }
 
-            currentScenarioId = scenarioId;
-            document.getElementById('dialogueInfo').style.display = 'block';
-            console.log('📚 에피소드 로딩 시작 - 시나리오:', scenarioId);
+                currentScenarioId = scenarioId;
+                document.getElementById('dialogueInfo').style.display = 'block';
+                console.log('📚 에피소드 로딩 시작 - 시나리오:', scenarioId);
 
-            try {
                 // API에서 에피소드 로딩
                 console.log('🔗 Dialogue Manager API 호출:', `/api/dialogue-manager?action=list&scenario_id=${scenarioId}`);
 
