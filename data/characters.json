@@ -1,40 +1,11 @@
 {
-  "characters": {
-    "미진_infj_1759066440634": {
-      "id": "미진_infj_1759066440634",
-      "name": "미진",
-      "age": 20,
-      "mbti": "INFJ",
-      "gender": "female",
-      "personality_traits": [],
-      "major": "general",
-      "family": "only_child",
-      "hometown": "seoul",
-      "relationship": "독립적이며 자신이 원하는 사람과의 관계를 추구",
-      "appearance": {
-        "hair": "섹시한 긴 생머리",
-        "eyes": "유혹적인 눈매",
-        "body": "petite_sexy",
-        "bust": "small_cute",
-        "waist_hip": "slim_tight",
-        "style": "sexy_chic"
-      },
-      "hobbies": [],
-      "values": "love_family",
-      "speech_style": "타인의 진심을 느끼게 하는 말투",
-      "speech_habit": "상대에게 진심을 전달하는 동시에 섹시하게 목소리를 낮추며 말하는 습관, 가끔씩 입술을 살짝 베며 말하는 습관",
-      "created_at": "2025-09-28T13:34:00.634Z",
-      "source": "api_save",
-      "active": true,
-      "updated_at": "2025-09-28T13:34:01.031Z"
-    }
-  },
+  "characters": {},
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 1,
+    "total_characters": 0,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-29T01:17:55.249Z",
-    "last_accessed": "2025-09-29T01:17:55.249Z"
+    "last_updated": "2025-09-29T01:18:01.821Z",
+    "last_accessed": "2025-09-29T01:18:01.820Z"
   }
 }
