@@ -8847,23 +8847,53 @@
 
         // 선택된 매력 포인트들 가져오기 (빈 배열이면 null 반환)
         function getSelectedCharms() {
+            console.log('🔍 getSelectedCharms 실행 중...');
+
+            // 1. 모든 .charm-btn 요소 확인
+            const allCharmBtns = document.querySelectorAll('.charm-btn');
+            console.log('📊 전체 charm-btn 요소 수:', allCharmBtns.length);
+
+            // 2. .selected 클래스가 있는 요소들 확인
+            const selectedCharmBtns = document.querySelectorAll('.charm-btn.selected');
+            console.log('📊 선택된 charm-btn 요소 수:', selectedCharmBtns.length);
+
+            // 3. 각 선택된 요소의 데이터 확인
             const selectedCharms = [];
-            document.querySelectorAll('.charm-btn.selected').forEach(btn => {
-                selectedCharms.push(btn.dataset.charm);
+            selectedCharmBtns.forEach((btn, index) => {
+                const charmValue = btn.dataset.charm;
+                console.log(`📋 선택된 charm ${index + 1}:`, charmValue, '(요소:', btn, ')');
+                selectedCharms.push(charmValue);
             });
-            console.log('🎯 선택된 매력 포인트:', selectedCharms);
+
+            console.log('🎯 최종 선택된 매력 포인트:', selectedCharms);
             const result = selectedCharms.slice(0, 3); // 최대 3개
+            console.log('🎯 반환할 결과:', result.length === 0 ? 'null' : result);
             return result.length === 0 ? null : result; // 🚨 빈 배열이면 null 반환
         }
 
         // 선택된 핵심 욕구들 가져오기 (빈 배열이면 null 반환)
         function getSelectedDesires() {
+            console.log('🔍 getSelectedDesires 실행 중...');
+
+            // 1. 모든 .desire-btn 요소 확인
+            const allDesireBtns = document.querySelectorAll('.desire-btn');
+            console.log('📊 전체 desire-btn 요소 수:', allDesireBtns.length);
+
+            // 2. .selected 클래스가 있는 요소들 확인
+            const selectedDesireBtns = document.querySelectorAll('.desire-btn.selected');
+            console.log('📊 선택된 desire-btn 요소 수:', selectedDesireBtns.length);
+
+            // 3. 각 선택된 요소의 데이터 확인
             const selectedDesires = [];
-            document.querySelectorAll('.desire-btn.selected').forEach(btn => {
-                selectedDesires.push(btn.dataset.desire);
+            selectedDesireBtns.forEach((btn, index) => {
+                const desireValue = btn.dataset.desire;
+                console.log(`📋 선택된 desire ${index + 1}:`, desireValue, '(요소:', btn, ')');
+                selectedDesires.push(desireValue);
             });
-            console.log('🎯 선택된 핵심 욕구:', selectedDesires);
+
+            console.log('🎯 최종 선택된 핵심 욕구:', selectedDesires);
             const result = selectedDesires.slice(0, 3); // 최대 3개
+            console.log('🎯 반환할 결과:', result.length === 0 ? 'null' : result);
             return result.length === 0 ? null : result; // 🚨 빈 배열이면 null 반환
         }
 
