@@ -2513,6 +2513,192 @@
             box-shadow: 0 6px 20px rgba(156, 39, 176, 0.4);
         }
 
+        /* 📸 사진 관리 모달 CSS */
+        .photo-manager-modal {
+            max-width: 900px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .photo-manager-container {
+            padding: 20px;
+        }
+
+        .photo-status-bar {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 25px;
+            border: 1px solid #2196f3;
+        }
+
+        .photo-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-weight: 500;
+            color: #1976d2;
+        }
+
+        .photo-categories-container {
+            display: grid;
+            gap: 25px;
+        }
+
+        .photo-category-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #f0f0f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f5f5f5;
+        }
+
+        .category-header h3 {
+            margin: 0;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .category-limit {
+            font-size: 0.9em;
+            color: #666;
+            background: #f8f9fa;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .photo-upload-zone {
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .photo-upload-zone:hover {
+            border-color: #2196f3;
+            background: #f8f9ff;
+        }
+
+        .upload-placeholder {
+            padding: 20px;
+        }
+
+        .upload-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            opacity: 0.7;
+        }
+
+        .upload-placeholder p {
+            margin: 10px 0 5px 0;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .upload-placeholder small {
+            color: #888;
+            font-size: 0.85em;
+        }
+
+        .photo-preview-container {
+            margin-top: 15px;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .photo-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .photo-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .photo-item .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .photo-item .delete-btn:hover {
+            background: #f44336;
+            transform: scale(1.1);
+        }
+
+        .photo-management-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f5f5f5;
+        }
+
+        .photo-management-actions .btn {
+            padding: 12px 24px;
+            font-weight: 500;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .photo-management-actions .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .photo-management-actions .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            color: white;
+        }
+
+        .photo-management-actions .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+
+        .photo-management-actions .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: white;
+        }
+
         /* 반응형 디자인 */
         @media (max-width: 768px) {
             .body-language-grid, .speech-habits-grid, .forbidden-topics-grid, .male-priority-grid {
@@ -2524,6 +2710,31 @@
             .body-language-btn, .speech-habit-btn, .forbidden-topic-btn, .male-priority-btn {
                 padding: 12px 8px;
                 font-size: 11px;
+            }
+
+            .photo-manager-modal {
+                width: 98%;
+                max-height: 95vh;
+            }
+
+            .photo-stats {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .photo-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .photo-management-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .photo-management-actions .btn {
+                width: 100%;
             }
         }
 
@@ -4811,6 +5022,7 @@
                             </div>
                         </div>
                     </div>
+
 
                     <!-- 📋 과거 이력 (새로 추가) -->
                     <div class="char-category">
@@ -8594,6 +8806,7 @@
                         </div>
                         <div class="actions" onclick="event.stopPropagation()">
                             <button class="btn btn-success" onclick="editCharacter('${character.id}')">수정</button>
+                            <button class="btn btn-primary" onclick="openPhotoManager('${character.id}', '${getCharacterName(character)}')">📷 사진</button>
                             <button class="btn btn-danger" onclick="deleteCharacter('${character.id}')">삭제</button>
                         </div>
                     </div>
@@ -10586,7 +10799,492 @@
                 generatedDialogue = null;
             } else if (modalId === 'characterModal') {
                 document.getElementById('characterForm').reset();
+            } else if (modalId === 'photoManagerModal') {
+                clearPhotoUploads();
             }
+        }
+
+        // 📸 사진 관리 전역 변수들
+        let currentCharacterId = null;
+        let currentCharacterName = '';
+        let characterPhotos = {
+            profile: null,
+            casual: [],
+            romantic: [],
+            emotional: [],
+            special: []
+        };
+
+        // 📸 사진 관리 모달 열기
+        async function openPhotoManager(characterId, characterName) {
+            console.log('📸 사진 관리 모달 열기:', characterId, characterName);
+
+            currentCharacterId = characterId;
+            currentCharacterName = characterName;
+
+            // 모달 제목 업데이트
+            document.getElementById('characterPhotoName').textContent = characterName;
+
+            // 기존 사진 데이터 로드
+            await loadCharacterPhotos(characterId);
+
+            // 모달 표시
+            document.getElementById('photoManagerModal').style.display = 'block';
+
+            // 파일 입력 이벤트 리스너 설정
+            setupPhotoInputListeners();
+
+            // 통계 업데이트
+            updatePhotoStats();
+        }
+
+        // 📸 캐릭터 사진 데이터 로드
+        async function loadCharacterPhotos(characterId) {
+            try {
+                console.log('📂 캐릭터 사진 로드 중:', characterId);
+
+                const response = await fetch(`/api/character-photo-manager?action=get_character_photos&character_id=${characterId}&_t=${Date.now()}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    characterPhotos = result.data.photos || {
+                        profile: null,
+                        casual: [],
+                        romantic: [],
+                        emotional: [],
+                        special: []
+                    };
+                    console.log('✅ 사진 데이터 로드 완료:', characterPhotos);
+
+                    // UI에 사진들 표시
+                    displayPhotosInUI();
+                } else {
+                    console.warn('⚠️ 사진 데이터 로드 실패:', result.message);
+                    // 빈 데이터로 초기화
+                    characterPhotos = {
+                        profile: null,
+                        casual: [],
+                        romantic: [],
+                        emotional: [],
+                        special: []
+                    };
+                }
+            } catch (error) {
+                console.error('❌ 사진 로드 오류:', error);
+                characterPhotos = {
+                    profile: null,
+                    casual: [],
+                    romantic: [],
+                    emotional: [],
+                    special: []
+                };
+            }
+        }
+
+        // 📸 UI에 사진들 표시
+        function displayPhotosInUI() {
+            // 프로필 사진 표시
+            const profileContainer = document.getElementById('profilePhotoContainer');
+            profileContainer.innerHTML = '';
+
+            if (characterPhotos.profile) {
+                const photoItem = createPhotoItemElement(characterPhotos.profile, 'profile');
+                profileContainer.appendChild(photoItem);
+            }
+
+            // 각 카테고리별 사진들 표시
+            ['casual', 'romantic', 'emotional', 'special'].forEach(category => {
+                const grid = document.getElementById(`${category}PhotoGrid`);
+                grid.innerHTML = '';
+
+                if (characterPhotos[category] && characterPhotos[category].length > 0) {
+                    characterPhotos[category].forEach(photo => {
+                        const photoItem = createPhotoItemElement(photo, category);
+                        grid.appendChild(photoItem);
+                    });
+                }
+            });
+        }
+
+        // 📸 사진 아이템 HTML 요소 생성
+        function createPhotoItemElement(photo, category) {
+            const photoDiv = document.createElement('div');
+            photoDiv.className = 'photo-item';
+            photoDiv.innerHTML = `
+                <img src="${photo.data}" alt="${category} 사진" />
+                <button class="delete-btn" onclick="deletePhoto('${photo.id}', '${category}')" title="사진 삭제">
+                    🗑️
+                </button>
+            `;
+            return photoDiv;
+        }
+
+        // 📸 파일 입력 이벤트 리스너 설정
+        function setupPhotoInputListeners() {
+            // 프로필 사진 입력
+            document.getElementById('profilePhotoInput').onchange = function(e) {
+                handlePhotoUpload(e, 'profile');
+            };
+
+            // 일반 사진들 입력
+            ['casual', 'romantic', 'emotional', 'special'].forEach(category => {
+                document.getElementById(`${category}PhotoInput`).onchange = function(e) {
+                    handlePhotoUpload(e, category);
+                };
+            });
+        }
+
+        // 📸 사진 업로드 처리
+        async function handlePhotoUpload(event, category) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            console.log(`📷 ${category} 카테고리에 ${files.length}개 파일 업로드 중...`);
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+
+                // 파일 유효성 검사
+                if (!validatePhotoFile(file, category)) {
+                    continue;
+                }
+
+                try {
+                    // 파일을 Base64로 변환
+                    const base64Data = await fileToBase64(file);
+
+                    // 서버에 업로드
+                    await uploadPhotoToServer(base64Data, category);
+
+                } catch (error) {
+                    console.error(`❌ ${file.name} 업로드 실패:`, error);
+                    alert(`${file.name} 업로드에 실패했습니다: ${error.message}`);
+                }
+            }
+
+            // 입력 필드 리셋
+            event.target.value = '';
+        }
+
+        // 📸 파일 유효성 검사
+        function validatePhotoFile(file, category) {
+            // 파일 타입 검사
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                alert(`지원하지 않는 파일 형식입니다: ${file.name}\n지원 형식: JPG, PNG, WEBP`);
+                return false;
+            }
+
+            // 파일 크기 검사 (500KB = 512,000 bytes)
+            const maxSize = 500 * 1024;
+            if (file.size > maxSize) {
+                alert(`파일 크기가 너무 큽니다: ${file.name}\n최대 크기: 500KB (현재: ${Math.round(file.size / 1024)}KB)`);
+                return false;
+            }
+
+            // 카테고리별 개수 제한 검사
+            const limits = { profile: 1, casual: 5, romantic: 5, emotional: 5, special: 4 };
+            const currentCount = category === 'profile' ?
+                (characterPhotos.profile ? 1 : 0) :
+                characterPhotos[category].length;
+
+            if (currentCount >= limits[category]) {
+                const categoryNames = {
+                    profile: '프로필',
+                    casual: '일상',
+                    romantic: '로맨틱',
+                    emotional: '감정 표현',
+                    special: '특별한 순간'
+                };
+                alert(`${categoryNames[category]} 카테고리는 최대 ${limits[category]}장까지만 업로드 가능합니다.`);
+                return false;
+            }
+
+            return true;
+        }
+
+        // 📸 파일을 Base64로 변환
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // 📸 서버에 사진 업로드
+        async function uploadPhotoToServer(photoData, category) {
+            try {
+                console.log(`📡 서버에 ${category} 사진 업로드 중...`);
+
+                const response = await fetch('/api/character-photo-manager', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'upload_photo',
+                        character_id: currentCharacterId,
+                        category: category,
+                        photo_data: photoData
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log('✅ 사진 업로드 성공');
+
+                    // 로컬 데이터 업데이트
+                    if (category === 'profile') {
+                        characterPhotos.profile = {
+                            id: `${currentCharacterId}_profile_${Date.now()}`,
+                            data: photoData,
+                            uploaded_at: new Date().toISOString()
+                        };
+                    } else {
+                        characterPhotos[category].push({
+                            id: `${currentCharacterId}_${category}_${Date.now()}`,
+                            data: photoData,
+                            uploaded_at: new Date().toISOString()
+                        });
+                    }
+
+                    // UI 업데이트
+                    displayPhotosInUI();
+                    updatePhotoStats();
+
+                    // 성공 메시지
+                    showNotification('✅ 사진이 성공적으로 업로드되었습니다!', 'success');
+
+                } else {
+                    throw new Error(result.message || '업로드 실패');
+                }
+
+            } catch (error) {
+                console.error('❌ 사진 업로드 오류:', error);
+                throw error;
+            }
+        }
+
+        // 📸 사진 삭제
+        async function deletePhoto(photoId, category) {
+            if (!confirm('정말로 이 사진을 삭제하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                console.log(`🗑️ 사진 삭제 중: ${photoId} (${category})`);
+
+                const response = await fetch('/api/character-photo-manager', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'delete_photo',
+                        character_id: currentCharacterId,
+                        category: category,
+                        photo_id: photoId
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log('✅ 사진 삭제 성공');
+
+                    // 로컬 데이터 업데이트
+                    if (category === 'profile') {
+                        characterPhotos.profile = null;
+                    } else {
+                        const index = characterPhotos[category].findIndex(photo => photo.id === photoId);
+                        if (index !== -1) {
+                            characterPhotos[category].splice(index, 1);
+                        }
+                    }
+
+                    // UI 업데이트
+                    displayPhotosInUI();
+                    updatePhotoStats();
+
+                    showNotification('✅ 사진이 삭제되었습니다.', 'success');
+
+                } else {
+                    throw new Error(result.message || '삭제 실패');
+                }
+
+            } catch (error) {
+                console.error('❌ 사진 삭제 오류:', error);
+                alert('사진 삭제에 실패했습니다: ' + error.message);
+            }
+        }
+
+        // 📸 사진 통계 업데이트
+        function updatePhotoStats() {
+            let totalCount = 0;
+            let totalSize = 0;
+
+            // 프로필 사진
+            if (characterPhotos.profile) {
+                totalCount += 1;
+                totalSize += estimateBase64Size(characterPhotos.profile.data);
+            }
+
+            // 기타 카테고리들
+            ['casual', 'romantic', 'emotional', 'special'].forEach(category => {
+                if (characterPhotos[category]) {
+                    totalCount += characterPhotos[category].length;
+                    characterPhotos[category].forEach(photo => {
+                        totalSize += estimateBase64Size(photo.data);
+                    });
+                }
+            });
+
+            const maxSlots = 20; // 총 최대 슬롯 수
+            const remainingSlots = maxSlots - totalCount;
+
+            // UI 업데이트
+            document.getElementById('totalPhotoCount').textContent = `총 ${totalCount}장`;
+            document.getElementById('totalPhotoSize').textContent = `용량: ${formatFileSize(totalSize)}`;
+            document.getElementById('remainingSlots').textContent = `남은 슬롯: ${remainingSlots}개`;
+        }
+
+        // 📸 Base64 크기 추정
+        function estimateBase64Size(base64Data) {
+            // Base64는 원본의 약 133% 크기
+            return Math.round((base64Data.length * 3) / 4);
+        }
+
+        // 📸 파일 크기 포맷팅
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0KB';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + sizes[i];
+        }
+
+        // 📸 모든 사진 삭제
+        async function clearAllCharacterPhotos() {
+            if (!confirm('정말로 이 캐릭터의 모든 사진을 삭제하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                // 각 카테고리별로 삭제
+                const deletePromises = [];
+
+                if (characterPhotos.profile) {
+                    deletePromises.push(deletePhoto(characterPhotos.profile.id, 'profile'));
+                }
+
+                ['casual', 'romantic', 'emotional', 'special'].forEach(category => {
+                    characterPhotos[category].forEach(photo => {
+                        deletePromises.push(deletePhoto(photo.id, category));
+                    });
+                });
+
+                await Promise.all(deletePromises);
+
+                showNotification('✅ 모든 사진이 삭제되었습니다.', 'success');
+
+            } catch (error) {
+                console.error('❌ 전체 사진 삭제 오류:', error);
+                alert('일부 사진 삭제에 실패했습니다.');
+            }
+        }
+
+        // 📸 사진 미리보기
+        function previewCharacterPhotos() {
+            // 모든 사진을 새 창에서 미리보기
+            const previewWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
+
+            let previewHTML = `
+                <html>
+                    <head>
+                        <title>${currentCharacterName} - 사진 미리보기</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+                            .category { margin-bottom: 30px; background: white; padding: 20px; border-radius: 10px; }
+                            .photo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+                            .photo { border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+                            .photo img { width: 100%; height: 200px; object-fit: cover; }
+                            h2 { color: #333; margin-top: 0; }
+                            h3 { color: #666; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+                        </style>
+                    </head>
+                    <body>
+                        <h2>📸 ${currentCharacterName} 사진 미리보기</h2>
+            `;
+
+            // 프로필 사진
+            if (characterPhotos.profile) {
+                previewHTML += `
+                    <div class="category">
+                        <h3>📋 프로필 사진</h3>
+                        <div class="photo-grid">
+                            <div class="photo">
+                                <img src="${characterPhotos.profile.data}" alt="프로필 사진" />
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 기타 카테고리들
+            const categoryNames = {
+                casual: '😊 일상 사진',
+                romantic: '💕 로맨틱 사진',
+                emotional: '😍 감정 표현 사진',
+                special: '✨ 특별한 순간'
+            };
+
+            Object.keys(categoryNames).forEach(category => {
+                if (characterPhotos[category] && characterPhotos[category].length > 0) {
+                    previewHTML += `
+                        <div class="category">
+                            <h3>${categoryNames[category]}</h3>
+                            <div class="photo-grid">
+                    `;
+
+                    characterPhotos[category].forEach(photo => {
+                        previewHTML += `
+                            <div class="photo">
+                                <img src="${photo.data}" alt="${category} 사진" />
+                            </div>
+                        `;
+                    });
+
+                    previewHTML += `
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            previewHTML += `
+                    </body>
+                </html>
+            `;
+
+            previewWindow.document.write(previewHTML);
+            previewWindow.document.close();
+        }
+
+        // 📸 업로드 데이터 초기화
+        function clearPhotoUploads() {
+            // 파일 입력 필드들 리셋
+            ['profile', 'casual', 'romantic', 'emotional', 'special'].forEach(category => {
+                const input = document.getElementById(`${category}PhotoInput`);
+                if (input) input.value = '';
+            });
+        }
+
+        // 📸 변경사항 저장 (현재는 자동 저장이므로 성공 메시지만)
+        function savePhotoChanges() {
+            showNotification('✅ 모든 사진이 자동으로 저장되었습니다!', 'success');
         }
 
         function updateAllStats() {
@@ -15309,6 +16007,134 @@
         } else {
             initializeDeveloperMode();
         }
+    </script>
+
+    <!-- 📸 캐릭터 사진 관리 모달 -->
+    <div id="photoManagerModal" class="modal">
+        <div class="modal-content photo-manager-modal">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal('photoManagerModal')">&times;</span>
+                <h2 id="photoManagerTitle">📸 <span id="characterPhotoName">캐릭터</span> 사진 관리</h2>
+                <p style="text-align: center; color: #666; margin-top: 5px;">
+                    카테고리별로 사진을 업로드하여 다양한 게임 상황에 활용하세요 ✨
+                </p>
+            </div>
+            <div class="modal-body">
+                <div class="photo-manager-container">
+                    <!-- 사진 업로드 상태 표시 -->
+                    <div class="photo-status-bar">
+                        <div class="photo-stats">
+                            <span id="totalPhotoCount">총 0장</span> |
+                            <span id="totalPhotoSize">용량: 0KB</span> |
+                            <span id="remainingSlots">남은 슬롯: 20개</span>
+                        </div>
+                    </div>
+
+                    <!-- 사진 카테고리들 -->
+                    <div class="photo-categories-container">
+                        <!-- 프로필 사진 -->
+                        <div class="photo-category-section">
+                            <div class="category-header">
+                                <h3>📋 프로필 사진</h3>
+                                <span class="category-limit">(1장)</span>
+                            </div>
+                            <div class="photo-upload-zone" data-category="profile">
+                                <input type="file" id="profilePhotoInput" accept="image/*" style="display: none;">
+                                <div class="upload-placeholder" onclick="document.getElementById('profilePhotoInput').click()">
+                                    <div class="upload-icon">📷</div>
+                                    <p>메인 프로필 사진 업로드</p>
+                                    <small>JPG, PNG, WEBP (최대 500KB)</small>
+                                </div>
+                                <div class="photo-preview-container" id="profilePhotoContainer"></div>
+                            </div>
+                        </div>
+
+                        <!-- 일상 사진들 -->
+                        <div class="photo-category-section">
+                            <div class="category-header">
+                                <h3>😊 일상 사진</h3>
+                                <span class="category-limit">(최대 5장)</span>
+                            </div>
+                            <div class="photo-upload-zone" data-category="casual">
+                                <input type="file" id="casualPhotoInput" accept="image/*" multiple style="display: none;">
+                                <div class="upload-placeholder" onclick="document.getElementById('casualPhotoInput').click()">
+                                    <div class="upload-icon">📷</div>
+                                    <p>일상적인 모습 사진 업로드</p>
+                                    <small>최대 5장, 각각 500KB 이하</small>
+                                </div>
+                                <div class="photo-grid" id="casualPhotoGrid"></div>
+                            </div>
+                        </div>
+
+                        <!-- 로맨틱 사진들 -->
+                        <div class="photo-category-section">
+                            <div class="category-header">
+                                <h3>💕 로맨틱 사진</h3>
+                                <span class="category-limit">(최대 5장)</span>
+                            </div>
+                            <div class="photo-upload-zone" data-category="romantic">
+                                <input type="file" id="romanticPhotoInput" accept="image/*" multiple style="display: none;">
+                                <div class="upload-placeholder" onclick="document.getElementById('romanticPhotoInput').click()">
+                                    <div class="upload-icon">📷</div>
+                                    <p>로맨틱한 순간 사진 업로드</p>
+                                    <small>최대 5장, 각각 500KB 이하</small>
+                                </div>
+                                <div class="photo-grid" id="romanticPhotoGrid"></div>
+                            </div>
+                        </div>
+
+                        <!-- 감정 표현 사진들 -->
+                        <div class="photo-category-section">
+                            <div class="category-header">
+                                <h3>😍 감정 표현 사진</h3>
+                                <span class="category-limit">(최대 5장)</span>
+                            </div>
+                            <div class="photo-upload-zone" data-category="emotional">
+                                <input type="file" id="emotionalPhotoInput" accept="image/*" multiple style="display: none;">
+                                <div class="upload-placeholder" onclick="document.getElementById('emotionalPhotoInput').click()">
+                                    <div class="upload-icon">📷</div>
+                                    <p>다양한 감정 표현 사진 업로드</p>
+                                    <small>최대 5장, 각각 500KB 이하</small>
+                                </div>
+                                <div class="photo-grid" id="emotionalPhotoGrid"></div>
+                            </div>
+                        </div>
+
+                        <!-- 특별한 순간 사진들 -->
+                        <div class="photo-category-section">
+                            <div class="category-header">
+                                <h3>✨ 특별한 순간</h3>
+                                <span class="category-limit">(최대 4장)</span>
+                            </div>
+                            <div class="photo-upload-zone" data-category="special">
+                                <input type="file" id="specialPhotoInput" accept="image/*" multiple style="display: none;">
+                                <div class="upload-placeholder" onclick="document.getElementById('specialPhotoInput').click()">
+                                    <div class="upload-icon">📷</div>
+                                    <p>특별한 이벤트나 순간 사진 업로드</p>
+                                    <small>최대 4장, 각각 500KB 이하</small>
+                                </div>
+                                <div class="photo-grid" id="specialPhotoGrid"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 관리 버튼들 -->
+                    <div class="photo-management-actions">
+                        <button class="btn btn-secondary" onclick="clearAllCharacterPhotos()">
+                            🗑️ 모든 사진 삭제
+                        </button>
+                        <button class="btn btn-primary" onclick="previewCharacterPhotos()">
+                            👁️ 전체 미리보기
+                        </button>
+                        <button class="btn btn-success" onclick="savePhotoChanges()">
+                            💾 변경사항 저장
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     </script>
 </body>
 </html>

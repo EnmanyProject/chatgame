@@ -1,0 +1,49 @@
+{
+  "photos": {
+    "수진_esfj_1759230138703": {
+      "character_id": "수진_esfj_1759230138703",
+      "character_name": "수진",
+      "photos": {
+        "profile": null,
+        "casual": [],
+        "romantic": [],
+        "emotional": [],
+        "special": []
+      },
+      "photo_count": 0,
+      "created_at": "2025-09-30T11:45:00.000Z",
+      "updated_at": "2025-09-30T11:45:00.000Z"
+    },
+    "미화_infp_1759231955151": {
+      "character_id": "미화_infp_1759231955151",
+      "character_name": "미화",
+      "photos": {
+        "profile": null,
+        "casual": [],
+        "romantic": [],
+        "emotional": [],
+        "special": []
+      },
+      "photo_count": 0,
+      "created_at": "2025-09-30T11:45:00.000Z",
+      "updated_at": "2025-09-30T11:45:00.000Z"
+    }
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "total_characters": 2,
+    "total_photos": 0,
+    "storage_type": "github_base64",
+    "max_photo_size": "500KB",
+    "supported_formats": ["jpeg", "jpg", "png", "webp"],
+    "categories": {
+      "profile": "프로필 사진 (1장)",
+      "casual": "일상 사진 (최대 5장)",
+      "romantic": "로맨틱 사진 (최대 5장)",
+      "emotional": "감정 표현 사진 (최대 5장)",
+      "special": "특별한 순간 사진 (최대 4장)"
+    },
+    "created": "2025-09-30T11:45:00.000Z",
+    "last_updated": "2025-09-30T11:45:00.000Z"
+  }
+}
