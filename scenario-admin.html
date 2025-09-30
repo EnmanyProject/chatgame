@@ -14109,12 +14109,162 @@
                 }
             }
 
-            // 과거 경험 모티프는 HTML에 구현되지 않아서 제거
+            // 🎀 성격 특성 랜덤 선택 (1-3개)
+            const traitOptions = ['감성적', '활발한', '매혹적인', '섹시한', '창의적', '유혹적인', '자신감 있는', '열정적', '도발적인', '성숙한'];
+            const numTraits = Math.floor(Math.random() * 3) + 1; // 1-3개
+            document.querySelectorAll('.trait-btn').forEach(btn => btn.classList.remove('selected'));
+            const selectedTraits = [];
+            for (let i = 0; i < numTraits; i++) {
+                const availableOptions = traitOptions.filter(option => !selectedTraits.includes(option));
+                if (availableOptions.length > 0) {
+                    const randomTrait = availableOptions[Math.floor(Math.random() * availableOptions.length)];
+                    selectedTraits.push(randomTrait);
+                    const traitBtn = document.querySelector(`[data-trait="${randomTrait}"]`);
+                    if (traitBtn) {
+                        traitBtn.classList.add('selected');
+                        console.log('✅ 성격특성 선택됨:', randomTrait);
+                    }
+                }
+            }
+
+            // 🎀 취미 랜덤 선택 (2-3개)
+            const hobbyOptions = ['reading', 'drawing', 'music', 'photography', 'cooking', 'exercise', 'travel', 'movies', 'gaming', 'dancing', 'shopping', 'cafe'];
+            const numHobbies = Math.floor(Math.random() * 2) + 2; // 2-3개
+            document.querySelectorAll('.hobby-btn').forEach(btn => btn.classList.remove('selected'));
+            const selectedHobbies = [];
+            for (let i = 0; i < numHobbies; i++) {
+                const availableOptions = hobbyOptions.filter(option => !selectedHobbies.includes(option));
+                if (availableOptions.length > 0) {
+                    const randomHobby = availableOptions[Math.floor(Math.random() * availableOptions.length)];
+                    selectedHobbies.push(randomHobby);
+                    const hobbyBtn = document.querySelector(`[data-hobby="${randomHobby}"]`);
+                    if (hobbyBtn) {
+                        hobbyBtn.classList.add('selected');
+                        console.log('✅ 취미 선택됨:', randomHobby);
+                    }
+                }
+            }
+
+            // ✨ 자신있는 부위 랜덤 선택 (2-3개)
+            const featureOptions = ['beautiful_face', 'seductive_eyes', 'sexy_lips', 'elegant_neck', 'attractive_chest', 'slim_waist', 'curvy_hips', 'long_legs', 'soft_skin'];
+            const numFeatures = Math.floor(Math.random() * 2) + 2; // 2-3개
+            document.querySelectorAll('.confident-part-btn').forEach(btn => btn.classList.remove('selected'));
+            const selectedFeatures = [];
+            for (let i = 0; i < numFeatures; i++) {
+                const availableOptions = featureOptions.filter(option => !selectedFeatures.includes(option));
+                if (availableOptions.length > 0) {
+                    const randomFeature = availableOptions[Math.floor(Math.random() * availableOptions.length)];
+                    selectedFeatures.push(randomFeature);
+                    const featureBtn = document.querySelector(`[data-feature="${randomFeature}"]`);
+                    if (featureBtn) {
+                        featureBtn.classList.add('selected');
+                        console.log('✅ 자신있는 부위 선택됨:', randomFeature);
+                    }
+                }
+            }
+
+            // 💃 유혹적인 포즈 랜덤 선택 (1-2개)
+            const poseOptions = ['lip_biting', 'hair_touch', 'deep_gaze', 'shoulder_expose', 'crossed_legs', 'leaning_forward', 'subtle_wink', 'gentle_stretch', 'playful_smile'];
+            const numPoses = Math.floor(Math.random() * 2) + 1; // 1-2개
+            document.querySelectorAll('.seductive-pose-btn').forEach(btn => btn.classList.remove('selected'));
+            const selectedPoses = [];
+            for (let i = 0; i < numPoses; i++) {
+                const availableOptions = poseOptions.filter(option => !selectedPoses.includes(option));
+                if (availableOptions.length > 0) {
+                    const randomPose = availableOptions[Math.floor(Math.random() * availableOptions.length)];
+                    selectedPoses.push(randomPose);
+                    const poseBtn = document.querySelector(`[data-habit="${randomPose}"]`);
+                    if (poseBtn) {
+                        poseBtn.classList.add('selected');
+                        console.log('✅ 유혹적인 포즈 선택됨:', randomPose);
+                    }
+                }
+            }
+
+            // 🎁 좋아하는 선물 랜덤 선택 (2-3개)
+            const giftOptions = ['luxury_lingerie', 'expensive_car', 'jewelry', 'perfume', 'designer_bag', 'flowers', 'chocolate', 'spa_voucher', 'wine', 'books', 'cute_accessories', 'travel_package'];
+            const numGifts = Math.floor(Math.random() * 2) + 2; // 2-3개
+            document.querySelectorAll('.gift-btn').forEach(btn => btn.classList.remove('selected'));
+            const selectedGifts = [];
+            for (let i = 0; i < numGifts; i++) {
+                const availableOptions = giftOptions.filter(option => !selectedGifts.includes(option));
+                if (availableOptions.length > 0) {
+                    const randomGift = availableOptions[Math.floor(Math.random() * availableOptions.length)];
+                    selectedGifts.push(randomGift);
+                    const giftBtn = document.querySelector(`[data-gift="${randomGift}"]`);
+                    if (giftBtn) {
+                        giftBtn.classList.add('selected');
+                        console.log('✅ 좋아하는 선물 선택됨:', randomGift);
+                    }
+                }
+            }
+
+            // 💬 플러팅 패턴 랜덤 선택 (1-3개)
+            const flirtingOptions = ['subtle_teasing', 'direct_compliments', 'playful_banter', 'gentle_touches', 'eye_contact', 'mysterious_hints'];
+            const numFlirting = Math.floor(Math.random() * 3) + 1; // 1-3개
+            document.querySelectorAll('.flirting-btn').forEach(btn => btn.classList.remove('selected'));
+            const selectedFlirting = [];
+            for (let i = 0; i < numFlirting; i++) {
+                const availableOptions = flirtingOptions.filter(option => !selectedFlirting.includes(option));
+                if (availableOptions.length > 0) {
+                    const randomFlirting = availableOptions[Math.floor(Math.random() * availableOptions.length)];
+                    selectedFlirting.push(randomFlirting);
+                    const flirtingBtn = document.querySelector(`[data-flirting="${randomFlirting}"]`);
+                    if (flirtingBtn) {
+                        flirtingBtn.classList.add('selected');
+                        console.log('✅ 플러팅 패턴 선택됨:', randomFlirting);
+                    }
+                }
+            }
+
+            // 🗨️ 대화 훅 랜덤 선택 (2-4개)
+            const hookOptions = ['travel_stories', 'food_culture', 'music_movies', 'life_philosophy', 'future_dreams', 'childhood_memories', 'work_passion', 'relationships'];
+            const numHooks = Math.floor(Math.random() * 3) + 2; // 2-4개
+            document.querySelectorAll('.hook-btn').forEach(btn => btn.classList.remove('selected'));
+            const selectedHooks = [];
+            for (let i = 0; i < numHooks; i++) {
+                const availableOptions = hookOptions.filter(option => !selectedHooks.includes(option));
+                if (availableOptions.length > 0) {
+                    const randomHook = availableOptions[Math.floor(Math.random() * availableOptions.length)];
+                    selectedHooks.push(randomHook);
+                    const hookBtn = document.querySelector(`[data-hook="${randomHook}"]`);
+                    if (hookBtn) {
+                        hookBtn.classList.add('selected');
+                        console.log('✅ 대화 훅 선택됨:', randomHook);
+                    }
+                }
+            }
+
+            // 🎭 허용 모티프 랜덤 선택 (2-5개)
+            const motifOptions = ['romance_love', 'dreams_goals', 'personal_growth', 'art_creativity', 'nature_travel', 'friendship', 'philosophy', 'daily_life'];
+            const numMotifs = Math.floor(Math.random() * 4) + 2; // 2-5개
+            document.querySelectorAll('.motif-btn').forEach(btn => btn.classList.remove('selected'));
+            const selectedMotifs = [];
+            for (let i = 0; i < numMotifs; i++) {
+                const availableOptions = motifOptions.filter(option => !selectedMotifs.includes(option));
+                if (availableOptions.length > 0) {
+                    const randomMotif = availableOptions[Math.floor(Math.random() * availableOptions.length)];
+                    selectedMotifs.push(randomMotif);
+                    const motifBtn = document.querySelector(`[data-motif="${randomMotif}"]`);
+                    if (motifBtn) {
+                        motifBtn.classList.add('selected');
+                        console.log('✅ 허용 모티프 선택됨:', randomMotif);
+                    }
+                }
+            }
 
             console.log('🎲 캐릭터 폼 자동 채우기 완료:', {
                 mbti: randomMbti,
                 relationship: randomRelationship,
                 speech: randomSpeech,
+                traits: selectedTraits,
+                hobbies: selectedHobbies,
+                features: selectedFeatures,
+                poses: selectedPoses,
+                gifts: selectedGifts,
+                flirting: selectedFlirting,
+                hooks: selectedHooks,
+                motifs: selectedMotifs,
                 charms: selectedCharms,
                 desires: selectedDesires,
                 skinships: selectedSkinships
