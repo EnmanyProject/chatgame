@@ -10843,7 +10843,7 @@
             try {
                 console.log('📂 캐릭터 사진 로드 중:', characterId);
 
-                const response = await fetch(`/api/character-photo-manager?action=get_character_photos&character_id=${characterId}&_t=${Date.now()}`);
+                const response = await fetch(`/api/character-ai-generator?action=get_character_photos&character_id=${characterId}&_t=${Date.now()}`);
                 const result = await response.json();
 
                 if (result.success) {
@@ -11019,7 +11019,7 @@
             try {
                 console.log(`📡 서버에 ${category} 사진 업로드 중...`);
 
-                const response = await fetch('/api/character-photo-manager', {
+                const response = await fetch('/api/character-ai-generator', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -11078,7 +11078,7 @@
             try {
                 console.log(`🗑️ 사진 삭제 중: ${photoId} (${category})`);
 
-                const response = await fetch('/api/character-photo-manager', {
+                const response = await fetch('/api/character-ai-generator', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
