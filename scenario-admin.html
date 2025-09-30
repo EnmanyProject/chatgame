@@ -8303,7 +8303,16 @@
                     'mature_elegant': '성숙하고 우아한',
                     'cute_innocent': '귀엽고 순수한',
                     'sultry_dominant': '요염하고 지배적인',
-                    'warm_friendly': '따뜻하고 친근한'
+                    'warm_friendly': '따뜻하고 친근한',
+                    // 🆕 8가지 유혹적인 말투 추가
+                    'seductive_teasing': '유혹적이고 장난스러운',
+                    'mysterious_alluring': '신비롭고 매혹적인',
+                    'playful_flirty': '발랄하고 플러팅하는',
+                    'intense_passionate': '강렬하고 열정적인',
+                    'gentle_seductive': '부드럽고 유혹적인',
+                    'confident_provocative': '자신감 있고 도발적인',
+                    'sweet_tempting': '달콤하고 유혹적인',
+                    'bold_captivating': '대담하고 매혹적인'
                 },
                 comfort_level: {
                     'light_flirtation': '가벼운 플러팅',
@@ -8315,6 +8324,29 @@
                     'gradual_building': '점진적 발전',
                     'moderate_pace': '적당한 속도',
                     'quick_progression': '빠른 진전'
+                },
+                // 🆕 취미 번역
+                hobbies: {
+                    'reading': '독서',
+                    'drawing': '그림 그리기',
+                    'music': '음악 감상',
+                    'photography': '사진 촬영',
+                    'cooking': '요리',
+                    'exercise': '운동',
+                    'travel': '여행',
+                    'movies': '영화 감상',
+                    'gaming': '게임',
+                    'dancing': '댄스',
+                    'shopping': '쇼핑',
+                    'cafe': '카페 탐방'
+                },
+                // 🆕 가치관 번역
+                values: {
+                    'love_family': '가족과 사랑을 중시',
+                    'personal_growth': '개인적 성장을 추구',
+                    'helping_others': '타인을 돕는 것을 좋아함',
+                    'creative_expression': '창의적 표현을 중시',
+                    'stability_security': '안정과 보안을 중시'
                 }
             };
 
@@ -12190,7 +12222,7 @@
             modal.style.display = 'block';
         }
 
-        // 현재 폼 데이터 수집 함수 (기존)
+        // 현재 폼 데이터 수집 함수 (확장된 버전)
         function collectCharacterFormData() {
             const formData = {
                 id: document.getElementById('characterId')?.value || null,
@@ -12206,7 +12238,10 @@
                     charm_points: getSelectedCharmPoints(),
                     emotional_intelligence: parseInt(document.getElementById('emotionalIntelligence')?.value) || null,
                     confidence_level: parseInt(document.getElementById('confidenceLevel')?.value) || null,
-                    mystery_factor: parseInt(document.getElementById('mysteryFactor')?.value) || null
+                    mystery_factor: parseInt(document.getElementById('mysteryFactor')?.value) || null,
+                    sexual_curiosity: parseInt(document.getElementById('sexualCuriosity')?.value) || null, // 🆕 성적 호기심
+                    sexual_comfort: parseInt(document.getElementById('sexualComfort')?.value) || null, // 🆕 성적 쿨적도
+                    hobbies: getSelectedHobbies() // 🆕 취미
                 },
                 physical_allure: {
                     appearance: {
@@ -12216,10 +12251,14 @@
                         bust: document.getElementById('charBust')?.value || '',
                         waist_hip: document.getElementById('charWaistHip')?.value || '',
                         style: document.getElementById('charStyle')?.value || ''
-                    }
+                    },
+                    feature_elements: getSelectedFeatureElements(), // 🆕 외모 매력의 특징요소
+                    sensual_habits: getSelectedSensualHabits(), // 🆕 관능적 습관
+                    body_language: document.getElementById('bodyLanguage')?.value || '' // 🆕 몸짓 언어
                 },
                 psychological_depth: {
                     core_desires: getSelectedCoreDesires(),
+                    values: document.getElementById('charValues')?.value || '', // 🆕 가치관
                     boundaries: {
                         comfort_level: document.getElementById('comfortLevel')?.value || '',
                         escalation_pace: document.getElementById('escalationPace')?.value || ''
@@ -12227,10 +12266,17 @@
                 },
                 conversation_dynamics: {
                     speech_style: getSelectedSpeechStyle() // 🚨 버튼 시스템으로 변경
+                },
+                // 🆕 과거 이력 정보
+                past_history: {
+                    boyfriend_count: parseInt(document.getElementById('boyfriendCount')?.value) || null,
+                    preferred_skinship: getSelectedSkinship(),
+                    relationship_experience: document.getElementById('relationshipExperience')?.value || '',
+                    first_experience_age: document.getElementById('firstExperienceAge')?.value || ''
                 }
             };
 
-            console.log('📋 수집된 폼 데이터:', formData);
+            console.log('📋 수집된 폼 데이터 (확장):', formData);
             return formData;
         }
 
@@ -12317,6 +12363,82 @@
 
             console.log('⚠️ 선택된 말투스타일이 없음');
             return null;
+        }
+
+        // 🆕 선택된 취미 수집
+        function getSelectedHobbies() {
+            console.log('🔍 getSelectedHobbies 실행 중...');
+            const selected = [];
+            const selectedHobbyBtns = document.querySelectorAll('.hobby-btn.selected');
+            console.log('📊 선택된 hobby-btn 요소 수:', selectedHobbyBtns.length);
+
+            selectedHobbyBtns.forEach(btn => {
+                const value = btn.getAttribute('data-hobby');
+                if (value) {
+                    selected.push(value);
+                    console.log('✅ 취미 수집됨:', value);
+                }
+            });
+
+            console.log('🎯 최종 취미 배열:', selected);
+            return selected.length === 0 ? null : selected;
+        }
+
+        // 🆕 선택된 외모 매력 특징요소 수집
+        function getSelectedFeatureElements() {
+            console.log('🔍 getSelectedFeatureElements 실행 중...');
+            const selected = [];
+            const selectedFeatureBtns = document.querySelectorAll('.feature-btn.selected');
+            console.log('📊 선택된 feature-btn 요소 수:', selectedFeatureBtns.length);
+
+            selectedFeatureBtns.forEach(btn => {
+                const value = btn.getAttribute('data-feature');
+                if (value) {
+                    selected.push(value);
+                    console.log('✅ 특징요소 수집됨:', value);
+                }
+            });
+
+            console.log('🎯 최종 특징요소 배열:', selected);
+            return selected.length === 0 ? null : selected;
+        }
+
+        // 🆕 선택된 관능적 습관 수집
+        function getSelectedSensualHabits() {
+            console.log('🔍 getSelectedSensualHabits 실행 중...');
+            const selected = [];
+            const selectedHabitBtns = document.querySelectorAll('.habit-btn.selected');
+            console.log('📊 선택된 habit-btn 요소 수:', selectedHabitBtns.length);
+
+            selectedHabitBtns.forEach(btn => {
+                const value = btn.getAttribute('data-habit');
+                if (value) {
+                    selected.push(value);
+                    console.log('✅ 관능적습관 수집됨:', value);
+                }
+            });
+
+            console.log('🎯 최종 관능적습관 배열:', selected);
+            return selected.length === 0 ? null : selected;
+        }
+
+        // 🆕 선택된 스킨십 수집
+        function getSelectedSkinship() {
+            console.log('🔍 getSelectedSkinship 실행 중...');
+            const selected = [];
+            const selectedSkinshipBtns = document.querySelectorAll('.skinship-btn.selected');
+            console.log('📊 선택된 skinship-btn 요소 수:', selectedSkinshipBtns.length);
+
+            selectedSkinshipBtns.forEach(btn => {
+                const value = btn.getAttribute('data-skinship');
+                if (value) {
+                    selected.push(value);
+                    console.log('✅ 스킨십 수집됨:', value);
+                }
+            });
+
+            console.log('🎯 최종 스킨십 배열:', selected);
+            return selected.length === 0 ? null : selected;
         }
 
         // 🔄 업그레이드된 캐릭터 폼 데이터 채우기 함수 (v2.0)
@@ -13429,6 +13551,73 @@
         function getCharacterForbiddenTerms(character) {
             const terms = character.conversation_dynamics?.forbidden_terms;
             return terms && Array.isArray(terms) ? terms.join(', ') : '-';
+        }
+
+        // 🆕 새로 추가된 필드들을 위한 getter 함수들
+        function getCharacterHobbies(character) {
+            const hobbies = character.appeal_profile?.hobbies;
+            if (hobbies && Array.isArray(hobbies) && hobbies.length > 0) {
+                return hobbies.map(hobby => translateToKorean(hobby, 'hobbies')).join(', ');
+            }
+            return '-';
+        }
+
+        function getCharacterValues(character) {
+            const values = character.psychological_depth?.values || '-';
+            return values === '-' ? values : translateToKorean(values, 'values');
+        }
+
+        function getCharacterSexualCuriosity(character) {
+            const value = character.appeal_profile?.sexual_curiosity;
+            return value ? `${value}/10` : '-';
+        }
+
+        function getCharacterSexualComfort(character) {
+            const value = character.appeal_profile?.sexual_comfort;
+            return value ? `${value}/10` : '-';
+        }
+
+        function getCharacterFeatureElements(character) {
+            const features = character.physical_allure?.feature_elements;
+            return features && Array.isArray(features) ? features.join(', ') : '-';
+        }
+
+        function getCharacterSensualHabits(character) {
+            const habits = character.physical_allure?.sensual_habits;
+            return habits && Array.isArray(habits) ? habits.join(', ') : '-';
+        }
+
+        function getCharacterBodyLanguage(character) {
+            return character.physical_allure?.body_language || '-';
+        }
+
+        function getCharacterPreferredSkinship(character) {
+            const skinship = character.past_history?.preferred_skinship;
+            return skinship && Array.isArray(skinship) ? skinship.join(', ') : '-';
+        }
+
+        function getCharacterRelationshipExperience(character) {
+            const exp = character.past_history?.relationship_experience || '-';
+            const translations = {
+                'beginner': '초보 (1-2번)',
+                'intermediate': '보통 (3-5번)',
+                'experienced': '경험 많음 (6-8번)',
+                'very_experienced': '매우 경험 많음 (9번 이상)'
+            };
+            return translations[exp] || exp;
+        }
+
+        function getCharacterFirstExperienceAge(character) {
+            const age = character.past_history?.first_experience_age || '-';
+            const translations = {
+                'early_teens': '중학교 (13-15세)',
+                'late_teens': '고등학교 (16-18세)',
+                'early_twenties': '대학교 초기 (19-21세)',
+                'mid_twenties': '대학교 후기/직장 초기 (22-25세)',
+                'late_twenties': '직장인 (26-29세)',
+                'no_experience': '경험 없음'
+            };
+            return translations[age] || age;
         }
 
         function getCharacterBoyfriendCount(character) {
