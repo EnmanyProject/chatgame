@@ -9223,6 +9223,24 @@
                     'ambition': '🎆 열정과 목표의식',
                     'communication': '💬 소통능력과 경청',
                     'reliability': '🤝 신뢰성과 성실함'
+                },
+                // 🧠 심리적 취약점 번역
+                vulnerabilities: {
+                    'perfectionism': '완벽주의',
+                    'commitment_fear': '헌신에 대한 두려움',
+                    'abandonment_fear': '버림받을 두려움',
+                    'intimacy_anxiety': '친밀감에 대한 불안',
+                    'self_doubt': '자기 의심',
+                    'emotional_walls': '감정적 벽',
+                    'trust_issues': '신뢰 문제',
+                    'validation_seeking': '인정받고 싶은 욕구'
+                },
+                // 🔥 성적 톤 밴드 번역
+                sexual_tone_band: {
+                    'conservative': '보수적',
+                    'moderate': '중간 정도',
+                    'open': '개방적',
+                    'adventurous': '모험적'
                 }
             };
 
@@ -10321,9 +10339,11 @@
                     <div class="preview-section">
                         <h5>🧠 심리적 깊이</h5>
                         <p><strong>핵심 욕구:</strong> ${Array.isArray(character.psychological_depth?.core_desires) ? character.psychological_depth.core_desires.map(desire => translateToKorean(desire, 'core_desires')).join(', ') : '정보 없음'}</p>
-                        <p><strong>취약점:</strong> ${Array.isArray(character.psychological_depth?.vulnerabilities) ? character.psychological_depth.vulnerabilities.join(', ') : '정보 없음'}</p>
+                        <p><strong>취약점:</strong> ${Array.isArray(character.psychological_depth?.vulnerabilities) ? character.psychological_depth.vulnerabilities.map(vul => translateToKorean(vul, 'vulnerabilities')).join(', ') : '정보 없음'}</p>
                         <p><strong>경계선:</strong> ${translateToKorean(character.psychological_depth?.boundaries?.comfort_level || 'unknown', 'comfort_level')}</p>
                         <p><strong>발전 속도:</strong> ${translateToKorean(character.psychological_depth?.boundaries?.escalation_pace || 'unknown', 'escalation_pace')}</p>
+                        <p><strong>성적 톤 밴드:</strong> ${translateToKorean(character.psychological_depth?.boundaries?.sexual_tone_band || 'unknown', 'sexual_tone_band')}</p>
+                        <p><strong>성적 자유분방함:</strong> ${character.psychological_depth?.sexual_freedom ? character.psychological_depth.sexual_freedom + '/10' : '정보 없음'}</p>
                     </div>
 
                     <div class="preview-section">
@@ -13306,11 +13326,14 @@
                 },
                 psychological_depth: {
                     core_desires: getSelectedCoreDesires(),
+                    vulnerabilities: ['perfectionism', 'commitment_fear'], // 🆕 기본 취약점 추가
                     values: document.getElementById('charValues')?.value || 'love_family', // 🆕 가치관
                     boundaries: {
                         comfort_level: document.getElementById('comfortLevel')?.value || 'light_flirtation',
-                        escalation_pace: document.getElementById('escalationPace')?.value || 'very_gradual'
-                    }
+                        escalation_pace: document.getElementById('escalationPace')?.value || 'very_gradual',
+                        sexual_tone_band: 'moderate', // 🆕 성적 톤 밴드 추가
+                    },
+                    sexual_freedom: Math.floor(Math.random() * 5) + 3 // 🆕 성적 자유분방함 (3-7 랜덤)
                 },
                 conversation_dynamics: {
                     speech_style: getSelectedSpeechStyle(), // 🚨 버튼 시스템으로 변경
@@ -15051,7 +15074,8 @@
 
         function getCharacterVulnerabilities(character) {
             const vulnerabilities = character.psychological_depth?.vulnerabilities;
-            return vulnerabilities && Array.isArray(vulnerabilities) ? vulnerabilities.join(', ') : '-';
+            return vulnerabilities && Array.isArray(vulnerabilities) ?
+                vulnerabilities.map(vul => translateToKorean(vul, 'vulnerabilities')).join(', ') : '-';
         }
 
         function getCharacterComfortLevel(character) {
@@ -15065,7 +15089,8 @@
         }
 
         function getCharacterSexualToneBand(character) {
-            return character.psychological_depth?.boundaries?.sexual_tone_band || '-';
+            const toneBand = character.psychological_depth?.boundaries?.sexual_tone_band || '-';
+            return toneBand === '-' ? toneBand : translateToKorean(toneBand, 'sexual_tone_band');
         }
 
         function getCharacterSexualFreedom(character) {
