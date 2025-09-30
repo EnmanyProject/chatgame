@@ -2119,6 +2119,43 @@
             color: white;
         }
 
+        /* 대화역학 버튼 스타일 */
+        .flirting-btn, .hook-btn, .motif-btn {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 4px;
+            border: 2px solid #e9ecef;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .flirting-btn:hover, .hook-btn:hover, .motif-btn:hover {
+            border-color: #fd7e14;
+            background: #fff3cd;
+            transform: translateY(-2px);
+        }
+
+        .flirting-btn.selected, .hook-btn.selected, .motif-btn.selected {
+            border-color: #fd7e14;
+            background: #fd7e14;
+            color: white;
+        }
+
+        .conversation-dynamics {
+            display: grid;
+            gap: 20px;
+            padding: 15px;
+        }
+
+        .flirting-options, .conversation-hooks, .allowed-motifs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
         /* AI 생성 영역 */
         .ai-generation {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -4411,6 +4448,106 @@
                     </div>
 
                     <!-- 장르/시나리오 설정 섹션 제거됨 -->
+
+                    <!-- 🎯 대화역학 (신규 추가) -->
+                    <div class="char-category">
+                        <h3>💬 대화역학</h3>
+                        <div class="conversation-dynamics">
+                            <div class="form-group">
+                                <label>플러팅 패턴 (최대 3개 선택)</label>
+                                <div class="flirting-options">
+                                    <button type="button" class="flirting-btn" data-flirting="subtle_teasing">😊 은근한 놀림</button>
+                                    <button type="button" class="flirting-btn" data-flirting="direct_compliments">💕 직접적인 칭찬</button>
+                                    <button type="button" class="flirting-btn" data-flirting="playful_banter">🎪 장난스러운 농담</button>
+                                    <button type="button" class="flirting-btn" data-flirting="gentle_touches">🤗 가벼운 스킨십</button>
+                                    <button type="button" class="flirting-btn" data-flirting="eye_contact">👀 깊은 눈맞춤</button>
+                                    <button type="button" class="flirting-btn" data-flirting="mysterious_hints">🔮 신비로운 암시</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>유머에 대한 반응</label>
+                                <select id="humorResponse">
+                                    <option value="giggles_easily">😄 쉽게 웃어줌</option>
+                                    <option value="witty_comeback">🎭 재치있게 받아침</option>
+                                    <option value="shy_smile">😊 수줍게 미소</option>
+                                    <option value="playful_tease">😏 장난스럽게 놀림</option>
+                                    <option value="dry_humor">🙄 건조한 유머로 응수</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>칭찬에 대한 반응</label>
+                                <select id="complimentResponse">
+                                    <option value="gracefully_accepts">🥰 우아하게 받아들임</option>
+                                    <option value="bashfully_denies">😳 부끄러워하며 부인</option>
+                                    <option value="confidently_agrees">😎 자신있게 동의</option>
+                                    <option value="returns_compliment">💖 칭찬으로 화답</option>
+                                    <option value="changes_subject">😅 화제를 돌림</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>관심 표현 반응</label>
+                                <select id="interestResponse">
+                                    <option value="enthusiastic_sharing">✨ 열정적으로 공유</option>
+                                    <option value="curious_questions">🤔 호기심 많은 질문</option>
+                                    <option value="gentle_encouragement">💕 부드러운 격려</option>
+                                    <option value="playful_challenge">😏 장난스러운 도전</option>
+                                    <option value="thoughtful_listening">🎧 사려깊은 경청</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>대화 훅/관심사 (최대 4개 선택)</label>
+                                <div class="conversation-hooks">
+                                    <button type="button" class="hook-btn" data-hook="travel_stories">✈️ 여행 이야기</button>
+                                    <button type="button" class="hook-btn" data-hook="food_culture">🍜 음식 문화</button>
+                                    <button type="button" class="hook-btn" data-hook="music_movies">🎵 음악/영화</button>
+                                    <button type="button" class="hook-btn" data-hook="life_philosophy">💭 인생 철학</button>
+                                    <button type="button" class="hook-btn" data-hook="future_dreams">🌟 미래 꿈</button>
+                                    <button type="button" class="hook-btn" data-hook="childhood_memories">👶 어린 시절</button>
+                                    <button type="button" class="hook-btn" data-hook="work_passion">💼 일과 열정</button>
+                                    <button type="button" class="hook-btn" data-hook="relationships">💑 인간관계</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>말투 습관 (선택사항)</label>
+                                <input type="text" id="speechHabits" placeholder="예: ~네요 자주 사용, 감탄사 많이 씀, 영어 단어 섞어 말함" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>어휘 수준</label>
+                                <select id="vocabularyRegister">
+                                    <option value="casual_friendly">😊 캐주얼하고 친근함</option>
+                                    <option value="polite_formal">🎭 정중하고 격식있음</option>
+                                    <option value="intellectual">🧠 지적이고 세련됨</option>
+                                    <option value="trendy_modern">📱 트렌디하고 현대적</option>
+                                    <option value="warm_nurturing">🤗 따뜻하고 포용적</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>허용 대화 주제 (최대 5개 선택)</label>
+                                <div class="allowed-motifs">
+                                    <button type="button" class="motif-btn" data-motif="romance_love">💕 로맨스/사랑</button>
+                                    <button type="button" class="motif-btn" data-motif="dreams_goals">🌟 꿈과 목표</button>
+                                    <button type="button" class="motif-btn" data-motif="personal_growth">🌱 개인적 성장</button>
+                                    <button type="button" class="motif-btn" data-motif="art_creativity">🎨 예술과 창작</button>
+                                    <button type="button" class="motif-btn" data-motif="nature_travel">🌸 자연과 여행</button>
+                                    <button type="button" class="motif-btn" data-motif="friendship">👫 우정과 인연</button>
+                                    <button type="button" class="motif-btn" data-motif="philosophy">💭 철학적 대화</button>
+                                    <button type="button" class="motif-btn" data-motif="daily_life">🏠 일상 이야기</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>금지 용어/주제 (선택사항)</label>
+                                <input type="text" id="forbiddenTerms" placeholder="예: 정치, 종교, 극단적 표현 등 (쉼표로 구분)" />
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- 🎲 랜덤 생성 영역 -->
                     <div class="char-category random-generation">
@@ -8347,6 +8484,63 @@
                     'helping_others': '타인을 돕는 것을 좋아함',
                     'creative_expression': '창의적 표현을 중시',
                     'stability_security': '안정과 보안을 중시'
+                },
+                // 🆕 대화역학 번역
+                flirting_patterns: {
+                    'subtle_teasing': '은근한 놀림',
+                    'direct_compliments': '직접적인 칭찬',
+                    'playful_banter': '장난스러운 농담',
+                    'gentle_touches': '가벼운 스킨십',
+                    'eye_contact': '깊은 눈맞춤',
+                    'mysterious_hints': '신비로운 암시'
+                },
+                humor_response: {
+                    'giggles_easily': '쉽게 웃어줌',
+                    'witty_comeback': '재치있게 받아침',
+                    'shy_smile': '수줍게 미소',
+                    'playful_tease': '장난스럽게 놀림',
+                    'dry_humor': '건조한 유머로 응수'
+                },
+                compliment_response: {
+                    'gracefully_accepts': '우아하게 받아들임',
+                    'bashfully_denies': '부끄러워하며 부인',
+                    'confidently_agrees': '자신있게 동의',
+                    'returns_compliment': '칭찬으로 화답',
+                    'changes_subject': '화제를 돌림'
+                },
+                interest_response: {
+                    'enthusiastic_sharing': '열정적으로 공유',
+                    'curious_questions': '호기심 많은 질문',
+                    'gentle_encouragement': '부드러운 격려',
+                    'playful_challenge': '장난스러운 도전',
+                    'thoughtful_listening': '사려깊은 경청'
+                },
+                conversation_hooks: {
+                    'travel_stories': '여행 이야기',
+                    'food_culture': '음식 문화',
+                    'music_movies': '음악/영화',
+                    'life_philosophy': '인생 철학',
+                    'future_dreams': '미래 꿈',
+                    'childhood_memories': '어린 시절',
+                    'work_passion': '일과 열정',
+                    'relationships': '인간관계'
+                },
+                vocabulary_register: {
+                    'casual_friendly': '캐주얼하고 친근함',
+                    'polite_formal': '정중하고 격식있음',
+                    'intellectual': '지적이고 세련됨',
+                    'trendy_modern': '트렌디하고 현대적',
+                    'warm_nurturing': '따뜻하고 포용적'
+                },
+                allowed_motifs: {
+                    'romance_love': '로맨스/사랑',
+                    'dreams_goals': '꿈과 목표',
+                    'personal_growth': '개인적 성장',
+                    'art_creativity': '예술과 창작',
+                    'nature_travel': '자연과 여행',
+                    'friendship': '우정과 인연',
+                    'philosophy': '철학적 대화',
+                    'daily_life': '일상 이야기'
                 }
             };
 
@@ -8460,7 +8654,7 @@
             document.getElementById('characterForm').reset();
 
             // 모든 선택 버튼들 초기화
-            document.querySelectorAll('.mbti-btn.selected, .trait-btn.selected, .relationship-btn.selected, .hobby-btn.selected, .speech-btn.selected, .charm-btn.selected, .desire-btn.selected, .skinship-btn.selected, .motif-btn.selected').forEach(btn => {
+            document.querySelectorAll('.mbti-btn.selected, .trait-btn.selected, .relationship-btn.selected, .hobby-btn.selected, .speech-btn.selected, .charm-btn.selected, .desire-btn.selected, .skinship-btn.selected, .motif-btn.selected, .flirting-btn.selected, .hook-btn.selected, .feature-btn.selected, .habit-btn.selected').forEach(btn => {
                 btn.classList.remove('selected');
             });
 
@@ -9163,6 +9357,48 @@
                         alert('좋아하는 스킨십은 최대 4개까지만 선택 가능합니다.');
                     }
                     console.log('✅ 선택된 스킨십:', getSelectedSkinships());
+                }
+
+                // 🆕 대화역학: 플러팅 패턴 버튼 클릭 이벤트 (최대 3개 선택)
+                if (e.target.classList.contains('flirting-btn')) {
+                    const selectedFlirting = document.querySelectorAll('.flirting-btn.selected').length;
+
+                    if (e.target.classList.contains('selected')) {
+                        e.target.classList.remove('selected');
+                    } else if (selectedFlirting < 3) {
+                        e.target.classList.add('selected');
+                    } else {
+                        alert('플러팅 패턴은 최대 3개까지만 선택 가능합니다.');
+                    }
+                    console.log('✅ 선택된 플러팅 패턴:', getSelectedFlirtingPatterns());
+                }
+
+                // 🆕 대화역학: 대화 훅 버튼 클릭 이벤트 (최대 4개 선택)
+                if (e.target.classList.contains('hook-btn')) {
+                    const selectedHooks = document.querySelectorAll('.hook-btn.selected').length;
+
+                    if (e.target.classList.contains('selected')) {
+                        e.target.classList.remove('selected');
+                    } else if (selectedHooks < 4) {
+                        e.target.classList.add('selected');
+                    } else {
+                        alert('대화 훅은 최대 4개까지만 선택 가능합니다.');
+                    }
+                    console.log('✅ 선택된 대화 훅:', getSelectedConversationHooks());
+                }
+
+                // 🆕 대화역학: 허용 모티프 버튼 클릭 이벤트 (최대 5개 선택)
+                if (e.target.classList.contains('motif-btn')) {
+                    const selectedMotifs = document.querySelectorAll('.motif-btn.selected').length;
+
+                    if (e.target.classList.contains('selected')) {
+                        e.target.classList.remove('selected');
+                    } else if (selectedMotifs < 5) {
+                        e.target.classList.add('selected');
+                    } else {
+                        alert('허용 대화 주제는 최대 5개까지만 선택 가능합니다.');
+                    }
+                    console.log('✅ 선택된 허용 모티프:', getSelectedAllowedMotifs());
                 }
             });
         }
@@ -12265,7 +12501,19 @@
                     }
                 },
                 conversation_dynamics: {
-                    speech_style: getSelectedSpeechStyle() // 🚨 버튼 시스템으로 변경
+                    speech_style: getSelectedSpeechStyle(), // 🚨 버튼 시스템으로 변경
+                    flirting_patterns: getSelectedFlirtingPatterns(), // 🆕 플러팅 패턴
+                    reaction_tendencies: {
+                        humor: document.getElementById('humorResponse')?.value || '', // 🆕 유머 반응
+                        compliment: document.getElementById('complimentResponse')?.value || '', // 🆕 칭찬 반응
+                        interest_expression: document.getElementById('interestResponse')?.value || '' // 🆕 관심 표현 반응
+                    },
+                    conversation_hooks: getSelectedConversationHooks(), // 🆕 대화 훅
+                    speech_habits: document.getElementById('speechHabits')?.value || '', // 🆕 말투 습관
+                    vocabulary_register: document.getElementById('vocabularyRegister')?.value || '', // 🆕 어휘 수준
+                    allowed_motifs: getSelectedAllowedMotifs(), // 🆕 허용 주제
+                    forbidden_terms: document.getElementById('forbiddenTerms')?.value ?
+                        document.getElementById('forbiddenTerms').value.split(',').map(s => s.trim()).filter(s => s) : [] // 🆕 금지 용어
                 },
                 // 🆕 과거 이력 정보
                 past_history: {
@@ -12438,6 +12686,65 @@
             });
 
             console.log('🎯 최종 스킨십 배열:', selected);
+            return selected.length === 0 ? null : selected;
+        }
+
+        // 🆕 대화역학 관련 새 데이터 수집 함수들
+
+        // 선택된 플러팅 패턴 수집
+        function getSelectedFlirtingPatterns() {
+            console.log('🔍 getSelectedFlirtingPatterns 실행 중...');
+            const selected = [];
+            const selectedFlirtingBtns = document.querySelectorAll('.flirting-btn.selected');
+            console.log('📊 선택된 flirting-btn 요소 수:', selectedFlirtingBtns.length);
+
+            selectedFlirtingBtns.forEach(btn => {
+                const value = btn.getAttribute('data-flirting');
+                if (value) {
+                    selected.push(value);
+                    console.log('✅ 플러팅패턴 수집됨:', value);
+                }
+            });
+
+            console.log('🎯 최종 플러팅패턴 배열:', selected);
+            return selected.length === 0 ? null : selected;
+        }
+
+        // 선택된 대화 훅 수집
+        function getSelectedConversationHooks() {
+            console.log('🔍 getSelectedConversationHooks 실행 중...');
+            const selected = [];
+            const selectedHookBtns = document.querySelectorAll('.hook-btn.selected');
+            console.log('📊 선택된 hook-btn 요소 수:', selectedHookBtns.length);
+
+            selectedHookBtns.forEach(btn => {
+                const value = btn.getAttribute('data-hook');
+                if (value) {
+                    selected.push(value);
+                    console.log('✅ 대화훅 수집됨:', value);
+                }
+            });
+
+            console.log('🎯 최종 대화훅 배열:', selected);
+            return selected.length === 0 ? null : selected;
+        }
+
+        // 선택된 허용 모티프 수집
+        function getSelectedAllowedMotifs() {
+            console.log('🔍 getSelectedAllowedMotifs 실행 중...');
+            const selected = [];
+            const selectedMotifBtns = document.querySelectorAll('.motif-btn.selected');
+            console.log('📊 선택된 motif-btn 요소 수:', selectedMotifBtns.length);
+
+            selectedMotifBtns.forEach(btn => {
+                const value = btn.getAttribute('data-motif');
+                if (value) {
+                    selected.push(value);
+                    console.log('✅ 허용모티프 수집됨:', value);
+                }
+            });
+
+            console.log('🎯 최종 허용모티프 배열:', selected);
             return selected.length === 0 ? null : selected;
         }
 
