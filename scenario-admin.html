@@ -3975,34 +3975,48 @@
                         </div>
                     </div>
 
-                    <!-- 🆔 최상위 메타 정보 -->
-                    <div class="char-category">
+                    <!-- 🆔 최상위 메타 정보 (숨겨진 자동 생성 필드들) -->
+                    <div class="char-category" style="display: none;">
                         <h3>🆔 기본 메타 정보</h3>
                         <div class="category-grid">
-                            <div class="form-group">
-                                <label>캐릭터 ID</label>
-                                <input type="text" id="characterMetaId" placeholder="자동 생성됩니다" readonly />
-                            </div>
+                            <!-- 자동 생성되는 필드들 -->
+                            <input type="hidden" id="characterMetaId" value="" />
+                            <input type="hidden" id="characterActive" value="true" />
+                            <input type="hidden" id="characterVersion" value="2.1" />
+                            <input type="hidden" id="characterSource" value="manual_creation" />
+                        </div>
+                    </div>
+
+                    <!-- 🔧 고급 설정 (필요시만 표시) -->
+                    <div class="char-category" id="advancedMetaSection" style="display: none;">
+                        <h3>🔧 고급 메타 설정</h3>
+                        <div class="category-grid">
                             <div class="form-group">
                                 <label>활성 여부</label>
-                                <select id="characterActive">
+                                <select id="characterActiveVisible">
                                     <option value="true" selected>✅ 활성</option>
                                     <option value="false">❌ 비활성</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>버전</label>
-                                <input type="text" id="characterVersion" value="2.1" readonly />
-                            </div>
-                            <div class="form-group">
                                 <label>소스</label>
-                                <select id="characterSource">
+                                <select id="characterSourceVisible">
                                     <option value="manual_creation" selected>🖐️ 수동 생성</option>
                                     <option value="ai_assisted">🤖 AI 보조</option>
                                     <option value="template_based">📋 템플릿 기반</option>
                                 </select>
                             </div>
                         </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-secondary" onclick="hideAdvancedMeta()">⬆️ 고급 설정 숨기기</button>
+                        </div>
+                    </div>
+
+                    <!-- 고급 설정 토글 버튼 -->
+                    <div class="form-group" style="text-align: center; margin-bottom: 20px;">
+                        <button type="button" class="btn btn-info btn-sm" onclick="toggleAdvancedMeta()" id="advancedToggleBtn">
+                            🔧 고급 메타 설정 보기
+                        </button>
                     </div>
 
                     <!-- 💖 기본 정보 -->
@@ -12709,6 +12723,25 @@
             }
         }
 
+        // 🔧 고급 메타 설정 토글 함수들
+        function toggleAdvancedMeta() {
+            const section = document.getElementById('advancedMetaSection');
+            const button = document.getElementById('advancedToggleBtn');
+
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                button.innerHTML = '🔧 고급 메타 설정 숨기기';
+            } else {
+                section.style.display = 'none';
+                button.innerHTML = '🔧 고급 메타 설정 보기';
+            }
+        }
+
+        function hideAdvancedMeta() {
+            document.getElementById('advancedMetaSection').style.display = 'none';
+            document.getElementById('advancedToggleBtn').innerHTML = '🔧 고급 메타 설정 보기';
+        }
+
         // 전역 함수로 등록
         window.randomizeName = randomizeName;
         window.randomizeAge = randomizeAge;
@@ -12728,6 +12761,8 @@
         window.randomizeStyle = randomizeStyle;
         window.randomizeAllFields = randomizeAllFields;
         window.resetAllFields = resetAllFields;
+        window.toggleAdvancedMeta = toggleAdvancedMeta;
+        window.hideAdvancedMeta = hideAdvancedMeta;
 
         // 즉시 초기화 (DOMContentLoaded 이미 발생한 경우 대비)
         if (document.readyState === 'loading') {
