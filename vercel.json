@@ -1,8 +1,19 @@
 {
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
+  "functions": {
+    "api/character-ai-generator.js": {
+      "maxDuration": 30
+    },
+    "api/admin-auth.js": {
+      "maxDuration": 10
+    },
+    "api/error-logger.js": {
+      "maxDuration": 10
+    },
+    "api/scenario-manager.js": {
+      "maxDuration": 30
+    },
+    "api/episode-manager.js": {
+      "maxDuration": 30
     }
-  ]
+  }
 }
