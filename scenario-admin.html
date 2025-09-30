@@ -12828,36 +12828,90 @@
 
         function randomizeHair() {
             const options = ['어깨선까지 내려오는 웨이브', '긴 생머리', '단발머리', '포니테일', '곱슬머리'];
-            document.getElementById('charHair').value = options[Math.floor(Math.random() * options.length)];
+            const element = document.getElementById('charHair');
+            if (!element) {
+                console.log('❌ charHair 요소를 찾을 수 없음');
+                return;
+            }
+            const selectedOption = options[Math.floor(Math.random() * options.length)];
+            element.value = selectedOption;
+            console.log('✅ 머리카락 랜덤 선택:', selectedOption);
         }
 
         function randomizeEyes() {
             const options = ['유혹적인 눈매', '아몬드형 눈', '고양이 같은 눈', '신비로운 깊은 눈', '관능적인 시선'];
-            document.getElementById('charEyes').value = options[Math.floor(Math.random() * options.length)];
+            const element = document.getElementById('charEyes');
+            if (!element) {
+                console.log('❌ charEyes 요소를 찾을 수 없음');
+                return;
+            }
+            const selectedOption = options[Math.floor(Math.random() * options.length)];
+            element.value = selectedOption;
+            console.log('✅ 눈 랜덤 선택:', selectedOption);
         }
 
         function randomizeBody() {
             const select = document.getElementById('charBody');
+            if (!select) {
+                console.log('❌ charBody 요소를 찾을 수 없음');
+                return;
+            }
             const options = select.options;
-            select.selectedIndex = Math.floor(Math.random() * options.length);
+            if (options.length === 0) {
+                console.log('❌ charBody 옵션이 없음');
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * options.length);
+            select.selectedIndex = randomIndex;
+            console.log('✅ 체형 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
         }
 
         function randomizeBust() {
             const select = document.getElementById('charBust');
+            if (!select) {
+                console.log('❌ charBust 요소를 찾을 수 없음');
+                return;
+            }
             const options = select.options;
-            select.selectedIndex = Math.floor(Math.random() * options.length);
+            if (options.length === 0) {
+                console.log('❌ charBust 옵션이 없음');
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * options.length);
+            select.selectedIndex = randomIndex;
+            console.log('✅ 가슴 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
         }
 
         function randomizeWaistHip() {
             const select = document.getElementById('charWaistHip');
+            if (!select) {
+                console.log('❌ charWaistHip 요소를 찾을 수 없음');
+                return;
+            }
             const options = select.options;
-            select.selectedIndex = Math.floor(Math.random() * options.length);
+            if (options.length === 0) {
+                console.log('❌ charWaistHip 옵션이 없음');
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * options.length);
+            select.selectedIndex = randomIndex;
+            console.log('✅ 허리/엉덩이 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
         }
 
         function randomizeStyle() {
             const select = document.getElementById('charStyle');
+            if (!select) {
+                console.log('❌ charStyle 요소를 찾을 수 없음');
+                return;
+            }
             const options = select.options;
-            select.selectedIndex = Math.floor(Math.random() * options.length);
+            if (options.length === 0) {
+                console.log('❌ charStyle 옵션이 없음');
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * options.length);
+            select.selectedIndex = randomIndex;
+            console.log('✅ 스타일 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
         }
 
         function randomizeAllFields() {
@@ -12886,12 +12940,16 @@
 
         // 🎯 캐릭터 폼 자동 채우기 함수 (폼 열 때 자동 실행)
         function autoFillRandomCharacterData() {
+            console.log('🎲 === autoFillRandomCharacterData 시작 ===');
+
             // 기본 정보 랜덤 선택
+            console.log('📝 기본 정보 랜덤 선택 중...');
             randomizeName();
             randomizeAge();
             randomizeOccupation();
 
             // 매력 프로필 랜덤 선택
+            console.log('💫 매력 프로필 랜덤 선택 중...');
             randomizeSeduction();
             randomizeCharms();
             randomizeEI();
@@ -12899,6 +12957,7 @@
             randomizeMystery();
 
             // 외모 정보 랜덤 선택
+            console.log('🎨 외모 정보 랜덤 선택 중...');
             randomizeHair();
             randomizeEyes();
             randomizeBody();
@@ -13010,6 +13069,8 @@
                 desires: selectedDesires,
                 skinships: selectedSkinships
             });
+
+            console.log('✅ === autoFillRandomCharacterData 완료 ===');
         }
 
         function resetAllFields() {
