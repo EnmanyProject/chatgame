@@ -539,7 +539,7 @@ module.exports = async function handler(req, res) {
     }
 
     if (action === 'get_character_photos') {
-      const { character_id } = req.query;
+      const character_id = req.query.character_id || req.body?.character_id;
       console.log('📸 캐릭터 사진 조회:', character_id);
 
       if (!character_id) {
