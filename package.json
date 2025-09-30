@@ -1,0 +1,28 @@
+{
+  "name": "chatgame",
+  "version": "1.0.0",
+  "description": "MBTI-based character chat training system",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'",
+    "start": "echo 'No start script required'"
+  },
+  "dependencies": {
+    "@octokit/rest": "^20.0.2"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "chat",
+    "game",
+    "mbti",
+    "character",
+    "training"
+  ],
+  "author": "ChatGame Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EnmanyProject/chatgame.git"
+  }
+}

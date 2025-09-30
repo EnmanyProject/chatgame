@@ -1,7 +1,7 @@
 // 캐릭터 사진 관리 API v1.0.0
 // GitHub API를 통한 사진 저장 및 관리 시스템
 
-import { Octokit } from 'https://esm.sh/@octokit/rest';
+const { Octokit } = require('@octokit/rest');
 
 // GitHub 설정
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
@@ -97,7 +97,7 @@ async function savePhotosToGitHub(photosData, sha) {
 }
 
 // 🎯 메인 API 핸들러
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     // CORS 헤더 설정
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
