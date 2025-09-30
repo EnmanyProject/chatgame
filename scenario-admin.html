@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌐 온라인 관리 시스템 - 채팅 기술 훈련</title>
+    <title>🌐 온라인 관리 시스템 - 채팅 기술 훈련 v2.1</title>
     <style>
         * {
             margin: 0;
@@ -10838,10 +10838,10 @@
             updatePhotoStats();
         }
 
-        // 📸 캐릭터 사진 데이터 로드
+        // 📸 캐릭터 사진 데이터 로드 (통합 API 사용)
         async function loadCharacterPhotos(characterId) {
             try {
-                console.log('📂 캐릭터 사진 로드 중:', characterId);
+                console.log('📂 캐릭터 사진 로드 중 (통합 API):', characterId);
 
                 const response = await fetch(`/api/character-ai-generator?action=get_character_photos&character_id=${characterId}&_t=${Date.now()}`);
                 const result = await response.json();
