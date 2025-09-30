@@ -68,6 +68,14 @@ module.exports = async function handler(req, res) {
 
         if (characterData) {
           console.log('✅ GitHub 직접 로드 성공:', Object.keys(characterData.characters || {}).length, '개 캐릭터');
+          return res.json({
+            success: true,
+            data: characterData,
+            characters: characterData.characters,
+            metadata: characterData.metadata,
+            message: 'GitHub에서 캐릭터 데이터를 성공적으로 로드했습니다',
+            source: 'github_success'
+          });
         } else {
           console.log('📂 GitHub에 캐릭터 데이터 없음, 빈 응답 반환');
           // 빈 데이터로 응답
