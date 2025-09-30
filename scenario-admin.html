@@ -2239,6 +2239,117 @@
             }
         }
 
+        /* 🎁 좋아하는 선물 CSS */
+        .favorite-gifts-section {
+            padding: 20px;
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-radius: 20px;
+            border: 2px solid #ff9800;
+            margin: 15px 0;
+        }
+
+        .favorite-gifts-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff8e1 0%, #fff3c4 100%);
+            border-radius: 18px;
+            border: 1px solid #ffb74d;
+        }
+
+        .gift-btn {
+            padding: 16px 14px;
+            border: 2px solid #ff9800;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #fffbf5 100%);
+            color: #e65100;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 3px 12px rgba(255, 152, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gift-btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 193, 7, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .gift-btn:hover {
+            border-color: #f57c00;
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(255, 152, 0, 0.25);
+            color: #bf360c;
+        }
+
+        .gift-btn:hover:before {
+            left: 100%;
+        }
+
+        .gift-btn.selected {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+            transform: translateY(-4px) scale(1.08);
+            box-shadow: 0 10px 30px rgba(255, 152, 0, 0.5);
+            animation: giftPulse 2s infinite;
+            border-color: #e65100;
+        }
+
+        @keyframes giftPulse {
+            0%, 100% {
+                box-shadow: 0 10px 30px rgba(255, 152, 0, 0.5);
+            }
+            50% {
+                box-shadow: 0 12px 35px rgba(255, 152, 0, 0.7);
+            }
+        }
+
+        .gift-btn:active {
+            transform: translateY(-2px) scale(0.98);
+            transition: all 0.1s ease;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .favorite-gifts-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+                padding: 15px;
+            }
+
+            .gift-btn {
+                padding: 14px 10px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .favorite-gifts-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .gift-btn {
+                padding: 12px 8px;
+                font-size: 11px;
+            }
+        }
+
         .conversation-dynamics {
             display: grid;
             gap: 20px;
@@ -4434,6 +4545,30 @@
                                 <label>성적 쿨적도 (1-10): <span id="sexualComfortValue">5</span></label>
                                 <input type="range" id="sexualComfort" min="1" max="10" value="5" oninput="document.getElementById('sexualComfortValue').textContent = this.value">
                                 <button type="button" class="btn-random" onclick="randomizeSexualComfort()">🎲</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 🎁 좋아하는 선물 (새로 추가) -->
+                    <div class="char-category">
+                        <h3>🎁 좋아하는 선물</h3>
+                        <div class="favorite-gifts-section">
+                            <div class="form-group">
+                                <label>💝 선호하는 선물 (최대 3개 선택)</label>
+                                <div class="favorite-gifts-grid">
+                                    <button type="button" class="gift-btn" data-gift="luxury_lingerie">💎 고급 속옷</button>
+                                    <button type="button" class="gift-btn" data-gift="expensive_car">🚗 고급 자동차</button>
+                                    <button type="button" class="gift-btn" data-gift="jewelry">💍 보석류</button>
+                                    <button type="button" class="gift-btn" data-gift="perfume">🌹 향수</button>
+                                    <button type="button" class="gift-btn" data-gift="designer_bag">👜 명품 가방</button>
+                                    <button type="button" class="gift-btn" data-gift="flowers">🌸 꽃다발</button>
+                                    <button type="button" class="gift-btn" data-gift="chocolate">🍫 고급 초콜릿</button>
+                                    <button type="button" class="gift-btn" data-gift="spa_voucher">🧖‍♀️ 스파 이용권</button>
+                                    <button type="button" class="gift-btn" data-gift="wine">🍷 고급 와인</button>
+                                    <button type="button" class="gift-btn" data-gift="books">📚 좋아하는 책</button>
+                                    <button type="button" class="gift-btn" data-gift="cute_accessories">🎀 귀여운 액세서리</button>
+                                    <button type="button" class="gift-btn" data-gift="travel_package">✈️ 여행 패키지</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -8677,6 +8812,21 @@
                     'subtle_wink': '은근한 윙크',
                     'gentle_stretch': '부드러운 스트레칭',
                     'playful_smile': '장난스러운 미소'
+                },
+                // 🎁 좋아하는 선물 번역
+                favorite_gifts: {
+                    'luxury_lingerie': '💎 고급 속옷 (50만원~)',
+                    'expensive_car': '🚗 고급 자동차 (5천만원~)',
+                    'jewelry': '💍 보석류 (100만원~)',
+                    'perfume': '🌹 향수 (10만원~)',
+                    'designer_bag': '👜 명품 가방 (200만원~)',
+                    'flowers': '🌸 꽃다발 (3만원~)',
+                    'chocolate': '🍫 고급 초콜릿 (5만원~)',
+                    'spa_voucher': '🧖‍♀️ 스파 이용권 (20만원~)',
+                    'wine': '🍷 고급 와인 (15만원~)',
+                    'books': '📚 좋아하는 책 (2만원~)',
+                    'cute_accessories': '🎀 귀여운 액세서리 (5만원~)',
+                    'travel_package': '✈️ 여행 패키지 (500만원~)'
                 }
             };
 
@@ -8790,7 +8940,7 @@
             document.getElementById('characterForm').reset();
 
             // 모든 선택 버튼들 초기화
-            document.querySelectorAll('.mbti-btn.selected, .trait-btn.selected, .relationship-btn.selected, .hobby-btn.selected, .speech-btn.selected, .charm-btn.selected, .desire-btn.selected, .skinship-btn.selected, .motif-btn.selected, .flirting-btn.selected, .hook-btn.selected, .confident-part-btn.selected, .seductive-pose-btn.selected').forEach(btn => {
+            document.querySelectorAll('.mbti-btn.selected, .trait-btn.selected, .relationship-btn.selected, .hobby-btn.selected, .speech-btn.selected, .charm-btn.selected, .desire-btn.selected, .skinship-btn.selected, .motif-btn.selected, .flirting-btn.selected, .hook-btn.selected, .confident-part-btn.selected, .seductive-pose-btn.selected, .gift-btn.selected').forEach(btn => {
                 btn.classList.remove('selected');
             });
 
@@ -9563,6 +9713,20 @@
                         alert('유혹적인 포즈는 최대 2개까지만 선택 가능합니다.');
                     }
                     console.log('✅ 선택된 유혹적인 포즈:', getSelectedSensualHabits());
+                }
+
+                // 🎁 좋아하는 선물 버튼 클릭 이벤트 (최대 3개 선택)
+                if (e.target.classList.contains('gift-btn')) {
+                    const selectedGifts = document.querySelectorAll('.gift-btn.selected').length;
+
+                    if (e.target.classList.contains('selected')) {
+                        e.target.classList.remove('selected');
+                    } else if (selectedGifts < 3) {
+                        e.target.classList.add('selected');
+                    } else {
+                        alert('좋아하는 선물은 최대 3개까지만 선택 가능합니다.');
+                    }
+                    console.log('✅ 선택된 좋아하는 선물:', getSelectedFavoriteGifts());
                 }
             });
         }
@@ -12685,7 +12849,9 @@
                     preferred_skinship: getSelectedSkinship(),
                     relationship_experience: document.getElementById('relationshipExperience')?.value || 'beginner',
                     first_experience_age: document.getElementById('firstExperienceAge')?.value || 'early_twenties'
-                }
+                },
+                // 🎁 좋아하는 선물 정보
+                favorite_gifts: getSelectedFavoriteGifts()
             };
 
             console.log('📋 수집된 폼 데이터 (확장):', formData);
@@ -12832,6 +12998,25 @@
 
             console.log('🎯 최종 유혹적인 포즈 배열:', selected);
             return selected.length === 0 ? ['hair_touch', 'deep_gaze'] : selected;
+        }
+
+        // 🎁 좋아하는 선물 선택된 항목 가져오기
+        function getSelectedFavoriteGifts() {
+            console.log('🔍 getSelectedFavoriteGifts 실행 중...');
+            const selected = [];
+            const selectedGiftBtns = document.querySelectorAll('.gift-btn.selected');
+            console.log('📊 선택된 gift-btn 요소 수:', selectedGiftBtns.length);
+
+            selectedGiftBtns.forEach(btn => {
+                const value = btn.getAttribute('data-gift');
+                if (value) {
+                    selected.push(value);
+                    console.log('✅ 좋아하는 선물 수집됨:', value);
+                }
+            });
+
+            console.log('🎯 최종 좋아하는 선물 배열:', selected);
+            return selected.length === 0 ? ['flowers', 'chocolate', 'perfume'] : selected;
         }
 
         // 🆕 선택된 스킨십 수집
@@ -13733,6 +13918,39 @@
             console.log('✅ 스타일 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
         }
 
+        // 🎁 좋아하는 선물 랜덤 선택 (3개 중 2-3개 선택)
+        function randomizeGifts() {
+            console.log('🎲 좋아하는 선물 랜덤 선택 시작...');
+
+            // 기존 선택 모두 해제
+            document.querySelectorAll('.gift-btn.selected').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            const giftBtns = document.querySelectorAll('.gift-btn');
+            if (giftBtns.length === 0) {
+                console.log('❌ gift-btn 요소를 찾을 수 없음');
+                return;
+            }
+
+            // 2-3개 사이 랜덤 선택
+            const selectCount = Math.floor(Math.random() * 2) + 2; // 2-3개
+            const giftArray = Array.from(giftBtns);
+
+            // 배열 섞기
+            for (let i = giftArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [giftArray[i], giftArray[j]] = [giftArray[j], giftArray[i]];
+            }
+
+            // 처음 selectCount개 선택
+            for (let i = 0; i < selectCount && i < giftArray.length; i++) {
+                giftArray[i].classList.add('selected');
+            }
+
+            console.log(`✅ 좋아하는 선물 ${selectCount}개 랜덤 선택 완료`);
+        }
+
         function randomizeAllFields() {
             randomizeName();
             randomizeAge();
@@ -13750,6 +13968,7 @@
             randomizeBust();
             randomizeWaistHip();
             randomizeStyle();
+            randomizeGifts(); // 🎁 좋아하는 선물 랜덤 선택
 
             const statusEl = document.getElementById('randomStatus');
             if (statusEl) {
@@ -13950,6 +14169,15 @@
 
         function getCharacterBodyLanguage(character) {
             return character.physical_allure?.body_language || '-';
+        }
+
+        // 🎁 좋아하는 선물 표시 함수
+        function getCharacterFavoriteGifts(character) {
+            const gifts = character.favorite_gifts;
+            if (gifts && Array.isArray(gifts) && gifts.length > 0) {
+                return gifts.map(gift => translateToKorean(gift, 'favorite_gifts')).join(', ');
+            }
+            return '-';
         }
 
         function getCharacterCoreDesires(character) {
