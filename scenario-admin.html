@@ -8365,18 +8365,19 @@
                     'direct_passionate': '직설적이고 열정적인'
                 },
                 hair: {
-                    'long_straight': '긴 직모',
-                    'long_wavy': '긴 웨이브 머리',
-                    'medium_bob': '단정한 단발머리',
-                    'short_cute': '짧고 귀여운 머리',
-                    'curly_hair': '곱슬머리'
+                    'long_straight': '섹시한 긴 생머리',
+                    'shoulder_wave': '매혹적인 웨이브',
+                    'short_bob': '도발적인 단발',
+                    'ponytail': '유혹적인 포니테일',
+                    'curly_volume': '볼륨 있는 컬',
+                    'messy_sexy': '섹시한 무조건 머리'
                 },
                 eyes: {
-                    'round_cute': '둥글고 귀여운 눈',
                     'seductive_eyes': '유혹적인 눈매',
-                    'innocent_eyes': '순수한 눈빛',
-                    'mysterious_eyes': '신비로운 눈매',
-                    'bright_eyes': '밝은 눈빛'
+                    'almond_elegant': '아몬드형 우아한',
+                    'cat_like': '고양이 같은',
+                    'mysterious_deep': '신비로운 깊은 눈',
+                    'sultry_gaze': '관능적인 시선'
                 },
                 body: {
                     'petite': '소녀 같은',
@@ -12476,8 +12477,8 @@
                 },
                 physical_allure: {
                     appearance: {
-                        hair: document.getElementById('charHair')?.value || '',
-                        eyes: document.getElementById('charEyes')?.value || '',
+                        hair: document.getElementById('charHair')?.value || 'long_straight',
+                        eyes: document.getElementById('charEyes')?.value || 'seductive_eyes',
                         body: document.getElementById('charBody')?.value || '',
                         bust: document.getElementById('charBust')?.value || '',
                         waist_hip: document.getElementById('charWaistHip')?.value || '',
@@ -13477,7 +13478,7 @@
         }
 
         function randomizeHair() {
-            const options = ['어깨선까지 내려오는 웨이브', '긴 생머리', '단발머리', '포니테일', '곱슬머리'];
+            const options = ['long_straight', 'shoulder_wave', 'short_bob', 'ponytail', 'curly_volume', 'messy_sexy'];
             const element = document.getElementById('charHair');
             if (!element) {
                 console.log('❌ charHair 요소를 찾을 수 없음');
@@ -13489,7 +13490,7 @@
         }
 
         function randomizeEyes() {
-            const options = ['유혹적인 눈매', '아몬드형 눈', '고양이 같은 눈', '신비로운 깊은 눈', '관능적인 시선'];
+            const options = ['seductive_eyes', 'almond_elegant', 'cat_like', 'mysterious_deep', 'sultry_gaze'];
             const element = document.getElementById('charEyes');
             if (!element) {
                 console.log('❌ charEyes 요소를 찾을 수 없음');
