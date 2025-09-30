@@ -1,54 +1,11 @@
 {
-  "characters": {
-    "나연__infj_1759213112713": {
-      "id": "나연__infj_1759213112713",
-      "basic_info": {
-        "name": "나연 ",
-        "age": 35,
-        "mbti": "INFJ",
-        "occupation": "art",
-        "gender": "female"
-      },
-      "appeal_profile": {
-        "seduction_style": "warm_nurturing",
-        "charm_points": null,
-        "emotional_intelligence": 9,
-        "confidence_level": 4,
-        "mystery_factor": 4
-      },
-      "physical_allure": {
-        "appearance": {
-          "hair": "shoulder_wave",
-          "eyes": "cat_like",
-          "body": "average_attractive",
-          "bust": "full_attractive",
-          "waist_hip": "hourglass",
-          "style": "casual_alluring"
-        }
-      },
-      "psychological_depth": {
-        "core_desires": null,
-        "boundaries": {
-          "comfort_level": "light_flirtation",
-          "escalation_pace": "very_gradual"
-        }
-      },
-      "conversation_dynamics": {
-        "speech_style": null
-      },
-      "created_at": "2025-09-30T06:18:32.713Z",
-      "updated_at": "2025-09-30T06:18:33.740Z",
-      "source": "api_save",
-      "active": true,
-      "version": "2.0"
-    }
-  },
+  "characters": {},
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 1,
+    "total_characters": 0,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-30T06:18:33.740Z",
-    "last_accessed": "2025-09-30T06:18:33.739Z"
+    "last_updated": "2025-09-30T06:28:04.871Z",
+    "last_accessed": "2025-09-30T06:28:04.871Z"
   }
 }
