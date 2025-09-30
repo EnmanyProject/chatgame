@@ -1,6 +1,6 @@
 {
   "name": "chatgame",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MBTI-based character chat training system",
   "main": "index.js",
   "scripts": {
