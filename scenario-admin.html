@@ -1112,13 +1112,15 @@
         }
 
         .photo-thumbnail {
-            width: 30px;
-            height: 30px;
-            border-radius: 6px;
-            object-fit: cover;
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: contain;
+            background: #f8f9fa;
             border: 2px solid #e0e0e0;
             cursor: pointer;
             transition: all 0.2s ease;
+            padding: 2px;
         }
 
         .photo-thumbnail:hover {
@@ -1128,9 +1130,9 @@
         }
 
         .more-photos-indicator {
-            width: 30px;
-            height: 30px;
-            border-radius: 6px;
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             display: flex;
