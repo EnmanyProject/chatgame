@@ -83,14 +83,56 @@
       "source": "api_save",
       "active": true,
       "version": "2.0"
+    },
+    "예린_infj_1759215342625": {
+      "id": "예린_infj_1759215342625",
+      "basic_info": {
+        "name": "예린",
+        "age": 25,
+        "mbti": "INFJ",
+        "occupation": "art",
+        "gender": "female"
+      },
+      "appeal_profile": {
+        "seduction_style": "intellectually_stimulating",
+        "charm_points": null,
+        "emotional_intelligence": 6,
+        "confidence_level": 2,
+        "mystery_factor": 3
+      },
+      "physical_allure": {
+        "appearance": {
+          "hair": "long_straight",
+          "eyes": "seductive_eyes",
+          "body": "petite_sexy",
+          "bust": "glamorous",
+          "waist_hip": "soft_feminine",
+          "style": "casual_alluring"
+        }
+      },
+      "psychological_depth": {
+        "core_desires": null,
+        "boundaries": {
+          "comfort_level": "light_flirtation",
+          "escalation_pace": "very_gradual"
+        }
+      },
+      "conversation_dynamics": {
+        "speech_style": null
+      },
+      "created_at": "2025-09-30T06:55:42.625Z",
+      "updated_at": "2025-09-30T06:55:43.077Z",
+      "source": "api_save",
+      "active": true,
+      "version": "2.0"
     }
   },
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 2,
+    "total_characters": 3,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-30T06:42:19.584Z",
-    "last_accessed": "2025-09-30T06:42:19.584Z"
+    "last_updated": "2025-09-30T06:55:43.077Z",
+    "last_accessed": "2025-09-30T06:55:43.077Z"
   }
 }
