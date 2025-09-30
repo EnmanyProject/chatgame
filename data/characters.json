@@ -1,29 +1,29 @@
 {
   "characters": {
-    "나연__infj_1759213112713": {
-      "id": "나연__infj_1759213112713",
+    "미화_enfp_1759213722666": {
+      "id": "미화_enfp_1759213722666",
       "basic_info": {
-        "name": "나연 ",
-        "age": 35,
-        "mbti": "INFJ",
+        "name": "미화",
+        "age": 27,
+        "mbti": "ENFP",
         "occupation": "art",
         "gender": "female"
       },
       "appeal_profile": {
-        "seduction_style": "warm_nurturing",
+        "seduction_style": "intellectually_stimulating",
         "charm_points": null,
-        "emotional_intelligence": 9,
-        "confidence_level": 4,
-        "mystery_factor": 4
+        "emotional_intelligence": 4,
+        "confidence_level": 9,
+        "mystery_factor": 5
       },
       "physical_allure": {
         "appearance": {
-          "hair": "shoulder_wave",
-          "eyes": "cat_like",
-          "body": "average_attractive",
-          "bust": "full_attractive",
-          "waist_hip": "hourglass",
-          "style": "casual_alluring"
+          "hair": "long_straight",
+          "eyes": "",
+          "body": "tall_elegant",
+          "bust": "small_cute",
+          "waist_hip": "slim_tight",
+          "style": "provocative_fashion"
         }
       },
       "psychological_depth": {
@@ -36,8 +36,8 @@
       "conversation_dynamics": {
         "speech_style": null
       },
-      "created_at": "2025-09-30T06:18:32.713Z",
-      "updated_at": "2025-09-30T06:18:33.740Z",
+      "created_at": "2025-09-30T06:28:42.666Z",
+      "updated_at": "2025-09-30T06:28:43.514Z",
       "source": "api_save",
       "active": true,
       "version": "2.0"
@@ -48,7 +48,7 @@
     "total_characters": 1,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-30T06:18:33.740Z",
-    "last_accessed": "2025-09-30T06:18:33.739Z"
+    "last_updated": "2025-09-30T06:28:43.514Z",
+    "last_accessed": "2025-09-30T06:28:43.513Z"
   }
 }
