@@ -1,15 +1,52 @@
-// AI 캐릭터 생성 API - v4.1.0 (응급 복구 완료)
-// 상태: 복잡한 하이브리드 캐시 시스템 제거, 안정적인 GitHub 직접 방식으로 복구
+// AI 캐릭터 생성 API - v4.2.0 (사진 관리 기능 통합)
+// 상태: 안정적인 GitHub 직접 방식 + 캐릭터 사진 관리 시스템 통합
 // 이전 문제: Vercel 서버리스 환경에서 메모리 캐시가 요청 간 유지되지 않아 500 오류 발생
 
 const DEFAULT_METADATA = {
-  version: "4.1.0",
+  version: "4.2.0",
   total_characters: 0,
   created: new Date().toISOString(),
   storage_type: "stable_github_direct",
   last_updated: new Date().toISOString(),
   performance_mode: "stable_reliable"
 };
+
+// 📸 사진 관리 시스템 추가
+const PHOTO_CATEGORIES = {
+    'profile': { name: '프로필', max: 1, description: '메인 프로필 사진' },
+    'casual': { name: '일상', max: 5, description: '일상적인 모습' },
+    'romantic': { name: '로맨틱', max: 5, description: '로맨틱한 순간' },
+    'emotional': { name: '감정표현', max: 5, description: '다양한 감정 표현' },
+    'special': { name: '특별한순간', max: 4, description: '특별한 이벤트나 순간' }
+};
+
+const PHOTOS_FILE_PATH = 'data/character-photos.json';
+
+// 🔧 사진 관리 유틸리티 함수들
+function validatePhotoData(photoData, category) {
+    if (!photoData || !photoData.startsWith('data:image/')) {
+        throw new Error('유효하지 않은 이미지 데이터입니다.');
+    }
+
+    if (!PHOTO_CATEGORIES[category]) {
+        throw new Error(`지원하지 않는 카테고리입니다: ${category}`);
+    }
+
+    // Base64 데이터 크기 확인 (약 2MB 제한)
+    const sizeInBytes = (photoData.length * 3) / 4;
+    const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+
+    if (sizeInBytes > maxSizeInBytes) {
+        throw new Error(`이미지 크기가 너무 큽니다. 최대 2MB까지 지원됩니다. (현재: ${Math.round(sizeInBytes / (1024 * 1024) * 10) / 10}MB)`);
+    }
+
+    return true;
+}
+
+function generatePhotoId(characterId, category) {
+    const timestamp = Date.now();
+    return `${characterId}_${category}_${timestamp}`;
+}
 
 module.exports = async function handler(req, res) {
   // 🚨 강력한 디버깅: API 호출 시작
@@ -481,6 +518,230 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // 📸 사진 관리 액션들
+    if (action === 'list_all_photos') {
+      console.log('📸 모든 사진 목록 조회');
+      try {
+        const photosData = await loadPhotosFromGitHub();
+        return res.status(200).json({
+          success: true,
+          data: photosData,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('❌ 사진 목록 조회 실패:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: error.message || '사진 데이터 로드 실패',
+          error_type: 'photo_list_error'
+        });
+      }
+    }
+
+    if (action === 'get_character_photos') {
+      const { character_id } = req.query;
+      console.log('📸 캐릭터 사진 조회:', character_id);
+
+      if (!character_id) {
+        return res.status(400).json({
+          success: false,
+          message: '캐릭터 ID가 필요합니다.'
+        });
+      }
+
+      try {
+        const photosData = await loadPhotosFromGitHub();
+
+        const characterPhotos = photosData.photos[character_id] || {
+          character_id,
+          photos: Object.keys(PHOTO_CATEGORIES).reduce((acc, cat) => {
+            acc[cat] = cat === 'profile' ? null : [];
+            return acc;
+          }, {}),
+          photo_count: 0
+        };
+
+        return res.status(200).json({
+          success: true,
+          data: characterPhotos,
+          categories: PHOTO_CATEGORIES
+        });
+      } catch (error) {
+        console.error('❌ 캐릭터 사진 조회 실패:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: error.message || '캐릭터 사진 조회 실패',
+          error_type: 'character_photos_error'
+        });
+      }
+    }
+
+    if (action === 'upload_photo') {
+      const { character_id, category, photo_data } = req.body;
+      console.log('📸 사진 업로드:', character_id, category);
+
+      if (!character_id || !category || !photo_data) {
+        return res.status(400).json({
+          success: false,
+          message: '캐릭터 ID, 카테고리, 사진 데이터가 모두 필요합니다.'
+        });
+      }
+
+      try {
+        // 사진 데이터 검증
+        validatePhotoData(photo_data, category);
+
+        // 사진 데이터 로드
+        const photosData = await loadPhotosFromGitHub();
+
+        // 캐릭터 사진 데이터 초기화 (없는 경우)
+        if (!photosData.photos[character_id]) {
+          photosData.photos[character_id] = {
+            character_id,
+            character_name: character_id.split('_')[0],
+            photos: Object.keys(PHOTO_CATEGORIES).reduce((acc, cat) => {
+              acc[cat] = cat === 'profile' ? null : [];
+              return acc;
+            }, {}),
+            photo_count: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+        }
+
+        const charPhotos = photosData.photos[character_id];
+        const categoryConfig = PHOTO_CATEGORIES[category];
+
+        // 카테고리별 최대 개수 확인
+        if (category === 'profile') {
+          charPhotos.photos.profile = {
+            id: generatePhotoId(character_id, 'profile'),
+            data: photo_data,
+            uploaded_at: new Date().toISOString()
+          };
+        } else {
+          if (charPhotos.photos[category].length >= categoryConfig.max) {
+            return res.status(400).json({
+              success: false,
+              message: `${categoryConfig.name} 카테고리는 최대 ${categoryConfig.max}장까지만 업로드 가능합니다.`
+            });
+          }
+
+          charPhotos.photos[category].push({
+            id: generatePhotoId(character_id, category),
+            data: photo_data,
+            uploaded_at: new Date().toISOString()
+          });
+        }
+
+        // 카운트 업데이트
+        charPhotos.photo_count = Object.values(charPhotos.photos).reduce((count, photos) => {
+          if (Array.isArray(photos)) {
+            return count + photos.length;
+          } else if (photos !== null) {
+            return count + 1;
+          }
+          return count;
+        }, 0);
+
+        charPhotos.updated_at = new Date().toISOString();
+
+        // 메타데이터 업데이트
+        photosData.metadata.total_photos = Object.values(photosData.photos).reduce((total, char) => total + char.photo_count, 0);
+        photosData.metadata.last_updated = new Date().toISOString();
+
+        // GitHub에 저장
+        await savePhotosToGitHub(photosData);
+
+        return res.status(200).json({
+          success: true,
+          message: '사진이 성공적으로 업로드되었습니다.',
+          data: charPhotos,
+          categories: PHOTO_CATEGORIES
+        });
+
+      } catch (error) {
+        console.error('❌ 사진 업로드 실패:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: error.message || '사진 업로드 실패',
+          error_type: 'photo_upload_error'
+        });
+      }
+    }
+
+    if (action === 'delete_photo') {
+      const { character_id, category, photo_id } = req.body;
+      console.log('📸 사진 삭제:', character_id, category, photo_id);
+
+      if (!character_id || !category || !photo_id) {
+        return res.status(400).json({
+          success: false,
+          message: '캐릭터 ID, 카테고리, 사진 ID가 모두 필요합니다.'
+        });
+      }
+
+      try {
+        const photosData = await loadPhotosFromGitHub();
+
+        if (!photosData.photos[character_id]) {
+          return res.status(404).json({
+            success: false,
+            message: '캐릭터를 찾을 수 없습니다.'
+          });
+        }
+
+        const targetCharPhotos = photosData.photos[character_id];
+        let needsSave = false;
+
+        if (category === 'profile') {
+          if (targetCharPhotos.photos.profile && targetCharPhotos.photos.profile.id === photo_id) {
+            targetCharPhotos.photos.profile = null;
+            needsSave = true;
+          }
+        } else {
+          const photoIndex = targetCharPhotos.photos[category].findIndex(photo => photo.id === photo_id);
+          if (photoIndex !== -1) {
+            targetCharPhotos.photos[category].splice(photoIndex, 1);
+            needsSave = true;
+          }
+        }
+
+        if (needsSave) {
+          // 카운트 업데이트
+          targetCharPhotos.photo_count = Object.values(targetCharPhotos.photos).reduce((count, photos) => {
+            if (Array.isArray(photos)) {
+              return count + photos.length;
+            } else if (photos !== null) {
+              return count + 1;
+            }
+            return count;
+          }, 0);
+
+          targetCharPhotos.updated_at = new Date().toISOString();
+          photosData.metadata.last_updated = new Date().toISOString();
+
+          // GitHub에 저장
+          await savePhotosToGitHub(photosData);
+        }
+
+        return res.status(200).json({
+          success: true,
+          message: '사진이 성공적으로 삭제되었습니다.',
+          data: targetCharPhotos,
+          categories: PHOTO_CATEGORIES
+        });
+
+      } catch (error) {
+        console.error('❌ 사진 삭제 실패:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: error.message || '사진 삭제 실패',
+          error_type: 'photo_delete_error'
+        });
+      }
+    }
+
     console.log('❌❌❌ 액션 매칭 실패 ❌❌❌');
     console.log('❌ 요청된 액션:', action);
     console.log('❌ 액션 타입:', typeof action);
@@ -493,10 +754,14 @@ module.exports = async function handler(req, res) {
     console.log('  - auto_complete_character');
     console.log('  - generate_character_profile');
     console.log('  - generate_complete_character_with_profile');
+    console.log('  - list_all_photos');
+    console.log('  - get_character_photos');
+    console.log('  - upload_photo');
+    console.log('  - delete_photo');
 
     return res.status(400).json({
       success: false,
-      message: 'Unknown action. Available: list_characters, save_character, delete_character, reset_all_characters, generate_character, auto_complete_character, generate_character_profile, generate_complete_character_with_profile',
+      message: 'Unknown action. Available: list_characters, save_character, delete_character, reset_all_characters, generate_character, auto_complete_character, generate_character_profile, generate_complete_character_with_profile, list_all_photos, get_character_photos, upload_photo, delete_photo',
       received_action: action,
       action_type: typeof action,
       debug_info: debugInfo,
@@ -1988,4 +2253,127 @@ function getPsychologicalDescription(characterData) {
 
 function randomChoice(array) {
   return array[Math.floor(Math.random() * array.length)];
+}
+
+// 📸 사진 관리를 위한 GitHub 함수들
+async function loadPhotosFromGitHub() {
+  const REPO_OWNER = 'EnmanyProject';
+  const REPO_NAME = 'chatgame';
+  const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+
+  try {
+    console.log('📸 GitHub에서 사진 데이터 로드 시도...');
+
+    const getFileUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${PHOTOS_FILE_PATH}`;
+
+    const headers = {
+      'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'ChatGame-Photo-Loader'
+    };
+
+    if (GITHUB_TOKEN) {
+      headers['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
+    }
+
+    const response = await fetch(getFileUrl, {
+      method: 'GET',
+      headers: headers
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const content = Buffer.from(data.content, 'base64').toString('utf-8');
+      console.log('✅ 사진 데이터 로드 성공');
+      return JSON.parse(content);
+    } else if (response.status === 404) {
+      console.log('📸 사진 데이터베이스가 없습니다. 새로 생성합니다.');
+      return {
+        photos: {},
+        metadata: {
+          version: "1.0.0",
+          total_characters: 0,
+          total_photos: 0,
+          storage_type: "github_base64",
+          max_photo_size: "2MB",
+          supported_formats: ["jpeg", "jpg", "png", "webp"],
+          categories: PHOTO_CATEGORIES,
+          created: new Date().toISOString(),
+          last_updated: new Date().toISOString()
+        }
+      };
+    } else {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error('❌ 사진 데이터 로드 실패:', error.message);
+    throw error;
+  }
+}
+
+async function savePhotosToGitHub(photosData) {
+  const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+  const REPO_OWNER = 'EnmanyProject';
+  const REPO_NAME = 'chatgame';
+
+  try {
+    console.log('📸 GitHub에 사진 데이터 저장 시도...');
+
+    if (!GITHUB_TOKEN) {
+      throw new Error('GitHub 토큰이 설정되지 않았습니다');
+    }
+
+    // 현재 파일의 SHA 가져오기
+    const getFileUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${PHOTOS_FILE_PATH}`;
+    let sha = null;
+
+    try {
+      const getResponse = await fetch(getFileUrl, {
+        headers: {
+          'Authorization': `Bearer ${GITHUB_TOKEN}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+
+      if (getResponse.ok) {
+        const fileData = await getResponse.json();
+        sha = fileData.sha;
+      }
+    } catch (error) {
+      console.log('📄 기존 파일 없음 - 새 파일 생성');
+    }
+
+    // 파일 업데이트/생성
+    const content = Buffer.from(JSON.stringify(photosData, null, 2)).toString('base64');
+
+    const updateUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${PHOTOS_FILE_PATH}`;
+    const updateData = {
+      message: `Update character photos database - ${new Date().toISOString()}`,
+      content: content
+    };
+
+    if (sha) {
+      updateData.sha = sha;
+    }
+
+    const updateResponse = await fetch(updateUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updateData)
+    });
+
+    if (updateResponse.ok) {
+      console.log('✅ 사진 데이터 GitHub 저장 성공');
+      return true;
+    } else {
+      const error = await updateResponse.text();
+      throw new Error(`GitHub 저장 실패: ${updateResponse.status} - ${error}`);
+    }
+  } catch (error) {
+    console.error('❌ 사진 데이터 GitHub 저장 실패:', error.message);
+    throw error;
+  }
 }
