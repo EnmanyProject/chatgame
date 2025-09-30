@@ -12940,8 +12940,8 @@
                 document.getElementById('charSpeechStyle').value = randomSpeech;
             }
 
-            // 매력 포인트 랜덤 선택 (1-3개)
-            const charmOptions = ['smile', 'eyes', 'voice', 'personality', 'intelligence', 'humor', 'kindness', 'passion'];
+            // 매력 포인트 랜덤 선택 (1-3개) - 실제 HTML의 data-charm 값들 사용
+            const charmOptions = ['infectious_smile', 'witty_banter', 'confident_touch', 'mysterious_aura', 'graceful_movements', 'expressive_eyes'];
             const numCharms = Math.floor(Math.random() * 3) + 1; // 1-3개
             document.querySelectorAll('.charm-btn').forEach(btn => btn.classList.remove('selected'));
             const selectedCharms = [];
@@ -12953,12 +12953,15 @@
                     const charmBtn = document.querySelector(`[data-charm="${randomCharm}"]`);
                     if (charmBtn) {
                         charmBtn.classList.add('selected');
+                        console.log('✅ 매력포인트 선택됨:', randomCharm);
+                    } else {
+                        console.log('❌ 매력포인트 버튼 못찾음:', randomCharm);
                     }
                 }
             }
 
-            // 핵심 욕구 랜덤 선택 (1-2개)
-            const desireOptions = ['love', 'recognition', 'security', 'freedom', 'growth', 'adventure'];
+            // 핵심 욕구 랜덤 선택 (1-2개) - 실제 HTML의 data-desire 값들 사용
+            const desireOptions = ['meaningful_connection', 'creative_expression', 'personal_growth', 'adventure_excitement', 'intellectual_stimulation'];
             const numDesires = Math.floor(Math.random() * 2) + 1; // 1-2개
             document.querySelectorAll('.desire-btn').forEach(btn => btn.classList.remove('selected'));
             const selectedDesires = [];
@@ -12970,27 +12973,34 @@
                     const desireBtn = document.querySelector(`[data-desire="${randomDesire}"]`);
                     if (desireBtn) {
                         desireBtn.classList.add('selected');
+                        console.log('✅ 핵심욕구 선택됨:', randomDesire);
+                    } else {
+                        console.log('❌ 핵심욕구 버튼 못찾음:', randomDesire);
                     }
                 }
             }
 
-            // 스킨십 수위 랜덤 선택
-            const skinshipOptions = ['innocent', 'moderate', 'intimate'];
-            const randomSkinship = skinshipOptions[Math.floor(Math.random() * skinshipOptions.length)];
+            // 스킨십 수위 랜덤 선택 (1-3개) - 실제 HTML의 data-skinship 값들 사용
+            const skinshipOptions = ['hand_holding', 'light_hugs', 'cheek_kiss', 'shoulder_massage', 'head_patting', 'back_rubbing', 'intimate_cuddling', 'passionate_kiss'];
+            const numSkinships = Math.floor(Math.random() * 3) + 1; // 1-3개
             document.querySelectorAll('.skinship-btn').forEach(btn => btn.classList.remove('selected'));
-            const skinshipBtn = document.querySelector(`[data-skinship="${randomSkinship}"]`);
-            if (skinshipBtn) {
-                skinshipBtn.classList.add('selected');
+            const selectedSkinships = [];
+            for (let i = 0; i < numSkinships; i++) {
+                const availableOptions = skinshipOptions.filter(option => !selectedSkinships.includes(option));
+                if (availableOptions.length > 0) {
+                    const randomSkinship = availableOptions[Math.floor(Math.random() * availableOptions.length)];
+                    selectedSkinships.push(randomSkinship);
+                    const skinshipBtn = document.querySelector(`[data-skinship="${randomSkinship}"]`);
+                    if (skinshipBtn) {
+                        skinshipBtn.classList.add('selected');
+                        console.log('✅ 스킨십 선택됨:', randomSkinship);
+                    } else {
+                        console.log('❌ 스킨십 버튼 못찾음:', randomSkinship);
+                    }
+                }
             }
 
-            // 과거 경험 모티프 랜덤 선택
-            const motifOptions = ['first_love', 'heartbreak', 'family_issue', 'career_struggle', 'friendship_betrayal', 'personal_growth'];
-            const randomMotif = motifOptions[Math.floor(Math.random() * motifOptions.length)];
-            document.querySelectorAll('.motif-btn').forEach(btn => btn.classList.remove('selected'));
-            const motifBtn = document.querySelector(`[data-motif="${randomMotif}"]`);
-            if (motifBtn) {
-                motifBtn.classList.add('selected');
-            }
+            // 과거 경험 모티프는 HTML에 구현되지 않아서 제거
 
             console.log('🎲 캐릭터 폼 자동 채우기 완료:', {
                 mbti: randomMbti,
@@ -12998,8 +13008,7 @@
                 speech: randomSpeech,
                 charms: selectedCharms,
                 desires: selectedDesires,
-                skinship: randomSkinship,
-                motif: randomMotif
+                skinships: selectedSkinships
             });
         }
 
