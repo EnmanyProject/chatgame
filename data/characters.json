@@ -150,91 +150,14 @@
       "source": "scenario_admin_v2",
       "active": true,
       "version": "2.0"
-    },
-    "유리_entp_1759222013317": {
-      "id": "유리_entp_1759222013317",
-      "basic_info": {
-        "name": "유리",
-        "age": 31,
-        "mbti": "ENTP",
-        "occupation": "art",
-        "gender": "female"
-      },
-      "appeal_profile": {
-        "seduction_style": "warm_nurturing",
-        "charm_points": [
-          "confident_touch",
-          "graceful_movements"
-        ],
-        "emotional_intelligence": 4,
-        "confidence_level": 9,
-        "mystery_factor": 1,
-        "sexual_curiosity": 10,
-        "sexual_comfort": 2,
-        "hobbies": null
-      },
-      "physical_allure": {
-        "appearance": {
-          "hair": "",
-          "eyes": "",
-          "body": "model_like",
-          "bust": "glamorous",
-          "waist_hip": "slim_tight",
-          "style": "provocative_fashion"
-        },
-        "feature_elements": null,
-        "sensual_habits": null,
-        "body_language": ""
-      },
-      "psychological_depth": {
-        "core_desires": [
-          "creative_expression",
-          "personal_growth"
-        ],
-        "values": "personal_growth",
-        "boundaries": {
-          "comfort_level": "light_flirtation",
-          "escalation_pace": "quick_progression"
-        }
-      },
-      "conversation_dynamics": {
-        "speech_style": "bold_provocative",
-        "flirting_patterns": null,
-        "reaction_tendencies": {
-          "humor": "giggles_easily",
-          "compliment": "gracefully_accepts",
-          "interest_expression": "enthusiastic_sharing"
-        },
-        "conversation_hooks": null,
-        "speech_habits": "",
-        "vocabulary_register": "intellectual",
-        "allowed_motifs": [
-          "art_creativity"
-        ],
-        "forbidden_terms": []
-      },
-      "past_history": {
-        "boyfriend_count": 2,
-        "preferred_skinship": [
-          "hand_holding",
-          "passionate_kiss"
-        ],
-        "relationship_experience": "intermediate",
-        "first_experience_age": "early_teens"
-      },
-      "created_at": "2025-09-30T08:46:53.317Z",
-      "updated_at": "2025-09-30T08:46:54.041Z",
-      "source": "scenario_admin_v2",
-      "active": true,
-      "version": "2.0"
     }
   },
   "metadata": {
     "version": "4.1.0",
-    "total_characters": 3,
+    "total_characters": 2,
     "created": "2025-09-28T10:43:23.975Z",
-    "storage_type": "stable_github_direct",
-    "last_updated": "2025-09-30T08:46:54.041Z",
-    "last_accessed": "2025-09-30T08:46:54.041Z"
+    "storage_type": "github_api_only",
+    "last_updated": "2025-09-30T08:53:48.028Z",
+    "last_accessed": "2025-09-30T08:53:48.028Z"
   }
 }
