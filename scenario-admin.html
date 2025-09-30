@@ -8104,8 +8104,6 @@
                     <div class="character-info">
                         <div class="mbti">${getCharacterMBTI(character)}</div>
                         <h3>${getCharacterName(character)}</h3>
-                        <p class="traits" style="margin-bottom: 8px;"><strong>매력:</strong> ${getCharacterTraits(character)}</p>
-                        <p style="font-size: 0.9em; color: #95a5a6; margin-bottom: 8px;"><strong>말투:</strong> ${getCharacterSpeechStyle(character)}</p>
                         <p style="font-size: 0.9em; color: #34495e; margin-bottom: 8px;"><strong>스타일:</strong> ${getCharacterSeductionStyle(character)}</p>
                         <p style="font-size: 0.9em; color: #34495e; margin-bottom: 8px;"><strong>체형:</strong> ${getCharacterBody(character)}</p>
                         <div style="font-size: 0.85em; color: #7f8c8d; margin-bottom: 8px;">
@@ -8113,9 +8111,6 @@
                         </div>
                         <div style="font-size: 0.85em; color: #27ae60; margin-bottom: 10px;">
                             <strong>욕구:</strong> ${getCharacterCoreDesires(character)}
-                        </div>
-                        <div class="character-schema-info" style="font-size: 0.8em; color: #7f8c8d; margin-bottom: 10px;">
-                            ${character.version || (character.basic_info ? 'v2.0' : 'v1.0')} ${character.source ? `• ${character.source}` : ''}
                         </div>
                         <div class="actions" onclick="event.stopPropagation()">
                             <button class="btn btn-success" onclick="editCharacter('${character.id}')">수정</button>
