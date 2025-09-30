@@ -4585,25 +4585,157 @@
                         </div>
                     </div>
 
-                    <!-- 매력 프로필 (v2.0 스키마용) -->
-                    <div class="detail-section" id="appealProfileSection" style="display: none;">
-                        <h3>💕 매력 프로필</h3>
+                    <!-- 매력 프로필 (v2.1 스키마 확장) -->
+                    <div class="detail-section" id="appealProfileSection">
+                        <h3>💫 매력 프로필</h3>
                         <div class="detail-grid">
                             <div class="detail-item">
                                 <span class="detail-label">유혹 스타일:</span>
                                 <span id="detailSeductionStyle" class="detail-value">-</span>
                             </div>
                             <div class="detail-item">
+                                <span class="detail-label">매력 포인트:</span>
+                                <span id="detailCharmPoints" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
                                 <span class="detail-label">감정지능:</span>
                                 <span id="detailEmotionalIntelligence" class="detail-value">-</span>
                             </div>
                             <div class="detail-item">
-                                <span class="detail-label">자신감:</span>
+                                <span class="detail-label">자신감 수준:</span>
                                 <span id="detailConfidenceLevel" class="detail-value">-</span>
                             </div>
                             <div class="detail-item">
-                                <span class="detail-label">신비감:</span>
+                                <span class="detail-label">신비로움:</span>
                                 <span id="detailMysteryFactor" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">성적 호기심:</span>
+                                <span id="detailSexualCuriosity" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">성적 쿨적도:</span>
+                                <span id="detailSexualComfort" class="detail-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 외모 매력 (새로운 v2.1 필드들) -->
+                    <div class="detail-section">
+                        <h3>✨ 외모 매력</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item detail-full">
+                                <span class="detail-label">특징 요소:</span>
+                                <span id="detailFeatureElements" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item detail-full">
+                                <span class="detail-label">관능적 습관:</span>
+                                <span id="detailSensualHabits" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item detail-full">
+                                <span class="detail-label">몸짓 언어:</span>
+                                <span id="detailBodyLanguage" class="detail-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 심리적 깊이 (확장) -->
+                    <div class="detail-section">
+                        <h3>🧠 심리적 깊이</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item detail-full">
+                                <span class="detail-label">핵심 욕구:</span>
+                                <span id="detailCoreDesires" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item detail-full">
+                                <span class="detail-label">취약점:</span>
+                                <span id="detailVulnerabilities" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">플러팅 수위:</span>
+                                <span id="detailComfortLevel" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">전개 속도:</span>
+                                <span id="detailEscalationPace" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">성적 톤 밴드:</span>
+                                <span id="detailSexualToneBand" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">성적 자유분방함:</span>
+                                <span id="detailSexualFreedom" class="detail-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 대화역학 (새로운 v2.1 섹션) -->
+                    <div class="detail-section">
+                        <h3>💬 대화역학</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item detail-full">
+                                <span class="detail-label">플러팅 패턴:</span>
+                                <span id="detailFlirtingPatterns" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">유머 반응:</span>
+                                <span id="detailHumorResponse" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">칭찬 반응:</span>
+                                <span id="detailComplimentResponse" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">관심 표현 반응:</span>
+                                <span id="detailInterestResponse" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item detail-full">
+                                <span class="detail-label">대화 훅:</span>
+                                <span id="detailConversationHooks" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">말투 스타일:</span>
+                                <span id="detailSpeechStyleNew" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item detail-full">
+                                <span class="detail-label">말투 습관:</span>
+                                <span id="detailSpeechHabits" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">어휘 레지스터:</span>
+                                <span id="detailVocabularyRegister" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item detail-full">
+                                <span class="detail-label">허용 모티프:</span>
+                                <span id="detailAllowedMotifs" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item detail-full">
+                                <span class="detail-label">금지 용어:</span>
+                                <span id="detailForbiddenTerms" class="detail-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 과거 이력 (새로운 v2.1 섹션) -->
+                    <div class="detail-section">
+                        <h3>📋 과거 이력</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">남자친구 수:</span>
+                                <span id="detailBoyfriendCount" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item detail-full">
+                                <span class="detail-label">선호 스킨십:</span>
+                                <span id="detailPreferredSkinship" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">연애 경험치:</span>
+                                <span id="detailRelationshipExperience" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">첫 경험 시기:</span>
+                                <span id="detailFirstExperienceAge" class="detail-value">-</span>
                             </div>
                         </div>
                     </div>
@@ -7941,19 +8073,51 @@
             safeSetTextContent('detailFamily', getCharacterFamily(character));
             safeSetTextContent('detailHometown', getCharacterHometown(character));
 
-            // 매력 프로필 (v2.0 스키마인 경우만 표시)
+            // 매력 프로필 (v2.0+ 스키마 표시)
             const isV2Schema = character.basic_info || character.appeal_profile;
             const appealSection = document.getElementById('appealProfileSection');
-            if (appealSection) {
-                if (isV2Schema) {
-                    appealSection.style.display = 'block';
-                    safeSetTextContent('detailSeductionStyle', getCharacterSeductionStyle(character));
-                    safeSetTextContent('detailEmotionalIntelligence', getCharacterEmotionalIntelligence(character));
-                    safeSetTextContent('detailConfidenceLevel', getCharacterConfidenceLevel(character));
-                    safeSetTextContent('detailMysteryFactor', getCharacterMysteryFactor(character));
-                } else {
-                    appealSection.style.display = 'none';
-                }
+            if (appealSection && isV2Schema) {
+                // 기본 매력 프로필
+                safeSetTextContent('detailSeductionStyle', getCharacterSeductionStyle(character));
+                safeSetTextContent('detailCharmPoints', getCharacterCharmPoints(character));
+                safeSetTextContent('detailEmotionalIntelligence', getCharacterEmotionalIntelligence(character));
+                safeSetTextContent('detailConfidenceLevel', getCharacterConfidenceLevel(character));
+                safeSetTextContent('detailMysteryFactor', getCharacterMysteryFactor(character));
+
+                // v2.1 새 필드들
+                safeSetTextContent('detailSexualCuriosity', getCharacterSexualCuriosity(character));
+                safeSetTextContent('detailSexualComfort', getCharacterSexualComfort(character));
+
+                // 외모 매력 v2.1
+                safeSetTextContent('detailFeatureElements', getCharacterFeatureElements(character));
+                safeSetTextContent('detailSensualHabits', getCharacterSensualHabits(character));
+                safeSetTextContent('detailBodyLanguage', getCharacterBodyLanguage(character));
+
+                // 심리적 깊이 v2.1
+                safeSetTextContent('detailCoreDesires', getCharacterCoreDesires(character));
+                safeSetTextContent('detailVulnerabilities', getCharacterVulnerabilities(character));
+                safeSetTextContent('detailComfortLevel', getCharacterComfortLevel(character));
+                safeSetTextContent('detailEscalationPace', getCharacterEscalationPace(character));
+                safeSetTextContent('detailSexualToneBand', getCharacterSexualToneBand(character));
+                safeSetTextContent('detailSexualFreedom', getCharacterSexualFreedom(character));
+
+                // 대화역학 v2.1
+                safeSetTextContent('detailFlirtingPatterns', getCharacterFlirtingPatterns(character));
+                safeSetTextContent('detailHumorResponse', getCharacterHumorResponse(character));
+                safeSetTextContent('detailComplimentResponse', getCharacterComplimentResponse(character));
+                safeSetTextContent('detailInterestResponse', getCharacterInterestResponse(character));
+                safeSetTextContent('detailConversationHooks', getCharacterConversationHooks(character));
+                safeSetTextContent('detailSpeechStyleNew', getCharacterSpeechStyleNew(character));
+                safeSetTextContent('detailSpeechHabits', getCharacterSpeechHabits(character));
+                safeSetTextContent('detailVocabularyRegister', getCharacterVocabularyRegister(character));
+                safeSetTextContent('detailAllowedMotifs', getCharacterAllowedMotifs(character));
+                safeSetTextContent('detailForbiddenTerms', getCharacterForbiddenTerms(character));
+
+                // 과거 이력 v2.1
+                safeSetTextContent('detailBoyfriendCount', getCharacterBoyfriendCount(character));
+                safeSetTextContent('detailPreferredSkinship', getCharacterPreferredSkinship(character));
+                safeSetTextContent('detailRelationshipExperience', getCharacterRelationshipExperience(character));
+                safeSetTextContent('detailFirstExperienceAge', getCharacterFirstExperienceAge(character));
             }
 
             // 시스템 정보
@@ -12721,6 +12885,126 @@
             if (statusEl) {
                 statusEl.innerHTML = '🔄 모든 필드가 초기화되었습니다!';
             }
+        }
+
+        // 📝 v2.1 스키마 필드 추출 함수들
+        function getCharacterCharmPoints(character) {
+            const charmPoints = character.appeal_profile?.charm_points;
+            return charmPoints && Array.isArray(charmPoints) ? charmPoints.join(', ') : '-';
+        }
+
+        function getCharacterSexualCuriosity(character) {
+            const value = character.appeal_profile?.sexual_curiosity;
+            return value ? `${value}/10` : '-';
+        }
+
+        function getCharacterSexualComfort(character) {
+            const value = character.appeal_profile?.sexual_comfort;
+            return value ? `${value}/10` : '-';
+        }
+
+        function getCharacterFeatureElements(character) {
+            const features = character.physical_allure?.feature_elements;
+            return features && Array.isArray(features) ? features.join(', ') : '-';
+        }
+
+        function getCharacterSensualHabits(character) {
+            const habits = character.physical_allure?.sensual_habits;
+            return habits && Array.isArray(habits) ? habits.join(', ') : '-';
+        }
+
+        function getCharacterBodyLanguage(character) {
+            return character.physical_allure?.body_language || '-';
+        }
+
+        function getCharacterCoreDesires(character) {
+            const desires = character.psychological_depth?.core_desires;
+            return desires && Array.isArray(desires) ? desires.join(', ') : '-';
+        }
+
+        function getCharacterVulnerabilities(character) {
+            const vulnerabilities = character.psychological_depth?.vulnerabilities;
+            return vulnerabilities && Array.isArray(vulnerabilities) ? vulnerabilities.join(', ') : '-';
+        }
+
+        function getCharacterComfortLevel(character) {
+            return character.psychological_depth?.boundaries?.comfort_level || '-';
+        }
+
+        function getCharacterEscalationPace(character) {
+            return character.psychological_depth?.boundaries?.escalation_pace || '-';
+        }
+
+        function getCharacterSexualToneBand(character) {
+            return character.psychological_depth?.boundaries?.sexual_tone_band || '-';
+        }
+
+        function getCharacterSexualFreedom(character) {
+            const value = character.psychological_depth?.sexual_freedom;
+            return value ? `${value}/10` : '-';
+        }
+
+        function getCharacterFlirtingPatterns(character) {
+            const patterns = character.conversation_dynamics?.flirting_patterns;
+            return patterns && Array.isArray(patterns) ? patterns.join(', ') : '-';
+        }
+
+        function getCharacterHumorResponse(character) {
+            return character.conversation_dynamics?.reaction_tendencies?.humor || '-';
+        }
+
+        function getCharacterComplimentResponse(character) {
+            return character.conversation_dynamics?.reaction_tendencies?.compliment || '-';
+        }
+
+        function getCharacterInterestResponse(character) {
+            return character.conversation_dynamics?.reaction_tendencies?.interest_expression || '-';
+        }
+
+        function getCharacterConversationHooks(character) {
+            const hooks = character.conversation_dynamics?.conversation_hooks;
+            return hooks && Array.isArray(hooks) ? hooks.join(', ') : '-';
+        }
+
+        function getCharacterSpeechStyleNew(character) {
+            return character.conversation_dynamics?.speech_style || '-';
+        }
+
+        function getCharacterSpeechHabits(character) {
+            const habits = character.conversation_dynamics?.speech_habits;
+            return habits && Array.isArray(habits) ? habits.join(', ') : '-';
+        }
+
+        function getCharacterVocabularyRegister(character) {
+            return character.conversation_dynamics?.vocabulary_register || '-';
+        }
+
+        function getCharacterAllowedMotifs(character) {
+            const motifs = character.conversation_dynamics?.allowed_motifs;
+            return motifs && Array.isArray(motifs) ? motifs.join(', ') : '-';
+        }
+
+        function getCharacterForbiddenTerms(character) {
+            const terms = character.conversation_dynamics?.forbidden_terms;
+            return terms && Array.isArray(terms) ? terms.join(', ') : '-';
+        }
+
+        function getCharacterBoyfriendCount(character) {
+            const count = character.past_history?.boyfriend_count;
+            return count !== undefined ? `${count}명` : '-';
+        }
+
+        function getCharacterPreferredSkinship(character) {
+            const skinship = character.past_history?.preferred_skinship;
+            return skinship && Array.isArray(skinship) ? skinship.join(', ') : '-';
+        }
+
+        function getCharacterRelationshipExperience(character) {
+            return character.past_history?.relationship_experience || '-';
+        }
+
+        function getCharacterFirstExperienceAge(character) {
+            return character.past_history?.first_experience_age || '-';
         }
 
         // 🔧 고급 메타 설정 토글 함수들
