@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>🌐 온라인 관리 시스템 - 채팅 기술 훈련 v2.2-CACHE-FIX</title>
+    <title>🌐 온라인 관리 시스템 - 채팅 기술 훈련 v2.3-FUNCTION-RENAME</title>
     <style>
         * {
             margin: 0;
@@ -5775,9 +5775,11 @@
 
         // 페이지 초기화
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 통합 관리 시스템 v2.2-CACHE-FIX 초기화');
+            console.log('🚀 통합 관리 시스템 v2.3-FUNCTION-RENAME 초기화');
             console.log('🔧 사진 API: character-ai-generator 통합 버전 사용');
-            console.log('❌ 이전 character-photo-manager API는 더 이상 사용하지 않음');
+            console.log('❌ character-photo-manager API 완전 삭제됨');
+            console.log('🔄 함수명 변경: loadCharacterPhotosV2, uploadPhotoToServerV2, deletePhotoV2');
+            console.log('🎯 이제 모든 사진 기능이 통합 API를 사용합니다!');
 
             // 🔐 로그인 시스템 초기화
             initializeAuth();
@@ -10830,8 +10832,8 @@
             // 모달 제목 업데이트
             document.getElementById('characterPhotoName').textContent = characterName;
 
-            // 기존 사진 데이터 로드
-            await loadCharacterPhotos(characterId);
+            // 기존 사진 데이터 로드 (V2.3)
+            await loadCharacterPhotosV2(characterId);
 
             // 모달 표시
             document.getElementById('photoManagerModal').style.display = 'block';
@@ -10843,13 +10845,17 @@
             updatePhotoStats();
         }
 
-        // 📸 캐릭터 사진 데이터 로드 (통합 API v2.2 - CACHE FIXED)
-        async function loadCharacterPhotos(characterId) {
+        // 📸 캐릭터 사진 데이터 로드 (통합 API v2.3 - RENAMED FUNCTION)
+        async function loadCharacterPhotosV2(characterId) {
             try {
-                console.log('📂 캐릭터 사진 로드 중 (통합 API v2.2):', characterId);
-                console.log('🔧 API 엔드포인트: /api/character-ai-generator (NOT character-photo-manager)');
+                console.log('📂 [V2.3] 캐릭터 사진 로드 중 (통합 API):', characterId);
+                console.log('🔧 [V2.3] API 엔드포인트: /api/character-ai-generator');
+                console.log('❌ [V2.3] character-photo-manager는 삭제됨!');
 
-                const response = await fetch(`/api/character-ai-generator?action=get_character_photos&character_id=${characterId}&_t=${Date.now()}`);
+                const apiUrl = `/api/character-ai-generator?action=get_character_photos&character_id=${characterId}&_t=${Date.now()}`;
+                console.log('🌐 [V2.3] 호출 URL:', apiUrl);
+
+                const response = await fetch(apiUrl);
                 const result = await response.json();
 
                 if (result.success) {
@@ -10918,7 +10924,7 @@
             photoDiv.className = 'photo-item';
             photoDiv.innerHTML = `
                 <img src="${photo.data}" alt="${category} 사진" />
-                <button class="delete-btn" onclick="deletePhoto('${photo.id}', '${category}')" title="사진 삭제">
+                <button class="delete-btn" onclick="deletePhotoV2('${photo.id}', '${category}')" title="사진 삭제">
                     🗑️
                 </button>
             `;
@@ -10959,8 +10965,8 @@
                     // 파일을 Base64로 변환
                     const base64Data = await fileToBase64(file);
 
-                    // 서버에 업로드
-                    await uploadPhotoToServer(base64Data, category);
+                    // 서버에 업로드 (V2.3)
+                    await uploadPhotoToServerV2(base64Data, category);
 
                 } catch (error) {
                     console.error(`❌ ${file.name} 업로드 실패:`, error);
@@ -11020,13 +11026,17 @@
             });
         }
 
-        // 📸 서버에 사진 업로드
-        async function uploadPhotoToServer(photoData, category) {
+        // 📸 서버에 사진 업로드 (V2.3 renamed)
+        async function uploadPhotoToServerV2(photoData, category) {
             try {
-                console.log(`📡 서버에 ${category} 사진 업로드 중 (통합 API v2.2)...`);
-                console.log('🔧 사용 중인 API: character-ai-generator (NOT photo-manager)');
+                console.log(`📡 [V2.3] 서버에 ${category} 사진 업로드 중...`);
+                console.log('🔧 [V2.3] 사용 중인 API: character-ai-generator');
+                console.log('❌ [V2.3] character-photo-manager 사용 안함!');
 
-                const response = await fetch('/api/character-ai-generator', {
+                const apiUrl = '/api/character-ai-generator';
+                console.log('🌐 [V2.3] 업로드 URL:', apiUrl);
+
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -11077,13 +11087,14 @@
         }
 
         // 📸 사진 삭제
-        async function deletePhoto(photoId, category) {
+        async function deletePhotoV2(photoId, category) {
             if (!confirm('정말로 이 사진을 삭제하시겠습니까?')) {
                 return;
             }
 
             try {
-                console.log(`🗑️ 사진 삭제 중: ${photoId} (${category})`);
+                console.log(`🗑️ [V2.3] 사진 삭제 중: ${photoId} (${category})`);
+                console.log('🔧 [V2.3] 삭제 API: character-ai-generator');
 
                 const response = await fetch('/api/character-ai-generator', {
                     method: 'POST',
@@ -11185,12 +11196,12 @@
                 const deletePromises = [];
 
                 if (characterPhotos.profile) {
-                    deletePromises.push(deletePhoto(characterPhotos.profile.id, 'profile'));
+                    deletePromises.push(deletePhotoV2(characterPhotos.profile.id, 'profile'));
                 }
 
                 ['casual', 'romantic', 'emotional', 'special'].forEach(category => {
                     characterPhotos[category].forEach(photo => {
-                        deletePromises.push(deletePhoto(photo.id, category));
+                        deletePromises.push(deletePhotoV2(photo.id, category));
                     });
                 });
 
