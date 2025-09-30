@@ -41,56 +41,14 @@
       "source": "api_save",
       "active": true,
       "version": "2.0"
-    },
-    "미화__enfp_1759192502021": {
-      "id": "미화__enfp_1759192502021",
-      "basic_info": {
-        "name": "미화 ",
-        "age": 22,
-        "mbti": "ENFP",
-        "occupation": "art",
-        "gender": "female"
-      },
-      "appeal_profile": {
-        "seduction_style": "playful_confident",
-        "charm_points": null,
-        "emotional_intelligence": 7,
-        "confidence_level": 8,
-        "mystery_factor": 6
-      },
-      "physical_allure": {
-        "appearance": {
-          "hair": "long_straight",
-          "eyes": "seductive_eyes",
-          "body": "petite_sexy",
-          "bust": "small_cute",
-          "waist_hip": "slim_tight",
-          "style": "sexy_chic"
-        }
-      },
-      "psychological_depth": {
-        "core_desires": null,
-        "boundaries": {
-          "comfort_level": "light_flirtation",
-          "escalation_pace": "very_gradual"
-        }
-      },
-      "conversation_dynamics": {
-        "speech_style": null
-      },
-      "created_at": "2025-09-30T00:35:02.021Z",
-      "updated_at": "2025-09-30T00:35:02.793Z",
-      "source": "api_save",
-      "active": true,
-      "version": "2.0"
     }
   },
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 2,
+    "total_characters": 1,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-30T00:35:02.793Z",
-    "last_accessed": "2025-09-30T00:35:02.792Z"
+    "last_updated": "2025-09-30T05:45:46.791Z",
+    "last_accessed": "2025-09-30T05:45:46.791Z"
   }
 }
