@@ -8811,7 +8811,8 @@
                     'natural_curves': '자연스러운 곡선',
                     'soft_feminine': '부드럽고 여성스러운',
                     'curvy_sexy': '곡선미 있고 섹시한',
-                    'athletic': '운동선수 같은'
+                    'athletic': '운동선수 같은',
+                    'athletic_toned': '운동으로 단련된'
                 },
                 style: {
                     'cute_casual': '귀엽고 캐주얼한',
@@ -8820,11 +8821,13 @@
                     'elegant_fashion': '우아한 패션',
                     'seductive_elegant': '유혹적이고 우아한',
                     'provocative_fashion': '도발적인 패션',
+                    'casual_alluring': '캐주얼하지만 매혹적인',
                     'sporty_style': '스포티한 스타일'
                 },
                 charm_points: {
                     'infectious_smile': '전염성 있는 미소',
                     'gentle_touch': '부드러운 터치',
+                    'confident_touch': '자신감 있는 터치',
                     'expressive_eyes': '표현력 있는 눈빛',
                     'witty_banter': '재치 있는 대화',
                     'graceful_movements': '우아한 몸짓',
@@ -8854,6 +8857,7 @@
                     'cute_innocent': '귀엽고 순수한',
                     'sultry_dominant': '요염하고 지배적인',
                     'warm_friendly': '따뜻하고 친근한',
+                    'mysterious_seductive': '신비록고 유혹적인',
                     // 🆕 8가지 유혹적인 말투 추가
                     'seductive_teasing': '유혹적이고 장난스러운',
                     'mysterious_alluring': '신비롭고 매혹적인',
@@ -9005,7 +9009,8 @@
                     'photography': '사진촬영',
                     'shopping': '쇼핑',
                     'yoga': '요가',
-                    'swimming': '수영'
+                    'swimming': '수영',
+                    'gaming': '게임'
                 },
                 // 💼 직업 번역
                 occupation: {
@@ -9025,7 +9030,9 @@
                     'dreams_goals': '꿈과 목표',
                     'personal_stories': '개인적인 이야기',
                     'hobbies_interests': '취미와 관심사',
-                    'life_philosophy': '인생 철학'
+                    'life_philosophy': '인생 철학',
+                    'food_culture': '음식과 문화',
+                    'future_dreams': '미래 꿈'
                 },
                 // 💖 플러팅 패턴 번역
                 flirting_patterns: {
@@ -9034,7 +9041,8 @@
                     'physical_proximity': '물리적 근접',
                     'playful_banter': '장난스러운 대화',
                     'eye_contact': '아이 컨택트',
-                    'gentle_touch': '부드러운 터치'
+                    'gentle_touch': '부드러운 터치',
+                    'gentle_touches': '부드러운 터치들'
                 },
                 // 😊 반응 성향 번역
                 humor: {
@@ -9065,7 +9073,8 @@
                     'mid_teens': '중고등학교 시절',
                     'late_teens': '고등학교 말',
                     'early_twenties': '대학교 초반',
-                    'mid_twenties': '대학교 후반'
+                    'mid_twenties': '대학교 후반',
+                    'late_twenties': '이십대 후반'
                 },
                 // 🤗 선호하는 스킨십 번역
                 preferred_skinship: {
@@ -9076,7 +9085,9 @@
                     'gentle_touch': '부드러운 터치',
                     'warm_embrace': '따뜻한 포옹',
                     'playful_tickling': '장난스러운 간지럽히기',
-                    'cuddling': '모드기'
+                    'cuddling': '모드기',
+                    'head_patting': '머리 쓰다듬기',
+                    'intimate_cuddling': '친밀한 모드기'
                 },
                 // 🗣️ 어휘 수준 번역
                 vocabulary_register: {
@@ -9092,6 +9103,42 @@
                     'personal_growth': '개인적 성장',
                     'adventure_freedom': '모험과 자유',
                     'stability_security': '안정과 보안'
+                },
+                // 🗣️ 말투 습관 번역 새로 추가
+                speech_habits: {
+                    'slow_speech': '느린 말투',
+                    'giggle_often': '자주 웃는',
+                    'polite_ending': '정중한 어미 (~네요, ~요)',
+                    'cute_ending': '귀여운 어미 (~당, ~지)',
+                    'question_ending': '질문형 어미 (~죠?, ~네요?)',
+                    'soft_tone': '부드러운 억양',
+                    'playful_tone': '장난스러운 억양',
+                    'emotional_expression': '감정적 표현',
+                    'detailed_description': '상세한 묘사'
+                },
+                // 💃 몸짓 언어 번역 새로 추가
+                body_language: {
+                    'playful_movements': '장난스러운 움직임',
+                    'gentle_gestures': '부드러운 제스처',
+                    'expressive_hands': '표현력 있는 손짓',
+                    'graceful_posture': '우아한 자세',
+                    'confident_stance': '자신감 있는 자세',
+                    'seductive_gaze': '유혹적인 시선',
+                    'natural_smile': '자연스러운 웃음',
+                    'flexible_movements': '유연한 몸짓',
+                    'relaxed_posture': '편안한 자세'
+                },
+                // 🚫 금지 용어 번역 새로 추가
+                forbidden_terms: {
+                    'religion': '종교',
+                    'work_stress': '업무 스트레스',
+                    'politics': '정치',
+                    'military': '군대',
+                    'sports': '스포츠',
+                    'business_investment': '사업/투자',
+                    'health_medical': '건강/의료',
+                    'personal_past': '개인적 과거',
+                    'family_issues': '가족 문제'
                 }
             };
 
@@ -14798,7 +14845,11 @@
         }
 
         function getCharacterBodyLanguage(character) {
-            return character.physical_allure?.body_language || '-';
+            const bodyLanguage = character.physical_allure?.body_language;
+            if (bodyLanguage && Array.isArray(bodyLanguage) && bodyLanguage.length > 0) {
+                return bodyLanguage.map(lang => translateToKorean(lang, 'body_language')).join(', ');
+            }
+            return bodyLanguage ? translateToKorean(bodyLanguage, 'body_language') : '-';
         }
 
         // 🎁 좋아하는 선물 표시 함수
@@ -14871,7 +14922,10 @@
 
         function getCharacterSpeechHabits(character) {
             const habits = character.conversation_dynamics?.speech_habits;
-            return habits && Array.isArray(habits) ? habits.join(', ') : '-';
+            if (habits && Array.isArray(habits) && habits.length > 0) {
+                return habits.map(habit => translateToKorean(habit, 'speech_habits')).join(', ');
+            }
+            return habits ? translateToKorean(habits, 'speech_habits') : '-';
         }
 
         function getCharacterVocabularyRegister(character) {
@@ -14885,7 +14939,10 @@
 
         function getCharacterForbiddenTerms(character) {
             const terms = character.conversation_dynamics?.forbidden_terms;
-            return terms && Array.isArray(terms) ? terms.join(', ') : '-';
+            if (terms && Array.isArray(terms) && terms.length > 0) {
+                return terms.map(term => translateToKorean(term, 'forbidden_terms')).join(', ');
+            }
+            return terms ? translateToKorean(terms, 'forbidden_terms') : '-';
         }
 
         // 🆕 새로 추가된 필드들을 위한 getter 함수들
@@ -14929,12 +14986,19 @@
         }
 
         function getCharacterBodyLanguage(character) {
-            return character.physical_allure?.body_language || '-';
+            const bodyLanguage = character.physical_allure?.body_language;
+            if (bodyLanguage && Array.isArray(bodyLanguage) && bodyLanguage.length > 0) {
+                return bodyLanguage.map(lang => translateToKorean(lang, 'body_language')).join(', ');
+            }
+            return bodyLanguage ? translateToKorean(bodyLanguage, 'body_language') : '-';
         }
 
         function getCharacterPreferredSkinship(character) {
             const skinship = character.past_history?.preferred_skinship;
-            return skinship && Array.isArray(skinship) ? skinship.join(', ') : '-';
+            if (skinship && Array.isArray(skinship) && skinship.length > 0) {
+                return skinship.map(skin => translateToKorean(skin, 'preferred_skinship')).join(', ');
+            }
+            return skinship ? translateToKorean(skinship, 'preferred_skinship') : '-';
         }
 
         function getCharacterRelationshipExperience(character) {
@@ -14968,15 +15032,20 @@
 
         function getCharacterPreferredSkinship(character) {
             const skinship = character.past_history?.preferred_skinship;
-            return skinship && Array.isArray(skinship) ? skinship.join(', ') : '-';
+            if (skinship && Array.isArray(skinship) && skinship.length > 0) {
+                return skinship.map(skin => translateToKorean(skin, 'preferred_skinship')).join(', ');
+            }
+            return skinship ? translateToKorean(skinship, 'preferred_skinship') : '-';
         }
 
         function getCharacterRelationshipExperience(character) {
-            return character.past_history?.relationship_experience || '-';
+            const exp = character.past_history?.relationship_experience || 'unknown';
+            return translateToKorean(exp, 'relationship_experience');
         }
 
         function getCharacterFirstExperienceAge(character) {
-            return character.past_history?.first_experience_age || '-';
+            const age = character.past_history?.first_experience_age || 'unknown';
+            return translateToKorean(age, 'first_experience_age');
         }
 
         // 🔧 고급 메타 설정 토글 함수들
