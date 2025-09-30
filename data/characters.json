@@ -1,54 +1,11 @@
 {
-  "characters": {
-    "미화__infj_1759212864622": {
-      "id": "미화__infj_1759212864622",
-      "basic_info": {
-        "name": "미화 ",
-        "age": 30,
-        "mbti": "INFJ",
-        "occupation": "art",
-        "gender": "female"
-      },
-      "appeal_profile": {
-        "seduction_style": "mysterious_elegant",
-        "charm_points": null,
-        "emotional_intelligence": 2,
-        "confidence_level": 9,
-        "mystery_factor": 8
-      },
-      "physical_allure": {
-        "appearance": {
-          "hair": "long_straight",
-          "eyes": "almond_elegant",
-          "body": "petite_sexy",
-          "bust": "full_attractive",
-          "waist_hip": "slim_tight",
-          "style": "casual_alluring"
-        }
-      },
-      "psychological_depth": {
-        "core_desires": null,
-        "boundaries": {
-          "comfort_level": "light_flirtation",
-          "escalation_pace": "very_gradual"
-        }
-      },
-      "conversation_dynamics": {
-        "speech_style": null
-      },
-      "created_at": "2025-09-30T06:14:24.622Z",
-      "updated_at": "2025-09-30T06:14:25.218Z",
-      "source": "api_save",
-      "active": true,
-      "version": "2.0"
-    }
-  },
+  "characters": {},
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 1,
+    "total_characters": 0,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-30T06:14:31.121Z",
-    "last_accessed": "2025-09-30T06:14:31.121Z"
+    "last_updated": "2025-09-30T06:17:32.940Z",
+    "last_accessed": "2025-09-30T06:17:32.940Z"
   }
 }
