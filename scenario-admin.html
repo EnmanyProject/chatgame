@@ -9540,7 +9540,75 @@
                 return '정보 없음';
             }
 
-            return value; // 번역이 없으면 원본 반환
+            // 번역이 없는 경우 영어를 한글로 변환 시도
+            return convertEnglishToKorean(value);
+        }
+
+        // 🔄 영어를 한글로 변환하는 보조 함수
+        function convertEnglishToKorean(englishValue) {
+            if (!englishValue || typeof englishValue !== 'string') {
+                return '정보 없음';
+            }
+
+            // 언더스코어를 공백으로 변환하고 각 단어의 첫 글자 대문자화
+            const formatted = englishValue
+                .replace(/_/g, ' ')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
+
+            // 일반적인 영어 단어 번역
+            const commonTranslations = {
+                'High': '높음',
+                'Medium': '보통',
+                'Low': '낮음',
+                'Very High': '매우 높음',
+                'Very Low': '매우 낮음',
+                'Strong': '강함',
+                'Weak': '약함',
+                'Average': '평균',
+                'Excellent': '우수',
+                'Good': '좋음',
+                'Poor': '부족',
+                'Active': '활발함',
+                'Passive': '소극적',
+                'Confident': '자신감',
+                'Shy': '수줍음',
+                'Outgoing': '외향적',
+                'Introverted': '내향적',
+                'Creative': '창의적',
+                'Logical': '논리적',
+                'Emotional': '감정적',
+                'Practical': '실용적',
+                'Artistic': '예술적',
+                'Academic': '학문적',
+                'Social': '사교적',
+                'Independent': '독립적',
+                'Caring': '배려심',
+                'Adventurous': '모험심',
+                'Conservative': '보수적',
+                'Liberal': '진보적',
+                'Optimistic': '낙관적',
+                'Pessimistic': '비관적',
+                'Friendly': '친근함',
+                'Serious': '진지함',
+                'Playful': '장난기',
+                'Mature': '성숙함',
+                'Youthful': '젊음',
+                'Elegant': '우아함',
+                'Casual': '캐주얼',
+                'Formal': '격식',
+                'Natural': '자연스러움',
+                'Sophisticated': '세련됨'
+            };
+
+            // 번역이 있으면 반환
+            if (commonTranslations[formatted]) {
+                return commonTranslations[formatted];
+            }
+
+            // 번역이 없으면 포맷된 형태로 반환 (한글 표시용)
+            return `${formatted} (번역 필요)`;
         }
 
         function getCharacterSeductionStyle(character) {
