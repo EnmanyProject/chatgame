@@ -11354,24 +11354,45 @@
 
         // 🖼️ 캐릭터 카드 프로필 이미지 로드
         async function loadCharacterProfileImage(characterId) {
+            console.log(`🔍 프로필 이미지 로드 시작: ${characterId}`);
+
             try {
                 const apiUrl = `/api/character-ai-generator?action=get_character_photos&character_id=${characterId}&_t=${Date.now()}`;
-                const response = await fetch(apiUrl);
-                const result = await response.json();
+                console.log(`📡 API 호출: ${apiUrl}`);
 
-                if (result.success && result.photos && result.photos.profile) {
-                    const profileContainer = document.getElementById(`profile-image-${characterId}`);
-                    if (profileContainer) {
-                        profileContainer.innerHTML = `
-                            <img src="${result.photos.profile.data}"
-                                 alt="프로필 사진"
-                                 style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
-                                 onerror="this.parentElement.innerHTML='<div class=\\"no-image\\">${characterId.split('_')[0].charAt(0)}</div>'"/>
-                        `;
+                const response = await fetch(apiUrl);
+                console.log(`📥 API 응답 상태: ${response.status}`);
+
+                const result = await response.json();
+                console.log(`📊 API 응답 데이터:`, result);
+
+                if (result.success) {
+                    console.log(`✅ API 성공, 사진 데이터 확인:`, result.photos);
+
+                    if (result.photos && result.photos.profile) {
+                        console.log(`📷 프로필 사진 데이터 존재: ${result.photos.profile.data ? '있음' : '없음'}`);
+
+                        const profileContainer = document.getElementById(`profile-image-${characterId}`);
+                        console.log(`🎯 프로필 컨테이너 찾기: ${profileContainer ? '찾음' : '없음'}`);
+
+                        if (profileContainer) {
+                            profileContainer.innerHTML = `
+                                <img src="${result.photos.profile.data}"
+                                     alt="프로필 사진"
+                                     style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
+                                     onload="console.log('✅ 프로필 이미지 로드 성공: ${characterId}')"
+                                     onerror="console.log('❌ 프로필 이미지 로드 실패: ${characterId}'); this.parentElement.innerHTML='<div class=\\"no-image\\">${characterId.split('_')[0].charAt(0)}</div>'"/>
+                            `;
+                            console.log(`🎨 프로필 이미지 HTML 설정 완료: ${characterId}`);
+                        }
+                    } else {
+                        console.log(`❌ 프로필 사진 데이터 없음: ${characterId}`);
                     }
+                } else {
+                    console.log(`❌ API 실패: ${result.message || '알 수 없는 오류'}`);
                 }
             } catch (error) {
-                console.log(`📷 캐릭터 ${characterId} 프로필 이미지 로드 실패:`, error);
+                console.log(`💥 프로필 이미지 로드 오류 - 캐릭터: ${characterId}`, error);
                 // 에러 시에는 기본 이미지 유지
             }
         }
