@@ -12095,7 +12095,7 @@
                     }
                 },
                 conversation_dynamics: {
-                    speech_style: document.getElementById('charSpeechStyle')?.value || null // 🚨 빈 문자열이면 null
+                    speech_style: getSelectedSpeechStyle() // 🚨 버튼 시스템으로 변경
                 }
             };
 
@@ -12105,22 +12105,87 @@
 
         // 선택된 매력 포인트 수집 (빈 배열이면 null 반환)
         function getSelectedCharmPoints() {
+            console.log('🔍 getSelectedCharmPoints 실행 중...');
             const selected = [];
+
+            // 버튼 시스템으로 변경 - .charm-btn.selected 클래스로 찾기
+            const selectedCharmBtns = document.querySelectorAll('.charm-btn.selected');
+            console.log('📊 선택된 charm-btn 요소 수:', selectedCharmBtns.length);
+
+            selectedCharmBtns.forEach(btn => {
+                const value = btn.getAttribute('data-value');
+                if (value) {
+                    selected.push(value);
+                    console.log('✅ 매력포인트 수집됨:', value);
+                }
+            });
+
+            // 기존 체크박스 시스템도 체크 (호환성)
             const checkboxes = document.querySelectorAll('input[name="charm_points"]:checked');
-            checkboxes.forEach(cb => selected.push(cb.value));
+            console.log('📊 체크된 체크박스 수:', checkboxes.length);
+            checkboxes.forEach(cb => {
+                selected.push(cb.value);
+                console.log('✅ 체크박스 매력포인트 수집됨:', cb.value);
+            });
+
+            console.log('🎯 최종 매력포인트 배열:', selected);
             return selected.length === 0 ? null : selected; // 🚨 빈 배열이면 null 반환
         }
 
         // 선택된 핵심 욕구 수집 (빈 배열이면 null 반환)
         function getSelectedCoreDesires() {
+            console.log('🔍 getSelectedCoreDesires 실행 중...');
             const selected = [];
+
+            // 버튼 시스템으로 변경 - .desire-btn.selected 클래스로 찾기
+            const selectedDesireBtns = document.querySelectorAll('.desire-btn.selected');
+            console.log('📊 선택된 desire-btn 요소 수:', selectedDesireBtns.length);
+
+            selectedDesireBtns.forEach(btn => {
+                const value = btn.getAttribute('data-value');
+                if (value) {
+                    selected.push(value);
+                    console.log('✅ 핵심욕구 수집됨:', value);
+                }
+            });
+
+            // 기존 select 시스템도 체크 (호환성)
             const select = document.getElementById('coreDesires');
             if (select) {
+                console.log('📊 select 요소 발견, selectedOptions 수:', select.selectedOptions.length);
                 for (let option of select.selectedOptions) {
                     selected.push(option.value);
+                    console.log('✅ select 핵심욕구 수집됨:', option.value);
                 }
+            } else {
+                console.log('⚠️ coreDesires select 요소를 찾을 수 없음');
             }
+
+            console.log('🎯 최종 핵심욕구 배열:', selected);
             return selected.length === 0 ? null : selected; // 🚨 빈 배열이면 null 반환
+        }
+
+        // 선택된 말투 스타일 수집 (버튼 시스템)
+        function getSelectedSpeechStyle() {
+            console.log('🔍 getSelectedSpeechStyle 실행 중...');
+
+            // 버튼 시스템으로 찾기 - .speech-btn.selected 클래스로 찾기
+            const selectedSpeechBtn = document.querySelector('.speech-btn.selected');
+            if (selectedSpeechBtn) {
+                const value = selectedSpeechBtn.getAttribute('data-value');
+                console.log('✅ 말투스타일 수집됨:', value);
+                return value;
+            }
+
+            // 기존 select 시스템도 체크 (호환성)
+            const select = document.getElementById('charSpeechStyle');
+            if (select && select.value) {
+                console.log('✅ select 말투스타일 수집됨:', select.value);
+                return select.value;
+            }
+
+            console.log('⚠️ 선택된 말투스타일이 없음');
+            return null;
         }
 
         // 🔄 업그레이드된 캐릭터 폼 데이터 채우기 함수 (v2.0)
