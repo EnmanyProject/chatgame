@@ -8297,9 +8297,15 @@
             document.getElementById('characterForm').reset();
 
             // 모든 선택 버튼들 초기화
-            document.querySelectorAll('.mbti-btn.selected, .trait-btn.selected, .relationship-btn.selected, .hobby-btn.selected, .speech-btn.selected').forEach(btn => {
+            document.querySelectorAll('.mbti-btn.selected, .trait-btn.selected, .relationship-btn.selected, .hobby-btn.selected, .speech-btn.selected, .charm-btn.selected, .desire-btn.selected, .skinship-btn.selected, .motif-btn.selected').forEach(btn => {
                 btn.classList.remove('selected');
             });
+
+            // 🎲 폼 열 때 자동으로 랜덤 선택된 상태로 만들기
+            setTimeout(() => {
+                autoFillRandomCharacterData();
+                console.log('✨ 캐릭터 폼에 랜덤 데이터 자동 채우기 완료');
+            }, 100);
 
             // 숨겨진 필드들 초기화
             document.getElementById('charMbti').value = '';
@@ -12876,6 +12882,125 @@
             if (statusEl) {
                 statusEl.innerHTML = '✨ 모든 필드가 랜덤으로 선택되었습니다!';
             }
+        }
+
+        // 🎯 캐릭터 폼 자동 채우기 함수 (폼 열 때 자동 실행)
+        function autoFillRandomCharacterData() {
+            // 기본 정보 랜덤 선택
+            randomizeName();
+            randomizeAge();
+            randomizeOccupation();
+
+            // 매력 프로필 랜덤 선택
+            randomizeSeduction();
+            randomizeCharms();
+            randomizeEI();
+            randomizeConfidence();
+            randomizeMystery();
+
+            // 외모 정보 랜덤 선택
+            randomizeHair();
+            randomizeEyes();
+            randomizeBody();
+            randomizeBust();
+            randomizeWaistHip();
+            randomizeStyle();
+
+            // 심리적 특성 랜덤 선택
+            randomizeSexualCuriosity();
+            randomizeSexualComfort();
+
+            // MBTI 랜덤 선택
+            const mbtiOptions = ['enfp', 'infp', 'enfj', 'infj', 'entp', 'intp', 'entj', 'intj', 'esfp', 'isfp', 'esfj', 'isfj', 'estp', 'istp', 'estj', 'istj'];
+            const randomMbti = mbtiOptions[Math.floor(Math.random() * mbtiOptions.length)];
+            document.querySelectorAll('.mbti-btn').forEach(btn => btn.classList.remove('selected'));
+            const mbtiBtn = document.querySelector(`[data-mbti="${randomMbti}"]`);
+            if (mbtiBtn) {
+                mbtiBtn.classList.add('selected');
+                document.getElementById('charMbti').value = randomMbti;
+            }
+
+            // 관계 설정 랜덤 선택
+            const relationshipOptions = ['junior', 'same_age', 'senior', 'stranger', 'friend'];
+            const randomRelationship = relationshipOptions[Math.floor(Math.random() * relationshipOptions.length)];
+            document.querySelectorAll('.relationship-btn').forEach(btn => btn.classList.remove('selected'));
+            const relationshipBtn = document.querySelector(`[data-relationship="${randomRelationship}"]`);
+            if (relationshipBtn) {
+                relationshipBtn.classList.add('selected');
+                document.getElementById('charRelationship').value = randomRelationship;
+            }
+
+            // 말투 스타일 랜덤 선택
+            const speechOptions = ['cute_innocent', 'mature_sexy', 'friendly_casual', 'shy_reserved', 'confident_bold'];
+            const randomSpeech = speechOptions[Math.floor(Math.random() * speechOptions.length)];
+            document.querySelectorAll('.speech-btn').forEach(btn => btn.classList.remove('selected'));
+            const speechBtn = document.querySelector(`[data-speech="${randomSpeech}"]`);
+            if (speechBtn) {
+                speechBtn.classList.add('selected');
+                document.getElementById('charSpeechStyle').value = randomSpeech;
+            }
+
+            // 매력 포인트 랜덤 선택 (1-3개)
+            const charmOptions = ['smile', 'eyes', 'voice', 'personality', 'intelligence', 'humor', 'kindness', 'passion'];
+            const numCharms = Math.floor(Math.random() * 3) + 1; // 1-3개
+            document.querySelectorAll('.charm-btn').forEach(btn => btn.classList.remove('selected'));
+            const selectedCharms = [];
+            for (let i = 0; i < numCharms; i++) {
+                const availableOptions = charmOptions.filter(option => !selectedCharms.includes(option));
+                if (availableOptions.length > 0) {
+                    const randomCharm = availableOptions[Math.floor(Math.random() * availableOptions.length)];
+                    selectedCharms.push(randomCharm);
+                    const charmBtn = document.querySelector(`[data-charm="${randomCharm}"]`);
+                    if (charmBtn) {
+                        charmBtn.classList.add('selected');
+                    }
+                }
+            }
+
+            // 핵심 욕구 랜덤 선택 (1-2개)
+            const desireOptions = ['love', 'recognition', 'security', 'freedom', 'growth', 'adventure'];
+            const numDesires = Math.floor(Math.random() * 2) + 1; // 1-2개
+            document.querySelectorAll('.desire-btn').forEach(btn => btn.classList.remove('selected'));
+            const selectedDesires = [];
+            for (let i = 0; i < numDesires; i++) {
+                const availableOptions = desireOptions.filter(option => !selectedDesires.includes(option));
+                if (availableOptions.length > 0) {
+                    const randomDesire = availableOptions[Math.floor(Math.random() * availableOptions.length)];
+                    selectedDesires.push(randomDesire);
+                    const desireBtn = document.querySelector(`[data-desire="${randomDesire}"]`);
+                    if (desireBtn) {
+                        desireBtn.classList.add('selected');
+                    }
+                }
+            }
+
+            // 스킨십 수위 랜덤 선택
+            const skinshipOptions = ['innocent', 'moderate', 'intimate'];
+            const randomSkinship = skinshipOptions[Math.floor(Math.random() * skinshipOptions.length)];
+            document.querySelectorAll('.skinship-btn').forEach(btn => btn.classList.remove('selected'));
+            const skinshipBtn = document.querySelector(`[data-skinship="${randomSkinship}"]`);
+            if (skinshipBtn) {
+                skinshipBtn.classList.add('selected');
+            }
+
+            // 과거 경험 모티프 랜덤 선택
+            const motifOptions = ['first_love', 'heartbreak', 'family_issue', 'career_struggle', 'friendship_betrayal', 'personal_growth'];
+            const randomMotif = motifOptions[Math.floor(Math.random() * motifOptions.length)];
+            document.querySelectorAll('.motif-btn').forEach(btn => btn.classList.remove('selected'));
+            const motifBtn = document.querySelector(`[data-motif="${randomMotif}"]`);
+            if (motifBtn) {
+                motifBtn.classList.add('selected');
+            }
+
+            console.log('🎲 캐릭터 폼 자동 채우기 완료:', {
+                mbti: randomMbti,
+                relationship: randomRelationship,
+                speech: randomSpeech,
+                charms: selectedCharms,
+                desires: selectedDesires,
+                skinship: randomSkinship,
+                motif: randomMotif
+            });
         }
 
         function resetAllFields() {
