@@ -1,22 +1,14 @@
-// AI 캐릭터 생성 API - v4.0.0 (메모리 우선, GitHub 배치 백업)
-// 메모리 우선 사용, GitHub 주기적 배치 백업
+// AI 캐릭터 생성 API - v4.1.0 (응급 복구 완료)
+// 상태: 복잡한 하이브리드 캐시 시스템 제거, 안정적인 GitHub 직접 방식으로 복구
+// 이전 문제: Vercel 서버리스 환경에서 메모리 캐시가 요청 간 유지되지 않아 500 오류 발생
 
-// 하이브리드 시스템: GitHub = 실시간 DB, 메모리 = 고성능 캐시
-let memoryCache = {}; // 읽기 성능용 캐시
-let lastCacheSync = 0;
-let cacheValid = false;
-const CACHE_SYNC_INTERVAL = 2 * 60 * 1000; // 2분마다 캐시 검증
-const OPTIMISTIC_TIMEOUT = 5000; // 5초 내 GitHub 저장 완료되어야 함
-
-// 메타데이터 템플릿 (하이브리드 시스템)
 const DEFAULT_METADATA = {
-  version: "4.0.0",
+  version: "4.1.0",
   total_characters: 0,
   created: new Date().toISOString(),
-  storage_type: "hybrid_github_primary_cache_performance",
+  storage_type: "stable_github_direct",
   last_updated: new Date().toISOString(),
-  last_cache_sync: null,
-  performance_mode: "hybrid_fast_reliable"
+  performance_mode: "stable_reliable"
 };
 
 module.exports = async function handler(req, res) {
@@ -65,38 +57,64 @@ module.exports = async function handler(req, res) {
   });
 
   try {
-    // v4.0.0 캐릭터 리스트 조회 (하이브리드: 캐시 우선 + GitHub 실시간 DB)
+    // v4.1.0 캐릭터 리스트 조회 (안정적인 GitHub 직접 방식)
     if (action === 'list_characters') {
       console.log('✅ 🔍 액션 매칭: list_characters');
-      console.log('⚡ 하이브리드 캐릭터 리스트 조회 (v4.0.0)...');
+      console.log('🛡️ 안정적인 GitHub 직접 조회 (v4.1.0)...');
 
-      // 캐시에서 즉시 응답 또는 GitHub에서 로드
-      const characterData = await getFromCacheOrGitHub();
+      try {
+        // GitHub에서 직접 로드 (타임아웃 추가)
+        const characterData = await loadFromGitHub();
 
-      console.log('✅ 하이브리드 응답 완료:', Object.keys(characterData.characters || {}).length, '개 캐릭터');
+        if (characterData) {
+          console.log('✅ GitHub 직접 로드 성공:', Object.keys(characterData.characters || {}).length, '개 캐릭터');
+        } else {
+          console.log('📂 GitHub에 캐릭터 데이터 없음, 빈 응답 반환');
+          // 빈 데이터로 응답
+          const emptyData = {
+            characters: {},
+            metadata: {
+              ...DEFAULT_METADATA,
+              total_characters: 0
+            }
+          };
+          return res.json({
+            success: true,
+            data: emptyData,
+            message: 'GitHub에 캐릭터 데이터가 없습니다',
+            source: 'github_empty'
+          });
+        }
+      } catch (error) {
+        console.error('❌ GitHub 로드 실패:', error.message);
 
-      if (!characterData) {
-        console.log('📂 캐릭터 데이터가 없음 - 빈 응답 반환');
+        // 빈 데이터로 graceful fallback
+        const fallbackData = {
+          characters: {},
+          metadata: {
+            ...DEFAULT_METADATA,
+            total_characters: 0,
+            storage_type: 'fallback_empty'
+          }
+        };
+
         return res.json({
           success: true,
-          characters: {},
-          metadata: { ...DEFAULT_METADATA },
-          github_synced: false
+          data: fallbackData,
+          message: 'GitHub 연결 실패, 빈 상태로 시작합니다',
+          warning: 'GitHub API 연결에 문제가 있습니다',
+          source: 'fallback'
         });
       }
 
-      console.log('📊 로드된 캐릭터 수:', Object.keys(characterData.characters || {}).length, '개 (소스:', dataSource, ')');
-
+      // 정상적으로 데이터를 로드한 경우
       return res.json({
         success: true,
+        data: characterData,
         characters: characterData.characters,
-        metadata: {
-          ...characterData.metadata,
-          data_source: dataSource,
-          github_synced: dataSource === 'github',
-          sync_time: new Date().toISOString(),
-          warning: dataSource === 'memory' ? 'GitHub 연결 실패, 메모리 데이터 사용 중' : null
-        }
+        metadata: characterData.metadata,
+        message: 'GitHub에서 캐릭터 데이터를 성공적으로 로드했습니다',
+        source: 'github_success'
       });
     }
 
@@ -135,16 +153,10 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // v4.0.0 캐릭터 저장 (메모리 우선 + 배치 백업)
+    // v4.1.0 캐릭터 저장 (안정적인 GitHub 직접 방식)
     if (action === 'save_character') {
       console.log('✅ 💾 액션 매칭: save_character');
-      console.log('⚡ 메모리 우선 캐릭터 저장 시작 (v4.0.0)...');
-
-      // 🚀 첫 요청 시에만 GitHub에서 캐시 초기화
-      if (Object.keys(memoryCache).length === 0) {
-        console.log('🔄 캐시가 비어있어 GitHub에서 초기화...');
-        await syncCacheWithGitHub();
-      }
+      console.log('🛡️ 안정적인 GitHub 직접 저장 시작 (v4.1.0)...');
 
       // scenario-admin.html에서 {action: 'save_character', character: {...}} 형태로 전송
       const characterData = req.body.character || req.body;
@@ -172,40 +184,70 @@ module.exports = async function handler(req, res) {
         });
       }
 
-      console.log('💾 하이브리드 캐릭터 저장 시작 v4.0:', name);
+      console.log('💾 안정적인 GitHub 직접 저장 시작:', name);
 
       // ID가 없으면 생성 (v2.0 호환)
       if (!characterData.id) {
         characterData.id = `${name.toLowerCase().replace(/\s+/g, '_')}_${mbti.toLowerCase()}_${Date.now()}`;
       }
 
-      // 🚀 하이브리드 저장: 낙관적 업데이트 + GitHub 실시간 저장
+      // 🛡️ 안정적인 GitHub 직접 저장
       try {
-        await saveWithOptimisticUpdates(characterData.id, characterData);
-
-        console.log('🎉 하이브리드 저장 완료 - 캐시 + GitHub 동기화 성공');
-        return res.json({
-          success: true,
-          message: `캐릭터 '${name}' 저장 완료 (하이브리드 v4.0)`,
-          character: characterData,
-          storage_info: {
-            cache_updated: true,
-            github_confirmed: true,
-            response_time: 'fast',
-            data_integrity: 'guaranteed'
+        // 기존 데이터 로드
+        const existingData = await loadFromGitHub() || {
+          characters: {},
+          metadata: {
+            ...DEFAULT_METADATA,
+            total_characters: 0
           }
-        });
+        };
+
+        // 캐릭터 추가/업데이트
+        existingData.characters[characterData.id] = {
+          ...characterData,
+          id: characterData.id,
+          created_at: characterData.created_at || new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        // 메타데이터 업데이트
+        existingData.metadata = {
+          ...existingData.metadata,
+          total_characters: Object.keys(existingData.characters).length,
+          last_updated: new Date().toISOString(),
+          version: "4.1.0",
+          storage_type: "stable_github_direct"
+        };
+
+        // GitHub에 직접 저장
+        const saveResult = await saveToGitHub(existingData);
+
+        if (saveResult) {
+          console.log('🎉 GitHub 직접 저장 완료');
+          return res.json({
+            success: true,
+            message: `캐릭터 '${name}' 저장 완료 (안정적인 v4.1.0)`,
+            character: characterData,
+            storage_info: {
+              github_confirmed: true,
+              response_time: 'stable',
+              data_integrity: 'verified',
+              method: 'github_direct'
+            }
+          });
+        } else {
+          throw new Error('GitHub 저장 실패');
+        }
 
       } catch (error) {
-        console.error('❌ 하이브리드 저장 실패:', error.message);
+        console.error('❌ GitHub 직접 저장 실패:', error.message);
         return res.status(500).json({
           success: false,
           message: `캐릭터 저장 실패: ${error.message}`,
-          details: 'GitHub 실시간 저장 실패로 인한 롤백',
+          details: 'GitHub 직접 저장 실패',
           storage_info: {
-            cache_updated: false,
             github_confirmed: false,
-            rollback_performed: true
+            method: 'github_direct_failed'
           }
         });
       }
@@ -1143,131 +1185,7 @@ async function loadFromGitHub() {
   }
 }
 
-// 🚀 v4.0.0 하이브리드 시스템: GitHub 실시간 DB + 고성능 캐시
-
-// 캐시 동기화 및 검증
-async function syncCacheWithGitHub() {
-  if (Date.now() - lastCacheSync < CACHE_SYNC_INTERVAL && cacheValid) {
-    console.log('📊 캐시가 유효해 동기화를 건너뜁니다');
-    return {
-      characters: memoryCache,
-      metadata: {
-        ...DEFAULT_METADATA,
-        total_characters: Object.keys(memoryCache).length,
-        storage_type: 'cache_valid_skip_sync'
-      }
-    };
-  }
-
-  try {
-    console.log('🔄 GitHub와 캐시 동기화 시작...');
-    const githubData = await loadFromGitHub();
-
-    if (githubData && githubData.characters) {
-      memoryCache = githubData.characters;
-      lastCacheSync = Date.now();
-      cacheValid = true;
-      console.log(`✅ GitHub → 캐시 동기화 완료: ${Object.keys(memoryCache).length}개 캐릭터`);
-    } else {
-      console.log('📂 GitHub에 데이터가 없어 빈 캐시로 설정');
-      memoryCache = {};
-      cacheValid = true;
-    }
-
-    return {
-      characters: memoryCache,
-      metadata: {
-        ...DEFAULT_METADATA,
-        total_characters: Object.keys(memoryCache).length,
-        storage_type: 'github_cache_synced'
-      }
-    };
-  } catch (error) {
-    console.log('⚠️ GitHub 동기화 실패, 기존 캐시 유지:', error.message);
-    cacheValid = false;
-    return {
-      characters: memoryCache,
-      metadata: {
-        ...DEFAULT_METADATA,
-        total_characters: Object.keys(memoryCache).length,
-        storage_type: 'cache_fallback'
-      }
-    };
-  }
-}
-
-// 낙관적 UI 업데이트 (Optimistic Updates)
-async function saveWithOptimisticUpdates(characterId, characterData) {
-  console.log(`⚡ 낙관적 업데이트 시작: ${characterData.basic_info?.name || characterId}`);
-
-  // 1. 캐시에 즉시 반영 (사용자에게 즉시 보임)
-  memoryCache[characterId] = {
-    ...characterData,
-    updated_at: new Date().toISOString(),
-    source: 'optimistic_update'
-  };
-
-  // 2. GitHub에 실제 저장
-  try {
-    const githubData = await loadFromGitHub();
-    const updatedData = {
-      characters: {
-        ...(githubData?.characters || {}),
-        [characterId]: {
-          ...characterData,
-          updated_at: new Date().toISOString(),
-          source: 'github_confirmed'
-        }
-      },
-      metadata: {
-        ...(githubData?.metadata || DEFAULT_METADATA),
-        total_characters: Object.keys(githubData?.characters || {}).length + 1,
-        last_updated: new Date().toISOString()
-      }
-    };
-
-    await saveToGitHub(updatedData);
-
-    // 3. GitHub 저장 성공 시 캐시 확정
-    memoryCache[characterId] = {
-      ...characterData,
-      updated_at: new Date().toISOString(),
-      source: 'github_confirmed'
-    };
-
-    console.log('✅ 낙관적 업데이트 → GitHub 저장 완료');
-    return { success: true, source: 'github' };
-
-  } catch (error) {
-    console.error('❌ GitHub 저장 실패, 캐시에서 제거:', error.message);
-
-    // 4. GitHub 저장 실패 시 캐시에서 제거 (롤백)
-    delete memoryCache[characterId];
-    cacheValid = false;
-
-    throw error;
-  }
-}
-
-// 고성능 캐시 읽기 (GitHub fallback 포함)
-async function getFromCacheOrGitHub() {
-  // 1. 캐시가 유효하면 즉시 반환
-  if (cacheValid && Object.keys(memoryCache).length > 0) {
-    console.log('⚡ 캐시에서 즉시 응답');
-    return {
-      characters: memoryCache,
-      metadata: {
-        ...DEFAULT_METADATA,
-        total_characters: Object.keys(memoryCache).length,
-        storage_type: 'cache_fast_response'
-      }
-    };
-  }
-
-  // 2. 캐시가 무효하거나 비어있으면 GitHub에서 로드
-  console.log('🔄 캐시 무효, GitHub에서 로드...');
-  return await syncCacheWithGitHub();
-}
+// 🛡️ v4.1.0 안정적인 GitHub 직접 방식: 복잡한 캐시 로직 제거, 검증된 방식으로 복구
 
 // 🎯 캐릭터 자동 완성 함수 (새로 추가)
 async function autoCompleteCharacter(inputData) {
