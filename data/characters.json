@@ -1,54 +1,11 @@
 {
-  "characters": {
-    "수진_infj_1759211682188": {
-      "id": "수진_infj_1759211682188",
-      "basic_info": {
-        "name": "수진",
-        "age": 20,
-        "mbti": "INFJ",
-        "occupation": "art",
-        "gender": "female"
-      },
-      "appeal_profile": {
-        "seduction_style": "mysterious_elegant",
-        "charm_points": null,
-        "emotional_intelligence": 2,
-        "confidence_level": 10,
-        "mystery_factor": 2
-      },
-      "physical_allure": {
-        "appearance": {
-          "hair": "",
-          "eyes": "",
-          "body": "average_attractive",
-          "bust": "small_cute",
-          "waist_hip": "slim_tight",
-          "style": "provocative_fashion"
-        }
-      },
-      "psychological_depth": {
-        "core_desires": null,
-        "boundaries": {
-          "comfort_level": "light_flirtation",
-          "escalation_pace": "very_gradual"
-        }
-      },
-      "conversation_dynamics": {
-        "speech_style": null
-      },
-      "created_at": "2025-09-30T05:54:42.188Z",
-      "updated_at": "2025-09-30T05:54:42.745Z",
-      "source": "api_save",
-      "active": true,
-      "version": "2.0"
-    }
-  },
+  "characters": {},
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 1,
+    "total_characters": 0,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-30T05:54:42.745Z",
-    "last_accessed": "2025-09-30T05:54:42.744Z"
+    "last_updated": "2025-09-30T06:01:35.614Z",
+    "last_accessed": "2025-09-30T06:01:35.614Z"
   }
 }
