@@ -4549,19 +4549,6 @@
                         </div>
                     </div>
 
-                    <!-- 🎲 랜덤 생성 영역 -->
-                    <div class="char-category random-generation">
-                        <h3>🎲 랜덤 생성 도구</h3>
-                        <div class="random-controls">
-                            <button type="button" class="btn btn-random-all" onclick="randomizeAllFields()">
-                                🎲 전체 랜덤 생성
-                            </button>
-                            <button type="button" class="btn btn-reset" onclick="resetAllFields()">
-                                🔄 모든 필드 초기화
-                            </button>
-                        </div>
-                        <div class="random-status" id="randomStatus"></div>
-                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -12459,30 +12446,30 @@
             const formData = {
                 id: document.getElementById('characterId')?.value || null,
                 basic_info: {
-                    name: document.getElementById('charName')?.value || '',
-                    age: parseInt(document.getElementById('charAge')?.value) || null,
-                    mbti: document.getElementById('charMbti')?.value || '',
-                    occupation: document.getElementById('charMajor')?.value || '', // charMajor 사용 (charOccupation 없음)
+                    name: document.getElementById('charName')?.value || '미지의 소녀',
+                    age: parseInt(document.getElementById('charAge')?.value) || 22,
+                    mbti: document.getElementById('charMbti')?.value || 'INFP',
+                    occupation: document.getElementById('charMajor')?.value || 'art', // charMajor 사용 (charOccupation 없음)
                     gender: 'female'
                 },
                 appeal_profile: {
-                    seduction_style: document.getElementById('seductionStyle')?.value || '',
+                    seduction_style: document.getElementById('seductionStyle')?.value || 'warm_nurturing',
                     charm_points: getSelectedCharmPoints(),
-                    emotional_intelligence: parseInt(document.getElementById('emotionalIntelligence')?.value) || null,
-                    confidence_level: parseInt(document.getElementById('confidenceLevel')?.value) || null,
-                    mystery_factor: parseInt(document.getElementById('mysteryFactor')?.value) || null,
-                    sexual_curiosity: parseInt(document.getElementById('sexualCuriosity')?.value) || null, // 🆕 성적 호기심
-                    sexual_comfort: parseInt(document.getElementById('sexualComfort')?.value) || null, // 🆕 성적 쿨적도
+                    emotional_intelligence: parseInt(document.getElementById('emotionalIntelligence')?.value) || 7,
+                    confidence_level: parseInt(document.getElementById('confidenceLevel')?.value) || 6,
+                    mystery_factor: parseInt(document.getElementById('mysteryFactor')?.value) || 5,
+                    sexual_curiosity: parseInt(document.getElementById('sexualCuriosity')?.value) || 5, // 🆕 성적 호기심
+                    sexual_comfort: parseInt(document.getElementById('sexualComfort')?.value) || 4, // 🆕 성적 쿨적도
                     hobbies: getSelectedHobbies() // 🆕 취미
                 },
                 physical_allure: {
                     appearance: {
                         hair: document.getElementById('charHair')?.value || 'long_straight',
                         eyes: document.getElementById('charEyes')?.value || 'seductive_eyes',
-                        body: document.getElementById('charBody')?.value || '',
-                        bust: document.getElementById('charBust')?.value || '',
-                        waist_hip: document.getElementById('charWaistHip')?.value || '',
-                        style: document.getElementById('charStyle')?.value || ''
+                        body: document.getElementById('charBody')?.value || 'average_attractive',
+                        bust: document.getElementById('charBust')?.value || 'medium_balanced',
+                        waist_hip: document.getElementById('charWaistHip')?.value || 'curvy_sexy',
+                        style: document.getElementById('charStyle')?.value || 'seductive_elegant'
                     },
                     feature_elements: getSelectedFeatureElements(), // 🆕 외모 매력의 특징요소
                     sensual_habits: getSelectedSensualHabits(), // 🆕 관능적 습관
@@ -12490,33 +12477,33 @@
                 },
                 psychological_depth: {
                     core_desires: getSelectedCoreDesires(),
-                    values: document.getElementById('charValues')?.value || '', // 🆕 가치관
+                    values: document.getElementById('charValues')?.value || 'love_family', // 🆕 가치관
                     boundaries: {
-                        comfort_level: document.getElementById('comfortLevel')?.value || '',
-                        escalation_pace: document.getElementById('escalationPace')?.value || ''
+                        comfort_level: document.getElementById('comfortLevel')?.value || 'light_flirtation',
+                        escalation_pace: document.getElementById('escalationPace')?.value || 'very_gradual'
                     }
                 },
                 conversation_dynamics: {
                     speech_style: getSelectedSpeechStyle(), // 🚨 버튼 시스템으로 변경
                     flirting_patterns: getSelectedFlirtingPatterns(), // 🆕 플러팅 패턴
                     reaction_tendencies: {
-                        humor: document.getElementById('humorResponse')?.value || '', // 🆕 유머 반응
-                        compliment: document.getElementById('complimentResponse')?.value || '', // 🆕 칭찬 반응
-                        interest_expression: document.getElementById('interestResponse')?.value || '' // 🆕 관심 표현 반응
+                        humor: document.getElementById('humorResponse')?.value || 'giggles_easily', // 🆕 유머 반응
+                        compliment: document.getElementById('complimentResponse')?.value || 'gracefully_accepts', // 🆕 칭찬 반응
+                        interest_expression: document.getElementById('interestResponse')?.value || 'enthusiastic_sharing' // 🆕 관심 표현 반응
                     },
                     conversation_hooks: getSelectedConversationHooks(), // 🆕 대화 훅
                     speech_habits: document.getElementById('speechHabits')?.value || '', // 🆕 말투 습관
-                    vocabulary_register: document.getElementById('vocabularyRegister')?.value || '', // 🆕 어휘 수준
+                    vocabulary_register: document.getElementById('vocabularyRegister')?.value || 'casual_friendly', // 🆕 어휘 수준
                     allowed_motifs: getSelectedAllowedMotifs(), // 🆕 허용 주제
                     forbidden_terms: document.getElementById('forbiddenTerms')?.value ?
                         document.getElementById('forbiddenTerms').value.split(',').map(s => s.trim()).filter(s => s) : [] // 🆕 금지 용어
                 },
                 // 🆕 과거 이력 정보
                 past_history: {
-                    boyfriend_count: parseInt(document.getElementById('boyfriendCount')?.value) || null,
+                    boyfriend_count: parseInt(document.getElementById('boyfriendCount')?.value) || 2,
                     preferred_skinship: getSelectedSkinship(),
-                    relationship_experience: document.getElementById('relationshipExperience')?.value || '',
-                    first_experience_age: document.getElementById('firstExperienceAge')?.value || ''
+                    relationship_experience: document.getElementById('relationshipExperience')?.value || 'beginner',
+                    first_experience_age: document.getElementById('firstExperienceAge')?.value || 'early_twenties'
                 }
             };
 
@@ -12550,7 +12537,7 @@
             });
 
             console.log('🎯 최종 매력포인트 배열:', selected);
-            return selected.length === 0 ? null : selected; // 🚨 빈 배열이면 null 반환
+            return selected.length === 0 ? ['infectious_smile', 'witty_banter'] : selected; // 🚨 빈 배열이면 기본값 반환
         }
 
         // 선택된 핵심 욕구 수집 (빈 배열이면 null 반환)
@@ -12583,7 +12570,7 @@
             }
 
             console.log('🎯 최종 핵심욕구 배열:', selected);
-            return selected.length === 0 ? null : selected; // 🚨 빈 배열이면 null 반환
+            return selected.length === 0 ? ['meaningful_connection', 'personal_growth'] : selected; // 🚨 빈 배열이면 기본값 반환
         }
 
         // 선택된 말투 스타일 수집 (버튼 시스템)
@@ -12606,7 +12593,7 @@
             }
 
             console.log('⚠️ 선택된 말투스타일이 없음');
-            return null;
+            return 'confident_alluring';
         }
 
         // 🆕 선택된 취미 수집
@@ -12625,7 +12612,7 @@
             });
 
             console.log('🎯 최종 취미 배열:', selected);
-            return selected.length === 0 ? null : selected;
+            return selected.length === 0 ? ['reading', 'music', 'movies'] : selected;
         }
 
         // 🆕 선택된 외모 매력 특징요소 수집
@@ -12682,7 +12669,7 @@
             });
 
             console.log('🎯 최종 스킨십 배열:', selected);
-            return selected.length === 0 ? null : selected;
+            return selected.length === 0 ? ['hand_holding', 'cheek_kiss'] : selected;
         }
 
         // 🆕 대화역학 관련 새 데이터 수집 함수들
@@ -12703,7 +12690,7 @@
             });
 
             console.log('🎯 최종 플러팅패턴 배열:', selected);
-            return selected.length === 0 ? null : selected;
+            return selected.length === 0 ? ['subtle_teasing', 'playful_banter'] : selected;
         }
 
         // 선택된 대화 훅 수집
@@ -12722,7 +12709,7 @@
             });
 
             console.log('🎯 최종 대화훅 배열:', selected);
-            return selected.length === 0 ? null : selected;
+            return selected.length === 0 ? ['travel_stories', 'music_movies'] : selected;
         }
 
         // 선택된 허용 모티프 수집
@@ -12741,7 +12728,7 @@
             });
 
             console.log('🎯 최종 허용모티프 배열:', selected);
-            return selected.length === 0 ? null : selected;
+            return selected.length === 0 ? ['romance_love', 'daily_life'] : selected;
         }
 
         // 🔄 업그레이드된 캐릭터 폼 데이터 채우기 함수 (v2.0)
