@@ -11382,15 +11382,19 @@
                     console.log(`🔍 result.data 내용:`, result.data);
                     console.log(`🔍 result.categories 내용:`, result.categories);
 
-                    if (result.photos && result.photos.profile) {
-                        console.log(`📷 프로필 사진 데이터 존재: ${result.photos.profile.data ? '있음' : '없음'}`);
+                    // 올바른 위치에서 사진 데이터 찾기: result.data.photos
+                    const photosData = result.data?.photos;
+                    console.log(`🔍 실제 사진 데이터 위치 확인:`, photosData);
+
+                    if (photosData && photosData.profile) {
+                        console.log(`📷 프로필 사진 데이터 존재: ${photosData.profile.data ? '있음' : '없음'}`);
 
                         const profileContainer = document.getElementById(`profile-image-${characterId}`);
                         console.log(`🎯 프로필 컨테이너 찾기: ${profileContainer ? '찾음' : '없음'}`);
 
                         if (profileContainer) {
                             profileContainer.innerHTML = `
-                                <img src="${result.photos.profile.data}"
+                                <img src="${photosData.profile.data}"
                                      alt="프로필 사진"
                                      style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
                                      onload="console.log('✅ 프로필 이미지 로드 성공: ${characterId}')"
@@ -11400,6 +11404,7 @@
                         }
                     } else {
                         console.log(`❌ 프로필 사진 데이터 없음: ${characterId}`);
+                        console.log(`🔍 사진 데이터 구조:`, photosData);
                     }
                 } else {
                     console.log(`❌ API 실패: ${result.message || '알 수 없는 오류'}`);
