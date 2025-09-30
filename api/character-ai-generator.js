@@ -1,12 +1,15 @@
-// AI 캐릭터 생성 API - v3.0.0 (GitHub API 전용)
-// 메모리 저장소 제거, GitHub API만 사용
+// AI 캐릭터 생성 API - v3.1.0 (GitHub API 우선, 메모리 폴백)
+// GitHub API 우선 사용, 실패 시 메모리 폴백
+
+// 메모리 저장소 (GitHub 실패 시 폴백용)
+let memoryCharacters = {};
 
 // GitHub API 전용 저장소 (로컬 파일/메모리 의존성 제거)
 const DEFAULT_METADATA = {
-  version: "3.0.0",
+  version: "3.1.0",
   total_characters: 0,
   created: new Date().toISOString(),
-  storage_type: "github_api_only",
+  storage_type: "github_api_with_memory_fallback",
   last_updated: new Date().toISOString()
 };
 
@@ -61,23 +64,29 @@ module.exports = async function handler(req, res) {
       console.log('✅ 🔍 액션 매칭: list_characters');
       console.log('🐙 GitHub API 전용 캐릭터 리스트 조회...');
 
-      // GitHub API에서 직접 데이터 로드 (메모리 저장소 제거)
+      // GitHub API에서 데이터 로드 시도, 실패 시 메모리 폴백
       let characterData;
+      let dataSource = 'github';
+
       try {
         characterData = await loadFromGitHub();
+        console.log('✅ GitHub에서 데이터 로드 성공');
       } catch (error) {
-        console.error('❌ 캐릭터 데이터 로드 실패:', error.message);
-        return res.status(500).json({
-          success: false,
-          message: `캐릭터 데이터 로드 실패: ${error.message}`,
-          error_type: 'GITHUB_API_ERROR',
-          troubleshooting: [
-            'Vercel 환경변수 GITHUB_TOKEN 확인',
-            '인터넷 연결 상태 확인',
-            'GitHub API 상태 확인 (status.github.com)',
-            'Repository 접근 권한 확인'
-          ]
-        });
+        console.error('❌ GitHub 데이터 로드 실패:', error.message);
+        console.log('🔄 메모리 데이터로 폴백...');
+
+        // 메모리 데이터로 폴백
+        characterData = {
+          characters: memoryCharacters,
+          metadata: {
+            ...DEFAULT_METADATA,
+            total_characters: Object.keys(memoryCharacters).length,
+            storage_type: 'memory_fallback',
+            last_updated: new Date().toISOString()
+          }
+        };
+        dataSource = 'memory';
+        console.log('✅ 메모리 데이터 사용:', Object.keys(memoryCharacters).length, '개 캐릭터');
       }
 
       if (!characterData) {
@@ -90,15 +99,17 @@ module.exports = async function handler(req, res) {
         });
       }
 
-      console.log('📊 GitHub에서 로드된 캐릭터 수:', Object.keys(characterData.characters || {}).length, '개');
+      console.log('📊 로드된 캐릭터 수:', Object.keys(characterData.characters || {}).length, '개 (소스:', dataSource, ')');
 
       return res.json({
         success: true,
         characters: characterData.characters,
         metadata: {
           ...characterData.metadata,
-          github_synced: true,
-          sync_time: new Date().toISOString()
+          data_source: dataSource,
+          github_synced: dataSource === 'github',
+          sync_time: new Date().toISOString(),
+          warning: dataSource === 'memory' ? 'GitHub 연결 실패, 메모리 데이터 사용 중' : null
         }
       });
     }
@@ -197,17 +208,34 @@ module.exports = async function handler(req, res) {
         }
       };
 
-      // GitHub API로 직접 저장 (메모리 저장소 제거)
+      // GitHub API로 저장 시도 (실패해도 메모리 저장 유지)
+      let githubSaved = false;
+      let githubError = null;
+
       try {
         console.log('🔄 GitHub 저장 시작 - 총 캐릭터 수:', Object.keys(updatedData.characters).length);
         const saveResult = await saveToGitHub(updatedData);
         console.log('🎉 GitHub에 성공적으로 저장됨');
+        githubSaved = true;
       } catch (error) {
         console.error('❌ GitHub 저장 실패:', error.message);
-        return res.status(500).json({
-          success: false,
-          message: 'GitHub 저장 실패: ' + error.message
-        });
+        githubError = error.message;
+
+        // GITHUB_TOKEN 문제인 경우 특별히 처리
+        if (error.message.includes('GITHUB_TOKEN')) {
+          console.warn('⚠️ GITHUB_TOKEN 환경변수가 설정되지 않았습니다');
+          console.warn('⚠️ 캐릭터는 세션 메모리에만 저장됩니다 (임시)');
+        } else {
+          console.warn('⚠️ GitHub 저장 실패, 메모리 저장으로 계속 진행');
+        }
+
+        // GitHub 저장 실패 시 메모리에 저장
+        memoryCharacters[characterData.id] = {
+          ...characterData,
+          updated_at: new Date().toISOString(),
+          source: 'api_save_memory_fallback'
+        };
+        console.log('💾 메모리에 폴백 저장 완료:', characterData.id);
       }
 
       console.log('✅ 캐릭터 저장 완료:', characterData.id);
@@ -215,9 +243,13 @@ module.exports = async function handler(req, res) {
       return res.json({
         success: true,
         character: characterData,
-        message: '캐릭터가 성공적으로 저장되었습니다',
+        message: githubSaved
+          ? '캐릭터가 성공적으로 저장되었습니다 (GitHub 백업됨)'
+          : '캐릭터가 임시 저장되었습니다 (GitHub 백업 실패)',
         id: characterData.id,
-        github_saved: true
+        github_saved: githubSaved,
+        github_error: githubError,
+        warning: githubSaved ? null : 'GitHub 백업이 실패했습니다. GITHUB_TOKEN 환경변수를 확인하세요.'
       });
     }
 
