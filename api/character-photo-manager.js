@@ -33,12 +33,12 @@ function validatePhotoData(photoData, category) {
         throw new Error(`지원하지 않는 카테고리입니다: ${category}`);
     }
 
-    // Base64 데이터 크기 확인 (약 500KB 제한)
+    // Base64 데이터 크기 확인 (약 2MB 제한)
     const sizeInBytes = (photoData.length * 3) / 4;
-    const maxSizeInBytes = 500 * 1024; // 500KB
+    const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
 
     if (sizeInBytes > maxSizeInBytes) {
-        throw new Error(`이미지 크기가 너무 큽니다. 최대 500KB까지 지원됩니다. (현재: ${Math.round(sizeInBytes / 1024)}KB)`);
+        throw new Error(`이미지 크기가 너무 큽니다. 최대 2MB까지 지원됩니다. (현재: ${Math.round(sizeInBytes / (1024 * 1024) * 10) / 10}MB)`);
     }
 
     return true;
@@ -70,7 +70,7 @@ async function loadPhotosFromGitHub() {
                     total_characters: 0,
                     total_photos: 0,
                     storage_type: "github_base64",
-                    max_photo_size: "500KB",
+                    max_photo_size: "2MB",
                     supported_formats: ["jpeg", "jpg", "png", "webp"],
                     categories: PHOTO_CATEGORIES,
                     created: new Date().toISOString(),

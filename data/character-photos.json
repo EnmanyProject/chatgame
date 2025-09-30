@@ -34,7 +34,7 @@
     "total_characters": 2,
     "total_photos": 0,
     "storage_type": "github_base64",
-    "max_photo_size": "500KB",
+    "max_photo_size": "2MB",
     "supported_formats": ["jpeg", "jpg", "png", "webp"],
     "categories": {
       "profile": "프로필 사진 (1장)",
