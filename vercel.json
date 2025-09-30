@@ -1,11 +1,7 @@
 {
   "functions": {
     "api/*.js": {
-      "runtime": "@vercel/node@18"
+      "runtime": "nodejs18.x"
     }
-  },
-  "outputDirectory": ".",
-  "buildCommand": "echo 'No build step required'",
-  "installCommand": "npm install",
-  "framework": null
+  }
 }
