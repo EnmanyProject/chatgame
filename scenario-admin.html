@@ -8152,27 +8152,33 @@
         }
 
         function getCharacterHair(character) {
-            return character.physical_allure?.appearance?.hair || character.physical_allure?.hair || character.appearance?.hair || '-';
+            const hair = character.physical_allure?.appearance?.hair || character.physical_allure?.hair || character.appearance?.hair || '-';
+            return hair === '-' || hair === '' ? '미설정' : translateToKorean(hair, 'hair');
         }
 
         function getCharacterEyes(character) {
-            return character.physical_allure?.appearance?.eyes || character.physical_allure?.eyes || character.appearance?.eyes || '-';
+            const eyes = character.physical_allure?.appearance?.eyes || character.physical_allure?.eyes || character.appearance?.eyes || '-';
+            return eyes === '-' || eyes === '' ? '미설정' : translateToKorean(eyes, 'eyes');
         }
 
         function getCharacterBody(character) {
-            return character.physical_allure?.appearance?.body || character.physical_allure?.body || character.appearance?.body || '-';
+            const body = character.physical_allure?.appearance?.body || character.physical_allure?.body || character.appearance?.body || '-';
+            return body === '-' ? body : translateToKorean(body, 'body');
         }
 
         function getCharacterBust(character) {
-            return character.physical_allure?.appearance?.bust || character.physical_allure?.bust || character.appearance?.bust || '-';
+            const bust = character.physical_allure?.appearance?.bust || character.physical_allure?.bust || character.appearance?.bust || '-';
+            return bust === '-' ? bust : translateToKorean(bust, 'bust');
         }
 
         function getCharacterWaistHip(character) {
-            return character.physical_allure?.appearance?.waist_hip || character.physical_allure?.waist_hip || character.appearance?.waist_hip || '-';
+            const waistHip = character.physical_allure?.appearance?.waist_hip || character.physical_allure?.waist_hip || character.appearance?.waist_hip || '-';
+            return waistHip === '-' ? waistHip : translateToKorean(waistHip, 'waist_hip');
         }
 
         function getCharacterStyle(character) {
-            return character.physical_allure?.appearance?.style || character.physical_allure?.style || character.appearance?.style || '-';
+            const style = character.physical_allure?.appearance?.style || character.physical_allure?.style || character.appearance?.style || '-';
+            return style === '-' ? style : translateToKorean(style, 'style');
         }
 
         function getCharacterHobbies(character) {
@@ -8199,8 +8205,112 @@
             return character.background?.hometown || character.hometown || '-';
         }
 
+        // 🇰🇷 한글 번역 매핑 함수들
+        function translateToKorean(value, category) {
+            const translations = {
+                seduction_style: {
+                    'playful_confident': '장난스럽고 자신감 있는',
+                    'mysterious_elegant': '신비롭고 우아한',
+                    'warm_nurturing': '따뜻하고 포용적인',
+                    'intellectually_stimulating': '지적으로 자극적인',
+                    'innocent_charming': '순수하고 매력적인',
+                    'direct_passionate': '직설적이고 열정적인'
+                },
+                hair: {
+                    'long_straight': '긴 직모',
+                    'long_wavy': '긴 웨이브 머리',
+                    'medium_bob': '단정한 단발머리',
+                    'short_cute': '짧고 귀여운 머리',
+                    'curly_hair': '곱슬머리'
+                },
+                eyes: {
+                    'round_cute': '둥글고 귀여운 눈',
+                    'seductive_eyes': '유혹적인 눈매',
+                    'innocent_eyes': '순수한 눈빛',
+                    'mysterious_eyes': '신비로운 눈매',
+                    'bright_eyes': '밝은 눈빛'
+                },
+                body: {
+                    'petite': '소녀 같은',
+                    'petite_sexy': '소녀 같지만 섹시한',
+                    'average_height': '적당한 키의',
+                    'tall_elegant': '키 크고 우아한',
+                    'model_like': '모델 같은'
+                },
+                bust: {
+                    'small_cute': '작고 귀여운',
+                    'medium_natural': '자연스러운',
+                    'large_attractive': '매력적인',
+                    'glamorous': '글래머러스한'
+                },
+                waist_hip: {
+                    'slim_tight': '슬림하고 탄탄한',
+                    'natural_curves': '자연스러운 곡선',
+                    'soft_feminine': '부드럽고 여성스러운',
+                    'athletic': '운동선수 같은'
+                },
+                style: {
+                    'cute_casual': '귀엽고 캐주얼한',
+                    'sexy_chic': '섹시하고 세련된',
+                    'innocent_style': '순수한 스타일',
+                    'elegant_fashion': '우아한 패션',
+                    'sporty_style': '스포티한 스타일'
+                },
+                charm_points: {
+                    'infectious_smile': '전염성 있는 미소',
+                    'gentle_touch': '부드러운 터치',
+                    'expressive_eyes': '표현력 있는 눈빛',
+                    'witty_banter': '재치 있는 대화',
+                    'graceful_movements': '우아한 몸짓',
+                    'mysterious_aura': '신비로운 아우라',
+                    'confident_gaze': '자신감 있는 시선',
+                    'intelligent_conversation': '지적인 대화',
+                    'caring_gestures': '배려심 있는 제스처',
+                    'warm_smile': '따뜻한 미소',
+                    'attentive_listening': '세심한 경청',
+                    'confident_independence': '자신감 있는 독립성',
+                    'subtle_touches': '은은한 터치',
+                    'cool_demeanor': '쿨한 태도'
+                },
+                core_desires: {
+                    'meaningful_connection': '의미 있는 연결',
+                    'creative_expression': '창의적 표현',
+                    'adventure_excitement': '모험과 흥미',
+                    'intellectual_stimulation': '지적 자극',
+                    'personal_growth': '개인적 성장',
+                    'helping_others': '타인 돕기',
+                    'personal_freedom': '개인적 자유',
+                    'practical_achievements': '실용적 성취'
+                },
+                speech_style: {
+                    'sensual_whisper': '관능적인 속삭임',
+                    'mature_elegant': '성숙하고 우아한',
+                    'cute_innocent': '귀엽고 순수한',
+                    'sultry_dominant': '요염하고 지배적인',
+                    'warm_friendly': '따뜻하고 친근한'
+                },
+                comfort_level: {
+                    'light_flirtation': '가벼운 플러팅',
+                    'moderate_flirtation': '적당한 플러팅',
+                    'intense_chemistry': '강렬한 케미'
+                },
+                escalation_pace: {
+                    'very_gradual': '매우 점진적',
+                    'gradual_building': '점진적 발전',
+                    'moderate_pace': '적당한 속도',
+                    'quick_progression': '빠른 진전'
+                }
+            };
+
+            if (translations[category] && translations[category][value]) {
+                return translations[category][value];
+            }
+            return value; // 번역이 없으면 원본 반환
+        }
+
         function getCharacterSeductionStyle(character) {
-            return character.appeal_profile?.seduction_style || '-';
+            const style = character.appeal_profile?.seduction_style || '-';
+            return style === '-' ? style : translateToKorean(style, 'seduction_style');
         }
 
         function getCharacterEmotionalIntelligence(character) {
@@ -13197,7 +13307,10 @@
         // 📝 v2.1 스키마 필드 추출 함수들
         function getCharacterCharmPoints(character) {
             const charmPoints = character.appeal_profile?.charm_points;
-            return charmPoints && Array.isArray(charmPoints) ? charmPoints.join(', ') : '-';
+            if (charmPoints && Array.isArray(charmPoints) && charmPoints.length > 0) {
+                return charmPoints.map(point => translateToKorean(point, 'charm_points')).join(', ');
+            }
+            return '-';
         }
 
         function getCharacterSexualCuriosity(character) {
@@ -13226,7 +13339,10 @@
 
         function getCharacterCoreDesires(character) {
             const desires = character.psychological_depth?.core_desires;
-            return desires && Array.isArray(desires) ? desires.join(', ') : '-';
+            if (desires && Array.isArray(desires) && desires.length > 0) {
+                return desires.map(desire => translateToKorean(desire, 'core_desires')).join(', ');
+            }
+            return '-';
         }
 
         function getCharacterVulnerabilities(character) {
@@ -13235,11 +13351,13 @@
         }
 
         function getCharacterComfortLevel(character) {
-            return character.psychological_depth?.boundaries?.comfort_level || '-';
+            const level = character.psychological_depth?.boundaries?.comfort_level || '-';
+            return level === '-' ? level : translateToKorean(level, 'comfort_level');
         }
 
         function getCharacterEscalationPace(character) {
-            return character.psychological_depth?.boundaries?.escalation_pace || '-';
+            const pace = character.psychological_depth?.boundaries?.escalation_pace || '-';
+            return pace === '-' ? pace : translateToKorean(pace, 'escalation_pace');
         }
 
         function getCharacterSexualToneBand(character) {
@@ -13274,7 +13392,8 @@
         }
 
         function getCharacterSpeechStyleNew(character) {
-            return character.conversation_dynamics?.speech_style || '-';
+            const style = character.conversation_dynamics?.speech_style || '-';
+            return style === '-' ? style : translateToKorean(style, 'speech_style');
         }
 
         function getCharacterSpeechHabits(character) {
