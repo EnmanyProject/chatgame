@@ -3975,39 +3975,59 @@
                         </div>
                     </div>
 
-                    <!-- 기본 정보 -->
+                    <!-- 🆔 최상위 메타 정보 -->
+                    <div class="char-category">
+                        <h3>🆔 기본 메타 정보</h3>
+                        <div class="category-grid">
+                            <div class="form-group">
+                                <label>캐릭터 ID</label>
+                                <input type="text" id="characterMetaId" placeholder="자동 생성됩니다" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label>활성 여부</label>
+                                <select id="characterActive">
+                                    <option value="true" selected>✅ 활성</option>
+                                    <option value="false">❌ 비활성</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>버전</label>
+                                <input type="text" id="characterVersion" value="2.1" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label>소스</label>
+                                <select id="characterSource">
+                                    <option value="manual_creation" selected>🖐️ 수동 생성</option>
+                                    <option value="ai_assisted">🤖 AI 보조</option>
+                                    <option value="template_based">📋 템플릿 기반</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 💖 기본 정보 -->
                     <div class="char-category">
                         <h3>💖 기본 정보</h3>
                         <div class="category-grid">
                             <div class="form-group">
-                                <label>캐릭터 이름</label>
-                                <input type="text" id="charName" placeholder="예: 윤아, 수진, 혜원" />
+                                <label>이름 (1-24자)</label>
+                                <input type="text" id="charName" placeholder="예: 윤아, 수진, 혜원" maxlength="24" />
+                                <button type="button" class="btn-random" onclick="randomizeName()">🎲 랜덤</button>
                             </div>
                             <div class="form-group">
-                                <label>나이</label>
-                                <select id="charAge">
-                                    <option value="20" selected>20세 (성인 대학생)</option>
-                                    <option value="21">21세 (매력적인 대학생)</option>
-                                    <option value="22">22세 (성숙한 대학 선배)</option>
-                                    <option value="23">23세 (섹시한 대학원생)</option>
-                                    <option value="24">24세 (매혹적인 대학원생)</option>
-                                    <option value="25">25세 (성인 매력의 사회 초년생)</option>
-                                    <option value="26">26세 (성숙한 사회인)</option>
-                                    <option value="27">27세 (매력적인 사회인)</option>
-                                    <option value="28">28세 (섹시한 직장인)</option>
-                                    <option value="29">29세 (성숙한 매력의 직장인)</option>
-                                    <option value="30">30세 (완성된 성인 매력)</option>
-                                </select>
+                                <label>나이 (20-40)</label>
+                                <input type="number" id="charAge" min="20" max="40" value="22" />
+                                <button type="button" class="btn-random" onclick="randomizeAge()">🎲 랜덤</button>
                             </div>
                             <div class="form-group">
-                                <label>캐릭터 타입</label>
-                                <select id="charType">
-                                    <option value="seductive_junior">💋 매혹적인 후배</option>
-                                    <option value="sexy_peer">🔥 섹시한 동갑</option>
-                                    <option value="alluring_senior">😈 유혹적인 선배</option>
-                                    <option value="sensual_friend">💕 관능적인 친구</option>
-                                    <option value="mysterious_seductress">🌙 신비로운 요부</option>
-                                    <option value="mature_beauty">👑 성숙한 미인</option>
+                                <label>직업 (1-40자)</label>
+                                <input type="text" id="charOccupation" placeholder="예: 대학생, 디자이너, 간호사" maxlength="40" />
+                                <button type="button" class="btn-random" onclick="randomizeOccupation()">🎲 랜덤</button>
+                            </div>
+                            <div class="form-group">
+                                <label>성별</label>
+                                <select id="charGender">
+                                    <option value="female" selected>👩 여성</option>
                                 </select>
                             </div>
                         </div>
@@ -4188,6 +4208,7 @@
                                     <option value="warm_nurturing">🌸 따뜻하고 포용적인</option>
                                     <option value="intellectually_stimulating">🧠 지적이고 자극적인</option>
                                 </select>
+                                <button type="button" class="btn-random" onclick="randomizeSeduction()">🎲 랜덤</button>
                             </div>
 
                             <div class="form-group">
@@ -4200,27 +4221,37 @@
                                     <button type="button" class="charm-btn" data-charm="graceful_movements">💃 우아한 움직임</button>
                                     <button type="button" class="charm-btn" data-charm="expressive_eyes">👀 표현력 있는 눈빛</button>
                                 </div>
+                                <button type="button" class="btn-random" onclick="randomizeCharms()">🎲 랜덤 선택</button>
                             </div>
 
                             <div class="form-group">
                                 <label>감성 지능 (1-10): <span id="eiValue">7</span></label>
                                 <input type="range" id="emotionalIntelligence" min="1" max="10" value="7" oninput="document.getElementById('eiValue').textContent = this.value">
+                                <button type="button" class="btn-random" onclick="randomizeEI()">🎲</button>
                             </div>
 
                             <div class="form-group">
                                 <label>자신감 수준 (1-10): <span id="confidenceValue">8</span></label>
                                 <input type="range" id="confidenceLevel" min="1" max="10" value="8" oninput="document.getElementById('confidenceValue').textContent = this.value">
+                                <button type="button" class="btn-random" onclick="randomizeConfidence()">🎲</button>
                             </div>
 
                             <div class="form-group">
                                 <label>신비로움 (1-10): <span id="mysteryValue">6</span></label>
                                 <input type="range" id="mysteryFactor" min="1" max="10" value="6" oninput="document.getElementById('mysteryValue').textContent = this.value">
+                                <button type="button" class="btn-random" onclick="randomizeMystery()">🎲</button>
                             </div>
 
-                            <!-- 🔥 새로 추가: 성적 호기심 -->
                             <div class="form-group">
                                 <label>성적 호기심 (1-10): <span id="sexualCuriosityValue">5</span></label>
                                 <input type="range" id="sexualCuriosity" min="1" max="10" value="5" oninput="document.getElementById('sexualCuriosityValue').textContent = this.value">
+                                <button type="button" class="btn-random" onclick="randomizeSexualCuriosity()">🎲</button>
+                            </div>
+
+                            <div class="form-group">
+                                <label>성적 쿨적도 (1-10): <span id="sexualComfortValue">5</span></label>
+                                <input type="range" id="sexualComfort" min="1" max="10" value="5" oninput="document.getElementById('sexualComfortValue').textContent = this.value">
+                                <button type="button" class="btn-random" onclick="randomizeSexualComfort()">🎲</button>
                             </div>
                         </div>
                     </div>
@@ -4367,18 +4398,18 @@
 
                     <!-- 장르/시나리오 설정 섹션 제거됨 -->
 
-                    <!-- AI 생성 영역 -->
-                    <div class="char-category ai-generation">
-                        <h3>🤖 AI 자동 생성 영역</h3>
-                        <div class="ai-controls">
-                            <button type="button" class="btn btn-ai" onclick="generateAICharacter()">
-                                ✨ AI로 캐릭터 완성하기
+                    <!-- 🎲 랜덤 생성 영역 -->
+                    <div class="char-category random-generation">
+                        <h3>🎲 랜덤 생성 도구</h3>
+                        <div class="random-controls">
+                            <button type="button" class="btn btn-random-all" onclick="randomizeAllFields()">
+                                🎲 전체 랜덤 생성
                             </button>
-                            <div id="aiGenerationStatus" class="generation-status"></div>
+                            <button type="button" class="btn btn-reset" onclick="resetAllFields()">
+                                🔄 모든 필드 초기화
+                            </button>
                         </div>
-                        <div class="generated-preview" id="characterPreview" style="display: none;">
-                            <!-- AI 생성 결과 미리보기 -->
-                        </div>
+                        <div class="random-status" id="randomStatus"></div>
                     </div>
                 </form>
             </div>
@@ -12538,6 +12569,162 @@
 
         // 페이지 로드 시 개발자 모드 초기화
         document.addEventListener('DOMContentLoaded', initializeDeveloperMode);
+
+        // 🎲 랜덤 선택 함수들 (기존 옵션에서 무작위 선택)
+        function randomizeName() {
+            const names = ['수진', '미화', '예린', '나연', '지은', '소영', '혜진', '유리', '다은', '민지'];
+            document.getElementById('charName').value = names[Math.floor(Math.random() * names.length)];
+        }
+
+        function randomizeAge() {
+            const age = Math.floor(Math.random() * 21) + 20; // 20-40
+            document.getElementById('charAge').value = age;
+        }
+
+        function randomizeOccupation() {
+            const occupations = ['대학생', '디자이너', '간호사', '예술가', '회사원', '선생님', '개발자', '기자', '사진작가'];
+            document.getElementById('charOccupation').value = occupations[Math.floor(Math.random() * occupations.length)];
+        }
+
+        function randomizeSeduction() {
+            const select = document.getElementById('seductionStyle');
+            const options = select.options;
+            const randomIndex = Math.floor(Math.random() * options.length);
+            select.selectedIndex = randomIndex;
+        }
+
+        function randomizeCharms() {
+            const charmBtns = document.querySelectorAll('.charm-btn');
+            // 모든 선택 해제
+            charmBtns.forEach(btn => btn.classList.remove('selected'));
+
+            // 랜덤하게 3개 선택
+            const indices = [];
+            while (indices.length < 3) {
+                const randomIndex = Math.floor(Math.random() * charmBtns.length);
+                if (!indices.includes(randomIndex)) {
+                    indices.push(randomIndex);
+                    charmBtns[randomIndex].classList.add('selected');
+                }
+            }
+        }
+
+        function randomizeEI() {
+            const value = Math.floor(Math.random() * 10) + 1;
+            document.getElementById('emotionalIntelligence').value = value;
+            document.getElementById('eiValue').textContent = value;
+        }
+
+        function randomizeConfidence() {
+            const value = Math.floor(Math.random() * 10) + 1;
+            document.getElementById('confidenceLevel').value = value;
+            document.getElementById('confidenceValue').textContent = value;
+        }
+
+        function randomizeMystery() {
+            const value = Math.floor(Math.random() * 10) + 1;
+            document.getElementById('mysteryFactor').value = value;
+            document.getElementById('mysteryValue').textContent = value;
+        }
+
+        function randomizeSexualCuriosity() {
+            const value = Math.floor(Math.random() * 10) + 1;
+            document.getElementById('sexualCuriosity').value = value;
+            document.getElementById('sexualCuriosityValue').textContent = value;
+        }
+
+        function randomizeSexualComfort() {
+            const value = Math.floor(Math.random() * 10) + 1;
+            document.getElementById('sexualComfort').value = value;
+            document.getElementById('sexualComfortValue').textContent = value;
+        }
+
+        function randomizeHair() {
+            const options = ['어깨선까지 내려오는 웨이브', '긴 생머리', '단발머리', '포니테일', '곱슬머리'];
+            document.getElementById('charHair').value = options[Math.floor(Math.random() * options.length)];
+        }
+
+        function randomizeEyes() {
+            const options = ['유혹적인 눈매', '아몬드형 눈', '고양이 같은 눈', '신비로운 깊은 눈', '관능적인 시선'];
+            document.getElementById('charEyes').value = options[Math.floor(Math.random() * options.length)];
+        }
+
+        function randomizeBody() {
+            const select = document.getElementById('charBody');
+            const options = select.options;
+            select.selectedIndex = Math.floor(Math.random() * options.length);
+        }
+
+        function randomizeBust() {
+            const select = document.getElementById('charBust');
+            const options = select.options;
+            select.selectedIndex = Math.floor(Math.random() * options.length);
+        }
+
+        function randomizeWaistHip() {
+            const select = document.getElementById('charWaistHip');
+            const options = select.options;
+            select.selectedIndex = Math.floor(Math.random() * options.length);
+        }
+
+        function randomizeStyle() {
+            const select = document.getElementById('charStyle');
+            const options = select.options;
+            select.selectedIndex = Math.floor(Math.random() * options.length);
+        }
+
+        function randomizeAllFields() {
+            randomizeName();
+            randomizeAge();
+            randomizeOccupation();
+            randomizeSeduction();
+            randomizeCharms();
+            randomizeEI();
+            randomizeConfidence();
+            randomizeMystery();
+            randomizeSexualCuriosity();
+            randomizeSexualComfort();
+            randomizeHair();
+            randomizeEyes();
+            randomizeBody();
+            randomizeBust();
+            randomizeWaistHip();
+            randomizeStyle();
+
+            const statusEl = document.getElementById('randomStatus');
+            if (statusEl) {
+                statusEl.innerHTML = '✨ 모든 필드가 랜덤으로 선택되었습니다!';
+            }
+        }
+
+        function resetAllFields() {
+            document.getElementById('characterForm').reset();
+            document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+            const statusEl = document.getElementById('randomStatus');
+            if (statusEl) {
+                statusEl.innerHTML = '🔄 모든 필드가 초기화되었습니다!';
+            }
+        }
+
+        // 전역 함수로 등록
+        window.randomizeName = randomizeName;
+        window.randomizeAge = randomizeAge;
+        window.randomizeOccupation = randomizeOccupation;
+        window.randomizeSeduction = randomizeSeduction;
+        window.randomizeCharms = randomizeCharms;
+        window.randomizeEI = randomizeEI;
+        window.randomizeConfidence = randomizeConfidence;
+        window.randomizeMystery = randomizeMystery;
+        window.randomizeSexualCuriosity = randomizeSexualCuriosity;
+        window.randomizeSexualComfort = randomizeSexualComfort;
+        window.randomizeHair = randomizeHair;
+        window.randomizeEyes = randomizeEyes;
+        window.randomizeBody = randomizeBody;
+        window.randomizeBust = randomizeBust;
+        window.randomizeWaistHip = randomizeWaistHip;
+        window.randomizeStyle = randomizeStyle;
+        window.randomizeAllFields = randomizeAllFields;
+        window.resetAllFields = resetAllFields;
 
         // 즉시 초기화 (DOMContentLoaded 이미 발생한 경우 대비)
         if (document.readyState === 'loading') {
