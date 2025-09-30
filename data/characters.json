@@ -1,11 +1,58 @@
 {
-  "characters": {},
+  "characters": {
+    "유리_intp_1759219255066": {
+      "id": "유리_intp_1759219255066",
+      "basic_info": {
+        "name": "유리",
+        "age": 32,
+        "mbti": "INTP",
+        "occupation": "art",
+        "gender": "female"
+      },
+      "appeal_profile": {
+        "seduction_style": "mysterious_elegant",
+        "charm_points": [
+          "graceful_movements"
+        ],
+        "emotional_intelligence": 1,
+        "confidence_level": 9,
+        "mystery_factor": 5
+      },
+      "physical_allure": {
+        "appearance": {
+          "hair": "",
+          "eyes": "",
+          "body": "model_like",
+          "bust": "glamorous",
+          "waist_hip": "soft_feminine",
+          "style": "sexy_chic"
+        }
+      },
+      "psychological_depth": {
+        "core_desires": [
+          "personal_growth"
+        ],
+        "boundaries": {
+          "comfort_level": "light_flirtation",
+          "escalation_pace": "very_gradual"
+        }
+      },
+      "conversation_dynamics": {
+        "speech_style": "sultry_dominant"
+      },
+      "created_at": "2025-09-30T08:00:55.066Z",
+      "updated_at": "2025-09-30T08:00:55.980Z",
+      "source": "scenario_admin_v2",
+      "active": true,
+      "version": "2.0"
+    }
+  },
   "metadata": {
     "version": "4.1.0",
-    "total_characters": 0,
+    "total_characters": 1,
     "created": "2025-09-28T10:43:23.975Z",
-    "storage_type": "github_api_only",
-    "last_updated": "2025-09-30T08:00:32.720Z",
-    "last_accessed": "2025-09-30T08:00:32.720Z"
+    "storage_type": "stable_github_direct",
+    "last_updated": "2025-09-30T08:00:55.980Z",
+    "last_accessed": "2025-09-30T08:00:55.980Z"
   }
 }
