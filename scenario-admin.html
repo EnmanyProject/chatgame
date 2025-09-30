@@ -8128,10 +8128,11 @@
             document.getElementById('charRelationship').value = '';
             document.getElementById('charSpeechStyle').value = '';
 
-            // AI 생성 영역 초기화
-            generatedCharacter = null; // 글로벌 변수도 초기화
-            document.getElementById('aiGenerationStatus').innerHTML = '';
-            document.getElementById('characterPreview').style.display = 'none';
+            // 랜덤 생성 영역 초기화
+            const randomStatusEl = document.getElementById('randomStatus');
+            if (randomStatusEl) {
+                randomStatusEl.innerHTML = '';
+            }
             
             document.getElementById('characterModal').style.display = 'block';
         }
@@ -8789,10 +8790,13 @@
             });
         }
 
-        // === AI 캐릭터 자동 생성 함수 ===
+        // === AI 캐릭터 자동 생성 함수 (DEPRECATED) ===
         async function generateAICharacter() {
-            const statusDiv = document.getElementById('aiGenerationStatus');
-            const previewDiv = document.getElementById('characterPreview');
+            console.warn('⚠️ AI 생성 기능이 비활성화되었습니다. 랜덤 선택 기능을 사용하세요.');
+            return;
+            // 이하 코드 비활성화
+            const statusDiv = null; // document.getElementById('aiGenerationStatus');
+            const previewDiv = null; // document.getElementById('characterPreview');
             
             statusDiv.innerHTML = '🤖 AI가 캐릭터를 생성하고 있습니다...';
             
@@ -9016,12 +9020,11 @@
 
                 console.log('✅ 모든 폼 요소 적용 완료!');
 
-                // AI 생성 영역 숨기기
-                const previewElement = document.getElementById('characterPreview');
-                const statusElement = document.getElementById('aiGenerationStatus');
-
-                if (previewElement) previewElement.style.display = 'none';
-                if (statusElement) statusElement.innerHTML = '✅ 캐릭터가 폼에 적용되었습니다!';
+                // 랜덤 생성 영역 숨기기
+                const randomStatusElement = document.getElementById('randomStatus');
+                if (randomStatusElement) {
+                    randomStatusElement.innerHTML = '✅ 캐릭터가 폼에 적용되었습니다!';
+                }
 
                 // 성공 메시지와 자동 저장 여부 확인
                 const autoSave = confirm('💖 AI 생성 캐릭터가 폼에 적용되었습니다!\n\n바로 저장하시겠습니까?\n\n• 확인: 바로 저장\n• 취소: 수정 후 저장');
