@@ -1,47 +1,65 @@
 {
   "characters": {
-    "유리_intp_1759219255066": {
-      "id": "유리_intp_1759219255066",
+    "미화_entj_1759220751761": {
+      "id": "미화_entj_1759220751761",
       "basic_info": {
-        "name": "유리",
-        "age": 32,
-        "mbti": "INTP",
+        "name": "미화",
+        "age": 30,
+        "mbti": "ENTJ",
         "occupation": "art",
         "gender": "female"
       },
       "appeal_profile": {
-        "seduction_style": "mysterious_elegant",
+        "seduction_style": "intellectually_stimulating",
         "charm_points": [
-          "graceful_movements"
+          "infectious_smile",
+          "witty_banter",
+          "expressive_eyes"
         ],
-        "emotional_intelligence": 1,
-        "confidence_level": 9,
-        "mystery_factor": 5
+        "emotional_intelligence": 9,
+        "confidence_level": 6,
+        "mystery_factor": 5,
+        "sexual_curiosity": 8,
+        "sexual_comfort": 5,
+        "hobbies": null
       },
       "physical_allure": {
         "appearance": {
-          "hair": "",
-          "eyes": "",
-          "body": "model_like",
+          "hair": "long_straight",
+          "eyes": "seductive_eyes",
+          "body": "petite_sexy",
           "bust": "glamorous",
-          "waist_hip": "soft_feminine",
-          "style": "sexy_chic"
-        }
+          "waist_hip": "curvy_sexy",
+          "style": "provocative_fashion"
+        },
+        "feature_elements": null,
+        "sensual_habits": null,
+        "body_language": ""
       },
       "psychological_depth": {
         "core_desires": [
-          "personal_growth"
+          "intellectual_stimulation"
         ],
+        "values": "love_family",
         "boundaries": {
           "comfort_level": "light_flirtation",
           "escalation_pace": "very_gradual"
         }
       },
       "conversation_dynamics": {
-        "speech_style": "sultry_dominant"
+        "speech_style": "confident_alluring"
       },
-      "created_at": "2025-09-30T08:00:55.066Z",
-      "updated_at": "2025-09-30T08:00:55.980Z",
+      "past_history": {
+        "boyfriend_count": 2,
+        "preferred_skinship": [
+          "hand_holding",
+          "cheek_kiss"
+        ],
+        "relationship_experience": "beginner",
+        "first_experience_age": "early_twenties"
+      },
+      "created_at": "2025-09-30T08:25:51.761Z",
+      "updated_at": "2025-09-30T08:25:52.677Z",
       "source": "scenario_admin_v2",
       "active": true,
       "version": "2.0"
@@ -52,7 +70,7 @@
     "total_characters": 1,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "stable_github_direct",
-    "last_updated": "2025-09-30T08:00:55.980Z",
-    "last_accessed": "2025-09-30T08:00:55.980Z"
+    "last_updated": "2025-09-30T08:25:52.677Z",
+    "last_accessed": "2025-09-30T08:25:52.676Z"
   }
 }
