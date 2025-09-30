@@ -9958,11 +9958,19 @@
             // MBTI 버튼 클릭 이벤트
             document.addEventListener('click', function(e) {
                 if (e.target.classList.contains('mbti-btn')) {
-                    document.querySelectorAll('.mbti-btn').forEach(btn => btn.classList.remove('selected'));
-                    e.target.classList.add('selected');
-                    const selectedMbti = e.target.dataset.mbti;
-                    document.getElementById('charMbti').value = selectedMbti;
-                    console.log('✅ MBTI 선택됨:', selectedMbti);
+                    if (e.target.classList.contains('selected')) {
+                        // 이미 선택된 것을 다시 클릭 → 해제
+                        e.target.classList.remove('selected');
+                        document.getElementById('charMbti').value = '';
+                        console.log('✅ MBTI 선택 해제됨');
+                    } else {
+                        // 새로운 선택
+                        document.querySelectorAll('.mbti-btn').forEach(btn => btn.classList.remove('selected'));
+                        e.target.classList.add('selected');
+                        const selectedMbti = e.target.dataset.mbti;
+                        document.getElementById('charMbti').value = selectedMbti;
+                        console.log('✅ MBTI 선택됨:', selectedMbti);
+                    }
                 }
 
                 // 성격 특성 버튼 클릭 이벤트 (최대 3개 선택)
@@ -9980,9 +9988,18 @@
 
                 // 관계 설정 버튼 클릭 이벤트
                 if (e.target.classList.contains('relationship-btn')) {
-                    document.querySelectorAll('.relationship-btn').forEach(btn => btn.classList.remove('selected'));
-                    e.target.classList.add('selected');
-                    document.getElementById('charRelationship').value = e.target.dataset.rel;
+                    if (e.target.classList.contains('selected')) {
+                        // 이미 선택된 것을 다시 클릭 → 해제
+                        e.target.classList.remove('selected');
+                        document.getElementById('charRelationship').value = '';
+                        console.log('✅ 관계 설정 해제됨');
+                    } else {
+                        // 새로운 선택
+                        document.querySelectorAll('.relationship-btn').forEach(btn => btn.classList.remove('selected'));
+                        e.target.classList.add('selected');
+                        document.getElementById('charRelationship').value = e.target.dataset.rel;
+                        console.log('✅ 관계 설정 선택됨:', e.target.dataset.rel);
+                    }
                 }
 
                 // 취미 버튼 클릭 이벤트 (최대 3개 선택)
@@ -10000,9 +10017,18 @@
 
                 // 말투 스타일 버튼 클릭 이벤트
                 if (e.target.classList.contains('speech-btn')) {
-                    document.querySelectorAll('.speech-btn').forEach(btn => btn.classList.remove('selected'));
-                    e.target.classList.add('selected');
-                    document.getElementById('charSpeechStyle').value = e.target.dataset.speech;
+                    if (e.target.classList.contains('selected')) {
+                        // 이미 선택된 것을 다시 클릭 → 해제
+                        e.target.classList.remove('selected');
+                        document.getElementById('charSpeechStyle').value = '';
+                        console.log('✅ 말투 스타일 해제됨');
+                    } else {
+                        // 새로운 선택
+                        document.querySelectorAll('.speech-btn').forEach(btn => btn.classList.remove('selected'));
+                        e.target.classList.add('selected');
+                        document.getElementById('charSpeechStyle').value = e.target.dataset.speech;
+                        console.log('✅ 말투 스타일 선택됨:', e.target.dataset.speech);
+                    }
                 }
 
                 // 💫 매력 포인트 버튼 클릭 이벤트 (최대 3개 선택)
