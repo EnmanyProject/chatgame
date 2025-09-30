@@ -8794,19 +8794,23 @@
                     'petite': '소녀 같은',
                     'petite_sexy': '소녀 같지만 섹시한',
                     'average_height': '적당한 키의',
+                    'average_attractive': '보통 매력적인',
                     'tall_elegant': '키 크고 우아한',
                     'model_like': '모델 같은'
                 },
                 bust: {
                     'small_cute': '작고 귀여운',
                     'medium_natural': '자연스러운',
+                    'medium_balanced': '균형 잡힌',
                     'large_attractive': '매력적인',
+                    'voluptuous': '섹감한',
                     'glamorous': '글래머러스한'
                 },
                 waist_hip: {
                     'slim_tight': '슬림하고 탄탄한',
                     'natural_curves': '자연스러운 곡선',
                     'soft_feminine': '부드럽고 여성스러운',
+                    'curvy_sexy': '곡선미 있고 섹시한',
                     'athletic': '운동선수 같은'
                 },
                 style: {
@@ -8814,6 +8818,8 @@
                     'sexy_chic': '섹시하고 세련된',
                     'innocent_style': '순수한 스타일',
                     'elegant_fashion': '우아한 패션',
+                    'seductive_elegant': '유혹적이고 우아한',
+                    'provocative_fashion': '도발적인 패션',
                     'sporty_style': '스포티한 스타일'
                 },
                 charm_points: {
@@ -8985,12 +8991,119 @@
                     'books': '📚 좋아하는 책 (2만원~)',
                     'cute_accessories': '🎀 귀여운 액세서리 (5만원~)',
                     'travel_package': '✈️ 여행 패키지 (500만원~)'
+                },
+                // 🎈 취미 번역
+                hobbies: {
+                    'music': '음악',
+                    'dancing': '댓스',
+                    'reading': '독서',
+                    'movies': '영화 감상',
+                    'cooking': '요리',
+                    'travel': '여행',
+                    'art': '예술',
+                    'fitness': '피트니스',
+                    'photography': '사진촬영',
+                    'shopping': '쇼핑',
+                    'yoga': '요가',
+                    'swimming': '수영'
+                },
+                // 💼 직업 번역
+                occupation: {
+                    'art': '예술가',
+                    'student': '학생',
+                    'teacher': '교사',
+                    'nurse': '간호사',
+                    'designer': '디자이너',
+                    'business': '사업가',
+                    'engineer': '엔지니어',
+                    'writer': '작가'
+                },
+                // 💬 대화 훅 번역
+                conversation_hooks: {
+                    'work_passion': '일에 대한 열정',
+                    'relationships': '인간관계',
+                    'dreams_goals': '꿈과 목표',
+                    'personal_stories': '개인적인 이야기',
+                    'hobbies_interests': '취미와 관심사',
+                    'life_philosophy': '인생 철학'
+                },
+                // 💖 플러팅 패턴 번역
+                flirting_patterns: {
+                    'subtle_teasing': '은근한 장난',
+                    'compliment_giving': '칭찬하기',
+                    'physical_proximity': '물리적 근접',
+                    'playful_banter': '장난스러운 대화',
+                    'eye_contact': '아이 컨택트',
+                    'gentle_touch': '부드러운 터치'
+                },
+                // 😊 반응 성향 번역
+                humor: {
+                    'giggles_easily': '잘 웃는',
+                    'witty_responses': '재치 있는 대답',
+                    'playful_teasing': '장난스러운 놓임'
+                },
+                compliment: {
+                    'gracefully_accepts': '우아하게 받아들이는',
+                    'shy_response': '수줄어하는',
+                    'confident_response': '자신감 있게 받는'
+                },
+                interest_expression: {
+                    'enthusiastic_sharing': '열정적인 공유',
+                    'curious_questioning': '호기심 많은 질문',
+                    'attentive_listening': '주의 깊은 경청'
+                },
+                // 👤 관계 경험 번역
+                relationship_experience: {
+                    'beginner': '초보자',
+                    'intermediate': '중급자',
+                    'experienced': '경험자',
+                    'expert': '전문가'
+                },
+                // 👶 첫 경험 연령 번역
+                first_experience_age: {
+                    'early_teens': '어린 시절',
+                    'mid_teens': '중고등학교 시절',
+                    'late_teens': '고등학교 말',
+                    'early_twenties': '대학교 초반',
+                    'mid_twenties': '대학교 후반'
+                },
+                // 🤗 선호하는 스킨십 번역
+                preferred_skinship: {
+                    'light_hugs': '가벼운 포옹',
+                    'hand_holding': '손 잡기',
+                    'shoulder_massage': '어깨 마사지',
+                    'passionate_kiss': '열정적인 키스',
+                    'gentle_touch': '부드러운 터치',
+                    'warm_embrace': '따뜻한 포옹',
+                    'playful_tickling': '장난스러운 간지럽히기',
+                    'cuddling': '모드기'
+                },
+                // 🗣️ 어휘 수준 번역
+                vocabulary_register: {
+                    'casual_friendly': '캐주얼하고 친근한',
+                    'polite_formal': '정중하고 격식적인',
+                    'intimate_personal': '친밀하고 개인적인',
+                    'playful_casual': '장난스럽고 자연스러운'
+                },
+                // 💪 가치관 번역
+                values: {
+                    'love_family': '사랑과 가족',
+                    'career_success': '경력과 성공',
+                    'personal_growth': '개인적 성장',
+                    'adventure_freedom': '모험과 자유',
+                    'stability_security': '안정과 보안'
                 }
             };
 
             if (translations[category] && translations[category][value]) {
                 return translations[category][value];
             }
+
+            // unknown 값에 대한 처리
+            if (value === 'unknown' || value === '' || !value) {
+                return '정보 없음';
+            }
+
             return value; // 번역이 없으면 원본 반환
         }
 
@@ -10010,13 +10123,13 @@
                         <p><strong>이름:</strong> ${character.basic_info?.name || character.name || '이름 없음'}</p>
                         <p><strong>나이:</strong> ${character.basic_info?.age || character.age || '나이 정보 없음'}세</p>
                         <p><strong>MBTI:</strong> ${character.basic_info?.mbti || character.mbti || 'MBTI 정보 없음'}</p>
-                        <p><strong>직업/전공:</strong> ${character.basic_info?.occupation || character.major || '직업 정보 없음'}</p>
+                        <p><strong>직업/전공:</strong> ${translateToKorean(character.basic_info?.occupation || character.major || 'unknown', 'occupation')}</p>
                     </div>
 
                     <div class="preview-section">
                         <h5>💫 매력 프로필</h5>
-                        <p><strong>유혹 스타일:</strong> ${character.appeal_profile?.seduction_style || '정보 없음'}</p>
-                        <p><strong>매력 포인트:</strong> ${Array.isArray(character.appeal_profile?.charm_points) ? character.appeal_profile.charm_points.join(', ') : '정보 없음'}</p>
+                        <p><strong>유혹 스타일:</strong> ${translateToKorean(character.appeal_profile?.seduction_style || 'unknown', 'seduction_style')}</p>
+                        <p><strong>매력 포인트:</strong> ${Array.isArray(character.appeal_profile?.charm_points) ? character.appeal_profile.charm_points.map(charm => translateToKorean(charm, 'charm_points')).join(', ') : '정보 없음'}</p>
                         <p><strong>감성 지능:</strong> ${character.appeal_profile?.emotional_intelligence || '정보 없음'}/10</p>
                         <p><strong>자신감:</strong> ${character.appeal_profile?.confidence_level || '정보 없음'}/10</p>
                         <p><strong>신비로움:</strong> ${character.appeal_profile?.mystery_factor || '정보 없음'}/10</p>
@@ -10025,28 +10138,28 @@
                     <div class="preview-section">
                         <h5>👀 외모 & 스타일</h5>
                         <p><strong>특징적 외모:</strong> ${Array.isArray(character.physical_allure?.signature_features) ? character.physical_allure.signature_features.join(', ') : '정보 없음'}</p>
-                        <p><strong>헤어스타일:</strong> ${character.physical_allure?.appearance?.hair || character.appearance?.hair || character.hair || '헤어 정보 없음'}</p>
-                        <p><strong>눈:</strong> ${character.physical_allure?.appearance?.eyes || character.appearance?.eyes || character.eyes || '눈 정보 없음'}</p>
-                        <p><strong>체형:</strong> ${character.physical_allure?.appearance?.body || character.appearance?.body || character.body || '체형 정보 없음'}</p>
-                        <p><strong>가슴:</strong> ${character.physical_allure?.appearance?.bust || character.appearance?.bust || character.bust || '정보 없음'}</p>
-                        <p><strong>허리/엉덩이:</strong> ${character.physical_allure?.appearance?.waist_hip || character.appearance?.waist_hip || character.waist_hip || '정보 없음'}</p>
-                        <p><strong>패션:</strong> ${character.physical_allure?.appearance?.style || character.appearance?.style || character.style || '스타일 정보 없음'}</p>
-                        <p><strong>매력적 습관:</strong> ${Array.isArray(character.physical_allure?.sensual_habits) ? character.physical_allure.sensual_habits.join(', ') : '정보 없음'}</p>
+                        <p><strong>헤어스타일:</strong> ${translateToKorean(character.physical_allure?.appearance?.hair || character.appearance?.hair || character.hair || 'unknown', 'hair')}</p>
+                        <p><strong>눈:</strong> ${translateToKorean(character.physical_allure?.appearance?.eyes || character.appearance?.eyes || character.eyes || 'unknown', 'eyes')}</p>
+                        <p><strong>체형:</strong> ${translateToKorean(character.physical_allure?.appearance?.body || character.appearance?.body || character.body || 'unknown', 'body')}</p>
+                        <p><strong>가슴:</strong> ${translateToKorean(character.physical_allure?.appearance?.bust || character.appearance?.bust || character.bust || 'unknown', 'bust')}</p>
+                        <p><strong>허리/엉덩이:</strong> ${translateToKorean(character.physical_allure?.appearance?.waist_hip || character.appearance?.waist_hip || character.waist_hip || 'unknown', 'waist_hip')}</p>
+                        <p><strong>패션:</strong> ${translateToKorean(character.physical_allure?.appearance?.style || character.appearance?.style || character.style || 'unknown', 'style')}</p>
+                        <p><strong>매력적 습관:</strong> ${Array.isArray(character.physical_allure?.sensual_habits) ? character.physical_allure.sensual_habits.map(habit => translateToKorean(habit, 'sensual_habits')).join(', ') : '정보 없음'}</p>
                     </div>
 
                     <div class="preview-section">
                         <h5>🧠 심리적 깊이</h5>
-                        <p><strong>핵심 욕구:</strong> ${Array.isArray(character.psychological_depth?.core_desires) ? character.psychological_depth.core_desires.join(', ') : '정보 없음'}</p>
+                        <p><strong>핵심 욕구:</strong> ${Array.isArray(character.psychological_depth?.core_desires) ? character.psychological_depth.core_desires.map(desire => translateToKorean(desire, 'core_desires')).join(', ') : '정보 없음'}</p>
                         <p><strong>취약점:</strong> ${Array.isArray(character.psychological_depth?.vulnerabilities) ? character.psychological_depth.vulnerabilities.join(', ') : '정보 없음'}</p>
-                        <p><strong>경계선:</strong> ${character.psychological_depth?.boundaries?.comfort_level || '정보 없음'}</p>
-                        <p><strong>발전 속도:</strong> ${character.psychological_depth?.boundaries?.escalation_pace || '정보 없음'}</p>
+                        <p><strong>경계선:</strong> ${translateToKorean(character.psychological_depth?.boundaries?.comfort_level || 'unknown', 'comfort_level')}</p>
+                        <p><strong>발전 속도:</strong> ${translateToKorean(character.psychological_depth?.boundaries?.escalation_pace || 'unknown', 'escalation_pace')}</p>
                     </div>
 
                     <div class="preview-section">
                         <h5>💬 대화 특성</h5>
-                        <p><strong>플러팅 패턴:</strong> ${Array.isArray(character.conversation_dynamics?.flirtation_patterns) ? character.conversation_dynamics.flirtation_patterns.join(', ') : '정보 없음'}</p>
-                        <p><strong>대화 훅:</strong> ${Array.isArray(character.conversation_dynamics?.conversation_hooks) ? character.conversation_dynamics.conversation_hooks.join(', ') : '정보 없음'}</p>
-                        <p><strong>말투:</strong> ${character.conversation_dynamics?.speech_style || character.speech_style || '말투 정보 없음'}</p>
+                        <p><strong>플러팅 패턴:</strong> ${Array.isArray(character.conversation_dynamics?.flirtation_patterns) ? character.conversation_dynamics.flirtation_patterns.map(pattern => translateToKorean(pattern, 'flirting_patterns')).join(', ') : '정보 없음'}</p>
+                        <p><strong>대화 훅:</strong> ${Array.isArray(character.conversation_dynamics?.conversation_hooks) ? character.conversation_dynamics.conversation_hooks.map(hook => translateToKorean(hook, 'conversation_hooks')).join(', ') : '정보 없음'}</p>
+                        <p><strong>말투:</strong> ${translateToKorean(character.conversation_dynamics?.speech_style || character.speech_style || 'unknown', 'speech_style')}</p>
                         <p><strong>말버릇:</strong> ${Array.isArray(character.conversation_dynamics?.speech_quirks) ? character.conversation_dynamics.speech_quirks.join(', ') : character.speech_habit || '정보 없음'}</p>
                     </div>
 
@@ -10055,8 +10168,8 @@
                         <p><strong>가족:</strong> ${character.background?.family || character.family || '가족 정보 없음'}</p>
                         <p><strong>고향:</strong> ${character.background?.hometown || character.hometown || '고향 정보 없음'}</p>
                         <p><strong>관계:</strong> ${character.background?.relationship || character.relationship || '관계 정보 없음'}</p>
-                        <p><strong>취미:</strong> ${Array.isArray(character.hobbies) ? character.hobbies.join(', ') : character.hobbies || '취미 정보 없음'}</p>
-                        <p><strong>가치관:</strong> ${character.values || '가치관 정보 없음'}</p>
+                        <p><strong>취미:</strong> ${Array.isArray(character.hobbies) ? character.hobbies.map(hobby => translateToKorean(hobby, 'hobbies')).join(', ') : translateToKorean(character.hobbies || 'unknown', 'hobbies')}</p>
+                        <p><strong>가치관:</strong> ${translateToKorean(character.values || 'unknown', 'values')}</p>
                     </div>
 
                     <div class="preview-section">
