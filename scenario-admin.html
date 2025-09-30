@@ -4245,6 +4245,36 @@
                                 </select>
                             </div>
                         </div>
+
+                        <!-- 🆕 외모 매력 특징 -->
+                        <div class="form-group">
+                            <label>외모 매력 특징요소 (최대 3개 선택)</label>
+                            <div class="feature-options">
+                                <button type="button" class="feature-btn" data-feature="dimples">😊 보조개</button>
+                                <button type="button" class="feature-btn" data-feature="long_eyelashes">👁️ 긴 속눈썹</button>
+                                <button type="button" class="feature-btn" data-feature="cute_nose">👃 귀여운 코</button>
+                                <button type="button" class="feature-btn" data-feature="graceful_neck">🦢 우아한 목선</button>
+                                <button type="button" class="feature-btn" data-feature="small_waist">⏳ 잘록한 허리</button>
+                                <button type="button" class="feature-btn" data-feature="long_legs">🦵 긴 다리</button>
+                                <button type="button" class="feature-btn" data-feature="soft_skin">✨ 부드러운 피부</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>관능적 습관 (최대 2개 선택)</label>
+                            <div class="habit-options">
+                                <button type="button" class="habit-btn" data-habit="lip_biting">💋 입술 깨물기</button>
+                                <button type="button" class="habit-btn" data-habit="hair_flipping">💇‍♀️ 머리카락 넘기기</button>
+                                <button type="button" class="habit-btn" data-habit="eye_contact">👀 깊은 눈맞춤</button>
+                                <button type="button" class="habit-btn" data-habit="gentle_touch">🤗 부드러운 터치</button>
+                                <button type="button" class="habit-btn" data-habit="seductive_walk">🚶‍♀️ 유혹적인 걸음걸이</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>몸짓 언어 (선택사항)</label>
+                            <input type="text" id="bodyLanguage" placeholder="예: 말할 때 손짓을 많이 함, 웃을 때 눈이 반달 모양" />
+                        </div>
                     </div>
 
                     <!-- 💫 매력 프로필 (새로 추가) -->
@@ -8524,6 +8554,22 @@
                     'friendship': '우정과 인연',
                     'philosophy': '철학적 대화',
                     'daily_life': '일상 이야기'
+                },
+                feature_elements: {
+                    'dimples': '보조개',
+                    'long_eyelashes': '긴 속눈썹',
+                    'cute_nose': '귀여운 코',
+                    'graceful_neck': '우아한 목선',
+                    'small_waist': '잘록한 허리',
+                    'long_legs': '긴 다리',
+                    'soft_skin': '부드러운 피부'
+                },
+                sensual_habits: {
+                    'lip_biting': '입술 깨물기',
+                    'hair_flipping': '머리카락 넘기기',
+                    'eye_contact': '깊은 눈맞춤',
+                    'gentle_touch': '부드러운 터치',
+                    'seductive_walk': '유혹적인 걸음걸이'
                 }
             };
 
@@ -9382,6 +9428,34 @@
                         alert('허용 대화 주제는 최대 5개까지만 선택 가능합니다.');
                     }
                     console.log('✅ 선택된 허용 모티프:', getSelectedAllowedMotifs());
+                }
+
+                // 🆕 외모 매력: 특징요소 버튼 클릭 이벤트 (최대 3개 선택)
+                if (e.target.classList.contains('feature-btn')) {
+                    const selectedFeatures = document.querySelectorAll('.feature-btn.selected').length;
+
+                    if (e.target.classList.contains('selected')) {
+                        e.target.classList.remove('selected');
+                    } else if (selectedFeatures < 3) {
+                        e.target.classList.add('selected');
+                    } else {
+                        alert('외모 매력 특징요소는 최대 3개까지만 선택 가능합니다.');
+                    }
+                    console.log('✅ 선택된 특징요소:', getSelectedFeatureElements());
+                }
+
+                // 🆕 외모 매력: 관능적 습관 버튼 클릭 이벤트 (최대 2개 선택)
+                if (e.target.classList.contains('habit-btn')) {
+                    const selectedHabits = document.querySelectorAll('.habit-btn.selected').length;
+
+                    if (e.target.classList.contains('selected')) {
+                        e.target.classList.remove('selected');
+                    } else if (selectedHabits < 2) {
+                        e.target.classList.add('selected');
+                    } else {
+                        alert('관능적 습관은 최대 2개까지만 선택 가능합니다.');
+                    }
+                    console.log('✅ 선택된 관능적 습관:', getSelectedSensualHabits());
                 }
             });
         }
@@ -12631,7 +12705,7 @@
             });
 
             console.log('🎯 최종 특징요소 배열:', selected);
-            return selected.length === 0 ? null : selected;
+            return selected.length === 0 ? ['dimples', 'long_eyelashes'] : selected;
         }
 
         // 🆕 선택된 관능적 습관 수집
@@ -12650,7 +12724,7 @@
             });
 
             console.log('🎯 최종 관능적습관 배열:', selected);
-            return selected.length === 0 ? null : selected;
+            return selected.length === 0 ? ['hair_flipping', 'eye_contact'] : selected;
         }
 
         // 🆕 선택된 스킨십 수집
