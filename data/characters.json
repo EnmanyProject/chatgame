@@ -74,90 +74,14 @@
       "source": "scenario_admin_v2",
       "active": true,
       "version": "2.0"
-    },
-    "예린_enfj_1759221491314": {
-      "id": "예린_enfj_1759221491314",
-      "basic_info": {
-        "name": "예린",
-        "age": 40,
-        "mbti": "ENFJ",
-        "occupation": "art",
-        "gender": "female"
-      },
-      "appeal_profile": {
-        "seduction_style": "warm_nurturing",
-        "charm_points": [
-          "infectious_smile",
-          "confident_touch"
-        ],
-        "emotional_intelligence": 3,
-        "confidence_level": 3,
-        "mystery_factor": 6,
-        "sexual_curiosity": 8,
-        "sexual_comfort": 4,
-        "hobbies": null
-      },
-      "physical_allure": {
-        "appearance": {
-          "hair": "",
-          "eyes": "",
-          "body": "average_attractive",
-          "bust": "medium_balanced",
-          "waist_hip": "athletic_toned",
-          "style": "seductive_elegant"
-        },
-        "feature_elements": null,
-        "sensual_habits": null,
-        "body_language": ""
-      },
-      "psychological_depth": {
-        "core_desires": [
-          "personal_growth",
-          "adventure_excitement"
-        ],
-        "values": "love_family",
-        "boundaries": {
-          "comfort_level": "light_flirtation",
-          "escalation_pace": "very_gradual"
-        }
-      },
-      "conversation_dynamics": {
-        "speech_style": "bold_provocative",
-        "flirting_patterns": null,
-        "reaction_tendencies": {
-          "humor": "giggles_easily",
-          "compliment": "gracefully_accepts",
-          "interest_expression": "enthusiastic_sharing"
-        },
-        "conversation_hooks": null,
-        "speech_habits": "",
-        "vocabulary_register": "casual_friendly",
-        "allowed_motifs": null,
-        "forbidden_terms": []
-      },
-      "past_history": {
-        "boyfriend_count": 2,
-        "preferred_skinship": [
-          "hand_holding",
-          "cheek_kiss",
-          "head_patting"
-        ],
-        "relationship_experience": "beginner",
-        "first_experience_age": "early_teens"
-      },
-      "created_at": "2025-09-30T08:38:11.314Z",
-      "updated_at": "2025-09-30T08:38:12.382Z",
-      "source": "scenario_admin_v2",
-      "active": true,
-      "version": "2.0"
     }
   },
   "metadata": {
     "version": "4.1.0",
-    "total_characters": 2,
+    "total_characters": 1,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-30T08:53:48.028Z",
-    "last_accessed": "2025-09-30T08:53:48.028Z"
+    "last_updated": "2025-09-30T08:53:53.734Z",
+    "last_accessed": "2025-09-30T08:53:53.733Z"
   }
 }
