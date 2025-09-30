@@ -1,47 +1,5 @@
 {
   "characters": {
-    "미화__infp_1759191852447": {
-      "id": "미화__infp_1759191852447",
-      "basic_info": {
-        "name": "미화 ",
-        "age": 22,
-        "mbti": "INFP",
-        "occupation": "art",
-        "gender": "female"
-      },
-      "appeal_profile": {
-        "seduction_style": "playful_confident",
-        "charm_points": null,
-        "emotional_intelligence": 7,
-        "confidence_level": 8,
-        "mystery_factor": 8
-      },
-      "physical_allure": {
-        "appearance": {
-          "hair": "long_straight",
-          "eyes": "seductive_eyes",
-          "body": "petite_sexy",
-          "bust": "small_cute",
-          "waist_hip": "slim_tight",
-          "style": "sexy_chic"
-        }
-      },
-      "psychological_depth": {
-        "core_desires": null,
-        "boundaries": {
-          "comfort_level": "intense_chemistry",
-          "escalation_pace": "very_gradual"
-        }
-      },
-      "conversation_dynamics": {
-        "speech_style": "playful_seductive"
-      },
-      "created_at": "2025-09-30T00:24:12.447Z",
-      "updated_at": "2025-09-30T00:24:12.766Z",
-      "source": "api_save",
-      "active": true,
-      "version": "2.0"
-    },
     "수진_entp_1759192334381": {
       "id": "수진_entp_1759192334381",
       "basic_info": {
@@ -87,10 +45,10 @@
   },
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 2,
+    "total_characters": 1,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-30T00:32:14.921Z",
-    "last_accessed": "2025-09-30T00:32:14.920Z"
+    "last_updated": "2025-09-30T00:34:14.037Z",
+    "last_accessed": "2025-09-30T00:34:14.036Z"
   }
 }
