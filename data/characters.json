@@ -1,109 +1,34 @@
 {
   "characters": {
-    "미화_entj_1759220751761": {
-      "id": "미화_entj_1759220751761",
+    "미화__entj_1759222641017": {
+      "id": "미화__entj_1759222641017",
       "basic_info": {
-        "name": "미화",
-        "age": 30,
+        "name": "미화 ",
+        "age": 28,
         "mbti": "ENTJ",
         "occupation": "art",
         "gender": "female"
       },
       "appeal_profile": {
-        "seduction_style": "intellectually_stimulating",
+        "seduction_style": "playful_confident",
         "charm_points": [
-          "infectious_smile",
           "witty_banter",
           "expressive_eyes"
         ],
-        "emotional_intelligence": 9,
-        "confidence_level": 6,
+        "emotional_intelligence": 10,
+        "confidence_level": 2,
         "mystery_factor": 5,
-        "sexual_curiosity": 8,
-        "sexual_comfort": 5,
+        "sexual_curiosity": 1,
+        "sexual_comfort": 6,
         "hobbies": null
       },
       "physical_allure": {
         "appearance": {
-          "hair": "long_straight",
-          "eyes": "seductive_eyes",
-          "body": "petite_sexy",
-          "bust": "glamorous",
-          "waist_hip": "curvy_sexy",
-          "style": "provocative_fashion"
-        },
-        "feature_elements": null,
-        "sensual_habits": null,
-        "body_language": ""
-      },
-      "psychological_depth": {
-        "core_desires": [
-          "intellectual_stimulation"
-        ],
-        "values": "love_family",
-        "boundaries": {
-          "comfort_level": "light_flirtation",
-          "escalation_pace": "very_gradual"
-        }
-      },
-      "conversation_dynamics": {
-        "speech_style": "confident_alluring",
-        "flirting_patterns": null,
-        "reaction_tendencies": {
-          "humor": "",
-          "compliment": "",
-          "interest_expression": ""
-        },
-        "conversation_hooks": null,
-        "speech_habits": "",
-        "vocabulary_register": "",
-        "allowed_motifs": null,
-        "forbidden_terms": []
-      },
-      "past_history": {
-        "boyfriend_count": 2,
-        "preferred_skinship": [
-          "hand_holding",
-          "cheek_kiss"
-        ],
-        "relationship_experience": "beginner",
-        "first_experience_age": "early_twenties"
-      },
-      "created_at": "2025-09-30T08:25:51.761Z",
-      "updated_at": "2025-09-30T08:25:52.677Z",
-      "source": "scenario_admin_v2",
-      "active": true,
-      "version": "2.0"
-    },
-    "예린_enfj_1759221491314": {
-      "id": "예린_enfj_1759221491314",
-      "basic_info": {
-        "name": "예린",
-        "age": 40,
-        "mbti": "ENFJ",
-        "occupation": "art",
-        "gender": "female"
-      },
-      "appeal_profile": {
-        "seduction_style": "warm_nurturing",
-        "charm_points": [
-          "infectious_smile",
-          "confident_touch"
-        ],
-        "emotional_intelligence": 3,
-        "confidence_level": 3,
-        "mystery_factor": 6,
-        "sexual_curiosity": 8,
-        "sexual_comfort": 4,
-        "hobbies": null
-      },
-      "physical_allure": {
-        "appearance": {
-          "hair": "",
-          "eyes": "",
-          "body": "average_attractive",
-          "bust": "medium_balanced",
-          "waist_hip": "athletic_toned",
+          "hair": "short_bob",
+          "eyes": "almond_elegant",
+          "body": "tall_elegant",
+          "bust": "voluptuous",
+          "waist_hip": "slim_tight",
           "style": "seductive_elegant"
         },
         "feature_elements": null,
@@ -112,8 +37,7 @@
       },
       "psychological_depth": {
         "core_desires": [
-          "personal_growth",
-          "adventure_excitement"
+          "meaningful_connection"
         ],
         "values": "love_family",
         "boundaries": {
@@ -122,7 +46,7 @@
         }
       },
       "conversation_dynamics": {
-        "speech_style": "bold_provocative",
+        "speech_style": "sensual_whisper",
         "flirting_patterns": null,
         "reaction_tendencies": {
           "humor": "giggles_easily",
@@ -139,91 +63,14 @@
         "boyfriend_count": 2,
         "preferred_skinship": [
           "hand_holding",
-          "cheek_kiss",
+          "shoulder_massage",
           "head_patting"
         ],
         "relationship_experience": "beginner",
         "first_experience_age": "early_teens"
       },
-      "created_at": "2025-09-30T08:38:11.314Z",
-      "updated_at": "2025-09-30T08:38:12.382Z",
-      "source": "scenario_admin_v2",
-      "active": true,
-      "version": "2.0"
-    },
-    "유리_entp_1759222013317": {
-      "id": "유리_entp_1759222013317",
-      "basic_info": {
-        "name": "유리",
-        "age": 31,
-        "mbti": "ENTP",
-        "occupation": "art",
-        "gender": "female"
-      },
-      "appeal_profile": {
-        "seduction_style": "warm_nurturing",
-        "charm_points": [
-          "confident_touch",
-          "graceful_movements"
-        ],
-        "emotional_intelligence": 4,
-        "confidence_level": 9,
-        "mystery_factor": 1,
-        "sexual_curiosity": 10,
-        "sexual_comfort": 2,
-        "hobbies": null
-      },
-      "physical_allure": {
-        "appearance": {
-          "hair": "",
-          "eyes": "",
-          "body": "model_like",
-          "bust": "glamorous",
-          "waist_hip": "slim_tight",
-          "style": "provocative_fashion"
-        },
-        "feature_elements": null,
-        "sensual_habits": null,
-        "body_language": ""
-      },
-      "psychological_depth": {
-        "core_desires": [
-          "creative_expression",
-          "personal_growth"
-        ],
-        "values": "personal_growth",
-        "boundaries": {
-          "comfort_level": "light_flirtation",
-          "escalation_pace": "quick_progression"
-        }
-      },
-      "conversation_dynamics": {
-        "speech_style": "bold_provocative",
-        "flirting_patterns": null,
-        "reaction_tendencies": {
-          "humor": "giggles_easily",
-          "compliment": "gracefully_accepts",
-          "interest_expression": "enthusiastic_sharing"
-        },
-        "conversation_hooks": null,
-        "speech_habits": "",
-        "vocabulary_register": "intellectual",
-        "allowed_motifs": [
-          "art_creativity"
-        ],
-        "forbidden_terms": []
-      },
-      "past_history": {
-        "boyfriend_count": 2,
-        "preferred_skinship": [
-          "hand_holding",
-          "passionate_kiss"
-        ],
-        "relationship_experience": "intermediate",
-        "first_experience_age": "early_teens"
-      },
-      "created_at": "2025-09-30T08:46:53.317Z",
-      "updated_at": "2025-09-30T08:46:54.041Z",
+      "created_at": "2025-09-30T08:57:21.017Z",
+      "updated_at": "2025-09-30T08:57:22.080Z",
       "source": "scenario_admin_v2",
       "active": true,
       "version": "2.0"
@@ -231,10 +78,10 @@
   },
   "metadata": {
     "version": "4.1.0",
-    "total_characters": 3,
+    "total_characters": 1,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "stable_github_direct",
-    "last_updated": "2025-09-30T08:46:54.041Z",
-    "last_accessed": "2025-09-30T08:46:54.041Z"
+    "last_updated": "2025-09-30T08:57:22.080Z",
+    "last_accessed": "2025-09-30T08:57:22.080Z"
   }
 }
