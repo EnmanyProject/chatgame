@@ -1072,6 +1072,26 @@
             border-radius: 50%;
         }
 
+        .profile-image-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .profile-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+
+        .profile-image-container:hover img {
+            transform: scale(1.05);
+        }
+
         .character-info {
             text-align: center;
             width: 100%;
@@ -8854,10 +8874,12 @@
             container.innerHTML = characterArray.map(character => `
                 <div class="character-card" onclick="showCharacterDetail('${character.id}')">
                     <div class="character-image">
-                        ${character.image ?
-                            `<img src="${character.image}" alt="${getCharacterName(character)}" onerror="this.src='data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 100 100\\"><rect width=\\"100\\" height=\\"100\\" fill=\\"%23f0f0f0\\"/><text x=\\"50\\" y=\\"50\\" text-anchor=\\"middle\\" dy=\\".3em\\" fill=\\"%23999\\">${getCharacterName(character).charAt(0)}</text></svg>'"/>` :
-                            `<div class="no-image">${getCharacterName(character).charAt(0)}</div>`
-                        }
+                        <div id="profile-image-${character.id}" class="profile-image-container">
+                            ${character.image ?
+                                `<img src="${character.image}" alt="${getCharacterName(character)}" onerror="this.src='data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 100 100\\"><rect width=\\"100\\" height=\\"100\\" fill=\\"%23f0f0f0\\"/><text x=\\"50\\" y=\\"50\\" text-anchor=\\"middle\\" dy=\\".3em\\" fill=\\"%23999\\">${getCharacterName(character).charAt(0)}</text></svg>'"/>` :
+                                `<div class="no-image">${getCharacterName(character).charAt(0)}</div>`
+                            }
+                        </div>
                     </div>
                     <div class="character-info">
                         <div class="mbti">${getCharacterMBTI(character)}</div>
@@ -8888,6 +8910,7 @@
             // 각 캐릭터의 사진 미리보기 로드
             characterArray.forEach(character => {
                 loadCharacterPhotoPreview(character.id);
+                loadCharacterProfileImage(character.id);
             });
         }
 
@@ -11326,6 +11349,30 @@
             } catch (error) {
                 console.log(`📷 캐릭터 ${characterId} 사진 미리보기 로드 실패:`, error);
                 // 에러 시에는 조용히 처리 (빈 상태 유지)
+            }
+        }
+
+        // 🖼️ 캐릭터 카드 프로필 이미지 로드
+        async function loadCharacterProfileImage(characterId) {
+            try {
+                const apiUrl = `/api/character-ai-generator?action=get_character_photos&character_id=${characterId}&_t=${Date.now()}`;
+                const response = await fetch(apiUrl);
+                const result = await response.json();
+
+                if (result.success && result.photos && result.photos.profile) {
+                    const profileContainer = document.getElementById(`profile-image-${characterId}`);
+                    if (profileContainer) {
+                        profileContainer.innerHTML = `
+                            <img src="${result.photos.profile.data}"
+                                 alt="프로필 사진"
+                                 style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
+                                 onerror="this.parentElement.innerHTML='<div class=\\"no-image\\">${characterId.split('_')[0].charAt(0)}</div>'"/>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.log(`📷 캐릭터 ${characterId} 프로필 이미지 로드 실패:`, error);
+                // 에러 시에는 기본 이미지 유지
             }
         }
 
