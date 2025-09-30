@@ -7967,8 +7967,16 @@
                     <div class="character-info">
                         <div class="mbti">${getCharacterMBTI(character)}</div>
                         <h3>${getCharacterName(character)}</h3>
-                        <p class="traits">${getCharacterTraits(character)}</p>
-                        <p style="font-size: 0.9em; color: #95a5a6; margin-bottom: 15px;">${getCharacterSpeechStyle(character)}</p>
+                        <p class="traits" style="margin-bottom: 8px;"><strong>매력:</strong> ${getCharacterTraits(character)}</p>
+                        <p style="font-size: 0.9em; color: #95a5a6; margin-bottom: 8px;"><strong>말투:</strong> ${getCharacterSpeechStyle(character)}</p>
+                        <p style="font-size: 0.9em; color: #34495e; margin-bottom: 8px;"><strong>스타일:</strong> ${getCharacterSeductionStyle(character)}</p>
+                        <p style="font-size: 0.9em; color: #34495e; margin-bottom: 8px;"><strong>체형:</strong> ${getCharacterBody(character)}</p>
+                        <div style="font-size: 0.85em; color: #7f8c8d; margin-bottom: 8px;">
+                            <strong>외모:</strong> ${getCharacterStyle(character)} • ${getCharacterBust(character)}
+                        </div>
+                        <div style="font-size: 0.85em; color: #27ae60; margin-bottom: 10px;">
+                            <strong>욕구:</strong> ${getCharacterCoreDesires(character)}
+                        </div>
                         <div class="character-schema-info" style="font-size: 0.8em; color: #7f8c8d; margin-bottom: 10px;">
                             ${character.version || (character.basic_info ? 'v2.0' : 'v1.0')} ${character.source ? `• ${character.source}` : ''}
                         </div>
@@ -7994,7 +8002,9 @@
         function getCharacterTraits(character) {
             // v2.0 스키마의 경우
             if (character.appeal_profile?.charm_points && Array.isArray(character.appeal_profile.charm_points)) {
-                return character.appeal_profile.charm_points.join(', ');
+                return character.appeal_profile.charm_points
+                    .map(point => translateToKorean(point, 'charm_points'))
+                    .join(', ');
             }
 
             // v1.0 스키마의 경우
@@ -8009,9 +8019,15 @@
         }
 
         function getCharacterSpeechStyle(character) {
-            return character.conversation_dynamics?.speech_style ||
-                   character.speech_style ||
-                   '말투 정보 없음';
+            const style = character.conversation_dynamics?.speech_style ||
+                         character.speech_style ||
+                         '말투 정보 없음';
+
+            if (style === '말투 정보 없음') {
+                return style;
+            }
+
+            return translateToKorean(style, 'speech_style');
         }
 
         // 🔍 캐릭터 상세 정보 모달 표시 함수
