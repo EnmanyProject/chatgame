@@ -6442,7 +6442,7 @@
                 console.log('🔍 API 키 상태 확인 시작...');
 
                 // 환경변수는 서버사이드에서만 확인 가능하므로 간단한 테스트 API 사용
-                const response = await fetch('/api/character-ai-generator?action=list_characters');
+                const response = await fetch(`/api/character-ai-generator?action=list_characters&_t=${Date.now()}`);
                 const data = await response.json();
 
                 console.log('📋 API 상태:', data.success ? '정상' : '오류');
@@ -7618,8 +7618,8 @@
                 // API 엔드포인트별 상태 확인
                 const checks = [
                     { name: 'Dialogue Manager', url: '/api/dialogue-manager?action=test' },
-                    { name: 'Scenario Manager', url: '/api/scenario-manager?action=list' },
-                    { name: 'Character Manager', url: '/api/character-ai-generator?action=list_characters' }
+                    { name: 'Scenario Manager', url: `/api/scenario-manager?action=list&_t=${Date.now()}` },
+                    { name: 'Character Manager', url: `/api/character-ai-generator?action=list_characters&_t=${Date.now()}` }
                 ];
 
                 const results = [];
@@ -8357,7 +8357,7 @@
                 console.log('🔐 GitHub 토큰은 서버에서 자동 관리됨');
                 
                 // API를 통해 GitHub 데이터 로드 (토큰은 서버에서 처리)
-                const apiResponse = await fetch('/api/character-ai-generator?action=list_characters');
+                const apiResponse = await fetch(`/api/character-ai-generator?action=list_characters&_t=${Date.now()}`);
                 if (apiResponse.ok) {
                     const apiData = await apiResponse.json();
                     const gitHubCharacters = apiData.characters || {};
@@ -11486,7 +11486,7 @@
             console.log('🌐 === API를 통한 캐릭터 로드 시작 ===');
             try {
                 // 직접 API 호출로 캐릭터 데이터 로드
-                const response = await fetch('/api/character-ai-generator?action=list_characters');
+                const response = await fetch(`/api/character-ai-generator?action=list_characters&_t=${Date.now()}`);
                 if (!response.ok) {
                     throw new Error(`API 호출 실패: ${response.status}`);
                 }
@@ -11648,7 +11648,7 @@
             console.log('🌐 API를 통한 시나리오 로드...');
             try {
                 // 직접 API 호출로 시나리오 데이터 로드
-                const response = await fetch('/api/scenario-manager?action=list');
+                const response = await fetch(`/api/scenario-manager?action=list&_t=${Date.now()}`);
                 if (!response.ok) {
                     throw new Error(`API 호출 실패: ${response.status}`);
                 }
