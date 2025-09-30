@@ -228,129 +228,14 @@
       "source": "scenario_admin_v2",
       "active": true,
       "version": "2.0"
-    },
-    "소영_esfp_1759233316707": {
-      "id": "소영_esfp_1759233316707",
-      "basic_info": {
-        "name": "소영",
-        "age": 20,
-        "mbti": "ESFP",
-        "occupation": "art",
-        "gender": "female"
-      },
-      "appeal_profile": {
-        "seduction_style": "intellectually_stimulating",
-        "charm_points": [
-          "confident_touch"
-        ],
-        "emotional_intelligence": 7,
-        "confidence_level": 5,
-        "mystery_factor": 3,
-        "sexual_curiosity": 4,
-        "sexual_comfort": 6,
-        "hobbies": [
-          "photography",
-          "shopping"
-        ]
-      },
-      "physical_allure": {
-        "appearance": {
-          "hair": "curly_volume",
-          "eyes": "seductive_eyes",
-          "body": "tall_elegant",
-          "bust": "voluptuous",
-          "waist_hip": "hourglass",
-          "style": "sexy_chic"
-        },
-        "feature_elements": [
-          "beautiful_face",
-          "sexy_lips"
-        ],
-        "sensual_habits": [
-          "gentle_stretch"
-        ],
-        "body_language": [
-          "playful_movements"
-        ]
-      },
-      "psychological_depth": {
-        "core_desires": [
-          "personal_growth"
-        ],
-        "vulnerabilities": [
-          "perfectionism",
-          "commitment_fear"
-        ],
-        "values": "love_family",
-        "boundaries": {
-          "comfort_level": "light_flirtation",
-          "escalation_pace": "very_gradual",
-          "sexual_tone_band": "moderate"
-        },
-        "sexual_freedom": 4
-      },
-      "conversation_dynamics": {
-        "speech_style": "mature_elegant",
-        "flirting_patterns": [
-          "subtle_teasing"
-        ],
-        "reaction_tendencies": {
-          "humor": "giggles_easily",
-          "compliment": "gracefully_accepts",
-          "interest_expression": "enthusiastic_sharing"
-        },
-        "conversation_hooks": [
-          "life_philosophy",
-          "future_dreams",
-          "childhood_memories"
-        ],
-        "speech_habits": [
-          "whisper_tone"
-        ],
-        "vocabulary_register": "casual_friendly",
-        "allowed_motifs": [
-          "romance_love",
-          "dreams_goals",
-          "art_creativity",
-          "nature_travel"
-        ],
-        "forbidden_terms": [
-          "finance",
-          "work_stress",
-          "past_relationships"
-        ]
-      },
-      "past_history": {
-        "boyfriend_count": 2,
-        "preferred_skinship": [
-          "light_hugs",
-          "intimate_cuddling"
-        ],
-        "relationship_experience": "beginner",
-        "first_experience_age": "early_teens"
-      },
-      "favorite_gifts": [
-        "designer_bag",
-        "books"
-      ],
-      "male_priorities": [
-        "personality",
-        "emotional_maturity",
-        "reliability"
-      ],
-      "created_at": "2025-09-30T11:55:16.707Z",
-      "updated_at": "2025-09-30T11:55:17.523Z",
-      "source": "scenario_admin_v2",
-      "active": true,
-      "version": "2.0"
     }
   },
   "metadata": {
     "version": "4.1.0",
-    "total_characters": 3,
+    "total_characters": 2,
     "created": "2025-09-28T10:43:23.975Z",
-    "storage_type": "stable_github_direct",
-    "last_updated": "2025-09-30T11:55:17.523Z",
-    "last_accessed": "2025-09-30T11:55:17.523Z"
+    "storage_type": "github_api_only",
+    "last_updated": "2025-09-30T13:26:10.516Z",
+    "last_accessed": "2025-09-30T13:26:10.516Z"
   }
 }
