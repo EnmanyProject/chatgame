@@ -1,11 +1,96 @@
 {
-  "characters": {},
+  "characters": {
+    "미화__infp_1759191852447": {
+      "id": "미화__infp_1759191852447",
+      "basic_info": {
+        "name": "미화 ",
+        "age": 22,
+        "mbti": "INFP",
+        "occupation": "art",
+        "gender": "female"
+      },
+      "appeal_profile": {
+        "seduction_style": "playful_confident",
+        "charm_points": null,
+        "emotional_intelligence": 7,
+        "confidence_level": 8,
+        "mystery_factor": 8
+      },
+      "physical_allure": {
+        "appearance": {
+          "hair": "long_straight",
+          "eyes": "seductive_eyes",
+          "body": "petite_sexy",
+          "bust": "small_cute",
+          "waist_hip": "slim_tight",
+          "style": "sexy_chic"
+        }
+      },
+      "psychological_depth": {
+        "core_desires": null,
+        "boundaries": {
+          "comfort_level": "intense_chemistry",
+          "escalation_pace": "very_gradual"
+        }
+      },
+      "conversation_dynamics": {
+        "speech_style": "playful_seductive"
+      },
+      "created_at": "2025-09-30T00:24:12.447Z",
+      "updated_at": "2025-09-30T00:24:12.766Z",
+      "source": "api_save",
+      "active": true,
+      "version": "2.0"
+    },
+    "수진_estj_1759191906217": {
+      "id": "수진_estj_1759191906217",
+      "basic_info": {
+        "name": "수진",
+        "age": 30,
+        "mbti": "ESTJ",
+        "occupation": "art",
+        "gender": "female"
+      },
+      "appeal_profile": {
+        "seduction_style": "playful_confident",
+        "charm_points": null,
+        "emotional_intelligence": 7,
+        "confidence_level": 8,
+        "mystery_factor": 6
+      },
+      "physical_allure": {
+        "appearance": {
+          "hair": "long_straight",
+          "eyes": "seductive_eyes",
+          "body": "tall_elegant",
+          "bust": "voluptuous",
+          "waist_hip": "hourglass",
+          "style": "provocative_fashion"
+        }
+      },
+      "psychological_depth": {
+        "core_desires": null,
+        "boundaries": {
+          "comfort_level": "light_flirtation",
+          "escalation_pace": "very_gradual"
+        }
+      },
+      "conversation_dynamics": {
+        "speech_style": null
+      },
+      "created_at": "2025-09-30T00:25:06.217Z",
+      "updated_at": "2025-09-30T00:25:07.204Z",
+      "source": "api_save",
+      "active": true,
+      "version": "2.0"
+    }
+  },
   "metadata": {
     "version": "2.0.0",
-    "total_characters": 0,
+    "total_characters": 2,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-29T14:56:19.562Z",
-    "last_accessed": "2025-09-29T14:56:19.562Z"
+    "last_updated": "2025-09-30T00:25:07.204Z",
+    "last_accessed": "2025-09-30T00:25:07.203Z"
   }
 }
