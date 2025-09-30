@@ -5342,6 +5342,11 @@
             // 모달 외부 클릭으로 닫기
             window.onclick = function(event) {
                 if (event.target.className === 'modal') {
+                    // 캐릭터 모달은 백그라운드 클릭으로 닫히지 않도록 예외 처리
+                    if (event.target.id === 'characterModal') {
+                        console.log('🚫 캐릭터 모달은 백그라운드 클릭으로 닫히지 않습니다');
+                        return;
+                    }
                     event.target.style.display = 'none';
                 }
             }
@@ -12113,7 +12118,7 @@
             console.log('📊 선택된 charm-btn 요소 수:', selectedCharmBtns.length);
 
             selectedCharmBtns.forEach(btn => {
-                const value = btn.getAttribute('data-value');
+                const value = btn.getAttribute('data-charm');
                 if (value) {
                     selected.push(value);
                     console.log('✅ 매력포인트 수집됨:', value);
@@ -12142,7 +12147,7 @@
             console.log('📊 선택된 desire-btn 요소 수:', selectedDesireBtns.length);
 
             selectedDesireBtns.forEach(btn => {
-                const value = btn.getAttribute('data-value');
+                const value = btn.getAttribute('data-desire');
                 if (value) {
                     selected.push(value);
                     console.log('✅ 핵심욕구 수집됨:', value);
@@ -12172,7 +12177,7 @@
             // 버튼 시스템으로 찾기 - .speech-btn.selected 클래스로 찾기
             const selectedSpeechBtn = document.querySelector('.speech-btn.selected');
             if (selectedSpeechBtn) {
-                const value = selectedSpeechBtn.getAttribute('data-value');
+                const value = selectedSpeechBtn.getAttribute('data-speech');
                 console.log('✅ 말투스타일 수집됨:', value);
                 return value;
             }
@@ -13064,34 +13069,46 @@
             randomizeSexualCuriosity();
             randomizeSexualComfort();
 
-            // MBTI 랜덤 선택
-            const mbtiOptions = ['enfp', 'infp', 'enfj', 'infj', 'entp', 'intp', 'entj', 'intj', 'esfp', 'isfp', 'esfj', 'isfj', 'estp', 'istp', 'estj', 'istj'];
+            // MBTI 랜덤 선택 - 대문자 사용
+            const mbtiOptions = ['ENFP', 'INFP', 'ENFJ', 'INFJ', 'ENTP', 'INTP', 'ENTJ', 'INTJ', 'ESFP', 'ISFP', 'ESFJ', 'ISFJ', 'ESTP', 'ISTP', 'ESTJ', 'ISTJ'];
             const randomMbti = mbtiOptions[Math.floor(Math.random() * mbtiOptions.length)];
+            console.log('🧠 MBTI 랜덤 선택:', randomMbti);
             document.querySelectorAll('.mbti-btn').forEach(btn => btn.classList.remove('selected'));
             const mbtiBtn = document.querySelector(`[data-mbti="${randomMbti}"]`);
             if (mbtiBtn) {
                 mbtiBtn.classList.add('selected');
                 document.getElementById('charMbti').value = randomMbti;
+                console.log('✅ MBTI 버튼 선택됨:', randomMbti);
+            } else {
+                console.log('❌ MBTI 버튼을 찾을 수 없음:', randomMbti);
             }
 
-            // 관계 설정 랜덤 선택
-            const relationshipOptions = ['junior', 'same_age', 'senior', 'stranger', 'friend'];
+            // 관계 설정 랜덤 선택 - 실제 HTML의 data-rel 값들 사용
+            const relationshipOptions = ['seductive_junior', 'adult_friend', 'mature_senior', 'sexy_classmate', 'sensual_clubmate', 'alluring_neighbor'];
             const randomRelationship = relationshipOptions[Math.floor(Math.random() * relationshipOptions.length)];
+            console.log('👥 관계설정 랜덤 선택:', randomRelationship);
             document.querySelectorAll('.relationship-btn').forEach(btn => btn.classList.remove('selected'));
-            const relationshipBtn = document.querySelector(`[data-relationship="${randomRelationship}"]`);
+            const relationshipBtn = document.querySelector(`[data-rel="${randomRelationship}"]`);
             if (relationshipBtn) {
                 relationshipBtn.classList.add('selected');
                 document.getElementById('charRelationship').value = randomRelationship;
+                console.log('✅ 관계설정 버튼 선택됨:', randomRelationship);
+            } else {
+                console.log('❌ 관계설정 버튼을 찾을 수 없음:', randomRelationship);
             }
 
-            // 말투 스타일 랜덤 선택
-            const speechOptions = ['cute_innocent', 'mature_sexy', 'friendly_casual', 'shy_reserved', 'confident_bold'];
+            // 말투 스타일 랜덤 선택 - 실제 HTML의 data-speech 값들 사용
+            const speechOptions = ['sensual_whisper', 'mature_elegant', 'playful_seductive', 'sexy_flirty', 'mysterious_seductive', 'confident_alluring', 'sultry_dominant', 'sweet_tempting', 'bold_provocative'];
             const randomSpeech = speechOptions[Math.floor(Math.random() * speechOptions.length)];
+            console.log('🗣️ 말투 랜덤 선택:', randomSpeech);
             document.querySelectorAll('.speech-btn').forEach(btn => btn.classList.remove('selected'));
             const speechBtn = document.querySelector(`[data-speech="${randomSpeech}"]`);
             if (speechBtn) {
                 speechBtn.classList.add('selected');
                 document.getElementById('charSpeechStyle').value = randomSpeech;
+                console.log('✅ 말투 버튼 선택됨:', randomSpeech);
+            } else {
+                console.log('❌ 말투 버튼을 찾을 수 없음:', randomSpeech);
             }
 
             // 매력 포인트 랜덤 선택 (1-3개) - 실제 HTML의 data-charm 값들 사용
