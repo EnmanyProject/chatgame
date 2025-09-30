@@ -1102,6 +1102,63 @@
             line-height: 1.4;
         }
 
+        /* 캐릭터 카드 사진 미리보기 */
+        .photo-thumbnails {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .photo-thumbnail {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .photo-thumbnail:hover {
+            transform: scale(1.1);
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .more-photos-indicator {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid #667eea;
+        }
+
+        .more-photos-indicator:hover {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+
+        .photo-count-badge {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            color: white;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 0.7em;
+            font-weight: bold;
+            margin-left: 4px;
+        }
+
         /* 모달 */
         .modal {
             display: none;
@@ -8811,6 +8868,11 @@
                         <div style="font-size: 0.85em; color: #27ae60; margin-bottom: 10px;">
                             <strong>욕구:</strong> ${getCharacterCoreDesires(character)}
                         </div>
+                        <!-- 사진 미리보기 -->
+                        <div class="photo-thumbnails" id="photo-preview-${character.id}">
+                            <!-- 사진 썸네일들이 여기에 동적으로 추가됩니다 -->
+                        </div>
+
                         <div class="actions" onclick="event.stopPropagation()">
                             <button class="btn btn-success" onclick="editCharacter('${character.id}')">수정</button>
                             <button class="btn btn-primary" onclick="openPhotoManager('${character.id}', '${getCharacterName(character)}')">📷 사진</button>
@@ -8820,6 +8882,11 @@
                 </div>
             `).join('');
             console.log('✅ 캐릭터 카드 HTML 생성 완료');
+
+            // 각 캐릭터의 사진 미리보기 로드
+            characterArray.forEach(character => {
+                loadCharacterPhotoPreview(character.id);
+            });
         }
 
         // 🔄 스키마 호환성을 위한 헬퍼 함수들 (v2.0 업그레이드)
@@ -11138,6 +11205,86 @@
                 console.error('❌ 사진 삭제 오류:', error);
                 alert('사진 삭제에 실패했습니다: ' + error.message);
             }
+        }
+
+        // 🖼️ 캐릭터 카드용 사진 미리보기 로드
+        async function loadCharacterPhotoPreview(characterId) {
+            try {
+                const apiUrl = `/api/character-ai-generator?action=get_character_photos&character_id=${characterId}&_t=${Date.now()}`;
+                const response = await fetch(apiUrl);
+                const result = await response.json();
+
+                if (result.success && result.photos) {
+                    const previewContainer = document.getElementById(`photo-preview-${characterId}`);
+                    if (!previewContainer) return;
+
+                    let thumbnailsHtml = '';
+                    let photoCount = 0;
+
+                    // 프로필 사진 (우선순위)
+                    if (result.photos.profile) {
+                        thumbnailsHtml += `<img src="${result.photos.profile.data}" class="photo-thumbnail"
+                                           onclick="showPhotoModal('${result.photos.profile.data}', 'profile')"
+                                           title="프로필 사진" alt="프로필"/>`;
+                        photoCount++;
+                    }
+
+                    // 다른 카테고리들에서 최대 4개까지 더 가져오기
+                    const categories = ['casual', 'romantic', 'emotional', 'special'];
+                    for (const category of categories) {
+                        if (photoCount >= 5) break; // 최대 5개까지만 표시
+                        if (result.photos[category] && Array.isArray(result.photos[category])) {
+                            for (const photo of result.photos[category]) {
+                                if (photoCount >= 5) break;
+                                thumbnailsHtml += `<img src="${photo.data}" class="photo-thumbnail"
+                                                   onclick="showPhotoModal('${photo.data}', '${category}')"
+                                                   title="${category} 사진" alt="${category}"/>`;
+                                photoCount++;
+                            }
+                        }
+                    }
+
+                    // 추가 사진이 있는 경우 +N 표시
+                    const totalPhotos = getTotalPhotoCount(result.photos);
+                    if (totalPhotos > 5) {
+                        thumbnailsHtml += `<div class="more-photos-indicator" onclick="openPhotoManager('${characterId}', '')"
+                                           title="${totalPhotos - 5}개 더 보기">+${totalPhotos - 5}</div>`;
+                    }
+
+                    previewContainer.innerHTML = thumbnailsHtml;
+                }
+            } catch (error) {
+                console.log(`📷 캐릭터 ${characterId} 사진 미리보기 로드 실패:`, error);
+                // 에러 시에는 조용히 처리 (빈 상태 유지)
+            }
+        }
+
+        // 🔢 전체 사진 개수 계산
+        function getTotalPhotoCount(photos) {
+            let total = 0;
+            if (photos.profile) total += 1;
+            ['casual', 'romantic', 'emotional', 'special'].forEach(category => {
+                if (photos[category] && Array.isArray(photos[category])) {
+                    total += photos[category].length;
+                }
+            });
+            return total;
+        }
+
+        // 🖼️ 사진 확대 모달 표시
+        function showPhotoModal(photoData, category) {
+            // 간단한 사진 확대 모달
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.8); display: flex; align-items: center;
+                justify-content: center; z-index: 10000; cursor: pointer;
+            `;
+            modal.innerHTML = `
+                <img src="${photoData}" style="max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" alt="${category}"/>
+            `;
+            modal.onclick = () => document.body.removeChild(modal);
+            document.body.appendChild(modal);
         }
 
         // 📸 사진 통계 업데이트
