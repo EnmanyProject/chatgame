@@ -97,117 +97,6 @@
       "active": true,
       "version": "2.0"
     },
-    "미화_isfp_1759228807278": {
-      "id": "미화_isfp_1759228807278",
-      "basic_info": {
-        "name": "미화",
-        "age": 26,
-        "mbti": "ISFP",
-        "occupation": "art",
-        "gender": "female"
-      },
-      "appeal_profile": {
-        "seduction_style": "playful_confident",
-        "charm_points": [
-          "infectious_smile",
-          "confident_touch",
-          "expressive_eyes"
-        ],
-        "emotional_intelligence": 4,
-        "confidence_level": 2,
-        "mystery_factor": 10,
-        "sexual_curiosity": 6,
-        "sexual_comfort": 6,
-        "hobbies": [
-          "reading",
-          "music",
-          "gaming"
-        ]
-      },
-      "physical_allure": {
-        "appearance": {
-          "hair": "curly_volume",
-          "eyes": "seductive_eyes",
-          "body": "tall_elegant",
-          "bust": "voluptuous",
-          "waist_hip": "athletic_toned",
-          "style": "casual_alluring"
-        },
-        "feature_elements": [
-          "seductive_eyes",
-          "sexy_lips",
-          "slim_waist"
-        ],
-        "sensual_habits": [
-          "shoulder_expose",
-          "playful_smile"
-        ],
-        "body_language": [
-          "playful_movements",
-          "gentle_gestures"
-        ]
-      },
-      "psychological_depth": {
-        "core_desires": [
-          "creative_expression",
-          "adventure_excitement"
-        ],
-        "values": "love_family",
-        "boundaries": {
-          "comfort_level": "light_flirtation",
-          "escalation_pace": "quick_progression"
-        }
-      },
-      "conversation_dynamics": {
-        "speech_style": "mysterious_seductive",
-        "flirting_patterns": [
-          "gentle_touches"
-        ],
-        "reaction_tendencies": {
-          "humor": "giggles_easily",
-          "compliment": "gracefully_accepts",
-          "interest_expression": "enthusiastic_sharing"
-        },
-        "conversation_hooks": [
-          "food_culture",
-          "life_philosophy",
-          "future_dreams"
-        ],
-        "speech_habits": [
-          "slow_speech",
-          "giggle_often"
-        ],
-        "vocabulary_register": "casual_friendly",
-        "allowed_motifs": [
-          "personal_growth",
-          "philosophy",
-          "daily_life"
-        ],
-        "forbidden_terms": [
-          "religion",
-          "work_stress"
-        ]
-      },
-      "past_history": {
-        "boyfriend_count": 2,
-        "preferred_skinship": [
-          "head_patting",
-          "intimate_cuddling"
-        ],
-        "relationship_experience": "beginner",
-        "first_experience_age": "late_twenties"
-      },
-      "favorite_gifts": [
-        "expensive_car",
-        "designer_bag",
-        "wine"
-      ],
-      "created_at": "2025-09-30T10:40:07.278Z",
-      "updated_at": "2025-09-30T10:40:07.751Z",
-      "source": "scenario_admin_v2",
-      "active": true,
-      "version": "2.0"
-    },
     "수진_esfj_1759230138703": {
       "id": "수진_esfj_1759230138703",
       "basic_info": {
@@ -326,10 +215,10 @@
   },
   "metadata": {
     "version": "4.1.0",
-    "total_characters": 3,
+    "total_characters": 2,
     "created": "2025-09-28T10:43:23.975Z",
-    "storage_type": "stable_github_direct",
-    "last_updated": "2025-09-30T11:02:19.435Z",
-    "last_accessed": "2025-09-30T11:02:19.435Z"
+    "storage_type": "github_api_only",
+    "last_updated": "2025-09-30T11:23:17.114Z",
+    "last_accessed": "2025-09-30T11:23:17.114Z"
   }
 }
