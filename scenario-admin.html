@@ -11343,17 +11343,81 @@
 
         // 🖼️ 사진 확대 모달 표시
         function showPhotoModal(photoData, category) {
-            // 간단한 사진 확대 모달
+            // 개선된 사진 확대 모달
             const modal = document.createElement('div');
             modal.style.cssText = `
                 position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0,0,0,0.8); display: flex; align-items: center;
+                background: rgba(0,0,0,0.9); display: flex; align-items: center;
                 justify-content: center; z-index: 10000; cursor: pointer;
+                padding: 20px; box-sizing: border-box;
             `;
-            modal.innerHTML = `
-                <img src="${photoData}" style="max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" alt="${category}"/>
+
+            // 이미지 컨테이너 생성
+            const imageContainer = document.createElement('div');
+            imageContainer.style.cssText = `
+                max-width: 80vw; max-height: 80vh;
+                display: flex; align-items: center; justify-content: center;
+                background: white; border-radius: 15px; padding: 15px;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+                position: relative;
             `;
-            modal.onclick = () => document.body.removeChild(modal);
+
+            const img = document.createElement('img');
+            img.src = photoData;
+            img.alt = category;
+            img.style.cssText = `
+                max-width: 100%; max-height: 100%;
+                object-fit: contain; border-radius: 10px;
+                display: block; min-height: 200px;
+            `;
+
+            // 카테고리 라벨 추가
+            const label = document.createElement('div');
+            label.textContent = `${category} 사진`;
+            label.style.cssText = `
+                position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+                background: rgba(255,255,255,0.95); padding: 8px 16px;
+                border-radius: 20px; color: #333; font-weight: bold;
+                font-size: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                z-index: 10001;
+            `;
+
+            // 닫기 버튼 추가
+            const closeBtn = document.createElement('div');
+            closeBtn.innerHTML = '✕';
+            closeBtn.style.cssText = `
+                position: absolute; top: 40px; right: 40px;
+                width: 40px; height: 40px; border-radius: 50%;
+                background: rgba(255,255,255,0.9); color: #333;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 20px; font-weight: bold; cursor: pointer;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                z-index: 10001; transition: all 0.2s ease;
+            `;
+            closeBtn.onmouseover = () => closeBtn.style.background = 'rgba(255,255,255,1)';
+            closeBtn.onmouseout = () => closeBtn.style.background = 'rgba(255,255,255,0.9)';
+
+            imageContainer.appendChild(img);
+            modal.appendChild(imageContainer);
+            modal.appendChild(label);
+            modal.appendChild(closeBtn);
+
+            // 클릭하면 모달 닫기
+            modal.onclick = (e) => {
+                if (e.target === modal || e.target === label || e.target === closeBtn) {
+                    document.body.removeChild(modal);
+                }
+            };
+
+            // ESC 키로 닫기
+            const closeOnEsc = (e) => {
+                if (e.key === 'Escape') {
+                    document.body.removeChild(modal);
+                    document.removeEventListener('keydown', closeOnEsc);
+                }
+            };
+            document.addEventListener('keydown', closeOnEsc);
+
             document.body.appendChild(modal);
         }
 
