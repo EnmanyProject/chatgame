@@ -8908,10 +8908,13 @@
             console.log('✅ 캐릭터 카드 HTML 생성 완료');
 
             // 각 캐릭터의 사진 미리보기 로드
-            characterArray.forEach(character => {
+            console.log('🔄 각 캐릭터의 사진 로드 시작...');
+            characterArray.forEach((character, index) => {
+                console.log(`📸 ${index + 1}/${characterArray.length} 캐릭터 사진 로드: ${character.id}`);
                 loadCharacterPhotoPreview(character.id);
                 loadCharacterProfileImage(character.id);
             });
+            console.log('✅ 모든 캐릭터 사진 로드 함수 호출 완료');
         }
 
         // 🔄 스키마 호환성을 위한 헬퍼 함수들 (v2.0 업그레이드)
@@ -11365,9 +11368,19 @@
 
                 const result = await response.json();
                 console.log(`📊 API 응답 데이터:`, result);
+                console.log(`🔍 API 응답 구조 분석:`, {
+                    success: result.success,
+                    hasData: !!result.data,
+                    hasPhotos: !!result.photos,
+                    hasCategories: !!result.categories,
+                    dataKeys: result.data ? Object.keys(result.data) : null,
+                    categoriesKeys: result.categories ? Object.keys(result.categories) : null
+                });
 
                 if (result.success) {
                     console.log(`✅ API 성공, 사진 데이터 확인:`, result.photos);
+                    console.log(`🔍 result.data 내용:`, result.data);
+                    console.log(`🔍 result.categories 내용:`, result.categories);
 
                     if (result.photos && result.photos.profile) {
                         console.log(`📷 프로필 사진 데이터 존재: ${result.photos.profile.data ? '있음' : '없음'}`);
