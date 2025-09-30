@@ -4880,11 +4880,11 @@
                         <h3>✨ 외모 매력</h3>
                         <div class="detail-grid">
                             <div class="detail-item detail-full">
-                                <span class="detail-label">특징 요소:</span>
+                                <span class="detail-label">✨ 자신있는 부위:</span>
                                 <span id="detailFeatureElements" class="detail-value">-</span>
                             </div>
                             <div class="detail-item detail-full">
-                                <span class="detail-label">관능적 습관:</span>
+                                <span class="detail-label">💃 유혹적인 포즈:</span>
                                 <span id="detailSensualHabits" class="detail-value">-</span>
                             </div>
                             <div class="detail-item detail-full">
@@ -13934,12 +13934,18 @@
 
         function getCharacterFeatureElements(character) {
             const features = character.physical_allure?.feature_elements;
-            return features && Array.isArray(features) ? features.join(', ') : '-';
+            if (features && Array.isArray(features) && features.length > 0) {
+                return features.map(feature => translateToKorean(feature, 'feature_elements')).join(', ');
+            }
+            return '-';
         }
 
         function getCharacterSensualHabits(character) {
             const habits = character.physical_allure?.sensual_habits;
-            return habits && Array.isArray(habits) ? habits.join(', ') : '-';
+            if (habits && Array.isArray(habits) && habits.length > 0) {
+                return habits.map(habit => translateToKorean(habit, 'sensual_habits')).join(', ');
+            }
+            return '-';
         }
 
         function getCharacterBodyLanguage(character) {
@@ -14050,12 +14056,18 @@
 
         function getCharacterFeatureElements(character) {
             const features = character.physical_allure?.feature_elements;
-            return features && Array.isArray(features) ? features.join(', ') : '-';
+            if (features && Array.isArray(features) && features.length > 0) {
+                return features.map(feature => translateToKorean(feature, 'feature_elements')).join(', ');
+            }
+            return '-';
         }
 
         function getCharacterSensualHabits(character) {
             const habits = character.physical_allure?.sensual_habits;
-            return habits && Array.isArray(habits) ? habits.join(', ') : '-';
+            if (habits && Array.isArray(habits) && habits.length > 0) {
+                return habits.map(habit => translateToKorean(habit, 'sensual_habits')).join(', ');
+            }
+            return '-';
         }
 
         function getCharacterBodyLanguage(character) {
