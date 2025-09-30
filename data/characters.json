@@ -1,11 +1,11 @@
 {
   "characters": {
-    "미화__infp_1759191852447": {
-      "id": "미화__infp_1759191852447",
+    "수진_entp_1759192334381": {
+      "id": "수진_entp_1759192334381",
       "basic_info": {
-        "name": "미화 ",
-        "age": 22,
-        "mbti": "INFP",
+        "name": "수진",
+        "age": 30,
+        "mbti": "ENTP",
         "occupation": "art",
         "gender": "female"
       },
@@ -14,14 +14,14 @@
         "charm_points": null,
         "emotional_intelligence": 7,
         "confidence_level": 8,
-        "mystery_factor": 8
+        "mystery_factor": 6
       },
       "physical_allure": {
         "appearance": {
-          "hair": "long_straight",
+          "hair": "shoulder_wave",
           "eyes": "seductive_eyes",
-          "body": "petite_sexy",
-          "bust": "small_cute",
+          "body": "tall_elegant",
+          "bust": "full_attractive",
           "waist_hip": "slim_tight",
           "style": "sexy_chic"
         }
@@ -30,24 +30,24 @@
         "core_desires": null,
         "boundaries": {
           "comfort_level": "intense_chemistry",
-          "escalation_pace": "very_gradual"
+          "escalation_pace": "quick_progression"
         }
       },
       "conversation_dynamics": {
-        "speech_style": "playful_seductive"
+        "speech_style": "sensual_whisper"
       },
-      "created_at": "2025-09-30T00:24:12.447Z",
-      "updated_at": "2025-09-30T00:24:12.766Z",
+      "created_at": "2025-09-30T00:32:14.381Z",
+      "updated_at": "2025-09-30T00:32:14.921Z",
       "source": "api_save",
       "active": true,
       "version": "2.0"
     },
-    "수진_estj_1759191906217": {
-      "id": "수진_estj_1759191906217",
+    "미화__enfp_1759192502021": {
+      "id": "미화__enfp_1759192502021",
       "basic_info": {
-        "name": "수진",
-        "age": 30,
-        "mbti": "ESTJ",
+        "name": "미화 ",
+        "age": 22,
+        "mbti": "ENFP",
         "occupation": "art",
         "gender": "female"
       },
@@ -62,10 +62,10 @@
         "appearance": {
           "hair": "long_straight",
           "eyes": "seductive_eyes",
-          "body": "tall_elegant",
-          "bust": "voluptuous",
-          "waist_hip": "hourglass",
-          "style": "provocative_fashion"
+          "body": "petite_sexy",
+          "bust": "small_cute",
+          "waist_hip": "slim_tight",
+          "style": "sexy_chic"
         }
       },
       "psychological_depth": {
@@ -78,8 +78,8 @@
       "conversation_dynamics": {
         "speech_style": null
       },
-      "created_at": "2025-09-30T00:25:06.217Z",
-      "updated_at": "2025-09-30T00:25:07.204Z",
+      "created_at": "2025-09-30T00:35:02.021Z",
+      "updated_at": "2025-09-30T00:35:02.793Z",
       "source": "api_save",
       "active": true,
       "version": "2.0"
@@ -90,7 +90,7 @@
     "total_characters": 2,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "github_api_only",
-    "last_updated": "2025-09-30T00:25:07.204Z",
-    "last_accessed": "2025-09-30T00:25:07.203Z"
+    "last_updated": "2025-09-30T00:35:02.793Z",
+    "last_accessed": "2025-09-30T00:35:02.792Z"
   }
 }
