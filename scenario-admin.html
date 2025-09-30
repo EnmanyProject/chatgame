@@ -2464,15 +2464,64 @@
             box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
         }
 
+        /* 👨 남자 우선순위 CSS */
+        .male-priority-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+            border-radius: 15px;
+            border: 1px solid #9c27b0;
+        }
+
+        .male-priority-btn {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 2px solid #9c27b0;
+            color: #9c27b0;
+            padding: 15px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 50px;
+            line-height: 1.2;
+        }
+
+        .male-priority-btn:hover {
+            background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
+        }
+
+        .male-priority-btn.selected {
+            background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
+        }
+
+        .male-priority-btn.selected:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(156, 39, 176, 0.4);
+        }
+
         /* 반응형 디자인 */
         @media (max-width: 768px) {
-            .body-language-grid, .speech-habits-grid, .forbidden-topics-grid {
+            .body-language-grid, .speech-habits-grid, .forbidden-topics-grid, .male-priority-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 10px;
                 padding: 12px;
             }
 
-            .body-language-btn, .speech-habit-btn, .forbidden-topic-btn {
+            .body-language-btn, .speech-habit-btn, .forbidden-topic-btn, .male-priority-btn {
                 padding: 12px 8px;
                 font-size: 11px;
             }
@@ -4744,6 +4793,22 @@
                                     <option value="quick_progression">💨 빠른 진전</option>
                                 </select>
                             </div>
+
+                            <!-- 👨 남자를 볼 때 최우선시 하는 것 (새로 추가) -->
+                            <div class="form-group">
+                                <label>👨 남자를 볼 때 최우선시 하는 것 (최대 3개 선택)</label>
+                                <div class="male-priority-grid">
+                                    <button type="button" class="male-priority-btn" data-priority="appearance">😍 외모와 체형</button>
+                                    <button type="button" class="male-priority-btn" data-priority="personality">😊 성격과 인성</button>
+                                    <button type="button" class="male-priority-btn" data-priority="intelligence">🧠 지성과 교양</button>
+                                    <button type="button" class="male-priority-btn" data-priority="humor">😂 유머와 재치</button>
+                                    <button type="button" class="male-priority-btn" data-priority="financial_stability">💰 경제력과 안정성</button>
+                                    <button type="button" class="male-priority-btn" data-priority="emotional_maturity">🥰 감정적 성숙함</button>
+                                    <button type="button" class="male-priority-btn" data-priority="ambition">🎆 열정과 목표의식</button>
+                                    <button type="button" class="male-priority-btn" data-priority="communication">💬 소통능력과 경청</button>
+                                    <button type="button" class="male-priority-btn" data-priority="reliability">🤝 신뢰성과 성실함</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -5284,6 +5349,10 @@
                             <div class="detail-item">
                                 <span class="detail-label">첫 경험 시기:</span>
                                 <span id="detailFirstExperienceAge" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">👨 남자 우선순위:</span>
+                                <span id="detailMalePriorities" class="detail-value">-</span>
                             </div>
                         </div>
                     </div>
@@ -8682,6 +8751,9 @@
                 safeSetTextContent('detailPreferredSkinship', getCharacterPreferredSkinship(character));
                 safeSetTextContent('detailRelationshipExperience', getCharacterRelationshipExperience(character));
                 safeSetTextContent('detailFirstExperienceAge', getCharacterFirstExperienceAge(character));
+
+                // 👨 남자 우선순위 v2.1+
+                safeSetTextContent('detailMalePriorities', getCharacterMalePriorities(character));
             }
 
             // 시스템 정보
@@ -9139,6 +9211,18 @@
                     'health_medical': '건강/의료',
                     'personal_past': '개인적 과거',
                     'family_issues': '가족 문제'
+                },
+                // 👨 남자를 볼 때 최우선시하는 것 번역
+                male_priorities: {
+                    'appearance': '😍 외모와 체형',
+                    'personality': '😊 성격과 인성',
+                    'intelligence': '🧠 지성과 교양',
+                    'humor': '😂 유머와 재치',
+                    'financial_stability': '💰 경제력과 안정성',
+                    'emotional_maturity': '🥰 감정적 성숙함',
+                    'ambition': '🎆 열정과 목표의식',
+                    'communication': '💬 소통능력과 경청',
+                    'reliability': '🤝 신뢰성과 성실함'
                 }
             };
 
@@ -10087,6 +10171,20 @@
                         alert('금지 분야는 최대 4개까지만 선택 가능합니다.');
                     }
                     console.log('✅ 선택된 금지 분야:', getSelectedForbiddenTopics());
+                }
+
+                // 👨 남자 우선순위 버튼 클릭 이벤트 (최대 3개 선택)
+                if (e.target.classList.contains('male-priority-btn')) {
+                    const selectedPriorities = document.querySelectorAll('.male-priority-btn.selected').length;
+
+                    if (e.target.classList.contains('selected')) {
+                        e.target.classList.remove('selected');
+                    } else if (selectedPriorities < 3) {
+                        e.target.classList.add('selected');
+                    } else {
+                        alert('남자를 볼 때 최우선시 하는 것은 최대 3개까지만 선택 가능합니다.');
+                    }
+                    console.log('✅ 선택된 남자 우선순위:', getSelectedMalePriorities());
                 }
             });
         }
@@ -13210,7 +13308,9 @@
                     first_experience_age: document.getElementById('firstExperienceAge')?.value || 'early_twenties'
                 },
                 // 🎁 좋아하는 선물 정보
-                favorite_gifts: getSelectedFavoriteGifts()
+                favorite_gifts: getSelectedFavoriteGifts(),
+                // 👨 남자를 볼 때 최우선시하는 것
+                male_priorities: getSelectedMalePriorities()
             };
 
             console.log('📋 수집된 폼 데이터 (확장):', formData);
@@ -13433,6 +13533,25 @@
 
             console.log('🎯 최종 금지 분야 배열:', selected);
             return selected.length === 0 ? [] : selected; // 기본값 없음
+        }
+
+        // 👨 선택된 남자 우선순위 수집
+        function getSelectedMalePriorities() {
+            console.log('🔍 getSelectedMalePriorities 실행 중...');
+            const selected = [];
+            const selectedPriorityBtns = document.querySelectorAll('.male-priority-btn.selected');
+            console.log('📊 선택된 male-priority-btn 요소 수:', selectedPriorityBtns.length);
+
+            selectedPriorityBtns.forEach(btn => {
+                const value = btn.getAttribute('data-priority');
+                if (value) {
+                    selected.push(value);
+                    console.log('✅ 남자 우선순위 수집됨:', value);
+                }
+            });
+
+            console.log('🎯 최종 남자 우선순위 배열:', selected);
+            return selected.length === 0 ? [] : selected;
         }
 
         // 🆕 선택된 스킨십 수집
@@ -14491,6 +14610,38 @@
             console.log(`✅ 금지 분야 ${selectCount}개 랜덤 선택 완료`);
         }
 
+        // 👨 남자 우선순위 랜덤 선택 함수
+        function randomizeMalePriorities() {
+            console.log('👨 남자 우선순위 랜덤 선택 중...');
+
+            // 기존 선택 해제
+            document.querySelectorAll('.male-priority-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            const malePriorityButtons = Array.from(document.querySelectorAll('.male-priority-btn'));
+            if (malePriorityButtons.length === 0) {
+                console.log('❌ 남자 우선순위 버튼을 찾을 수 없음');
+                return;
+            }
+
+            // 2-3개 랜덤 선택
+            const selectCount = Math.floor(Math.random() * 2) + 2; // 2 또는 3
+
+            // Fisher-Yates 셔플
+            for (let i = malePriorityButtons.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [malePriorityButtons[i], malePriorityButtons[j]] = [malePriorityButtons[j], malePriorityButtons[i]];
+            }
+
+            // 처음 selectCount개 선택
+            for (let i = 0; i < selectCount && i < malePriorityButtons.length; i++) {
+                malePriorityButtons[i].classList.add('selected');
+            }
+
+            console.log(`✅ 남자 우선순위 ${selectCount}개 랜덤 선택 완료`);
+        }
+
         // 🎯 캐릭터 폼 자동 채우기 함수 (폼 열 때 자동 실행)
         function autoFillRandomCharacterData() {
             console.log('🎲 === autoFillRandomCharacterData 시작 ===');
@@ -14797,6 +14948,9 @@
             // 🎁 좋아하는 선물 랜덤 선택
             randomizeGifts();
 
+            // 👨 남자를 볼 때 최우선시하는 것 랜덤 선택
+            randomizeMalePriorities();
+
             console.log('✅ === autoFillRandomCharacterData 완료 ===');
         }
 
@@ -15023,6 +15177,15 @@
                 'no_experience': '경험 없음'
             };
             return translations[age] || age;
+        }
+
+        function getCharacterMalePriorities(character) {
+            const priorities = character.male_priorities;
+            if (!priorities || !Array.isArray(priorities) || priorities.length === 0) {
+                return '-';
+            }
+
+            return priorities.map(priority => translateToKorean(priority, 'male_priorities')).join(', ');
         }
 
         function getCharacterBoyfriendCount(character) {
