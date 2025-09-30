@@ -2144,6 +2144,101 @@
             color: white;
         }
 
+        /* 🆕 자신있는 부위와 유혹적인 포즈 버튼 스타일 */
+        .confident-parts-grid, .seductive-poses-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #ffeef5 0%, #fff5f8 100%);
+            border-radius: 15px;
+            border: 1px solid #f8d7da;
+        }
+
+        .confident-part-btn, .seductive-pose-btn {
+            padding: 14px 12px;
+            border: 2px solid #e91e63;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #ffffff 0%, #fef9fa 100%);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 13px;
+            font-weight: 500;
+            color: #d63384;
+            box-shadow: 0 2px 8px rgba(233, 30, 99, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .confident-part-btn::before, .seductive-pose-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            transition: left 0.5s;
+        }
+
+        .confident-part-btn:hover, .seductive-pose-btn:hover {
+            border-color: #e91e63;
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(233, 30, 99, 0.25);
+            color: #ad1457;
+        }
+
+        .confident-part-btn:hover::before, .seductive-pose-btn:hover::before {
+            left: 100%;
+        }
+
+        .confident-part-btn.selected, .seductive-pose-btn.selected {
+            border-color: #c2185b;
+            background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+            color: white;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(233, 30, 99, 0.4);
+            animation: selectedPulse 2s infinite;
+        }
+
+        @keyframes selectedPulse {
+            0%, 100% {
+                box-shadow: 0 8px 25px rgba(233, 30, 99, 0.4);
+            }
+            50% {
+                box-shadow: 0 8px 30px rgba(233, 30, 99, 0.6);
+            }
+        }
+
+        .confident-part-btn:active, .seductive-pose-btn:active {
+            transform: translateY(-1px) scale(0.98);
+            transition: all 0.1s ease;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .confident-parts-grid, .seductive-poses-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                padding: 12px;
+            }
+
+            .confident-part-btn, .seductive-pose-btn {
+                padding: 12px 8px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .confident-parts-grid, .seductive-poses-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+        }
+
         .conversation-dynamics {
             display: grid;
             gap: 20px;
@@ -4246,28 +4341,34 @@
                             </div>
                         </div>
 
-                        <!-- 🆕 외모 매력 특징 -->
+                        <!-- 🆕 자신있는 부위 -->
                         <div class="form-group">
-                            <label>외모 매력 특징요소 (최대 3개 선택)</label>
-                            <div class="feature-options">
-                                <button type="button" class="feature-btn" data-feature="dimples">😊 보조개</button>
-                                <button type="button" class="feature-btn" data-feature="long_eyelashes">👁️ 긴 속눈썹</button>
-                                <button type="button" class="feature-btn" data-feature="cute_nose">👃 귀여운 코</button>
-                                <button type="button" class="feature-btn" data-feature="graceful_neck">🦢 우아한 목선</button>
-                                <button type="button" class="feature-btn" data-feature="small_waist">⏳ 잘록한 허리</button>
-                                <button type="button" class="feature-btn" data-feature="long_legs">🦵 긴 다리</button>
-                                <button type="button" class="feature-btn" data-feature="soft_skin">✨ 부드러운 피부</button>
+                            <label>✨ 자신있는 부위 (최대 3개 선택)</label>
+                            <div class="confident-parts-grid">
+                                <button type="button" class="confident-part-btn" data-feature="beautiful_face">😍 아름다운 얼굴</button>
+                                <button type="button" class="confident-part-btn" data-feature="seductive_eyes">👁️ 유혹적인 눈</button>
+                                <button type="button" class="confident-part-btn" data-feature="sexy_lips">💋 섹시한 입술</button>
+                                <button type="button" class="confident-part-btn" data-feature="elegant_neck">🦢 우아한 목선</button>
+                                <button type="button" class="confident-part-btn" data-feature="attractive_chest">💗 매력적인 가슴</button>
+                                <button type="button" class="confident-part-btn" data-feature="slim_waist">⏳ 잘록한 허리</button>
+                                <button type="button" class="confident-part-btn" data-feature="curvy_hips">🍑 곡선미 있는 엉덩이</button>
+                                <button type="button" class="confident-part-btn" data-feature="long_legs">🦵 긴 다리</button>
+                                <button type="button" class="confident-part-btn" data-feature="soft_skin">✨ 부드러운 피부</button>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label>관능적 습관 (최대 2개 선택)</label>
-                            <div class="habit-options">
-                                <button type="button" class="habit-btn" data-habit="lip_biting">💋 입술 깨물기</button>
-                                <button type="button" class="habit-btn" data-habit="hair_flipping">💇‍♀️ 머리카락 넘기기</button>
-                                <button type="button" class="habit-btn" data-habit="eye_contact">👀 깊은 눈맞춤</button>
-                                <button type="button" class="habit-btn" data-habit="gentle_touch">🤗 부드러운 터치</button>
-                                <button type="button" class="habit-btn" data-habit="seductive_walk">🚶‍♀️ 유혹적인 걸음걸이</button>
+                            <label>💃 유혹적인 포즈 (최대 2개 선택)</label>
+                            <div class="seductive-poses-grid">
+                                <button type="button" class="seductive-pose-btn" data-habit="lip_biting">💋 입술 살짝 깨물기</button>
+                                <button type="button" class="seductive-pose-btn" data-habit="hair_touch">💇‍♀️ 머리카락 만지작거리기</button>
+                                <button type="button" class="seductive-pose-btn" data-habit="deep_gaze">👀 깊은 시선으로 바라보기</button>
+                                <button type="button" class="seductive-pose-btn" data-habit="shoulder_expose">👗 어깨 살짝 드러내기</button>
+                                <button type="button" class="seductive-pose-btn" data-habit="crossed_legs">🦵 다리 꼬고 앉기</button>
+                                <button type="button" class="seductive-pose-btn" data-habit="leaning_forward">💃 몸 앞으로 기울이기</button>
+                                <button type="button" class="seductive-pose-btn" data-habit="subtle_wink">😉 은근한 윙크</button>
+                                <button type="button" class="seductive-pose-btn" data-habit="gentle_stretch">🤸‍♀️ 부드러운 스트레칭</button>
+                                <button type="button" class="seductive-pose-btn" data-habit="playful_smile">😏 장난스러운 미소</button>
                             </div>
                         </div>
 
@@ -8556,20 +8657,26 @@
                     'daily_life': '일상 이야기'
                 },
                 feature_elements: {
-                    'dimples': '보조개',
-                    'long_eyelashes': '긴 속눈썹',
-                    'cute_nose': '귀여운 코',
-                    'graceful_neck': '우아한 목선',
-                    'small_waist': '잘록한 허리',
+                    'beautiful_face': '아름다운 얼굴',
+                    'seductive_eyes': '유혹적인 눈',
+                    'sexy_lips': '섹시한 입술',
+                    'elegant_neck': '우아한 목선',
+                    'attractive_chest': '매력적인 가슴',
+                    'slim_waist': '잘록한 허리',
+                    'curvy_hips': '곡선미 있는 엉덩이',
                     'long_legs': '긴 다리',
                     'soft_skin': '부드러운 피부'
                 },
                 sensual_habits: {
-                    'lip_biting': '입술 깨물기',
-                    'hair_flipping': '머리카락 넘기기',
-                    'eye_contact': '깊은 눈맞춤',
-                    'gentle_touch': '부드러운 터치',
-                    'seductive_walk': '유혹적인 걸음걸이'
+                    'lip_biting': '입술 살짝 깨물기',
+                    'hair_touch': '머리카락 만지작거리기',
+                    'deep_gaze': '깊은 시선으로 바라보기',
+                    'shoulder_expose': '어깨 살짝 드러내기',
+                    'crossed_legs': '다리 꼬고 앉기',
+                    'leaning_forward': '몸 앞으로 기울이기',
+                    'subtle_wink': '은근한 윙크',
+                    'gentle_stretch': '부드러운 스트레칭',
+                    'playful_smile': '장난스러운 미소'
                 }
             };
 
@@ -8683,7 +8790,7 @@
             document.getElementById('characterForm').reset();
 
             // 모든 선택 버튼들 초기화
-            document.querySelectorAll('.mbti-btn.selected, .trait-btn.selected, .relationship-btn.selected, .hobby-btn.selected, .speech-btn.selected, .charm-btn.selected, .desire-btn.selected, .skinship-btn.selected, .motif-btn.selected, .flirting-btn.selected, .hook-btn.selected, .feature-btn.selected, .habit-btn.selected').forEach(btn => {
+            document.querySelectorAll('.mbti-btn.selected, .trait-btn.selected, .relationship-btn.selected, .hobby-btn.selected, .speech-btn.selected, .charm-btn.selected, .desire-btn.selected, .skinship-btn.selected, .motif-btn.selected, .flirting-btn.selected, .hook-btn.selected, .confident-part-btn.selected, .seductive-pose-btn.selected').forEach(btn => {
                 btn.classList.remove('selected');
             });
 
@@ -9430,32 +9537,32 @@
                     console.log('✅ 선택된 허용 모티프:', getSelectedAllowedMotifs());
                 }
 
-                // 🆕 외모 매력: 특징요소 버튼 클릭 이벤트 (최대 3개 선택)
-                if (e.target.classList.contains('feature-btn')) {
-                    const selectedFeatures = document.querySelectorAll('.feature-btn.selected').length;
+                // 🆕 자신있는 부위 버튼 클릭 이벤트 (최대 3개 선택)
+                if (e.target.classList.contains('confident-part-btn')) {
+                    const selectedParts = document.querySelectorAll('.confident-part-btn.selected').length;
 
                     if (e.target.classList.contains('selected')) {
                         e.target.classList.remove('selected');
-                    } else if (selectedFeatures < 3) {
+                    } else if (selectedParts < 3) {
                         e.target.classList.add('selected');
                     } else {
-                        alert('외모 매력 특징요소는 최대 3개까지만 선택 가능합니다.');
+                        alert('자신있는 부위는 최대 3개까지만 선택 가능합니다.');
                     }
-                    console.log('✅ 선택된 특징요소:', getSelectedFeatureElements());
+                    console.log('✅ 선택된 자신있는 부위:', getSelectedFeatureElements());
                 }
 
-                // 🆕 외모 매력: 관능적 습관 버튼 클릭 이벤트 (최대 2개 선택)
-                if (e.target.classList.contains('habit-btn')) {
-                    const selectedHabits = document.querySelectorAll('.habit-btn.selected').length;
+                // 🆕 유혹적인 포즈 버튼 클릭 이벤트 (최대 2개 선택)
+                if (e.target.classList.contains('seductive-pose-btn')) {
+                    const selectedPoses = document.querySelectorAll('.seductive-pose-btn.selected').length;
 
                     if (e.target.classList.contains('selected')) {
                         e.target.classList.remove('selected');
-                    } else if (selectedHabits < 2) {
+                    } else if (selectedPoses < 2) {
                         e.target.classList.add('selected');
                     } else {
-                        alert('관능적 습관은 최대 2개까지만 선택 가능합니다.');
+                        alert('유혹적인 포즈는 최대 2개까지만 선택 가능합니다.');
                     }
-                    console.log('✅ 선택된 관능적 습관:', getSelectedSensualHabits());
+                    console.log('✅ 선택된 유혹적인 포즈:', getSelectedSensualHabits());
                 }
             });
         }
@@ -12689,42 +12796,42 @@
             return selected.length === 0 ? ['reading', 'music', 'movies'] : selected;
         }
 
-        // 🆕 선택된 외모 매력 특징요소 수집
+        // 🆕 선택된 자신있는 부위 수집
         function getSelectedFeatureElements() {
             console.log('🔍 getSelectedFeatureElements 실행 중...');
             const selected = [];
-            const selectedFeatureBtns = document.querySelectorAll('.feature-btn.selected');
-            console.log('📊 선택된 feature-btn 요소 수:', selectedFeatureBtns.length);
+            const selectedPartBtns = document.querySelectorAll('.confident-part-btn.selected');
+            console.log('📊 선택된 confident-part-btn 요소 수:', selectedPartBtns.length);
 
-            selectedFeatureBtns.forEach(btn => {
+            selectedPartBtns.forEach(btn => {
                 const value = btn.getAttribute('data-feature');
                 if (value) {
                     selected.push(value);
-                    console.log('✅ 특징요소 수집됨:', value);
+                    console.log('✅ 자신있는 부위 수집됨:', value);
                 }
             });
 
-            console.log('🎯 최종 특징요소 배열:', selected);
-            return selected.length === 0 ? ['dimples', 'long_eyelashes'] : selected;
+            console.log('🎯 최종 자신있는 부위 배열:', selected);
+            return selected.length === 0 ? ['seductive_eyes', 'slim_waist'] : selected;
         }
 
-        // 🆕 선택된 관능적 습관 수집
+        // 🆕 선택된 유혹적인 포즈 수집
         function getSelectedSensualHabits() {
             console.log('🔍 getSelectedSensualHabits 실행 중...');
             const selected = [];
-            const selectedHabitBtns = document.querySelectorAll('.habit-btn.selected');
-            console.log('📊 선택된 habit-btn 요소 수:', selectedHabitBtns.length);
+            const selectedPoseBtns = document.querySelectorAll('.seductive-pose-btn.selected');
+            console.log('📊 선택된 seductive-pose-btn 요소 수:', selectedPoseBtns.length);
 
-            selectedHabitBtns.forEach(btn => {
+            selectedPoseBtns.forEach(btn => {
                 const value = btn.getAttribute('data-habit');
                 if (value) {
                     selected.push(value);
-                    console.log('✅ 관능적습관 수집됨:', value);
+                    console.log('✅ 유혹적인 포즈 수집됨:', value);
                 }
             });
 
-            console.log('🎯 최종 관능적습관 배열:', selected);
-            return selected.length === 0 ? ['hair_flipping', 'eye_contact'] : selected;
+            console.log('🎯 최종 유혹적인 포즈 배열:', selected);
+            return selected.length === 0 ? ['hair_touch', 'deep_gaze'] : selected;
         }
 
         // 🆕 선택된 스킨십 수집
