@@ -11403,11 +11403,11 @@
                 return false;
             }
 
-            // 파일 크기 검사 (5MB = 5,242,880 bytes)
-            const maxSize = 5 * 1024 * 1024;
+            // 파일 크기 검사 - Vercel 4.5MB 페이로드 제한을 고려하여 3MB로 제한
+            const maxSize = 3 * 1024 * 1024; // 3MB (Base64로 약 4MB가 되어 안전한 범위)
             if (file.size > maxSize) {
                 const currentSizeMB = Math.round(file.size / (1024 * 1024) * 10) / 10;
-                alert(`파일 크기가 너무 큽니다: ${file.name}\n최대 크기: 5MB (현재: ${currentSizeMB}MB)`);
+                alert(`파일 크기가 너무 큽니다: ${file.name}\n최대 크기: 3MB (현재: ${currentSizeMB}MB)\n\n팁: 이미지 편집 프로그램으로 압축하거나 크기를 줄여주세요.`);
                 return false;
             }
 
@@ -11465,7 +11465,26 @@
                     })
                 });
 
-                const result = await response.json();
+                // 특별 오류 상태 처리
+                if (response.status === 413) {
+                    throw new Error('파일 크기가 너무 큽니다. 1MB 이하로 압축해주세요.');
+                }
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('서버 오류 응답:', errorText);
+                    throw new Error(`서버 오류: ${response.status} ${response.statusText}`);
+                }
+
+                let result;
+                try {
+                    result = await response.json();
+                } catch (parseError) {
+                    console.error('JSON 파싱 오류:', parseError);
+                    const textResponse = await response.text();
+                    console.error('응답 내용:', textResponse);
+                    throw new Error('서버 응답 형식 오류');
+                }
 
                 if (result.success) {
                     console.log('✅ 사진 업로드 성공');
@@ -16910,7 +16929,7 @@
                                 <div class="upload-placeholder" onclick="document.getElementById('profilePhotoInput').click()">
                                     <div class="upload-icon">📷</div>
                                     <p>메인 프로필 사진 업로드</p>
-                                    <small>JPG, PNG, WEBP (최대 5MB)</small>
+                                    <small>JPG, PNG, WEBP (최대 3MB)</small>
                                 </div>
                                 <div class="photo-preview-container" id="profilePhotoContainer"></div>
                             </div>
@@ -16927,7 +16946,7 @@
                                 <div class="upload-placeholder" onclick="document.getElementById('casualPhotoInput').click()">
                                     <div class="upload-icon">📷</div>
                                     <p>일상적인 모습 사진 업로드</p>
-                                    <small>최대 5장, 각각 5MB 이하</small>
+                                    <small>최대 5장, 각각 3MB 이하</small>
                                 </div>
                                 <div class="photo-grid" id="casualPhotoGrid"></div>
                             </div>
@@ -16944,7 +16963,7 @@
                                 <div class="upload-placeholder" onclick="document.getElementById('romanticPhotoInput').click()">
                                     <div class="upload-icon">📷</div>
                                     <p>로맨틱한 순간 사진 업로드</p>
-                                    <small>최대 5장, 각각 5MB 이하</small>
+                                    <small>최대 5장, 각각 3MB 이하</small>
                                 </div>
                                 <div class="photo-grid" id="romanticPhotoGrid"></div>
                             </div>
@@ -16961,7 +16980,7 @@
                                 <div class="upload-placeholder" onclick="document.getElementById('emotionalPhotoInput').click()">
                                     <div class="upload-icon">📷</div>
                                     <p>다양한 감정 표현 사진 업로드</p>
-                                    <small>최대 5장, 각각 5MB 이하</small>
+                                    <small>최대 5장, 각각 3MB 이하</small>
                                 </div>
                                 <div class="photo-grid" id="emotionalPhotoGrid"></div>
                             </div>
@@ -16978,7 +16997,7 @@
                                 <div class="upload-placeholder" onclick="document.getElementById('specialPhotoInput').click()">
                                     <div class="upload-icon">📷</div>
                                     <p>특별한 이벤트나 순간 사진 업로드</p>
-                                    <small>최대 4장, 각각 5MB 이하</small>
+                                    <small>최대 4장, 각각 3MB 이하</small>
                                 </div>
                                 <div class="photo-grid" id="specialPhotoGrid"></div>
                             </div>

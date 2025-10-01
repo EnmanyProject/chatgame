@@ -32,12 +32,12 @@ function validatePhotoData(photoData, category) {
         throw new Error(`지원하지 않는 카테고리입니다: ${category}`);
     }
 
-    // Base64 데이터 크기 확인 (약 5MB 제한)
+    // Base64 데이터 크기 확인 (약 3MB 제한 - Vercel 4.5MB 페이로드 제한 고려)
     const sizeInBytes = (photoData.length * 3) / 4;
-    const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
+    const maxSizeInBytes = 3 * 1024 * 1024; // 3MB (Base64로 인코딩 시 약 4MB가 되어 Vercel 4.5MB 제한 내)
 
     if (sizeInBytes > maxSizeInBytes) {
-        throw new Error(`이미지 크기가 너무 큽니다. 최대 5MB까지 지원됩니다. (현재: ${Math.round(sizeInBytes / (1024 * 1024) * 10) / 10}MB)`);
+        throw new Error(`이미지 크기가 너무 큽니다. 최대 3MB까지 지원됩니다. (현재: ${Math.round(sizeInBytes / (1024 * 1024) * 10) / 10}MB)`);
     }
 
     return true;
@@ -628,8 +628,8 @@ module.exports = async function handler(req, res) {
         const photoDataSize = JSON.stringify(characterPhotos).length;
         console.log(`📏 사진 데이터 크기: ${Math.round(photoDataSize / 1024)}KB`);
 
-        // 5MB 이상의 데이터는 요약 형태로 반환
-        if (photoDataSize > 5 * 1024 * 1024) {
+        // 3MB 이상의 데이터는 요약 형태로 반환 (Vercel 4.5MB 제한 고려)
+        if (photoDataSize > 3 * 1024 * 1024) {
           console.log('⚠️ 데이터가 너무 큼 - 요약 형태로 반환');
           const summaryPhotos = {
             ...characterPhotos,
@@ -967,13 +967,13 @@ module.exports = async function handler(req, res) {
           });
         }
 
-        // 크기 검증
+        // 크기 검증 (Vercel 4.5MB 페이로드 제한 고려)
         const photoSizeBytes = (photo_data.length * 3) / 4;
-        const maxSize = 5 * 1024 * 1024; // 5MB
+        const maxSize = 3 * 1024 * 1024; // 3MB (Base64로 약 4MB가 되어 안전한 범위)
         if (photoSizeBytes > maxSize) {
           return res.status(413).json({
             success: false,
-            message: `파일이 너무 큽니다. 최대 5MB (현재: ${Math.round(photoSizeBytes / (1024 * 1024))}MB)`
+            message: `파일이 너무 큽니다. 최대 3MB (현재: ${Math.round(photoSizeBytes / (1024 * 1024))}MB)`
           });
         }
 
