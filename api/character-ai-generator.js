@@ -361,21 +361,57 @@ module.exports = async function handler(req, res) {
         });
 
       } catch (error) {
-        console.error('❌ 프롬프트 생성 실패:', error);
+        console.error('❌ 프롬프트 생성 실패 (첫 번째 시도):', error);
 
-        // fallback으로 템플릿 기반 프롬프트 생성
-        const fallbackPrompt = generateFallbackPrompt(character_data, style, length);
+        // 재시도 로직 - 더 간단한 모델과 더 짧은 길이로 재시도
+        try {
+          console.log('🔄 더 안정적인 설정으로 재시도 중...');
 
-        return res.json({
-          success: true,
-          prompt: fallbackPrompt,
-          character_name: character_data.basic_info?.name,
-          model_used: 'fallback-template',
-          style: style,
-          length: length,
-          fallback: true,
-          message: 'OpenAI API 오류로 템플릿 기반 프롬프트를 생성했습니다.'
-        });
+          const retryPrompt = await generatePromptWithOpenAI(character_data, 'gpt-3.5-turbo', style, 'medium');
+
+          return res.json({
+            success: true,
+            prompt: retryPrompt,
+            character_name: character_data.basic_info?.name,
+            model_used: 'gpt-3.5-turbo-retry',
+            style: style,
+            length: length,
+            retry: true,
+            message: '재시도를 통해 프롬프트를 성공적으로 생성했습니다.'
+          });
+
+        } catch (retryError) {
+          console.error('❌ 재시도도 실패:', retryError);
+
+          // 두 번째 재시도 - 가장 짧은 길이로
+          try {
+            console.log('🔄 최종 재시도 중 (짧은 길이)...');
+
+            const finalRetryPrompt = await generatePromptWithOpenAI(character_data, 'gpt-3.5-turbo', style, 'short');
+
+            return res.json({
+              success: true,
+              prompt: finalRetryPrompt,
+              character_name: character_data.basic_info?.name,
+              model_used: 'gpt-3.5-turbo-final-retry',
+              style: style,
+              length: 'short',
+              final_retry: true,
+              message: '최종 재시도를 통해 짧은 프롬프트를 생성했습니다.'
+            });
+
+          } catch (finalError) {
+            console.error('❌ 모든 재시도 실패:', finalError);
+
+            return res.status(500).json({
+              success: false,
+              message: 'OpenAI API가 모든 재시도에서 실패했습니다. 잠시 후 다시 시도해주세요.',
+              error: finalError.message,
+              original_error: error.message,
+              retry_error: retryError.message
+            });
+          }
+        }
       }
     }
 
@@ -3056,7 +3092,7 @@ ${characterSummary}
             content: userPrompt
           }
         ],
-        max_tokens: length === 'short' ? 1500 : length === 'medium' ? 2500 : 4000,
+        max_tokens: length === 'short' ? 3000 : length === 'medium' ? 5000 : 8000,
         temperature: 0.7
       })
     });
