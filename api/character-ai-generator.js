@@ -347,12 +347,12 @@ module.exports = async function handler(req, res) {
       }
 
       try {
-        // OpenAI 정책에 안전한 캐릭터 데이터로 변환
-        const sanitizedCharacterData = sanitizeCharacterForOpenAI(character_data);
-        console.log('🛡️ 캐릭터 데이터 안전 변환 완료');
+        // OpenAI 전송용 안전한 구간만 추출 (민감한 필드 완전 제외)
+        const safeCharacterData = extractSafeDataForOpenAI(character_data);
+        console.log('🎯 안전한 구간만 추출 완료 - 민감한 필드 제외됨');
 
         // OpenAI API를 통한 프롬프트 생성
-        const prompt = await generateCharacterPromptWithOpenAI(sanitizedCharacterData, model, style, length, system_prompt);
+        const prompt = await generateCharacterPromptWithOpenAI(safeCharacterData, model, style, length, system_prompt);
 
         console.log('✅ 프롬프트 생성 성공');
         return res.json({
@@ -371,7 +371,7 @@ module.exports = async function handler(req, res) {
         try {
           console.log('🔄 더 안정적인 설정으로 재시도 중...');
 
-          const retryPrompt = await generateCharacterPromptWithOpenAI(sanitizedCharacterData, 'gpt-4o', style, 'medium', 'AI 캐릭터 프롬프트를 상세하게 작성해주세요. 제공된 모든 캐릭터 정보를 빠짐없이 포함해야 합니다.');
+          const retryPrompt = await generateCharacterPromptWithOpenAI(safeCharacterData, 'gpt-4o', style, 'medium', 'AI 캐릭터 프롬프트를 상세하게 작성해주세요. 제공된 모든 캐릭터 정보를 빠짐없이 포함해야 합니다.');
 
           return res.json({
             success: true,
@@ -391,7 +391,7 @@ module.exports = async function handler(req, res) {
           try {
             console.log('🔄 최종 재시도 중 (짧은 길이)...');
 
-            const finalRetryPrompt = await generateCharacterPromptWithOpenAI(sanitizedCharacterData, 'gpt-4o', style, 'short', 'AI 캐릭터 프롬프트를 작성해주세요. 모든 캐릭터 데이터를 포함해야 합니다.');
+            const finalRetryPrompt = await generateCharacterPromptWithOpenAI(safeCharacterData, 'gpt-4o', style, 'short', 'AI 캐릭터 프롬프트를 작성해주세요. 모든 캐릭터 데이터를 포함해야 합니다.');
 
             return res.json({
               success: true,
@@ -3177,47 +3177,31 @@ async function generateCharacterPromptWithOpenAI(characterData, model = 'gpt-4o'
   console.log('🎨 스타일:', style);
 
   // 캐릭터 데이터를 안전하게 요약해서 프롬프트에 포함
-  const safeCharacterData = sanitizeCharacterForOpenAI(characterData);
-  const characterSummary = createCharacterSummary(safeCharacterData);
+  const characterSummary = createCharacterSummary(characterData);
 
-  const userPrompt = `다음 캐릭터에 대한 ${style} 스타일의 프롬프트를 ${length} 길이로 작성해주세요.
+  const userPrompt = `다음 캐릭터에 대한 ${style} 스타일의 상세한 프롬프트를 작성해주세요.
 
 캐릭터 데이터:
 ${characterSummary}
 
-⚠️ 중요한 요구사항:
-- 위에 제공된 캐릭터 데이터의 모든 세부사항을 빠짐없이 포함해야 합니다
-- 모든 수치 (감정지능, 자신감, 신비로움 등)를 구체적으로 언급하세요
-- 모든 배열 항목들 (매력포인트, 취미, 대화주제 등)을 개별적으로 언급하세요
-- 외모 특징 (헤어스타일, 눈 모양, 체형, 패션스타일 등)을 우아하게 표현하세요
-- 대화 스타일과 소통 방식을 구체적으로 표현하세요
-- 과거 경험과 인생 이력을 자연스럽게 녹여 넣으세요
-- 심리적 특성과 가치관을 깊이 있게 다루세요
+요구사항:
+- 제공된 캐릭터 데이터의 모든 주요 특성을 포함해주세요
+- 모든 수치 (감정지능, 자신감, 신비로움 등)를 구체적으로 언급
+- 배열 항목들 (매력포인트, 취미, 대화주제 등)을 개별적으로 언급
+- 외모, 성격, 대화스타일, 과거경험을 균형있게 다뤄주세요
+- MBTI 특성을 자연스럽게 반영
+- 한국어로 자연스럽고 매력적으로 작성
 
-작성 스타일:
-- 매우 상세하고 구체적으로 (최소 8000자 이상 필수, 10000자 이상 권장)
-- 제공된 55개 필드를 모두 빠짐없이 포함 (하나도 생략하지 마세요)
-- 각 수치와 점수를 정확히 언급 (예: "감정지능 8점", "자신감 6점", "신비로움 7점")
-- 배열 데이터의 모든 항목을 개별적으로 상세 설명 (예: 취미가 ["게임", "독서", "요리"]면 세 개 모두 별도로 자세히 설명)
-- MBTI 특성을 모든 행동, 사고, 감정 표현에 자연스럽게 반영
-- 외모와 스타일을 우아하고 품격있게 묘사 (헤어스타일, 눈 모양, 체형, 패션 스타일, 특징적 요소 등)
-- 심리적 특성, 핵심 욕구, 취약점, 가치관을 깊이 있게 분석
-- 대화 스타일, 말투, 소통 패턴, 말 습관을 매우 자세히 기술
-- 과거 경험, 개인사, 선호도를 풍부하게 설명
-- 미래 목표와 꿈을 구체적으로 표현
-- 한국어로 자연스럽고 매력적이면서도 정보량이 극도로 풍부하게 작성
+작성 형식:
+1. 캐릭터 개요 (기본정보, 핵심 특징)
+2. 성격과 심리적 특성 (MBTI 특성, 감정지능, 취약점 등)
+3. 외모와 매력 포인트 (헤어, 체형, 스타일, 특징적 요소)
+4. 대화 스타일과 소통 방식 (말투, 습관, 반응 패턴)
+5. 취미와 관심사
+6. 과거 경험과 관계 패턴
+7. 가치관과 미래 목표
 
-🎯 절대 목표:
-1. 최소 8000자 이상의 매우 상세한 설명 (더 길수록 좋음)
-2. 제공된 55개 캐릭터 필드를 100% 완전히 포함 (누락 절대 금지)
-3. 각 필드별로 충분한 설명과 구체적인 예시 포함
-4. 읽는 사람이 캐릭터의 모든 면을 완벽히 이해할 수 있는 수준의 극도로 상세한 디테일
-
-⚠️ 매우 중요:
-- 절대로 요약하거나 축약하지 마세요
-- 모든 필드를 빠뜨리지 말고 매우 길고 상세하게 작성하세요
-- 길이 제한을 걱정하지 말고 최대한 자세히 써주세요
-- 15000 토큰까지 사용 가능하므로 매우 풍부하게 작성하세요`;
+목표 길이: 3000-5000자 정도로 충실하면서도 읽기 좋게 작성해주세요.`;
 
   try {
     // 타임아웃을 위한 AbortController 설정 (25초)
@@ -3243,7 +3227,7 @@ ${characterSummary}
             content: userPrompt
           }
         ],
-        max_tokens: length === 'short' ? 8000 : length === 'medium' ? 12000 : 15000,
+        max_tokens: length === 'short' ? 3000 : length === 'medium' ? 5000 : 7000,
         temperature: 0.7
       })
     });
@@ -3388,9 +3372,8 @@ function createCharacterSummary(characterData) {
   const basic = characterData.basic_info || {};
   const appeal = characterData.appeal_profile || {};
   const physical = characterData.physical_allure || {};
-  const psychological = characterData.psychological_depth || {};
   const conversation = characterData.conversation_dynamics || {};
-  const pastHistory = characterData.past_history || {};
+  // 안전한 데이터만 사용 - psychological_depth, past_history 제외
 
   let summary = `==== 📋 기본 정보 ====
 이름: ${basic.name || '미정'}
@@ -3421,14 +3404,9 @@ MBTI: ${basic.mbti || '미정'}
 매력적 습관: ${physical.sensual_habits ? translateToKorean(physical.sensual_habits) : '자연스러운 행동'}
 바디 랭귀지: ${physical.body_language ? translateToKorean(physical.body_language) : '편안한 몸짓'}
 
-==== 🧠 심리적 깊이 ====
-핵심 욕구: ${psychological.core_desires ? translateToKorean(psychological.core_desires) : '의미있는 관계'}
-취약점: ${psychological.vulnerabilities ? translateToKorean(psychological.vulnerabilities) : '완벽주의'}
-가치관: ${translateToKorean(psychological.values) || '사랑과 가족'}
-개방성 수준: ${psychological.sexual_freedom || '보통'}점 (10점 만점)
-편안함 수준: ${translateToKorean(psychological.boundaries?.comfort_level) || '자연스러운 소통'}
-발전 속도: ${translateToKorean(psychological.boundaries?.escalation_pace) || '천천히'}
-소통 톤: ${translateToKorean(psychological.boundaries?.sexual_tone_band) || '보통'}
+==== 🧠 MBTI 성격 특성 ====
+MBTI 유형: ${basic.mbti || 'INFP'}
+성격 특징: ${getMBTICharacteristics(basic.mbti || 'INFP')}
 
 ==== 💬 대화 역학 ====
 말투: ${translateToKorean(conversation.speech_style) || '자연스럽고 친근함'}
@@ -3444,19 +3422,9 @@ MBTI: ${basic.mbti || '미정'}
 - 칭찬에 대한 반응: ${translateToKorean(conversation.reaction_tendencies?.compliment) || '감사히 받아들임'}
 - 관심 표현 방식: ${translateToKorean(conversation.reaction_tendencies?.interest_expression) || '열정적으로 공유'}
 
-==== 💕 과거 경험 ====
-연애 경험: ${translateToKorean(pastHistory.relationship_experience) || '초보'}
-남자친구 수: ${pastHistory.boyfriend_count || '2-3'}명
-선호하는 친밀감 표현: ${pastHistory.preferred_skinship ? translateToKorean(pastHistory.preferred_skinship) : '손잡기, 포옹'}
-인생 경험 시기: ${translateToKorean(pastHistory.first_experience_age) || '10대 후반'}
-
-==== 🎁 선호도 ====
-좋아하는 선물: ${characterData.favorite_gifts ? translateToKorean(characterData.favorite_gifts) : '꽃, 초콜릿'}
-남성에게 중요한 것: ${characterData.male_priorities ? translateToKorean(characterData.male_priorities) : '유머, 성격'}
-
-==== 🎯 미래 목표 ====
-자산 목표: ${translateToKorean(characterData.future_goals?.asset_goal) || '안정적인 미래'}
-미래 직업: ${characterData.future_goals?.future_careers?.length > 0 ? translateToKorean(characterData.future_goals.future_careers) : '현재 직업 유지'}
+==== 🎯 취미와 관심사 ====
+주요 취미: ${appeal.hobbies ? translateToKorean(appeal.hobbies) : '독서, 음악감상'}
+대화 주제: ${conversation.conversation_hooks ? translateToKorean(conversation.conversation_hooks) : '일상, 취미'}
 
 ==== 📊 메타데이터 ====
 생성일: ${characterData.created_at || '미정'}
@@ -3613,32 +3581,72 @@ function sanitizeValueForOpenAI(value) {
   }
 }
 
-// 캐릭터 데이터 전체를 안전하게 변환하는 함수
-function sanitizeCharacterForOpenAI(character) {
+// 🎯 OpenAI 전송용 안전한 구간만 추출하는 함수 (구조적 접근법)
+function extractSafeDataForOpenAI(character) {
   if (!character) return character;
 
-  // 깊은 복사를 통해 원본 데이터 보존
-  const sanitizedCharacter = JSON.parse(JSON.stringify(character));
+  console.log('🎯 안전 구간 추출 시작 - 민감한 필드 완전 제외');
 
-  // 재귀적으로 모든 값 처리
-  function sanitizeObject(obj) {
-    if (!obj || typeof obj !== 'object') return obj;
+  // ✅ OpenAI에 전송할 안전한 구간만 추출
+  const safeData = {
+    // 1. ✅ 기본 정보 (완전 안전)
+    basic_info: character.basic_info ? {
+      name: character.basic_info.name,
+      age: character.basic_info.age,
+      mbti: character.basic_info.mbti,
+      occupation: character.basic_info.occupation,
+      gender: character.basic_info.gender
+    } : {},
 
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        if (Array.isArray(obj[key])) {
-          obj[key] = obj[key].map(item =>
-            typeof item === 'string' ? sanitizeValueForOpenAI(item) : item
-          );
-        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-          sanitizeObject(obj[key]);
-        } else if (typeof obj[key] === 'string') {
-          obj[key] = sanitizeValueForOpenAI(obj[key]);
-        }
-      }
-    }
-  }
+    // 2. ✅ 매력 프로필 (민감한 sexual_ 필드 제외)
+    appeal_profile: character.appeal_profile ? {
+      seduction_style: character.appeal_profile.seduction_style,
+      charm_points: character.appeal_profile.charm_points,
+      emotional_intelligence: character.appeal_profile.emotional_intelligence,
+      confidence_level: character.appeal_profile.confidence_level,
+      mystery_factor: character.appeal_profile.mystery_factor,
+      hobbies: character.appeal_profile.hobbies
+      // ❌ sexual_curiosity, sexual_comfort 제외
+    } : {},
 
-  sanitizeObject(sanitizedCharacter);
-  return sanitizedCharacter;
+    // 3. ✅ 외모 (민감한 세부사항 제외)
+    physical_allure: character.physical_allure ? {
+      appearance: character.physical_allure.appearance ? {
+        hair: character.physical_allure.appearance.hair,
+        eyes: character.physical_allure.appearance.eyes,
+        body: character.physical_allure.appearance.body,
+        waist_hip: character.physical_allure.appearance.waist_hip,
+        style: character.physical_allure.appearance.style
+        // ❌ bust 제외
+      } : {}
+      // ❌ feature_elements, sensual_habits, body_language 제외
+    } : {},
+
+    // 4. ✅ 대화 스타일 (안전한 부분만)
+    conversation_dynamics: character.conversation_dynamics ? {
+      speech_style: character.conversation_dynamics.speech_style,
+      flirting_patterns: character.conversation_dynamics.flirting_patterns,
+      conversation_hooks: character.conversation_dynamics.conversation_hooks,
+      speech_habits: character.conversation_dynamics.speech_habits,
+      vocabulary_register: character.conversation_dynamics.vocabulary_register,
+      allowed_motifs: character.conversation_dynamics.allowed_motifs
+      // ❌ reaction_tendencies, forbidden_terms 제외 (덜 중요)
+    } : {}
+
+    // ═══ 여기까지만 OpenAI 전송 ═══
+    // ❌ psychological_depth 완전 제외
+    // ❌ past_history 완전 제외
+    // ❌ favorite_gifts 완전 제외
+    // ❌ future_goals 완전 제외
+    // ❌ male_priorities 완전 제외
+  };
+
+  console.log('🎯 안전 구간 추출 완료:');
+  console.log('  ✅ basic_info:', !!safeData.basic_info);
+  console.log('  ✅ appeal_profile:', !!safeData.appeal_profile);
+  console.log('  ✅ physical_allure:', !!safeData.physical_allure);
+  console.log('  ✅ conversation_dynamics:', !!safeData.conversation_dynamics);
+  console.log('  ❌ 민감한 필드들 모두 제외됨');
+
+  return safeData;
 }
