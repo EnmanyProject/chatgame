@@ -3153,7 +3153,10 @@ function translateToKorean(value) {
 
     // 취미
     'gaming': '게임', 'dancing': '춤', 'photography': '사진촬영', 'reading': '독서', 'music': '음악',
-    'movies': '영화', 'cooking': '요리', 'shopping': '쇼핑', 'cafe': '카페',
+    'movies': '영화', 'cooking': '요리', 'shopping': '쇼핑', 'cafe': '카페', 'coding': '코딩',
+
+    // 직업
+    'student': '학생', 'office_worker': '회사원', 'teacher': '교사', 'designer': '디자이너',
 
     // 스킨십
     'hand_holding': '손잡기', 'head_patting': '머리 쓰다듬기', 'passionate_kiss': '열정적인 키스',

@@ -71,11 +71,11 @@ async function testKoreanAccuracy() {
       '어깨까지 오는 웨이브', // shoulder_wave
       '신비롭고 깊은',      // mysterious_deep
       '모델 같은',          // model_like
-      '자신감 있는',        // confident_touch
+      '자신감 있는 스킨십',  // confident_touch (full translation)
       '여성',               // female
-      '학생',               // student (if translated)
+      '학생',               // student
       '독서',               // reading
-      '코딩'                // coding (if kept or translated)
+      '코딩'                // coding
     ];
 
     console.log('🔍 Checking Korean Translation Accuracy:');
