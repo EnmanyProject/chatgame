@@ -3361,83 +3361,28 @@ MBTI 유형: ${basic.mbti || 'INFP'}
   return summary;
 }
 
-// 전체 캐릭터 데이터 제공 (필터링 없음) - Groq API용
+// 전체 캐릭터 데이터 제공 (필터링 없음, 원본 필드값) - Groq API용
 function createFullCharacterData(characterData) {
-  const basic = characterData.basic_info || {};
-  const appeal = characterData.appeal_profile || {};
-  const physical = characterData.physical_allure || {};
-  const psychological = characterData.psychological_depth || {};
-  const conversation = characterData.conversation_dynamics || {};
-  const pastHistory = characterData.past_history || {};
-  const favoriteGifts = characterData.favorite_gifts || [];
-  const futureGoals = characterData.future_goals || {};
+  // JSON 형태로 완전한 원본 데이터를 제공
+  return `완전한 캐릭터 데이터 (JSON 형식):
 
-  let fullData = `==== 📋 기본 정보 (Basic Info) ====
-이름: ${basic.name || '미정'}
-나이: ${basic.age || '미정'}세
-MBTI: ${basic.mbti || '미정'}
-직업: ${translateToKorean(basic.occupation) || basic.occupation || '미정'}
-성별: ${basic.gender === 'female' ? '여성' : basic.gender === 'male' ? '남성' : '여성'}
+${JSON.stringify(characterData, null, 2)}
 
-==== ✨ 매력 프로필 (Appeal Profile) ====
-매력 스타일: ${translateToKorean(appeal.seduction_style) || appeal.seduction_style || '미정'}
-매력 포인트: ${appeal.charm_points ? (Array.isArray(appeal.charm_points) ? appeal.charm_points.map(p => translateToKorean(p) || p).join(', ') : translateToKorean(appeal.charm_points) || appeal.charm_points) : '미정'}
-감정지능: ${appeal.emotional_intelligence || '미정'}점 (10점 만점)
-자신감: ${appeal.confidence_level || '미정'}점 (10점 만점)
-미스터리: ${appeal.mystery_factor || '미정'}점 (10점 만점)
-성적 호기심: ${appeal.sexual_curiosity || '미정'}점 (10점 만점)
-성적 편안함: ${appeal.sexual_comfort || '미정'}점 (10점 만점)
-취미: ${appeal.hobbies ? (Array.isArray(appeal.hobbies) ? appeal.hobbies.map(h => translateToKorean(h) || h).join(', ') : translateToKorean(appeal.hobbies) || appeal.hobbies) : '미정'}
+추가 설명:
+위의 JSON 데이터에는 캐릭터의 모든 속성이 영어 키워드로 포함되어 있습니다.
+각 필드의 영어 값들을 한국어로 자연스럽게 번역하여 프롬프트에 반영해주세요.
+특히 다음과 같은 핵심 필드들을 모두 포함해야 합니다:
 
-==== 👄 외모적 매력 (Physical Allure) ====
-헤어스타일: ${translateToKorean(physical.appearance?.hair) || physical.appearance?.hair || '미정'}
-눈: ${translateToKorean(physical.appearance?.eyes) || physical.appearance?.eyes || '미정'}
-체형: ${translateToKorean(physical.appearance?.body) || physical.appearance?.body || '미정'}
-가슴: ${physical.appearance?.bust || '미정'}
-허리/힙: ${physical.appearance?.waist_hip || '미정'}
-스타일: ${physical.appearance?.style || '미정'}
-특징 요소: ${physical.feature_elements ? (Array.isArray(physical.feature_elements) ? physical.feature_elements.map(f => translateToKorean(f) || f).join(', ') : translateToKorean(physical.feature_elements) || physical.feature_elements) : '미정'}
-관능적 습관: ${physical.sensual_habits ? (Array.isArray(physical.sensual_habits) ? physical.sensual_habits.join(', ') : physical.sensual_habits) : '미정'}
-바디랭귀지: ${physical.body_language ? (Array.isArray(physical.body_language) ? physical.body_language.join(', ') : physical.body_language) : '미정'}
+- basic_info: 기본 정보 (이름, 나이, MBTI, 직업, 성별)
+- appeal_profile: 매력 프로필 (매력 스타일, 매력 포인트, 감정지능, 자신감, 미스터리, 성적 호기심/편안함, 취미)
+- physical_allure: 외모적 매력 (헤어, 눈, 체형, 가슴, 허리힙, 스타일, 특징 요소, 관능적 습관, 바디랭귀지)
+- psychological_depth: 심리적 깊이 (핵심 욕구, 취약점, 가치관, 경계선, 성적 자유도)
+- conversation_dynamics: 대화 역학 (말투, 플러팅 패턴, 반응 성향, 대화 주제, 말 습관, 어휘 수준, 허용 모티프)
+- past_history: 과거 이력 (연애 횟수, 선호 스킨십, 연애 경험, 첫 경험 나이)
+- favorite_gifts: 선호 선물
+- future_goals: 미래 목표
 
-==== 🧠 심리적 깊이 (Psychological Depth) ====
-핵심 욕구: ${psychological.core_desires ? (Array.isArray(psychological.core_desires) ? psychological.core_desires.map(d => translateToKorean(d) || d).join(', ') : translateToKorean(psychological.core_desires) || psychological.core_desires) : '미정'}
-취약점: ${psychological.vulnerabilities ? (Array.isArray(psychological.vulnerabilities) ? psychological.vulnerabilities.map(v => translateToKorean(v) || v).join(', ') : translateToKorean(psychological.vulnerabilities) || psychological.vulnerabilities) : '미정'}
-가치관: ${translateToKorean(psychological.values) || psychological.values || '미정'}
-편안함 수준: ${translateToKorean(psychological.boundaries?.comfort_level) || psychological.boundaries?.comfort_level || '미정'}
-발전 속도: ${translateToKorean(psychological.boundaries?.escalation_pace) || psychological.boundaries?.escalation_pace || '미정'}
-성적 톤: ${translateToKorean(psychological.boundaries?.sexual_tone_band) || psychological.boundaries?.sexual_tone_band || '미정'}
-성적 자유도: ${psychological.sexual_freedom || '미정'}점 (10점 만점)
-
-==== 💬 대화 역학 (Conversation Dynamics) ====
-말투 스타일: ${translateToKorean(conversation.speech_style) || conversation.speech_style || '미정'}
-플러팅 패턴: ${conversation.flirting_patterns ? (Array.isArray(conversation.flirting_patterns) ? conversation.flirting_patterns.map(p => translateToKorean(p) || p).join(', ') : translateToKorean(conversation.flirting_patterns) || conversation.flirting_patterns) : '미정'}
-유머 반응: ${translateToKorean(conversation.reaction_tendencies?.humor) || conversation.reaction_tendencies?.humor || '미정'}
-칭찬 반응: ${translateToKorean(conversation.reaction_tendencies?.compliment) || conversation.reaction_tendencies?.compliment || '미정'}
-관심 표현: ${translateToKorean(conversation.reaction_tendencies?.interest_expression) || conversation.reaction_tendencies?.interest_expression || '미정'}
-대화 주제: ${conversation.conversation_hooks ? (Array.isArray(conversation.conversation_hooks) ? conversation.conversation_hooks.map(h => translateToKorean(h) || h).join(', ') : translateToKorean(conversation.conversation_hooks) || conversation.conversation_hooks) : '미정'}
-말 습관: ${conversation.speech_habits ? (Array.isArray(conversation.speech_habits) ? conversation.speech_habits.map(h => translateToKorean(h) || h).join(', ') : translateToKorean(conversation.speech_habits) || conversation.speech_habits) : '미정'}
-어휘 수준: ${translateToKorean(conversation.vocabulary_register) || conversation.vocabulary_register || '미정'}
-허용 모티프: ${conversation.allowed_motifs ? (Array.isArray(conversation.allowed_motifs) ? conversation.allowed_motifs.map(m => translateToKorean(m) || m).join(', ') : translateToKorean(conversation.allowed_motifs) || conversation.allowed_motifs) : '미정'}
-
-==== 📚 과거 이력 (Past History) ====
-연애 횟수: ${pastHistory.boyfriend_count || '미정'}회
-선호 스킨십: ${pastHistory.preferred_skinship ? (Array.isArray(pastHistory.preferred_skinship) ? pastHistory.preferred_skinship.map(s => translateToKorean(s) || s).join(', ') : translateToKorean(pastHistory.preferred_skinship) || pastHistory.preferred_skinship) : '미정'}
-연애 경험: ${translateToKorean(pastHistory.relationship_experience) || pastHistory.relationship_experience || '미정'}
-첫 경험 나이: ${translateToKorean(pastHistory.first_experience_age) || pastHistory.first_experience_age || '미정'}
-
-==== 🎁 선호 선물 (Favorite Gifts) ====
-좋아하는 선물: ${favoriteGifts ? (Array.isArray(favoriteGifts) ? favoriteGifts.map(g => translateToKorean(g) || g).join(', ') : translateToKorean(favoriteGifts) || favoriteGifts) : '미정'}
-
-==== 🎯 미래 목표 (Future Goals) ====
-자산 목표: ${translateToKorean(futureGoals.asset_goal) || futureGoals.asset_goal || '미정'}
-미래 직업: ${futureGoals.future_careers ? (Array.isArray(futureGoals.future_careers) ? futureGoals.future_careers.join(', ') : futureGoals.future_careers) : '미정'}
-
-==== 🧬 MBTI 성격 특성 ====
-MBTI 유형: ${basic.mbti || 'INFP'}
-성격 특징: ${getMBTICharacteristics(basic.mbti || 'INFP')}`;
-
-  return fullData;
+모든 영어 키워드와 값들을 적절한 한국어로 번역하여 자연스럽고 매력적인 캐릭터 프롬프트를 작성해주세요.`;
 }
 
 // Fallback 프롬프트 생성 (OpenAI 실패 시)
