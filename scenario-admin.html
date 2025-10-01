@@ -4263,7 +4263,8 @@
                     <div class="form-group">
                         <label for="promptGenerationModel">🤖 AI 모델 선택</label>
                         <select id="promptGenerationModel">
-                            <option value="gpt-4" selected>GPT-4 (권장)</option>
+                            <option value="gpt-4o" selected>GPT-4o (권장)</option>
+                            <option value="gpt-4">GPT-4</option>
                             <option value="gpt-3.5-turbo">GPT-3.5 Turbo (빠름)</option>
                         </select>
                     </div>
@@ -6318,9 +6319,9 @@
         // 캐릭터별 시스템 프롬프트 생성
         function createSystemPromptForCharacter(character, style, length) {
             const lengthGuide = {
-                'short': '1200-1800자 (핵심 필드 포함)',
-                'medium': '1800-3000자 (상세한 분석)',
-                'long': '3000-5000자 (완전한 캐릭터 가이드)'
+                'short': '3000-5000자 (핵심 필드 포함)',
+                'medium': '5000-8000자 (상세한 분석)',
+                'long': '8000-12000자 (완전한 캐릭터 가이드)'
             };
 
             const styleGuide = {
@@ -6349,33 +6350,33 @@
 - 감정지능: ${character.appeal_profile?.emotional_intelligence}/10
 - 자신감: ${character.appeal_profile?.confidence_level}/10
 - 신비로움: ${character.appeal_profile?.mystery_factor}/10
-- 성적 호기심: ${character.appeal_profile?.sexual_curiosity}/10
-- 성적 편안함: ${character.appeal_profile?.sexual_comfort}/10
+- 호기심 정도: ${character.appeal_profile?.sexual_curiosity}/10
+- 개방성 정도: ${character.appeal_profile?.sexual_comfort}/10
 - 취미: ${Array.isArray(character.appeal_profile?.hobbies) ? character.appeal_profile.hobbies.join(', ') : ''}
 
 👄 외모적 매력 (구체적으로):
 - 헤어: ${character.physical_allure?.appearance?.hair}
 - 눈: ${character.physical_allure?.appearance?.eyes}
 - 체형: ${character.physical_allure?.appearance?.body}
-- 가슴: ${character.physical_allure?.appearance?.bust}
+- 체격: ${character.physical_allure?.appearance?.bust}
 - 허리/힙: ${character.physical_allure?.appearance?.waist_hip}
 - 스타일: ${character.physical_allure?.appearance?.style}
 - 특징적 요소: ${Array.isArray(character.physical_allure?.feature_elements) ? character.physical_allure.feature_elements.join(', ') : ''}
-- 감각적 습관: ${Array.isArray(character.physical_allure?.sensual_habits) ? character.physical_allure.sensual_habits.join(', ') : ''}
+- 우아한 습관: ${Array.isArray(character.physical_allure?.sensual_habits) ? character.physical_allure.sensual_habits.join(', ') : ''}
 - 바디랭귀지: ${Array.isArray(character.physical_allure?.body_language) ? character.physical_allure.body_language.join(', ') : ''}
 
 🧠 심리적 깊이 (세밀하게):
 - 핵심 욕구: ${Array.isArray(character.psychological_depth?.core_desires) ? character.psychological_depth.core_desires.join(', ') : ''}
 - 취약점: ${Array.isArray(character.psychological_depth?.vulnerabilities) ? character.psychological_depth.vulnerabilities.join(', ') : ''}
 - 가치관: ${character.psychological_depth?.values}
-- 성적 자유도: ${character.psychological_depth?.sexual_freedom}/10
+- 개방성 수준: ${character.psychological_depth?.sexual_freedom}/10
 - 편안함 수준: ${character.psychological_depth?.boundaries?.comfort_level}
 - 발전 속도: ${character.psychological_depth?.boundaries?.escalation_pace}
-- 성적 톤: ${character.psychological_depth?.boundaries?.sexual_tone_band}
+- 소통 톤: ${character.psychological_depth?.boundaries?.sexual_tone_band}
 
 💬 대화 역학 (상세히):
 - 말투: ${character.conversation_dynamics?.speech_style}
-- 플러팅 패턴: ${Array.isArray(character.conversation_dynamics?.flirting_patterns) ? character.conversation_dynamics.flirting_patterns.join(', ') : ''}
+- 매력적 대화법: ${Array.isArray(character.conversation_dynamics?.flirting_patterns) ? character.conversation_dynamics.flirting_patterns.join(', ') : ''}
 - 대화 주제: ${Array.isArray(character.conversation_dynamics?.conversation_hooks) ? character.conversation_dynamics.conversation_hooks.join(', ') : ''}
 - 말 습관: ${Array.isArray(character.conversation_dynamics?.speech_habits) ? character.conversation_dynamics.speech_habits.join(', ') : ''}
 - 어휘 수준: ${character.conversation_dynamics?.vocabulary_register}
@@ -6388,8 +6389,8 @@
 💕 과거 경험:
 - 연애 경험: ${character.past_history?.relationship_experience}
 - 남자친구 수: ${character.past_history?.boyfriend_count}명
-- 선호 스킨십: ${Array.isArray(character.past_history?.preferred_skinship) ? character.past_history.preferred_skinship.join(', ') : ''}
-- 첫 경험: ${character.past_history?.first_experience_age}
+- 선호하는 친밀감 표현: ${Array.isArray(character.past_history?.preferred_skinship) ? character.past_history.preferred_skinship.join(', ') : ''}
+- 인생 경험 시기: ${character.past_history?.first_experience_age}
 
 🎁 기타 정보:
 - 좋아하는 선물: ${Array.isArray(character.favorite_gifts) ? character.favorite_gifts.join(', ') : ''}
@@ -6404,7 +6405,7 @@
 4. 관계에서 중요하게 생각하는 가치 (가치관, 경계선 포함)
 5. 특별한 취미나 관심사 (허용/금기 모티프 포함)
 6. 과거 경험과 연애 패턴 (구체적인 경험치 포함)
-7. 선호하는 관계 발전 방식 (스킨십, 속도감 포함)
+7. 선호하는 관계 발전 방식 (친밀감 표현, 속도감 포함)
 
 위에 제공된 모든 데이터를 빠짐없이 자연스럽게 녹여서 한국어로 매력적인 프롬프트를 작성해주세요.
 각 수치와 구체적인 특징들을 모두 언급해야 합니다.`;
