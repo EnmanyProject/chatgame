@@ -3024,7 +3024,7 @@ ${characterSummary}
 - 심리적 특성과 가치관을 깊이 있게 다루세요
 
 작성 스타일:
-- 매우 상세하고 구체적으로 (최소 2000자 이상)
+- 상세하고 구체적으로 (최소 1500자 이상 권장)
 - 캐릭터의 성격과 매력을 생생하게 드러내는 방식
 - MBTI 특성이 모든 행동과 사고에 자연스럽게 반영
 - 대화할 때 실제로 유용한 구체적인 성격 정보 포함
@@ -3033,12 +3033,17 @@ ${characterSummary}
 목표: 이 프롬프트를 읽는 사람이 캐릭터의 모든 면을 완벽히 이해할 수 있도록 포괄적으로 작성해주세요.`;
 
   try {
+    // 타임아웃을 위한 AbortController 설정 (25초)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
+      signal: controller.signal,
       body: JSON.stringify({
         model: model,
         messages: [
@@ -3051,14 +3056,22 @@ ${characterSummary}
             content: userPrompt
           }
         ],
-        max_tokens: length === 'short' ? 2500 : length === 'medium' ? 4000 : 6000,
+        max_tokens: length === 'short' ? 1500 : length === 'medium' ? 2500 : 4000,
         temperature: 0.7
       })
     });
 
+    clearTimeout(timeoutId);
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`OpenAI API 오류: ${response.status} - ${errorData.error?.message || '알 수 없는 오류'}`);
+      let errorMessage = `OpenAI API 오류: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage += ` - ${errorData.error?.message || '알 수 없는 오류'}`;
+      } catch (e) {
+        errorMessage += ' - 응답 파싱 실패';
+      }
+      throw new Error(errorMessage);
     }
 
     const result = await response.json();
@@ -3068,11 +3081,22 @@ ${characterSummary}
       throw new Error('OpenAI API에서 프롬프트를 생성하지 못했습니다');
     }
 
-    console.log('✅ OpenAI API 프롬프트 생성 완료');
+    console.log('✅ OpenAI API 프롬프트 생성 완료, 길이:', generatedPrompt.length);
     return generatedPrompt;
 
   } catch (error) {
     console.error('❌ OpenAI API 호출 실패:', error.message);
+
+    // 타임아웃 에러 처리
+    if (error.name === 'AbortError') {
+      throw new Error('프롬프트 생성 시간이 초과되었습니다. 더 짧은 길이로 다시 시도해주세요.');
+    }
+
+    // 기타 네트워크 에러
+    if (error.message.includes('fetch')) {
+      throw new Error('네트워크 연결 문제가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    }
+
     throw error;
   }
 }
