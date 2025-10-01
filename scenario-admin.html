@@ -9080,6 +9080,22 @@
         }
 
         // 🔄 스키마 호환성을 위한 헬퍼 함수들 (v2.0 업그레이드)
+
+        // 안전한 요소 설정 함수 (전역 스코프)
+        function safeSetValue(id, value) {
+            const element = document.getElementById(id);
+            if (element && value !== null && value !== undefined) {
+                element.value = value;
+                console.log(`✅ ${id} 설정 완료:`, value);
+                return true;
+            } else if (!element) {
+                console.warn(`⚠️ 요소를 찾을 수 없음: ${id}`);
+            } else {
+                console.log(`ℹ️ ${id} 값이 비어있음:`, value);
+            }
+            return false;
+        }
+
         function getCharacterName(character) {
             return character.basic_info?.name || character.name || '이름 없음';
         }
@@ -11041,20 +11057,7 @@
                 const character = generatedCharacter;
                 console.log('🎭 AI 캐릭터 폼 적용 시작:', character);
 
-                // 안전한 요소 설정 함수
-                function safeSetValue(id, value) {
-                    const element = document.getElementById(id);
-                    if (element && value) {
-                        element.value = value;
-                        console.log(`✅ ${id} 설정 완료:`, value);
-                        return true;
-                    } else if (!element) {
-                        console.warn(`⚠️ 요소를 찾을 수 없음: ${id}`);
-                    }
-                    return false;
-                }
-
-                // 기본 정보 적용
+                // 기본 정보 적용 (전역 safeSetValue 함수 사용)
                 safeSetValue('charName', character.name);
                 safeSetValue('charAge', character.age || '22');
                 safeSetValue('charMbti', character.mbti);
