@@ -17968,7 +17968,26 @@
                     throw new Error('캐릭터 목록을 가져올 수 없습니다.');
                 }
 
-                const targetCharacter = charactersData.characters.find(c => c.id === selectedCharacterId);
+                // 캐릭터 데이터 구조 확인 및 적절한 방식으로 찾기
+                console.log('🔍 캐릭터 데이터 구조:', charactersData);
+
+                let targetCharacter = null;
+
+                // 배열인 경우
+                if (Array.isArray(charactersData.characters)) {
+                    targetCharacter = charactersData.characters.find(c => c.id === selectedCharacterId);
+                }
+                // 객체인 경우 (현재 구조)
+                else if (charactersData.characters && typeof charactersData.characters === 'object') {
+                    targetCharacter = charactersData.characters[selectedCharacterId];
+                }
+                // data 프로퍼티에 있는 경우
+                else if (charactersData.data && typeof charactersData.data === 'object') {
+                    targetCharacter = charactersData.data[selectedCharacterId];
+                }
+
+                console.log('🎯 찾은 캐릭터:', targetCharacter);
+
                 if (!targetCharacter) {
                     throw new Error('선택된 캐릭터를 찾을 수 없습니다.');
                 }
