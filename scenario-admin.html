@@ -6755,6 +6755,9 @@
             // 🔐 로그인 시스템 초기화
             initializeAuth();
 
+            // 🎯 성격 특성 버튼 이벤트 초기화
+            initializeTraitButtons();
+
             // AI 탭 감지 시스템 초기화
             setTimeout(() => {
                 setupAITabDetection();
@@ -11329,9 +11332,9 @@
         // 선택된 성격 특성들 가져오기
         function getSelectedTraits() {
             const selectedTraits = [];
-            // 실제 체크박스에서 선택된 성격 특성 수집
-            document.querySelectorAll('input[name="personality"]:checked').forEach(input => {
-                selectedTraits.push(input.value);
+            // 선택된 성격 특성 버튼에서 수집 (trait-btn.selected)
+            document.querySelectorAll('.trait-btn.selected').forEach(button => {
+                selectedTraits.push(button.getAttribute('data-trait'));
             });
             console.log('🎯 선택된 성격 특성:', selectedTraits);
             return selectedTraits.slice(0, 5); // 최대 5개로 증가
@@ -16123,6 +16126,34 @@
             }
 
             console.log('✅ 클릭형 필드들 복원 완료');
+        }
+
+        // 🎯 성격 특성 버튼 이벤트 초기화
+        function initializeTraitButtons() {
+            console.log('🎯 성격 특성 버튼 이벤트 초기화...');
+
+            // 성격 특성 버튼 클릭 이벤트
+            document.querySelectorAll('.trait-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const maxSelection = 3; // 최대 3개 선택
+                    const currentSelected = document.querySelectorAll('.trait-btn.selected').length;
+
+                    if (this.classList.contains('selected')) {
+                        // 이미 선택된 버튼은 해제
+                        this.classList.remove('selected');
+                        console.log('❌ 성격 특성 해제:', this.getAttribute('data-trait'));
+                    } else if (currentSelected < maxSelection) {
+                        // 최대 개수 미만이면 선택
+                        this.classList.add('selected');
+                        console.log('✅ 성격 특성 선택:', this.getAttribute('data-trait'));
+                    } else {
+                        // 최대 개수 초과 시 경고
+                        alert(`성격 특성은 최대 ${maxSelection}개까지만 선택할 수 있습니다.`);
+                    }
+                });
+            });
+
+            console.log('✅ 성격 특성 버튼 이벤트 초기화 완료');
         }
 
         // 🔹 기본 정보 채우기 (새로운 basic_info 스키마 + 기존 직접 필드)
