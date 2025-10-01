@@ -3148,9 +3148,9 @@ ${characterSummary}
 - 1000-2000자 분량`;
 
   try {
-    // 타임아웃을 위한 AbortController 설정 (7초)
+    // 타임아웃을 위한 AbortController 설정 (9초)
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 7000);
+    const timeoutId = setTimeout(() => controller.abort(), 9000);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -3171,7 +3171,7 @@ ${characterSummary}
             content: userPrompt
           }
         ],
-        max_tokens: length === 'short' ? 600 : length === 'medium' ? 900 : 1200,
+        max_tokens: length === 'short' ? 400 : length === 'medium' ? 600 : 800,
         temperature: 0.7
       })
     });
