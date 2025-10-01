@@ -8907,14 +8907,14 @@
             `).join('');
             console.log('✅ 캐릭터 카드 HTML 생성 완료');
 
-            // 각 캐릭터의 사진 미리보기 로드 (임시 비활성화)
-            console.log('⚠️ 사진 로드 임시 비활성화 - JSON 파싱 에러 해결 중...');
-            // characterArray.forEach((character, index) => {
-            //     console.log(`📸 ${index + 1}/${characterArray.length} 캐릭터 사진 로드: ${character.id}`);
-            //     loadCharacterPhotoPreview(character.id);
-            //     loadCharacterProfileImage(character.id);
-            // });
-            console.log('✅ 캐릭터 표시 완료 (사진 제외)');
+            // 각 캐릭터의 사진 미리보기 로드 (복구 후 재활성화)
+            console.log('🔄 각 캐릭터의 사진 로드 시작... (데이터베이스 복구됨)');
+            characterArray.forEach((character, index) => {
+                console.log(`📸 ${index + 1}/${characterArray.length} 캐릭터 사진 로드: ${character.id}`);
+                loadCharacterPhotoPreview(character.id);
+                loadCharacterProfileImage(character.id);
+            });
+            console.log('✅ 모든 캐릭터 사진 로드 함수 호출 완료');
         }
 
         // 🔄 스키마 호환성을 위한 헬퍼 함수들 (v2.0 업그레이드)
