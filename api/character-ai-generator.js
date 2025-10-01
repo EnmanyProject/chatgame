@@ -3137,34 +3137,20 @@ async function generateCharacterPromptWithOpenAI(characterData, model = 'gpt-4o'
   // 캐릭터 데이터를 안전하게 요약해서 프롬프트에 포함
   const characterSummary = createCharacterSummary(characterData);
 
-  const userPrompt = `다음 캐릭터에 대한 ${style} 스타일의 상세한 프롬프트를 작성해주세요.
+  const userPrompt = `다음 캐릭터 데이터를 바탕으로 간결한 캐릭터 프롬프트를 작성해주세요.
 
-캐릭터 데이터:
 ${characterSummary}
 
 요구사항:
-- 제공된 캐릭터 데이터의 모든 주요 특성을 포함해주세요
-- 모든 수치 (감정지능, 자신감, 신비로움 등)를 구체적으로 언급
-- 배열 항목들 (매력포인트, 취미, 대화주제 등)을 개별적으로 언급
-- 외모, 성격, 대화스타일, 과거경험을 균형있게 다뤄주세요
-- MBTI 특성을 자연스럽게 반영
-- 한국어로 자연스럽고 매력적으로 작성
-
-작성 형식:
-1. 캐릭터 개요 (기본정보, 핵심 특징)
-2. 성격과 심리적 특성 (MBTI 특성, 감정지능, 취약점 등)
-3. 외모와 매력 포인트 (헤어, 체형, 스타일, 특징적 요소)
-4. 대화 스타일과 소통 방식 (말투, 습관, 반응 패턴)
-5. 취미와 관심사
-6. 과거 경험과 관계 패턴
-7. 가치관과 미래 목표
-
-목표 길이: 3000-5000자 정도로 충실하면서도 읽기 좋게 작성해주세요.`;
+- 모든 특성을 자연스럽게 포함
+- MBTI와 수치 데이터 반영
+- 한국어로 매력적이고 읽기 쉽게 작성
+- 1000-2000자 분량`;
 
   try {
-    // 타임아웃을 위한 AbortController 설정 (5초)
+    // 타임아웃을 위한 AbortController 설정 (7초)
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 7000);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -3185,7 +3171,7 @@ ${characterSummary}
             content: userPrompt
           }
         ],
-        max_tokens: length === 'short' ? 800 : length === 'medium' ? 1200 : 1500,
+        max_tokens: length === 'short' ? 600 : length === 'medium' ? 900 : 1200,
         temperature: 0.7
       })
     });
