@@ -11192,9 +11192,9 @@
         // 📸 서버에 사진 업로드 (V2.3 renamed)
         async function uploadPhotoToServerV2(photoData, category) {
             try {
-                console.log(`📡 [V2.3] 서버에 ${category} 사진 업로드 중...`);
-                console.log('🔧 [V2.3] 사용 중인 API: character-ai-generator');
-                console.log('❌ [V2.3] character-photo-manager 사용 안함!');
+                console.log(`📡 [V3.0-SAFE] 안전한 개별 파일 업로드: ${category}`);
+                console.log('🔧 [V3.0] 새로운 API: upload_single_photo');
+                console.log('📏 사진 크기:', Math.round(photoData.length / 1024), 'KB');
 
                 const apiUrl = '/api/character-ai-generator';
                 console.log('🌐 [V2.3] 업로드 URL:', apiUrl);
@@ -11205,7 +11205,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        action: 'upload_photo',
+                        action: 'upload_single_photo',
                         character_id: currentCharacterId,
                         category: category,
                         photo_data: photoData

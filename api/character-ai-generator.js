@@ -636,6 +636,79 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // 📸 간단한 개별 사진 업로드 (안전한 방식)
+    if (action === 'upload_single_photo') {
+      const { character_id, category, photo_data } = req.body;
+      console.log('📸 간단한 사진 업로드:', character_id, category);
+
+      try {
+        // 기본 검증
+        if (!character_id || !category || !photo_data) {
+          return res.status(400).json({
+            success: false,
+            message: '필수 데이터가 누락되었습니다.'
+          });
+        }
+
+        // 크기 검증
+        const photoSizeBytes = (photo_data.length * 3) / 4;
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (photoSizeBytes > maxSize) {
+          return res.status(413).json({
+            success: false,
+            message: `파일이 너무 큽니다. 최대 5MB (현재: ${Math.round(photoSizeBytes / (1024 * 1024))}MB)`
+          });
+        }
+
+        // 개별 캐릭터 사진 파일로 저장
+        const filename = `data/photos/${character_id}_${category}_${Date.now()}.json`;
+        const photoRecord = {
+          character_id,
+          category,
+          photo_data,
+          uploaded_at: new Date().toISOString(),
+          file_size: photoSizeBytes
+        };
+
+        // GitHub에 개별 파일로 저장
+        console.log('💾 개별 파일로 저장:', filename);
+        const content = JSON.stringify(photoRecord, null, 2);
+        const base64Content = Buffer.from(content).toString('base64');
+
+        const octokit = new (require('@octokit/rest').Octokit)({
+          auth: process.env.GITHUB_TOKEN
+        });
+
+        await octokit.repos.createOrUpdateFileContents({
+          owner: 'EnmanyProject',
+          repo: 'chatgame',
+          path: filename,
+          message: `Add photo for ${character_id} - ${category}`,
+          content: base64Content,
+          branch: 'main'
+        });
+
+        console.log('✅ 사진 업로드 성공');
+        return res.status(200).json({
+          success: true,
+          message: '사진이 성공적으로 업로드되었습니다.',
+          data: {
+            character_id,
+            category,
+            filename,
+            uploaded_at: photoRecord.uploaded_at
+          }
+        });
+
+      } catch (error) {
+        console.error('❌ 간단한 사진 업로드 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: error.message || '업로드 실패'
+        });
+      }
+    }
+
     // 🔧 사진 데이터베이스 복구 기능
     if (action === 'repair_photo_database') {
       console.log('🔧 사진 데이터베이스 복구 시작...');
@@ -709,8 +782,29 @@ module.exports = async function handler(req, res) {
           });
         }
 
-        // 사진 데이터 로드
-        const photosData = await loadPhotosFromGitHub();
+        // 사진 데이터 로드 - 개별 캐릭터 파일 방식으로 변경
+        console.log('📂 개별 캐릭터 사진 파일 로드 시도...');
+
+        let photosData;
+        try {
+          photosData = await loadPhotosFromGitHub();
+          console.log('✅ 기존 통합 파일 로드 성공');
+        } catch (loadError) {
+          console.log('❌ 통합 파일 로드 실패:', loadError.message);
+          console.log('🔄 개별 파일 방식으로 전환...');
+
+          // 빈 구조로 초기화
+          photosData = {
+            photos: {},
+            metadata: {
+              version: "2.0.0",
+              total_photos: 0,
+              created: new Date().toISOString(),
+              last_updated: new Date().toISOString(),
+              storage_mode: "individual_files"
+            }
+          };
+        }
 
         // 캐릭터 사진 데이터 초기화 (없는 경우)
         if (!photosData.photos[character_id]) {
@@ -907,12 +1001,13 @@ module.exports = async function handler(req, res) {
     console.log('  - list_all_photos');
     console.log('  - get_character_photos');
     console.log('  - upload_photo');
+    console.log('  - upload_single_photo');
     console.log('  - delete_photo');
     console.log('  - repair_photo_database');
 
     return res.status(400).json({
       success: false,
-      message: 'Unknown action. Available: list_characters, save_character, delete_character, reset_all_characters, generate_character, auto_complete_character, generate_character_profile, generate_complete_character_with_profile, list_all_photos, get_character_photos, upload_photo, delete_photo, repair_photo_database',
+      message: 'Unknown action. Available: list_characters, save_character, delete_character, reset_all_characters, generate_character, auto_complete_character, generate_character_profile, generate_complete_character_with_profile, list_all_photos, get_character_photos, upload_photo, upload_single_photo, delete_photo, repair_photo_database',
       received_action: action,
       action_type: typeof action,
       debug_info: debugInfo,
