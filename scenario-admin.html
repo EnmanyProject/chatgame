@@ -10842,9 +10842,17 @@
 
         // 🔄 캐릭터 편집 함수 v2.0 (새로운 스키마 지원)
         function editCharacter(characterId) {
-            const character = characters[characterId];
+            // 🔧 데이터 구조에 따른 캐릭터 조회 (v4.1.0 구조 지원)
+            let character = null;
+            if (characters && characters.characters) {
+                character = characters.characters[characterId];
+            } else if (characters && characters[characterId]) {
+                character = characters[characterId];
+            }
+
             if (!character) {
                 console.error('캐릭터를 찾을 수 없습니다:', characterId);
+                console.log('🔍 전체 캐릭터 데이터 구조:', characters);
                 return;
             }
 
@@ -10910,42 +10918,8 @@
             safeSetValue('characterId', characterId);
 
             // ✅ 모든 폼 필드는 위의 fillCharacterForm(character) 호출로 이미 처리됨
+            // (체크박스, 라디오 버튼, 셀렉트박스 포함)
             console.log('✅ 편집 모드: fillCharacterForm v2.0으로 모든 데이터 채움 완료');
-
-            // 🔄 체크박스 초기화 (편집 전 모든 선택 해제)
-            document.querySelectorAll('input[name="personality"]').forEach(checkbox => checkbox.checked = false);
-            document.querySelectorAll('input[name="hobbies"]').forEach(checkbox => checkbox.checked = false);
-            document.querySelectorAll('input[name="charm_points"]').forEach(checkbox => checkbox.checked = false);
-            console.log('🔄 체크박스 초기화 완료');
-
-            // 🎯 체크박스 선택 복원 (성격특성, 취미) - v2.0 스키마 호환
-            // 성격특성 복원 (v1.0: personality_traits, v2.0: psychological_traits.personality)
-            const personalityTraits = character.personality_traits ||
-                                    character.psychological_traits?.personality || [];
-
-            if (Array.isArray(personalityTraits) && personalityTraits.length > 0) {
-                personalityTraits.forEach(trait => {
-                    const checkbox = document.querySelector(`input[name="personality"][value="${trait}"]`);
-                    if (checkbox) {
-                        checkbox.checked = true;
-                        console.log(`✅ 성격특성 체크 (v2.0 호환): ${trait}`);
-                    }
-                });
-            }
-
-            // 취미 복원 (v1.0: hobbies, v2.0: appeal_profile.hobbies)
-            const hobbies = character.hobbies ||
-                           character.appeal_profile?.hobbies || [];
-
-            if (Array.isArray(hobbies) && hobbies.length > 0) {
-                hobbies.forEach(hobby => {
-                    const checkbox = document.querySelector(`input[name="hobbies"][value="${hobby}"]`);
-                    if (checkbox) {
-                        checkbox.checked = true;
-                        console.log(`✅ 취미 체크 (v2.0 호환): ${hobby}`);
-                    }
-                });
-            }
 
             // 모달 표시
             document.getElementById('characterModal').style.display = 'block';
@@ -16033,6 +16007,9 @@
             console.log('📝 폼 데이터 채우기 시작:', character);
             console.log('🔍 캐릭터 데이터 구조 분석:', Object.keys(character));
 
+            // 🔄 0단계: 모든 클릭형 필드 초기화
+            resetAllClickableFields();
+
             // 🎯 1단계: 기본 정보 처리 (새로운 스키마 + 기존 스키마 호환)
             fillBasicInfo(character);
 
@@ -16048,7 +16025,104 @@
             // 🎯 5단계: 대화 스타일 처리
             fillConversationStyle(character);
 
+            // 🎯 6단계: 클릭형 필드들 복원
+            restoreClickableFields(character);
+
             console.log('✅ 폼 데이터 채우기 완료');
+        }
+
+        // 🔄 모든 클릭형 필드 초기화 함수
+        function resetAllClickableFields() {
+            console.log('🔄 모든 클릭형 필드 초기화 시작...');
+
+            // 체크박스 초기화
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => checkbox.checked = false);
+
+            // 특정 이름의 체크박스들 초기화
+            document.querySelectorAll('input[name="charm_points"]').forEach(checkbox => checkbox.checked = false);
+            document.querySelectorAll('input[name="hobbies"]').forEach(checkbox => checkbox.checked = false);
+            document.querySelectorAll('input[name="personality"]').forEach(checkbox => checkbox.checked = false);
+
+            // MBTI 버튼 초기화
+            document.querySelectorAll('.mbti-btn').forEach(btn => btn.classList.remove('selected'));
+
+            // 성격 특성 버튼 초기화
+            document.querySelectorAll('.trait-btn').forEach(btn => btn.classList.remove('selected'));
+
+            // 관계 설정 버튼 초기화
+            document.querySelectorAll('.relationship-btn').forEach(btn => btn.classList.remove('selected'));
+
+            // 기타 선택 버튼들 초기화
+            document.querySelectorAll('.btn.selected').forEach(btn => btn.classList.remove('selected'));
+
+            console.log('✅ 모든 클릭형 필드 초기화 완료');
+        }
+
+        // 🎯 클릭형 필드들 복원 함수
+        function restoreClickableFields(character) {
+            console.log('🎯 클릭형 필드들 복원 시작...');
+
+            // 1. MBTI 버튼 복원
+            const mbti = character.basic_info?.mbti || character.mbti;
+            if (mbti) {
+                const mbtiBtn = document.querySelector(`.mbti-btn[data-mbti="${mbti}"]`);
+                if (mbtiBtn) {
+                    mbtiBtn.classList.add('selected');
+                    document.getElementById('charMbti').value = mbti;
+                    console.log('✅ MBTI 버튼 선택:', mbti);
+                }
+            }
+
+            // 2. 관계 설정 버튼 복원
+            const relationship = character.relationship;
+            if (relationship) {
+                const relBtn = document.querySelector(`.relationship-btn[data-rel="${relationship}"]`);
+                if (relBtn) {
+                    relBtn.classList.add('selected');
+                    document.getElementById('charRelationship').value = relationship;
+                    console.log('✅ 관계 설정 버튼 선택:', relationship);
+                }
+            }
+
+            // 3. 성격 특성 버튼 복원 (여러 개 선택 가능)
+            const personalityTraits = character.personality_traits ||
+                                   character.psychological_traits?.personality ||
+                                   character.appeal_profile?.personality_traits || [];
+
+            if (Array.isArray(personalityTraits) && personalityTraits.length > 0) {
+                personalityTraits.forEach(trait => {
+                    const traitBtn = document.querySelector(`.trait-btn[data-trait="${trait}"]`);
+                    if (traitBtn) {
+                        traitBtn.classList.add('selected');
+                        console.log('✅ 성격 특성 버튼 선택:', trait);
+                    }
+                });
+            }
+
+            // 4. 체크박스 복원 (매력 포인트, 취미)
+            const charmPoints = character.appeal_profile?.charm_points || [];
+            if (Array.isArray(charmPoints)) {
+                charmPoints.forEach(point => {
+                    const checkbox = document.querySelector(`input[name="charm_points"][value="${point}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        console.log('✅ 매력 포인트 체크박스 선택:', point);
+                    }
+                });
+            }
+
+            const hobbies = character.hobbies || character.appeal_profile?.hobbies || [];
+            if (Array.isArray(hobbies)) {
+                hobbies.forEach(hobby => {
+                    const checkbox = document.querySelector(`input[name="hobbies"][value="${hobby}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        console.log('✅ 취미 체크박스 선택:', hobby);
+                    }
+                });
+            }
+
+            console.log('✅ 클릭형 필드들 복원 완료');
         }
 
         // 🔹 기본 정보 채우기 (새로운 basic_info 스키마 + 기존 직접 필드)
