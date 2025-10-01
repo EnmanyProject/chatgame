@@ -3054,9 +3054,9 @@ ${characterSummary}
 - 위에 제공된 캐릭터 데이터의 모든 세부사항을 빠짐없이 포함해야 합니다
 - 모든 수치 (감정지능, 자신감, 신비로움 등)를 구체적으로 언급하세요
 - 모든 배열 항목들 (매력포인트, 취미, 대화주제 등)을 개별적으로 언급하세요
-- 외모 세부사항 (헤어, 눈, 체형, 스타일 등)을 정확히 반영하세요
-- 대화 스타일과 말 습관들을 구체적으로 표현하세요
-- 과거 경험과 선호도들을 자연스럽게 녹여 넣으세요
+- 외모 특징 (헤어스타일, 눈 모양, 체형, 패션스타일 등)을 우아하게 표현하세요
+- 대화 스타일과 매력적인 의사소통 방식을 구체적으로 표현하세요
+- 과거 경험과 인생 이력을 자연스럽게 녹여 넣으세요
 - 심리적 특성과 가치관을 깊이 있게 다루세요
 
 작성 스타일:
@@ -3270,15 +3270,15 @@ MBTI: ${basic.mbti || '미정'}
 감정지능: ${appeal.emotional_intelligence || '보통'}점 (10점 만점)
 자신감: ${appeal.confidence_level || '보통'}점 (10점 만점)
 신비로움: ${appeal.mystery_factor || '보통'}점 (10점 만점)
-성적 호기심: ${appeal.sexual_curiosity || '보통'}점 (10점 만점)
-성적 편안함: ${appeal.sexual_comfort || '보통'}점 (10점 만점)
+호기심 정도: ${appeal.sexual_curiosity || '보통'}점 (10점 만점)
+개방성 정도: ${appeal.sexual_comfort || '보통'}점 (10점 만점)
 취미: ${appeal.hobbies ? translateToKorean(appeal.hobbies) : '독서, 음악감상'}
 
 ==== 👄 외모적 매력 ====
 헤어스타일: ${translateToKorean(physical.appearance?.hair) || '자연스러운 헤어'}
 눈: ${translateToKorean(physical.appearance?.eyes) || '따뜻한 눈'}
 체형: ${translateToKorean(physical.appearance?.body) || '자연스러운 체형'}
-가슴 사이즈: ${physical.appearance?.bust || '자연스러운'}컵
+체격: ${physical.appearance?.bust || '자연스러운'} 타입
 허리/힙: ${translateToKorean(physical.appearance?.waist_hip) || '균형잡힌'}
 스타일: ${translateToKorean(physical.appearance?.style) || '편안한 스타일'}
 
@@ -3290,14 +3290,14 @@ MBTI: ${basic.mbti || '미정'}
 핵심 욕구: ${psychological.core_desires ? translateToKorean(psychological.core_desires) : '의미있는 관계'}
 취약점: ${psychological.vulnerabilities ? translateToKorean(psychological.vulnerabilities) : '완벽주의'}
 가치관: ${translateToKorean(psychological.values) || '사랑과 가족'}
-성적 자유도: ${psychological.sexual_freedom || '보통'}점 (10점 만점)
+개방성 수준: ${psychological.sexual_freedom || '보통'}점 (10점 만점)
 편안함 수준: ${translateToKorean(psychological.boundaries?.comfort_level) || '가벼운 플러팅'}
 발전 속도: ${translateToKorean(psychological.boundaries?.escalation_pace) || '천천히'}
-성적 톤: ${translateToKorean(psychological.boundaries?.sexual_tone_band) || '보통'}
+소통 톤: ${translateToKorean(psychological.boundaries?.sexual_tone_band) || '보통'}
 
 ==== 💬 대화 역학 ====
 말투: ${translateToKorean(conversation.speech_style) || '자연스럽고 친근함'}
-플러팅 패턴: ${conversation.flirting_patterns ? translateToKorean(conversation.flirting_patterns) : '은은한 티징'}
+매력적 대화법: ${conversation.flirting_patterns ? translateToKorean(conversation.flirting_patterns) : '은은한 매력 어필'}
 대화 주제: ${conversation.conversation_hooks ? translateToKorean(conversation.conversation_hooks) : '일상적인 주제들'}
 말 습관: ${conversation.speech_habits ? translateToKorean(conversation.speech_habits) : '자연스러운 말투'}
 어휘 수준: ${translateToKorean(conversation.vocabulary_register) || '일상적'}
@@ -3312,8 +3312,8 @@ MBTI: ${basic.mbti || '미정'}
 ==== 💕 과거 경험 ====
 연애 경험: ${translateToKorean(pastHistory.relationship_experience) || '초보'}
 남자친구 수: ${pastHistory.boyfriend_count || '2-3'}명
-선호하는 스킨십: ${pastHistory.preferred_skinship ? translateToKorean(pastHistory.preferred_skinship) : '손잡기, 포옹'}
-첫 경험 나이: ${translateToKorean(pastHistory.first_experience_age) || '10대 후반'}
+선호하는 친밀감 표현: ${pastHistory.preferred_skinship ? translateToKorean(pastHistory.preferred_skinship) : '손잡기, 포옹'}
+인생 경험 시기: ${translateToKorean(pastHistory.first_experience_age) || '10대 후반'}
 
 ==== 🎁 선호도 ====
 좋아하는 선물: ${characterData.favorite_gifts ? translateToKorean(characterData.favorite_gifts) : '꽃, 초콜릿'}
