@@ -3282,30 +3282,42 @@ function generateFallbackPrompt(characterData, style, length) {
   const basic = characterData.basic_info || {};
   const appeal = characterData.appeal_profile || {};
   const conversation = characterData.conversation_dynamics || {};
+  const physical = characterData.physical_allure || {};
 
   const name = basic.name || '미정';
   const age = basic.age || '20대';
   const mbti = basic.mbti || 'ISFJ';
-  const occupation = basic.occupation || '학생';
+  const occupation = translateToKorean(basic.occupation) || '학생';
 
-  // 스타일별 템플릿
+  // Korean translations applied to all fields
+  const seductionStyle = translateToKorean(appeal.seduction_style) || '따뜻하고 배려심 많은';
+  const speechStyle = translateToKorean(conversation.speech_style) || '자연스럽고 친근한';
+  const hobbies = appeal.hobbies ? translateToKorean(appeal.hobbies) : '독서와 음악감상';
+  const charmPoints = appeal.charm_points ? translateToKorean(appeal.charm_points) : '자연스러운 매력';
+  const hair = translateToKorean(physical.appearance?.hair) || '자연스러운 헤어';
+  const eyes = translateToKorean(physical.appearance?.eyes) || '따뜻한 눈';
+  const body = translateToKorean(physical.appearance?.body) || '균형잡힌 체형';
+
+  // 스타일별 템플릿 (Korean translations applied)
   const templates = {
-    comprehensive: `${name}는 ${age}세의 ${mbti} 성격을 가진 매력적인 여성입니다. ${occupation} 분야에서 활동하며, ${appeal.seduction_style || '따뜻하고 배려심 많은'} 매력을 가지고 있습니다.
+    comprehensive: `${name}는 ${age}세의 ${mbti} 성격을 가진 매력적인 여성입니다. ${occupation} 분야에서 활동하며, ${seductionStyle} 매력을 가지고 있습니다.
 
-그녀의 대화 스타일은 ${conversation.speech_style || '자연스럽고 친근한'} 방식이며, ${Array.isArray(conversation.flirting_patterns) ? conversation.flirting_patterns.join('과 ') : '은은한 티징'}을 통해 상대방과 소통합니다. ${mbti} 특성에 따라 ${getMBTICharacteristics(mbti)}한 면모를 보입니다.
+외모적으로는 ${hair}, ${eyes}, ${body}의 특징을 가지고 있으며, ${charmPoints} 등의 매력 포인트가 있습니다.
 
-관계에서 중요하게 생각하는 것은 ${characterData.psychological_depth?.values || '진정성과 배려'}이며, ${Array.isArray(appeal.hobbies) ? appeal.hobbies.join(', ') : '독서와 음악감상'} 등의 취미를 즐깁니다.`,
+그녀의 대화 스타일은 ${speechStyle} 방식이며, ${Array.isArray(conversation.flirting_patterns) ? translateToKorean(conversation.flirting_patterns) : '은은한 티징'}을 통해 상대방과 소통합니다. ${mbti} 특성에 따라 ${getMBTICharacteristics(mbti)}한 면모를 보입니다.
+
+관계에서 중요하게 생각하는 것은 ${translateToKorean(characterData.psychological_depth?.values) || '진정성과 배려'}이며, ${hobbies} 등의 취미를 즐깁니다.`,
 
     roleplay: `안녕하세요, 저는 ${name}이에요! ${age}세이고 ${occupation}을 하고 있어요. ${mbti} 성격이라서 ${getMBTICharacteristics(mbti)}한 편이에요.
 
-저는 ${appeal.seduction_style || '따뜻하고 배려심 많은'} 성격으로, 대화할 때 ${conversation.speech_style || '자연스럽고 친근하게'} 말하는 편이에요. ${Array.isArray(appeal.hobbies) ? appeal.hobbies.join('와 ') : '독서와 음악감상'}을 좋아하고, 특히 ${Array.isArray(conversation.conversation_hooks) ? conversation.conversation_hooks[0] : '일상 이야기'}에 대해 이야기하는 걸 즐겨요.`,
+저는 ${seductionStyle} 성격으로, 대화할 때 ${speechStyle} 말하는 편이에요. ${hobbies}을 좋아하고, 특히 ${Array.isArray(conversation.conversation_hooks) ? translateToKorean(conversation.conversation_hooks[0]) : '일상 이야기'}에 대해 이야기하는 걸 즐겨요.`,
 
     psychological: `${name}의 심리적 프로필:
 
 핵심 성격: ${mbti} 타입으로 ${getMBTICharacteristics(mbti)}한 특성을 보입니다.
-내면의 욕구: ${Array.isArray(characterData.psychological_depth?.core_desires) ? characterData.psychological_depth.core_desires.join(', ') : '의미있는 관계와 개인적 성장'}
+내면의 욕구: ${Array.isArray(characterData.psychological_depth?.core_desires) ? translateToKorean(characterData.psychological_depth.core_desires) : '의미있는 관계와 개인적 성장'}
 감정적 특성: ${appeal.emotional_intelligence || '7'}/10의 감정지능을 가지며, ${appeal.confidence_level || '5'}/10의 자신감 수준을 보입니다.
-대인관계 패턴: ${conversation.speech_style || '따뜻하고 배려심 있는'} 소통을 선호하며, ${Array.isArray(conversation.flirting_patterns) ? conversation.flirting_patterns.join(', ') : '은은한 매력 어필'}을 통해 관계를 발전시킵니다.`
+대인관계 패턴: ${speechStyle} 소통을 선호하며, ${Array.isArray(conversation.flirting_patterns) ? translateToKorean(conversation.flirting_patterns) : '은은한 매력 어필'}을 통해 관계를 발전시킵니다.`
   };
 
   let basePrompt = templates[style] || templates.comprehensive;
