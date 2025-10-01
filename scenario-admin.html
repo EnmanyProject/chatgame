@@ -4263,9 +4263,9 @@
                     <div class="form-group">
                         <label for="promptGenerationModel">🤖 AI 모델 선택</label>
                         <select id="promptGenerationModel">
-                            <option value="gpt-4o" selected>GPT-4o (권장)</option>
-                            <option value="gpt-4o-mini">GPT-4o Mini (빠름)</option>
-                            <option value="gpt-4">GPT-4</option>
+                            <option value="llama-3.1-8b-instant" selected>Llama 3.1 8B (권장, 고속)</option>
+                            <option value="llama-3.1-70b-versatile">Llama 3.1 70B (고성능)</option>
+                            <option value="mixtral-8x7b-32768">Mixtral 8x7B (다목적)</option>
                         </select>
                     </div>
 
@@ -6238,7 +6238,7 @@
             const length = document.getElementById('promptLength').value;
 
             try {
-                console.log('🤖 OpenAI API를 통한 프롬프트 생성 시작...');
+                console.log('🚀 Groq API를 통한 프롬프트 생성 시작...');
                 addPromptLog('프롬프트 생성 시작', 'info');
 
                 // 버튼 비활성화
