@@ -759,7 +759,67 @@ module.exports = async function handler(req, res) {
             });
 
             console.log(`📁 파일 응답 상태: ${fileResponse.status}`);
+            console.log(`📁 파일 size: ${fileResponse.data.size}`);
+            console.log(`📁 파일 truncated: ${fileResponse.data.truncated}`);
             console.log(`📁 파일 content 길이: ${fileResponse.data.content ? fileResponse.data.content.length : 'no content'}`);
+
+            // GitHub API는 1MB 이상 파일을 truncate함 - 이 경우 Git Blob API 사용
+            if (fileResponse.data.truncated || fileResponse.data.size > 1000000) {
+              console.log(`⚠️ 파일이 너무 큼 (${fileResponse.data.size} bytes) 또는 잘림 - Git Blob API 사용`);
+
+              // Git Blob API로 전체 파일 내용 가져오기
+              const blobResponse = await octokit.git.getBlob({
+                owner: 'EnmanyProject',
+                repo: 'chatgame',
+                file_sha: fileResponse.data.sha
+              });
+
+              console.log(`📦 Blob API 응답 크기: ${blobResponse.data.content.length}`);
+              const content = Buffer.from(blobResponse.data.content, 'base64').toString();
+              console.log(`📄 Blob 디코딩된 content 길이: ${content.length}`);
+              console.log(`📄 Blob content 미리보기: ${content.substring(0, 100)}...`);
+
+              const photoData = JSON.parse(content);
+              console.log(`📊 Blob 파싱된 데이터:`, {
+                hasCategory: !!photoData.category,
+                category: photoData.category,
+                hasPhotoData: !!photoData.photo_data,
+                photoDataLength: photoData.photo_data ? photoData.photo_data.length : 0
+              });
+
+              // 카테고리별로 분류 - Blob API 버전
+              if (photoData.category === 'profile') {
+                console.log(`🎯 프로필 사진 발견! (Blob API) 파일: ${file.name}`);
+                console.log(`🎯 설정 전 characterPhotos.photos.profile:`, characterPhotos.photos.profile);
+
+                characterPhotos.photos.profile = {
+                  id: file.name,
+                  data: photoData.photo_data,
+                  uploaded_at: photoData.uploaded_at
+                };
+
+                console.log(`🎯 설정 후 characterPhotos.photos.profile:`, {
+                  id: characterPhotos.photos.profile.id,
+                  hasData: !!characterPhotos.photos.profile.data,
+                  dataLength: characterPhotos.photos.profile.data ? characterPhotos.photos.profile.data.length : 0,
+                  uploaded_at: characterPhotos.photos.profile.uploaded_at
+                });
+                console.log(`✅ 프로필 사진 설정 완료 (Blob API): ${file.name}`);
+              } else if (characterPhotos.photos[photoData.category]) {
+                characterPhotos.photos[photoData.category].push({
+                  id: file.name,
+                  data: photoData.photo_data,
+                  uploaded_at: photoData.uploaded_at
+                });
+                console.log(`✅ ${photoData.category} 사진 추가 완료 (Blob API): ${file.name}`);
+              } else {
+                console.log(`⚠️ 알 수 없는 카테고리 (Blob API): ${photoData.category} (파일: ${file.name})`);
+              }
+
+              characterPhotos.photo_count++;
+              console.log(`📊 현재 총 사진 수 (Blob API): ${characterPhotos.photo_count}`);
+              continue; // 다음 파일로 넘어감
+            }
 
             const content = Buffer.from(fileResponse.data.content, 'base64').toString();
             console.log(`📄 디코딩된 content 길이: ${content.length}`);
@@ -821,7 +881,7 @@ module.exports = async function handler(req, res) {
           profileKeys: characterPhotos.photos.profile ? Object.keys(characterPhotos.photos.profile) : 'no keys'
         });
 
-        // 처리 요약 정보 생성
+        // 처리 요약 정보 생성 - Git Blob API 지원
         const processing_summary = [];
         for (const file of photoFiles) {
           try {
@@ -830,7 +890,23 @@ module.exports = async function handler(req, res) {
               repo: 'chatgame',
               path: file.path
             });
-            const content = Buffer.from(fileResponse.data.content, 'base64').toString();
+
+            let content;
+            let usedBlobAPI = false;
+
+            // 큰 파일의 경우 Git Blob API 사용
+            if (fileResponse.data.truncated || fileResponse.data.size > 1000000) {
+              const blobResponse = await octokit.git.getBlob({
+                owner: 'EnmanyProject',
+                repo: 'chatgame',
+                file_sha: fileResponse.data.sha
+              });
+              content = Buffer.from(blobResponse.data.content, 'base64').toString();
+              usedBlobAPI = true;
+            } else {
+              content = Buffer.from(fileResponse.data.content, 'base64').toString();
+            }
+
             const photoData = JSON.parse(content);
 
             processing_summary.push({
@@ -838,7 +914,10 @@ module.exports = async function handler(req, res) {
               status: 'success',
               category: photoData.category,
               has_photo_data: !!photoData.photo_data,
-              photo_data_length: photoData.photo_data ? photoData.photo_data.length : 0
+              photo_data_length: photoData.photo_data ? photoData.photo_data.length : 0,
+              file_size: fileResponse.data.size,
+              used_blob_api: usedBlobAPI,
+              truncated: fileResponse.data.truncated
             });
           } catch (summaryError) {
             processing_summary.push({
