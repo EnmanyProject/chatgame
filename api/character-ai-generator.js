@@ -346,11 +346,11 @@ module.exports = async function handler(req, res) {
         });
       }
 
-      try {
-        // OpenAI 전송용 안전한 구간만 추출 (민감한 필드 완전 제외)
-        const safeCharacterData = extractSafeDataForOpenAI(character_data);
-        console.log('🎯 안전한 구간만 추출 완료 - 민감한 필드 제외됨');
+      // OpenAI 전송용 안전한 구간만 추출 (민감한 필드 완전 제외)
+      const safeCharacterData = extractSafeDataForOpenAI(character_data);
+      console.log('🎯 안전한 구간만 추출 완료 - 민감한 필드 제외됨');
 
+      try {
         // OpenAI API를 통한 프롬프트 생성
         const prompt = await generateCharacterPromptWithOpenAI(safeCharacterData, model, style, length, system_prompt);
 
