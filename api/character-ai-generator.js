@@ -3039,7 +3039,7 @@ ${characterSummary}
             content: userPrompt
           }
         ],
-        max_tokens: length === 'short' ? 300 : length === 'medium' ? 500 : 800,
+        max_tokens: length === 'short' ? 1200 : length === 'medium' ? 2000 : 3000,
         temperature: 0.7
       })
     });
@@ -3074,41 +3074,78 @@ function createCharacterSummary(characterData) {
   const conversation = characterData.conversation_dynamics || {};
   const pastHistory = characterData.past_history || {};
 
-  let summary = `이름: ${basic.name || '미정'}
+  let summary = `==== 📋 기본 정보 ====
+이름: ${basic.name || '미정'}
 나이: ${basic.age || '미정'}세
 MBTI: ${basic.mbti || '미정'}
 직업: ${basic.occupation || '미정'}
 성별: ${basic.gender || '여성'}
 
-성격 특징:
-- 매력 스타일: ${appeal.seduction_style || '따뜻하고 배려심 많음'}
-- 매력 포인트: ${Array.isArray(appeal.charm_points) ? appeal.charm_points.join(', ') : '자연스러운 매력'}
-- 감정지능: ${appeal.emotional_intelligence || '보통'}/10
-- 자신감: ${appeal.confidence_level || '보통'}/10
-- 신비로움: ${appeal.mystery_factor || '보통'}/10
+==== ✨ 매력 프로필 ====
+매력 스타일: ${appeal.seduction_style || '따뜻하고 배려심 많음'}
+매력 포인트: ${Array.isArray(appeal.charm_points) ? appeal.charm_points.join(', ') : '자연스러운 매력'}
+감정지능: ${appeal.emotional_intelligence || '보통'}/10
+자신감: ${appeal.confidence_level || '보통'}/10
+신비로움: ${appeal.mystery_factor || '보통'}/10
+성적 호기심: ${appeal.sexual_curiosity || '보통'}/10
+성적 편안함: ${appeal.sexual_comfort || '보통'}/10
+취미: ${Array.isArray(appeal.hobbies) ? appeal.hobbies.join(', ') : '독서, 음악감상'}
 
-외모적 특징:
-- 헤어: ${physical.appearance?.hair || '자연스러운 헤어'}
-- 눈: ${physical.appearance?.eyes || '따뜻한 눈'}
-- 체형: ${physical.appearance?.body || '자연스러운 체형'}
-- 스타일: ${physical.appearance?.style || '편안한 스타일'}
+==== 👄 외모적 매력 ====
+헤어스타일: ${physical.appearance?.hair || '자연스러운 헤어'}
+눈: ${physical.appearance?.eyes || '따뜻한 눈'}
+체형: ${physical.appearance?.body || '자연스러운 체형'}
+가슴 사이즈: ${physical.appearance?.bust || '자연스러운'}
+허리/힙: ${physical.appearance?.waist_hip || '균형잡힌'}
+스타일: ${physical.appearance?.style || '편안한 스타일'}
 
-심리적 특성:
-- 핵심 욕구: ${Array.isArray(psychological.core_desires) ? psychological.core_desires.join(', ') : '의미있는 관계'}
-- 취약점: ${Array.isArray(psychological.vulnerabilities) ? psychological.vulnerabilities.join(', ') : '완벽주의'}
-- 가치관: ${psychological.values || '사랑과 가족'}
+특징적 요소: ${Array.isArray(physical.feature_elements) ? physical.feature_elements.join(', ') : '자연스러운 매력'}
+감각적 습관: ${Array.isArray(physical.sensual_habits) ? physical.sensual_habits.join(', ') : '자연스러운 행동'}
+바디 랭귀지: ${Array.isArray(physical.body_language) ? physical.body_language.join(', ') : '편안한 몸짓'}
 
-대화 스타일:
-- 말투: ${conversation.speech_style || '자연스럽고 친근함'}
-- 플러팅 패턴: ${Array.isArray(conversation.flirting_patterns) ? conversation.flirting_patterns.join(', ') : '은은한 티징'}
-- 대화 주제: ${Array.isArray(conversation.conversation_hooks) ? conversation.conversation_hooks.join(', ') : '일상적인 주제들'}
+==== 🧠 심리적 깊이 ====
+핵심 욕구: ${Array.isArray(psychological.core_desires) ? psychological.core_desires.join(', ') : '의미있는 관계'}
+취약점: ${Array.isArray(psychological.vulnerabilities) ? psychological.vulnerabilities.join(', ') : '완벽주의'}
+가치관: ${psychological.values || '사랑과 가족'}
+성적 자유도: ${psychological.sexual_freedom || '보통'}/10
+편안함 수준: ${psychological.boundaries?.comfort_level || '가벼운 플러팅'}
+발전 속도: ${psychological.boundaries?.escalation_pace || '천천히'}
+성적 톤: ${psychological.boundaries?.sexual_tone_band || '보통'}
 
-과거 경험:
-- 연애 경험: ${pastHistory.relationship_experience || '초보'}
-- 선호하는 스킨십: ${Array.isArray(pastHistory.preferred_skinship) ? pastHistory.preferred_skinship.join(', ') : '손잡기, 포옹'}
+==== 💬 대화 역학 ====
+말투: ${conversation.speech_style || '자연스럽고 친근함'}
+플러팅 패턴: ${Array.isArray(conversation.flirting_patterns) ? conversation.flirting_patterns.join(', ') : '은은한 티징'}
+대화 주제: ${Array.isArray(conversation.conversation_hooks) ? conversation.conversation_hooks.join(', ') : '일상적인 주제들'}
+말 습관: ${Array.isArray(conversation.speech_habits) ? conversation.speech_habits.join(', ') : '자연스러운 말투'}
+어휘 수준: ${conversation.vocabulary_register || '일상적'}
+허용 모티프: ${Array.isArray(conversation.allowed_motifs) ? conversation.allowed_motifs.join(', ') : '일반적 주제들'}
+금기 단어: ${Array.isArray(conversation.forbidden_terms) ? conversation.forbidden_terms.join(', ') : '없음'}
 
-취미:
-- ${Array.isArray(appeal.hobbies) ? appeal.hobbies.join(', ') : '독서, 음악감상'}`;
+반응 패턴:
+- 유머에 대한 반응: ${conversation.reaction_tendencies?.humor || '자연스럽게 웃음'}
+- 칭찬에 대한 반응: ${conversation.reaction_tendencies?.compliment || '감사히 받아들임'}
+- 관심 표현 방식: ${conversation.reaction_tendencies?.interest_expression || '열정적으로 공유'}
+
+==== 💕 과거 경험 ====
+연애 경험: ${pastHistory.relationship_experience || '초보'}
+남자친구 수: ${pastHistory.boyfriend_count || '2-3명'}
+선호하는 스킨십: ${Array.isArray(pastHistory.preferred_skinship) ? pastHistory.preferred_skinship.join(', ') : '손잡기, 포옹'}
+첫 경험 나이: ${pastHistory.first_experience_age || '10대 후반'}
+
+==== 🎁 선호도 ====
+좋아하는 선물: ${Array.isArray(characterData.favorite_gifts) ? characterData.favorite_gifts.join(', ') : '꽃, 초콜릿'}
+남성에게 중요한 것: ${Array.isArray(characterData.male_priorities) ? characterData.male_priorities.join(', ') : '유머, 성격'}
+
+==== 🎯 미래 목표 ====
+자산 목표: ${characterData.future_goals?.asset_goal || '안정적인 미래'}
+미래 직업: ${Array.isArray(characterData.future_goals?.future_careers) ? characterData.future_goals.future_careers.join(', ') : '현재 직업 유지'}
+
+==== 📊 메타데이터 ====
+생성일: ${characterData.created_at || '미정'}
+업데이트일: ${characterData.updated_at || '미정'}
+소스: ${characterData.source || '수동 생성'}
+버전: ${characterData.version || '1.0'}
+활성 상태: ${characterData.active ? '활성' : '비활성'}`;
 
   return summary;
 }

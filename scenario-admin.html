@@ -6318,9 +6318,9 @@
         // 캐릭터별 시스템 프롬프트 생성
         function createSystemPromptForCharacter(character, style, length) {
             const lengthGuide = {
-                'short': '200-400자',
-                'medium': '400-600자',
-                'long': '600-1000자'
+                'short': '1000-1500자 (매우 상세하게)',
+                'medium': '1500-2500자 (극도로 상세하게)',
+                'long': '2500-4000자 (모든 세부사항 포함)'
             };
 
             const styleGuide = {
@@ -6330,23 +6330,84 @@
             };
 
             return `당신은 MBTI 기반 캐릭터 분석 전문가입니다.
-주어진 캐릭터 데이터를 바탕으로 ${styleGuide[style]} 프롬프트를 ${lengthGuide[length]} 분량으로 작성해주세요.
+주어진 캐릭터 데이터의 모든 필드값을 빠짐없이 반영하여 ${styleGuide[style]} 프롬프트를 ${lengthGuide[length]} 분량으로 작성해주세요.
 
-캐릭터 정보:
-- 이름: ${character.basic_info.name}
-- 나이: ${character.basic_info.age}세
-- MBTI: ${character.basic_info.mbti}
-- 직업: ${character.basic_info.occupation}
-- 성격 특징: ${character.appeal_profile.seduction_style}
+**중요: 제공된 캐릭터 데이터의 모든 세부사항을 반드시 프롬프트에 포함해야 합니다.**
+
+다음 모든 요소들을 구체적으로 언급하여 작성해주세요:
+
+📋 기본정보 (필수 포함):
+- 이름: ${character.basic_info?.name}
+- 나이: ${character.basic_info?.age}세
+- MBTI: ${character.basic_info?.mbti}
+- 직업: ${character.basic_info?.occupation}
+- 성별: ${character.basic_info?.gender}
+
+✨ 매력 프로필 (모두 포함):
+- 매력 스타일: ${character.appeal_profile?.seduction_style}
+- 매력 포인트: ${Array.isArray(character.appeal_profile?.charm_points) ? character.appeal_profile.charm_points.join(', ') : ''}
+- 감정지능: ${character.appeal_profile?.emotional_intelligence}/10
+- 자신감: ${character.appeal_profile?.confidence_level}/10
+- 신비로움: ${character.appeal_profile?.mystery_factor}/10
+- 성적 호기심: ${character.appeal_profile?.sexual_curiosity}/10
+- 성적 편안함: ${character.appeal_profile?.sexual_comfort}/10
+- 취미: ${Array.isArray(character.appeal_profile?.hobbies) ? character.appeal_profile.hobbies.join(', ') : ''}
+
+👄 외모적 매력 (구체적으로):
+- 헤어: ${character.physical_allure?.appearance?.hair}
+- 눈: ${character.physical_allure?.appearance?.eyes}
+- 체형: ${character.physical_allure?.appearance?.body}
+- 가슴: ${character.physical_allure?.appearance?.bust}
+- 허리/힙: ${character.physical_allure?.appearance?.waist_hip}
+- 스타일: ${character.physical_allure?.appearance?.style}
+- 특징적 요소: ${Array.isArray(character.physical_allure?.feature_elements) ? character.physical_allure.feature_elements.join(', ') : ''}
+- 감각적 습관: ${Array.isArray(character.physical_allure?.sensual_habits) ? character.physical_allure.sensual_habits.join(', ') : ''}
+- 바디랭귀지: ${Array.isArray(character.physical_allure?.body_language) ? character.physical_allure.body_language.join(', ') : ''}
+
+🧠 심리적 깊이 (세밀하게):
+- 핵심 욕구: ${Array.isArray(character.psychological_depth?.core_desires) ? character.psychological_depth.core_desires.join(', ') : ''}
+- 취약점: ${Array.isArray(character.psychological_depth?.vulnerabilities) ? character.psychological_depth.vulnerabilities.join(', ') : ''}
+- 가치관: ${character.psychological_depth?.values}
+- 성적 자유도: ${character.psychological_depth?.sexual_freedom}/10
+- 편안함 수준: ${character.psychological_depth?.boundaries?.comfort_level}
+- 발전 속도: ${character.psychological_depth?.boundaries?.escalation_pace}
+- 성적 톤: ${character.psychological_depth?.boundaries?.sexual_tone_band}
+
+💬 대화 역학 (상세히):
+- 말투: ${character.conversation_dynamics?.speech_style}
+- 플러팅 패턴: ${Array.isArray(character.conversation_dynamics?.flirting_patterns) ? character.conversation_dynamics.flirting_patterns.join(', ') : ''}
+- 대화 주제: ${Array.isArray(character.conversation_dynamics?.conversation_hooks) ? character.conversation_dynamics.conversation_hooks.join(', ') : ''}
+- 말 습관: ${Array.isArray(character.conversation_dynamics?.speech_habits) ? character.conversation_dynamics.speech_habits.join(', ') : ''}
+- 어휘 수준: ${character.conversation_dynamics?.vocabulary_register}
+- 허용 모티프: ${Array.isArray(character.conversation_dynamics?.allowed_motifs) ? character.conversation_dynamics.allowed_motifs.join(', ') : ''}
+- 금기 단어: ${Array.isArray(character.conversation_dynamics?.forbidden_terms) ? character.conversation_dynamics.forbidden_terms.join(', ') : ''}
+- 유머 반응: ${character.conversation_dynamics?.reaction_tendencies?.humor}
+- 칭찬 반응: ${character.conversation_dynamics?.reaction_tendencies?.compliment}
+- 관심 표현: ${character.conversation_dynamics?.reaction_tendencies?.interest_expression}
+
+💕 과거 경험:
+- 연애 경험: ${character.past_history?.relationship_experience}
+- 남자친구 수: ${character.past_history?.boyfriend_count}명
+- 선호 스킨십: ${Array.isArray(character.past_history?.preferred_skinship) ? character.past_history.preferred_skinship.join(', ') : ''}
+- 첫 경험: ${character.past_history?.first_experience_age}
+
+🎁 기타 정보:
+- 좋아하는 선물: ${Array.isArray(character.favorite_gifts) ? character.favorite_gifts.join(', ') : ''}
+- 남성 우선순위: ${Array.isArray(character.male_priorities) ? character.male_priorities.join(', ') : ''}
+- 자산 목표: ${character.future_goals?.asset_goal}
+- 미래 직업: ${Array.isArray(character.future_goals?.future_careers) ? character.future_goals.future_careers.join(', ') : ''}
 
 다음 형식으로 작성해주세요:
-1. 캐릭터의 핵심 성격과 매력
-2. MBTI 특성에 따른 행동 패턴
-3. 대화 스타일과 선호하는 소통 방식
-4. 관계에서 중요하게 생각하는 가치
-5. 특별한 취미나 관심사
+1. 캐릭터의 핵심 성격과 매력 (외모, 성격, 특징 모두 구체적으로)
+2. MBTI 특성에 따른 행동 패턴 (심리적 깊이 반영)
+3. 대화 스타일과 선호하는 소통 방식 (모든 대화 역학 포함)
+4. 관계에서 중요하게 생각하는 가치 (가치관, 경계선 포함)
+5. 특별한 취미나 관심사 (허용/금기 모티프 포함)
+6. 과거 경험과 연애 패턴 (구체적인 경험치 포함)
+7. 선호하는 관계 발전 방식 (스킨십, 속도감 포함)
 
-한국어로 자연스럽고 매력적인 프롬프트를 작성해주세요.`;
+위에 제공된 모든 데이터를 빠짐없이 자연스럽게 녹여서 한국어로 매력적인 프롬프트를 작성해주세요.
+각 수치와 구체적인 특징들을 모두 언급해야 합니다.`;
         }
 
         // 생성된 프롬프트 표시
