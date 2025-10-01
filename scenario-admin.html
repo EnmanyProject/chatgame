@@ -6295,26 +6295,24 @@
         async function callOpenAIForPromptGeneration(character, model, style, length) {
             const apiUrl = '/api/character-ai-generator';
 
-            // 캐릭터 데이터를 OpenAI 정책에 안전하게 변환
-            const sanitizedCharacter = sanitizeCharacterForOpenAI(character);
-            console.log('🛡️ 원본 캐릭터 데이터 안전하게 변환 완료');
-            console.log('📋 원본 캐릭터 데이터:', character);
-            console.log('🛡️ 변환된 안전 캐릭터 데이터:', sanitizedCharacter);
+            // 🔥 Groq API용: 모든 필드 데이터를 원본 그대로 전송 (필터링 없음)
+            console.log('🔥 원본 캐릭터 데이터를 필터링 없이 그대로 전송');
+            console.log('📋 전체 캐릭터 데이터:', character);
+            console.log('📊 전송할 필드 수:', Object.keys(character).length);
 
-            // 안전한 캐릭터 정보를 기반으로 한 시스템 프롬프트 생성
-            const systemPrompt = createSystemPromptForCharacter(sanitizedCharacter, style, length);
-            console.log('📝 생성된 시스템 프롬프트 미리보기:', systemPrompt.substring(0, 1000) + '...');
+            // Groq API는 OpenAI보다 관대하므로 원본 데이터 그대로 사용
+            const systemPrompt = 'AI 캐릭터 프롬프트를 상세하게 작성해주세요. 제공된 모든 캐릭터 정보를 자연스럽게 포함해야 합니다.';
 
             const requestData = {
                 action: 'generate_character_prompt',
-                character_data: sanitizedCharacter,  // 안전하게 변환된 데이터 사용
+                character_data: character,  // 🔥 원본 데이터 그대로 사용 (45개 필드 모두 포함)
                 model: model,
                 style: style,
                 length: length,
                 system_prompt: systemPrompt
             };
 
-            console.log('📤 OpenAI API 요청 데이터 (안전 변환됨):', requestData);
+            console.log('📤 Groq API 요청 데이터 (원본 전체 필드):', requestData);
 
             const response = await fetch(apiUrl, {
                 method: 'POST',
