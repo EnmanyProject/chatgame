@@ -329,6 +329,56 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // 🎭 캐릭터 프롬프트 생성 (OpenAI API 기반)
+    if (action === 'generate_character_prompt') {
+      const { character_data, model, style, length, system_prompt } = req.body;
+
+      console.log('🎭 캐릭터 프롬프트 생성 시작');
+      console.log('📋 캐릭터:', character_data?.basic_info?.name);
+      console.log('🤖 모델:', model);
+      console.log('📝 스타일:', style);
+      console.log('📏 길이:', length);
+
+      if (!character_data) {
+        return res.status(400).json({
+          success: false,
+          error: '캐릭터 데이터가 필요합니다.'
+        });
+      }
+
+      try {
+        // OpenAI API를 통한 프롬프트 생성
+        const prompt = await generateCharacterPromptWithOpenAI(character_data, model, style, length, system_prompt);
+
+        console.log('✅ 프롬프트 생성 성공');
+        return res.json({
+          success: true,
+          prompt: prompt,
+          character_name: character_data.basic_info?.name,
+          model_used: model,
+          style: style,
+          length: length
+        });
+
+      } catch (error) {
+        console.error('❌ 프롬프트 생성 실패:', error);
+
+        // fallback으로 템플릿 기반 프롬프트 생성
+        const fallbackPrompt = generateFallbackPrompt(character_data, style, length);
+
+        return res.json({
+          success: true,
+          prompt: fallbackPrompt,
+          character_name: character_data.basic_info?.name,
+          model_used: 'fallback-template',
+          style: style,
+          length: length,
+          fallback: true,
+          message: 'OpenAI API 오류로 템플릿 기반 프롬프트를 생성했습니다.'
+        });
+      }
+    }
+
     // 캐릭터 삭제
     if (action === 'delete_character') {
       const { character_id } = req.body;
@@ -1325,7 +1375,7 @@ module.exports = async function handler(req, res) {
 
     return res.status(400).json({
       success: false,
-      message: 'Unknown action. Available: list_characters, save_character, delete_character, reset_all_characters, generate_character, auto_complete_character, generate_character_profile, generate_complete_character_with_profile, list_all_photos, get_character_photos, get_character_photos_v2, upload_photo, upload_single_photo, delete_photo, repair_photo_database',
+      message: 'Unknown action. Available: list_characters, save_character, delete_character, reset_all_characters, generate_character, generate_character_prompt, auto_complete_character, generate_character_profile, generate_complete_character_with_profile, list_all_photos, get_character_photos, get_character_photos_v2, upload_photo, upload_single_photo, delete_photo, repair_photo_database',
       received_action: action,
       action_type: typeof action,
       debug_info: debugInfo,
@@ -2940,4 +2990,192 @@ async function savePhotosToGitHub(photosData) {
     console.error('❌ 사진 데이터 GitHub 저장 실패:', error.message);
     throw error;
   }
+}
+
+// 🎭 ================ 캐릭터 프롬프트 생성 함수들 ================
+
+// OpenAI API를 통한 캐릭터 프롬프트 생성
+async function generateCharacterPromptWithOpenAI(characterData, model = 'gpt-4', style, length, systemPrompt) {
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+  if (!OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY 환경변수가 설정되지 않았습니다');
+  }
+
+  console.log('🤖 OpenAI API 프롬프트 생성 시작...');
+  console.log('📋 캐릭터:', characterData.basic_info?.name);
+  console.log('🎨 스타일:', style);
+
+  // 캐릭터 데이터를 요약해서 프롬프트에 포함
+  const characterSummary = createCharacterSummary(characterData);
+
+  const userPrompt = `다음 캐릭터에 대한 ${style} 스타일의 프롬프트를 ${length} 길이로 작성해주세요.
+
+캐릭터 데이터:
+${characterSummary}
+
+요구사항:
+- 캐릭터의 성격과 매력을 잘 드러내는 프롬프트
+- MBTI 특성이 자연스럽게 반영된 내용
+- 대화할 때 유용한 성격 정보 포함
+- 한국어로 자연스럽고 매력적으로 작성`;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt
+          },
+          {
+            role: 'user',
+            content: userPrompt
+          }
+        ],
+        max_tokens: length === 'short' ? 300 : length === 'medium' ? 500 : 800,
+        temperature: 0.7
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`OpenAI API 오류: ${response.status} - ${errorData.error?.message || '알 수 없는 오류'}`);
+    }
+
+    const result = await response.json();
+    const generatedPrompt = result.choices[0]?.message?.content?.trim();
+
+    if (!generatedPrompt) {
+      throw new Error('OpenAI API에서 프롬프트를 생성하지 못했습니다');
+    }
+
+    console.log('✅ OpenAI API 프롬프트 생성 완료');
+    return generatedPrompt;
+
+  } catch (error) {
+    console.error('❌ OpenAI API 호출 실패:', error.message);
+    throw error;
+  }
+}
+
+// 캐릭터 데이터 요약 생성
+function createCharacterSummary(characterData) {
+  const basic = characterData.basic_info || {};
+  const appeal = characterData.appeal_profile || {};
+  const physical = characterData.physical_allure || {};
+  const psychological = characterData.psychological_depth || {};
+  const conversation = characterData.conversation_dynamics || {};
+  const pastHistory = characterData.past_history || {};
+
+  let summary = `이름: ${basic.name || '미정'}
+나이: ${basic.age || '미정'}세
+MBTI: ${basic.mbti || '미정'}
+직업: ${basic.occupation || '미정'}
+성별: ${basic.gender || '여성'}
+
+성격 특징:
+- 매력 스타일: ${appeal.seduction_style || '따뜻하고 배려심 많음'}
+- 매력 포인트: ${Array.isArray(appeal.charm_points) ? appeal.charm_points.join(', ') : '자연스러운 매력'}
+- 감정지능: ${appeal.emotional_intelligence || '보통'}/10
+- 자신감: ${appeal.confidence_level || '보통'}/10
+- 신비로움: ${appeal.mystery_factor || '보통'}/10
+
+외모적 특징:
+- 헤어: ${physical.appearance?.hair || '자연스러운 헤어'}
+- 눈: ${physical.appearance?.eyes || '따뜻한 눈'}
+- 체형: ${physical.appearance?.body || '자연스러운 체형'}
+- 스타일: ${physical.appearance?.style || '편안한 스타일'}
+
+심리적 특성:
+- 핵심 욕구: ${Array.isArray(psychological.core_desires) ? psychological.core_desires.join(', ') : '의미있는 관계'}
+- 취약점: ${Array.isArray(psychological.vulnerabilities) ? psychological.vulnerabilities.join(', ') : '완벽주의'}
+- 가치관: ${psychological.values || '사랑과 가족'}
+
+대화 스타일:
+- 말투: ${conversation.speech_style || '자연스럽고 친근함'}
+- 플러팅 패턴: ${Array.isArray(conversation.flirting_patterns) ? conversation.flirting_patterns.join(', ') : '은은한 티징'}
+- 대화 주제: ${Array.isArray(conversation.conversation_hooks) ? conversation.conversation_hooks.join(', ') : '일상적인 주제들'}
+
+과거 경험:
+- 연애 경험: ${pastHistory.relationship_experience || '초보'}
+- 선호하는 스킨십: ${Array.isArray(pastHistory.preferred_skinship) ? pastHistory.preferred_skinship.join(', ') : '손잡기, 포옹'}
+
+취미:
+- ${Array.isArray(appeal.hobbies) ? appeal.hobbies.join(', ') : '독서, 음악감상'}`;
+
+  return summary;
+}
+
+// Fallback 프롬프트 생성 (OpenAI 실패 시)
+function generateFallbackPrompt(characterData, style, length) {
+  const basic = characterData.basic_info || {};
+  const appeal = characterData.appeal_profile || {};
+  const conversation = characterData.conversation_dynamics || {};
+
+  const name = basic.name || '미정';
+  const age = basic.age || '20대';
+  const mbti = basic.mbti || 'ISFJ';
+  const occupation = basic.occupation || '학생';
+
+  // 스타일별 템플릿
+  const templates = {
+    comprehensive: `${name}는 ${age}세의 ${mbti} 성격을 가진 매력적인 여성입니다. ${occupation} 분야에서 활동하며, ${appeal.seduction_style || '따뜻하고 배려심 많은'} 매력을 가지고 있습니다.
+
+그녀의 대화 스타일은 ${conversation.speech_style || '자연스럽고 친근한'} 방식이며, ${Array.isArray(conversation.flirting_patterns) ? conversation.flirting_patterns.join('과 ') : '은은한 티징'}을 통해 상대방과 소통합니다. ${mbti} 특성에 따라 ${getMBTICharacteristics(mbti)}한 면모를 보입니다.
+
+관계에서 중요하게 생각하는 것은 ${characterData.psychological_depth?.values || '진정성과 배려'}이며, ${Array.isArray(appeal.hobbies) ? appeal.hobbies.join(', ') : '독서와 음악감상'} 등의 취미를 즐깁니다.`,
+
+    roleplay: `안녕하세요, 저는 ${name}이에요! ${age}세이고 ${occupation}을 하고 있어요. ${mbti} 성격이라서 ${getMBTICharacteristics(mbti)}한 편이에요.
+
+저는 ${appeal.seduction_style || '따뜻하고 배려심 많은'} 성격으로, 대화할 때 ${conversation.speech_style || '자연스럽고 친근하게'} 말하는 편이에요. ${Array.isArray(appeal.hobbies) ? appeal.hobbies.join('와 ') : '독서와 음악감상'}을 좋아하고, 특히 ${Array.isArray(conversation.conversation_hooks) ? conversation.conversation_hooks[0] : '일상 이야기'}에 대해 이야기하는 걸 즐겨요.`,
+
+    psychological: `${name}의 심리적 프로필:
+
+핵심 성격: ${mbti} 타입으로 ${getMBTICharacteristics(mbti)}한 특성을 보입니다.
+내면의 욕구: ${Array.isArray(characterData.psychological_depth?.core_desires) ? characterData.psychological_depth.core_desires.join(', ') : '의미있는 관계와 개인적 성장'}
+감정적 특성: ${appeal.emotional_intelligence || '7'}/10의 감정지능을 가지며, ${appeal.confidence_level || '5'}/10의 자신감 수준을 보입니다.
+대인관계 패턴: ${conversation.speech_style || '따뜻하고 배려심 있는'} 소통을 선호하며, ${Array.isArray(conversation.flirting_patterns) ? conversation.flirting_patterns.join(', ') : '은은한 매력 어필'}을 통해 관계를 발전시킵니다.`
+  };
+
+  let basePrompt = templates[style] || templates.comprehensive;
+
+  // 길이 조정
+  if (length === 'short') {
+    return basePrompt.substring(0, 300) + '...';
+  } else if (length === 'long') {
+    return basePrompt + `\n\n추가적으로 ${name}는 ${Array.isArray(characterData.physical_allure?.sensual_habits) ? characterData.physical_allure.sensual_habits.join(', ') : '자연스러운 제스처'}와 같은 특별한 매력을 가지고 있으며, 상대방과의 관계에서 ${characterData.psychological_depth?.boundaries?.comfort_level || '편안한 수준'}의 친밀감을 추구합니다.`;
+  }
+
+  return basePrompt;
+}
+
+// MBTI 특성 설명
+function getMBTICharacteristics(mbti) {
+  const characteristics = {
+    'ISFJ': '배려심 많고 온화',
+    'ISFP': '감성적이고 예술적',
+    'INFJ': '직관적이고 이상주의적',
+    'INFP': '순수하고 로맨틱',
+    'ESFJ': '사교적이고 따뜻',
+    'ESFP': '활발하고 즐거움을 추구',
+    'ENFJ': '카리스마 있고 영감을 주는',
+    'ENFP': '열정적이고 창의적',
+    'ISTJ': '신뢰할 수 있고 체계적',
+    'ISTP': '실용적이고 독립적',
+    'INTJ': '전략적이고 독립적',
+    'INTP': '논리적이고 호기심 많은',
+    'ESTJ': '리더십 있고 조직적',
+    'ESTP': '모험적이고 실용적',
+    'ENTJ': '자신감 있고 결단력 있는',
+    'ENTP': '혁신적이고 논쟁을 좋아하는'
+  };
+
+  return characteristics[mbti] || '독특하고 매력적';
 }

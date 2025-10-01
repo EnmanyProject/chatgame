@@ -4466,6 +4466,80 @@
                 <div id="testResultContent"></div>
             </div>
 
+            <!-- 캐릭터 프롬프트 생성 섹션 -->
+            <div class="tuning-section">
+                <h4>🎭 캐릭터 프롬프트 생성 엔진</h4>
+                <div class="tuning-controls">
+                    <div class="form-group">
+                        <label for="characterPromptTarget">🎯 대상 캐릭터 선택</label>
+                        <select id="characterPromptTarget">
+                            <option value="">캐릭터를 선택하세요</option>
+                        </select>
+                        <small class="form-help">프롬프트를 생성할 캐릭터를 선택하세요</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="promptGenerationModel">🤖 AI 모델 선택</label>
+                        <select id="promptGenerationModel">
+                            <option value="gpt-4" selected>GPT-4 (권장)</option>
+                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo (빠름)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="promptStyle">📝 프롬프트 스타일</label>
+                        <select id="promptStyle">
+                            <option value="comprehensive" selected>종합형 (상세한 성격 분석)</option>
+                            <option value="roleplay">롤플레이형 (대화 중심)</option>
+                            <option value="psychological">심리 분석형 (깊이 있는 분석)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="promptLength">📏 프롬프트 길이</label>
+                        <select id="promptLength">
+                            <option value="medium" selected>중간 (400-600자)</option>
+                            <option value="short">짧음 (200-400자)</option>
+                            <option value="long">긴 (600-1000자)</option>
+                        </select>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="generateCharacterPrompt()">
+                            ✨ 프롬프트 생성
+                        </button>
+                        <button class="btn btn-secondary" onclick="previewCharacterData()">
+                            👁️ 캐릭터 데이터 미리보기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 생성된 프롬프트 미리보기 -->
+                <div id="promptPreviewArea" style="display: none; margin-top: 20px;">
+                    <h5>📋 생성된 프롬프트 미리보기</h5>
+                    <div id="promptPreviewContent" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto;"></div>
+                    <div class="action-buttons" style="margin-top: 10px;">
+                        <button class="btn btn-success" onclick="savePromptToCharacter()">
+                            💾 캐릭터에 저장
+                        </button>
+                        <button class="btn btn-warning" onclick="regeneratePrompt()">
+                            🔄 다시 생성
+                        </button>
+                        <button class="btn btn-secondary" onclick="copyPromptToClipboard()">
+                            📋 클립보드에 복사
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 프롬프트 생성 로그 -->
+                <div id="promptGenerationLog" style="margin-top: 20px; display: none;">
+                    <h5>📊 생성 로그</h5>
+                    <div id="promptLogContent" style="background: #f8f9fa; border-radius: 8px; padding: 10px; max-height: 150px; overflow-y: auto;">
+                        <!-- 로그 내용이 여기에 추가됩니다 -->
+                    </div>
+                </div>
+            </div>
+
             <!-- AI 성능 로그 -->
             <div class="ai-performance-log">
                 <h4>📈 AI 성능 로그</h4>
@@ -6009,6 +6083,351 @@
                 }, 3000);
             }
         }
+
+        // 🎭 ================ 캐릭터 프롬프트 생성 시스템 ================
+
+        let currentGeneratedPrompt = null;
+        let currentPromptCharacterId = null;
+
+        // 캐릭터 목록을 프롬프트 생성 드롭다운에 로드
+        async function loadCharactersForPromptGeneration() {
+            try {
+                console.log('📋 프롬프트 생성용 캐릭터 목록 로드 중...');
+
+                // 캐릭터 데이터가 없다면 로드
+                if (!window.characters || Object.keys(window.characters).length === 0) {
+                    await window.loadCharacters();
+                }
+
+                const characterSelect = document.getElementById('characterPromptTarget');
+                if (!characterSelect) return;
+
+                // 기존 옵션 제거 (첫 번째 기본 옵션 제외)
+                characterSelect.innerHTML = '<option value="">캐릭터를 선택하세요</option>';
+
+                // 캐릭터 옵션 추가
+                Object.values(window.characters).forEach(character => {
+                    const option = document.createElement('option');
+                    option.value = character.id;
+                    option.textContent = `${character.basic_info.name} (${character.basic_info.mbti})`;
+                    characterSelect.appendChild(option);
+                });
+
+                console.log(`✅ ${Object.keys(window.characters).length}개 캐릭터 로드 완료`);
+            } catch (error) {
+                console.error('❌ 캐릭터 목록 로드 실패:', error);
+                showNotification('캐릭터 목록 로드에 실패했습니다.', 'error');
+            }
+        }
+
+        // 캐릭터 데이터 미리보기
+        function previewCharacterData() {
+            const selectedCharacterId = document.getElementById('characterPromptTarget').value;
+            if (!selectedCharacterId) {
+                showNotification('먼저 캐릭터를 선택해주세요.', 'warning');
+                return;
+            }
+
+            const character = window.characters[selectedCharacterId];
+            if (!character) {
+                showNotification('선택한 캐릭터 데이터를 찾을 수 없습니다.', 'error');
+                return;
+            }
+
+            // 프리뷰 영역 표시
+            const previewArea = document.getElementById('promptPreviewArea');
+            const previewContent = document.getElementById('promptPreviewContent');
+
+            previewArea.style.display = 'block';
+            previewContent.textContent = JSON.stringify(character, null, 2);
+
+            // 저장 버튼 숨기기 (미리보기 모드)
+            const saveButton = previewArea.querySelector('button[onclick="savePromptToCharacter()"]');
+            if (saveButton) saveButton.style.display = 'none';
+
+            console.log('👁️ 캐릭터 데이터 미리보기:', character.basic_info.name);
+        }
+
+        // OpenAI API를 통한 캐릭터 프롬프트 생성
+        async function generateCharacterPrompt() {
+            const selectedCharacterId = document.getElementById('characterPromptTarget').value;
+            if (!selectedCharacterId) {
+                showNotification('먼저 캐릭터를 선택해주세요.', 'warning');
+                return;
+            }
+
+            const character = window.characters[selectedCharacterId];
+            if (!character) {
+                showNotification('선택한 캐릭터 데이터를 찾을 수 없습니다.', 'error');
+                return;
+            }
+
+            // 프롬프트 생성 설정 가져오기
+            const model = document.getElementById('promptGenerationModel').value;
+            const style = document.getElementById('promptStyle').value;
+            const length = document.getElementById('promptLength').value;
+
+            try {
+                console.log('🤖 OpenAI API를 통한 프롬프트 생성 시작...');
+                addPromptLog('프롬프트 생성 시작', 'info');
+
+                // 버튼 비활성화
+                const generateButton = document.querySelector('button[onclick="generateCharacterPrompt()"]');
+                if (generateButton) {
+                    generateButton.disabled = true;
+                    generateButton.innerHTML = '⏳ 생성 중...';
+                }
+
+                // OpenAI API 호출
+                const prompt = await callOpenAIForPromptGeneration(character, model, style, length);
+
+                if (prompt) {
+                    currentGeneratedPrompt = prompt;
+                    currentPromptCharacterId = selectedCharacterId;
+
+                    displayGeneratedPrompt(prompt);
+                    addPromptLog(`${character.basic_info.name} 프롬프트 생성 완료`, 'success');
+                    console.log('✅ 프롬프트 생성 성공');
+                } else {
+                    throw new Error('프롬프트 생성 실패');
+                }
+
+            } catch (error) {
+                console.error('❌ 프롬프트 생성 오류:', error);
+                addPromptLog(`프롬프트 생성 실패: ${error.message}`, 'error');
+                showNotification('프롬프트 생성에 실패했습니다. 다시 시도해주세요.', 'error');
+            } finally {
+                // 버튼 복원
+                const generateButton = document.querySelector('button[onclick="generateCharacterPrompt()"]');
+                if (generateButton) {
+                    generateButton.disabled = false;
+                    generateButton.innerHTML = '✨ 프롬프트 생성';
+                }
+            }
+        }
+
+        // OpenAI API 호출 함수
+        async function callOpenAIForPromptGeneration(character, model, style, length) {
+            const apiUrl = '/api/character-ai-generator';
+
+            // 캐릭터 정보를 기반으로 한 시스템 프롬프트 생성
+            const systemPrompt = createSystemPromptForCharacter(character, style, length);
+
+            const requestData = {
+                action: 'generate_character_prompt',
+                character_data: character,
+                model: model,
+                style: style,
+                length: length,
+                system_prompt: systemPrompt
+            };
+
+            console.log('📤 OpenAI API 요청 데이터:', requestData);
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`API 요청 실패: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('📥 OpenAI API 응답:', result);
+
+            if (result.success && result.prompt) {
+                return result.prompt;
+            } else {
+                throw new Error(result.error || '프롬프트 생성 실패');
+            }
+        }
+
+        // 캐릭터별 시스템 프롬프트 생성
+        function createSystemPromptForCharacter(character, style, length) {
+            const lengthGuide = {
+                'short': '200-400자',
+                'medium': '400-600자',
+                'long': '600-1000자'
+            };
+
+            const styleGuide = {
+                'comprehensive': '캐릭터의 모든 측면을 종합적으로 분석하는',
+                'roleplay': '대화와 롤플레이에 최적화된',
+                'psychological': '심리적 특성과 내면을 깊이 있게 분석하는'
+            };
+
+            return `당신은 MBTI 기반 캐릭터 분석 전문가입니다.
+주어진 캐릭터 데이터를 바탕으로 ${styleGuide[style]} 프롬프트를 ${lengthGuide[length]} 분량으로 작성해주세요.
+
+캐릭터 정보:
+- 이름: ${character.basic_info.name}
+- 나이: ${character.basic_info.age}세
+- MBTI: ${character.basic_info.mbti}
+- 직업: ${character.basic_info.occupation}
+- 성격 특징: ${character.appeal_profile.seduction_style}
+
+다음 형식으로 작성해주세요:
+1. 캐릭터의 핵심 성격과 매력
+2. MBTI 특성에 따른 행동 패턴
+3. 대화 스타일과 선호하는 소통 방식
+4. 관계에서 중요하게 생각하는 가치
+5. 특별한 취미나 관심사
+
+한국어로 자연스럽고 매력적인 프롬프트를 작성해주세요.`;
+        }
+
+        // 생성된 프롬프트 표시
+        function displayGeneratedPrompt(prompt) {
+            const previewArea = document.getElementById('promptPreviewArea');
+            const previewContent = document.getElementById('promptPreviewContent');
+
+            previewArea.style.display = 'block';
+            previewContent.textContent = prompt;
+
+            // 저장 버튼 표시
+            const saveButton = previewArea.querySelector('button[onclick="savePromptToCharacter()"]');
+            if (saveButton) saveButton.style.display = 'inline-block';
+
+            console.log('📋 프롬프트 표시 완료');
+        }
+
+        // 프롬프트를 캐릭터에 저장
+        async function savePromptToCharacter() {
+            if (!currentGeneratedPrompt || !currentPromptCharacterId) {
+                showNotification('저장할 프롬프트가 없습니다.', 'error');
+                return;
+            }
+
+            try {
+                console.log('💾 캐릭터에 프롬프트 저장 시작...');
+
+                // 캐릭터 데이터에 프롬프트 추가
+                const character = window.characters[currentPromptCharacterId];
+                if (!character) {
+                    throw new Error('캐릭터 데이터를 찾을 수 없습니다.');
+                }
+
+                character.ai_prompt = currentGeneratedPrompt;
+                character.prompt_generated_at = new Date().toISOString();
+
+                // 서버에 저장
+                const saveResponse = await fetch('/api/character-ai-generator', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'save_character',
+                        character: character
+                    })
+                });
+
+                if (!saveResponse.ok) {
+                    throw new Error('서버 저장 실패');
+                }
+
+                const saveResult = await saveResponse.json();
+                if (!saveResult.success) {
+                    throw new Error(saveResult.error || '저장 실패');
+                }
+
+                // 로컬 데이터 업데이트
+                window.characters[currentPromptCharacterId] = character;
+
+                // 캐릭터 카드 다시 로드
+                await window.loadCharacters();
+                displayCharacters();
+
+                addPromptLog(`${character.basic_info.name}에 프롬프트 저장 완료`, 'success');
+                showNotification('프롬프트가 성공적으로 저장되었습니다!', 'success');
+
+                console.log('✅ 프롬프트 저장 완료');
+
+            } catch (error) {
+                console.error('❌ 프롬프트 저장 오류:', error);
+                addPromptLog(`프롬프트 저장 실패: ${error.message}`, 'error');
+                showNotification('프롬프트 저장에 실패했습니다.', 'error');
+            }
+        }
+
+        // 프롬프트 재생성
+        function regeneratePrompt() {
+            if (currentPromptCharacterId) {
+                generateCharacterPrompt();
+            } else {
+                showNotification('먼저 캐릭터를 선택해주세요.', 'warning');
+            }
+        }
+
+        // 클립보드에 복사
+        function copyPromptToClipboard() {
+            if (!currentGeneratedPrompt) {
+                showNotification('복사할 프롬프트가 없습니다.', 'warning');
+                return;
+            }
+
+            navigator.clipboard.writeText(currentGeneratedPrompt).then(() => {
+                showNotification('프롬프트가 클립보드에 복사되었습니다!', 'success');
+                addPromptLog('클립보드에 복사 완료', 'info');
+            }).catch(err => {
+                console.error('클립보드 복사 실패:', err);
+                showNotification('클립보드 복사에 실패했습니다.', 'error');
+            });
+        }
+
+        // 프롬프트 생성 로그 추가
+        function addPromptLog(message, type = 'info') {
+            const logArea = document.getElementById('promptGenerationLog');
+            const logContent = document.getElementById('promptLogContent');
+
+            if (!logContent) return;
+
+            // 로그 영역 표시
+            logArea.style.display = 'block';
+
+            // 로그 엔트리 생성
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.style.cssText = 'margin-bottom: 5px; padding: 5px; border-left: 3px solid #ddd; font-size: 12px;';
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString();
+
+            const typeColor = {
+                'info': '#17a2b8',
+                'success': '#28a745',
+                'error': '#dc3545',
+                'warning': '#ffc107'
+            };
+
+            logEntry.style.borderLeftColor = typeColor[type] || '#ddd';
+            logEntry.innerHTML = `<span style="color: #666;">[${timeStr}]</span> ${message}`;
+
+            // 최신 로그를 상단에 추가
+            logContent.insertBefore(logEntry, logContent.firstChild);
+
+            // 로그가 너무 많으면 오래된 것 제거 (최대 20개)
+            while (logContent.children.length > 20) {
+                logContent.removeChild(logContent.lastChild);
+            }
+        }
+
+        // AI 관리 탭이 열릴 때 캐릭터 목록 로드
+        const originalShowTab = window.showTab;
+        window.showTab = function(tabName) {
+            if (originalShowTab) originalShowTab(tabName);
+
+            if (tabName === 'ai-management' || tabName === 'ai-management-section') {
+                // AI 관리 탭이 열릴 때 캐릭터 목록 로드
+                setTimeout(() => {
+                    loadCharactersForPromptGeneration();
+                }, 100);
+            }
+        };
 
         // 페이지 초기화
         document.addEventListener('DOMContentLoaded', function() {
@@ -9040,6 +9459,19 @@
                         </div>
                     </div>
                     <div class="character-info">
+                        <!-- AI 프롬프트 표시 영역 -->
+                        ${character.ai_prompt ? `
+                        <div class="character-prompt" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 0.85em; line-height: 1.3;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                                <strong style="font-size: 0.9em;">🎭 AI 프롬프트</strong>
+                                <small style="opacity: 0.8;">${character.prompt_generated_at ? new Date(character.prompt_generated_at).toLocaleDateString() : ''}</small>
+                            </div>
+                            <div style="max-height: 80px; overflow-y: auto; background: rgba(255,255,255,0.1); padding: 6px; border-radius: 4px; font-size: 0.8em;">
+                                ${character.ai_prompt.substring(0, 200)}${character.ai_prompt.length > 200 ? '...' : ''}
+                            </div>
+                        </div>
+                        ` : ''}
+
                         <div class="mbti">${getCharacterMBTI(character)}</div>
                         <h3>${getCharacterName(character)}</h3>
                         <p style="font-size: 0.9em; color: #34495e; margin-bottom: 8px;"><strong>스타일:</strong> ${getCharacterSeductionStyle(character)}</p>
