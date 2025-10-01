@@ -32,12 +32,12 @@ function validatePhotoData(photoData, category) {
         throw new Error(`지원하지 않는 카테고리입니다: ${category}`);
     }
 
-    // Base64 데이터 크기 확인 (약 2MB 제한)
+    // Base64 데이터 크기 확인 (약 5MB 제한)
     const sizeInBytes = (photoData.length * 3) / 4;
-    const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+    const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
 
     if (sizeInBytes > maxSizeInBytes) {
-        throw new Error(`이미지 크기가 너무 큽니다. 최대 2MB까지 지원됩니다. (현재: ${Math.round(sizeInBytes / (1024 * 1024) * 10) / 10}MB)`);
+        throw new Error(`이미지 크기가 너무 큽니다. 최대 5MB까지 지원됩니다. (현재: ${Math.round(sizeInBytes / (1024 * 1024) * 10) / 10}MB)`);
     }
 
     return true;
@@ -550,7 +550,9 @@ module.exports = async function handler(req, res) {
       }
 
       try {
+        console.log('🔄 사진 데이터 로딩 시작...');
         const photosData = await loadPhotosFromGitHub();
+        console.log('✅ 사진 데이터 로딩 성공');
 
         const characterPhotos = photosData.photos[character_id] || {
           character_id,
@@ -561,17 +563,56 @@ module.exports = async function handler(req, res) {
           photo_count: 0
         };
 
-        return res.status(200).json({
+        console.log(`📊 캐릭터 ${character_id} 사진 개수:`, characterPhotos.photo_count);
+
+        // 대용량 데이터로 인한 JSON 직렬화 에러 방지 - 사진 데이터 크기 확인
+        const photoDataSize = JSON.stringify(characterPhotos).length;
+        console.log(`📏 사진 데이터 크기: ${Math.round(photoDataSize / 1024)}KB`);
+
+        // 5MB 이상의 데이터는 요약 형태로 반환
+        if (photoDataSize > 5 * 1024 * 1024) {
+          console.log('⚠️ 데이터가 너무 큼 - 요약 형태로 반환');
+          const summaryPhotos = {
+            ...characterPhotos,
+            photos: Object.keys(characterPhotos.photos || {}).reduce((acc, cat) => {
+              const photos = characterPhotos.photos[cat];
+              if (Array.isArray(photos)) {
+                acc[cat] = photos.map(photo => ({ ...photo, data: '[DATA_TOO_LARGE]' }));
+              } else if (photos && photos.data) {
+                acc[cat] = { ...photos, data: '[DATA_TOO_LARGE]' };
+              } else {
+                acc[cat] = photos;
+              }
+              return acc;
+            }, {})
+          };
+
+          return res.status(200).json({
+            success: true,
+            data: summaryPhotos,
+            categories: PHOTO_CATEGORIES,
+            warning: '데이터가 너무 커서 요약 형태로 반환됩니다.'
+          });
+        }
+
+        const responseData = {
           success: true,
           data: characterPhotos,
           categories: PHOTO_CATEGORIES
-        });
+        };
+
+        console.log('📤 응답 데이터 준비 완료');
+        return res.status(200).json(responseData);
+
       } catch (error) {
-        console.error('❌ 캐릭터 사진 조회 실패:', error.message);
+        console.error('❌ 캐릭터 사진 조회 실패:', error);
+        console.error('❌ 에러 스택:', error.stack);
+
         return res.status(500).json({
           success: false,
           message: error.message || '캐릭터 사진 조회 실패',
-          error_type: 'character_photos_error'
+          error_type: 'character_photos_error',
+          character_id: character_id
         });
       }
     }

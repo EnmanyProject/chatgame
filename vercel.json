@@ -4,7 +4,8 @@
   "trailingSlash": false,
   "functions": {
     "api/character-ai-generator.js": {
-      "maxDuration": 30
+      "maxDuration": 30,
+      "memory": 1024
     },
     "api/admin-auth.js": {
       "maxDuration": 10
