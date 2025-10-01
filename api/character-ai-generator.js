@@ -351,17 +351,20 @@ module.exports = async function handler(req, res) {
       console.log('🎯 안전한 구간만 추출 완료 - 민감한 필드 제외됨');
 
       try {
-        // OpenAI API를 통한 프롬프트 생성
-        const prompt = await generateCharacterPromptWithOpenAI(safeCharacterData, model, style, length, system_prompt);
+        // 임시: 빠른 응답을 위해 즉시 fallback 사용
+        console.log('⚡ 빠른 응답을 위해 fallback 프롬프트 사용');
+        const prompt = generateFallbackPrompt(safeCharacterData, style, length);
 
-        console.log('✅ 프롬프트 생성 성공');
+        console.log('✅ Fallback 프롬프트 생성 성공');
         return res.json({
           success: true,
           prompt: prompt,
           character_name: character_data.basic_info?.name,
-          model_used: model,
+          model_used: 'fallback-fast',
           style: style,
-          length: length
+          length: length,
+          fallback: true,
+          message: '빠른 응답을 위해 안정적인 템플릿 프롬프트를 제공합니다.'
         });
 
       } catch (error) {
