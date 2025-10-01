@@ -20,6 +20,17 @@ async function loadCharacterProfileImageFixed(characterId) {
         const result = await response.json();
         console.log(`📊 [FIXED] API 응답 데이터:`, result);
 
+        // 더 상세한 API 응답 분석
+        console.log(`🔍 [FIXED] 완전한 API 응답 분석:`, {
+            success: result.success,
+            hasData: !!result.data,
+            dataType: typeof result.data,
+            hasPhotos: !!(result.data && result.data.photos),
+            photosType: result.data && result.data.photos ? typeof result.data.photos : 'undefined',
+            hasProfile: !!(result.data && result.data.photos && result.data.photos.profile),
+            profileValue: result.data && result.data.photos ? result.data.photos.profile : 'no photos object'
+        });
+
         if (result.success && result.data && result.data.photos && result.data.photos.profile) {
             const profileData = result.data.photos.profile;
             console.log(`📷 [FIXED] 프로필 사진 데이터 확인:`, {

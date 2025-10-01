@@ -773,13 +773,23 @@ module.exports = async function handler(req, res) {
               photoDataLength: photoData.photo_data ? photoData.photo_data.length : 0
             });
 
-            // 카테고리별로 분류
+            // 카테고리별로 분류 - 더 상세한 로깅 추가
             if (photoData.category === 'profile') {
+              console.log(`🎯 프로필 사진 발견! 파일: ${file.name}`);
+              console.log(`🎯 설정 전 characterPhotos.photos.profile:`, characterPhotos.photos.profile);
+
               characterPhotos.photos.profile = {
                 id: file.name,
                 data: photoData.photo_data,
                 uploaded_at: photoData.uploaded_at
               };
+
+              console.log(`🎯 설정 후 characterPhotos.photos.profile:`, {
+                id: characterPhotos.photos.profile.id,
+                hasData: !!characterPhotos.photos.profile.data,
+                dataLength: characterPhotos.photos.profile.data ? characterPhotos.photos.profile.data.length : 0,
+                uploaded_at: characterPhotos.photos.profile.uploaded_at
+              });
               console.log(`✅ 프로필 사진 설정 완료: ${file.name}`);
             } else if (characterPhotos.photos[photoData.category]) {
               characterPhotos.photos[photoData.category].push({
@@ -801,6 +811,15 @@ module.exports = async function handler(req, res) {
         }
 
         console.log(`✅ 로드된 사진 수: ${characterPhotos.photo_count}`);
+
+        // 최종 프로필 사진 상태 확인
+        console.log(`🔍 최종 프로필 사진 상태:`, {
+          hasProfile: !!characterPhotos.photos.profile,
+          profileType: typeof characterPhotos.photos.profile,
+          profileNull: characterPhotos.photos.profile === null,
+          profileUndefined: characterPhotos.photos.profile === undefined,
+          profileKeys: characterPhotos.photos.profile ? Object.keys(characterPhotos.photos.profile) : 'no keys'
+        });
 
         // 처리 요약 정보 생성
         const processing_summary = [];
