@@ -351,114 +351,29 @@ module.exports = async function handler(req, res) {
       console.log('🎯 안전한 구간만 추출 완료 - 민감한 필드 제외됨');
 
       try {
-        // 임시: 빠른 응답을 위해 즉시 fallback 사용
-        console.log('⚡ 빠른 응답을 위해 fallback 프롬프트 사용');
-        const prompt = generateFallbackPrompt(safeCharacterData, style, length);
+        // OpenAI API를 통한 프롬프트 생성 (최적화된 설정)
+        console.log('🤖 OpenAI API 프롬프트 생성 시작 (최적화)');
+        const prompt = await generateCharacterPromptWithOpenAI(safeCharacterData, model, 'comprehensive', 'short', system_prompt);
 
-        console.log('✅ Fallback 프롬프트 생성 성공');
+        console.log('✅ OpenAI 프롬프트 생성 성공');
         return res.json({
           success: true,
           prompt: prompt,
           character_name: character_data.basic_info?.name,
-          model_used: 'fallback-fast',
+          model_used: model,
           style: style,
-          length: length,
-          fallback: true,
-          message: '빠른 응답을 위해 안정적인 템플릿 프롬프트를 제공합니다.'
+          length: length
         });
 
       } catch (error) {
-        console.error('❌ 프롬프트 생성 실패 (첫 번째 시도):', error);
+        console.error('❌ OpenAI API 프롬프트 생성 실패:', error);
 
-        // 시간 초과 관련 에러 시 즉시 fallback 사용
-        if (error.message.includes('timeout') || error.message.includes('시간') || error.message.includes('abort')) {
-          console.log('⚡ 첫 번째 시도에서 시간 초과 감지, 즉시 fallback 프롬프트 사용');
-          const fallbackPrompt = generateFallbackPrompt(safeCharacterData, style, length);
-
-          return res.json({
-            success: true,
-            prompt: fallbackPrompt,
-            character_name: character_data.basic_info?.name,
-            model_used: 'instant-fallback',
-            style: style,
-            length: length,
-            fallback: true,
-            message: '빠른 응답을 위해 안정적인 템플릿 프롬프트를 제공합니다.'
-          });
-        }
-
-        // 재시도 로직 - 더 간단한 모델과 더 짧은 길이로 재시도
-        try {
-          console.log('🔄 더 안정적인 설정으로 재시도 중...');
-
-          const retryPrompt = await generateCharacterPromptWithOpenAI(safeCharacterData, 'gpt-4o', style, 'medium', 'AI 캐릭터 프롬프트를 상세하게 작성해주세요. 제공된 모든 캐릭터 정보를 빠짐없이 포함해야 합니다.');
-
-          return res.json({
-            success: true,
-            prompt: retryPrompt,
-            character_name: character_data.basic_info?.name,
-            model_used: 'gpt-4o-retry',
-            style: style,
-            length: length,
-            retry: true,
-            message: '재시도를 통해 프롬프트를 성공적으로 생성했습니다.'
-          });
-
-        } catch (retryError) {
-          console.error('❌ 재시도도 실패:', retryError);
-
-          // 시간 초과 관련 에러 시 즉시 fallback 사용
-          if (retryError.message.includes('timeout') || retryError.message.includes('시간') || retryError.message.includes('abort')) {
-            console.log('⚡ 시간 초과 감지, 즉시 fallback 프롬프트 사용');
-            const fallbackPrompt = generateFallbackPrompt(safeCharacterData, style, length);
-
-            return res.json({
-              success: true,
-              prompt: fallbackPrompt,
-              character_name: character_data.basic_info?.name,
-              model_used: 'fast-fallback',
-              style: style,
-              length: length,
-              fallback: true,
-              message: '빠른 응답을 위해 안정적인 템플릿 프롬프트를 제공합니다.'
-            });
-          }
-
-          // 두 번째 재시도 - 가장 짧은 길이로
-          try {
-            console.log('🔄 최종 재시도 중 (짧은 길이)...');
-
-            const finalRetryPrompt = await generateCharacterPromptWithOpenAI(safeCharacterData, 'gpt-4o', style, 'short', 'AI 캐릭터 프롬프트를 작성해주세요. 모든 캐릭터 데이터를 포함해야 합니다.');
-
-            return res.json({
-              success: true,
-              prompt: finalRetryPrompt,
-              character_name: character_data.basic_info?.name,
-              model_used: 'gpt-4o-final-retry',
-              style: style,
-              length: 'short',
-              final_retry: true,
-              message: '최종 재시도를 통해 짧은 프롬프트를 생성했습니다.'
-            });
-
-          } catch (finalError) {
-            console.error('❌ 모든 재시도 실패, fallback 프롬프트 사용:', finalError);
-
-            // 모든 시도 실패 시 fallback 프롬프트 반환
-            const fallbackPrompt = generateFallbackPrompt(safeCharacterData, style, length);
-
-            return res.json({
-              success: true,
-              prompt: fallbackPrompt,
-              character_name: character_data.basic_info?.name,
-              model_used: 'fallback',
-              style: style,
-              length: length,
-              fallback: true,
-              message: 'OpenAI API 시간 초과로 안정적인 템플릿 프롬프트를 제공합니다.'
-            });
-          }
-        }
+        return res.status(500).json({
+          success: false,
+          message: 'OpenAI API를 통한 프롬프트 생성에 실패했습니다.',
+          error: error.message,
+          character_name: character_data.basic_info?.name
+        });
       }
     }
 
@@ -3247,9 +3162,9 @@ ${characterSummary}
 목표 길이: 3000-5000자 정도로 충실하면서도 읽기 좋게 작성해주세요.`;
 
   try {
-    // 타임아웃을 위한 AbortController 설정 (8초)
+    // 타임아웃을 위한 AbortController 설정 (5초)
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -3270,7 +3185,7 @@ ${characterSummary}
             content: userPrompt
           }
         ],
-        max_tokens: length === 'short' ? 1500 : length === 'medium' ? 2500 : 3500,
+        max_tokens: length === 'short' ? 800 : length === 'medium' ? 1200 : 1500,
         temperature: 0.7
       })
     });
