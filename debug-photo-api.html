@@ -90,6 +90,17 @@
                                 log(`  - ${filename}`);
                             });
                         }
+
+                        if (result.debug_info.file_processing_summary) {
+                            log('📊 파일 처리 결과:', 'success');
+                            result.debug_info.file_processing_summary.forEach(summary => {
+                                if (summary.status === 'success') {
+                                    log(`  ✅ ${summary.filename}: 카테고리=${summary.category}, 데이터크기=${summary.photo_data_length}`, 'success');
+                                } else {
+                                    log(`  ❌ ${summary.filename}: ${summary.error}`, 'error');
+                                }
+                            });
+                        }
                     }
 
                     log(`✅ ${characterId} 테스트 완료\n`, 'success');

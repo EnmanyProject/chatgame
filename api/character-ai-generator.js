@@ -802,6 +802,34 @@ module.exports = async function handler(req, res) {
 
         console.log(`✅ 로드된 사진 수: ${characterPhotos.photo_count}`);
 
+        // 처리 요약 정보 생성
+        const processing_summary = [];
+        for (const file of photoFiles) {
+          try {
+            const fileResponse = await octokit.repos.getContent({
+              owner: 'EnmanyProject',
+              repo: 'chatgame',
+              path: file.path
+            });
+            const content = Buffer.from(fileResponse.data.content, 'base64').toString();
+            const photoData = JSON.parse(content);
+
+            processing_summary.push({
+              filename: file.name,
+              status: 'success',
+              category: photoData.category,
+              has_photo_data: !!photoData.photo_data,
+              photo_data_length: photoData.photo_data ? photoData.photo_data.length : 0
+            });
+          } catch (summaryError) {
+            processing_summary.push({
+              filename: file.name,
+              status: 'error',
+              error: summaryError.message
+            });
+          }
+        }
+
         return res.status(200).json({
           success: true,
           data: characterPhotos,
@@ -812,7 +840,8 @@ module.exports = async function handler(req, res) {
             filtered_files_count: photoFiles.length,
             search_character_id: character_id,
             files_searched_in_github: contentsResponse && Array.isArray(contentsResponse.data) ?
-              contentsResponse.data.map(f => f.name) : ['no_files_or_not_array']
+              contentsResponse.data.map(f => f.name) : ['no_files_or_not_array'],
+            file_processing_summary: processing_summary
           }
         });
 
