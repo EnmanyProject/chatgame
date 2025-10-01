@@ -551,8 +551,27 @@ module.exports = async function handler(req, res) {
 
       try {
         console.log('🔄 사진 데이터 로딩 시작...');
-        const photosData = await loadPhotosFromGitHub();
-        console.log('✅ 사진 데이터 로딩 성공');
+
+        let photosData;
+        try {
+          photosData = await loadPhotosFromGitHub();
+          console.log('✅ 사진 데이터 로딩 성공');
+        } catch (parseError) {
+          console.error('❌ 사진 데이터 파싱 실패:', parseError.message);
+
+          // JSON 파싱 실패 시 빈 데이터로 복구
+          photosData = {
+            photos: {},
+            metadata: {
+              version: "1.0.0",
+              total_photos: 0,
+              created: new Date().toISOString(),
+              last_updated: new Date().toISOString()
+            }
+          };
+
+          console.log('🔧 빈 사진 데이터로 복구됨');
+        }
 
         const characterPhotos = photosData.photos[character_id] || {
           character_id,
@@ -613,6 +632,51 @@ module.exports = async function handler(req, res) {
           message: error.message || '캐릭터 사진 조회 실패',
           error_type: 'character_photos_error',
           character_id: character_id
+        });
+      }
+    }
+
+    // 🔧 사진 데이터베이스 복구 기능
+    if (action === 'repair_photo_database') {
+      console.log('🔧 사진 데이터베이스 복구 시작...');
+
+      try {
+        // 기존 사진 데이터 백업 시도
+        let backupData = null;
+        try {
+          backupData = await loadPhotosFromGitHub();
+          console.log('📦 기존 데이터 백업 성공');
+        } catch (e) {
+          console.log('⚠️ 기존 데이터 손상됨 - 새로 생성');
+        }
+
+        // 새로운 빈 데이터베이스 생성
+        const newPhotosData = {
+          photos: {},
+          metadata: {
+            version: "1.0.0",
+            total_photos: 0,
+            created: new Date().toISOString(),
+            last_updated: new Date().toISOString(),
+            repair_note: "Database repaired due to JSON parsing error"
+          }
+        };
+
+        // GitHub에 저장
+        await savePhotosToGitHub(newPhotosData);
+
+        return res.status(200).json({
+          success: true,
+          message: '사진 데이터베이스가 성공적으로 복구되었습니다.',
+          backup_available: !!backupData,
+          repaired_at: new Date().toISOString()
+        });
+
+      } catch (error) {
+        console.error('❌ 데이터베이스 복구 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: '데이터베이스 복구 실패: ' + error.message
         });
       }
     }
@@ -799,10 +863,11 @@ module.exports = async function handler(req, res) {
     console.log('  - get_character_photos');
     console.log('  - upload_photo');
     console.log('  - delete_photo');
+    console.log('  - repair_photo_database');
 
     return res.status(400).json({
       success: false,
-      message: 'Unknown action. Available: list_characters, save_character, delete_character, reset_all_characters, generate_character, auto_complete_character, generate_character_profile, generate_complete_character_with_profile, list_all_photos, get_character_photos, upload_photo, delete_photo',
+      message: 'Unknown action. Available: list_characters, save_character, delete_character, reset_all_characters, generate_character, auto_complete_character, generate_character_profile, generate_complete_character_with_profile, list_all_photos, get_character_photos, upload_photo, delete_photo, repair_photo_database',
       received_action: action,
       action_type: typeof action,
       debug_info: debugInfo,
