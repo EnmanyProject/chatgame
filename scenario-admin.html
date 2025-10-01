@@ -10027,7 +10027,8 @@
         }
 
         function getCharacterOccupation(character) {
-            return character.basic_info?.occupation || character.occupation || character.major || '-';
+            const occupation = character.basic_info?.occupation || character.occupation || character.major || '-';
+            return occupation === '-' ? '-' : translateToKorean(occupation, 'occupation');
         }
 
         function getCharacterRelationship(character) {
@@ -10562,6 +10563,31 @@
                     '50_billion': '50억 원 (여러 건물)',
                     '100_billion': '100억 원 (대기업 규모)'
                 },
+                // 🏢 현재 직업 번역
+                occupation: {
+                    'student': '학생',
+                    'art': '예술가',
+                    'flight_attendant': '승무원',
+                    'office_worker': '회사원',
+                    'teacher': '교사',
+                    'doctor': '의사',
+                    'nurse': '간호사',
+                    'designer': '디자이너',
+                    'freelancer': '프리랜서',
+                    'model': '모델',
+                    'actor': '배우',
+                    'chef': '요리사',
+                    'barista': '바리스타',
+                    'photographer': '사진작가',
+                    'engineer': '엔지니어',
+                    'lawyer': '변호사',
+                    'consultant': '컨설턴트',
+                    'manager': '매니저',
+                    'salesperson': '영업직',
+                    'housewife': '전업주부',
+                    'unemployed': '백수'
+                },
+
                 // 🎆 미래 직업 번역
                 future_careers: {
                     'housewife': '전업주부',
