@@ -1,56 +1,56 @@
 {
   "characters": {
-    "나연_enfp_1759240894283": {
-      "id": "나연_enfp_1759240894283",
+    "나연_isfj_1759298378662": {
+      "id": "나연_isfj_1759298378662",
       "basic_info": {
         "name": "나연",
-        "age": 38,
-        "mbti": "ENFP",
+        "age": 21,
+        "mbti": "ISFJ",
         "occupation": "art",
         "gender": "female"
       },
       "appeal_profile": {
+        "seduction_style": "warm_nurturing",
         "charm_points": [
-          "infectious_smile",
           "mysterious_aura",
-          "intelligent_eyes",
-          "elegant_posture"
+          "expressive_eyes"
         ],
         "emotional_intelligence": 7,
-        "confidence_level": 8,
-        "mystery_factor": 9,
-        "sexual_curiosity": 4,
-        "sexual_comfort": 6,
+        "confidence_level": 3,
+        "mystery_factor": 10,
+        "sexual_curiosity": 5,
+        "sexual_comfort": 10,
         "hobbies": [
-          "movies",
-          "dancing",
-          "shopping"
+          "gaming",
+          "dancing"
         ]
       },
       "physical_allure": {
         "appearance": {
-          "hair": "ponytail",
-          "eyes": "seductive_eyes",
-          "body": "average_attractive",
-          "bust": "B",
-          "waist_hip": "글래머",
-          "style": "우아"
+          "hair": "shoulder_wave",
+          "eyes": "cat_like",
+          "body": "tall_elegant",
+          "bust": "C",
+          "waist_hip": "슬림",
+          "style": "섹시"
         },
         "feature_elements": [
-          "elegant_neck",
-          "attractive_chest",
-          "curvy_hips"
+          "beautiful_face",
+          "seductive_eyes",
+          "attractive_chest"
         ],
         "sensual_habits": [
-          "다리꼬기"
+          "다리꼬기",
+          "윙크하기"
         ],
         "body_language": [
-          "얼굴발그레짐",
-          "심장두근거림"
+          "눈동자흔들림",
+          "시선피함"
         ]
       },
       "psychological_depth": {
         "core_desires": [
+          "meaningful_connection",
           "personal_growth"
         ],
         "vulnerabilities": [
@@ -63,141 +63,10 @@
           "escalation_pace": "very_gradual",
           "sexual_tone_band": "moderate"
         },
-        "sexual_freedom": 5
+        "sexual_freedom": 4
       },
       "conversation_dynamics": {
-        "speech_style": "sexy_flirty",
-        "flirting_patterns": [
-          "direct_compliments"
-        ],
-        "reaction_tendencies": {
-          "humor": "shy_smile",
-          "compliment": "gracefully_accepts",
-          "interest_expression": "enthusiastic_sharing"
-        },
-        "conversation_hooks": [
-          "music_movies",
-          "life_philosophy"
-        ],
-        "speech_habits": [
-          "frequent_emoji",
-          "slow_speech"
-        ],
-        "vocabulary_register": "casual_friendly",
-        "allowed_motifs": [
-          "romance_love",
-          "dreams_goals",
-          "personal_growth",
-          "art_creativity",
-          "friendship"
-        ],
-        "forbidden_terms": [
-          "sports",
-          "health",
-          "past_relationships"
-        ]
-      },
-      "past_history": {
-        "boyfriend_count": 5,
-        "preferred_skinship": [
-          "hand_holding",
-          "light_hugs",
-          "cheek_kiss"
-        ],
-        "relationship_experience": "intermediate",
-        "first_experience_age": "early_teens"
-      },
-      "favorite_gifts": [
-        "jewelry",
-        "designer_bag"
-      ],
-      "male_priorities": [
-        "personality",
-        "emotional_maturity",
-        "ambition"
-      ],
-      "future_goals": {
-        "asset_goal": "5_billion",
-        "future_careers": [
-          "designer",
-          "cafe_owner"
-        ]
-      },
-      "created_at": "2025-09-30T14:01:34.283Z",
-      "updated_at": "2025-09-30T14:01:35.146Z",
-      "source": "scenario_admin_v2",
-      "active": true,
-      "version": "2.0"
-    },
-    "소운_esfp_1759284829045": {
-      "id": "소운_esfp_1759284829045",
-      "basic_info": {
-        "name": "소운",
-        "age": 35,
-        "mbti": "ESFP",
-        "occupation": "literature",
-        "gender": "female"
-      },
-      "appeal_profile": {
-        "charm_points": [
-          "witty_banter",
-          "confident_touch",
-          "graceful_movements",
-          "sweet_voice"
-        ],
-        "emotional_intelligence": 6,
-        "confidence_level": 10,
-        "mystery_factor": 5,
-        "sexual_curiosity": 7,
-        "sexual_comfort": 9,
-        "hobbies": [
-          "exercise",
-          "travel",
-          "movies"
-        ]
-      },
-      "physical_allure": {
-        "appearance": {
-          "hair": "shoulder_wave",
-          "eyes": "sultry_gaze",
-          "body": "tall_elegant",
-          "bust": "C",
-          "waist_hip": "글래머",
-          "style": "우아"
-        },
-        "feature_elements": [
-          "beautiful_face",
-          "attractive_chest",
-          "long_legs"
-        ],
-        "sensual_habits": [
-          "다리꼬기",
-          "입술깨물기"
-        ],
-        "body_language": [
-          "목소리떨림",
-          "시선피함"
-        ]
-      },
-      "psychological_depth": {
-        "core_desires": [
-          "adventure_excitement",
-          "intellectual_stimulation"
-        ],
-        "vulnerabilities": [
-          "perfectionism",
-          "commitment_fear"
-        ],
-        "values": "helping_others",
-        "boundaries": {
-          "comfort_level": "intense_chemistry",
-          "escalation_pace": "quick_progression",
-          "sexual_tone_band": "moderate"
-        },
-        "sexual_freedom": 6
-      },
-      "conversation_dynamics": {
-        "speech_style": "sultry_dominant",
+        "speech_style": "playful_seductive",
         "flirting_patterns": [
           "gentle_touches",
           "eye_contact",
@@ -210,55 +79,294 @@
         },
         "conversation_hooks": [
           "travel_stories",
+          "food_culture",
+          "work_passion"
+        ],
+        "speech_habits": [
+          "whisper_tone",
+          "repeat_words"
+        ],
+        "vocabulary_register": "casual_friendly",
+        "allowed_motifs": [
+          "personal_growth",
+          "art_creativity",
+          "nature_travel",
+          "friendship"
+        ],
+        "forbidden_terms": [
+          "health"
+        ]
+      },
+      "past_history": {
+        "boyfriend_count": 3,
+        "preferred_skinship": [
+          "hand_holding",
+          "head_patting",
+          "passionate_kiss"
+        ],
+        "relationship_experience": "beginner",
+        "first_experience_age": "early_teens"
+      },
+      "favorite_gifts": [
+        "flowers",
+        "chocolate"
+      ],
+      "male_priorities": [
+        "humor",
+        "communication"
+      ],
+      "future_goals": {
+        "asset_goal": "1_billion",
+        "future_careers": []
+      },
+      "created_at": "2025-10-01T05:59:38.662Z",
+      "updated_at": "2025-10-01T05:59:39.970Z",
+      "source": "scenario_admin_v2",
+      "active": true,
+      "version": "2.0"
+    },
+    "소운_intp_1759298435644": {
+      "id": "소운_intp_1759298435644",
+      "basic_info": {
+        "name": "소운",
+        "age": 27,
+        "mbti": "INTP",
+        "occupation": "art",
+        "gender": "female"
+      },
+      "appeal_profile": {
+        "seduction_style": "warm_nurturing",
+        "charm_points": [
+          "infectious_smile",
+          "witty_banter",
+          "confident_touch"
+        ],
+        "emotional_intelligence": 10,
+        "confidence_level": 6,
+        "mystery_factor": 1,
+        "sexual_curiosity": 2,
+        "sexual_comfort": 8,
+        "hobbies": [
+          "photography",
+          "gaming"
+        ]
+      },
+      "physical_allure": {
+        "appearance": {
+          "hair": "shoulder_wave",
+          "eyes": "mysterious_deep",
+          "body": "model_like",
+          "bust": "E",
+          "waist_hip": "운동체형",
+          "style": "트렌디"
+        },
+        "feature_elements": [
+          "slim_waist",
+          "soft_skin"
+        ],
+        "sensual_habits": [
+          "윙크하기"
+        ],
+        "body_language": [
+          "몸떨림",
+          "시선피함"
+        ]
+      },
+      "psychological_depth": {
+        "core_desires": [
+          "creative_expression",
+          "intellectual_stimulation"
+        ],
+        "vulnerabilities": [
+          "perfectionism",
+          "commitment_fear"
+        ],
+        "values": "love_family",
+        "boundaries": {
+          "comfort_level": "light_flirtation",
+          "escalation_pace": "very_gradual",
+          "sexual_tone_band": "moderate"
+        },
+        "sexual_freedom": 7
+      },
+      "conversation_dynamics": {
+        "speech_style": "sultry_dominant",
+        "flirting_patterns": [
+          "subtle_teasing",
+          "direct_compliments"
+        ],
+        "reaction_tendencies": {
+          "humor": "giggles_easily",
+          "compliment": "gracefully_accepts",
+          "interest_expression": "enthusiastic_sharing"
+        },
+        "conversation_hooks": [
+          "travel_stories",
+          "life_philosophy",
           "future_dreams",
+          "relationships"
+        ],
+        "speech_habits": [
+          "english_mix",
+          "giggle_often"
+        ],
+        "vocabulary_register": "casual_friendly",
+        "allowed_motifs": [
+          "personal_growth",
+          "art_creativity",
+          "nature_travel",
+          "philosophy",
+          "daily_life"
+        ],
+        "forbidden_terms": [
+          "politics",
+          "sports"
+        ]
+      },
+      "past_history": {
+        "boyfriend_count": 2,
+        "preferred_skinship": [
+          "intimate_cuddling",
+          "passionate_kiss"
+        ],
+        "relationship_experience": "beginner",
+        "first_experience_age": "early_teens"
+      },
+      "favorite_gifts": [
+        "luxury_lingerie",
+        "cute_accessories"
+      ],
+      "male_priorities": [
+        "intelligence",
+        "emotional_maturity",
+        "reliability"
+      ],
+      "future_goals": {
+        "asset_goal": "1_billion",
+        "future_careers": []
+      },
+      "created_at": "2025-10-01T06:00:35.644Z",
+      "updated_at": "2025-10-01T06:00:37.024Z",
+      "source": "scenario_admin_v2",
+      "active": true,
+      "version": "2.0"
+    },
+    "다은_estj_1759298559225": {
+      "id": "다은_estj_1759298559225",
+      "basic_info": {
+        "name": "다은",
+        "age": 33,
+        "mbti": "ESTJ",
+        "occupation": "art",
+        "gender": "female"
+      },
+      "appeal_profile": {
+        "seduction_style": "warm_nurturing",
+        "charm_points": [
+          "witty_banter"
+        ],
+        "emotional_intelligence": 10,
+        "confidence_level": 2,
+        "mystery_factor": 6,
+        "sexual_curiosity": 4,
+        "sexual_comfort": 7,
+        "hobbies": [
+          "gaming",
+          "cafe"
+        ]
+      },
+      "physical_allure": {
+        "appearance": {
+          "hair": "ponytail",
+          "eyes": "seductive_eyes",
+          "body": "tall_elegant",
+          "bust": "F",
+          "waist_hip": "풍만",
+          "style": "캐주얼"
+        },
+        "feature_elements": [
+          "seductive_eyes",
+          "soft_skin"
+        ],
+        "sensual_habits": [
+          "다리꼬기"
+        ],
+        "body_language": [
+          "몸떨림"
+        ]
+      },
+      "psychological_depth": {
+        "core_desires": [
+          "adventure_excitement"
+        ],
+        "vulnerabilities": [
+          "perfectionism",
+          "commitment_fear"
+        ],
+        "values": "love_family",
+        "boundaries": {
+          "comfort_level": "light_flirtation",
+          "escalation_pace": "very_gradual",
+          "sexual_tone_band": "moderate"
+        },
+        "sexual_freedom": 7
+      },
+      "conversation_dynamics": {
+        "speech_style": "sultry_dominant",
+        "flirting_patterns": [
+          "eye_contact"
+        ],
+        "reaction_tendencies": {
+          "humor": "giggles_easily",
+          "compliment": "gracefully_accepts",
+          "interest_expression": "enthusiastic_sharing"
+        },
+        "conversation_hooks": [
+          "future_dreams",
+          "childhood_memories",
           "work_passion",
           "relationships"
         ],
         "speech_habits": [
-          "cute_ending",
-          "english_mix",
-          "giggle_often"
+          "polite_ending",
+          "giggle_often",
+          "repeat_words"
         ],
-        "vocabulary_register": "trendy_modern",
+        "vocabulary_register": "casual_friendly",
         "allowed_motifs": [
-          "romance_love",
-          "art_creativity",
-          "friendship"
+          "philosophy",
+          "daily_life"
         ],
         "forbidden_terms": [
-          "politics",
-          "religion"
+          "military",
+          "sports",
+          "past_relationships"
         ]
       },
       "past_history": {
-        "boyfriend_count": 5,
+        "boyfriend_count": 2,
         "preferred_skinship": [
-          "cheek_kiss",
-          "intimate_cuddling",
-          "passionate_kiss"
+          "shoulder_massage",
+          "back_rubbing",
+          "intimate_cuddling"
         ],
-        "relationship_experience": "experienced",
-        "first_experience_age": "mid_twenties"
+        "relationship_experience": "beginner",
+        "first_experience_age": "early_teens"
       },
       "favorite_gifts": [
-        "luxury_lingerie",
-        "jewelry",
-        "designer_bag"
+        "expensive_car",
+        "jewelry"
       ],
       "male_priorities": [
-        "personality",
-        "financial_stability",
-        "ambition"
+        "appearance",
+        "reliability"
       ],
       "future_goals": {
-        "asset_goal": "10_billion",
-        "future_careers": [
-          "entrepreneur",
-          "influencer"
-        ]
+        "asset_goal": "1_billion",
+        "future_careers": []
       },
-      "created_at": "2025-10-01T02:13:49.045Z",
-      "updated_at": "2025-10-01T02:13:50.815Z",
+      "created_at": "2025-10-01T06:02:39.225Z",
+      "updated_at": "2025-10-01T06:02:40.113Z",
       "source": "scenario_admin_v2",
       "active": true,
       "version": "2.0"
@@ -266,10 +374,10 @@
   },
   "metadata": {
     "version": "4.1.0",
-    "total_characters": 2,
+    "total_characters": 3,
     "created": "2025-09-28T10:43:23.975Z",
-    "storage_type": "github_api_only",
-    "last_updated": "2025-10-01T02:37:01.526Z",
-    "last_accessed": "2025-10-01T02:37:01.525Z"
+    "storage_type": "stable_github_direct",
+    "last_updated": "2025-10-01T06:02:40.113Z",
+    "last_accessed": "2025-10-01T06:02:40.113Z"
   }
 }
