@@ -14654,6 +14654,36 @@
                     ['운동', '요가', '산책'],
                     ['쇼핑', '패션', '뷰티'],
                     ['여행', '사진', '드라이브']
+                ],
+
+                // 남성 우선순위 옵션들
+                male_priorities: [
+                    ['humor', 'communication'],
+                    ['intelligence', 'emotional_maturity'],
+                    ['appearance', 'financial_stability'],
+                    ['reliability', 'personality'],
+                    ['creativity', 'adventure_spirit'],
+                    ['family_oriented', 'career_focused']
+                ],
+
+                // 미래 직업 목표들
+                future_careers: [
+                    ['entrepreneur', 'business_owner'],
+                    ['creative_director', 'freelancer'],
+                    ['teacher', 'counselor'],
+                    ['researcher', 'professor'],
+                    ['artist', 'designer'],
+                    ['manager', 'executive']
+                ],
+
+                // 선호하는 선물들
+                favorite_gifts: [
+                    ['flowers', 'chocolate'],
+                    ['jewelry', 'perfume'],
+                    ['books', 'music'],
+                    ['spa_voucher', 'luxury_lingerie'],
+                    ['cute_accessories', 'expensive_car'],
+                    ['art_supplies', 'tech_gadgets']
                 ]
             };
 
@@ -14705,6 +14735,21 @@
             }
             if (!completeData.hobbies || completeData.hobbies.length === 0) {
                 completeData.hobbies = randomChoice(randomSelections.hobbies);
+            }
+
+            // 남성 우선순위 (빈 배열이면 랜덤 선택)
+            if (!completeData.male_priorities || completeData.male_priorities.length === 0) {
+                completeData.male_priorities = randomChoice(randomSelections.male_priorities);
+            }
+
+            // 미래 직업 목표 (빈 배열이면 랜덤 선택)
+            if (!completeData.future_careers || completeData.future_careers.length === 0) {
+                completeData.future_careers = randomChoice(randomSelections.future_careers);
+            }
+
+            // 선호하는 선물 (빈 배열이면 랜덤 선택)
+            if (!completeData.favorite_gifts || completeData.favorite_gifts.length === 0) {
+                completeData.favorite_gifts = randomChoice(randomSelections.favorite_gifts);
             }
 
             console.log('🎲 랜덤 완성 결과:', completeData);
@@ -15092,7 +15137,7 @@
             });
 
             console.log('🎯 최종 남자 우선순위 배열:', selected);
-            return selected.length === 0 ? [] : selected;
+            return selected.length === 0 ? ['humor', 'communication'] : selected;
         }
 
         // 🆕 선택된 스킨십 수집
@@ -16217,7 +16262,7 @@
             });
 
             console.log('🎯 최종 미래 직업 배열:', selected);
-            return selected.length === 0 ? [] : selected;
+            return selected.length === 0 ? ['freelancer'] : selected;
         }
 
         // 🎆 자산 목표 랜덤 선택
@@ -16738,6 +16783,9 @@
 
             // 👨 남자를 볼 때 최우선시하는 것 랜덤 선택
             randomizeMalePriorities();
+
+            // 🚀 미래 직업 목표 랜덤 선택
+            randomizeFutureCareers();
 
             console.log('✅ === autoFillRandomCharacterData 완료 ===');
         }
