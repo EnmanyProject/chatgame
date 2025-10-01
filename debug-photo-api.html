@@ -79,6 +79,19 @@
                         });
                     }
 
+                    // 디버그 정보 출력
+                    if (result.debug_info) {
+                        log('🔧 GitHub API 디버그 정보:', 'success');
+                        log(`<pre>Debug Info: ${JSON.stringify(result.debug_info, null, 2)}</pre>`);
+
+                        if (result.debug_info.files_searched_in_github) {
+                            log('📁 GitHub에서 찾은 파일들:', 'success');
+                            result.debug_info.files_searched_in_github.forEach(filename => {
+                                log(`  - ${filename}`);
+                            });
+                        }
+                    }
+
                     log(`✅ ${characterId} 테스트 완료\n`, 'success');
 
                 } catch (error) {

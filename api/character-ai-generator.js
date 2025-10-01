@@ -786,7 +786,15 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({
           success: true,
           data: characterPhotos,
-          categories: PHOTO_CATEGORIES
+          categories: PHOTO_CATEGORIES,
+          debug_info: {
+            github_response_status: contentsResponse ? contentsResponse.status : 'no_response',
+            total_files_found: contentsResponse && Array.isArray(contentsResponse.data) ? contentsResponse.data.length : 0,
+            filtered_files_count: photoFiles.length,
+            search_character_id: character_id,
+            files_searched_in_github: contentsResponse && Array.isArray(contentsResponse.data) ?
+              contentsResponse.data.map(f => f.name) : ['no_files_or_not_array']
+          }
         });
 
       } catch (error) {
