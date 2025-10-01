@@ -11360,7 +11360,8 @@
             console.log(`🔍 프로필 이미지 로드 시작: ${characterId}`);
 
             try {
-                const apiUrl = `/api/character-ai-generator?action=get_character_photos&character_id=${characterId}&_t=${Date.now()}`;
+                const encodedCharacterId = encodeURIComponent(characterId);
+                const apiUrl = `/api/character-ai-generator?action=get_character_photos&character_id=${encodedCharacterId}&_t=${Date.now()}`;
                 console.log(`📡 API 호출: ${apiUrl}`);
 
                 const response = await fetch(apiUrl);

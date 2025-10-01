@@ -556,6 +556,29 @@ module.exports = async function handler(req, res) {
         try {
           photosData = await loadPhotosFromGitHub();
           console.log('✅ 사진 데이터 로딩 성공');
+          console.log('🔍 로드된 사진 데이터 구조:', {
+            isArray: Array.isArray(photosData),
+            hasPhotosProperty: !!photosData.photos,
+            hasMetadataProperty: !!photosData.metadata,
+            topLevelKeys: Object.keys(photosData),
+            firstFewKeys: Object.keys(photosData).slice(0, 3)
+          });
+          console.log('🔍 캐릭터 ID 검색:', {
+            searchingFor: character_id,
+            exists: !!photosData[character_id],
+            existsInPhotos: !!photosData.photos?.[character_id]
+          });
+
+          // 실제 캐릭터 ID들을 확인해보자
+          if (photosData.photos) {
+            console.log('📋 photos 속성 내 캐릭터 ID들:', Object.keys(photosData.photos));
+          }
+
+          // 최상위 레벨의 캐릭터 ID들을 확인
+          const topLevelCharIds = Object.keys(photosData).filter(key =>
+            key !== 'photos' && key !== 'metadata'
+          );
+          console.log('📋 최상위 레벨 캐릭터 ID들:', topLevelCharIds);
         } catch (parseError) {
           console.error('❌ 사진 데이터 파싱 실패:', parseError.message);
 
@@ -573,14 +596,31 @@ module.exports = async function handler(req, res) {
           console.log('🔧 빈 사진 데이터로 복구됨');
         }
 
-        const characterPhotos = photosData.photos[character_id] || {
-          character_id,
-          photos: Object.keys(PHOTO_CATEGORIES).reduce((acc, cat) => {
-            acc[cat] = cat === 'profile' ? null : [];
-            return acc;
-          }, {}),
-          photo_count: 0
-        };
+        // 올바른 데이터 구조로 캐릭터 사진 조회 - 두 가지 가능한 구조 처리
+        let characterPhotos;
+
+        // 구조 1: photosData[character_id] (현재 character-photos.json 구조)
+        if (photosData[character_id]) {
+          characterPhotos = photosData[character_id];
+          console.log('✅ 직접 접근으로 캐릭터 사진 데이터 발견');
+        }
+        // 구조 2: photosData.photos[character_id] (기존 구조)
+        else if (photosData.photos && photosData.photos[character_id]) {
+          characterPhotos = photosData.photos[character_id];
+          console.log('✅ photos 속성 내에서 캐릭터 사진 데이터 발견');
+        }
+        // 구조 3: 데이터 없음 - 기본값
+        else {
+          characterPhotos = {
+            character_id,
+            photos: Object.keys(PHOTO_CATEGORIES).reduce((acc, cat) => {
+              acc[cat] = cat === 'profile' ? null : [];
+              return acc;
+            }, {}),
+            photo_count: 0
+          };
+          console.log('❌ 캐릭터 사진 데이터 없음 - 기본값 사용');
+        }
 
         console.log(`📊 캐릭터 ${character_id} 사진 개수:`, characterPhotos.photo_count);
 
@@ -632,6 +672,111 @@ module.exports = async function handler(req, res) {
           message: error.message || '캐릭터 사진 조회 실패',
           error_type: 'character_photos_error',
           character_id: character_id
+        });
+      }
+    }
+
+    // 📷 개별 파일에서 캐릭터 사진 조회
+    if (action === 'get_character_photos_v2') {
+      const character_id = req.query.character_id || req.body?.character_id;
+      console.log('📷 개별 파일에서 캐릭터 사진 조회:', character_id);
+
+      try {
+        if (!character_id) {
+          return res.status(400).json({
+            success: false,
+            message: '캐릭터 ID가 필요합니다.'
+          });
+        }
+
+        // GitHub에서 해당 캐릭터의 모든 사진 파일 검색
+        const octokit = new (require('@octokit/rest').Octokit)({
+          auth: process.env.GITHUB_TOKEN
+        });
+
+        console.log('🔍 GitHub에서 사진 파일 검색 중...');
+
+        // data/photos 폴더에서 해당 캐릭터 파일들 찾기
+        let photoFiles = [];
+        try {
+          const contentsResponse = await octokit.repos.getContent({
+            owner: 'EnmanyProject',
+            repo: 'chatgame',
+            path: 'data/photos'
+          });
+
+          if (Array.isArray(contentsResponse.data)) {
+            photoFiles = contentsResponse.data.filter(file =>
+              file.name.startsWith(character_id) && file.name.endsWith('.json')
+            );
+          }
+        } catch (dirError) {
+          console.log('📁 photos 폴더가 없거나 비어있음');
+        }
+
+        console.log(`📊 찾은 사진 파일 수: ${photoFiles.length}`);
+
+        // 각 파일에서 사진 데이터 로드
+        const characterPhotos = {
+          character_id,
+          character_name: character_id.split('_')[0],
+          photos: {
+            profile: null,
+            casual: [],
+            romantic: [],
+            emotional: [],
+            special: []
+          },
+          photo_count: 0,
+          updated_at: new Date().toISOString()
+        };
+
+        for (const file of photoFiles) {
+          try {
+            const fileResponse = await octokit.repos.getContent({
+              owner: 'EnmanyProject',
+              repo: 'chatgame',
+              path: file.path
+            });
+
+            const content = Buffer.from(fileResponse.data.content, 'base64').toString();
+            const photoData = JSON.parse(content);
+
+            // 카테고리별로 분류
+            if (photoData.category === 'profile') {
+              characterPhotos.photos.profile = {
+                id: file.name,
+                data: photoData.photo_data,
+                uploaded_at: photoData.uploaded_at
+              };
+            } else if (characterPhotos.photos[photoData.category]) {
+              characterPhotos.photos[photoData.category].push({
+                id: file.name,
+                data: photoData.photo_data,
+                uploaded_at: photoData.uploaded_at
+              });
+            }
+
+            characterPhotos.photo_count++;
+          } catch (parseError) {
+            console.log(`⚠️ 파일 파싱 실패: ${file.name}`, parseError.message);
+          }
+        }
+
+        console.log(`✅ 로드된 사진 수: ${characterPhotos.photo_count}`);
+
+        return res.status(200).json({
+          success: true,
+          data: characterPhotos,
+          categories: PHOTO_CATEGORIES
+        });
+
+      } catch (error) {
+        console.error('❌ 개별 파일 사진 조회 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: error.message || '사진 조회 실패',
+          error_type: 'photo_query_error'
         });
       }
     }
@@ -1000,6 +1145,7 @@ module.exports = async function handler(req, res) {
     console.log('  - generate_complete_character_with_profile');
     console.log('  - list_all_photos');
     console.log('  - get_character_photos');
+    console.log('  - get_character_photos_v2');
     console.log('  - upload_photo');
     console.log('  - upload_single_photo');
     console.log('  - delete_photo');
@@ -1007,7 +1153,7 @@ module.exports = async function handler(req, res) {
 
     return res.status(400).json({
       success: false,
-      message: 'Unknown action. Available: list_characters, save_character, delete_character, reset_all_characters, generate_character, auto_complete_character, generate_character_profile, generate_complete_character_with_profile, list_all_photos, get_character_photos, upload_photo, upload_single_photo, delete_photo, repair_photo_database',
+      message: 'Unknown action. Available: list_characters, save_character, delete_character, reset_all_characters, generate_character, auto_complete_character, generate_character_profile, generate_complete_character_with_profile, list_all_photos, get_character_photos, get_character_photos_v2, upload_photo, upload_single_photo, delete_photo, repair_photo_database',
       received_action: action,
       action_type: typeof action,
       debug_info: debugInfo,
