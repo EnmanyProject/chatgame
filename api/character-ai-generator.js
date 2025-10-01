@@ -1422,8 +1422,11 @@ module.exports = async function handler(req, res) {
                 content: prompt || '안녕하세요라고 한국어로 인사말을 한 문장으로 작성해주세요.'
               }
             ],
-            max_tokens: 100,
-            temperature: 0.7
+            max_tokens: 150,
+            temperature: 0.9,
+            top_p: 0.95,
+            frequency_penalty: 0.5,
+            presence_penalty: 0.5
           })
         });
 
@@ -1465,12 +1468,13 @@ module.exports = async function handler(req, res) {
           });
         }
 
-        const prompt = `다음 캐릭터에 대해 2-3문장으로 간단히 소개해주세요:
+        const prompt = `다음 캐릭터에 대해 매번 다른 관점으로 2-3문장 소개해주세요:
 이름: ${character.name}
 나이: ${character.age}세
 MBTI: ${character.mbti}
 
-매우 간단하고 친근하게 소개해주세요.`;
+매번 다른 매력포인트나 특징을 강조해서 소개해주세요.
+(생성시각: ${Date.now()})`;
 
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -1487,7 +1491,10 @@ MBTI: ${character.mbti}
               }
             ],
             max_tokens: 200,
-            temperature: 0.7
+            temperature: 0.9,
+            top_p: 0.95,
+            frequency_penalty: 0.5,
+            presence_penalty: 0.5
           })
         });
 

@@ -122,7 +122,7 @@
                     },
                     body: JSON.stringify({
                         action: 'test_simple_generation',
-                        prompt: 'Hello라고 한번만 말해주세요.'
+                        prompt: `안녕하세요를 창의적이고 다양한 방식으로 표현해주세요. (${Date.now()})`
                     })
                 });
 
@@ -165,7 +165,7 @@
                     },
                     body: JSON.stringify({
                         action: 'test_simple_generation',
-                        prompt: '안녕하세요라고 한국어로 인사말을 한 문장으로 작성해주세요.'
+                        prompt: `오늘의 기분을 한 문장으로 표현해주세요. 매번 다르게 말해주세요. (요청시각: ${Date.now()})`
                     })
                 });
 
