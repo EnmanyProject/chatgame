@@ -1393,6 +1393,129 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // 🧪 간단한 OpenAI API 테스트 엔드포인트들
+    if (action === 'test_simple_generation') {
+      const { prompt } = req.body;
+
+      try {
+        console.log('🧪 간단한 텍스트 생성 테스트 시작');
+
+        const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+        if (!OPENAI_API_KEY) {
+          return res.status(500).json({
+            success: false,
+            error: 'OPENAI_API_KEY 환경변수가 설정되지 않았습니다'
+          });
+        }
+
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+              {
+                role: 'user',
+                content: prompt || '안녕하세요라고 한국어로 인사말을 한 문장으로 작성해주세요.'
+              }
+            ],
+            max_tokens: 100,
+            temperature: 0.7
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`OpenAI API 오류: ${response.status} - ${errorData.error?.message || '알 수 없는 오류'}`);
+        }
+
+        const result = await response.json();
+        const text = result.choices[0]?.message?.content?.trim();
+
+        return res.json({
+          success: true,
+          text: text,
+          model: 'gpt-4o-mini',
+          usage: result.usage
+        });
+
+      } catch (error) {
+        console.error('❌ 간단한 텍스트 생성 실패:', error);
+        return res.status(500).json({
+          success: false,
+          error: error.message
+        });
+      }
+    }
+
+    if (action === 'test_character_simple') {
+      const { character } = req.body;
+
+      try {
+        console.log('🧪 캐릭터 간단 설명 생성 테스트 시작');
+
+        const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+        if (!OPENAI_API_KEY) {
+          return res.status(500).json({
+            success: false,
+            error: 'OPENAI_API_KEY 환경변수가 설정되지 않았습니다'
+          });
+        }
+
+        const prompt = `다음 캐릭터에 대해 2-3문장으로 간단히 소개해주세요:
+이름: ${character.name}
+나이: ${character.age}세
+MBTI: ${character.mbti}
+
+매우 간단하고 친근하게 소개해주세요.`;
+
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            max_tokens: 200,
+            temperature: 0.7
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`OpenAI API 오류: ${response.status} - ${errorData.error?.message || '알 수 없는 오류'}`);
+        }
+
+        const result = await response.json();
+        const description = result.choices[0]?.message?.content?.trim();
+
+        return res.json({
+          success: true,
+          description: description,
+          character: character,
+          model: 'gpt-4o-mini',
+          usage: result.usage
+        });
+
+      } catch (error) {
+        console.error('❌ 캐릭터 간단 설명 생성 실패:', error);
+        return res.status(500).json({
+          success: false,
+          error: error.message
+        });
+      }
+    }
+
     console.log('❌❌❌ 액션 매칭 실패 ❌❌❌');
     console.log('❌ 요청된 액션:', action);
     console.log('❌ 액션 타입:', typeof action);
@@ -1415,7 +1538,7 @@ module.exports = async function handler(req, res) {
 
     return res.status(400).json({
       success: false,
-      message: 'Unknown action. Available: list_characters, save_character, delete_character, reset_all_characters, generate_character, generate_character_prompt, auto_complete_character, generate_character_profile, generate_complete_character_with_profile, list_all_photos, get_character_photos, get_character_photos_v2, upload_photo, upload_single_photo, delete_photo, repair_photo_database',
+      message: 'Unknown action. Available: list_characters, save_character, delete_character, reset_all_characters, generate_character, generate_character_prompt, auto_complete_character, generate_character_profile, generate_complete_character_with_profile, test_simple_generation, test_character_simple, list_all_photos, get_character_photos, get_character_photos_v2, upload_photo, upload_single_photo, delete_photo, repair_photo_database',
       received_action: action,
       action_type: typeof action,
       debug_info: debugInfo,
