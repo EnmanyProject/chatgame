@@ -3046,8 +3046,9 @@ async function generateCharacterPromptWithOpenAI(characterData, model = 'gpt-4o'
   console.log('📋 캐릭터:', characterData.basic_info?.name);
   console.log('🎨 스타일:', style);
 
-  // 캐릭터 데이터를 요약해서 프롬프트에 포함
-  const characterSummary = createCharacterSummary(characterData);
+  // 캐릭터 데이터를 안전하게 요약해서 프롬프트에 포함
+  const safeCharacterData = sanitizeCharacterForOpenAI(characterData);
+  const characterSummary = createCharacterSummary(safeCharacterData);
 
   const userPrompt = `다음 캐릭터에 대한 ${style} 스타일의 프롬프트를 ${length} 길이로 작성해주세요.
 
@@ -3059,7 +3060,7 @@ ${characterSummary}
 - 모든 수치 (감정지능, 자신감, 신비로움 등)를 구체적으로 언급하세요
 - 모든 배열 항목들 (매력포인트, 취미, 대화주제 등)을 개별적으로 언급하세요
 - 외모 특징 (헤어스타일, 눈 모양, 체형, 패션스타일 등)을 우아하게 표현하세요
-- 대화 스타일과 매력적인 의사소통 방식을 구체적으로 표현하세요
+- 대화 스타일과 소통 방식을 구체적으로 표현하세요
 - 과거 경험과 인생 이력을 자연스럽게 녹여 넣으세요
 - 심리적 특성과 가치관을 깊이 있게 다루세요
 
@@ -3069,10 +3070,10 @@ ${characterSummary}
 - 각 수치와 점수를 정확히 언급 (예: "감정지능 8점", "자신감 6점", "신비로움 7점")
 - 배열 데이터의 모든 항목을 개별적으로 상세 설명 (예: 취미가 ["게임", "독서", "요리"]면 세 개 모두 별도로 자세히 설명)
 - MBTI 특성을 모든 행동, 사고, 감정 표현에 자연스럽게 반영
-- 외모 세부사항을 매우 구체적이고 생생하게 묘사 (헤어스타일, 눈 모양, 체형, 패션 스타일, 특징적 요소 등)
+- 외모와 스타일을 우아하고 품격있게 묘사 (헤어스타일, 눈 모양, 체형, 패션 스타일, 특징적 요소 등)
 - 심리적 특성, 핵심 욕구, 취약점, 가치관을 깊이 있게 분석
-- 대화 스타일, 말투, 플러팅 패턴, 말 습관을 매우 자세히 기술
-- 과거 경험, 연애 이력, 선호도를 풍부하게 설명
+- 대화 스타일, 말투, 소통 패턴, 말 습관을 매우 자세히 기술
+- 과거 경험, 개인사, 선호도를 풍부하게 설명
 - 미래 목표와 꿈을 구체적으로 표현
 - 한국어로 자연스럽고 매력적이면서도 정보량이 극도로 풍부하게 작성
 
@@ -3301,7 +3302,7 @@ MBTI: ${basic.mbti || '미정'}
 
 ==== 💬 대화 역학 ====
 말투: ${translateToKorean(conversation.speech_style) || '자연스럽고 친근함'}
-매력적 대화법: ${conversation.flirting_patterns ? translateToKorean(conversation.flirting_patterns) : '은은한 매력 어필'}
+소통 패턴: ${conversation.flirting_patterns ? translateToKorean(conversation.flirting_patterns) : '자연스러운 소통'}
 대화 주제: ${conversation.conversation_hooks ? translateToKorean(conversation.conversation_hooks) : '일상적인 주제들'}
 말 습관: ${conversation.speech_habits ? translateToKorean(conversation.speech_habits) : '자연스러운 말투'}
 어휘 수준: ${translateToKorean(conversation.vocabulary_register) || '일상적'}
