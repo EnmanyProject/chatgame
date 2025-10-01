@@ -6283,9 +6283,12 @@
             // 캐릭터 데이터를 OpenAI 정책에 안전하게 변환
             const sanitizedCharacter = sanitizeCharacterForOpenAI(character);
             console.log('🛡️ 원본 캐릭터 데이터 안전하게 변환 완료');
+            console.log('📋 원본 캐릭터 데이터:', character);
+            console.log('🛡️ 변환된 안전 캐릭터 데이터:', sanitizedCharacter);
 
             // 안전한 캐릭터 정보를 기반으로 한 시스템 프롬프트 생성
             const systemPrompt = createSystemPromptForCharacter(sanitizedCharacter, style, length);
+            console.log('📝 생성된 시스템 프롬프트 미리보기:', systemPrompt.substring(0, 1000) + '...');
 
             const requestData = {
                 action: 'generate_character_prompt',
@@ -6358,6 +6361,8 @@
                 '섹시': '우아',
                 '몸기울이기': '자연스럽게기울이기',
                 '숨소리거칠어짐': '깊은호흡',
+                '다리꼬기': '단정히앉기',
+                '윙크하기': '미소짓기',
 
                 // 스타일 관련
                 'sultry_dominant': 'confident_charming',
@@ -6376,7 +6381,14 @@
                 'sexual_freedom': 'emotional_openness',
                 'sexual_tone_band': 'conversation_tone',
                 'early_teens': 'mature_age',
-                'first_experience_age': 'maturity_level'
+                'first_experience_age': 'maturity_level',
+
+                // 추가 안전 처리
+                'mysterious_deep': 'mysterious_gaze',
+                'model_like': 'elegant_figure',
+                'tall_elegant': 'graceful_stature',
+                'shoulder_massage': 'gentle_touch',
+                'back_rubbing': 'comfort_gesture'
             };
 
             if (Array.isArray(value)) {
