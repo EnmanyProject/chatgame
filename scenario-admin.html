@@ -11306,7 +11306,8 @@
         // 🖼️ 캐릭터 카드용 사진 미리보기 로드
         async function loadCharacterPhotoPreview(characterId) {
             try {
-                const apiUrl = `/api/character-ai-generator?action=get_character_photos&character_id=${characterId}&_t=${Date.now()}`;
+                const encodedCharacterId = encodeURIComponent(characterId);
+                const apiUrl = `/api/character-ai-generator?action=get_character_photos_v2&character_id=${encodedCharacterId}&_t=${Date.now()}`;
                 const response = await fetch(apiUrl);
                 const result = await response.json();
 
@@ -11361,7 +11362,7 @@
 
             try {
                 const encodedCharacterId = encodeURIComponent(characterId);
-                const apiUrl = `/api/character-ai-generator?action=get_character_photos&character_id=${encodedCharacterId}&_t=${Date.now()}`;
+                const apiUrl = `/api/character-ai-generator?action=get_character_photos_v2&character_id=${encodedCharacterId}&_t=${Date.now()}`;
                 console.log(`📡 API 호출: ${apiUrl}`);
 
                 const response = await fetch(apiUrl);
