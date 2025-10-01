@@ -4514,6 +4514,9 @@
                         <button class="btn btn-info" onclick="loadCharactersForPromptGeneration()" style="font-size: 0.9em;">
                             🔄 캐릭터 목록 새로고침
                         </button>
+                        <button class="btn btn-warning" onclick="debugCharacterLoading()" style="font-size: 0.8em;">
+                            🔍 디버그 모드
+                        </button>
                     </div>
                 </div>
 
@@ -6115,11 +6118,23 @@
                 const result = await response.json();
                 console.log('📡 API 응답:', result);
 
-                if (!result.success || !result.characters) {
-                    throw new Error('캐릭터 데이터가 없습니다');
+                if (!result.success) {
+                    throw new Error('API 호출 실패');
                 }
 
-                const characters = result.characters;
+                // API 응답에서 캐릭터 데이터 추출 (두 가지 구조 지원)
+                let characters = null;
+                if (result.characters) {
+                    characters = result.characters;
+                    console.log('📊 result.characters에서 데이터 발견');
+                } else if (result.data && result.data.characters) {
+                    characters = result.data.characters;
+                    console.log('📊 result.data.characters에서 데이터 발견');
+                } else {
+                    throw new Error('응답에서 캐릭터 데이터를 찾을 수 없습니다');
+                }
+
+                console.log('📋 추출된 캐릭터 데이터:', characters);
                 const characterArray = Object.values(characters);
 
                 if (characterArray.length === 0) {
@@ -6492,6 +6507,34 @@
 
             // 수동 로드 함수도 글로벌로 등록
             window.loadCharactersForPromptGeneration = loadCharactersForPromptGeneration;
+
+            // 디버깅용 전역 함수 등록
+            window.debugCharacterLoading = async function() {
+                console.log('🔍 === 캐릭터 로딩 디버깅 시작 ===');
+
+                // 1. 드롭다운 요소 확인
+                const dropdown = document.getElementById('characterPromptTarget');
+                console.log('드롭다운 요소:', dropdown);
+
+                if (!dropdown) {
+                    console.error('❌ characterPromptTarget 요소를 찾을 수 없음');
+                    return;
+                }
+
+                // 2. API 직접 호출 테스트
+                try {
+                    const response = await fetch('/api/character-ai-generator?action=list_characters&_t=' + Date.now());
+                    const result = await response.json();
+                    console.log('🔗 직접 API 호출 결과:', result);
+
+                    // 3. 수동으로 드롭다운 채우기
+                    await loadCharactersForPromptGeneration();
+
+                    console.log('✅ 디버깅 완료 - 드롭다운 상태:', dropdown.innerHTML);
+                } catch (error) {
+                    console.error('❌ 디버깅 중 오류:', error);
+                }
+            };
         }
 
         // 페이지 초기화
