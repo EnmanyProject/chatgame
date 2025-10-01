@@ -4935,6 +4935,7 @@
                                     <option value="younger_sibling">동생이 있는 첫째</option>
                                     <option value="middle_child">중간 자녀</option>
                                 </select>
+                                <button type="button" class="btn-random" onclick="randomizeFamily()">🎲 랜덤</button>
                             </div>
                             <div class="form-group">
                                 <label>출신 지역</label>
@@ -4944,6 +4945,7 @@
                                     <option value="gyeonggi">경기도 출신</option>
                                     <option value="countryside">지방 출신</option>
                                 </select>
+                                <button type="button" class="btn-random" onclick="randomizeHometown()">🎲 랜덤</button>
                             </div>
                         </div>
                     </div>
@@ -15872,6 +15874,38 @@
             document.getElementById('charOccupation').value = occupations[Math.floor(Math.random() * occupations.length)];
         }
 
+        function randomizeFamily() {
+            const familyElement = document.getElementById('charFamily');
+            if (!familyElement) {
+                console.error('❌ charFamily 요소를 찾을 수 없습니다!');
+                return;
+            }
+            const options = Array.from(familyElement.options);
+            if (options.length === 0) {
+                console.error('❌ 가족구성 옵션이 없습니다!');
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * options.length);
+            familyElement.selectedIndex = randomIndex;
+            console.log('✅ 가족구성 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
+        }
+
+        function randomizeHometown() {
+            const hometownElement = document.getElementById('charHometown');
+            if (!hometownElement) {
+                console.error('❌ charHometown 요소를 찾을 수 없습니다!');
+                return;
+            }
+            const options = Array.from(hometownElement.options);
+            if (options.length === 0) {
+                console.error('❌ 출신지 옵션이 없습니다!');
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * options.length);
+            hometownElement.selectedIndex = randomIndex;
+            console.log('✅ 출신지 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
+        }
+
         function randomizeSeduction() {
             const select = document.getElementById('seductionStyle');
             const options = select.options;
@@ -16121,6 +16155,8 @@
             randomizeName();
             randomizeAge();
             randomizeOccupation();
+            randomizeFamily();
+            randomizeHometown();
             randomizeCharms();
             randomizeEI();
             randomizeConfidence();
@@ -16283,6 +16319,8 @@
             randomizeName();
             randomizeAge();
             randomizeOccupation();
+            randomizeFamily();
+            randomizeHometown();
 
             // 매력 프로필 랜덤 선택
             console.log('💫 매력 프로필 랜덤 선택 중...');
