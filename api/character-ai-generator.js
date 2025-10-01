@@ -367,7 +367,7 @@ module.exports = async function handler(req, res) {
         try {
           console.log('🔄 더 안정적인 설정으로 재시도 중...');
 
-          const retryPrompt = await generatePromptWithOpenAI(character_data, 'gpt-3.5-turbo', style, 'medium');
+          const retryPrompt = await generateCharacterPromptWithOpenAI(character_data, 'gpt-3.5-turbo', style, 'medium', 'AI 캐릭터 프롬프트를 상세하게 작성해주세요. 제공된 모든 캐릭터 정보를 빠짐없이 포함해야 합니다.');
 
           return res.json({
             success: true,
@@ -387,7 +387,7 @@ module.exports = async function handler(req, res) {
           try {
             console.log('🔄 최종 재시도 중 (짧은 길이)...');
 
-            const finalRetryPrompt = await generatePromptWithOpenAI(character_data, 'gpt-3.5-turbo', style, 'short');
+            const finalRetryPrompt = await generateCharacterPromptWithOpenAI(character_data, 'gpt-3.5-turbo', style, 'short', 'AI 캐릭터 프롬프트를 작성해주세요. 모든 캐릭터 데이터를 포함해야 합니다.');
 
             return res.json({
               success: true,
