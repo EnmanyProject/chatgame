@@ -698,12 +698,18 @@ module.exports = async function handler(req, res) {
 
         // data/photos 폴더에서 해당 캐릭터 파일들 찾기
         let photoFiles = [];
+        let contentsResponse = null;
+
         try {
-          const contentsResponse = await octokit.repos.getContent({
+          contentsResponse = await octokit.repos.getContent({
             owner: 'EnmanyProject',
             repo: 'chatgame',
             path: 'data/photos'
           });
+
+          console.log(`📁 GitHub API 응답 상태: ${contentsResponse.status}`);
+          console.log(`📁 응답 데이터 타입: ${typeof contentsResponse.data}`);
+          console.log(`📁 응답 데이터 배열 여부: ${Array.isArray(contentsResponse.data)}`);
 
           if (Array.isArray(contentsResponse.data)) {
             photoFiles = contentsResponse.data.filter(file =>
@@ -717,8 +723,15 @@ module.exports = async function handler(req, res) {
 
         console.log(`📊 찾은 사진 파일 수: ${photoFiles.length}`);
         console.log(`🔍 검색 기준: character_id=${character_id}`);
-        console.log(`📁 전체 파일 목록:`, Array.isArray(contentsResponse.data) ?
-          contentsResponse.data.map(f => f.name) : 'contentsResponse.data is not array');
+
+        // contentsResponse가 정의되었을 때만 접근
+        if (contentsResponse && contentsResponse.data) {
+          console.log(`📁 전체 파일 목록:`, Array.isArray(contentsResponse.data) ?
+            contentsResponse.data.map(f => f.name) : 'contentsResponse.data is not array');
+        } else {
+          console.log(`📁 contentsResponse가 정의되지 않았거나 data가 없음`);
+        }
+
         console.log(`✅ 필터링된 파일:`, photoFiles.map(f => f.name));
 
         // 각 파일에서 사진 데이터 로드
