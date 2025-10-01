@@ -11421,88 +11421,107 @@
             }
         }
 
-        // 📸 개선된 프로필 이미지 로드 함수 (Enhanced)
+        // 📸 개선된 프로필 이미지 로드 함수 (FIXED)
         async function loadCharacterProfileImageEnhanced(characterId) {
-            console.log(`🔍 [ENHANCED] 프로필 이미지 로드 시작: ${characterId}`);
+            console.log(`🔍 [FIXED] 프로필 이미지 로드 시작: ${characterId}`);
 
             try {
                 const encodedCharacterId = encodeURIComponent(characterId);
                 const apiUrl = `/api/character-ai-generator?action=get_character_photos_v2&character_id=${encodedCharacterId}&_t=${Date.now()}`;
-                console.log(`📡 [ENHANCED] API 호출: ${apiUrl}`);
+                console.log(`📡 [FIXED] API 호출: ${apiUrl}`);
 
                 const response = await fetch(apiUrl);
+                console.log(`📥 [FIXED] API 응답 상태: ${response.status}`);
 
                 if (!response.ok) {
-                    console.error(`❌ [ENHANCED] API 응답 오류: ${response.status}`);
+                    console.error(`❌ [FIXED] API 응답 오류: ${response.status}`);
                     return false;
                 }
 
                 const result = await response.json();
-                console.log(`📊 [ENHANCED] API 응답 구조:`, {
-                    success: result.success,
-                    hasData: !!result.data,
-                    hasPhotos: !!(result.data && result.data.photos),
-                    hasProfile: !!(result.data && result.data.photos && result.data.photos.profile),
-                    profileDataExists: !!(result.data && result.data.photos && result.data.photos.profile && result.data.photos.profile.data)
-                });
+                console.log(`📊 [FIXED] API 응답 데이터:`, result);
 
-                if (result.success && result.data && result.data.photos && result.data.photos.profile && result.data.photos.profile.data) {
+                // 프로필 사진 존재 여부 정확한 체크
+                const hasProfileData = result.success &&
+                                       result.data &&
+                                       result.data.photos &&
+                                       result.data.photos.profile &&
+                                       result.data.photos.profile !== null &&
+                                       result.data.photos.profile.data;
+
+                if (hasProfileData) {
                     const profileData = result.data.photos.profile;
-                    console.log(`✅ [ENHANCED] 프로필 사진 데이터 확인됨 (크기: ${profileData.data.length})`);
+                    console.log(`📷 [FIXED] 프로필 사진 데이터 확인:`, {
+                        hasId: !!profileData.id,
+                        hasData: !!profileData.data,
+                        dataSize: profileData.data ? profileData.data.length : 0,
+                        dataPrefix: profileData.data ? profileData.data.substring(0, 50) : 'none'
+                    });
 
                     const profileContainer = document.getElementById(`profile-image-${characterId}`);
-                    if (!profileContainer) {
-                        console.error(`❌ [ENHANCED] 프로필 컨테이너를 찾을 수 없음: profile-image-${characterId}`);
-                        return false;
-                    }
+                    console.log(`🎯 [FIXED] 프로필 컨테이너 확인:`, {
+                        found: !!profileContainer,
+                        id: `profile-image-${characterId}`,
+                        currentHTML: profileContainer ? profileContainer.innerHTML.substring(0, 100) : 'not found'
+                    });
 
-                    // 기존 내용 백업 (실패시 복구용)
-                    const originalHTML = profileContainer.innerHTML;
-
-                    try {
+                    if (profileContainer && profileData.data) {
                         profileContainer.innerHTML = `
                             <img src="${profileData.data}"
                                  alt="프로필 사진"
                                  style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
-                                 onload="console.log('✅ [ENHANCED] 프로필 이미지 로드 성공: ${characterId}')"
-                                 onerror="console.log('❌ [ENHANCED] 프로필 이미지 로드 실패: ${characterId}'); this.parentElement.innerHTML='<div class=\\"no-image\\">${characterId.split('_')[0].charAt(0)}</div>'"/>
+                                 onload="console.log('✅ [FIXED] 프로필 이미지 로드 성공: ${characterId}')"
+                                 onerror="console.log('❌ [FIXED] 프로필 이미지 로드 실패: ${characterId}'); this.parentElement.innerHTML='<div class=\\\"no-image\\\">${characterId.split('_')[0].charAt(0)}</div>'"/>
                         `;
-                        console.log(`🎨 [ENHANCED] 프로필 이미지 HTML 설정 완료: ${characterId}`);
+                        console.log(`✅ [FIXED] 프로필 이미지 HTML 설정 완료: ${characterId}`);
                         return true;
-                    } catch (htmlError) {
-                        console.error(`❌ [ENHANCED] HTML 설정 실패, 원본 복구:`, htmlError);
-                        profileContainer.innerHTML = originalHTML;
+                    } else {
+                        console.log(`❌ [FIXED] 컨테이너 또는 이미지 데이터 없음`);
                         return false;
                     }
                 } else {
-                    console.log(`❌ [ENHANCED] 프로필 사진 데이터 없음 또는 구조 문제:`, {
+                    console.log(`❌ [FIXED] 프로필 사진 데이터 없음 또는 구조 문제:`, {
                         characterId,
                         success: result.success,
-                        data: !!result.data,
-                        photos: !!(result.data && result.data.photos),
-                        profile: !!(result.data && result.data.photos && result.data.photos.profile)
+                        hasData: !!result.data,
+                        hasPhotos: !!(result.data && result.data.photos),
+                        profileExists: !!(result.data && result.data.photos && result.data.photos.profile),
+                        profileIsNull: result.data && result.data.photos ? result.data.photos.profile === null : 'unknown',
+                        profileValue: result.data && result.data.photos ? result.data.photos.profile : 'none',
+                        allPhotosData: result.data && result.data.photos ? Object.keys(result.data.photos) : 'none'
                     });
 
-                    // 대체 이미지 표시
+                    // 컨테이너를 기본 상태로 설정
                     const profileContainer = document.getElementById(`profile-image-${characterId}`);
                     if (profileContainer) {
-                        const characterName = characterId.split('_')[0];
-                        profileContainer.innerHTML = `<div class="no-image">${characterName.charAt(0)}</div>`;
-                        console.log(`🎨 [ENHANCED] 대체 이미지 표시: ${characterName.charAt(0)}`);
+                        profileContainer.innerHTML = `<div class="no-image">${characterId.split('_')[0].charAt(0)}</div>`;
                     }
                     return false;
                 }
             } catch (error) {
-                console.error(`💥 [ENHANCED] 프로필 이미지 로드 예외:`, error);
-
-                // 에러 시 대체 이미지 표시
-                const profileContainer = document.getElementById(`profile-image-${characterId}`);
-                if (profileContainer) {
-                    const characterName = characterId.split('_')[0];
-                    profileContainer.innerHTML = `<div class="no-image">${characterName.charAt(0)}</div>`;
-                }
+                console.error(`❌ [FIXED] 프로필 이미지 로드 오류:`, error);
                 return false;
             }
+        }
+
+        // 📸 모든 캐릭터 프로필 이미지 로드 (일괄 처리)
+        function loadAllCharacterPhotos() {
+            console.log('🔄 [FIXED] 모든 캐릭터 프로필 이미지 로드 시작');
+
+            const characterCards = document.querySelectorAll('.character-card');
+            console.log(`📊 [FIXED] 찾은 캐릭터 카드 수: ${characterCards.length}`);
+
+            characterCards.forEach((card, index) => {
+                const profileImageContainer = card.querySelector('[id^="profile-image-"]');
+                if (profileImageContainer) {
+                    const characterId = profileImageContainer.id.replace('profile-image-', '');
+                    console.log(`📸 [FIXED] ${index + 1}/${characterCards.length} 캐릭터 이미지 로드: ${characterId}`);
+
+                    setTimeout(() => {
+                        loadCharacterProfileImageEnhanced(characterId);
+                    }, index * 100); // 100ms 간격으로 순차 로드
+                }
+            });
         }
 
         // 🔢 전체 사진 개수 계산
