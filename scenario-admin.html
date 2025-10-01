@@ -6398,34 +6398,74 @@
             }
         }
 
-        // 캐릭터 데이터 전체를 안전하게 변환하는 함수
+        // 🎯 OpenAI 전송용 안전한 구간만 추출하는 함수 (구조적 접근법)
         function sanitizeCharacterForOpenAI(character) {
             if (!character) return character;
 
-            // 깊은 복사를 통해 원본 데이터 보존
-            const sanitizedCharacter = JSON.parse(JSON.stringify(character));
+            console.log('🎯 웹 인터페이스: 안전 구간 추출 시작 - 민감한 필드 완전 제외');
 
-            // 재귀적으로 모든 값 처리
-            function sanitizeObject(obj) {
-                if (!obj || typeof obj !== 'object') return obj;
+            // ✅ OpenAI에 전송할 안전한 구간만 추출
+            const safeData = {
+                // 1. ✅ 기본 정보 (완전 안전)
+                basic_info: character.basic_info ? {
+                    name: character.basic_info.name,
+                    age: character.basic_info.age,
+                    mbti: character.basic_info.mbti,
+                    occupation: character.basic_info.occupation,
+                    gender: character.basic_info.gender
+                } : {},
 
-                for (const key in obj) {
-                    if (obj.hasOwnProperty(key)) {
-                        if (Array.isArray(obj[key])) {
-                            obj[key] = obj[key].map(item =>
-                                typeof item === 'string' ? sanitizeValueForOpenAI(item) : item
-                            );
-                        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-                            sanitizeObject(obj[key]);
-                        } else if (typeof obj[key] === 'string') {
-                            obj[key] = sanitizeValueForOpenAI(obj[key]);
-                        }
-                    }
-                }
-            }
+                // 2. ✅ 매력 프로필 (민감한 sexual_ 필드 제외)
+                appeal_profile: character.appeal_profile ? {
+                    seduction_style: character.appeal_profile.seduction_style,
+                    charm_points: character.appeal_profile.charm_points,
+                    emotional_intelligence: character.appeal_profile.emotional_intelligence,
+                    confidence_level: character.appeal_profile.confidence_level,
+                    mystery_factor: character.appeal_profile.mystery_factor,
+                    hobbies: character.appeal_profile.hobbies
+                    // ❌ sexual_curiosity, sexual_comfort 제외
+                } : {},
 
-            sanitizeObject(sanitizedCharacter);
-            return sanitizedCharacter;
+                // 3. ✅ 외모 (민감한 세부사항 제외)
+                physical_allure: character.physical_allure ? {
+                    appearance: character.physical_allure.appearance ? {
+                        hair: character.physical_allure.appearance.hair,
+                        eyes: character.physical_allure.appearance.eyes,
+                        body: character.physical_allure.appearance.body,
+                        waist_hip: character.physical_allure.appearance.waist_hip,
+                        style: character.physical_allure.appearance.style
+                        // ❌ bust 제외
+                    } : {}
+                    // ❌ feature_elements, sensual_habits, body_language 제외
+                } : {},
+
+                // 4. ✅ 대화 스타일 (안전한 부분만)
+                conversation_dynamics: character.conversation_dynamics ? {
+                    speech_style: character.conversation_dynamics.speech_style,
+                    flirting_patterns: character.conversation_dynamics.flirting_patterns,
+                    conversation_hooks: character.conversation_dynamics.conversation_hooks,
+                    speech_habits: character.conversation_dynamics.speech_habits,
+                    vocabulary_register: character.conversation_dynamics.vocabulary_register,
+                    allowed_motifs: character.conversation_dynamics.allowed_motifs
+                    // ❌ reaction_tendencies, forbidden_terms 제외 (덜 중요)
+                } : {}
+
+                // ═══ 여기까지만 OpenAI 전송 ═══
+                // ❌ psychological_depth 완전 제외
+                // ❌ past_history 완전 제외
+                // ❌ favorite_gifts 완전 제외
+                // ❌ future_goals 완전 제외
+                // ❌ male_priorities 완전 제외
+            };
+
+            console.log('🎯 웹 인터페이스: 안전 구간 추출 완료');
+            console.log('  ✅ basic_info:', !!safeData.basic_info);
+            console.log('  ✅ appeal_profile:', !!safeData.appeal_profile);
+            console.log('  ✅ physical_allure:', !!safeData.physical_allure);
+            console.log('  ✅ conversation_dynamics:', !!safeData.conversation_dynamics);
+            console.log('  ❌ 민감한 필드들 모두 제외됨');
+
+            return safeData;
         }
 
         function createSystemPromptForCharacter(character, style, length) {
@@ -6444,79 +6484,46 @@
             return `당신은 MBTI 기반 캐릭터 분석 전문가입니다.
 주어진 캐릭터 정보의 모든 특성을 빠짐없이 반영하여 ${styleGuide[style]} 캐릭터 프로필을 ${lengthGuide[length]} 분량으로 작성해주세요.
 
-**중요: 제공된 캐릭터의 모든 성격적, 심리적 특성을 반드시 포함해야 합니다.**
+**중요: 제공된 캐릭터의 모든 특성을 반드시 포함해야 합니다.**
 
 다음 모든 요소들을 구체적으로 언급하여 작성해주세요:
 
-📋 기본정보 (필수 포함):
+📋 기본정보:
 - 이름: ${character.basic_info?.name}
 - 나이: ${character.basic_info?.age}세
 - MBTI: ${character.basic_info?.mbti}
 - 직업: ${character.basic_info?.occupation}
 - 성별: ${character.basic_info?.gender}
 
-✨ 성격 프로필 (모두 포함):
+✨ 성격 프로필:
 - 매력 스타일: ${character.appeal_profile?.seduction_style}
 - 매력 포인트: ${Array.isArray(character.appeal_profile?.charm_points) ? character.appeal_profile.charm_points.join(', ') : ''}
 - 감정지능: ${character.appeal_profile?.emotional_intelligence}/10
 - 자신감: ${character.appeal_profile?.confidence_level}/10
 - 신비로움: ${character.appeal_profile?.mystery_factor}/10
-- 호기심 정도: ${character.appeal_profile?.sexual_curiosity || '보통'}/10
-- 개방성 정도: ${character.appeal_profile?.sexual_comfort || '보통'}/10
 - 취미: ${Array.isArray(character.appeal_profile?.hobbies) ? character.appeal_profile.hobbies.join(', ') : ''}
 
-👄 외모적 특징 (구체적으로):
+👄 외모적 특징:
 - 헤어: ${character.physical_allure?.appearance?.hair}
 - 눈: ${character.physical_allure?.appearance?.eyes}
 - 체형: ${character.physical_allure?.appearance?.body}
-- 체격: ${character.physical_allure?.appearance?.bust}
-- 허리/힙: ${character.physical_allure?.appearance?.waist_hip}
-- 스타일: ${character.physical_allure?.appearance?.style}
-- 특징적 요소: ${Array.isArray(character.physical_allure?.feature_elements) ? character.physical_allure.feature_elements.join(', ') : ''}
-- 매력적 습관: ${Array.isArray(character.physical_allure?.sensual_habits) ? character.physical_allure.sensual_habits.join(', ') : ''}
-- 바디랭귀지: ${Array.isArray(character.physical_allure?.body_language) ? character.physical_allure.body_language.join(', ') : ''}
 
-🧠 심리적 깊이 (세밀하게):
-- 핵심 욕구: ${Array.isArray(character.psychological_depth?.core_desires) ? character.psychological_depth.core_desires.join(', ') : ''}
-- 취약점: ${Array.isArray(character.psychological_depth?.vulnerabilities) ? character.psychological_depth.vulnerabilities.join(', ') : ''}
-- 가치관: ${character.psychological_depth?.values}
-- 개방성 수준: ${character.psychological_depth?.sexual_freedom || '보통'}/10
-- 편안함 수준: ${character.psychological_depth?.boundaries?.comfort_level}
-- 발전 속도: ${character.psychological_depth?.boundaries?.escalation_pace}
-- 소통 톤: ${character.psychological_depth?.boundaries?.sexual_tone_band || '보통'}
+🧠 MBTI 성격 특성:
+- MBTI 유형: ${character.basic_info?.mbti}
+- 성격 특징: ${character.basic_info?.mbti} 유형의 특성을 가진 매력적인 성격
 
-💬 대화 역학 (상세히):
+💬 대화 역학:
 - 말투: ${character.conversation_dynamics?.speech_style}
 - 매력적 대화법: ${Array.isArray(character.conversation_dynamics?.flirting_patterns) ? character.conversation_dynamics.flirting_patterns.join(', ') : ''}
 - 대화 주제: ${Array.isArray(character.conversation_dynamics?.conversation_hooks) ? character.conversation_dynamics.conversation_hooks.join(', ') : ''}
 - 말 습관: ${Array.isArray(character.conversation_dynamics?.speech_habits) ? character.conversation_dynamics.speech_habits.join(', ') : ''}
-- 어휘 수준: ${character.conversation_dynamics?.vocabulary_register}
-- 허용 모티프: ${Array.isArray(character.conversation_dynamics?.allowed_motifs) ? character.conversation_dynamics.allowed_motifs.join(', ') : ''}
-- 금기 단어: ${Array.isArray(character.conversation_dynamics?.forbidden_terms) ? character.conversation_dynamics.forbidden_terms.join(', ') : ''}
-- 유머 반응: ${character.conversation_dynamics?.reaction_tendencies?.humor}
-- 칭찬 반응: ${character.conversation_dynamics?.reaction_tendencies?.compliment}
-- 관심 표현: ${character.conversation_dynamics?.reaction_tendencies?.interest_expression}
-
-💕 과거 경험:
-- 연애 경험: ${character.past_history?.relationship_experience}
-- 남자친구 수: ${character.past_history?.boyfriend_count}명
-- 선호하는 친밀감 표현: ${Array.isArray(character.past_history?.preferred_skinship) ? character.past_history.preferred_skinship.join(', ') : ''}
-- 성숙한 경험 시기: ${character.past_history?.first_experience_age || '성인'}
-
-🎁 기타 정보:
-- 좋아하는 선물: ${Array.isArray(character.favorite_gifts) ? character.favorite_gifts.join(', ') : ''}
-- 남성 우선순위: ${Array.isArray(character.male_priorities) ? character.male_priorities.join(', ') : ''}
-- 자산 목표: ${character.future_goals?.asset_goal}
-- 미래 직업: ${Array.isArray(character.future_goals?.future_careers) ? character.future_goals.future_careers.join(', ') : ''}
 
 다음 형식으로 작성해주세요:
-1. 캐릭터의 핵심 성격과 특징 (외모, 성격, 매력 포인트 모두 구체적으로)
-2. MBTI 특성에 따른 행동 패턴 (심리적 깊이 반영)
-3. 대화 스타일과 선호하는 소통 방식 (모든 대화 특성 포함)
-4. 관계에서 중요하게 생각하는 가치 (가치관, 편안함 수준 포함)
-5. 특별한 취미나 관심사 (선호하는 주제들 포함)
-6. 과거 경험과 인간관계 패턴 (구체적인 경험 포함)
-7. 선호하는 관계 발전 방식 (친밀감 표현, 진행 속도 포함)
+1. 캐릭터의 핵심 성격과 특징 (외모, 성격, 매력 포인트)
+2. MBTI 특성에 따른 행동 패턴
+3. 대화 스타일과 선호하는 소통 방식
+4. 특별한 취미나 관심사
+5. 전반적인 매력과 특징
 
 위에 제공된 모든 특성을 빠짐없이 자연스럽게 녹여서 한국어로 매력적인 캐릭터 프로필을 작성해주세요.
 각 수치와 구체적인 특징들을 모두 언급해야 합니다.`;
