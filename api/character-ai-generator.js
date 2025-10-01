@@ -367,7 +367,7 @@ module.exports = async function handler(req, res) {
         try {
           console.log('🔄 더 안정적인 설정으로 재시도 중...');
 
-          const retryPrompt = await generateCharacterPromptWithOpenAI(character_data, 'gpt-3.5-turbo', style, 'medium', 'AI 캐릭터 프롬프트를 상세하게 작성해주세요. 제공된 모든 캐릭터 정보를 빠짐없이 포함해야 합니다.');
+          const retryPrompt = await generateCharacterPromptWithOpenAI(character_data, 'gpt-4o', style, 'medium', 'AI 캐릭터 프롬프트를 상세하게 작성해주세요. 제공된 모든 캐릭터 정보를 빠짐없이 포함해야 합니다.');
 
           return res.json({
             success: true,
@@ -387,7 +387,7 @@ module.exports = async function handler(req, res) {
           try {
             console.log('🔄 최종 재시도 중 (짧은 길이)...');
 
-            const finalRetryPrompt = await generateCharacterPromptWithOpenAI(character_data, 'gpt-3.5-turbo', style, 'short', 'AI 캐릭터 프롬프트를 작성해주세요. 모든 캐릭터 데이터를 포함해야 합니다.');
+            const finalRetryPrompt = await generateCharacterPromptWithOpenAI(character_data, 'gpt-4o', style, 'short', 'AI 캐릭터 프롬프트를 작성해주세요. 모든 캐릭터 데이터를 포함해야 합니다.');
 
             return res.json({
               success: true,
@@ -3031,7 +3031,7 @@ async function savePhotosToGitHub(photosData) {
 // 🎭 ================ 캐릭터 프롬프트 생성 함수들 ================
 
 // OpenAI API를 통한 캐릭터 프롬프트 생성
-async function generateCharacterPromptWithOpenAI(characterData, model = 'gpt-4', style, length, systemPrompt) {
+async function generateCharacterPromptWithOpenAI(characterData, model = 'gpt-4o', style, length, systemPrompt) {
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
   if (!OPENAI_API_KEY) {
