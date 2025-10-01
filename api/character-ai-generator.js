@@ -3373,7 +3373,7 @@ function createCharacterSummary(characterData) {
   const appeal = characterData.appeal_profile || {};
   const physical = characterData.physical_allure || {};
   const conversation = characterData.conversation_dynamics || {};
-  // 안전한 데이터만 사용 - psychological_depth, past_history 제외
+  // 안전한 데이터만 사용 - 민감한 필드 완전 제외
 
   let summary = `==== 📋 기본 정보 ====
 이름: ${basic.name || '미정'}
@@ -3388,21 +3388,12 @@ MBTI: ${basic.mbti || '미정'}
 감정지능: ${appeal.emotional_intelligence || '보통'}점 (10점 만점)
 자신감: ${appeal.confidence_level || '보통'}점 (10점 만점)
 신비로움: ${appeal.mystery_factor || '보통'}점 (10점 만점)
-호기심 정도: ${appeal.sexual_curiosity || '보통'}점 (10점 만점)
-개방성 정도: ${appeal.sexual_comfort || '보통'}점 (10점 만점)
 취미: ${appeal.hobbies ? translateToKorean(appeal.hobbies) : '독서, 음악감상'}
 
 ==== 👄 외모적 매력 ====
 헤어스타일: ${translateToKorean(physical.appearance?.hair) || '자연스러운 헤어'}
 눈: ${translateToKorean(physical.appearance?.eyes) || '따뜻한 눈'}
 체형: ${translateToKorean(physical.appearance?.body) || '자연스러운 체형'}
-체격: ${physical.appearance?.bust || '자연스러운'} 타입
-허리/힙: ${translateToKorean(physical.appearance?.waist_hip) || '균형잡힌'}
-스타일: ${translateToKorean(physical.appearance?.style) || '편안한 스타일'}
-
-특징적 요소: ${physical.feature_elements ? translateToKorean(physical.feature_elements) : '자연스러운 매력'}
-매력적 습관: ${physical.sensual_habits ? translateToKorean(physical.sensual_habits) : '자연스러운 행동'}
-바디 랭귀지: ${physical.body_language ? translateToKorean(physical.body_language) : '편안한 몸짓'}
 
 ==== 🧠 MBTI 성격 특성 ====
 MBTI 유형: ${basic.mbti || 'INFP'}
@@ -3413,25 +3404,10 @@ MBTI 유형: ${basic.mbti || 'INFP'}
 소통 패턴: ${conversation.flirting_patterns ? translateToKorean(conversation.flirting_patterns) : '자연스러운 소통'}
 대화 주제: ${conversation.conversation_hooks ? translateToKorean(conversation.conversation_hooks) : '일상적인 주제들'}
 말 습관: ${conversation.speech_habits ? translateToKorean(conversation.speech_habits) : '자연스러운 말투'}
-어휘 수준: ${translateToKorean(conversation.vocabulary_register) || '일상적'}
-허용 모티프: ${conversation.allowed_motifs ? translateToKorean(conversation.allowed_motifs) : '일반적 주제들'}
-금기 단어: ${conversation.forbidden_terms ? translateToKorean(conversation.forbidden_terms) : '없음'}
-
-반응 패턴:
-- 유머에 대한 반응: ${translateToKorean(conversation.reaction_tendencies?.humor) || '자연스럽게 웃음'}
-- 칭찬에 대한 반응: ${translateToKorean(conversation.reaction_tendencies?.compliment) || '감사히 받아들임'}
-- 관심 표현 방식: ${translateToKorean(conversation.reaction_tendencies?.interest_expression) || '열정적으로 공유'}
 
 ==== 🎯 취미와 관심사 ====
 주요 취미: ${appeal.hobbies ? translateToKorean(appeal.hobbies) : '독서, 음악감상'}
-대화 주제: ${conversation.conversation_hooks ? translateToKorean(conversation.conversation_hooks) : '일상, 취미'}
-
-==== 📊 메타데이터 ====
-생성일: ${characterData.created_at || '미정'}
-업데이트일: ${characterData.updated_at || '미정'}
-소스: ${characterData.source || '수동 생성'}
-버전: ${characterData.version || '1.0'}
-활성 상태: ${characterData.active ? '활성' : '비활성'}`;
+대화 주제: ${conversation.conversation_hooks ? translateToKorean(conversation.conversation_hooks) : '일상, 취미'}`;
 
   return summary;
 }
