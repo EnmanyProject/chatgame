@@ -10,10 +10,11 @@
         "gender": "female"
       },
       "appeal_profile": {
-        "seduction_style": "intellectually_stimulating",
         "charm_points": [
           "infectious_smile",
-          "mysterious_aura"
+          "mysterious_aura",
+          "intelligent_eyes",
+          "elegant_posture"
         ],
         "emotional_intelligence": 7,
         "confidence_level": 8,
@@ -115,6 +116,13 @@
         "emotional_maturity",
         "ambition"
       ],
+      "future_goals": {
+        "asset_goal": "5_billion",
+        "future_careers": [
+          "designer",
+          "cafe_owner"
+        ]
+      },
       "created_at": "2025-09-30T14:01:34.283Z",
       "updated_at": "2025-09-30T14:01:35.146Z",
       "source": "scenario_admin_v2",
@@ -131,11 +139,11 @@
         "gender": "female"
       },
       "appeal_profile": {
-        "seduction_style": "mysterious_elegant",
         "charm_points": [
           "witty_banter",
           "confident_touch",
-          "graceful_movements"
+          "graceful_movements",
+          "sweet_voice"
         ],
         "emotional_intelligence": 6,
         "confidence_level": 10,
@@ -242,6 +250,13 @@
         "financial_stability",
         "ambition"
       ],
+      "future_goals": {
+        "asset_goal": "10_billion",
+        "future_careers": [
+          "entrepreneur",
+          "influencer"
+        ]
+      },
       "created_at": "2025-10-01T02:13:49.045Z",
       "updated_at": "2025-10-01T02:13:50.815Z",
       "source": "scenario_admin_v2",

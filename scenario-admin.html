@@ -4979,18 +4979,7 @@
                         <h3>💫 매력 프로필</h3>
                         <div class="appeal-grid">
                             <div class="form-group">
-                                <label>유혹 스타일</label>
-                                <select id="seductionStyle">
-                                    <option value="playful_confident">🎭 장난스럽고 자신감 있는</option>
-                                    <option value="mysterious_elegant">🌙 신비롭고 우아한</option>
-                                    <option value="warm_nurturing">🌸 따뜻하고 포용적인</option>
-                                    <option value="intellectually_stimulating">🧠 지적이고 자극적인</option>
-                                </select>
-                                <button type="button" class="btn-random" onclick="randomizeSeduction()">🎲 랜덤</button>
-                            </div>
-
-                            <div class="form-group">
-                                <label>매력 포인트 (최대 3개 선택)</label>
+                                <label>💫 매력 포인트 (최대 4개 선택)</label>
                                 <div class="charm-options">
                                     <button type="button" class="charm-btn" data-charm="infectious_smile">😊 전염성 있는 미소</button>
                                     <button type="button" class="charm-btn" data-charm="witty_banter">💬 재치있는 대화</button>
@@ -4998,6 +4987,15 @@
                                     <button type="button" class="charm-btn" data-charm="mysterious_aura">🔮 신비로운 분위기</button>
                                     <button type="button" class="charm-btn" data-charm="graceful_movements">💃 우아한 움직임</button>
                                     <button type="button" class="charm-btn" data-charm="expressive_eyes">👀 표현력 있는 눈빛</button>
+                                    <button type="button" class="charm-btn" data-charm="sweet_voice">🎵 달콤한 목소리</button>
+                                    <button type="button" class="charm-btn" data-charm="elegant_posture">👸 우아한 자세</button>
+                                    <button type="button" class="charm-btn" data-charm="cute_laugh">😄 귀여운 웃음소리</button>
+                                    <button type="button" class="charm-btn" data-charm="natural_beauty">🌿 자연스러운 아름다움</button>
+                                    <button type="button" class="charm-btn" data-charm="intelligent_eyes">🤓 지적인 눈빛</button>
+                                    <button type="button" class="charm-btn" data-charm="warm_personality">☀️ 따뜻한 성격</button>
+                                    <button type="button" class="charm-btn" data-charm="playful_attitude">🎭 장난스러운 태도</button>
+                                    <button type="button" class="charm-btn" data-charm="gentle_touch">🤗 부드러운 터치</button>
+                                    <button type="button" class="charm-btn" data-charm="captivating_smile">✨ 매혹적인 미소</button>
                                 </div>
                                 <button type="button" class="btn-random" onclick="randomizeCharms()">🎲 랜덤 선택</button>
                             </div>
@@ -5333,6 +5331,47 @@
                                     <button type="button" class="forbidden-topic-btn" data-topic="work_stress">💼 직장 스트레스</button>
                                     <button type="button" class="forbidden-topic-btn" data-topic="past_relationships">💔 과거 연애</button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 🎆 미래 목표 (새로 추가) -->
+                    <div class="char-category">
+                        <h3>🎆 미래 목표</h3>
+                        <div class="future-goals-grid">
+                            <div class="form-group">
+                                <label>💰 자산 목표</label>
+                                <select id="assetGoal">
+                                    <option value="1_billion">🏏 1억 원 (주택 마련)</option>
+                                    <option value="3_billion">🏠 3억 원 (전세 없이 내 집)</option>
+                                    <option value="5_billion">🏡 5억 원 (땅 있는 집)</option>
+                                    <option value="10_billion">🏭 10억 원 (빌딩 한 층)</option>
+                                    <option value="30_billion">🏢 30억 원 (건물 전체)</option>
+                                    <option value="50_billion">🏯 50억 원 (여러 건물)</option>
+                                    <option value="100_billion">🏰 100억 원 (대기업 규모)</option>
+                                </select>
+                                <button type="button" class="btn-random" onclick="randomizeAssetGoal()">🎲 랜덤</button>
+                            </div>
+
+                            <div class="form-group">
+                                <label>💼 미래 직업 (최대 2개 선택)</label>
+                                <div class="future-career-grid">
+                                    <button type="button" class="career-btn" data-career="housewife">🏠 전업주부</button>
+                                    <button type="button" class="career-btn" data-career="freelancer">💻 프리랜서</button>
+                                    <button type="button" class="career-btn" data-career="doctor">👩‍⚕️ 의사</button>
+                                    <button type="button" class="career-btn" data-career="lawyer">👩‍⚖️ 변호사</button>
+                                    <button type="button" class="career-btn" data-career="teacher">👩‍🏫 교사</button>
+                                    <button type="button" class="career-btn" data-career="cafe_owner">☕ 카페 사장</button>
+                                    <button type="button" class="career-btn" data-career="restaurant_owner">🍝 식당 운영</button>
+                                    <button type="button" class="career-btn" data-career="designer">🎨 디자이너</button>
+                                    <button type="button" class="career-btn" data-career="influencer">📱 인플루언서</button>
+                                    <button type="button" class="career-btn" data-career="entrepreneur">🚀 창업가</button>
+                                    <button type="button" class="career-btn" data-career="artist">🎭 예술가</button>
+                                    <button type="button" class="career-btn" data-career="consultant">📈 컸설턴트</button>
+                                    <button type="button" class="career-btn" data-career="beauty_business">💅 미용 사업</button>
+                                    <button type="button" class="career-btn" data-career="unemployed">📏 백수(운동권)</button>
+                                </div>
+                                <button type="button" class="btn-random" onclick="randomizeFutureCareers()">🎲 랜덤 선택</button>
                             </div>
                         </div>
                     </div>
@@ -9623,6 +9662,33 @@
                     'moderate': '중간 정도',
                     'open': '개방적',
                     'adventurous': '모험적'
+                },
+                // 🎆 자산 목표 번역
+                asset_goal: {
+                    '1_billion': '1억 원 (주택 마련)',
+                    '3_billion': '3억 원 (전세 없이 내 집)',
+                    '5_billion': '5억 원 (땅 있는 집)',
+                    '10_billion': '10억 원 (빌딩 한 층)',
+                    '30_billion': '30억 원 (건물 전체)',
+                    '50_billion': '50억 원 (여러 건물)',
+                    '100_billion': '100억 원 (대기업 규모)'
+                },
+                // 🎆 미래 직업 번역
+                future_careers: {
+                    'housewife': '전업주부',
+                    'freelancer': '프리랜서',
+                    'doctor': '의사',
+                    'lawyer': '변호사',
+                    'teacher': '교사',
+                    'cafe_owner': '카페 사장',
+                    'restaurant_owner': '식당 운영',
+                    'designer': '디자이너',
+                    'influencer': '인플루언서',
+                    'entrepreneur': '창업가',
+                    'artist': '예술가',
+                    'consultant': '컸설턴트',
+                    'beauty_business': '미용 사업',
+                    'unemployed': '백수(운동권)'
                 }
             };
 
@@ -10499,16 +10565,16 @@
                     }
                 }
 
-                // 💫 매력 포인트 버튼 클릭 이벤트 (최대 3개 선택)
+                // 💫 매력 포인트 버튼 클릭 이벤트 (최대 4개 선택)
                 if (e.target.classList.contains('charm-btn')) {
                     const selectedCharms = document.querySelectorAll('.charm-btn.selected').length;
 
                     if (e.target.classList.contains('selected')) {
                         e.target.classList.remove('selected');
-                    } else if (selectedCharms < 3) {
+                    } else if (selectedCharms < 4) {
                         e.target.classList.add('selected');
                     } else {
-                        alert('매력 포인트는 최대 3개까지만 선택 가능합니다.');
+                        alert('매력 포인트는 최대 4개까지만 선택 가능합니다.');
                     }
                     console.log('✅ 매력 포인트 업데이트:', getSelectedCharms());
                 }
@@ -10679,6 +10745,20 @@
                         alert('남자를 볼 때 최우선시 하는 것은 최대 3개까지만 선택 가능합니다.');
                     }
                     console.log('✅ 선택된 남자 우선순위:', getSelectedMalePriorities());
+                }
+
+                // 🎆 미래 직업 버튼 클릭 이벤트 (최대 2개 선택)
+                if (e.target.classList.contains('career-btn')) {
+                    const selectedCareers = document.querySelectorAll('.career-btn.selected').length;
+
+                    if (e.target.classList.contains('selected')) {
+                        e.target.classList.remove('selected');
+                    } else if (selectedCareers < 2) {
+                        e.target.classList.add('selected');
+                    } else {
+                        alert('미래 직업은 최대 2개까지만 선택 가능합니다.');
+                    }
+                    console.log('✅ 선택된 미래 직업:', getSelectedFutureCareers());
                 }
             });
         }
@@ -14615,7 +14695,12 @@
                 // 🎁 좋아하는 선물 정보
                 favorite_gifts: getSelectedFavoriteGifts(),
                 // 👨 남자를 볼 때 최우선시하는 것
-                male_priorities: getSelectedMalePriorities()
+                male_priorities: getSelectedMalePriorities(),
+                // 🎆 미래 목표 정보
+                future_goals: {
+                    asset_goal: document.getElementById('assetGoal')?.value || '5_billion',
+                    future_careers: getSelectedFutureCareers()
+                }
             };
 
             console.log('📋 수집된 폼 데이터 (확장):', formData);
@@ -15836,11 +15921,56 @@
             console.log(`✅ 좋아하는 선물 ${selectCount}개 랜덤 선택 완료`);
         }
 
+        // 🎆 선택된 미래 직업 수집 (최대 2개)
+        function getSelectedFutureCareers() {
+            console.log('🔍 getSelectedFutureCareers 실행 중...');
+            const selected = [];
+            const selectedCareerBtns = document.querySelectorAll('.career-btn.selected');
+            console.log('📊 선택된 career-btn 요소 수:', selectedCareerBtns.length);
+
+            selectedCareerBtns.forEach(btn => {
+                const value = btn.getAttribute('data-career');
+                if (value) {
+                    selected.push(value);
+                    console.log('✅ 미래 직업 수집됨:', value);
+                }
+            });
+
+            console.log('🎯 최종 미래 직업 배열:', selected);
+            return selected.length === 0 ? [] : selected;
+        }
+
+        // 🎆 자산 목표 랜덤 선택
+        function randomizeAssetGoal() {
+            const assetGoals = ['1_billion', '3_billion', '5_billion', '10_billion', '30_billion', '50_billion', '100_billion'];
+            const randomGoal = assetGoals[Math.floor(Math.random() * assetGoals.length)];
+            document.getElementById('assetGoal').value = randomGoal;
+            console.log('🎲 랜덤 자산 목표 선택:', randomGoal);
+        }
+
+        // 🎆 미래 직업 랜덤 선택 (1-2개)
+        function randomizeFutureCareers() {
+            // 기존 선택 해제
+            document.querySelectorAll('.career-btn.selected').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            const careerBtns = document.querySelectorAll('.career-btn');
+            const numCareers = Math.floor(Math.random() * 2) + 1; // 1-2개 랜덤
+            const shuffled = Array.from(careerBtns).sort(() => 0.5 - Math.random());
+
+            for (let i = 0; i < numCareers && i < shuffled.length; i++) {
+                shuffled[i].classList.add('selected');
+                const career = shuffled[i].getAttribute('data-career');
+                console.log('🎲 랜덤 미래 직업 선택:', career);
+            }
+            console.log('✅ 미래 직업 랜덤 선택 완료');
+        }
+
         function randomizeAllFields() {
             randomizeName();
             randomizeAge();
             randomizeOccupation();
-            randomizeSeduction();
             randomizeCharms();
             randomizeEI();
             randomizeConfidence();
@@ -15857,6 +15987,8 @@
             randomizeBodyLanguage(); // 💕 흥분시 반응 랜덤 선택
             randomizeSpeechHabits(); // 🗣️ 말투 습관 랜덤 선택
             randomizeForbiddenTopics(); // 🚫 금지 분야 랜덤 선택
+            randomizeAssetGoal(); // 🎆 자산 목표 랜덤 선택
+            randomizeFutureCareers(); // 🎆 미래 직업 랜덤 선택
 
             const statusEl = document.getElementById('randomStatus');
             if (statusEl) {
@@ -16004,7 +16136,6 @@
 
             // 매력 프로필 랜덤 선택
             console.log('💫 매력 프로필 랜덤 선택 중...');
-            randomizeSeduction();
             randomizeCharms();
             randomizeEI();
             randomizeConfidence();
