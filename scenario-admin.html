@@ -6280,19 +6280,23 @@
         async function callOpenAIForPromptGeneration(character, model, style, length) {
             const apiUrl = '/api/character-ai-generator';
 
-            // 캐릭터 정보를 기반으로 한 시스템 프롬프트 생성
-            const systemPrompt = createSystemPromptForCharacter(character, style, length);
+            // 캐릭터 데이터를 OpenAI 정책에 안전하게 변환
+            const sanitizedCharacter = sanitizeCharacterForOpenAI(character);
+            console.log('🛡️ 원본 캐릭터 데이터 안전하게 변환 완료');
+
+            // 안전한 캐릭터 정보를 기반으로 한 시스템 프롬프트 생성
+            const systemPrompt = createSystemPromptForCharacter(sanitizedCharacter, style, length);
 
             const requestData = {
                 action: 'generate_character_prompt',
-                character_data: character,
+                character_data: sanitizedCharacter,  // 안전하게 변환된 데이터 사용
                 model: model,
                 style: style,
                 length: length,
                 system_prompt: systemPrompt
             };
 
-            console.log('📤 OpenAI API 요청 데이터:', requestData);
+            console.log('📤 OpenAI API 요청 데이터 (안전 변환됨):', requestData);
 
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -6317,6 +6321,81 @@
         }
 
         // 캐릭터별 시스템 프롬프트 생성
+        // 민감한 값들을 안전한 표현으로 변환하는 함수
+        function sanitizeValueForOpenAI(value) {
+            if (!value) return value;
+
+            const sanitizationMap = {
+                // 의류/액세서리 관련
+                'luxury_lingerie': 'elegant_accessories',
+                'sexy_lingerie': 'elegant_clothing',
+                'sensual_lingerie': 'stylish_undergarments',
+
+                // 외모 관련
+                'seductive_eyes': 'expressive_eyes',
+                'sultry_dominant': 'confident_charming',
+                'passionate_kiss': 'warm_affection',
+                'sultry_gaze': 'charming_gaze',
+                'seductive_smile': 'attractive_smile',
+
+                // 스킨십 관련
+                'intimate_cuddling': 'close_bonding',
+                'passionate_kiss': 'affectionate_gesture',
+                'intimate_touch': 'gentle_touch',
+                'sensual_massage': 'relaxing_massage',
+
+                // 신체 관련
+                'D': 'well_proportioned',
+                'E': 'full_figured',
+                'F': 'curvy',
+
+                // 기타 민감한 표현
+                'sensual_habits': 'charming_habits',
+                'sultry': 'charming',
+                'seductive': 'attractive',
+                'sensual': 'graceful',
+                'erotic': 'romantic',
+                'sexual': 'intimate',
+                'arousing': 'captivating'
+            };
+
+            if (Array.isArray(value)) {
+                return value.map(item => sanitizationMap[item] || item);
+            } else {
+                return sanitizationMap[value] || value;
+            }
+        }
+
+        // 캐릭터 데이터 전체를 안전하게 변환하는 함수
+        function sanitizeCharacterForOpenAI(character) {
+            if (!character) return character;
+
+            // 깊은 복사를 통해 원본 데이터 보존
+            const sanitizedCharacter = JSON.parse(JSON.stringify(character));
+
+            // 재귀적으로 모든 값 처리
+            function sanitizeObject(obj) {
+                if (!obj || typeof obj !== 'object') return obj;
+
+                for (const key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+                        if (Array.isArray(obj[key])) {
+                            obj[key] = obj[key].map(item =>
+                                typeof item === 'string' ? sanitizeValueForOpenAI(item) : item
+                            );
+                        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                            sanitizeObject(obj[key]);
+                        } else if (typeof obj[key] === 'string') {
+                            obj[key] = sanitizeValueForOpenAI(obj[key]);
+                        }
+                    }
+                }
+            }
+
+            sanitizeObject(sanitizedCharacter);
+            return sanitizedCharacter;
+        }
+
         function createSystemPromptForCharacter(character, style, length) {
             const lengthGuide = {
                 'short': '3000-5000자 (핵심 필드 포함)',
