@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 프롬프트 생성 검증 도구</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .section {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .character-data {
+            background: #e8f4fd;
+            border-left-color: #1976d2;
+        }
+        .generated-prompt {
+            background: #f3e5f5;
+            border-left-color: #8e24aa;
+        }
+        .analysis {
+            background: #fff3e0;
+            border-left-color: #f57c00;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .field-match {
+            background: #d4edda;
+            padding: 8px;
+            margin: 4px 0;
+            border-radius: 4px;
+            border-left: 3px solid #28a745;
+        }
+        .field-missing {
+            background: #f8d7da;
+            padding: 8px;
+            margin: 4px 0;
+            border-radius: 4px;
+            border-left: 3px solid #dc3545;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+        .comparison-table th {
+            background: #667eea;
+            color: white;
+        }
+        .comparison-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .match-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .match-yes { background: #d4edda; color: #155724; }
+        .match-partial { background: #fff3cd; color: #856404; }
+        .match-no { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 AI 프롬프트 생성 정확도 검증 도구</h1>
+        <p>캐릭터 데이터와 생성된 AI 프롬프트 간의 일치도를 상세 분석합니다.</p>
+
+        <div class="section">
+            <h3>🎯 테스트 설정</h3>
+            <label for="characterSelect">캐릭터 선택:</label>
+            <select id="characterSelect">
+                <option value="">캐릭터를 선택하세요</option>
+            </select>
+
+            <label for="promptStyle">프롬프트 스타일:</label>
+            <select id="promptStyle">
+                <option value="comprehensive">종합형</option>
+                <option value="roleplay">롤플레이형</option>
+                <option value="psychological">심리분석형</option>
+            </select>
+
+            <button onclick="runAccuracyTest()">🔍 정확도 테스트 실행</button>
+            <button onclick="loadCharacterList()">🔄 캐릭터 목록 새로고침</button>
+        </div>
+
+        <div id="results" style="display: none;">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="accuracyScore">-</div>
+                    <div>정확도 점수</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="fieldsMatched">-</div>
+                    <div>매칭된 필드</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalFields">-</div>
+                    <div>전체 필드</div>
+                </div>
+            </div>
+
+            <div class="section character-data">
+                <h3>📋 원본 캐릭터 데이터</h3>
+                <pre id="originalData"></pre>
+            </div>
+
+            <div class="section generated-prompt">
+                <h3>🤖 생성된 AI 프롬프트</h3>
+                <pre id="generatedPrompt"></pre>
+            </div>
+
+            <div class="section analysis">
+                <h3>📊 상세 분석 결과</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>필드</th>
+                            <th>원본 데이터</th>
+                            <th>프롬프트 반영</th>
+                            <th>매칭 상태</th>
+                        </tr>
+                    </thead>
+                    <tbody id="analysisTable">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let characters = {};
+
+        // 페이지 로드 시 캐릭터 목록 로드
+        window.addEventListener('load', loadCharacterList);
+
+        async function loadCharacterList() {
+            try {
+                console.log('📋 캐릭터 목록 로드 중...');
+                const response = await fetch('/api/character-ai-generator?action=list_characters&_t=' + Date.now());
+                const result = await response.json();
+
+                console.log('📥 API 응답:', result);
+
+                if (result.success) {
+                    characters = result.characters || result.data?.characters || {};
+
+                    const select = document.getElementById('characterSelect');
+                    select.innerHTML = '<option value="">캐릭터를 선택하세요</option>';
+
+                    Object.entries(characters).forEach(([id, character]) => {
+                        const option = document.createElement('option');
+                        option.value = id;
+                        option.textContent = `${character.basic_info?.name || id} (${character.basic_info?.mbti || 'MBTI미정'})`;
+                        select.appendChild(option);
+                    });
+
+                    console.log(`✅ ${Object.keys(characters).length}개 캐릭터 로드 완료`);
+                } else {
+                    throw new Error(result.message || '캐릭터 목록 로드 실패');
+                }
+            } catch (error) {
+                console.error('❌ 캐릭터 목록 로드 실패:', error);
+                alert('캐릭터 목록을 불러올 수 없습니다.');
+            }
+        }
+
+        async function runAccuracyTest() {
+            const selectedCharacterId = document.getElementById('characterSelect').value;
+            const promptStyle = document.getElementById('promptStyle').value;
+
+            if (!selectedCharacterId) {
+                alert('캐릭터를 선택해주세요.');
+                return;
+            }
+
+            const character = characters[selectedCharacterId];
+            if (!character) {
+                alert('선택한 캐릭터 데이터를 찾을 수 없습니다.');
+                return;
+            }
+
+            try {
+                console.log('🔍 정확도 테스트 시작...');
+
+                // 버튼 비활성화
+                const testButton = document.querySelector('button[onclick="runAccuracyTest()"]');
+                testButton.disabled = true;
+                testButton.innerHTML = '<span class="loading"></span> 분석 중...';
+
+                // AI 프롬프트 생성
+                const generatedPrompt = await generatePromptForTest(character, promptStyle);
+
+                // 결과 분석
+                const analysis = analyzePromptAccuracy(character, generatedPrompt);
+
+                // 결과 표시
+                displayResults(character, generatedPrompt, analysis);
+
+                console.log('✅ 정확도 테스트 완료');
+
+            } catch (error) {
+                console.error('❌ 테스트 실패:', error);
+                alert('테스트 실행에 실패했습니다: ' + error.message);
+            } finally {
+                // 버튼 복원
+                const testButton = document.querySelector('button[onclick="runAccuracyTest()"]');
+                testButton.disabled = false;
+                testButton.innerHTML = '🔍 정확도 테스트 실행';
+            }
+        }
+
+        async function generatePromptForTest(character, style) {
+            const response = await fetch('/api/character-ai-generator', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'generate_character_prompt',
+                    character_data: character,
+                    model: 'gpt-4',
+                    style: style,
+                    length: 'medium',
+                    system_prompt: `캐릭터 정보를 정확히 반영하여 프롬프트를 생성해주세요.`
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success && result.prompt) {
+                return result.prompt;
+            } else {
+                throw new Error(result.error || '프롬프트 생성 실패');
+            }
+        }
+
+        function analyzePromptAccuracy(character, prompt) {
+            const analysis = {
+                matches: [],
+                misses: [],
+                accuracyScore: 0
+            };
+
+            // 분석할 필드들 정의
+            const fieldsToCheck = [
+                { path: 'basic_info.name', label: '이름', getValue: (c) => c.basic_info?.name },
+                { path: 'basic_info.age', label: '나이', getValue: (c) => c.basic_info?.age },
+                { path: 'basic_info.mbti', label: 'MBTI', getValue: (c) => c.basic_info?.mbti },
+                { path: 'basic_info.occupation', label: '직업', getValue: (c) => c.basic_info?.occupation },
+                { path: 'appeal_profile.seduction_style', label: '매력 스타일', getValue: (c) => c.appeal_profile?.seduction_style },
+                { path: 'appeal_profile.charm_points', label: '매력 포인트', getValue: (c) => c.appeal_profile?.charm_points?.join(', ') },
+                { path: 'appeal_profile.hobbies', label: '취미', getValue: (c) => c.appeal_profile?.hobbies?.join(', ') },
+                { path: 'physical_allure.appearance.hair', label: '헤어스타일', getValue: (c) => c.physical_allure?.appearance?.hair },
+                { path: 'physical_allure.appearance.eyes', label: '눈', getValue: (c) => c.physical_allure?.appearance?.eyes },
+                { path: 'physical_allure.appearance.body', label: '체형', getValue: (c) => c.physical_allure?.appearance?.body },
+                { path: 'conversation_dynamics.speech_style', label: '말투', getValue: (c) => c.conversation_dynamics?.speech_style },
+                { path: 'conversation_dynamics.flirting_patterns', label: '플러팅 패턴', getValue: (c) => c.conversation_dynamics?.flirting_patterns?.join(', ') },
+                { path: 'conversation_dynamics.conversation_hooks', label: '대화 주제', getValue: (c) => c.conversation_dynamics?.conversation_hooks?.join(', ') },
+                { path: 'psychological_depth.core_desires', label: '핵심 욕구', getValue: (c) => c.psychological_depth?.core_desires?.join(', ') },
+                { path: 'psychological_depth.values', label: '가치관', getValue: (c) => c.psychological_depth?.values }
+            ];
+
+            let totalMatches = 0;
+            const promptLower = prompt.toLowerCase();
+
+            fieldsToCheck.forEach(field => {
+                const value = field.getValue(character);
+                if (value) {
+                    const valueStr = String(value).toLowerCase();
+                    let matchStatus = 'no';
+
+                    if (promptLower.includes(valueStr)) {
+                        matchStatus = 'yes';
+                        totalMatches++;
+                    } else {
+                        // 부분 매칭 검사 (번역된 내용이나 유사 표현)
+                        const words = valueStr.split(/[,\s]+/).filter(w => w.length > 1);
+                        const partialMatches = words.filter(word => promptLower.includes(word));
+                        if (partialMatches.length > 0) {
+                            matchStatus = 'partial';
+                            totalMatches += 0.5;
+                        }
+                    }
+
+                    analysis[matchStatus === 'no' ? 'misses' : 'matches'].push({
+                        field: field.label,
+                        originalValue: value,
+                        matchStatus: matchStatus,
+                        inPrompt: matchStatus !== 'no'
+                    });
+                }
+            });
+
+            analysis.accuracyScore = Math.round((totalMatches / fieldsToCheck.length) * 100);
+            return analysis;
+        }
+
+        function displayResults(character, prompt, analysis) {
+            // 통계 표시
+            document.getElementById('accuracyScore').textContent = analysis.accuracyScore + '%';
+            document.getElementById('fieldsMatched').textContent = Math.floor(analysis.accuracyScore * 15 / 100);
+            document.getElementById('totalFields').textContent = '15';
+
+            // 원본 데이터 표시
+            document.getElementById('originalData').textContent = JSON.stringify(character, null, 2);
+
+            // 생성된 프롬프트 표시
+            document.getElementById('generatedPrompt').textContent = prompt;
+
+            // 분석 테이블 표시
+            const tableBody = document.getElementById('analysisTable');
+            tableBody.innerHTML = '';
+
+            [...analysis.matches, ...analysis.misses].forEach(item => {
+                const row = tableBody.insertRow();
+                row.innerHTML = `
+                    <td>${item.field}</td>
+                    <td>${item.originalValue}</td>
+                    <td>${item.inPrompt ? '✅ 반영됨' : '❌ 반영안됨'}</td>
+                    <td><span class="match-status match-${item.matchStatus}">${
+                        item.matchStatus === 'yes' ? '완전매칭' :
+                        item.matchStatus === 'partial' ? '부분매칭' : '매칭안됨'
+                    }</span></td>
+                `;
+            });
+
+            // 결과 섹션 표시
+            document.getElementById('results').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
