@@ -31,9 +31,9 @@
           "hair": "ponytail",
           "eyes": "seductive_eyes",
           "body": "average_attractive",
-          "bust": "medium_balanced",
-          "waist_hip": "curvy_sexy",
-          "style": "seductive_elegant"
+          "bust": "B",
+          "waist_hip": "글래머",
+          "style": "우아"
         },
         "feature_elements": [
           "elegant_neck",
@@ -153,9 +153,9 @@
           "hair": "shoulder_wave",
           "eyes": "sultry_gaze",
           "body": "tall_elegant",
-          "bust": "full_attractive",
-          "waist_hip": "curvy_sexy",
-          "style": "seductive_elegant"
+          "bust": "C",
+          "waist_hip": "글래머",
+          "style": "우아"
         },
         "feature_elements": [
           "beautiful_face",

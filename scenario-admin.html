@@ -4893,31 +4893,36 @@
                             <div class="form-group">
                                 <label>가슴 사이즈</label>
                                 <select id="charBust">
-                                    <option value="small_cute">A컵 (작고 귀여운)</option>
-                                    <option value="medium_balanced">B컵 (균형잡힌)</option>
-                                    <option value="full_attractive">C컵 (풍만하고 매력적)</option>
-                                    <option value="voluptuous">D컵 (볼륨감 있는)</option>
-                                    <option value="glamorous">E컵+ (글래머러스)</option>
+                                    <option value="A">A컵</option>
+                                    <option value="B">B컵</option>
+                                    <option value="C">C컵</option>
+                                    <option value="D">D컵</option>
+                                    <option value="E">E컵</option>
+                                    <option value="F">F컵</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>허리/엉덩이</label>
                                 <select id="charWaistHip">
-                                    <option value="slim_tight">슬림한 허리, 탄탄한 엉덩이</option>
-                                    <option value="curvy_sexy">곡선미가 돋보이는 몸매</option>
-                                    <option value="hourglass">완벽한 모래시계 몸매</option>
-                                    <option value="athletic_toned">운동으로 다져진 몸매</option>
-                                    <option value="soft_feminine">부드럽고 여성스러운</option>
+                                    <option value="슬림">슬림</option>
+                                    <option value="글래머">글래머</option>
+                                    <option value="모래시계">모래시계</option>
+                                    <option value="운동체형">운동체형</option>
+                                    <option value="풍만">풍만</option>
+                                    <option value="균형">균형</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>패션 스타일</label>
                                 <select id="charStyle">
-                                    <option value="sexy_chic">💋 섹시 시크</option>
-                                    <option value="seductive_elegant">😈 유혹적 엘레간트</option>
-                                    <option value="mature_sophisticated">👑 성숙한 세련됨</option>
-                                    <option value="casual_alluring">🔥 캐주얼 매혹</option>
-                                    <option value="provocative_fashion">😏 도발적 패션</option>
+                                    <option value="섹시">섹시</option>
+                                    <option value="우아">우아</option>
+                                    <option value="캐주얼">캐주얼</option>
+                                    <option value="큐트">큐트</option>
+                                    <option value="도발적">도발적</option>
+                                    <option value="클래식">클래식</option>
+                                    <option value="트렌디">트렌디</option>
+                                    <option value="보헤미안">보헤미안</option>
                                 </select>
                             </div>
                         </div>
@@ -9190,30 +9195,56 @@
                     'model_like': '모델 같은'
                 },
                 bust: {
-                    'small_cute': '작고 귀여운',
-                    'medium_natural': '자연스러운',
-                    'medium_balanced': '균형 잡힌',
-                    'large_attractive': '매력적인',
-                    'voluptuous': '섹감한',
-                    'glamorous': '글래머러스한'
+                    'A': 'A컵',
+                    'B': 'B컵',
+                    'C': 'C컵',
+                    'D': 'D컵',
+                    'E': 'E컵',
+                    'F': 'F컵',
+                    // 기존 값들도 호환성을 위해 유지
+                    'small_cute': 'A컵',
+                    'medium_natural': 'B컵',
+                    'medium_balanced': 'B컵',
+                    'large_attractive': 'C컵',
+                    'full_attractive': 'C컵',
+                    'voluptuous': 'D컵',
+                    'glamorous': 'E컵'
                 },
                 waist_hip: {
-                    'slim_tight': '슬림하고 탄탄한',
-                    'natural_curves': '자연스러운 곡선',
-                    'soft_feminine': '부드럽고 여성스러운',
-                    'curvy_sexy': '곡선미 있고 섹시한',
-                    'athletic': '운동선수 같은',
-                    'athletic_toned': '운동으로 단련된'
+                    '슬림': '슬림',
+                    '글래머': '글래머',
+                    '모래시계': '모래시계',
+                    '운동체형': '운동체형',
+                    '풍만': '풍만',
+                    '균형': '균형',
+                    // 기존 값들도 호환성을 위해 유지
+                    'slim_tight': '슬림',
+                    'natural_curves': '균형',
+                    'soft_feminine': '풍만',
+                    'curvy_sexy': '글래머',
+                    'hourglass': '모래시계',
+                    'athletic': '운동체형',
+                    'athletic_toned': '운동체형'
                 },
                 style: {
-                    'cute_casual': '귀엽고 캐주얼한',
-                    'sexy_chic': '섹시하고 세련된',
-                    'innocent_style': '순수한 스타일',
-                    'elegant_fashion': '우아한 패션',
-                    'seductive_elegant': '유혹적이고 우아한',
-                    'provocative_fashion': '도발적인 패션',
-                    'casual_alluring': '캐주얼하지만 매혹적인',
-                    'sporty_style': '스포티한 스타일'
+                    '섹시': '섹시',
+                    '우아': '우아',
+                    '캐주얼': '캐주얼',
+                    '큐트': '큐트',
+                    '도발적': '도발적',
+                    '클래식': '클래식',
+                    '트렌디': '트렌디',
+                    '보헤미안': '보헤미안',
+                    // 기존 값들도 호환성을 위해 유지
+                    'cute_casual': '큐트',
+                    'sexy_chic': '섹시',
+                    'innocent_style': '큐트',
+                    'elegant_fashion': '우아',
+                    'seductive_elegant': '우아',
+                    'provocative_fashion': '도발적',
+                    'casual_alluring': '캐주얼',
+                    'sporty_style': '캐주얼',
+                    'mature_sophisticated': '클래식'
                 },
                 charm_points: {
                     'infectious_smile': '전염성 있는 미소',
@@ -10231,9 +10262,9 @@
                 hair: document.getElementById('charHair').value || 'long_straight',
                 eyes: document.getElementById('charEyes').value || 'round_cute',
                 body: document.getElementById('charBody').value || 'petite',
-                bust: document.getElementById('charBust')?.value || 'medium_balanced',
-                waist_hip: document.getElementById('charWaistHip')?.value || 'balanced_healthy',
-                style: document.getElementById('charStyle').value || 'cute_casual',
+                bust: document.getElementById('charBust')?.value || 'B',
+                waist_hip: document.getElementById('charWaistHip')?.value || '균형',
+                style: document.getElementById('charStyle').value || '캐주얼',
 
                 // 내면/취미
                 hobbies: getSelectedHobbies(),
@@ -14339,9 +14370,9 @@
                 hair: ['long_straight', 'long_wavy', 'medium_bob', 'short_cute'],
                 eyes: ['round_cute', 'seductive_eyes', 'innocent_eyes', 'mysterious_eyes'],
                 body: ['petite', 'petite_sexy', 'average_height', 'tall_elegant'],
-                bust: ['small_cute', 'average', 'medium', 'large'],
-                waist_hip: ['slim_tight', 'balanced', 'curvy'],
-                style: ['cute_casual', 'sexy_chic', 'innocent_style', 'elegant_fashion'],
+                bust: ['A', 'B', 'C', 'D', 'E', 'F'],
+                waist_hip: ['슬림', '글래머', '모래시계', '운동체형', '풍만', '균형'],
+                style: ['섹시', '우아', '캐주얼', '큐트', '도발적', '클래식', '트렌디', '보헤미안'],
 
                 values: ['love_family', 'pursue_dreams', 'value_friendship', 'seek_stability'],
 
@@ -14509,9 +14540,9 @@
                         hair: document.getElementById('charHair')?.value || 'long_straight',
                         eyes: document.getElementById('charEyes')?.value || 'seductive_eyes',
                         body: document.getElementById('charBody')?.value || 'average_attractive',
-                        bust: document.getElementById('charBust')?.value || 'medium_balanced',
-                        waist_hip: document.getElementById('charWaistHip')?.value || 'curvy_sexy',
-                        style: document.getElementById('charStyle')?.value || 'seductive_elegant'
+                        bust: document.getElementById('charBust')?.value || 'C',
+                        waist_hip: document.getElementById('charWaistHip')?.value || '글래머',
+                        style: document.getElementById('charStyle')?.value || '섹시'
                     },
                     feature_elements: getSelectedFeatureElements(), // 🆕 외모 매력의 특징요소
                     sensual_habits: getSelectedSensualHabits(), // 🆕 관능적 습관
@@ -15024,28 +15055,73 @@
                     console.log('✅ 체형 설정:', body);
                 }
 
-                // 가슴
+                // 가슴 - 기존 값을 새 컵 사이즈로 변환
                 const bust = appearance.bust;
                 const charBustEl = document.getElementById('charBust');
                 if (bust && charBustEl) {
-                    charBustEl.value = bust;
-                    console.log('✅ 가슴 설정:', bust);
+                    // 기존 값을 새 컵 사이즈로 변환
+                    let newBustValue = bust;
+                    const bustConversion = {
+                        'small_cute': 'A',
+                        'medium_natural': 'B',
+                        'medium_balanced': 'B',
+                        'large_attractive': 'C',
+                        'full_attractive': 'C',
+                        'voluptuous': 'D',
+                        'glamorous': 'E'
+                    };
+                    if (bustConversion[bust]) {
+                        newBustValue = bustConversion[bust];
+                    }
+                    charBustEl.value = newBustValue;
+                    console.log('✅ 가슴 설정:', bust, '->', newBustValue);
                 }
 
-                // 허리/엉덩이
+                // 허리/엉덩이 - 기존 값을 새 직관적 표현으로 변환
                 const waistHip = appearance.waist_hip;
                 const charWaistHipEl = document.getElementById('charWaistHip');
                 if (waistHip && charWaistHipEl) {
-                    charWaistHipEl.value = waistHip;
-                    console.log('✅ 허리/엉덩이 설정:', waistHip);
+                    // 기존 값을 새 직관적 표현으로 변환
+                    let newWaistHipValue = waistHip;
+                    const waistHipConversion = {
+                        'slim_tight': '슬림',
+                        'natural_curves': '균형',
+                        'soft_feminine': '풍만',
+                        'curvy_sexy': '글래머',
+                        'hourglass': '모래시계',
+                        'athletic': '운동체형',
+                        'athletic_toned': '운동체형',
+                        'balanced_healthy': '균형'
+                    };
+                    if (waistHipConversion[waistHip]) {
+                        newWaistHipValue = waistHipConversion[waistHip];
+                    }
+                    charWaistHipEl.value = newWaistHipValue;
+                    console.log('✅ 허리/엉덩이 설정:', waistHip, '->', newWaistHipValue);
                 }
 
-                // 스타일
+                // 스타일 - 기존 값을 새 한 단어 표현으로 변환
                 const style = appearance.style;
                 const charStyleEl = document.getElementById('charStyle');
                 if (style && charStyleEl) {
-                    charStyleEl.value = style;
-                    console.log('✅ 스타일 설정:', style);
+                    // 기존 값을 새 한 단어 표현으로 변환
+                    let newStyleValue = style;
+                    const styleConversion = {
+                        'cute_casual': '큐트',
+                        'sexy_chic': '섹시',
+                        'innocent_style': '큐트',
+                        'elegant_fashion': '우아',
+                        'seductive_elegant': '우아',
+                        'provocative_fashion': '도발적',
+                        'casual_alluring': '캐주얼',
+                        'sporty_style': '캐주얼',
+                        'mature_sophisticated': '클래식'
+                    };
+                    if (styleConversion[style]) {
+                        newStyleValue = styleConversion[style];
+                    }
+                    charStyleEl.value = newStyleValue;
+                    console.log('✅ 스타일 설정:', style, '->', newStyleValue);
                 }
             }
         }
