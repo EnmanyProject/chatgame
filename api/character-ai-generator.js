@@ -3288,7 +3288,7 @@ MBTI: ${basic.mbti || '미정'}
 스타일: ${translateToKorean(physical.appearance?.style) || '편안한 스타일'}
 
 특징적 요소: ${physical.feature_elements ? translateToKorean(physical.feature_elements) : '자연스러운 매력'}
-감각적 습관: ${physical.sensual_habits ? translateToKorean(physical.sensual_habits) : '자연스러운 행동'}
+매력적 습관: ${physical.sensual_habits ? translateToKorean(physical.sensual_habits) : '자연스러운 행동'}
 바디 랭귀지: ${physical.body_language ? translateToKorean(physical.body_language) : '편안한 몸짓'}
 
 ==== 🧠 심리적 깊이 ====
@@ -3296,7 +3296,7 @@ MBTI: ${basic.mbti || '미정'}
 취약점: ${psychological.vulnerabilities ? translateToKorean(psychological.vulnerabilities) : '완벽주의'}
 가치관: ${translateToKorean(psychological.values) || '사랑과 가족'}
 개방성 수준: ${psychological.sexual_freedom || '보통'}점 (10점 만점)
-편안함 수준: ${translateToKorean(psychological.boundaries?.comfort_level) || '가벼운 플러팅'}
+편안함 수준: ${translateToKorean(psychological.boundaries?.comfort_level) || '자연스러운 소통'}
 발전 속도: ${translateToKorean(psychological.boundaries?.escalation_pace) || '천천히'}
 소통 톤: ${translateToKorean(psychological.boundaries?.sexual_tone_band) || '보통'}
 
