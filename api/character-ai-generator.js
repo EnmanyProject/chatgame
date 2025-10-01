@@ -3297,6 +3297,7 @@ function generateFallbackPrompt(characterData, style, length) {
   const speechStyle = translateToKorean(conversation.speech_style) || '자연스럽고 친근한';
   const hobbies = appeal.hobbies ? translateToKorean(appeal.hobbies) : '독서와 음악감상';
   const charmPoints = appeal.charm_points ? translateToKorean(appeal.charm_points) : '자연스러운 매력';
+  const featureElements = physical.feature_elements ? translateToKorean(physical.feature_elements) : '';
   const hair = translateToKorean(physical.appearance?.hair) || '자연스러운 헤어';
   const eyes = translateToKorean(physical.appearance?.eyes) || '따뜻한 눈';
   const body = translateToKorean(physical.appearance?.body) || '균형잡힌 체형';
@@ -3305,7 +3306,7 @@ function generateFallbackPrompt(characterData, style, length) {
   const templates = {
     comprehensive: `${name}는 ${age}세의 ${mbti} 성격을 가진 매력적인 여성입니다. ${occupation} 분야에서 활동하며, ${seductionStyle} 매력을 가지고 있습니다.
 
-외모적으로는 ${hair}, ${eyes}, ${body}의 특징을 가지고 있으며, ${charmPoints} 등의 매력 포인트가 있습니다.
+외모적으로는 ${hair}, ${eyes}, ${body}의 특징을 가지고 있으며, ${charmPoints}${featureElements ? ', ' + featureElements : ''} 등의 매력 포인트가 있습니다.
 
 그녀의 대화 스타일은 ${speechStyle} 방식이며, ${Array.isArray(conversation.flirting_patterns) ? translateToKorean(conversation.flirting_patterns) : '은은한 티징'}을 통해 상대방과 소통합니다. ${mbti} 특성에 따라 ${getMBTICharacteristics(mbti)}한 면모를 보입니다.
 
