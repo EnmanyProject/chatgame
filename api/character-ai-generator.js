@@ -3220,7 +3220,7 @@ ${characterSummary}
         messages: [
           {
             role: 'system',
-            content: systemPrompt
+            content: systemPrompt || 'AI 캐릭터 프롬프트를 상세하게 작성해주세요. 제공된 캐릭터 정보를 자연스럽게 포함해야 합니다.'
           },
           {
             role: 'user',
