@@ -10102,6 +10102,12 @@
             // ✅ 모든 폼 필드는 위의 fillCharacterForm(character) 호출로 이미 처리됨
             console.log('✅ 편집 모드: fillCharacterForm v2.0으로 모든 데이터 채움 완료');
 
+            // 🔄 체크박스 초기화 (편집 전 모든 선택 해제)
+            document.querySelectorAll('input[name="personality"]').forEach(checkbox => checkbox.checked = false);
+            document.querySelectorAll('input[name="hobbies"]').forEach(checkbox => checkbox.checked = false);
+            document.querySelectorAll('input[name="charm_points"]').forEach(checkbox => checkbox.checked = false);
+            console.log('🔄 체크박스 초기화 완료');
+
             // 🎯 체크박스 선택 복원 (성격특성, 취미) - v2.0 스키마 호환
             // 성격특성 복원 (v1.0: personality_traits, v2.0: psychological_traits.personality)
             const personalityTraits = character.personality_traits ||
@@ -15225,6 +15231,45 @@
                 charOccupationEl.value = occupation;
                 console.log('✅ 직업 설정:', occupation);
             }
+
+            // 배경 정보 처리 (중첩 구조)
+            const family = character.background?.family || character.family;
+            const charFamilyEl = document.getElementById('charFamily');
+            if (family && charFamilyEl) {
+                charFamilyEl.value = family;
+                console.log('✅ 가족구성 설정:', family);
+            }
+
+            const hometown = character.background?.hometown || character.hometown;
+            const charHometownEl = document.getElementById('charHometown');
+            if (hometown && charHometownEl) {
+                charHometownEl.value = hometown;
+                console.log('✅ 출신지 설정:', hometown);
+            }
+
+            // 관계 처리
+            const relationship = character.relationship;
+            const charRelationshipEl = document.getElementById('charRelationship');
+            if (relationship && charRelationshipEl) {
+                charRelationshipEl.value = relationship;
+                console.log('✅ 관계 설정:', relationship);
+            }
+
+            // 성별 처리
+            const gender = character.basic_info?.gender || character.gender;
+            const charGenderEl = document.getElementById('charGender');
+            if (gender && charGenderEl) {
+                charGenderEl.value = gender;
+                console.log('✅ 성별 설정:', gender);
+            }
+
+            // 캐릭터 타입 처리
+            const characterType = character.character_type;
+            const charTypeEl = document.getElementById('charType');
+            if (characterType && charTypeEl) {
+                charTypeEl.value = characterType;
+                console.log('✅ 캐릭터 타입 설정:', characterType);
+            }
         }
 
         // 🔹 매력 프로필 채우기
@@ -15282,6 +15327,27 @@
                     if (checkbox) checkbox.checked = true;
                 });
                 console.log('✅ 매력 포인트 설정:', charmPoints);
+            }
+
+            // v2.1+ 추가 필드들
+            // 성적 호기심
+            const sexualCuriosity = character.appeal_profile?.sexual_curiosity;
+            const scSlider = document.getElementById('sexualCuriosity');
+            if (sexualCuriosity !== undefined && scSlider) {
+                scSlider.value = sexualCuriosity;
+                const scValue = document.getElementById('scValue');
+                if (scValue) scValue.textContent = sexualCuriosity;
+                console.log('✅ 성적 호기심 설정:', sexualCuriosity);
+            }
+
+            // 성적 편안함
+            const sexualComfort = character.appeal_profile?.sexual_comfort;
+            const comfortSlider = document.getElementById('sexualComfort');
+            if (sexualComfort !== undefined && comfortSlider) {
+                comfortSlider.value = sexualComfort;
+                const comfortValue = document.getElementById('comfortValue');
+                if (comfortValue) comfortValue.textContent = sexualComfort;
+                console.log('✅ 성적 편안함 설정:', sexualComfort);
             }
         }
 
@@ -15412,6 +15478,16 @@
                         paceSelect.value = escalationPace;
                         console.log('✅ 관계 발전 속도 설정:', escalationPace);
                     }
+
+                    // 성적 자유도
+                    const sexualFreedom = psychological.sexual_freedom;
+                    const freedomSlider = document.getElementById('sexualFreedom');
+                    if (sexualFreedom !== undefined && freedomSlider) {
+                        freedomSlider.value = sexualFreedom;
+                        const freedomValue = document.getElementById('freedomValue');
+                        if (freedomValue) freedomValue.textContent = sexualFreedom;
+                        console.log('✅ 성적 자유도 설정:', sexualFreedom);
+                    }
                 }
             }
         }
@@ -15426,6 +15502,22 @@
             if (speechStyle && speechInput) {
                 speechInput.value = speechStyle;
                 console.log('✅ 말투 스타일 설정:', speechStyle);
+            }
+
+            // 말투 습관 처리
+            const speechHabit = character.speech_habit;
+            const speechHabitInput = document.getElementById('charSpeechHabit');
+            if (speechHabit && speechHabitInput) {
+                speechHabitInput.value = speechHabit;
+                console.log('✅ 말투 습관 설정:', speechHabit);
+            }
+
+            // 가치관 처리
+            const values = character.psychological_depth?.values || character.values;
+            const valuesSelect = document.getElementById('charValues');
+            if (values && valuesSelect) {
+                valuesSelect.value = values;
+                console.log('✅ 가치관 설정:', values);
             }
         }
 
