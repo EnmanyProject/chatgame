@@ -2853,7 +2853,7 @@ function getFlirtationDescription(seductionStyle) {
   const descriptions = {
     'playful_confident': '장난스럽고 자신감 있는',
     'mysterious_elegant': '신비롭고 우아한',
-    'warm_nurturing': '따뜻하고 배려 깊은',
+    'warm_nurturing': '따뜻하고 보살피는',
     'intellectually_stimulating': '지적이고 자극적인'
   };
   return descriptions[seductionStyle] || '자연스럽고 매력적인';
@@ -3157,6 +3157,7 @@ function translateToKorean(value) {
 
     // 직업
     'student': '학생', 'office_worker': '회사원', 'teacher': '교사', 'designer': '디자이너',
+    'art': '예술가', 'artist': '예술가',
 
     // 스킨십
     'hand_holding': '손잡기', 'head_patting': '머리 쓰다듬기', 'passionate_kiss': '열정적인 키스',
