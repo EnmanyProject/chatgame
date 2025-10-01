@@ -750,6 +750,7 @@ module.exports = async function handler(req, res) {
         };
 
         for (const file of photoFiles) {
+          console.log(`🔍 파일 처리 시작: ${file.name}`);
           try {
             const fileResponse = await octokit.repos.getContent({
               owner: 'EnmanyProject',
@@ -757,8 +758,20 @@ module.exports = async function handler(req, res) {
               path: file.path
             });
 
+            console.log(`📁 파일 응답 상태: ${fileResponse.status}`);
+            console.log(`📁 파일 content 길이: ${fileResponse.data.content ? fileResponse.data.content.length : 'no content'}`);
+
             const content = Buffer.from(fileResponse.data.content, 'base64').toString();
+            console.log(`📄 디코딩된 content 길이: ${content.length}`);
+            console.log(`📄 content 미리보기: ${content.substring(0, 100)}...`);
+
             const photoData = JSON.parse(content);
+            console.log(`📊 파싱된 데이터:`, {
+              hasCategory: !!photoData.category,
+              category: photoData.category,
+              hasPhotoData: !!photoData.photo_data,
+              photoDataLength: photoData.photo_data ? photoData.photo_data.length : 0
+            });
 
             // 카테고리별로 분류
             if (photoData.category === 'profile') {
@@ -767,17 +780,23 @@ module.exports = async function handler(req, res) {
                 data: photoData.photo_data,
                 uploaded_at: photoData.uploaded_at
               };
+              console.log(`✅ 프로필 사진 설정 완료: ${file.name}`);
             } else if (characterPhotos.photos[photoData.category]) {
               characterPhotos.photos[photoData.category].push({
                 id: file.name,
                 data: photoData.photo_data,
                 uploaded_at: photoData.uploaded_at
               });
+              console.log(`✅ ${photoData.category} 사진 추가 완료: ${file.name}`);
+            } else {
+              console.log(`⚠️ 알 수 없는 카테고리: ${photoData.category} (파일: ${file.name})`);
             }
 
             characterPhotos.photo_count++;
+            console.log(`📊 현재 총 사진 수: ${characterPhotos.photo_count}`);
           } catch (parseError) {
-            console.log(`⚠️ 파일 파싱 실패: ${file.name}`, parseError.message);
+            console.log(`❌ 파일 파싱 실패: ${file.name}`, parseError.message);
+            console.log(`❌ 파싱 오류 상세:`, parseError);
           }
         }
 
