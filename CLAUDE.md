@@ -10,6 +10,31 @@
 
 > 💡 **비용 절감 지침은 CLAUDE-COST.md 참조**
 
+## 🚨 **중요 개발 지침**
+
+### 📋 **캐릭터 시스템 동기화 규칙**
+> **필수 준수 사항**: 캐릭터 생성 폼 구조를 업데이트할 때마다 반드시 캐릭터 카드 정보도 함께 동기화해야 함
+
+#### 🔄 **동기화 체크리스트**
+1. **캐릭터 생성 폼 수정 시**:
+   - 새 필드 추가 → 캐릭터 카드 표시 함수 업데이트
+   - 필드 이름 변경 → `getCharacter*()` 헬퍼 함수들 수정
+   - 데이터 구조 변경 → `fillCharacterForm()`, `fillMissingFieldsRandomly()` 함수 동기화
+
+2. **업데이트 필요 파일들**:
+   - `scenario-admin.html`: 캐릭터 생성 폼 + 카드 표시 + 편집 기능
+   - 모든 `getCharacter*()` 함수들 (이름, MBTI, 직업, 가족, 출신지 등)
+   - `displayCharacters()`, `showCharacterDetail()`, `fillCharacterDetailInfo()` 함수들
+
+3. **하위 호환성 보장**:
+   - 새 구조와 기존 구조 모두 지원하도록 구현
+   - `character.new_field || character.old_field || default_value` 패턴 사용
+
+#### ✅ **완료 예시 (2025-10-01)**
+- 직업 필드: 텍스트 입력 → 20개 드롭다운으로 확장
+- 배경정보: 직접 필드 → 중첩 구조 (`background.family`, `background.hometown`)
+- 모든 표시/편집 함수들이 신구 구조 모두 지원
+
 ## 프로젝트 개요
 **💬 남성 채팅 기술 향상 훈련 시스템**
 - MBTI 기반 여성 캐릭터와의 대화 시뮬레이션
