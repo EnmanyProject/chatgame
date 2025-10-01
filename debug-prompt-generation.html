@@ -315,23 +315,68 @@
                 accuracyScore: 0
             };
 
-            // 분석할 필드들 정의
+            // 분석할 필드들 정의 - 전체 55개 필드
             const fieldsToCheck = [
+                // 📋 기본 정보 (5개)
                 { path: 'basic_info.name', label: '이름', getValue: (c) => c.basic_info?.name },
                 { path: 'basic_info.age', label: '나이', getValue: (c) => c.basic_info?.age },
                 { path: 'basic_info.mbti', label: 'MBTI', getValue: (c) => c.basic_info?.mbti },
                 { path: 'basic_info.occupation', label: '직업', getValue: (c) => c.basic_info?.occupation },
+                { path: 'basic_info.gender', label: '성별', getValue: (c) => c.basic_info?.gender },
+
+                // ✨ 매력 프로필 (8개)
                 { path: 'appeal_profile.seduction_style', label: '매력 스타일', getValue: (c) => c.appeal_profile?.seduction_style },
                 { path: 'appeal_profile.charm_points', label: '매력 포인트', getValue: (c) => c.appeal_profile?.charm_points?.join(', ') },
+                { path: 'appeal_profile.emotional_intelligence', label: '감정지능', getValue: (c) => c.appeal_profile?.emotional_intelligence },
+                { path: 'appeal_profile.confidence_level', label: '자신감', getValue: (c) => c.appeal_profile?.confidence_level },
+                { path: 'appeal_profile.mystery_factor', label: '신비로움', getValue: (c) => c.appeal_profile?.mystery_factor },
+                { path: 'appeal_profile.sexual_curiosity', label: '성적 호기심', getValue: (c) => c.appeal_profile?.sexual_curiosity },
+                { path: 'appeal_profile.sexual_comfort', label: '성적 편안함', getValue: (c) => c.appeal_profile?.sexual_comfort },
                 { path: 'appeal_profile.hobbies', label: '취미', getValue: (c) => c.appeal_profile?.hobbies?.join(', ') },
+
+                // 👄 외모적 매력 (9개)
                 { path: 'physical_allure.appearance.hair', label: '헤어스타일', getValue: (c) => c.physical_allure?.appearance?.hair },
                 { path: 'physical_allure.appearance.eyes', label: '눈', getValue: (c) => c.physical_allure?.appearance?.eyes },
                 { path: 'physical_allure.appearance.body', label: '체형', getValue: (c) => c.physical_allure?.appearance?.body },
+                { path: 'physical_allure.appearance.bust', label: '가슴 사이즈', getValue: (c) => c.physical_allure?.appearance?.bust },
+                { path: 'physical_allure.appearance.waist_hip', label: '허리/힙', getValue: (c) => c.physical_allure?.appearance?.waist_hip },
+                { path: 'physical_allure.appearance.style', label: '스타일', getValue: (c) => c.physical_allure?.appearance?.style },
+                { path: 'physical_allure.feature_elements', label: '특징적 요소', getValue: (c) => c.physical_allure?.feature_elements?.join(', ') },
+                { path: 'physical_allure.sensual_habits', label: '감각적 습관', getValue: (c) => c.physical_allure?.sensual_habits?.join(', ') },
+                { path: 'physical_allure.body_language', label: '바디랭귀지', getValue: (c) => c.physical_allure?.body_language?.join(', ') },
+
+                // 🧠 심리적 깊이 (6개)
+                { path: 'psychological_depth.core_desires', label: '핵심 욕구', getValue: (c) => c.psychological_depth?.core_desires?.join(', ') },
+                { path: 'psychological_depth.vulnerabilities', label: '취약점', getValue: (c) => c.psychological_depth?.vulnerabilities?.join(', ') },
+                { path: 'psychological_depth.values', label: '가치관', getValue: (c) => c.psychological_depth?.values },
+                { path: 'psychological_depth.sexual_freedom', label: '성적 자유도', getValue: (c) => c.psychological_depth?.sexual_freedom },
+                { path: 'psychological_depth.boundaries.comfort_level', label: '편안함 수준', getValue: (c) => c.psychological_depth?.boundaries?.comfort_level },
+                { path: 'psychological_depth.boundaries.escalation_pace', label: '발전 속도', getValue: (c) => c.psychological_depth?.boundaries?.escalation_pace },
+                { path: 'psychological_depth.boundaries.sexual_tone_band', label: '성적 톤', getValue: (c) => c.psychological_depth?.boundaries?.sexual_tone_band },
+
+                // 💬 대화 역학 (9개)
                 { path: 'conversation_dynamics.speech_style', label: '말투', getValue: (c) => c.conversation_dynamics?.speech_style },
                 { path: 'conversation_dynamics.flirting_patterns', label: '플러팅 패턴', getValue: (c) => c.conversation_dynamics?.flirting_patterns?.join(', ') },
                 { path: 'conversation_dynamics.conversation_hooks', label: '대화 주제', getValue: (c) => c.conversation_dynamics?.conversation_hooks?.join(', ') },
-                { path: 'psychological_depth.core_desires', label: '핵심 욕구', getValue: (c) => c.psychological_depth?.core_desires?.join(', ') },
-                { path: 'psychological_depth.values', label: '가치관', getValue: (c) => c.psychological_depth?.values }
+                { path: 'conversation_dynamics.speech_habits', label: '말 습관', getValue: (c) => c.conversation_dynamics?.speech_habits?.join(', ') },
+                { path: 'conversation_dynamics.vocabulary_register', label: '어휘 수준', getValue: (c) => c.conversation_dynamics?.vocabulary_register },
+                { path: 'conversation_dynamics.allowed_motifs', label: '허용 모티프', getValue: (c) => c.conversation_dynamics?.allowed_motifs?.join(', ') },
+                { path: 'conversation_dynamics.forbidden_terms', label: '금기 단어', getValue: (c) => c.conversation_dynamics?.forbidden_terms?.join(', ') },
+                { path: 'conversation_dynamics.reaction_tendencies.humor', label: '유머 반응', getValue: (c) => c.conversation_dynamics?.reaction_tendencies?.humor },
+                { path: 'conversation_dynamics.reaction_tendencies.compliment', label: '칭찬 반응', getValue: (c) => c.conversation_dynamics?.reaction_tendencies?.compliment },
+                { path: 'conversation_dynamics.reaction_tendencies.interest_expression', label: '관심 표현', getValue: (c) => c.conversation_dynamics?.reaction_tendencies?.interest_expression },
+
+                // 💕 과거 경험 (4개)
+                { path: 'past_history.boyfriend_count', label: '남자친구 수', getValue: (c) => c.past_history?.boyfriend_count },
+                { path: 'past_history.preferred_skinship', label: '선호 스킨십', getValue: (c) => c.past_history?.preferred_skinship?.join(', ') },
+                { path: 'past_history.relationship_experience', label: '연애 경험', getValue: (c) => c.past_history?.relationship_experience },
+                { path: 'past_history.first_experience_age', label: '첫 경험 나이', getValue: (c) => c.past_history?.first_experience_age },
+
+                // 🎁 기타 정보 (4개)
+                { path: 'favorite_gifts', label: '좋아하는 선물', getValue: (c) => c.favorite_gifts?.join(', ') },
+                { path: 'male_priorities', label: '남성 우선순위', getValue: (c) => c.male_priorities?.join(', ') },
+                { path: 'future_goals.asset_goal', label: '자산 목표', getValue: (c) => c.future_goals?.asset_goal },
+                { path: 'future_goals.future_careers', label: '미래 직업', getValue: (c) => c.future_goals?.future_careers?.join(', ') || '없음' }
             ];
 
             let totalMatches = 0;
@@ -372,8 +417,8 @@
         function displayResults(character, prompt, analysis) {
             // 통계 표시
             document.getElementById('accuracyScore').textContent = analysis.accuracyScore + '%';
-            document.getElementById('fieldsMatched').textContent = Math.floor(analysis.accuracyScore * 15 / 100);
-            document.getElementById('totalFields').textContent = '15';
+            document.getElementById('fieldsMatched').textContent = Math.floor(analysis.accuracyScore * 41 / 100);
+            document.getElementById('totalFields').textContent = '41';
 
             // 원본 데이터 표시
             document.getElementById('originalData').textContent = JSON.stringify(character, null, 2);
