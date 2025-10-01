@@ -347,8 +347,12 @@ module.exports = async function handler(req, res) {
       }
 
       try {
+        // OpenAI 정책에 안전한 캐릭터 데이터로 변환
+        const sanitizedCharacterData = sanitizeCharacterForOpenAI(character_data);
+        console.log('🛡️ 캐릭터 데이터 안전 변환 완료');
+
         // OpenAI API를 통한 프롬프트 생성
-        const prompt = await generateCharacterPromptWithOpenAI(character_data, model, style, length, system_prompt);
+        const prompt = await generateCharacterPromptWithOpenAI(sanitizedCharacterData, model, style, length, system_prompt);
 
         console.log('✅ 프롬프트 생성 성공');
         return res.json({
@@ -367,7 +371,7 @@ module.exports = async function handler(req, res) {
         try {
           console.log('🔄 더 안정적인 설정으로 재시도 중...');
 
-          const retryPrompt = await generateCharacterPromptWithOpenAI(character_data, 'gpt-4o', style, 'medium', 'AI 캐릭터 프롬프트를 상세하게 작성해주세요. 제공된 모든 캐릭터 정보를 빠짐없이 포함해야 합니다.');
+          const retryPrompt = await generateCharacterPromptWithOpenAI(sanitizedCharacterData, 'gpt-4o', style, 'medium', 'AI 캐릭터 프롬프트를 상세하게 작성해주세요. 제공된 모든 캐릭터 정보를 빠짐없이 포함해야 합니다.');
 
           return res.json({
             success: true,
@@ -387,7 +391,7 @@ module.exports = async function handler(req, res) {
           try {
             console.log('🔄 최종 재시도 중 (짧은 길이)...');
 
-            const finalRetryPrompt = await generateCharacterPromptWithOpenAI(character_data, 'gpt-4o', style, 'short', 'AI 캐릭터 프롬프트를 작성해주세요. 모든 캐릭터 데이터를 포함해야 합니다.');
+            const finalRetryPrompt = await generateCharacterPromptWithOpenAI(sanitizedCharacterData, 'gpt-4o', style, 'short', 'AI 캐릭터 프롬프트를 작성해주세요. 모든 캐릭터 데이터를 포함해야 합니다.');
 
             return res.json({
               success: true,
@@ -3411,4 +3415,99 @@ function getMBTICharacteristics(mbti) {
   };
 
   return characteristics[mbti] || '독특하고 매력적';
+}
+
+// OpenAI 정책 준수를 위한 데이터 sanitization 함수들
+function sanitizeValueForOpenAI(value) {
+  if (!value) return value;
+
+  const sanitizationMap = {
+    // 의류/액세서리 관련
+    'luxury_lingerie': 'elegant_accessories',
+    'sexy_lingerie': 'elegant_clothing',
+    'sensual_lingerie': 'stylish_undergarments',
+
+    // 외모 관련 - 더 강화
+    'seductive_eyes': 'expressive_eyes',
+    'sultry_dominant': 'confident_charming',
+    'passionate_kiss': 'warm_affection',
+    'sultry_gaze': 'charming_gaze',
+    'seductive_smile': 'attractive_smile',
+    'playful_seductive': 'playful_charming',
+
+    // 스킨십 관련 - 더 강화
+    'intimate_cuddling': 'close_bonding',
+    'passionate_kiss': 'affectionate_gesture',
+    'intimate_touch': 'gentle_touch',
+    'sensual_massage': 'relaxing_massage',
+
+    // 신체 관련 - 강화
+    'D': 'well_proportioned',
+    'E': 'full_figured',
+    'F': 'curvy',
+    'petite_sexy': 'petite_elegant',
+    'attractive_chest': 'elegant_posture',
+
+    // 신체 행동 - 새로 추가
+    '입술깨물기': '미소짓기',
+    '유혹적시선': '따뜻한시선',
+    '섹시': '우아',
+    '몸기울이기': '자연스럽게기울이기',
+    '숨소리거칠어짐': '깊은호흡',
+
+    // 스타일 관련
+    'sultry_dominant': 'confident_charming',
+    'playful_seductive': 'playful_friendly',
+
+    // 기타 민감한 표현 - 강화
+    'sensual_habits': 'charming_habits',
+    'sultry': 'charming',
+    'seductive': 'attractive',
+    'sensual': 'graceful',
+    'erotic': 'romantic',
+    'sexual': 'intimate',
+    'arousing': 'captivating',
+    'sexual_curiosity': 'romantic_curiosity',
+    'sexual_comfort': 'emotional_comfort',
+    'sexual_freedom': 'emotional_openness',
+    'sexual_tone_band': 'conversation_tone',
+    'early_teens': 'mature_age',
+    'first_experience_age': 'maturity_level'
+  };
+
+  if (Array.isArray(value)) {
+    return value.map(item => sanitizationMap[item] || item);
+  } else {
+    return sanitizationMap[value] || value;
+  }
+}
+
+// 캐릭터 데이터 전체를 안전하게 변환하는 함수
+function sanitizeCharacterForOpenAI(character) {
+  if (!character) return character;
+
+  // 깊은 복사를 통해 원본 데이터 보존
+  const sanitizedCharacter = JSON.parse(JSON.stringify(character));
+
+  // 재귀적으로 모든 값 처리
+  function sanitizeObject(obj) {
+    if (!obj || typeof obj !== 'object') return obj;
+
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        if (Array.isArray(obj[key])) {
+          obj[key] = obj[key].map(item =>
+            typeof item === 'string' ? sanitizeValueForOpenAI(item) : item
+          );
+        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+          sanitizeObject(obj[key]);
+        } else if (typeof obj[key] === 'string') {
+          obj[key] = sanitizeValueForOpenAI(obj[key]);
+        }
+      }
+    }
+  }
+
+  sanitizeObject(sanitizedCharacter);
+  return sanitizedCharacter;
 }

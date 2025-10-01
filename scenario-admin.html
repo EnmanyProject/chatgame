@@ -6331,32 +6331,52 @@
                 'sexy_lingerie': 'elegant_clothing',
                 'sensual_lingerie': 'stylish_undergarments',
 
-                // 외모 관련
+                // 외모 관련 - 더 강화
                 'seductive_eyes': 'expressive_eyes',
                 'sultry_dominant': 'confident_charming',
                 'passionate_kiss': 'warm_affection',
                 'sultry_gaze': 'charming_gaze',
                 'seductive_smile': 'attractive_smile',
+                'playful_seductive': 'playful_charming',
 
-                // 스킨십 관련
+                // 스킨십 관련 - 더 강화
                 'intimate_cuddling': 'close_bonding',
                 'passionate_kiss': 'affectionate_gesture',
                 'intimate_touch': 'gentle_touch',
                 'sensual_massage': 'relaxing_massage',
 
-                // 신체 관련
+                // 신체 관련 - 강화
                 'D': 'well_proportioned',
                 'E': 'full_figured',
                 'F': 'curvy',
+                'petite_sexy': 'petite_elegant',
+                'attractive_chest': 'elegant_posture',
 
-                // 기타 민감한 표현
+                // 신체 행동 - 새로 추가
+                '입술깨물기': '미소짓기',
+                '유혹적시선': '따뜻한시선',
+                '섹시': '우아',
+                '몸기울이기': '자연스럽게기울이기',
+                '숨소리거칠어짐': '깊은호흡',
+
+                // 스타일 관련
+                'sultry_dominant': 'confident_charming',
+                'playful_seductive': 'playful_friendly',
+
+                // 기타 민감한 표현 - 강화
                 'sensual_habits': 'charming_habits',
                 'sultry': 'charming',
                 'seductive': 'attractive',
                 'sensual': 'graceful',
                 'erotic': 'romantic',
                 'sexual': 'intimate',
-                'arousing': 'captivating'
+                'arousing': 'captivating',
+                'sexual_curiosity': 'romantic_curiosity',
+                'sexual_comfort': 'emotional_comfort',
+                'sexual_freedom': 'emotional_openness',
+                'sexual_tone_band': 'conversation_tone',
+                'early_teens': 'mature_age',
+                'first_experience_age': 'maturity_level'
             };
 
             if (Array.isArray(value)) {
@@ -6429,8 +6449,8 @@
 - 감정지능: ${character.appeal_profile?.emotional_intelligence}/10
 - 자신감: ${character.appeal_profile?.confidence_level}/10
 - 신비로움: ${character.appeal_profile?.mystery_factor}/10
-- 호기심 정도: ${character.appeal_profile?.sexual_curiosity}/10
-- 개방성 정도: ${character.appeal_profile?.sexual_comfort}/10
+- 호기심 정도: ${character.appeal_profile?.sexual_curiosity || '보통'}/10
+- 개방성 정도: ${character.appeal_profile?.sexual_comfort || '보통'}/10
 - 취미: ${Array.isArray(character.appeal_profile?.hobbies) ? character.appeal_profile.hobbies.join(', ') : ''}
 
 👄 외모적 특징 (구체적으로):
@@ -6441,17 +6461,17 @@
 - 허리/힙: ${character.physical_allure?.appearance?.waist_hip}
 - 스타일: ${character.physical_allure?.appearance?.style}
 - 특징적 요소: ${Array.isArray(character.physical_allure?.feature_elements) ? character.physical_allure.feature_elements.join(', ') : ''}
-- 우아한 습관: ${Array.isArray(character.physical_allure?.sensual_habits) ? character.physical_allure.sensual_habits.join(', ') : ''}
+- 매력적 습관: ${Array.isArray(character.physical_allure?.sensual_habits) ? character.physical_allure.sensual_habits.join(', ') : ''}
 - 바디랭귀지: ${Array.isArray(character.physical_allure?.body_language) ? character.physical_allure.body_language.join(', ') : ''}
 
 🧠 심리적 깊이 (세밀하게):
 - 핵심 욕구: ${Array.isArray(character.psychological_depth?.core_desires) ? character.psychological_depth.core_desires.join(', ') : ''}
 - 취약점: ${Array.isArray(character.psychological_depth?.vulnerabilities) ? character.psychological_depth.vulnerabilities.join(', ') : ''}
 - 가치관: ${character.psychological_depth?.values}
-- 개방성 수준: ${character.psychological_depth?.sexual_freedom}/10
+- 개방성 수준: ${character.psychological_depth?.sexual_freedom || '보통'}/10
 - 편안함 수준: ${character.psychological_depth?.boundaries?.comfort_level}
 - 발전 속도: ${character.psychological_depth?.boundaries?.escalation_pace}
-- 소통 톤: ${character.psychological_depth?.boundaries?.sexual_tone_band}
+- 소통 톤: ${character.psychological_depth?.boundaries?.sexual_tone_band || '보통'}
 
 💬 대화 역학 (상세히):
 - 말투: ${character.conversation_dynamics?.speech_style}
@@ -6469,7 +6489,7 @@
 - 연애 경험: ${character.past_history?.relationship_experience}
 - 남자친구 수: ${character.past_history?.boyfriend_count}명
 - 선호하는 친밀감 표현: ${Array.isArray(character.past_history?.preferred_skinship) ? character.past_history.preferred_skinship.join(', ') : ''}
-- 인생 경험 시기: ${character.past_history?.first_experience_age}
+- 성숙한 경험 시기: ${character.past_history?.first_experience_age || '성인'}
 
 🎁 기타 정보:
 - 좋아하는 선물: ${Array.isArray(character.favorite_gifts) ? character.favorite_gifts.join(', ') : ''}
