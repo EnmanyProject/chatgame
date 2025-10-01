@@ -1653,7 +1653,7 @@ ${selectedTraits && selectedTraits.length > 0 ? selectedTraits.map(trait => `- $
 ${selectedHobbies && selectedHobbies.length > 0 ? selectedHobbies.map(hobby => `- ${hobby}`).join('\n') : '- 사용자가 선택하지 않음 (연령대 맞춤 기본 취미 적용)'}
 
 💬 커뮤니케이션:
-- 말투 스타일: ${userData.speech_style || '매혹적이고 성인 매력이 넘치는 말투'}
+- 말투 스타일: ${userData.speech_style || '매력적이고 우아한 말투'}
 - 말버릇: ${userData.speech_habit || '표현력 있는 제스처 사용'}
 - 가치관: ${userData.values || '가족중심'}
 
@@ -1765,7 +1765,7 @@ ${selectedHobbies && selectedHobbies.length > 0 ? selectedHobbies.map(hobby => `
         messages: [
           {
             role: 'system',
-            content: '당신은 매력적이고 섹시한 성인 여성 캐릭터를 만드는 전문가입니다. 성숙하고 매혹적인 성인 여성의 매력을 강조하며, 사용자의 요구사항을 정확히 반영하여 완성도 높은 성인 캐릭터를 만들어주세요. 모든 캐릭터는 20세 이상의 성인이며, 성인적 매력과 섹시함을 가진 캐릭터여야 합니다.'
+            content: '당신은 매력적인 성인 여성 캐릭터를 만드는 전문가입니다. 우아하고 매력적인 성인 여성의 특징을 강조하며, 사용자의 요구사항을 정확히 반영하여 완성도 높은 캐릭터를 만들어주세요. 모든 캐릭터는 20세 이상의 성인이며, 품격있고 매력적인 캐릭터여야 합니다.'
           },
           {
             role: 'user',
