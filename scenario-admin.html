@@ -10818,6 +10818,13 @@
 
             document.getElementById('characterForm').reset();
 
+            // 🆔 신규 생성 모드에서는 캐릭터 ID 필드 초기화
+            const characterIdInput = document.getElementById('characterId');
+            if (characterIdInput && mode === 'create') {
+                characterIdInput.value = '';
+                console.log('🆕 신규 생성 모드: 캐릭터 ID 필드 초기화');
+            }
+
             // 모든 선택 버튼들 초기화
             document.querySelectorAll('.mbti-btn.selected, .trait-btn.selected, .relationship-btn.selected, .hobby-btn.selected, .speech-btn.selected, .charm-btn.selected, .desire-btn.selected, .skinship-btn.selected, .motif-btn.selected, .flirting-btn.selected, .hook-btn.selected, .confident-part-btn.selected, .seductive-pose-btn.selected, .gift-btn.selected').forEach(btn => {
                 btn.classList.remove('selected');
@@ -13870,9 +13877,15 @@
             }
 
             try {
-                // 🆔 ID 생성 (없는 경우)
-                if (!characterData.id) {
+                // 🆔 편집 모드와 신규 생성 모드 구분
+                const isEditMode = currentMode === 'edit' && characterData.id;
+
+                if (isEditMode) {
+                    console.log('✏️ 편집 모드: 기존 ID 유지 -', characterData.id);
+                } else {
+                    // 신규 생성: 항상 새로운 ID 생성
                     characterData.id = `${name.toLowerCase().replace(/\s+/g, '_')}_${mbti.toLowerCase()}_${Date.now()}`;
+                    console.log('🆕 신규 생성: 새로운 ID 생성 -', characterData.id);
                 }
 
                 // 📅 메타데이터 추가
@@ -15633,6 +15646,8 @@
                     occupation: document.getElementById('charOccupation')?.value || 'student',
                     gender: 'female'
                 },
+                // 🆕 성격 특성 추가 (누락되었던 필드)
+                personality_traits: getSelectedTraits(),
                 appeal_profile: {
                     seduction_style: document.getElementById('seductionStyle')?.value || 'warm_nurturing',
                     charm_points: getSelectedCharmPoints(),
