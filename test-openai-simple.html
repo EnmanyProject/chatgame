@@ -112,24 +112,31 @@
             document.getElementById(resultId).innerHTML = '';
 
             try {
-                log(resultId, 'API 키 유효성 검사 시작...');
+                log(resultId, 'API 키 유효성 검사 시작... (간단한 텍스트 생성으로 테스트)');
 
-                const response = await fetch('/api/admin-auth', {
+                // 간단한 텍스트 생성으로 API 키 테스트
+                const response = await fetch('/api/character-ai-generator', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        action: 'test_openai_key'
+                        action: 'test_simple_generation',
+                        prompt: 'Hello라고 한번만 말해주세요.'
                     })
                 });
+
+                if (!response.ok) {
+                    log(resultId, `❌ HTTP 오류: ${response.status} ${response.statusText}`, 'error');
+                    return;
+                }
 
                 const result = await response.json();
 
                 if (result.success) {
-                    log(resultId, `✅ API 키 테스트 성공!\n모델: ${result.model || 'unknown'}\n응답: ${result.response || 'no response'}`, 'success');
+                    log(resultId, `✅ API 키 테스트 성공!\n모델: ${result.model}\n응답: "${result.text}"\n사용 토큰: ${JSON.stringify(result.usage)}`, 'success');
                 } else {
-                    log(resultId, `❌ API 키 테스트 실패: ${result.message || result.error}`, 'error');
+                    log(resultId, `❌ API 키 테스트 실패: ${result.error}`, 'error');
                 }
 
             } catch (error) {
