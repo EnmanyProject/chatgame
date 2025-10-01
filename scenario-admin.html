@@ -12387,9 +12387,22 @@
         async function loadCharacterPhotoPreview(characterId) {
             try {
                 const encodedCharacterId = encodeURIComponent(characterId);
-                const apiUrl = `/api/character-ai-generator?action=get_character_photos_v2&character_id=${encodedCharacterId}&_t=${Date.now()}`;
-                const response = await fetch(apiUrl);
+                // 강력한 캐시 버스팅을 위한 더 복잡한 타임스탬프
+                const cacheBreaker = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const apiUrl = `/api/character-ai-generator?action=get_character_photos_v2&character_id=${encodedCharacterId}&_t=${cacheBreaker}`;
+                console.log('📷 사진 미리보기 로드 시작:', characterId);
+                console.log('🌐 API URL:', apiUrl);
+
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
                 const result = await response.json();
+
+                console.log('📸 사진 API 응답:', result);
 
                 if (result.success && result.photos) {
                     const previewContainer = document.getElementById(`photo-preview-${characterId}`);
