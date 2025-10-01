@@ -9887,9 +9887,17 @@
         function showCharacterDetail(characterId) {
             console.log('👤 캐릭터 상세 정보 모달 열기:', characterId);
 
-            const character = characters[characterId];
+            // 🔧 데이터 구조에 따른 캐릭터 조회 (v4.1.0 구조 지원)
+            let character = null;
+            if (characters && characters.characters) {
+                character = characters.characters[characterId];
+            } else if (characters && characters[characterId]) {
+                character = characters[characterId];
+            }
+
             if (!character) {
                 console.error('❌ 캐릭터를 찾을 수 없습니다:', characterId);
+                console.log('🔍 전체 캐릭터 데이터 구조:', characters);
                 alert('캐릭터 정보를 찾을 수 없습니다.');
                 return;
             }
