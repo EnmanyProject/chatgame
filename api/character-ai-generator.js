@@ -693,8 +693,21 @@ module.exports = async function handler(req, res) {
       }
 
       try {
+        console.log('🔍 사진 데이터 크기 확인:', Math.round(photo_data.length / 1024), 'KB');
+
         // 사진 데이터 검증
         validatePhotoData(photo_data, category);
+        console.log('✅ 사진 데이터 검증 통과');
+
+        // 메모리 사용량 제한 - 매우 큰 파일은 거부
+        const photoSizeBytes = (photo_data.length * 3) / 4;
+        if (photoSizeBytes > 10 * 1024 * 1024) { // 10MB 초과
+          console.log('❌ 사진이 너무 큼:', Math.round(photoSizeBytes / (1024 * 1024)), 'MB');
+          return res.status(413).json({
+            success: false,
+            message: '사진 크기가 너무 큽니다. 서버 안정성을 위해 10MB 이하로 제한됩니다.'
+          });
+        }
 
         // 사진 데이터 로드
         const photosData = await loadPhotosFromGitHub();
@@ -755,22 +768,54 @@ module.exports = async function handler(req, res) {
         photosData.metadata.total_photos = Object.values(photosData.photos).reduce((total, char) => total + char.photo_count, 0);
         photosData.metadata.last_updated = new Date().toISOString();
 
-        // GitHub에 저장
-        await savePhotosToGitHub(photosData);
+        // GitHub에 저장 (재시도 로직 포함)
+        console.log('💾 GitHub 저장 시작...');
+        let saveAttempts = 0;
+        const maxAttempts = 3;
 
+        while (saveAttempts < maxAttempts) {
+          try {
+            await savePhotosToGitHub(photosData);
+            console.log('✅ GitHub 저장 성공');
+            break;
+          } catch (saveError) {
+            saveAttempts++;
+            console.log(`❌ GitHub 저장 실패 (시도 ${saveAttempts}/${maxAttempts}):`, saveError.message);
+
+            if (saveAttempts >= maxAttempts) {
+              throw new Error(`GitHub 저장 실패: ${saveError.message}`);
+            }
+
+            // 잠시 대기 후 재시도
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
+
+        // 응답 데이터를 간소화하여 JSON 크기 줄이기
+        const responseData = {
+          character_id: charPhotos.character_id,
+          character_name: charPhotos.character_name,
+          photo_count: charPhotos.photo_count,
+          updated_at: charPhotos.updated_at
+        };
+
+        console.log('📤 응답 전송 준비 완료');
         return res.status(200).json({
           success: true,
           message: '사진이 성공적으로 업로드되었습니다.',
-          data: charPhotos,
-          categories: PHOTO_CATEGORIES
+          data: responseData
         });
 
       } catch (error) {
-        console.error('❌ 사진 업로드 실패:', error.message);
+        console.error('❌ 사진 업로드 실패:', error);
+        console.error('❌ 에러 스택:', error.stack);
+
         return res.status(500).json({
           success: false,
           message: error.message || '사진 업로드 실패',
-          error_type: 'photo_upload_error'
+          error_type: 'photo_upload_error',
+          character_id: character_id,
+          category: category
         });
       }
     }
