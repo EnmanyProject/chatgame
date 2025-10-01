@@ -711,10 +711,15 @@ module.exports = async function handler(req, res) {
             );
           }
         } catch (dirError) {
-          console.log('📁 photos 폴더가 없거나 비어있음');
+          console.log('📁 photos 폴더가 없거나 비어있음:', dirError.message);
+          console.log('❌ GitHub API 오류 상세:', dirError);
         }
 
         console.log(`📊 찾은 사진 파일 수: ${photoFiles.length}`);
+        console.log(`🔍 검색 기준: character_id=${character_id}`);
+        console.log(`📁 전체 파일 목록:`, Array.isArray(contentsResponse.data) ?
+          contentsResponse.data.map(f => f.name) : 'contentsResponse.data is not array');
+        console.log(`✅ 필터링된 파일:`, photoFiles.map(f => f.name));
 
         // 각 파일에서 사진 데이터 로드
         const characterPhotos = {
