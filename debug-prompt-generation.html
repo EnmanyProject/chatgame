@@ -308,6 +308,84 @@
             }
         }
 
+        // 한국어 번역 매핑 (API의 translateToKorean 함수와 동일)
+        function getKoreanTranslation(englishValue) {
+            const translations = {
+                // MBTI
+                'INFP': 'INFP', 'ENFP': 'ENFP', 'INTJ': 'INTJ', 'ESTJ': 'ESTJ', 'ESFP': 'ESFP',
+                'ISTP': 'ISTP', 'ESFJ': 'ESFJ', 'ISFJ': 'ISFJ', 'ENTP': 'ENTP', 'ENTJ': 'ENTJ',
+
+                // 취미 (hobbies)
+                'gaming': '게임', 'reading': '독서', 'cooking': '요리', 'shopping': '쇼핑',
+                'traveling': '여행', 'photography': '사진', 'music': '음악', 'dancing': '춤',
+                'art': '미술', 'sports': '운동', 'hiking': '등산', 'swimming': '수영',
+                'movies': '영화', 'books': '책', 'fitness': '피트니스', 'yoga': '요가',
+
+                // 음식 선호도 (food_preference)
+                'Korean food': '한식', 'Italian food': '이탈리안', 'Japanese food': '일식',
+                'Chinese food': '중식', 'Western food': '양식', 'vegetarian': '채식',
+                'spicy food': '매운음식', 'sweet food': '단음식', 'healthy food': '건강식',
+
+                // 패션 스타일 (fashion_style)
+                'casual': '캐주얼', 'elegant': '우아한', 'sporty': '스포티', 'vintage': '빈티지',
+                'minimalist': '미니멀', 'bohemian': '보헤미안', 'preppy': '프레피', 'cute': '귀여운',
+
+                // 라이프스타일 (lifestyle)
+                'active': '활동적', 'relaxed': '여유로운', 'busy': '바쁜', 'social': '사교적',
+                'quiet': '조용한', 'adventurous': '모험적', 'homebody': '집순이',
+
+                // 성격 키워드 (personality_keywords)
+                'cheerful': '밝은', 'shy': '수줍은', 'confident': '자신감있는', 'kind': '친절한',
+                'funny': '재미있는', 'serious': '진지한', 'creative': '창의적', 'logical': '논리적',
+                'emotional': '감정적', 'rational': '이성적', 'optimistic': '낙관적', 'realistic': '현실적',
+
+                // 기타 번역들
+                'mysterious': '신비로운', 'charming': '매력적인', 'intelligent': '지적인',
+                'playful': '장난스러운', 'warm': '따뜻한', 'cool': '쿨한', 'passionate': '열정적인'
+            };
+
+            return translations[englishValue] || englishValue;
+        }
+
+        // 향상된 매칭 함수 - 원본 영어값과 한국어 번역 모두 체크
+        function checkValueInPrompt(prompt, value) {
+            if (!value) return { matched: false, type: 'none' };
+
+            const promptLower = prompt.toLowerCase();
+
+            if (Array.isArray(value)) {
+                // 배열인 경우 각 요소를 체크
+                for (const item of value) {
+                    const original = String(item).toLowerCase();
+                    const translated = getKoreanTranslation(String(item)).toLowerCase();
+
+                    if (promptLower.includes(original) || promptLower.includes(translated)) {
+                        return { matched: true, type: 'full', matchedValue: item };
+                    }
+                }
+                return { matched: false, type: 'none' };
+            } else {
+                const original = String(value).toLowerCase();
+                const translated = getKoreanTranslation(String(value)).toLowerCase();
+
+                if (promptLower.includes(original) || promptLower.includes(translated)) {
+                    return { matched: true, type: 'full', matchedValue: value };
+                }
+
+                // 부분 매칭 체크
+                const words = original.split(/[,\s]+/).filter(w => w.length > 1);
+                const translatedWords = translated.split(/[,\s]+/).filter(w => w.length > 1);
+
+                for (const word of [...words, ...translatedWords]) {
+                    if (promptLower.includes(word)) {
+                        return { matched: true, type: 'partial', matchedValue: word };
+                    }
+                }
+
+                return { matched: false, type: 'none' };
+            }
+        }
+
         function analyzePromptAccuracy(character, prompt) {
             const analysis = {
                 matches: [],
@@ -332,7 +410,7 @@
                 { path: 'appeal_profile.mystery_factor', label: '신비로움', getValue: (c) => c.appeal_profile?.mystery_factor },
                 { path: 'appeal_profile.sexual_curiosity', label: '성적 호기심', getValue: (c) => c.appeal_profile?.sexual_curiosity },
                 { path: 'appeal_profile.sexual_comfort', label: '성적 편안함', getValue: (c) => c.appeal_profile?.sexual_comfort },
-                { path: 'appeal_profile.hobbies', label: '취미', getValue: (c) => c.appeal_profile?.hobbies?.join(', ') },
+                { path: 'appeal_profile.hobbies', label: '취미', getValue: (c) => c.appeal_profile?.hobbies },
 
                 // 👄 외모적 매력 (9개)
                 { path: 'physical_allure.appearance.hair', label: '헤어스타일', getValue: (c) => c.physical_allure?.appearance?.hair },
@@ -341,12 +419,12 @@
                 { path: 'physical_allure.appearance.bust', label: '가슴 사이즈', getValue: (c) => c.physical_allure?.appearance?.bust },
                 { path: 'physical_allure.appearance.waist_hip', label: '허리/힙', getValue: (c) => c.physical_allure?.appearance?.waist_hip },
                 { path: 'physical_allure.appearance.style', label: '스타일', getValue: (c) => c.physical_allure?.appearance?.style },
-                { path: 'physical_allure.feature_elements', label: '특징적 요소', getValue: (c) => c.physical_allure?.feature_elements?.join(', ') },
-                { path: 'physical_allure.sensual_habits', label: '감각적 습관', getValue: (c) => c.physical_allure?.sensual_habits?.join(', ') },
-                { path: 'physical_allure.body_language', label: '바디랭귀지', getValue: (c) => c.physical_allure?.body_language?.join(', ') },
+                { path: 'physical_allure.feature_elements', label: '특징적 요소', getValue: (c) => c.physical_allure?.feature_elements },
+                { path: 'physical_allure.sensual_habits', label: '감각적 습관', getValue: (c) => c.physical_allure?.sensual_habits },
+                { path: 'physical_allure.body_language', label: '바디랭귀지', getValue: (c) => c.physical_allure?.body_language },
 
                 // 🧠 심리적 깊이 (6개)
-                { path: 'psychological_depth.core_desires', label: '핵심 욕구', getValue: (c) => c.psychological_depth?.core_desires?.join(', ') },
+                { path: 'psychological_depth.core_desires', label: '핵심 욕구', getValue: (c) => c.psychological_depth?.core_desires },
                 { path: 'psychological_depth.vulnerabilities', label: '취약점', getValue: (c) => c.psychological_depth?.vulnerabilities?.join(', ') },
                 { path: 'psychological_depth.values', label: '가치관', getValue: (c) => c.psychological_depth?.values },
                 { path: 'psychological_depth.sexual_freedom', label: '성적 자유도', getValue: (c) => c.psychological_depth?.sexual_freedom },
@@ -380,22 +458,18 @@
             ];
 
             let totalMatches = 0;
-            const promptLower = prompt.toLowerCase();
 
             fieldsToCheck.forEach(field => {
                 const value = field.getValue(character);
                 if (value) {
-                    const valueStr = String(value).toLowerCase();
+                    const matchResult = checkValueInPrompt(prompt, value);
                     let matchStatus = 'no';
 
-                    if (promptLower.includes(valueStr)) {
-                        matchStatus = 'yes';
-                        totalMatches++;
-                    } else {
-                        // 부분 매칭 검사 (번역된 내용이나 유사 표현)
-                        const words = valueStr.split(/[,\s]+/).filter(w => w.length > 1);
-                        const partialMatches = words.filter(word => promptLower.includes(word));
-                        if (partialMatches.length > 0) {
+                    if (matchResult.matched) {
+                        if (matchResult.type === 'full') {
+                            matchStatus = 'yes';
+                            totalMatches++;
+                        } else if (matchResult.type === 'partial') {
                             matchStatus = 'partial';
                             totalMatches += 0.5;
                         }
@@ -405,7 +479,8 @@
                         field: field.label,
                         originalValue: value,
                         matchStatus: matchStatus,
-                        inPrompt: matchStatus !== 'no'
+                        inPrompt: matchStatus !== 'no',
+                        matchedValue: matchResult.matchedValue || null
                     });
                 }
             });
@@ -432,14 +507,16 @@
 
             [...analysis.matches, ...analysis.misses].forEach(item => {
                 const row = tableBody.insertRow();
+                const statusText = item.inPrompt ? '✅ 반영됨' : '❌ 반영안됨';
+                const matchText = item.matchStatus === 'yes' ? '완전매칭' :
+                                item.matchStatus === 'partial' ? '부분매칭' : '매칭안됨';
+                const matchedInfo = item.matchedValue ? ` (매칭: "${item.matchedValue}")` : '';
+
                 row.innerHTML = `
                     <td>${item.field}</td>
                     <td>${item.originalValue}</td>
-                    <td>${item.inPrompt ? '✅ 반영됨' : '❌ 반영안됨'}</td>
-                    <td><span class="match-status match-${item.matchStatus}">${
-                        item.matchStatus === 'yes' ? '완전매칭' :
-                        item.matchStatus === 'partial' ? '부분매칭' : '매칭안됨'
-                    }</span></td>
+                    <td>${statusText}${matchedInfo}</td>
+                    <td><span class="match-status match-${item.matchStatus}">${matchText}</span></td>
                 `;
             });
 
