@@ -5634,6 +5634,14 @@
             </div>
             <div class="modal-body">
                 <div id="characterDetailContent">
+                    <!-- AI 프롬프트 섹션 (최상단) -->
+                    <div id="aiPromptSection" class="detail-section" style="display: none;">
+                        <h3>🤖 AI 생성 프롬프트</h3>
+                        <div class="ai-prompt-content" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <div id="aiPromptText" style="line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;"></div>
+                        </div>
+                    </div>
+
                     <!-- 기본 정보 섹션 -->
                     <div class="detail-section">
                         <h3>📋 기본 정보</h3>
@@ -9576,14 +9584,9 @@
                     <div class="character-info">
                         <!-- AI 프롬프트 표시 영역 -->
                         ${character.ai_prompt ? `
-                        <div class="character-prompt" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 0.85em; line-height: 1.3;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                                <strong style="font-size: 0.9em;">🎭 AI 프롬프트</strong>
-                                <small style="opacity: 0.8;">${character.prompt_generated_at ? new Date(character.prompt_generated_at).toLocaleDateString() : ''}</small>
-                            </div>
-                            <div style="max-height: 80px; overflow-y: auto; background: rgba(255,255,255,0.1); padding: 6px; border-radius: 4px; font-size: 0.8em;">
-                                ${character.ai_prompt.substring(0, 200)}${character.ai_prompt.length > 200 ? '...' : ''}
-                            </div>
+                        <div class="character-prompt-indicator" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 8px; border-radius: 15px; margin-bottom: 8px; font-size: 0.75em; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <span style="margin-right: 3px;">🤖</span>
+                            <strong>AI 소개있음</strong>
                         </div>
                         ` : ''}
 
@@ -9716,6 +9719,9 @@
         // 📝 캐릭터 상세 정보 채우기 함수
         function fillCharacterDetailInfo(character) {
             console.log('📝 캐릭터 상세 정보 채우는 중...');
+
+            // AI 프롬프트 섹션 (최상단)
+            displayAIPromptInDetail(character);
 
             // 기본 정보 섹션
             safeSetTextContent('detailName', getCharacterName(character));
@@ -10474,6 +10480,31 @@
                 return new Date(character.created_at).toLocaleString('ko-KR');
             }
             return '-';
+        }
+
+        // 🤖 AI 프롬프트 상세 표시 함수
+        function displayAIPromptInDetail(character) {
+            console.log('🤖 AI 프롬프트 상세 표시 중...');
+
+            const aiPromptSection = document.getElementById('aiPromptSection');
+            const aiPromptText = document.getElementById('aiPromptText');
+
+            if (!aiPromptSection || !aiPromptText) {
+                console.warn('⚠️ AI 프롬프트 섹션 요소를 찾을 수 없습니다');
+                return;
+            }
+
+            // AI 프롬프트가 있는지 확인
+            if (character && character.ai_prompt && character.ai_prompt.trim()) {
+                // AI 프롬프트 내용 표시
+                aiPromptText.textContent = character.ai_prompt;
+                aiPromptSection.style.display = 'block';
+                console.log('✅ AI 프롬프트 표시 완료');
+            } else {
+                // AI 프롬프트가 없으면 섹션 숨김
+                aiPromptSection.style.display = 'none';
+                console.log('ℹ️ AI 프롬프트가 없어 섹션을 숨깁니다');
+            }
         }
 
         // 🛠️ 안전한 텍스트 설정 함수
