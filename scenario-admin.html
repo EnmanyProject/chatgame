@@ -4853,8 +4853,29 @@
                                 <button type="button" class="btn-random" onclick="randomizeAge()">🎲 랜덤</button>
                             </div>
                             <div class="form-group">
-                                <label>직업 (1-40자)</label>
-                                <input type="text" id="charOccupation" placeholder="예: 대학생, 디자이너, 간호사" maxlength="40" />
+                                <label>직업</label>
+                                <select id="charOccupation">
+                                    <option value="student">👩‍🎓 대학생</option>
+                                    <option value="office_worker">💼 회사원</option>
+                                    <option value="designer">🎨 디자이너</option>
+                                    <option value="nurse">👩‍⚕️ 간호사</option>
+                                    <option value="teacher">👩‍🏫 선생님</option>
+                                    <option value="developer">👩‍💻 개발자</option>
+                                    <option value="artist">🎭 예술가</option>
+                                    <option value="photographer">📷 사진작가</option>
+                                    <option value="journalist">📰 기자</option>
+                                    <option value="unemployed">🏠 백수</option>
+                                    <option value="flight_attendant">✈️ 승무원</option>
+                                    <option value="doctor">👩‍⚕️ 의사</option>
+                                    <option value="singer">🎤 가수</option>
+                                    <option value="actress">🎬 배우</option>
+                                    <option value="pharmacist">💊 약사</option>
+                                    <option value="lawyer">⚖️ 변호사</option>
+                                    <option value="chef">👩‍🍳 요리사</option>
+                                    <option value="banker">🏦 은행원</option>
+                                    <option value="marketing">📢 마케터</option>
+                                    <option value="entrepreneur">🚀 사업가</option>
+                                </select>
                                 <button type="button" class="btn-random" onclick="randomizeOccupation()">🎲 랜덤</button>
                             </div>
                             <div class="form-group">
@@ -4914,19 +4935,6 @@
                     <div class="char-category">
                         <h3>🎓 배경 설정</h3>
                         <div class="category-grid">
-                            <div class="form-group">
-                                <label>전공/직업</label>
-                                <select id="charMajor">
-                                    <option value="art">🎨 예술대학 (미술, 디자인)</option>
-                                    <option value="literature">📚 문과대학 (문학, 어학)</option>
-                                    <option value="music">🎵 음악대학</option>
-                                    <option value="psychology">🧠 심리학과</option>
-                                    <option value="education">👩‍🏫 사범대학</option>
-                                    <option value="nursing">👩‍⚕️ 간호학과</option>
-                                    <option value="business">💼 경영학과</option>
-                                    <option value="media">📺 언론정보학과</option>
-                                </select>
-                            </div>
                             <div class="form-group">
                                 <label>가족 관계</label>
                                 <select id="charFamily">
@@ -10456,9 +10464,13 @@
                 mbti: document.getElementById('charMbti').value,
                 character_type: document.getElementById('charType').value || 'romance_junior',
                 personality_traits: getSelectedTraits(),
-                major: document.getElementById('charMajor').value || 'art',
-                family: document.getElementById('charFamily').value || 'only_child',
-                hometown: document.getElementById('charHometown').value || 'seoul',
+                occupation: document.getElementById('charOccupation').value || 'student',
+
+                // 배경 정보
+                background: {
+                    family: document.getElementById('charFamily').value || 'only_child',
+                    hometown: document.getElementById('charHometown').value || 'seoul'
+                },
                 relationship: document.getElementById('charRelationship').value,
 
                 // 외모 정보
@@ -11086,7 +11098,7 @@
                 console.log('🎉 AI 캐릭터 기본 정보 적용 완료!');
 
                 // 추가 폼 요소들도 안전하게 적용
-                safeSetValue('charMajor', character.major);
+                safeSetValue('charOccupation', character.occupation || character.major);
                 safeSetValue('charRelationship', character.relationship);
                 safeSetValue('charFamily', character.background?.family);
                 safeSetValue('charHometown', character.background?.hometown);
@@ -14558,9 +14570,11 @@
 
                 // 선택적 필드들 (입력된 것만 수집)
                 character_type: document.getElementById('charType')?.value || null,
-                major: document.getElementById('charMajor')?.value || null,
-                family: document.getElementById('charFamily')?.value || null,
-                hometown: document.getElementById('charHometown')?.value || null,
+                occupation: document.getElementById('charOccupation')?.value || null,
+                background: {
+                    family: document.getElementById('charFamily')?.value || null,
+                    hometown: document.getElementById('charHometown')?.value || null
+                },
                 relationship: document.getElementById('charRelationship')?.value || null,
 
                 // 외모 정보
@@ -14599,7 +14613,7 @@
         function fillMissingFieldsRandomly(inputData) {
             const randomSelections = {
                 character_type: ['romance_junior', 'seductive_junior', 'cute_junior', 'elegant_senior'],
-                major: ['art', 'music', 'literature', 'psychology', 'business', 'design'],
+                occupation: ['student', 'office_worker', 'designer', 'nurse', 'teacher', 'developer', 'artist', 'photographer', 'journalist', 'unemployed', 'flight_attendant', 'doctor', 'singer', 'actress', 'pharmacist', 'lawyer', 'chef', 'banker', 'marketing', 'entrepreneur'],
                 family: ['only_child', 'older_sister', 'younger_sister', 'middle_child'],
                 hometown: ['seoul', 'busan', 'incheon', 'daegu', 'gwangju'],
                 relationship: ['secret_crush', 'childhood_friend', 'senior_friend', 'classmate'],
@@ -14639,10 +14653,13 @@
 
             // 기본 정보
             if (!completeData.character_type) completeData.character_type = randomChoice(randomSelections.character_type);
-            if (!completeData.major) completeData.major = randomChoice(randomSelections.major);
-            if (!completeData.family) completeData.family = randomChoice(randomSelections.family);
-            if (!completeData.hometown) completeData.hometown = randomChoice(randomSelections.hometown);
+            if (!completeData.occupation) completeData.occupation = randomChoice(randomSelections.occupation);
             if (!completeData.relationship) completeData.relationship = randomChoice(randomSelections.relationship);
+
+            // 배경 정보 (중첩 구조)
+            if (!completeData.background) completeData.background = {};
+            if (!completeData.background.family) completeData.background.family = randomChoice(randomSelections.family);
+            if (!completeData.background.hometown) completeData.background.hometown = randomChoice(randomSelections.hometown);
 
             // 외모 정보
             if (!completeData.appearance.hair) completeData.appearance.hair = randomChoice(randomSelections.hair);
@@ -14759,7 +14776,7 @@
                     name: document.getElementById('charName')?.value || '미지의 소녀',
                     age: parseInt(document.getElementById('charAge')?.value) || 22,
                     mbti: document.getElementById('charMbti')?.value || 'INFP',
-                    occupation: document.getElementById('charMajor')?.value || 'art', // charMajor 사용 (charOccupation 없음)
+                    occupation: document.getElementById('charOccupation')?.value || 'student',
                     gender: 'female'
                 },
                 appeal_profile: {
@@ -15198,12 +15215,12 @@
                 console.log('✅ MBTI 설정:', mbti);
             }
 
-            // 직업/전공 처리 (charMajor 필드 사용)
+            // 직업 처리 (charOccupation 필드 사용)
             const occupation = character.basic_info?.occupation || character.occupation || character.major;
-            const charMajorEl = document.getElementById('charMajor');
-            if (occupation && charMajorEl) {
-                charMajorEl.value = occupation;
-                console.log('✅ 직업/전공 설정:', occupation);
+            const charOccupationEl = document.getElementById('charOccupation');
+            if (occupation && charOccupationEl) {
+                charOccupationEl.value = occupation;
+                console.log('✅ 직업 설정:', occupation);
             }
         }
 
@@ -15868,8 +15885,19 @@
         }
 
         function randomizeOccupation() {
-            const occupations = ['대학생', '디자이너', '간호사', '예술가', '회사원', '선생님', '개발자', '기자', '사진작가'];
-            document.getElementById('charOccupation').value = occupations[Math.floor(Math.random() * occupations.length)];
+            const occupationElement = document.getElementById('charOccupation');
+            if (!occupationElement) {
+                console.error('❌ charOccupation 요소를 찾을 수 없습니다!');
+                return;
+            }
+            const options = Array.from(occupationElement.options);
+            if (options.length === 0) {
+                console.error('❌ 직업 옵션이 없습니다!');
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * options.length);
+            occupationElement.selectedIndex = randomIndex;
+            console.log('✅ 직업 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
         }
 
         function randomizeFamily() {
