@@ -2432,6 +2432,112 @@
             }
         }
 
+        /* 🎆 미래 직업 버튼 스타일 */
+        .future-career-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            border: 1px solid #dee2e6;
+        }
+
+        .career-btn {
+            padding: 16px 14px;
+            border: 2px solid #6c5ce7;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f7ff 100%);
+            color: #5a54d6;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 3px 12px rgba(108, 92, 231, 0.15);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 50px;
+        }
+
+        .career-btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(116, 103, 239, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .career-btn:hover {
+            border-color: #5a54d6;
+            background: linear-gradient(135deg, #f3f2ff 0%, #e8e6ff 100%);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.25);
+            color: #4c43d4;
+        }
+
+        .career-btn:hover:before {
+            left: 100%;
+        }
+
+        .career-btn.selected {
+            background: linear-gradient(135deg, #6c5ce7 0%, #5a54d6 100%);
+            color: white;
+            transform: translateY(-4px) scale(1.08);
+            box-shadow: 0 10px 30px rgba(108, 92, 231, 0.5);
+            animation: careerPulse 2s infinite;
+            border-color: #4c43d4;
+        }
+
+        @keyframes careerPulse {
+            0%, 100% {
+                box-shadow: 0 10px 30px rgba(108, 92, 231, 0.5);
+            }
+            50% {
+                box-shadow: 0 12px 35px rgba(108, 92, 231, 0.7);
+            }
+        }
+
+        .career-btn:active {
+            transform: translateY(-2px) scale(0.98);
+            transition: all 0.1s ease;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .future-career-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+                padding: 15px;
+            }
+
+            .career-btn {
+                padding: 14px 10px;
+                font-size: 12px;
+                min-height: 45px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .future-career-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+                padding: 12px;
+            }
+
+            .career-btn {
+                padding: 12px 8px;
+                font-size: 11px;
+                min-height: 40px;
+            }
+        }
+
         /* 💕 흥분시 반응 CSS */
         .body-language-grid {
             display: grid;
@@ -5367,7 +5473,7 @@
                                     <button type="button" class="career-btn" data-career="influencer">📱 인플루언서</button>
                                     <button type="button" class="career-btn" data-career="entrepreneur">🚀 창업가</button>
                                     <button type="button" class="career-btn" data-career="artist">🎭 예술가</button>
-                                    <button type="button" class="career-btn" data-career="consultant">📈 컸설턴트</button>
+                                    <button type="button" class="career-btn" data-career="consultant">📈 컨설턴트</button>
                                     <button type="button" class="career-btn" data-career="beauty_business">💅 미용 사업</button>
                                     <button type="button" class="career-btn" data-career="unemployed">📏 백수(운동권)</button>
                                 </div>
@@ -9686,7 +9792,7 @@
                     'influencer': '인플루언서',
                     'entrepreneur': '창업가',
                     'artist': '예술가',
-                    'consultant': '컸설턴트',
+                    'consultant': '컨설턴트',
                     'beauty_business': '미용 사업',
                     'unemployed': '백수(운동권)'
                 }
@@ -15942,29 +16048,54 @@
 
         // 🎆 자산 목표 랜덤 선택
         function randomizeAssetGoal() {
+            console.log('🔄 randomizeAssetGoal 함수 실행 시작...');
+
             const assetGoals = ['1_billion', '3_billion', '5_billion', '10_billion', '30_billion', '50_billion', '100_billion'];
             const randomGoal = assetGoals[Math.floor(Math.random() * assetGoals.length)];
-            document.getElementById('assetGoal').value = randomGoal;
-            console.log('🎲 랜덤 자산 목표 선택:', randomGoal);
+
+            const assetGoalElement = document.getElementById('assetGoal');
+            if (assetGoalElement) {
+                assetGoalElement.value = randomGoal;
+                console.log('🎲 랜덤 자산 목표 선택:', randomGoal);
+            } else {
+                console.error('❌ assetGoal 요소를 찾을 수 없습니다!');
+            }
         }
 
         // 🎆 미래 직업 랜덤 선택 (1-2개)
         function randomizeFutureCareers() {
+            console.log('🔄 randomizeFutureCareers 함수 실행 시작...');
+
             // 기존 선택 해제
-            document.querySelectorAll('.career-btn.selected').forEach(btn => {
+            const existingSelected = document.querySelectorAll('.career-btn.selected');
+            console.log('🗑️ 기존 선택 해제 - 선택된 개수:', existingSelected.length);
+            existingSelected.forEach(btn => {
                 btn.classList.remove('selected');
             });
 
             const careerBtns = document.querySelectorAll('.career-btn');
+            console.log('🔍 발견된 .career-btn 요소 수:', careerBtns.length);
+
+            if (careerBtns.length === 0) {
+                console.error('❌ .career-btn 요소를 찾을 수 없습니다!');
+                return;
+            }
+
             const numCareers = Math.floor(Math.random() * 2) + 1; // 1-2개 랜덤
+            console.log('🎯 선택할 직업 수:', numCareers);
+
             const shuffled = Array.from(careerBtns).sort(() => 0.5 - Math.random());
+            console.log('🔀 배열 섹팩 완료, 처음 3개 요소:', shuffled.slice(0, 3).map(btn => btn.getAttribute('data-career')));
 
             for (let i = 0; i < numCareers && i < shuffled.length; i++) {
                 shuffled[i].classList.add('selected');
                 const career = shuffled[i].getAttribute('data-career');
-                console.log('🎲 랜덤 미래 직업 선택:', career);
+                console.log(`🎲 ${i+1}번째 랜덤 미래 직업 선택:`, career);
             }
-            console.log('✅ 미래 직업 랜덤 선택 완료');
+
+            // 최종 검증
+            const finalSelected = document.querySelectorAll('.career-btn.selected');
+            console.log('✅ 미래 직업 랜덤 선택 완료 - 최종 선택된 개수:', finalSelected.length);
         }
 
         function randomizeAllFields() {
@@ -16717,7 +16848,7 @@
         window.randomizeName = randomizeName;
         window.randomizeAge = randomizeAge;
         window.randomizeOccupation = randomizeOccupation;
-        window.randomizeSeduction = randomizeSeduction;
+        // window.randomizeSeduction = randomizeSeduction; // 제거됨
         window.randomizeCharms = randomizeCharms;
         window.randomizeEI = randomizeEI;
         window.randomizeConfidence = randomizeConfidence;
@@ -16731,6 +16862,8 @@
         window.randomizeWaistHip = randomizeWaistHip;
         window.randomizeStyle = randomizeStyle;
         window.randomizeAllFields = randomizeAllFields;
+        window.randomizeAssetGoal = randomizeAssetGoal;
+        window.randomizeFutureCareers = randomizeFutureCareers;
         window.resetAllFields = resetAllFields;
         window.toggleAdvancedMeta = toggleAdvancedMeta;
         window.hideAdvancedMeta = hideAdvancedMeta;
