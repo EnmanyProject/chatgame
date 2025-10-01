@@ -351,11 +351,11 @@ module.exports = async function handler(req, res) {
       console.log('🎯 안전한 구간만 추출 완료 - 민감한 필드 제외됨');
 
       try {
-        // OpenAI API를 통한 프롬프트 생성 (최적화된 설정)
-        console.log('🤖 OpenAI API 프롬프트 생성 시작 (최적화)');
-        const prompt = await generateCharacterPromptWithOpenAI(safeCharacterData, model, 'comprehensive', 'short', system_prompt);
+        // Groq API를 통한 프롬프트 생성 (빠른 속도)
+        console.log('🚀 Groq API 프롬프트 생성 시작 (고속)');
+        const prompt = await generateCharacterPromptWithGroq(safeCharacterData, model, 'comprehensive', 'short', system_prompt);
 
-        console.log('✅ OpenAI 프롬프트 생성 성공');
+        console.log('✅ Groq 프롬프트 생성 성공');
         return res.json({
           success: true,
           prompt: prompt,
@@ -366,11 +366,11 @@ module.exports = async function handler(req, res) {
         });
 
       } catch (error) {
-        console.error('❌ OpenAI API 프롬프트 생성 실패:', error);
+        console.error('❌ Groq API 프롬프트 생성 실패:', error);
 
         return res.status(500).json({
           success: false,
-          message: 'OpenAI API를 통한 프롬프트 생성에 실패했습니다.',
+          message: 'Groq API를 통한 프롬프트 생성에 실패했습니다.',
           error: error.message,
           character_name: character_data.basic_info?.name
         });
@@ -3123,14 +3123,14 @@ async function savePhotosToGitHub(photosData) {
 // 🎭 ================ 캐릭터 프롬프트 생성 함수들 ================
 
 // OpenAI API를 통한 캐릭터 프롬프트 생성
-async function generateCharacterPromptWithOpenAI(characterData, model = 'gpt-4o', style, length, systemPrompt) {
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+async function generateCharacterPromptWithGroq(characterData, model = 'llama3-8b-8192', style, length, systemPrompt) {
+  const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
-  if (!OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY 환경변수가 설정되지 않았습니다');
+  if (!GROQ_API_KEY) {
+    throw new Error('GROQ_API_KEY 환경변수가 설정되지 않았습니다');
   }
 
-  console.log('🤖 OpenAI API 프롬프트 생성 시작...');
+  console.log('🚀 Groq API 프롬프트 생성 시작...');
   console.log('📋 캐릭터:', characterData.basic_info?.name);
   console.log('🎨 스타일:', style);
 
@@ -3148,19 +3148,19 @@ ${characterSummary}
 - 1000-2000자 분량`;
 
   try {
-    // 타임아웃을 위한 AbortController 설정 (9초)
+    // 타임아웃을 위한 AbortController 설정 (3초) - Groq은 매우 빠름
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 9000);
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${GROQ_API_KEY}`,
         'Content-Type': 'application/json',
       },
       signal: controller.signal,
       body: JSON.stringify({
-        model: model,
+        model: 'llama3-8b-8192',
         messages: [
           {
             role: 'system',
@@ -3179,7 +3179,7 @@ ${characterSummary}
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      let errorMessage = `OpenAI API 오류: ${response.status}`;
+      let errorMessage = `Groq API 오류: ${response.status}`;
       try {
         const errorData = await response.json();
         errorMessage += ` - ${errorData.error?.message || '알 수 없는 오류'}`;
@@ -3193,14 +3193,14 @@ ${characterSummary}
     const generatedPrompt = result.choices[0]?.message?.content?.trim();
 
     if (!generatedPrompt) {
-      throw new Error('OpenAI API에서 프롬프트를 생성하지 못했습니다');
+      throw new Error('Groq API에서 프롬프트를 생성하지 못했습니다');
     }
 
-    console.log('✅ OpenAI API 프롬프트 생성 완료, 길이:', generatedPrompt.length);
+    console.log('✅ Groq API 프롬프트 생성 완료, 길이:', generatedPrompt.length);
     return generatedPrompt;
 
   } catch (error) {
-    console.error('❌ OpenAI API 호출 실패:', error.message);
+    console.error('❌ Groq API 호출 실패:', error.message);
 
     // 타임아웃 에러 처리
     if (error.name === 'AbortError') {
