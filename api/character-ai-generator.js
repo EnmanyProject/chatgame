@@ -3123,7 +3123,7 @@ async function savePhotosToGitHub(photosData) {
 // 🎭 ================ 캐릭터 프롬프트 생성 함수들 ================
 
 // OpenAI API를 통한 캐릭터 프롬프트 생성
-async function generateCharacterPromptWithGroq(characterData, model = 'llama3-8b-8192', style, length, systemPrompt) {
+async function generateCharacterPromptWithGroq(characterData, model = 'llama-3.1-8b-instant', style, length, systemPrompt) {
   const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
   if (!GROQ_API_KEY) {
@@ -3160,7 +3160,7 @@ ${characterSummary}
       },
       signal: controller.signal,
       body: JSON.stringify({
-        model: 'llama3-8b-8192',
+        model: 'llama-3.1-8b-instant',
         messages: [
           {
             role: 'system',
