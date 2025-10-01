@@ -4511,6 +4511,9 @@
                         <button class="btn btn-secondary" onclick="previewCharacterData()">
                             👁️ 캐릭터 데이터 미리보기
                         </button>
+                        <button class="btn btn-info" onclick="loadCharactersForPromptGeneration()" style="font-size: 0.9em;">
+                            🔄 캐릭터 목록 새로고침
+                        </button>
                     </div>
                 </div>
 
@@ -6094,28 +6097,66 @@
             try {
                 console.log('📋 프롬프트 생성용 캐릭터 목록 로드 중...');
 
-                // 캐릭터 데이터가 없다면 로드
-                if (!window.characters || Object.keys(window.characters).length === 0) {
-                    await window.loadCharacters();
+                const characterSelect = document.getElementById('characterPromptTarget');
+                if (!characterSelect) {
+                    console.error('❌ characterPromptTarget 요소를 찾을 수 없음');
+                    return;
                 }
 
-                const characterSelect = document.getElementById('characterPromptTarget');
-                if (!characterSelect) return;
-
                 // 기존 옵션 제거 (첫 번째 기본 옵션 제외)
+                characterSelect.innerHTML = '<option value="">캐릭터 로딩 중...</option>';
+
+                // 직접 API에서 최신 캐릭터 데이터 가져오기
+                const response = await fetch('/api/character-ai-generator?action=list_characters&_t=' + Date.now());
+                if (!response.ok) {
+                    throw new Error('캐릭터 목록 API 호출 실패');
+                }
+
+                const result = await response.json();
+                console.log('📡 API 응답:', result);
+
+                if (!result.success || !result.characters) {
+                    throw new Error('캐릭터 데이터가 없습니다');
+                }
+
+                const characters = result.characters;
+                const characterArray = Object.values(characters);
+
+                if (characterArray.length === 0) {
+                    characterSelect.innerHTML = '<option value="">생성된 캐릭터가 없습니다</option>';
+                    console.log('📭 생성된 캐릭터가 없음');
+                    return;
+                }
+
+                // 기본 옵션으로 재설정
                 characterSelect.innerHTML = '<option value="">캐릭터를 선택하세요</option>';
 
                 // 캐릭터 옵션 추가
-                Object.values(window.characters).forEach(character => {
+                characterArray.forEach(character => {
                     const option = document.createElement('option');
                     option.value = character.id;
-                    option.textContent = `${character.basic_info.name} (${character.basic_info.mbti})`;
+
+                    // v2.0 스키마와 v1.0 스키마 모두 지원
+                    const name = character.basic_info?.name || character.name || '이름없음';
+                    const mbti = character.basic_info?.mbti || character.mbti || 'MBTI';
+
+                    option.textContent = `${name} (${mbti})`;
                     characterSelect.appendChild(option);
+
+                    console.log(`✅ 캐릭터 옵션 추가: ${name} (${mbti})`);
                 });
 
-                console.log(`✅ ${Object.keys(window.characters).length}개 캐릭터 로드 완료`);
+                console.log(`✅ ${characterArray.length}개 캐릭터 로드 완료`);
+
+                // 전역 캐릭터 데이터도 업데이트
+                window.characters = characters;
+
             } catch (error) {
                 console.error('❌ 캐릭터 목록 로드 실패:', error);
+                const characterSelect = document.getElementById('characterPromptTarget');
+                if (characterSelect) {
+                    characterSelect.innerHTML = '<option value="">로드 실패 - 새로고침 후 재시도</option>';
+                }
                 showNotification('캐릭터 목록 로드에 실패했습니다.', 'error');
             }
         }
@@ -6416,18 +6457,42 @@
             }
         }
 
-        // AI 관리 탭이 열릴 때 캐릭터 목록 로드
-        const originalShowTab = window.showTab;
-        window.showTab = function(tabName) {
-            if (originalShowTab) originalShowTab(tabName);
-
-            if (tabName === 'ai-management' || tabName === 'ai-management-section') {
-                // AI 관리 탭이 열릴 때 캐릭터 목록 로드
-                setTimeout(() => {
-                    loadCharactersForPromptGeneration();
-                }, 100);
+        // AI 관리 탭 활성화 감지를 위한 MutationObserver
+        function setupAITabDetection() {
+            // AI 관리 탭 버튼 클릭 이벤트 감지
+            const aiTabButton = document.querySelector('[onclick*="ai-management"]');
+            if (aiTabButton) {
+                aiTabButton.addEventListener('click', function() {
+                    console.log('🧠 AI 관리 탭 클릭 감지');
+                    setTimeout(() => {
+                        loadCharactersForPromptGeneration();
+                    }, 200);
+                });
             }
-        };
+
+            // MutationObserver로 AI 관리 섹션이 표시될 때 감지
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        const aiSection = document.getElementById('ai-management-section');
+                        if (aiSection && aiSection.style.display !== 'none' && !aiSection.style.display.includes('none')) {
+                            console.log('🧠 AI 관리 섹션 활성화 감지');
+                            setTimeout(() => {
+                                loadCharactersForPromptGeneration();
+                            }, 100);
+                        }
+                    }
+                });
+            });
+
+            const aiSection = document.getElementById('ai-management-section');
+            if (aiSection) {
+                observer.observe(aiSection, { attributes: true, attributeFilter: ['style'] });
+            }
+
+            // 수동 로드 함수도 글로벌로 등록
+            window.loadCharactersForPromptGeneration = loadCharactersForPromptGeneration;
+        }
 
         // 페이지 초기화
         document.addEventListener('DOMContentLoaded', function() {
@@ -6436,9 +6501,16 @@
             console.log('❌ character-photo-manager API 완전 삭제됨');
             console.log('🔄 함수명 변경: loadCharacterPhotosV2, uploadPhotoToServerV2, deletePhotoV2');
             console.log('🎯 이제 모든 사진 기능이 통합 API를 사용합니다!');
+            console.log('🎭 캐릭터 프롬프트 생성 시스템 초기화');
 
             // 🔐 로그인 시스템 초기화
             initializeAuth();
+
+            // AI 탭 감지 시스템 초기화
+            setTimeout(() => {
+                setupAITabDetection();
+                console.log('✅ AI 탭 감지 시스템 초기화 완료');
+            }, 1000);
 
             // 기존 초기화는 로그인 후에 실행
         });
