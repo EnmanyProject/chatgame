@@ -3929,7 +3929,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.1.2</span>
+                <span id="systemVersion">v1.2.0</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -4253,10 +4253,10 @@
                 </div>
             </div>
 
-            <!-- 캐릭터 프롬프트 생성 엔진 (최상단 위치) -->
+            <!-- AI 소개 생성 엔진 (최상단 위치) -->
             <div class="ai-tuning-container" style="margin-top: 20px; border: 2px solid #667eea; border-radius: 15px; padding: 20px; background: linear-gradient(135deg, #f8f9ff 0%, #fff 100%); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);">
                 <h3 style="color: #667eea; margin-bottom: 20px; font-size: 1.4em; border-bottom: 2px solid #667eea; padding-bottom: 10px; display: flex; align-items: center;">
-                    🎭 캐릭터 프롬프트 생성 엔진
+                    🎭 AI 소개 생성 엔진
                     <span style="margin-left: 10px; font-size: 0.7em; background: #667eea; color: white; padding: 2px 8px; border-radius: 12px;">최신</span>
                 </h3>
 
@@ -4266,7 +4266,7 @@
                         <select id="characterPromptTarget">
                             <option value="">캐릭터를 선택하세요</option>
                         </select>
-                        <small class="form-help">프롬프트를 생성할 캐릭터를 선택하세요</small>
+                        <small class="form-help">AI 소개를 생성할 캐릭터를 선택하세요</small>
                     </div>
 
                     <div class="form-group">
@@ -4298,7 +4298,7 @@
 
                     <div class="action-buttons">
                         <button class="btn btn-primary" onclick="generateCharacterPrompt()">
-                            ✨ 프롬프트 생성
+                            ✨ AI 소개 생성
                         </button>
                         <button class="btn btn-secondary" onclick="previewCharacterData()">
                             👁️ 캐릭터 데이터 미리보기
@@ -4318,7 +4318,7 @@
 
                 <!-- 생성된 프롬프트 미리보기 -->
                 <div id="promptPreviewArea" style="display: none; margin-top: 20px;">
-                    <h5>📋 생성된 프롬프트 미리보기</h5>
+                    <h5>📋 생성된 AI 소개 미리보기</h5>
                     <div id="promptPreviewContent" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto;"></div>
                     <div class="action-buttons" style="margin-top: 10px;">
                         <button class="btn btn-success" onclick="savePromptToCharacter()">
@@ -4333,7 +4333,7 @@
                     </div>
                 </div>
 
-                <!-- 프롬프트 생성 로그 -->
+                <!-- AI 소개 생성 로그 -->
                 <div id="promptGenerationLog" style="margin-top: 20px; display: none;">
                     <h5>📊 생성 로그</h5>
                     <div id="promptLogContent" style="background: #f8f9fa; border-radius: 8px; padding: 10px; max-height: 150px; overflow-y: auto;">
@@ -5666,7 +5666,7 @@
                 <div id="characterDetailContent">
                     <!-- AI 프롬프트 섹션 (최상단) -->
                     <div id="aiPromptSection" class="detail-section" style="display: none;">
-                        <h3>🤖 AI 생성 프롬프트</h3>
+                        <h3>🤖 AI 소개</h3>
                         <div class="ai-prompt-content" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                             <div id="aiPromptText" style="line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;"></div>
                         </div>
@@ -6128,15 +6128,15 @@
             }
         }
 
-        // 🎭 ================ 캐릭터 프롬프트 생성 시스템 ================
+        // 🎭 ================ AI 소개 생성 시스템 ================
 
         let currentGeneratedPrompt = null;
         let currentPromptCharacterId = null;
 
-        // 캐릭터 목록을 프롬프트 생성 드롭다운에 로드
+        // 캐릭터 목록을 AI 소개 생성 드롭다운에 로드
         async function loadCharactersForPromptGeneration() {
             try {
-                console.log('📋 프롬프트 생성용 캐릭터 목록 로드 중...');
+                console.log('📋 AI 소개 생성용 캐릭터 목록 로드 중...');
 
                 const characterSelect = document.getElementById('characterPromptTarget');
                 if (!characterSelect) {
@@ -6242,7 +6242,7 @@
             console.log('👁️ 캐릭터 데이터 미리보기:', character.basic_info.name);
         }
 
-        // OpenAI API를 통한 캐릭터 프롬프트 생성
+        // AI API를 통한 캐릭터 소개 생성
         async function generateCharacterPrompt() {
             const selectedCharacterId = document.getElementById('characterPromptTarget').value;
             if (!selectedCharacterId) {
@@ -6256,7 +6256,7 @@
                 return;
             }
 
-            // 프롬프트 생성 설정 가져오기
+            // AI 소개 생성 설정 가져오기
             const model = document.getElementById('promptGenerationModel').value;
             const style = document.getElementById('promptStyle').value;
             const length = document.getElementById('promptLength').value;
