@@ -5123,6 +5123,7 @@
                                     <button type="button" class="trait-btn" data-trait="성숙한">👑 성숙한</button>
                                 </div>
                                 <button type="button" class="btn-random" onclick="randomizeTraits()">🎲 랜덤</button>
+                                <input type="hidden" id="charPersonalityTraits" />
                             </div>
                         </div>
                     </div>
@@ -5227,6 +5228,7 @@
                                 <button type="button" class="confident-part-btn" data-feature="long_legs">🦵 긴 다리</button>
                                 <button type="button" class="confident-part-btn" data-feature="soft_skin">✨ 부드러운 피부</button>
                             </div>
+                            <input type="hidden" id="charFeatureElements" />
                         </div>
 
                         <div class="form-group">
@@ -5242,6 +5244,7 @@
                                 <button type="button" class="seductive-pose-btn" data-habit="헤어터치">💇‍♀️ 헤어터치</button>
                                 <button type="button" class="seductive-pose-btn" data-habit="유혹적시선">👀 유혹적시선</button>
                             </div>
+                            <input type="hidden" id="charSensualHabits" />
                         </div>
 
                         <div class="form-group">
@@ -5257,6 +5260,7 @@
                                 <button type="button" class="body-language-btn" data-language="손끝떨림">✋ 손끝떨림</button>
                                 <button type="button" class="body-language-btn" data-language="시선피함">🙈 시선피함</button>
                             </div>
+                            <input type="hidden" id="charBodyLanguage" />
                         </div>
                     </div>
 
@@ -5462,6 +5466,7 @@
                                     <button type="button" class="hobby-btn" data-hobby="shopping">🛍️ 쇼핑</button>
                                     <button type="button" class="hobby-btn" data-hobby="cafe">☕ 카페 탐방</button>
                                 </div>
+                                <input type="hidden" id="charHobbies" />
                                     </div>
                             <div class="form-group">
                                 <label>가치관</label>
@@ -11503,6 +11508,13 @@
                 speech_style: document.getElementById('charSpeechStyle').value || null, // 🚨 빈 문자열이면 null
                 speech_habit: document.getElementById('charSpeechHabit').value || '오빠',
 
+                // 🆕 Button-based hidden input 데이터 (JSON 파싱)
+                personality_traits_extended: parseHiddenInput('charPersonalityTraits'),
+                hobbies_extended: parseHiddenInput('charHobbies'),
+                feature_elements: parseHiddenInput('charFeatureElements'),
+                sensual_habits: parseHiddenInput('charSensualHabits'),
+                body_language: parseHiddenInput('charBodyLanguage'),
+
                 // 💫 새로운 매력 프로필 필드들
                 seduction_style: document.getElementById('seductionStyle')?.value || 'playful_confident',
                 charm_points: getSelectedCharms(),
@@ -11687,6 +11699,9 @@
                     });
                     console.log('📋 최종 선택된 성격특성들:', currentSelected);
 
+                    // Hidden input 업데이트
+                    updatePersonalityTraitsHiddenInput();
+
                     // 이벤트 전파 방지
                     e.preventDefault();
                     e.stopPropagation();
@@ -11711,7 +11726,7 @@
                 // 취미 버튼 클릭 이벤트 (최대 3개 선택)
                 if (e.target.classList.contains('hobby-btn')) {
                     const selectedHobbies = document.querySelectorAll('.hobby-btn.selected').length;
-                    
+
                     if (e.target.classList.contains('selected')) {
                         e.target.classList.remove('selected');
                     } else if (selectedHobbies < 3) {
@@ -11719,6 +11734,9 @@
                     } else {
                         alert('취미는 최대 3개까지만 선택 가능합니다.');
                     }
+
+                    // Hidden input 업데이트
+                    updateHobbiesHiddenInput();
                 }
 
                 // 말투 스타일 버튼 클릭 이벤트
@@ -11832,6 +11850,9 @@
                     } else {
                         alert('자신있는 부위는 최대 3개까지만 선택 가능합니다.');
                     }
+
+                    // Hidden input 업데이트
+                    updateFeatureElementsHiddenInput();
                     console.log('✅ 선택된 자신있는 부위:', getSelectedFeatureElements());
                 }
 
@@ -11846,6 +11867,9 @@
                     } else {
                         alert('섹시포즈는 최대 2개까지만 선택 가능합니다.');
                     }
+
+                    // Hidden input 업데이트
+                    updateSensualHabitsHiddenInput();
                     console.log('✅ 선택된 섹시포즈:', getSelectedSensualHabits());
                 }
 
@@ -11874,6 +11898,9 @@
                     } else {
                         alert('흥분시 반응은 최대 2개까지만 선택 가능합니다.');
                     }
+
+                    // Hidden input 업데이트
+                    updateBodyLanguageHiddenInput();
                     console.log('✅ 선택된 흥분시 반응:', getSelectedBodyLanguage());
                 }
 
@@ -16038,6 +16065,95 @@
             return selected.length === 0 ? ['얼굴발그레짐', '심장두근거림'] : selected;
         }
 
+        // === Hidden Input 업데이트 함수들 ===
+
+        // 성격 특성 hidden input 업데이트
+        function updatePersonalityTraitsHiddenInput() {
+            const selected = [];
+            document.querySelectorAll('.trait-btn.selected').forEach(btn => {
+                const trait = btn.getAttribute('data-trait');
+                if (trait) selected.push(trait);
+            });
+            const hiddenInput = document.getElementById('charPersonalityTraits');
+            if (hiddenInput) {
+                hiddenInput.value = JSON.stringify(selected);
+                console.log('🔄 성격특성 hidden input 업데이트:', hiddenInput.value);
+            }
+        }
+
+        // 취미 hidden input 업데이트
+        function updateHobbiesHiddenInput() {
+            const selected = [];
+            document.querySelectorAll('.hobby-btn.selected').forEach(btn => {
+                const hobby = btn.getAttribute('data-hobby');
+                if (hobby) selected.push(hobby);
+            });
+            const hiddenInput = document.getElementById('charHobbies');
+            if (hiddenInput) {
+                hiddenInput.value = JSON.stringify(selected);
+                console.log('🔄 취미 hidden input 업데이트:', hiddenInput.value);
+            }
+        }
+
+        // 자신있는 부위 hidden input 업데이트
+        function updateFeatureElementsHiddenInput() {
+            const selected = [];
+            document.querySelectorAll('.confident-part-btn.selected').forEach(btn => {
+                const feature = btn.getAttribute('data-feature');
+                if (feature) selected.push(feature);
+            });
+            const hiddenInput = document.getElementById('charFeatureElements');
+            if (hiddenInput) {
+                hiddenInput.value = JSON.stringify(selected);
+                console.log('🔄 자신있는 부위 hidden input 업데이트:', hiddenInput.value);
+            }
+        }
+
+        // 섹시포즈 hidden input 업데이트
+        function updateSensualHabitsHiddenInput() {
+            const selected = [];
+            document.querySelectorAll('.seductive-pose-btn.selected').forEach(btn => {
+                const habit = btn.getAttribute('data-habit');
+                if (habit) selected.push(habit);
+            });
+            const hiddenInput = document.getElementById('charSensualHabits');
+            if (hiddenInput) {
+                hiddenInput.value = JSON.stringify(selected);
+                console.log('🔄 섹시포즈 hidden input 업데이트:', hiddenInput.value);
+            }
+        }
+
+        // 흥분시 반응 hidden input 업데이트
+        function updateBodyLanguageHiddenInput() {
+            const selected = [];
+            document.querySelectorAll('.body-language-btn.selected').forEach(btn => {
+                const language = btn.getAttribute('data-language');
+                if (language) selected.push(language);
+            });
+            const hiddenInput = document.getElementById('charBodyLanguage');
+            if (hiddenInput) {
+                hiddenInput.value = JSON.stringify(selected);
+                console.log('🔄 흥분시 반응 hidden input 업데이트:', hiddenInput.value);
+            }
+        }
+
+        // Hidden input 파싱 헬퍼 함수
+        function parseHiddenInput(inputId) {
+            try {
+                const input = document.getElementById(inputId);
+                if (!input || !input.value) {
+                    console.log(`⚠️ Hidden input ${inputId} is empty or missing`);
+                    return [];
+                }
+                const parsed = JSON.parse(input.value);
+                console.log(`✅ Parsed ${inputId}:`, parsed);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (error) {
+                console.error(`❌ Failed to parse ${inputId}:`, error);
+                return [];
+            }
+        }
+
         // 🗣️ 말투 습관 선택된 항목 가져오기
         function getSelectedSpeechHabits() {
             console.log('🔍 getSelectedSpeechHabits 실행 중...');
@@ -17569,6 +17685,145 @@
             if (statusEl) {
                 statusEl.innerHTML = '✨ 모든 필드가 랜덤으로 선택되었습니다!';
             }
+
+            // 🔄 임의 선택 후 hidden input들 업데이트
+            console.log('🔄 랜덤 선택 후 hidden input 동기화 중...');
+            setTimeout(() => {
+                updatePersonalityTraitsHiddenInput();
+                updateHobbiesHiddenInput();
+                updateFeatureElementsHiddenInput();
+                updateSensualHabitsHiddenInput();
+                updateBodyLanguageHiddenInput();
+                console.log('✅ 모든 hidden input 동기화 완료');
+            }, 100);
+        }
+
+        // 🎯 성격특성 랜덤 선택 함수
+        function randomizePersonalityTraits() {
+            console.log('🎯 성격특성 랜덤 선택 중...');
+
+            // 기존 선택 해제
+            document.querySelectorAll('.trait-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            const traitButtons = Array.from(document.querySelectorAll('.trait-btn'));
+            if (traitButtons.length === 0) {
+                console.log('❌ 성격특성 버튼을 찾을 수 없음');
+                return;
+            }
+
+            // 2-3개 랜덤 선택
+            const selectCount = Math.floor(Math.random() * 2) + 2; // 2 또는 3
+
+            // Fisher-Yates 셔플
+            for (let i = traitButtons.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [traitButtons[i], traitButtons[j]] = [traitButtons[j], traitButtons[i]];
+            }
+
+            // 처음 selectCount개 선택
+            for (let i = 0; i < selectCount && i < traitButtons.length; i++) {
+                traitButtons[i].classList.add('selected');
+            }
+
+            console.log(`✅ 성격특성 ${selectCount}개 랜덤 선택 완료`);
+        }
+
+        // 🎨 취미 랜덤 선택 함수
+        function randomizeHobbies() {
+            console.log('🎨 취미 랜덤 선택 중...');
+
+            // 기존 선택 해제
+            document.querySelectorAll('.hobby-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            const hobbyButtons = Array.from(document.querySelectorAll('.hobby-btn'));
+            if (hobbyButtons.length === 0) {
+                console.log('❌ 취미 버튼을 찾을 수 없음');
+                return;
+            }
+
+            // 2-3개 랜덤 선택
+            const selectCount = Math.floor(Math.random() * 2) + 2; // 2 또는 3
+
+            // Fisher-Yates 셔플
+            for (let i = hobbyButtons.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [hobbyButtons[i], hobbyButtons[j]] = [hobbyButtons[j], hobbyButtons[i]];
+            }
+
+            // 처음 selectCount개 선택
+            for (let i = 0; i < selectCount && i < hobbyButtons.length; i++) {
+                hobbyButtons[i].classList.add('selected');
+            }
+
+            console.log(`✅ 취미 ${selectCount}개 랜덤 선택 완료`);
+        }
+
+        // ✨ 자신있는 부위 랜덤 선택 함수
+        function randomizeFeatureElements() {
+            console.log('✨ 자신있는 부위 랜덤 선택 중...');
+
+            // 기존 선택 해제
+            document.querySelectorAll('.confident-part-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            const featureButtons = Array.from(document.querySelectorAll('.confident-part-btn'));
+            if (featureButtons.length === 0) {
+                console.log('❌ 자신있는 부위 버튼을 찾을 수 없음');
+                return;
+            }
+
+            // 2-3개 랜덤 선택
+            const selectCount = Math.floor(Math.random() * 2) + 2; // 2 또는 3
+
+            // Fisher-Yates 셔플
+            for (let i = featureButtons.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [featureButtons[i], featureButtons[j]] = [featureButtons[j], featureButtons[i]];
+            }
+
+            // 처음 selectCount개 선택
+            for (let i = 0; i < selectCount && i < featureButtons.length; i++) {
+                featureButtons[i].classList.add('selected');
+            }
+
+            console.log(`✅ 자신있는 부위 ${selectCount}개 랜덤 선택 완료`);
+        }
+
+        // 💃 섹시포즈 랜덤 선택 함수
+        function randomizeSensualHabits() {
+            console.log('💃 섹시포즈 랜덤 선택 중...');
+
+            // 기존 선택 해제
+            document.querySelectorAll('.seductive-pose-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            const poseButtons = Array.from(document.querySelectorAll('.seductive-pose-btn'));
+            if (poseButtons.length === 0) {
+                console.log('❌ 섹시포즈 버튼을 찾을 수 없음');
+                return;
+            }
+
+            // 1-2개 랜덤 선택
+            const selectCount = Math.floor(Math.random() * 2) + 1; // 1 또는 2
+
+            // Fisher-Yates 셔플
+            for (let i = poseButtons.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [poseButtons[i], poseButtons[j]] = [poseButtons[j], poseButtons[i]];
+            }
+
+            // 처음 selectCount개 선택
+            for (let i = 0; i < selectCount && i < poseButtons.length; i++) {
+                poseButtons[i].classList.add('selected');
+            }
+
+            console.log(`✅ 섹시포즈 ${selectCount}개 랜덤 선택 완료`);
         }
 
         // 💕 흥분시 반응 랜덤 선택 함수
@@ -17715,12 +17970,19 @@
             randomizePets();
             randomizeBloodType();
 
-            // 매력 프로필 랜덤 선택
+            // 💫 매력 프로필 랜덤 선택
             console.log('💫 매력 프로필 랜덤 선택 중...');
             randomizeCharms();
             randomizeEI();
             randomizeConfidence();
             randomizeMystery();
+
+            // 🎯 성격/취미 버튼 랜덤 선택
+            console.log('🎯 성격/취미 버튼 랜덤 선택 중...');
+            randomizePersonalityTraits();
+            randomizeHobbies();
+            randomizeFeatureElements();
+            randomizeSensualHabits();
 
             // 외모 정보 랜덤 선택
             console.log('🎨 외모 정보 랜덤 선택 중...');
