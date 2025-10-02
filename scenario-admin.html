@@ -3929,7 +3929,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.4.0</span>
+                <span id="systemVersion">v1.4.1</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -5128,30 +5128,6 @@
                         </div>
                     </div>
 
-                    <!-- 배경 설정 -->
-                    <div class="char-category">
-                        <h3>🎓 배경 설정</h3>
-                        <div class="category-grid">
-                            <div class="form-group">
-                                <label>가족 관계</label>
-                                <select id="charFamily">
-                                    <option value="only_child">외동딸</option>
-                                    <option value="older_sister">언니가 있는 막내</option>
-                                    <option value="younger_sibling">동생이 있는 첫째</option>
-                                    <option value="middle_child">중간 자녀</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>출신 지역</label>
-                                <select id="charHometown">
-                                    <option value="seoul">서울 출신</option>
-                                    <option value="busan">부산 출신</option>
-                                    <option value="gyeonggi">경기도 출신</option>
-                                    <option value="countryside">지방 출신</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- 관계 설정 -->
                     <div class="char-category">
@@ -10193,11 +10169,11 @@
         }
 
         function getCharacterFamily(character) {
-            return character.background?.family || character.family || '-';
+            return character.basic_info?.family_structure || character.family_structure || '-';
         }
 
         function getCharacterHometown(character) {
-            return character.background?.hometown || character.hometown || '-';
+            return character.basic_info?.hometown || character.hometown || '-';
         }
 
         // 🇰🇷 한글 번역 매핑 함수들
@@ -11025,7 +11001,7 @@
                 document.getElementById('summaryAppearance').textContent = appearanceText || '-';
 
                 // 배경 (family, hometown)
-                const backgroundText = `${character.family || character.background?.family || ''} / ${character.hometown || character.background?.hometown || ''}`.replace(/\s*\/\s*$/g, '').replace(/^\s*\/\s*/g, '');
+                const backgroundText = `${character.basic_info?.family_structure || character.family_structure || ''} / ${character.basic_info?.hometown || character.hometown || ''}`.replace(/\s*\/\s*$/g, '').replace(/^\s*\/\s*/g, '');
                 document.getElementById('summaryBackground').textContent = backgroundText || '-';
 
                 // 말투
@@ -11978,9 +11954,9 @@
 
                     <div class="preview-section">
                         <h5>🏠 배경 & 취미</h5>
-                        <p><strong>가족:</strong> ${character.background?.family || character.family || '가족 정보 없음'}</p>
-                        <p><strong>고향:</strong> ${character.background?.hometown || character.hometown || '고향 정보 없음'}</p>
-                        <p><strong>관계:</strong> ${character.background?.relationship || character.relationship || '관계 정보 없음'}</p>
+                        <p><strong>가족:</strong> ${character.basic_info?.family_structure || character.family_structure || '가족 정보 없음'}</p>
+                        <p><strong>고향:</strong> ${character.basic_info?.hometown || character.hometown || '고향 정보 없음'}</p>
+                        <p><strong>관계:</strong> ${character.relationship || '관계 정보 없음'}</p>
                         <p><strong>취미:</strong> ${Array.isArray(character.hobbies) ? character.hobbies.map(hobby => translateToKorean(hobby, 'hobbies')).join(', ') : translateToKorean(character.hobbies || 'unknown', 'hobbies')}</p>
                         <p><strong>가치관:</strong> ${translateToKorean(character.values || 'unknown', 'values')}</p>
                     </div>
@@ -12061,8 +12037,6 @@
                 // 추가 폼 요소들도 안전하게 적용
                 safeSetValue('charOccupation', character.occupation || character.major);
                 safeSetValue('charRelationship', character.relationship);
-                safeSetValue('charFamily', character.background?.family);
-                safeSetValue('charHometown', character.background?.hometown);
                 safeSetValue('charHair', character.appearance?.hair);
                 safeSetValue('charEyes', character.appearance?.eyes);
                 safeSetValue('charStyle', character.appearance?.style);
@@ -15463,10 +15437,6 @@
                 // 선택적 필드들 (입력된 것만 수집)
                 character_type: document.getElementById('charType')?.value || null,
                 occupation: document.getElementById('charOccupation')?.value || null,
-                background: {
-                    family: document.getElementById('charFamily')?.value || null,
-                    hometown: document.getElementById('charHometown')?.value || null
-                },
                 relationship: document.getElementById('charRelationship')?.value || null,
 
                 // 외모 정보
@@ -15578,10 +15548,6 @@
             if (!completeData.occupation) completeData.occupation = randomChoice(randomSelections.occupation);
             if (!completeData.relationship) completeData.relationship = randomChoice(randomSelections.relationship);
 
-            // 배경 정보 (중첩 구조)
-            if (!completeData.background) completeData.background = {};
-            if (!completeData.background.family) completeData.background.family = randomChoice(randomSelections.family);
-            if (!completeData.background.hometown) completeData.background.hometown = randomChoice(randomSelections.hometown);
 
             // 외모 정보
             if (!completeData.appearance.hair) completeData.appearance.hair = randomChoice(randomSelections.hair);
@@ -17153,37 +17119,6 @@
             console.log('✅ 혈액형 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
         }
 
-        function randomizeFamily() {
-            const familyElement = document.getElementById('charFamily');
-            if (!familyElement) {
-                console.error('❌ charFamily 요소를 찾을 수 없습니다!');
-                return;
-            }
-            const options = Array.from(familyElement.options);
-            if (options.length === 0) {
-                console.error('❌ 가족구성 옵션이 없습니다!');
-                return;
-            }
-            const randomIndex = Math.floor(Math.random() * options.length);
-            familyElement.selectedIndex = randomIndex;
-            console.log('✅ 가족구성 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
-        }
-
-        function randomizeHometown() {
-            const hometownElement = document.getElementById('charHometown');
-            if (!hometownElement) {
-                console.error('❌ charHometown 요소를 찾을 수 없습니다!');
-                return;
-            }
-            const options = Array.from(hometownElement.options);
-            if (options.length === 0) {
-                console.error('❌ 출신지 옵션이 없습니다!');
-                return;
-            }
-            const randomIndex = Math.floor(Math.random() * options.length);
-            hometownElement.selectedIndex = randomIndex;
-            console.log('✅ 출신지 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
-        }
 
         function randomizeSeduction() {
             const select = document.getElementById('seductionStyle');
