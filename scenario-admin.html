@@ -3929,7 +3929,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.3.7</span>
+                <span id="systemVersion">v1.3.8</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -11485,16 +11485,25 @@
 
                 // 성격 특성 버튼 클릭 이벤트 (최대 3개 선택)
                 if (e.target.classList.contains('trait-btn')) {
-                    console.log('🎯 성격특성 버튼 클릭됨:', e.target.getAttribute('data-trait'));
+                    console.log('🎯🎯🎯 성격특성 버튼 클릭됨:', e.target.getAttribute('data-trait'));
+                    console.log('🎯 현재 버튼 클래스:', e.target.className);
+                    console.log('🎯 현재 버튼 selected 여부:', e.target.classList.contains('selected'));
+
                     const selectedTraits = document.querySelectorAll('.trait-btn.selected').length;
+                    console.log('🎯 전체 선택된 개수:', selectedTraits);
 
                     if (e.target.classList.contains('selected')) {
+                        console.log('🔴 선택 해제 분기 진입');
                         e.target.classList.remove('selected');
-                        console.log('❌ 성격특성 해제:', e.target.getAttribute('data-trait'));
+                        console.log('❌ 성격특성 해제 완료:', e.target.getAttribute('data-trait'));
+                        console.log('🔴 해제 후 클래스:', e.target.className);
                     } else if (selectedTraits < 3) {
+                        console.log('🟢 새 선택 분기 진입');
                         e.target.classList.add('selected');
-                        console.log('✅ 성격특성 선택:', e.target.getAttribute('data-trait'));
+                        console.log('✅ 성격특성 선택 완료:', e.target.getAttribute('data-trait'));
+                        console.log('🟢 선택 후 클래스:', e.target.className);
                     } else {
+                        console.log('🟡 한도 초과 분기 진입');
                         alert('성격 특성은 최대 3개까지만 선택 가능합니다.');
                         console.log('⚠️ 성격특성 선택 한도 초과');
                     }
@@ -11504,7 +11513,11 @@
                     document.querySelectorAll('.trait-btn.selected').forEach(btn => {
                         currentSelected.push(btn.getAttribute('data-trait'));
                     });
-                    console.log('📋 현재 선택된 성격특성들:', currentSelected);
+                    console.log('📋 최종 선택된 성격특성들:', currentSelected);
+
+                    // 이벤트 전파 방지
+                    e.preventDefault();
+                    e.stopPropagation();
                 }
 
                 // 관계 설정 버튼 클릭 이벤트
