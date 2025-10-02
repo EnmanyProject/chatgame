@@ -353,7 +353,7 @@ module.exports = async function handler(req, res) {
       try {
         // Groq API를 통한 프롬프트 생성 (빠른 속도)
         console.log('🚀 Groq API 프롬프트 생성 시작 (고속)');
-        const prompt = await generateCharacterPromptWithGroq(safeCharacterData, model, 'comprehensive', 'short', system_prompt);
+        const prompt = await generateCharacterPromptWithGroq(safeCharacterData, model, style, length, system_prompt);
 
         console.log('✅ Groq 프롬프트 생성 성공');
         return res.json({
