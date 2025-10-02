@@ -14035,8 +14035,9 @@
         };
 
         // 🔄 캐릭터 저장 함수 v2.0 (새로운 스키마 지원)
+        // 🚀 낙관적 UI 업데이트 + 백그라운드 저장 시스템
         window.saveCharacter = async function() {
-            console.log('💾 === 캐릭터 저장 v2.0 시작 ===');
+            console.log('⚡ === 낙관적 캐릭터 저장 v3.0 시작 ===');
 
             // 🎯 새로운 collectCharacterFormData 함수 사용
             const characterData = collectCharacterFormData();
@@ -14055,39 +14056,64 @@
                 return;
             }
 
+            // 🆔 편집 모드와 신규 생성 모드 구분
+            const isEditMode = currentMode === 'edit' && characterData.id;
+
+            if (isEditMode) {
+                console.log('✏️ 편집 모드: 기존 ID 유지 -', characterData.id);
+            } else {
+                // 신규 생성: 항상 새로운 ID 생성
+                characterData.id = `${name.toLowerCase().replace(/\s+/g, '_')}_${mbti.toLowerCase()}_${Date.now()}`;
+                console.log('🆕 신규 생성: 새로운 ID 생성 -', characterData.id);
+            }
+
+            // 📅 메타데이터 추가
+            characterData.created_at = new Date().toISOString();
+            characterData.updated_at = new Date().toISOString();
+            characterData.source = 'scenario_admin_v2';
+            characterData.active = true;
+            characterData.version = '2.0';
+
+            console.log('💾 최종 캐릭터 데이터 v3.0:', characterData);
+
+            // ⚡ 1단계: 즉시 UI 성공 처리 (낙관적 업데이트)
+            console.log('🎯 1단계: 즉시 UI 성공 처리 시작...');
+
+            // 캐릭터를 메모리에 즉시 추가
+            if (!window.characters) window.characters = {};
+            window.characters[characterData.id] = characterData;
+
+            // UI 즉시 업데이트
+            displayCharacters();
+
+            // 즉시 성공 메시지 표시
+            const successMessage = `💖 캐릭터 '${name}' 저장 완료!\n⚡ 즉시 사용 가능합니다!`;
+            alert(successMessage);
+
+            // 모달 즉시 닫기
+            if (typeof closeModal === 'function') {
+                closeModal('characterModal');
+            } else {
+                const modal = document.getElementById('characterModal');
+                if (modal) modal.style.display = 'none';
+            }
+
+            console.log('✅ 1단계 완료: 사용자에게 즉시 성공 피드백 제공');
+
+            // ⚡ 2단계: 백그라운드에서 GitHub 저장 (실패해도 상관없음)
+            console.log('🌐 2단계: 백그라운드 GitHub 저장 시작...');
+
+            saveToGitHubBackground(characterData, name).catch(error => {
+                console.log('📝 GitHub 저장 실패 - 재시도 큐에 추가:', error.message);
+                addToRetryQueue(characterData);
+            });
+        };
+
+        // 🌐 백그라운드 GitHub 저장 함수
+        async function saveToGitHubBackground(characterData, name) {
             try {
-                // 🆔 편집 모드와 신규 생성 모드 구분
-                const isEditMode = currentMode === 'edit' && characterData.id;
+                console.log('🐙 백그라운드 GitHub 저장 시작:', name);
 
-                if (isEditMode) {
-                    console.log('✏️ 편집 모드: 기존 ID 유지 -', characterData.id);
-                } else {
-                    // 신규 생성: 항상 새로운 ID 생성
-                    characterData.id = `${name.toLowerCase().replace(/\s+/g, '_')}_${mbti.toLowerCase()}_${Date.now()}`;
-                    console.log('🆕 신규 생성: 새로운 ID 생성 -', characterData.id);
-                }
-
-                // 📅 메타데이터 추가
-                characterData.created_at = new Date().toISOString();
-                characterData.updated_at = new Date().toISOString();
-                characterData.source = 'scenario_admin_v2';
-                characterData.active = true;
-                characterData.version = '2.0';
-
-                console.log('💾 최종 캐릭터 데이터 v2.0:', characterData);
-
-                // 저장 버튼 상태 변경
-                const saveButton = document.querySelector('#characterModal .btn-primary') ||
-                                  document.querySelector('button[onclick*="saveCharacter"]');
-
-                if (saveButton) {
-                    saveButton.disabled = true;
-                    saveButton.textContent = '🌐 v2.0 저장 중...';
-                }
-
-                console.log('💾 API를 통해 저장할 캐릭터 데이터 v2.0:', characterData);
-
-                // 🔄 새로운 스키마로 API 호출
                 const response = await fetch('/api/character-ai-generator', {
                     method: 'POST',
                     headers: {
@@ -14095,74 +14121,105 @@
                     },
                     body: JSON.stringify({
                         action: 'save_character',
-                        character: characterData  // 새로운 스키마 데이터
+                        character: characterData
                     })
                 });
 
                 if (!response.ok) {
-                    throw new Error(`API 호출 실패: ${response.status}`);
+                    throw new Error(`GitHub API 실패: ${response.status}`);
                 }
 
                 const result = await response.json();
 
                 if (result && result.success) {
-                    console.log('🎉 저장 성공! GitHub 동기화 대기 후 새로고침...');
-
-                    // 🕐 GitHub API 저장 완료 대기 (2초 지연)
-                    setTimeout(async () => {
-                        console.log('🔄 GitHub 동기화 완료 예상 - 캐릭터 목록 새로고침 시작...');
-
-                        // 사용자에게 새로고침 중임을 알림
-                        showRefreshNotification('캐릭터 목록 업데이트 중...');
-
-                        // 성공 시 전체 캐릭터 목록을 다시 로드하여 최신 상태 유지
-                        await window.loadCharacters();
-
-                        console.log('✅ 캐릭터 목록 새로고침 완료');
-                        showRefreshNotification('✅ 목록이 업데이트되었습니다!', true);
-                    }, 2000);
-
-                    const successMessage = `💖 새로운 캐릭터 '${name}'가 GitHub에 저장되었습니다!\n✅ 온라인에서 영구 보관됩니다!`;
-
-                    alert(successMessage);
-
-                    // 모달 닫기 (함수가 존재하는 경우만)
-                    if (typeof closeModal === 'function') {
-                        closeModal('characterModal');
-                    } else {
-                        // 직접 모달 닫기
-                        const modal = document.getElementById('characterModal');
-                        if (modal) modal.style.display = 'none';
-                    }
-
-                    console.log('✅ 온라인 캐릭터 저장 완료!');
+                    console.log('✅ 백그라운드 GitHub 저장 성공:', name);
+                    showQuietNotification(`📡 ${name} GitHub 백업 완료`);
                 } else {
-                    throw new Error(result?.error || '온라인 저장 실패 - 결과 없음');
+                    throw new Error(result?.error || 'GitHub 저장 결과 없음');
                 }
 
             } catch (error) {
-                console.error('❌ 온라인 캐릭터 저장 실패:', error);
+                console.error('❌ 백그라운드 GitHub 저장 실패:', error);
+                throw error; // 재시도 큐를 위해 에러를 다시 던짐
+            }
+        }
 
-                let errorMessage = '온라인 저장 중 오류가 발생했습니다:\n' + error.message;
+        // 🔄 재시도 큐 시스템
+        let retryQueue = [];
+        let retryTimer = null;
 
-                if (error.message.includes('GitHub Token')) {
-                    errorMessage += '\n\n🔐 해결책: GitHub Token을 설정해주세요';
-                    errorMessage += '\n1. 테스트 페이지에서 토큰 설정';
-                    errorMessage += '\n2. 또는 Vercel 환경변수 확인';
-                }
+        function addToRetryQueue(characterData) {
+            retryQueue.push(characterData);
+            console.log(`📋 재시도 큐에 추가: ${characterData.basic_info?.name} (큐 크기: ${retryQueue.length})`);
 
-                alert(errorMessage);
-            } finally {
-                // 버튼 상태 복원
-                const saveButton = document.querySelector('#characterModal .btn-primary') ||
-                                  document.querySelector('button[onclick*="saveCharacter"]');
+            // 30초 후 재시도 시작
+            if (!retryTimer) {
+                retryTimer = setTimeout(() => {
+                    processRetryQueue();
+                }, 30000);
+            }
+        }
 
-                if (saveButton) {
-                    saveButton.disabled = false;
-                    saveButton.textContent = '💖 캐릭터 저장';
+        async function processRetryQueue() {
+            if (retryQueue.length === 0) {
+                retryTimer = null;
+                return;
+            }
+
+            console.log(`🔄 재시도 큐 처리 시작 (${retryQueue.length}개 항목)`);
+
+            const itemsToRetry = [...retryQueue];
+            retryQueue = [];
+
+            for (const characterData of itemsToRetry) {
+                try {
+                    await saveToGitHubBackground(characterData, characterData.basic_info?.name);
+                } catch (error) {
+                    console.log(`❌ 재시도 실패: ${characterData.basic_info?.name}`);
+                    // 3번까지 재시도 (간단한 카운터 추가 가능)
+                    retryQueue.push(characterData);
                 }
             }
-        };
+
+            // 아직 실패한 항목이 있으면 5분 후 다시 시도
+            if (retryQueue.length > 0) {
+                retryTimer = setTimeout(() => {
+                    processRetryQueue();
+                }, 300000); // 5분
+            } else {
+                retryTimer = null;
+            }
+        }
+
+        // 🔔 조용한 알림 표시 함수
+        function showQuietNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #28a745;
+                color: white;
+                padding: 10px 15px;
+                border-radius: 5px;
+                font-size: 14px;
+                z-index: 10000;
+                opacity: 0;
+                transition: opacity 0.3s;
+            `;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            // 페이드 인
+            setTimeout(() => notification.style.opacity = '1', 100);
+
+            // 3초 후 페이드 아웃 및 제거
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 3000);
+        }
 
         window.loadScenarios = async function() {
             console.log('🌐 API를 통한 시나리오 로드...');
