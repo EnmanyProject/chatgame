@@ -41,6 +41,13 @@
    - 업데이트 후 새로고침하여 버전 변경 확인
 
 #### 📝 **버전 히스토리 기록**
+- **v1.3.3** (2025-10-02): AI 소개 저장 기능 수정
+  - save_ai_prompt 액션에서 정의되지 않은 함수 호출 문제 해결
+  - getCharactersFromGitHub → loadFromGitHub 함수로 변경
+  - saveCharactersToGitHub → saveToGitHub 함수로 변경
+  - 데이터 구조 검증 로직 추가로 GitHub 로드 실패 시 적절한 에러 처리
+  - 500 Internal Server Error 해결
+
 - **v1.3.2** (2025-10-02): JavaScript 초기화 오류 수정
   - "clearAllData is not defined" ReferenceError 해결
   - 미사용 함수 참조 제거로 콘솔 오류 완전 해결

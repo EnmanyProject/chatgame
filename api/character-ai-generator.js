@@ -394,7 +394,14 @@ module.exports = async function handler(req, res) {
         console.log('💾 AI 소개 저장 시작:', character_id);
 
         // GitHub에서 현재 캐릭터 데이터 가져오기
-        const currentData = await getCharactersFromGitHub();
+        const currentData = await loadFromGitHub();
+
+        if (!currentData || !currentData.characters) {
+          return res.status(500).json({
+            success: false,
+            message: 'GitHub에서 캐릭터 데이터를 로드할 수 없습니다'
+          });
+        }
 
         if (!currentData.characters[character_id]) {
           return res.status(404).json({
@@ -412,7 +419,7 @@ module.exports = async function handler(req, res) {
         currentData.metadata.last_updated = new Date().toISOString();
 
         // GitHub에 저장
-        await saveCharactersToGitHub(currentData);
+        await saveToGitHub(currentData);
 
         console.log('✅ AI 소개 GitHub 저장 완료:', character_id);
 
