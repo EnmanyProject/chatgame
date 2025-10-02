@@ -820,8 +820,8 @@
     "version": "4.1.0",
     "total_characters": 6,
     "created": "2025-09-28T10:43:23.975Z",
-    "storage_type": "stable_github_direct",
-    "last_updated": "2025-10-02T06:14:08.216Z",
-    "last_accessed": "2025-10-02T06:14:08.216Z"
+    "storage_type": "github_api_only",
+    "last_updated": "2025-10-02T07:13:53.909Z",
+    "last_accessed": "2025-10-02T07:13:53.909Z"
   }
 }
