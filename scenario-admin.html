@@ -3929,7 +3929,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.3.5</span>
+                <span id="systemVersion">v1.3.6</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -4969,18 +4969,16 @@
                                     <option value="office_worker">💼 회사원</option>
                                     <option value="designer">🎨 디자이너</option>
                                     <option value="nurse">👩‍⚕️ 간호사</option>
-                                    <option value="teacher">👩‍🏫 선생님</option>
-                                    <option value="developer">👩‍💻 개발자</option>
+                                    <option value="housewife">🏠 주부</option>
+                                    <option value="celebrity">⭐ 연예인</option>
+                                    <option value="secretary">📋 비서</option>
+                                    <option value="instructor">👩‍🏫 교사</option>
+                                    <option value="youtuber">📹 유튜버</option>
                                     <option value="artist">🎭 예술가</option>
-                                    <option value="photographer">📷 사진작가</option>
                                     <option value="journalist">📰 기자</option>
                                     <option value="unemployed">🏠 백수</option>
                                     <option value="flight_attendant">✈️ 승무원</option>
-                                    <option value="doctor">👩‍⚕️ 의사</option>
-                                    <option value="singer">🎤 가수</option>
-                                    <option value="actress">🎬 배우</option>
                                     <option value="pharmacist">💊 약사</option>
-                                    <option value="lawyer">⚖️ 변호사</option>
                                     <option value="chef">👩‍🍳 요리사</option>
                                     <option value="banker">🏦 은행원</option>
                                     <option value="marketing">📢 마케터</option>
@@ -5582,9 +5580,10 @@
                                 <div class="future-career-grid">
                                     <button type="button" class="career-btn" data-career="housewife">🏠 전업주부</button>
                                     <button type="button" class="career-btn" data-career="freelancer">💻 프리랜서</button>
-                                    <button type="button" class="career-btn" data-career="doctor">👩‍⚕️ 의사</button>
-                                    <button type="button" class="career-btn" data-career="lawyer">👩‍⚖️ 변호사</button>
-                                    <button type="button" class="career-btn" data-career="teacher">👩‍🏫 교사</button>
+                                    <button type="button" class="career-btn" data-career="celebrity">⭐ 연예인</button>
+                                    <button type="button" class="career-btn" data-career="secretary">📋 비서</button>
+                                    <button type="button" class="career-btn" data-career="instructor">👩‍🏫 교사</button>
+                                    <button type="button" class="career-btn" data-career="youtuber">📹 유튜버</button>
                                     <button type="button" class="career-btn" data-career="cafe_owner">☕ 카페 사장</button>
                                     <button type="button" class="career-btn" data-career="restaurant_owner">🍝 식당 운영</button>
                                     <button type="button" class="career-btn" data-career="designer">🎨 디자이너</button>
@@ -10388,14 +10387,24 @@
                 },
                 // 💼 직업 번역
                 occupation: {
-                    'art': '예술가',
-                    'student': '학생',
-                    'teacher': '교사',
-                    'nurse': '간호사',
+                    'student': '대학생',
+                    'office_worker': '회사원',
                     'designer': '디자이너',
-                    'business': '사업가',
-                    'engineer': '엔지니어',
-                    'writer': '작가'
+                    'nurse': '간호사',
+                    'housewife': '주부',
+                    'celebrity': '연예인',
+                    'secretary': '비서',
+                    'instructor': '교사',
+                    'youtuber': '유튜버',
+                    'artist': '예술가',
+                    'journalist': '기자',
+                    'unemployed': '백수',
+                    'flight_attendant': '승무원',
+                    'pharmacist': '약사',
+                    'chef': '요리사',
+                    'banker': '은행원',
+                    'marketing': '마케터',
+                    'entrepreneur': '사업가'
                 },
                 // 💬 대화 훅 번역
                 conversation_hooks: {
@@ -10588,36 +10597,34 @@
                 },
                 // 🏢 현재 직업 번역
                 occupation: {
-                    'student': '학생',
-                    'art': '예술가',
-                    'flight_attendant': '승무원',
+                    'student': '대학생',
                     'office_worker': '회사원',
-                    'teacher': '교사',
-                    'doctor': '의사',
-                    'nurse': '간호사',
                     'designer': '디자이너',
-                    'freelancer': '프리랜서',
-                    'model': '모델',
-                    'actor': '배우',
+                    'nurse': '간호사',
+                    'housewife': '주부',
+                    'celebrity': '연예인',
+                    'secretary': '비서',
+                    'instructor': '교사',
+                    'youtuber': '유튜버',
+                    'artist': '예술가',
+                    'journalist': '기자',
+                    'unemployed': '백수',
+                    'flight_attendant': '승무원',
+                    'pharmacist': '약사',
                     'chef': '요리사',
-                    'barista': '바리스타',
-                    'photographer': '사진작가',
-                    'engineer': '엔지니어',
-                    'lawyer': '변호사',
-                    'consultant': '컨설턴트',
-                    'manager': '매니저',
-                    'salesperson': '영업직',
-                    'housewife': '전업주부',
-                    'unemployed': '백수'
+                    'banker': '은행원',
+                    'marketing': '마케터',
+                    'entrepreneur': '사업가'
                 },
 
                 // 🎆 미래 직업 번역
                 future_careers: {
                     'housewife': '전업주부',
                     'freelancer': '프리랜서',
-                    'doctor': '의사',
-                    'lawyer': '변호사',
-                    'teacher': '교사',
+                    'celebrity': '연예인',
+                    'secretary': '비서',
+                    'instructor': '교사',
+                    'youtuber': '유튜버',
                     'cafe_owner': '카페 사장',
                     'restaurant_owner': '식당 운영',
                     'designer': '디자이너',

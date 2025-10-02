@@ -41,6 +41,12 @@
    - 업데이트 후 새로고침하여 버전 변경 확인
 
 #### 📝 **버전 히스토리 기록**
+- **v1.3.6** (2025-10-02): 직업 선택 옵션 개선
+  - 추가된 직업: 주부(housewife), 연예인(celebrity), 비서(secretary), 교사(instructor), 유튜버(youtuber)
+  - 삭제된 직업: 가수(singer), 배우(actress), 변호사(lawyer), 의사(doctor), 개발자(developer), 선생님(teacher), 사진작가(photographer)
+  - 캐릭터 생성 폼, 미래 직업 버튼, 번역 함수 모두 동기화하여 일관성 확보
+  - occupation, future_careers 번역 테이블 완전 업데이트
+
 - **v1.3.5** (2025-10-02): AI 소개 길이 선택 기능 수정
   - 사용자가 선택한 길이 파라미터가 실제로 적용되도록 수정
   - 하드코딩된 'short' 길이를 사용자 선택값(length)으로 변경
