@@ -5122,7 +5122,7 @@
                                     <button type="button" class="trait-btn" data-trait="도발적인">😏 도발적인</button>
                                     <button type="button" class="trait-btn" data-trait="성숙한">👑 성숙한</button>
                                 </div>
-                                <button type="button" class="btn-random" onclick="randomizeTraits()">🎲 랜덤</button>
+                                <button type="button" class="btn-random" onclick="randomizePersonalityTraits()">🎲 랜덤</button>
                                 <input type="hidden" id="charPersonalityTraits" />
                             </div>
                         </div>
@@ -11676,16 +11676,22 @@
                     const selectedTraits = document.querySelectorAll('.trait-btn.selected').length;
                     console.log('🎯 전체 선택된 개수:', selectedTraits);
 
+                    // 🔄 이벤트 전파 먼저 방지 (다른 핸들러 간섭 방지)
+                    e.preventDefault();
+                    e.stopPropagation();
+
                     if (e.target.classList.contains('selected')) {
                         console.log('🔴 선택 해제 분기 진입');
                         e.target.classList.remove('selected');
                         console.log('❌ 성격특성 해제 완료:', e.target.getAttribute('data-trait'));
                         console.log('🔴 해제 후 클래스:', e.target.className);
+                        console.log('🔴 해제 후 selected 상태:', e.target.classList.contains('selected'));
                     } else if (selectedTraits < 3) {
                         console.log('🟢 새 선택 분기 진입');
                         e.target.classList.add('selected');
                         console.log('✅ 성격특성 선택 완료:', e.target.getAttribute('data-trait'));
                         console.log('🟢 선택 후 클래스:', e.target.className);
+                        console.log('🟢 선택 후 selected 상태:', e.target.classList.contains('selected'));
                     } else {
                         console.log('🟡 한도 초과 분기 진입');
                         alert('성격 특성은 최대 3개까지만 선택 가능합니다.');
@@ -11702,9 +11708,7 @@
                     // Hidden input 업데이트
                     updatePersonalityTraitsHiddenInput();
 
-                    // 이벤트 전파 방지
-                    e.preventDefault();
-                    e.stopPropagation();
+                    return false; // 추가 이벤트 전파 방지
                 }
 
                 // 관계 설정 버튼 클릭 이벤트
@@ -17401,8 +17405,8 @@
             // 모든 선택 해제
             traitBtns.forEach(btn => btn.classList.remove('selected'));
 
-            // 랜덤으로 1-3개 선택
-            const numTraits = Math.floor(Math.random() * 3) + 1; // 1~3개
+            // 랜덤으로 2-3개 선택 (기존 1-3개에서 2-3개로 변경)
+            const numTraits = Math.floor(Math.random() * 2) + 2; // 2~3개
             const availableTraits = Array.from(traitBtns);
 
             for (let i = 0; i < numTraits; i++) {
@@ -17417,6 +17421,9 @@
             }
 
             console.log('✅ 성격특성 랜덤 선택:', numTraits + '개 특성 선택됨');
+
+            // 🔄 Hidden input 업데이트 추가
+            updatePersonalityTraitsHiddenInput();
         }
 
 
