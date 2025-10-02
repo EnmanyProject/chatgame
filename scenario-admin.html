@@ -5421,8 +5421,8 @@
                                 <button type="button" class="speech-btn" data-speech="bold_provocative">😏 대담하고 도발적인</button>
                             </div>
                             <div class="form-group">
-                                <label>특별한 말버릇/습관</label>
-                                <input type="text" id="charSpeechHabit" placeholder="예: 이모티콘 자주 사용, ~해요 말투, 웃을 때 손으로 입 가리기" />
+                                <label>💬 주로쓰는 호칭</label>
+                                <input type="text" id="charSpeechHabit" placeholder="상대방을 부르는 호칭 (예: 오빠, 선배, 이름 등)" value="오빠" />
                             </div>
                             <input type="hidden" id="charSpeechStyle" />
                         </div>
@@ -5753,7 +5753,7 @@
                                 <span id="detailSpeechStyle" class="detail-value">-</span>
                             </div>
                             <div class="detail-item detail-full">
-                                <span class="detail-label">말버릇:</span>
+                                <span class="detail-label">주로쓰는 호칭:</span>
                                 <span id="detailSpeechHabit" class="detail-value">-</span>
                             </div>
                         </div>
@@ -11302,7 +11302,7 @@
                 hobbies: getSelectedHobbies(),
                 values: document.getElementById('charValues').value || 'love_family',
                 speech_style: document.getElementById('charSpeechStyle').value || null, // 🚨 빈 문자열이면 null
-                speech_habit: document.getElementById('charSpeechHabit').value || '',
+                speech_habit: document.getElementById('charSpeechHabit').value || '오빠',
 
                 // 💫 새로운 매력 프로필 필드들
                 seduction_style: document.getElementById('seductionStyle')?.value || 'playful_confident',
@@ -11340,10 +11340,25 @@
         function getSelectedTraits() {
             const selectedTraits = [];
             // 선택된 성격 특성 버튼에서 수집 (trait-btn.selected)
-            document.querySelectorAll('.trait-btn.selected').forEach(button => {
-                selectedTraits.push(button.getAttribute('data-trait'));
+            const selectedButtons = document.querySelectorAll('.trait-btn.selected');
+            console.log('🔍 성격특성 디버깅:');
+            console.log('  - 전체 trait-btn 버튼 수:', document.querySelectorAll('.trait-btn').length);
+            console.log('  - 선택된 trait-btn 버튼 수:', selectedButtons.length);
+
+            selectedButtons.forEach(button => {
+                const trait = button.getAttribute('data-trait');
+                selectedTraits.push(trait);
+                console.log('  - 선택된 특성:', trait);
             });
-            console.log('🎯 선택된 성격 특성:', selectedTraits);
+
+            console.log('🎯 최종 선택된 성격 특성:', selectedTraits);
+
+            // 만약 아무것도 선택되지 않았다면 기본값 제공
+            if (selectedTraits.length === 0) {
+                console.log('⚠️ 성격특성이 선택되지 않음 - 기본값 사용');
+                return ['감성적', '활발한']; // 기본 특성 2개
+            }
+
             return selectedTraits.slice(0, 5); // 최대 5개로 증가
         }
 
@@ -11443,15 +11458,26 @@
 
                 // 성격 특성 버튼 클릭 이벤트 (최대 3개 선택)
                 if (e.target.classList.contains('trait-btn')) {
+                    console.log('🎯 성격특성 버튼 클릭됨:', e.target.getAttribute('data-trait'));
                     const selectedTraits = document.querySelectorAll('.trait-btn.selected').length;
-                    
+
                     if (e.target.classList.contains('selected')) {
                         e.target.classList.remove('selected');
+                        console.log('❌ 성격특성 해제:', e.target.getAttribute('data-trait'));
                     } else if (selectedTraits < 3) {
                         e.target.classList.add('selected');
+                        console.log('✅ 성격특성 선택:', e.target.getAttribute('data-trait'));
                     } else {
                         alert('성격 특성은 최대 3개까지만 선택 가능합니다.');
+                        console.log('⚠️ 성격특성 선택 한도 초과');
                     }
+
+                    // 현재 선택된 특성들 표시
+                    const currentSelected = [];
+                    document.querySelectorAll('.trait-btn.selected').forEach(btn => {
+                        currentSelected.push(btn.getAttribute('data-trait'));
+                    });
+                    console.log('📋 현재 선택된 성격특성들:', currentSelected);
                 }
 
                 // 관계 설정 버튼 클릭 이벤트
@@ -11815,7 +11841,7 @@
                         <p><strong>플러팅 패턴:</strong> ${Array.isArray(character.conversation_dynamics?.flirtation_patterns) ? character.conversation_dynamics.flirtation_patterns.map(pattern => translateToKorean(pattern, 'flirting_patterns')).join(', ') : '정보 없음'}</p>
                         <p><strong>대화 훅:</strong> ${Array.isArray(character.conversation_dynamics?.conversation_hooks) ? character.conversation_dynamics.conversation_hooks.map(hook => translateToKorean(hook, 'conversation_hooks')).join(', ') : '정보 없음'}</p>
                         <p><strong>말투:</strong> ${translateToKorean(character.conversation_dynamics?.speech_style || character.speech_style || 'unknown', 'speech_style')}</p>
-                        <p><strong>말버릇:</strong> ${Array.isArray(character.conversation_dynamics?.speech_quirks) ? character.conversation_dynamics.speech_quirks.join(', ') : character.speech_habit || '정보 없음'}</p>
+                        <p><strong>주로쓰는 호칭:</strong> ${character.speech_habit || '오빠'}</p>
                     </div>
 
                     <div class="preview-section">
@@ -15411,7 +15437,7 @@
 
                 // 대화 스타일
                 speech_style: document.getElementById('charSpeechStyle')?.value || null, // 🚨 빈 문자열이면 null
-                speech_habit: document.getElementById('charSpeechHabit')?.value || null,
+                speech_habit: document.getElementById('charSpeechHabit')?.value || '오빠',
                 values: document.getElementById('charValues')?.value || null,
 
                 // 선택된 성격특성과 취미
@@ -15533,7 +15559,7 @@
                 completeData.speech_style = randomChoice(speechStyles);
             }
             if (!completeData.speech_habit) {
-                const speechHabits = ['이모티콘 자주 사용', '웃음소리 많이 냄', '말끝을 길게 늘임', '상대방 이름 자주 부름'];
+                const speechHabits = ['오빠', '선배', '이름으로', '님', '언니'];
                 completeData.speech_habit = randomChoice(speechHabits);
             }
 
@@ -16151,6 +16177,23 @@
                         console.log('✅ 취미 체크박스 선택:', hobby);
                     }
                 });
+            }
+
+            // 5. 미래직업 버튼 복원 (최대 2개 선택 가능)
+            const futureCareers = character.future_goals?.future_careers || character.future_careers || [];
+            if (Array.isArray(futureCareers) && futureCareers.length > 0) {
+                futureCareers.forEach(career => {
+                    const careerBtn = document.querySelector(`.career-btn[data-career="${career}"]`);
+                    if (careerBtn) {
+                        careerBtn.classList.add('selected');
+                        console.log('✅ 미래직업 버튼 선택:', career);
+                    } else {
+                        console.warn('⚠️ 미래직업 버튼을 찾을 수 없음:', career);
+                    }
+                });
+                console.log('🎯 미래직업 복원 완료 - 총', futureCareers.length, '개');
+            } else {
+                console.log('ℹ️ 복원할 미래직업 데이터 없음');
             }
 
             console.log('✅ 클릭형 필드들 복원 완료');

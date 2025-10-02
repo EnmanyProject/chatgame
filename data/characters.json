@@ -9,6 +9,7 @@
         "occupation": "art",
         "gender": "female"
       },
+      "personality_traits": ["감성적", "활발한", "창의적"],
       "appeal_profile": {
         "seduction_style": "warm_nurturing",
         "charm_points": [
@@ -134,6 +135,7 @@
         "occupation": "art",
         "gender": "female"
       },
+      "personality_traits": ["자신감 있는", "활발한", "매혹적인"],
       "appeal_profile": {
         "seduction_style": "warm_nurturing",
         "charm_points": [
@@ -254,6 +256,7 @@
         "occupation": "art",
         "gender": "female"
       },
+      "personality_traits": ["감성적", "창의적", "매혹적인"],
       "appeal_profile": {
         "seduction_style": "warm_nurturing",
         "charm_points": [
@@ -383,6 +386,7 @@
         "occupation": "singer",
         "gender": "female"
       },
+      "personality_traits": ["열정적", "유혹적인", "도발적인"],
       "appeal_profile": {
         "seduction_style": "warm_nurturing",
         "charm_points": [
