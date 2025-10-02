@@ -5003,7 +5003,6 @@
                                     <option value="technical_school">🔧 전문학교 졸업</option>
                                     <option value="art_school">🎨 예술대학 졸업</option>
                                 </select>
-                                <button type="button" class="btn-random" onclick="randomizeEducation()">🎲 랜덤</button>
                             </div>
                             <div class="form-group">
                                 <label>거주 지역</label>
@@ -5019,7 +5018,6 @@
                                     <option value="gangwon">⛰️ 강원도</option>
                                     <option value="jeju">🌴 제주도</option>
                                 </select>
-                                <button type="button" class="btn-random" onclick="randomizeLocation()">🎲 랜덤</button>
                             </div>
                             <div class="form-group">
                                 <label>출신 지역</label>
@@ -5069,11 +5067,10 @@
                                     <option value="rabbit">🐰 토끼</option>
                                     <option value="reptile">🦎 파충류</option>
                                 </select>
-                                <button type="button" class="btn-random" onclick="randomizePets()">🎲 랜덤</button>
                             </div>
                             <div class="form-group">
                                 <label>혈액형</label>
-                                <select id="charBloodType">
+                                <select id="charBloodtype">
                                     <option value="A">🅰️ A형</option>
                                     <option value="B">🅱️ B형</option>
                                     <option value="AB">🆎 AB형</option>
@@ -5124,6 +5121,7 @@
                                     <button type="button" class="trait-btn" data-trait="도발적인">😏 도발적인</button>
                                     <button type="button" class="trait-btn" data-trait="성숙한">👑 성숙한</button>
                                 </div>
+                                <button type="button" class="btn-random" onclick="randomizeTraits()">🎲 랜덤</button>
                             </div>
                         </div>
                     </div>
@@ -5463,7 +5461,7 @@
                                     <button type="button" class="hobby-btn" data-hobby="shopping">🛍️ 쇼핑</button>
                                     <button type="button" class="hobby-btn" data-hobby="cafe">☕ 카페 탐방</button>
                                 </div>
-                            </div>
+                                    </div>
                             <div class="form-group">
                                 <label>가치관</label>
                                 <select id="charValues">
@@ -17104,7 +17102,7 @@
         }
 
         function randomizeBloodType() {
-            const bloodTypeElement = document.getElementById('charBloodType');
+            const bloodTypeElement = document.getElementById('charBloodtype');
             if (!bloodTypeElement) {
                 console.error('❌ charBloodType 요소를 찾을 수 없습니다!');
                 return;
@@ -17126,6 +17124,45 @@
             const randomIndex = Math.floor(Math.random() * options.length);
             select.selectedIndex = randomIndex;
         }
+
+        function randomizeMbti() {
+            const mbtiOptions = ['ENFP', 'INFP', 'ENFJ', 'INFJ', 'ENTP', 'INTP', 'ENTJ', 'INTJ', 'ESFP', 'ISFP', 'ESFJ', 'ISFJ', 'ESTP', 'ISTP', 'ESTJ', 'ISTJ'];
+            const randomMbti = mbtiOptions[Math.floor(Math.random() * mbtiOptions.length)];
+            console.log('🧠 MBTI 랜덤 선택:', randomMbti);
+            document.querySelectorAll('.mbti-btn').forEach(btn => btn.classList.remove('selected'));
+            const mbtiBtn = document.querySelector(`[data-mbti="${randomMbti}"]`);
+            if (mbtiBtn) {
+                mbtiBtn.classList.add('selected');
+                document.getElementById('charMbti').value = randomMbti;
+                console.log('✅ MBTI 버튼 선택됨:', randomMbti);
+            } else {
+                console.log('❌ MBTI 버튼을 찾을 수 없음:', randomMbti);
+            }
+        }
+
+        function randomizeTraits() {
+            const traitBtns = document.querySelectorAll('.trait-btn');
+            // 모든 선택 해제
+            traitBtns.forEach(btn => btn.classList.remove('selected'));
+
+            // 랜덤으로 1-3개 선택
+            const numTraits = Math.floor(Math.random() * 3) + 1; // 1~3개
+            const availableTraits = Array.from(traitBtns);
+
+            for (let i = 0; i < numTraits; i++) {
+                if (availableTraits.length === 0) break;
+
+                const randomIndex = Math.floor(Math.random() * availableTraits.length);
+                const selectedBtn = availableTraits[randomIndex];
+                selectedBtn.classList.add('selected');
+
+                // 선택된 버튼은 목록에서 제거
+                availableTraits.splice(randomIndex, 1);
+            }
+
+            console.log('✅ 성격특성 랜덤 선택:', numTraits + '개 특성 선택됨');
+        }
+
 
         function randomizeCharms() {
             const charmBtns = document.querySelectorAll('.charm-btn');
@@ -17531,8 +17568,12 @@
             randomizeName();
             randomizeAge();
             randomizeOccupation();
-            randomizeFamily();
+            randomizeEducation();
+            randomizeLocation();
             randomizeHometown();
+            randomizeFamily();
+            randomizePets();
+            randomizeBloodType();
 
             // 매력 프로필 랜덤 선택
             console.log('💫 매력 프로필 랜덤 선택 중...');
