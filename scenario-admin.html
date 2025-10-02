@@ -3929,7 +3929,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.2.1</span>
+                <span id="systemVersion">v1.3.0</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -5667,8 +5667,13 @@
                     <!-- AI 프롬프트 섹션 (최상단) -->
                     <div id="aiPromptSection" class="detail-section" style="display: none;">
                         <h3>🤖 AI 소개</h3>
-                        <div class="ai-prompt-content" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="ai-prompt-content" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                             <div id="aiPromptText" style="line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;"></div>
+                        </div>
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <button class="btn btn-warning" onclick="openAiPromptEditModal()" style="background: #ffc107; border: none; color: #000; font-weight: bold; padding: 8px 20px; border-radius: 6px; cursor: pointer;">
+                                ✏️ AI 소개 수정
+                            </button>
                         </div>
                     </div>
 
@@ -9898,6 +9903,12 @@
         // 🔍 캐릭터 상세 정보 모달 표시 함수
         function showCharacterDetail(characterId) {
             console.log('👤 캐릭터 상세 정보 모달 열기:', characterId);
+
+            // 모달에 현재 캐릭터 ID 저장 (AI 소개 수정 기능을 위해)
+            const modal = document.getElementById('characterDetailModal');
+            if (modal) {
+                modal.dataset.characterId = characterId;
+            }
 
             // 🔧 데이터 구조에 따른 캐릭터 조회 (v4.1.0 구조 지원)
             let character = null;
@@ -18281,6 +18292,163 @@
         // 전역 함수로 등록
         window.testFullFieldAccuracy = testFullFieldAccuracy;
 
+        // ================ AI 소개 수정 모달 관련 함수들 ================
+
+        let currentEditingCharacterId = null;
+        let originalAiPrompt = null;
+
+        // AI 소개 수정 모달 열기
+        function openAiPromptEditModal() {
+            const currentDetailCharacter = getCurrentDetailCharacter();
+            if (!currentDetailCharacter) {
+                showNotification('캐릭터 정보를 찾을 수 없습니다.', 'error');
+                return;
+            }
+
+            currentEditingCharacterId = currentDetailCharacter.id;
+            originalAiPrompt = currentDetailCharacter.ai_prompt || '';
+
+            // 모달 열기
+            const modal = document.getElementById('aiPromptEditModal');
+            const textarea = document.getElementById('aiPromptTextArea');
+
+            textarea.value = originalAiPrompt;
+            updateCharacterCount();
+
+            modal.style.display = 'flex';
+            textarea.focus();
+
+            console.log('✏️ AI 소개 수정 모달 열림:', currentDetailCharacter.basic_info.name);
+        }
+
+        // AI 소개 수정 모달 닫기
+        function closeAiPromptEditModal() {
+            const modal = document.getElementById('aiPromptEditModal');
+            modal.style.display = 'none';
+
+            // 변수 초기화
+            currentEditingCharacterId = null;
+            originalAiPrompt = null;
+
+            console.log('❌ AI 소개 수정 모달 닫힘');
+        }
+
+        // 문자 수 업데이트
+        function updateCharacterCount() {
+            const textarea = document.getElementById('aiPromptTextArea');
+            const charCount = document.getElementById('charCount');
+
+            if (textarea && charCount) {
+                const count = textarea.value.length;
+                charCount.textContent = `${count.toLocaleString()}자`;
+
+                // 길이에 따른 색상 변경
+                if (count > 3000) {
+                    charCount.style.color = '#28a745'; // 적정 길이
+                } else if (count > 1000) {
+                    charCount.style.color = '#ffc107'; // 보통 길이
+                } else {
+                    charCount.style.color = '#999'; // 짧은 길이
+                }
+            }
+        }
+
+        // AI 소개 변경사항 저장
+        async function saveAiPromptChanges() {
+            const textarea = document.getElementById('aiPromptTextArea');
+            const newPrompt = textarea.value.trim();
+
+            if (!newPrompt) {
+                showNotification('AI 소개 내용을 입력해주세요.', 'warning');
+                return;
+            }
+
+            if (!currentEditingCharacterId) {
+                showNotification('수정할 캐릭터 정보를 찾을 수 없습니다.', 'error');
+                return;
+            }
+
+            try {
+                console.log('💾 AI 소개 저장 시작:', currentEditingCharacterId);
+
+                // API로 저장
+                const response = await fetch('/api/character-ai-generator', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'save_ai_prompt',
+                        character_id: currentEditingCharacterId,
+                        ai_prompt: newPrompt
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('✅ AI 소개가 성공적으로 저장되었습니다!', 'success');
+
+                    // 캐릭터 상세 화면 업데이트
+                    const aiPromptText = document.getElementById('aiPromptText');
+                    if (aiPromptText) {
+                        aiPromptText.textContent = newPrompt;
+                    }
+
+                    // 모달 닫기
+                    closeAiPromptEditModal();
+
+                    // 캐릭터 목록 새로고침
+                    await loadCharacters();
+
+                    console.log('✅ AI 소개 저장 완료');
+                } else {
+                    throw new Error(result.error || 'AI 소개 저장에 실패했습니다.');
+                }
+
+            } catch (error) {
+                console.error('❌ AI 소개 저장 실패:', error);
+                showNotification('❌ AI 소개 저장에 실패했습니다: ' + error.message, 'error');
+            }
+        }
+
+        // 현재 상세보기 중인 캐릭터 가져오기
+        function getCurrentDetailCharacter() {
+            // 전역 변수나 모달의 데이터 속성에서 현재 캐릭터 정보 가져오기
+            const modal = document.getElementById('characterDetailModal');
+            if (modal && modal.dataset.characterId) {
+                const characterId = modal.dataset.characterId;
+                // charactersData에서 해당 캐릭터 찾기
+                if (window.charactersData) {
+                    const characters = window.charactersData.characters || window.charactersData;
+                    if (Array.isArray(characters)) {
+                        return characters.find(char => char.id === characterId);
+                    } else {
+                        return characters[characterId];
+                    }
+                }
+            }
+            return null;
+        }
+
+        // 모달 외부 클릭 시 닫기
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('aiPromptEditModal');
+            if (event.target === modal) {
+                closeAiPromptEditModal();
+            }
+        });
+
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('aiPromptEditModal');
+                if (modal.style.display === 'flex') {
+                    closeAiPromptEditModal();
+                }
+            }
+        });
+
     </script>
 
     <!-- 📸 캐릭터 사진 관리 모달 -->
@@ -18405,6 +18573,37 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI 소개 수정 모달 -->
+    <div id="aiPromptEditModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+        <div class="modal-content" style="background: white; border-radius: 15px; padding: 0; width: 90%; max-width: 800px; max-height: 90vh; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 15px 15px 0 0;">
+                <h2 style="margin: 0; font-size: 1.5em;">✏️ AI 소개 수정</h2>
+                <button class="close-btn" onclick="closeAiPromptEditModal()" style="position: absolute; top: 15px; right: 20px; background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">×</button>
+            </div>
+            <div class="modal-body" style="padding: 20px; max-height: 60vh; overflow-y: auto;">
+                <div style="margin-bottom: 20px;">
+                    <label for="aiPromptTextArea" style="display: block; margin-bottom: 10px; font-weight: bold; color: #333;">AI 소개 내용:</label>
+                    <textarea id="aiPromptTextArea"
+                              style="width: 100%; height: 400px; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; line-height: 1.6; resize: vertical; outline: none; transition: border-color 0.3s;"
+                              placeholder="AI 소개 내용을 입력하거나 수정하세요..."
+                              onkeyup="updateCharacterCount()"></textarea>
+                    <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <small style="color: #666;">친구가 친구를 소개하는 자연스러운 느낌으로 작성해주세요</small>
+                        <small id="charCount" style="color: #999;">0자</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 20px; border-top: 1px solid #eee; display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeAiPromptEditModal()" style="padding: 10px 20px; border: 1px solid #ddd; background: #f8f9fa; color: #333; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                    ❌ 취소
+                </button>
+                <button class="btn btn-primary" onclick="saveAiPromptChanges()" style="padding: 10px 20px; border: none; background: #007bff; color: white; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold;">
+                    💾 저장
+                </button>
             </div>
         </div>
     </div>

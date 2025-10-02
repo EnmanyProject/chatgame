@@ -377,6 +377,61 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // AI 소개 저장
+    if (action === 'save_ai_prompt') {
+      console.log('✅ 💾 액션 매칭: save_ai_prompt');
+
+      const { character_id, ai_prompt } = req.body;
+
+      if (!character_id || !ai_prompt) {
+        return res.status(400).json({
+          success: false,
+          message: 'Character ID와 AI 소개 내용이 필요합니다'
+        });
+      }
+
+      try {
+        console.log('💾 AI 소개 저장 시작:', character_id);
+
+        // GitHub에서 현재 캐릭터 데이터 가져오기
+        const currentData = await getCharactersFromGitHub();
+
+        if (!currentData.characters[character_id]) {
+          return res.status(404).json({
+            success: false,
+            message: '해당 캐릭터를 찾을 수 없습니다'
+          });
+        }
+
+        // AI 소개 업데이트
+        currentData.characters[character_id].ai_prompt = ai_prompt;
+        currentData.characters[character_id].prompt_generated_at = new Date().toISOString();
+        currentData.characters[character_id].updated_at = new Date().toISOString();
+
+        // 메타데이터 업데이트
+        currentData.metadata.last_updated = new Date().toISOString();
+
+        // GitHub에 저장
+        await saveCharactersToGitHub(currentData);
+
+        console.log('✅ AI 소개 GitHub 저장 완료:', character_id);
+
+        return res.json({
+          success: true,
+          message: 'AI 소개가 성공적으로 저장되었습니다',
+          character_id: character_id,
+          updated_at: currentData.characters[character_id].updated_at
+        });
+
+      } catch (error) {
+        console.error('❌ AI 소개 저장 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: 'AI 소개 저장 중 오류가 발생했습니다: ' + error.message
+        });
+      }
+    }
+
     // 캐릭터 삭제
     if (action === 'delete_character') {
       const { character_id } = req.body;
