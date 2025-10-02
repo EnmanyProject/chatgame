@@ -5784,6 +5784,10 @@
                                 <span class="detail-label">혈액형:</span>
                                 <span id="detailBloodtype" class="detail-value">-</span>
                             </div>
+                            <div class="detail-item">
+                                <span class="detail-label">가족구성:</span>
+                                <span id="detailFamilyStructure" class="detail-value">-</span>
+                            </div>
                         </div>
                     </div>
 
@@ -10042,6 +10046,7 @@
             safeSetTextContent('detailLocation', getCharacterLocation(character));
             safeSetTextContent('detailPets', getCharacterPets(character));
             safeSetTextContent('detailBloodtype', getCharacterBloodtype(character));
+            safeSetTextContent('detailFamilyStructure', getCharacterFamilyStructure(character));
 
             // 외모 정보 섹션
             safeSetTextContent('detailHair', getCharacterHair(character));
@@ -10193,7 +10198,8 @@
         }
 
         function getCharacterHometown(character) {
-            return character.basic_info?.hometown || character.hometown || '-';
+            const hometown = character.basic_info?.hometown || character.hometown;
+            return hometown ? translateToKorean(hometown, 'location') : '-';
         }
 
         function getCharacterEducation(character) {
@@ -10213,7 +10219,12 @@
 
         function getCharacterBloodtype(character) {
             const bloodtype = character.basic_info?.bloodtype || character.bloodtype;
-            return bloodtype ? `${bloodtype}형` : '-';
+            return bloodtype ? translateToKorean(bloodtype, 'bloodtype') : '-';
+        }
+
+        function getCharacterFamilyStructure(character) {
+            const familyStructure = character.basic_info?.family_structure || character.family_structure;
+            return familyStructure ? translateToKorean(familyStructure, 'family_structure') : '-';
         }
 
         // 🇰🇷 한글 번역 매핑 함수들
@@ -10776,6 +10787,22 @@
                     'hamster': '햄스터',
                     'rabbit': '토끼',
                     'reptile': '파충류'
+                },
+                // 👨‍👩‍👧‍👦 가족구성 번역
+                family_structure: {
+                    'nuclear_family': '핵가족',
+                    'extended_family': '대가족',
+                    'single_parent': '한부모 가정',
+                    'single_child': '외동',
+                    'large_family': '대가족',
+                    'adoptive_family': '입양 가정'
+                },
+                // 🩸 혈액형 번역
+                bloodtype: {
+                    'A': 'A형',
+                    'B': 'B형',
+                    'AB': 'AB형',
+                    'O': 'O형'
                 }
             };
 
