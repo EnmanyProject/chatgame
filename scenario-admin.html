@@ -5767,6 +5767,22 @@
                                 <span class="detail-label">관계:</span>
                                 <span id="detailRelationship" class="detail-value">-</span>
                             </div>
+                            <div class="detail-item">
+                                <span class="detail-label">학력:</span>
+                                <span id="detailEducation" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">거주지역:</span>
+                                <span id="detailLocation" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">반려동물:</span>
+                                <span id="detailPets" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">혈액형:</span>
+                                <span id="detailBloodtype" class="detail-value">-</span>
+                            </div>
                         </div>
                     </div>
 
@@ -9932,18 +9948,18 @@
         }
 
         function getCharacterTraits(character) {
-            // v2.0 스키마의 경우
-            if (character.appeal_profile?.charm_points && Array.isArray(character.appeal_profile.charm_points)) {
-                return character.appeal_profile.charm_points
-                    .map(point => translateToKorean(point, 'charm_points'))
-                    .join(', ');
-            }
-
-            // v1.0 스키마의 경우
+            // 생성폼 기준: personality_traits 배열을 우선적으로 표시
             if (character.personality_traits) {
                 return Array.isArray(character.personality_traits)
                     ? character.personality_traits.join(', ')
                     : character.personality_traits;
+            }
+
+            // 백업: v2.0 스키마의 charm_points
+            if (character.appeal_profile?.charm_points && Array.isArray(character.appeal_profile.charm_points)) {
+                return character.appeal_profile.charm_points
+                    .map(point => translateToKorean(point, 'charm_points'))
+                    .join(', ');
             }
 
             // 기타 호환성
@@ -10021,6 +10037,10 @@
             safeSetTextContent('detailGender', getCharacterGender(character));
             safeSetTextContent('detailOccupation', getCharacterOccupation(character));
             safeSetTextContent('detailRelationship', getCharacterRelationship(character));
+            safeSetTextContent('detailEducation', getCharacterEducation(character));
+            safeSetTextContent('detailLocation', getCharacterLocation(character));
+            safeSetTextContent('detailPets', getCharacterPets(character));
+            safeSetTextContent('detailBloodtype', getCharacterBloodtype(character));
 
             // 외모 정보 섹션
             safeSetTextContent('detailHair', getCharacterHair(character));
@@ -10151,9 +10171,10 @@
         }
 
         function getCharacterHobbies(character) {
+            // 생성폼 기준: appeal_profile.hobbies를 우선으로 하되 한국어 번역 적용
             const hobbies = character.appeal_profile?.hobbies || character.hobbies;
             if (Array.isArray(hobbies) && hobbies.length > 0) {
-                return hobbies.join(', ');
+                return hobbies.map(hobby => translateToKorean(hobby, 'hobbies')).join(', ');
             }
             return '-';
         }
@@ -10172,6 +10193,26 @@
 
         function getCharacterHometown(character) {
             return character.basic_info?.hometown || character.hometown || '-';
+        }
+
+        function getCharacterEducation(character) {
+            const education = character.basic_info?.education || character.education;
+            return education ? translateToKorean(education, 'education') : '-';
+        }
+
+        function getCharacterLocation(character) {
+            const location = character.basic_info?.location || character.location;
+            return location ? translateToKorean(location, 'location') : '-';
+        }
+
+        function getCharacterPets(character) {
+            const pets = character.basic_info?.pets || character.pets;
+            return pets ? translateToKorean(pets, 'pets') : '-';
+        }
+
+        function getCharacterBloodtype(character) {
+            const bloodtype = character.basic_info?.bloodtype || character.bloodtype;
+            return bloodtype ? `${bloodtype}형` : '-';
         }
 
         // 🇰🇷 한글 번역 매핑 함수들
@@ -10697,6 +10738,43 @@
                     'consultant': '컨설턴트',
                     'beauty_business': '미용 사업',
                     'unemployed': '백수(운동권)'
+                },
+                // 🎓 학력 번역
+                education: {
+                    'high_school': '고등학교 졸업',
+                    'college_dropout': '대학교 중퇴',
+                    'college_graduate': '대학교 졸업',
+                    'masters': '석사 졸업',
+                    'phd': '박사 졸업',
+                    'technical_school': '전문학교 졸업',
+                    'art_school': '예술대학 졸업'
+                },
+                // 🏙️ 거주지역 번역
+                location: {
+                    'seoul': '서울',
+                    'busan': '부산',
+                    'daegu': '대구',
+                    'incheon': '인천',
+                    'gwangju': '광주',
+                    'daejeon': '대전',
+                    'ulsan': '울산',
+                    'gyeonggi': '경기도',
+                    'gangwon': '강원도',
+                    'jeju': '제주도',
+                    'gangnam': '강남구',
+                    'hongdae': '홍대',
+                    'itaewon': '이태원'
+                },
+                // 🐾 반려동물 번역
+                pets: {
+                    'none': '없음',
+                    'dog': '강아지',
+                    'cat': '고양이',
+                    'bird': '새',
+                    'fish': '물고기',
+                    'hamster': '햄스터',
+                    'rabbit': '토끼',
+                    'reptile': '파충류'
                 }
             };
 
