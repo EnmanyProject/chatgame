@@ -3929,7 +3929,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.3.0</span>
+                <span id="systemVersion">v1.3.1</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -18299,11 +18299,16 @@
 
         // AI 소개 수정 모달 열기
         function openAiPromptEditModal() {
+            console.log('✏️ AI 소개 수정 모달 열기 시작');
+
             const currentDetailCharacter = getCurrentDetailCharacter();
             if (!currentDetailCharacter) {
+                console.error('❌ getCurrentDetailCharacter 결과가 null');
                 showNotification('캐릭터 정보를 찾을 수 없습니다.', 'error');
                 return;
             }
+
+            console.log('✅ 캐릭터 정보 찾음:', currentDetailCharacter.basic_info?.name);
 
             currentEditingCharacterId = currentDetailCharacter.id;
             originalAiPrompt = currentDetailCharacter.ai_prompt || '';
@@ -18418,15 +18423,38 @@
             const modal = document.getElementById('characterDetailModal');
             if (modal && modal.dataset.characterId) {
                 const characterId = modal.dataset.characterId;
-                // charactersData에서 해당 캐릭터 찾기
-                if (window.charactersData) {
-                    const characters = window.charactersData.characters || window.charactersData;
-                    if (Array.isArray(characters)) {
-                        return characters.find(char => char.id === characterId);
-                    } else {
-                        return characters[characterId];
+                console.log('🔍 캐릭터 ID 검색 중:', characterId);
+
+                // characters 전역 변수에서 해당 캐릭터 찾기
+                if (typeof characters !== 'undefined') {
+                    console.log('🔍 characters 전역 변수 구조:', characters);
+
+                    // v4.1.0 구조 지원: characters.characters 또는 직접 characters
+                    let charactersData = null;
+                    if (characters && characters.characters) {
+                        charactersData = characters.characters;
+                        console.log('🔍 v4.1.0 구조 사용: characters.characters');
+                    } else if (characters) {
+                        charactersData = characters;
+                        console.log('🔍 직접 구조 사용: characters');
+                    }
+
+                    if (charactersData) {
+                        if (Array.isArray(charactersData)) {
+                            const found = charactersData.find(char => char.id === characterId);
+                            console.log('🔍 배열에서 검색 결과:', found ? '찾음' : '없음');
+                            return found;
+                        } else {
+                            const found = charactersData[characterId];
+                            console.log('🔍 객체에서 검색 결과:', found ? '찾음' : '없음');
+                            return found;
+                        }
                     }
                 }
+
+                console.error('❌ characters 전역 변수를 찾을 수 없음');
+            } else {
+                console.error('❌ 모달 또는 characterId를 찾을 수 없음');
             }
             return null;
         }
