@@ -3470,6 +3470,25 @@
             font-weight: bold;
         }
 
+        /* 버전 정보 표시 (왼쪽 상단) */
+        .version-info {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            background: rgba(52, 73, 94, 0.1);
+            padding: 4px 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(52, 73, 94, 0.2);
+            z-index: 1000;
+        }
+
+        .version-info span {
+            font-size: 11px;
+            color: #34495e;
+            font-weight: 500;
+            font-family: 'Courier New', monospace;
+        }
+
         /* 로그인 후 헤더에 사용자 정보 표시 */
         .user-info {
             position: absolute;
@@ -3910,7 +3929,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.0.0</span>
+                <span id="systemVersion">v1.1.1</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
