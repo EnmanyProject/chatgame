@@ -16283,6 +16283,40 @@
                 console.log('ℹ️ 복원할 미래직업 데이터 없음');
             }
 
+            // 🆕 6. 자신있는 부위 버튼 복원 (최대 3개 선택 가능)
+            const featureElements = character.physical_allure?.feature_elements || character.feature_elements || [];
+            if (Array.isArray(featureElements) && featureElements.length > 0) {
+                featureElements.forEach(feature => {
+                    const featureBtn = document.querySelector(`.feature-btn[data-feature="${feature}"]`);
+                    if (featureBtn) {
+                        featureBtn.classList.add('selected');
+                        console.log('✅ 자신있는 부위 버튼 선택:', feature);
+                    } else {
+                        console.warn('⚠️ 자신있는 부위 버튼을 찾을 수 없음:', feature);
+                    }
+                });
+                console.log('🎯 자신있는 부위 복원 완료 - 총', featureElements.length, '개');
+            } else {
+                console.log('ℹ️ 복원할 자신있는 부위 데이터 없음');
+            }
+
+            // 🆕 7. 섹시포즈 버튼 복원 (최대 3개 선택 가능)
+            const sensualHabits = character.physical_allure?.sensual_habits || character.sensual_habits || [];
+            if (Array.isArray(sensualHabits) && sensualHabits.length > 0) {
+                sensualHabits.forEach(pose => {
+                    const poseBtn = document.querySelector(`.pose-btn[data-pose="${pose}"]`);
+                    if (poseBtn) {
+                        poseBtn.classList.add('selected');
+                        console.log('✅ 섹시포즈 버튼 선택:', pose);
+                    } else {
+                        console.warn('⚠️ 섹시포즈 버튼을 찾을 수 없음:', pose);
+                    }
+                });
+                console.log('🎯 섹시포즈 복원 완료 - 총', sensualHabits.length, '개');
+            } else {
+                console.log('ℹ️ 복원할 섹시포즈 데이터 없음');
+            }
+
             console.log('✅ 클릭형 필드들 복원 완료');
         }
 
