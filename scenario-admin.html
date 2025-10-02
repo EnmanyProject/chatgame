@@ -3929,7 +3929,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.3.6</span>
+                <span id="systemVersion">v1.3.7</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -11935,7 +11935,7 @@
                         // 새 항목 선택
                         if (items && Array.isArray(items)) {
                             items.forEach(item => {
-                                const btn = document.querySelector(`[${dataAttr}="${item}"]`);
+                                const btn = document.querySelector(`${selector}[${dataAttr}="${item}"]`);
                                 if (btn) {
                                     btn.classList.add('selected');
                                     console.log(`✅ ${selector} 선택됨:`, item);
@@ -17502,7 +17502,7 @@
                 if (availableOptions.length > 0) {
                     const randomTrait = availableOptions[Math.floor(Math.random() * availableOptions.length)];
                     selectedTraits.push(randomTrait);
-                    const traitBtn = document.querySelector(`[data-trait="${randomTrait}"]`);
+                    const traitBtn = document.querySelector(`.trait-btn[data-trait="${randomTrait}"]`);
                     if (traitBtn) {
                         traitBtn.classList.add('selected');
                         console.log('✅ 성격특성 선택됨:', randomTrait);
