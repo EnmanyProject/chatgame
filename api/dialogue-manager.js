@@ -763,7 +763,7 @@ async function generateCharacterAwareDialogue(data, character, relationshipStage
     });
 
     if (!character) {
-      return generateFallbackDialogue(data);
+      throw new Error('캐릭터 데이터를 찾을 수 없습니다. 캐릭터 ID를 확인해주세요.');
     }
 
     // 캐릭터 특성 기반 대화 템플릿 생성
@@ -819,7 +819,7 @@ async function generateCharacterAwareDialogue(data, character, relationshipStage
 
   } catch (error) {
     console.error('❌ 캐릭터 인식 대화 생성 실패:', error.message);
-    return generateFallbackDialogue(data);
+    throw new Error('대화 생성 실패: ' + error.message);
   }
 }
 
@@ -977,6 +977,9 @@ function generateCharacterSpecificChoices(character, relationshipStage, currentA
   });
 }
 
+// ⚠️ DEPRECATED - Fallback 시스템 제거됨
+// 대화 생성 실패 시 명확한 에러를 반환하도록 변경
+// 이 함수는 더 이상 사용되지 않음
 function generateFallbackDialogue(data) {
   return {
     story_flow: [

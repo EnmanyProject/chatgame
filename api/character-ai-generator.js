@@ -133,22 +133,17 @@ module.exports = async function handler(req, res) {
       } catch (error) {
         console.error('❌ GitHub 로드 실패:', error.message);
 
-        // 빈 데이터로 graceful fallback
-        const fallbackData = {
-          characters: {},
-          metadata: {
-            ...DEFAULT_METADATA,
-            total_characters: 0,
-            storage_type: 'fallback_empty'
-          }
-        };
-
-        return res.json({
-          success: true,
-          data: fallbackData,
-          message: 'GitHub 연결 실패, 빈 상태로 시작합니다',
-          warning: 'GitHub API 연결에 문제가 있습니다',
-          source: 'fallback'
+        // Fallback 제거 - GitHub 연결 실패 시 명확한 에러 반환
+        return res.status(500).json({
+          success: false,
+          message: 'GitHub API 연결 실패: ' + error.message,
+          error_type: 'GITHUB_CONNECTION_ERROR',
+          troubleshooting: [
+            'GitHub API 상태 확인',
+            'Vercel 환경변수 GITHUB_TOKEN 확인',
+            '인터넷 연결 상태 확인',
+            'Repository 접근 권한 확인'
+          ]
         });
       }
 
@@ -316,15 +311,17 @@ module.exports = async function handler(req, res) {
       } catch (error) {
         console.error('❌ AI 캐릭터 생성 실패:', error);
 
-        // AI 실패 시 fallback으로 기존 랜덤 생성 사용
-        console.log('🔄 Fallback: 랜덤 생성으로 전환');
-        const character = generateRandomCharacterFromInput(inputData);
-
-        return res.json({
-          success: true,
-          character: character,
-          message: '캐릭터가 완성되었습니다 (AI 오류로 인한 기본 생성)',
-          fallback: true
+        // Fallback 제거 - AI 실패 시 명확한 에러 반환
+        return res.status(500).json({
+          success: false,
+          message: 'AI 캐릭터 생성 실패: ' + error.message,
+          error_type: 'AI_GENERATION_ERROR',
+          troubleshooting: [
+            'OpenAI API 키 확인 (Vercel 환경변수 OPENAI_API_KEY)',
+            'OpenAI 계정 크레딧 잔액 확인',
+            'API 키 권한 설정 확인',
+            '입력 데이터 형식 확인'
+          ]
         });
       }
     }
@@ -591,30 +588,19 @@ module.exports = async function handler(req, res) {
 
         } catch (aiError) {
           console.error('❌ AI 생성 실패:', aiError);
-          console.log('🔄 Fallback: 기본 생성으로 전환');
 
-          // AI 실패 시 fallback으로 기본 생성 사용
-          const characterData = convertToV2Schema(req.body);
-          console.log('🔄 v2.0 스키마로 변환 완료:', characterData);
-
-          const characterProfile = generateSimpleProfile(characterData);
-
-          console.log('🎉 Fallback 캐릭터 생성 완료:', {
-            character_name: characterData.basic_info.name,
-            has_profile: !!characterProfile.profile_text
-          });
-
-          return res.json({
-            success: true,
-            character: characterData,
-            character_profile: characterProfile,
-            message: `${characterData.basic_info.name} 캐릭터가 생성되었습니다 (AI 오류로 인한 기본 생성)`,
-            workflow: 'fallback_generation',
-            ai_powered: false,
-            fallback: true,
-            debug_info: debugInfo,
-            execution_path: 'FALLBACK_GENERATION',
-            ai_error: aiError.message
+          // Fallback 제거 - AI 실패 시 명확한 에러 반환
+          return res.status(500).json({
+            success: false,
+            message: 'AI 캐릭터 생성 실패: ' + aiError.message,
+            error_type: 'AI_GENERATION_ERROR',
+            troubleshooting: [
+              'OpenAI API 키 확인 (Vercel 환경변수 OPENAI_API_KEY)',
+              'OpenAI 계정 크레딧 잔액 확인',
+              'API 요청 형식 확인',
+              '네트워크 연결 상태 확인'
+            ],
+            debug_info: debugInfo
           });
         }
 
@@ -2416,8 +2402,7 @@ async function generateCharacterProfile(characterData) {
     const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
     if (!OPENAI_API_KEY) {
-      console.log('⚠️ OpenAI API 키 없음 - 템플릿 기반 소개 생성');
-      return generateTemplateBasedProfile(characterData);
+      throw new Error('OpenAI API 키가 설정되지 않았습니다. Vercel 환경변수 OPENAI_API_KEY를 설정해주세요.');
     }
 
     const profilePrompt = `다음 캐릭터 데이터를 바탕으로 매력적이고 생생한 인물 소개를 작성해주세요:
@@ -2505,12 +2490,15 @@ ${JSON.stringify(characterData, null, 2)}
 
   } catch (error) {
     console.error('❌ OpenAI 인물 소개 생성 실패:', error.message);
-    console.log('🔄 템플릿 기반 소개 생성으로 전환');
-    return generateTemplateBasedProfile(characterData);
+    throw new Error('AI 인물 소개 생성 실패: ' + error.message);
   }
 }
 
-// 🎲 템플릿 기반 캐릭터 자동 완성 (OpenAI 실패 시 사용)
+// ⚠️ DEPRECATED - Fallback 시스템 제거됨
+// OpenAI API 실패 시 명확한 에러를 반환하도록 변경
+// 아래 함수들은 더 이상 사용되지 않으며, 참고용으로만 남겨둠
+
+// 🎲 템플릿 기반 캐릭터 자동 완성 (OpenAI 실패 시 사용) - DEPRECATED
 function generateTemplateBasedCompletion(inputData) {
   console.log('🎲 템플릿 기반 캐릭터 자동 완성');
 
