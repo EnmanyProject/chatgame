@@ -7,7 +7,13 @@
         "age": 21,
         "mbti": "ISFJ",
         "occupation": "art",
-        "gender": "female"
+        "gender": "female",
+        "education": "college_graduate",
+        "location": "gangnam",
+        "hometown": "busan",
+        "family_structure": "nuclear_family",
+        "pets": "dog",
+        "bloodtype": "A"
       },
       "personality_traits": [
         "감성적",
@@ -137,7 +143,13 @@
         "age": 33,
         "mbti": "ESTJ",
         "occupation": "art",
-        "gender": "female"
+        "gender": "female",
+        "education": "masters",
+        "location": "hongdae",
+        "hometown": "seoul",
+        "family_structure": "single_parent",
+        "pets": "cat",
+        "bloodtype": "B"
       },
       "personality_traits": [
         "자신감 있는",
@@ -264,7 +276,13 @@
         "age": 22,
         "mbti": "ISFP",
         "occupation": "art",
-        "gender": "female"
+        "gender": "female",
+        "education": "art_school",
+        "location": "itaewon",
+        "hometown": "daegu",
+        "family_structure": "nuclear_family",
+        "pets": "hamster",
+        "bloodtype": "O"
       },
       "personality_traits": [
         "감성적",
@@ -398,7 +416,13 @@
         "age": 30,
         "mbti": "ENFP",
         "occupation": "singer",
-        "gender": "female"
+        "gender": "female",
+        "education": "college_graduate",
+        "location": "gangnam",
+        "hometown": "incheon",
+        "family_structure": "extended_family",
+        "pets": "none",
+        "bloodtype": "AB"
       },
       "personality_traits": [
         "열정적",
@@ -533,7 +557,13 @@
         "age": 40,
         "mbti": "INTP",
         "occupation": "pharmacist",
-        "gender": "female"
+        "gender": "female",
+        "education": "phd",
+        "location": "jongno",
+        "hometown": "gwangju",
+        "family_structure": "nuclear_family",
+        "pets": "bird",
+        "bloodtype": "A"
       },
       "personality_traits": [
         "활발한",

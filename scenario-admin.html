@@ -3929,7 +3929,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.3.9</span>
+                <span id="systemVersion">v1.4.0</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -4991,6 +4991,95 @@
                                 <select id="charGender">
                                     <option value="female" selected>👩 여성</option>
                                 </select>
+                            </div>
+                            <div class="form-group">
+                                <label>학력</label>
+                                <select id="charEducation">
+                                    <option value="high_school">🏫 고등학교 졸업</option>
+                                    <option value="college_dropout">📚 대학교 중퇴</option>
+                                    <option value="college_graduate">🎓 대학교 졸업</option>
+                                    <option value="masters">👩‍🎓 석사 졸업</option>
+                                    <option value="phd">👩‍🔬 박사 졸업</option>
+                                    <option value="technical_school">🔧 전문학교 졸업</option>
+                                    <option value="art_school">🎨 예술대학 졸업</option>
+                                </select>
+                                <button type="button" class="btn-random" onclick="randomizeEducation()">🎲 랜덤</button>
+                            </div>
+                            <div class="form-group">
+                                <label>거주 지역</label>
+                                <select id="charLocation">
+                                    <option value="seoul">🏙️ 서울</option>
+                                    <option value="busan">🌊 부산</option>
+                                    <option value="incheon">✈️ 인천</option>
+                                    <option value="daegu">🏔️ 대구</option>
+                                    <option value="daejeon">🏛️ 대전</option>
+                                    <option value="gwangju">🌸 광주</option>
+                                    <option value="ulsan">🏭 울산</option>
+                                    <option value="gyeonggi">🏡 경기도</option>
+                                    <option value="gangwon">⛰️ 강원도</option>
+                                    <option value="jeju">🌴 제주도</option>
+                                </select>
+                                <button type="button" class="btn-random" onclick="randomizeLocation()">🎲 랜덤</button>
+                            </div>
+                            <div class="form-group">
+                                <label>출신 지역</label>
+                                <select id="charHometown">
+                                    <option value="seoul">🏙️ 서울</option>
+                                    <option value="busan">🌊 부산</option>
+                                    <option value="incheon">✈️ 인천</option>
+                                    <option value="daegu">🏔️ 대구</option>
+                                    <option value="daejeon">🏛️ 대전</option>
+                                    <option value="gwangju">🌸 광주</option>
+                                    <option value="ulsan">🏭 울산</option>
+                                    <option value="gyeonggi">🏡 경기도</option>
+                                    <option value="gangwon">⛰️ 강원도</option>
+                                    <option value="jeju">🌴 제주도</option>
+                                    <option value="chungbuk">🍃 충청북도</option>
+                                    <option value="chungnam">🌾 충청남도</option>
+                                    <option value="gyeongbuk">🏞️ 경상북도</option>
+                                    <option value="gyeongnam">🌺 경상남도</option>
+                                    <option value="jeonbuk">🌿 전라북도</option>
+                                    <option value="jeonnam">🌊 전라남도</option>
+                                </select>
+                                <button type="button" class="btn-random" onclick="randomizeHometown()">🎲 랜덤</button>
+                            </div>
+                            <div class="form-group">
+                                <label>가족 구성</label>
+                                <select id="charFamilyStructure">
+                                    <option value="nuclear_family">👨‍👩‍👧‍👦 4인 가족 (부모+자녀2)</option>
+                                    <option value="small_family">👨‍👩‍👧 3인 가족 (부모+외동)</option>
+                                    <option value="single_parent">👩‍👧 한부모 가정</option>
+                                    <option value="grandparents">👴👵 조부모와 함께</option>
+                                    <option value="large_family">👨‍👩‍👧‍👦👶 대가족 (5인 이상)</option>
+                                    <option value="independent">🏠 독립 거주</option>
+                                    <option value="siblings_only">👭 형제자매끼리</option>
+                                </select>
+                                <button type="button" class="btn-random" onclick="randomizeFamilyStructure()">🎲 랜덤</button>
+                            </div>
+                            <div class="form-group">
+                                <label>반려동물</label>
+                                <select id="charPets">
+                                    <option value="none">❌ 없음</option>
+                                    <option value="dog">🐕 강아지</option>
+                                    <option value="cat">🐱 고양이</option>
+                                    <option value="dog_cat">🐕🐱 강아지+고양이</option>
+                                    <option value="bird">🐦 새</option>
+                                    <option value="fish">🐠 물고기</option>
+                                    <option value="hamster">🐹 햄스터</option>
+                                    <option value="rabbit">🐰 토끼</option>
+                                    <option value="reptile">🦎 파충류</option>
+                                </select>
+                                <button type="button" class="btn-random" onclick="randomizePets()">🎲 랜덤</button>
+                            </div>
+                            <div class="form-group">
+                                <label>혈액형</label>
+                                <select id="charBloodType">
+                                    <option value="A">🅰️ A형</option>
+                                    <option value="B">🅱️ B형</option>
+                                    <option value="AB">🆎 AB형</option>
+                                    <option value="O">🅾️ O형</option>
+                                </select>
+                                <button type="button" class="btn-random" onclick="randomizeBloodType()">🎲 랜덤</button>
                             </div>
                         </div>
                     </div>
@@ -11309,11 +11398,14 @@
                 personality_traits: getSelectedTraits(),
                 occupation: document.getElementById('charOccupation').value || 'student',
 
-                // 배경 정보
-                background: {
-                    family: document.getElementById('charFamily').value || 'only_child',
-                    hometown: document.getElementById('charHometown').value || 'seoul'
-                },
+                // 🆕 새로운 기본 정보 필드들
+                education: document.getElementById('charEducation').value || 'college_graduate',
+                location: document.getElementById('charLocation').value || 'gangnam',
+                hometown: document.getElementById('charHometown').value || 'seoul',
+                family_structure: document.getElementById('charFamilyStructure').value || 'nuclear_family',
+                pets: document.getElementById('charPets').value || 'none',
+                bloodtype: document.getElementById('charBloodtype').value || 'A',
+
                 relationship: document.getElementById('charRelationship').value,
 
                 // 외모 정보
@@ -16215,19 +16307,47 @@
                 console.log('✅ 직업 설정:', occupation);
             }
 
-            // 배경 정보 처리 (중첩 구조)
-            const family = character.background?.family || character.family;
-            const charFamilyEl = document.getElementById('charFamily');
-            if (family && charFamilyEl) {
-                charFamilyEl.value = family;
-                console.log('✅ 가족구성 설정:', family);
+            // 🆕 새로운 기본 정보 필드들 처리
+            const education = character.basic_info?.education || character.education;
+            const charEducationEl = document.getElementById('charEducation');
+            if (education && charEducationEl) {
+                charEducationEl.value = education;
+                console.log('✅ 학력 설정:', education);
             }
 
-            const hometown = character.background?.hometown || character.hometown;
+            const location = character.basic_info?.location || character.location;
+            const charLocationEl = document.getElementById('charLocation');
+            if (location && charLocationEl) {
+                charLocationEl.value = location;
+                console.log('✅ 거주지역 설정:', location);
+            }
+
+            const hometown = character.basic_info?.hometown || character.hometown;
             const charHometownEl = document.getElementById('charHometown');
             if (hometown && charHometownEl) {
                 charHometownEl.value = hometown;
-                console.log('✅ 출신지 설정:', hometown);
+                console.log('✅ 출신지역 설정:', hometown);
+            }
+
+            const familyStructure = character.basic_info?.family_structure || character.family_structure;
+            const charFamilyStructureEl = document.getElementById('charFamilyStructure');
+            if (familyStructure && charFamilyStructureEl) {
+                charFamilyStructureEl.value = familyStructure;
+                console.log('✅ 가족구성 설정:', familyStructure);
+            }
+
+            const pets = character.basic_info?.pets || character.pets;
+            const charPetsEl = document.getElementById('charPets');
+            if (pets && charPetsEl) {
+                charPetsEl.value = pets;
+                console.log('✅ 반려동물 설정:', pets);
+            }
+
+            const bloodtype = character.basic_info?.bloodtype || character.bloodtype;
+            const charBloodtypeEl = document.getElementById('charBloodtype');
+            if (bloodtype && charBloodtypeEl) {
+                charBloodtypeEl.value = bloodtype;
+                console.log('✅ 혈액형 설정:', bloodtype);
             }
 
             // 관계 처리
@@ -16935,6 +17055,102 @@
             const randomIndex = Math.floor(Math.random() * options.length);
             occupationElement.selectedIndex = randomIndex;
             console.log('✅ 직업 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
+        }
+
+        function randomizeEducation() {
+            const educationElement = document.getElementById('charEducation');
+            if (!educationElement) {
+                console.error('❌ charEducation 요소를 찾을 수 없습니다!');
+                return;
+            }
+            const options = Array.from(educationElement.options);
+            if (options.length === 0) {
+                console.error('❌ 학력 옵션이 없습니다!');
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * options.length);
+            educationElement.selectedIndex = randomIndex;
+            console.log('✅ 학력 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
+        }
+
+        function randomizeLocation() {
+            const locationElement = document.getElementById('charLocation');
+            if (!locationElement) {
+                console.error('❌ charLocation 요소를 찾을 수 없습니다!');
+                return;
+            }
+            const options = Array.from(locationElement.options);
+            if (options.length === 0) {
+                console.error('❌ 거주지역 옵션이 없습니다!');
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * options.length);
+            locationElement.selectedIndex = randomIndex;
+            console.log('✅ 거주지역 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
+        }
+
+        function randomizeHometown() {
+            const hometownElement = document.getElementById('charHometown');
+            if (!hometownElement) {
+                console.error('❌ charHometown 요소를 찾을 수 없습니다!');
+                return;
+            }
+            const options = Array.from(hometownElement.options);
+            if (options.length === 0) {
+                console.error('❌ 출신지역 옵션이 없습니다!');
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * options.length);
+            hometownElement.selectedIndex = randomIndex;
+            console.log('✅ 출신지역 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
+        }
+
+        function randomizeFamilyStructure() {
+            const familyElement = document.getElementById('charFamilyStructure');
+            if (!familyElement) {
+                console.error('❌ charFamilyStructure 요소를 찾을 수 없습니다!');
+                return;
+            }
+            const options = Array.from(familyElement.options);
+            if (options.length === 0) {
+                console.error('❌ 가족구성 옵션이 없습니다!');
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * options.length);
+            familyElement.selectedIndex = randomIndex;
+            console.log('✅ 가족구성 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
+        }
+
+        function randomizePets() {
+            const petsElement = document.getElementById('charPets');
+            if (!petsElement) {
+                console.error('❌ charPets 요소를 찾을 수 없습니다!');
+                return;
+            }
+            const options = Array.from(petsElement.options);
+            if (options.length === 0) {
+                console.error('❌ 반려동물 옵션이 없습니다!');
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * options.length);
+            petsElement.selectedIndex = randomIndex;
+            console.log('✅ 반려동물 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
+        }
+
+        function randomizeBloodType() {
+            const bloodTypeElement = document.getElementById('charBloodType');
+            if (!bloodTypeElement) {
+                console.error('❌ charBloodType 요소를 찾을 수 없습니다!');
+                return;
+            }
+            const options = Array.from(bloodTypeElement.options);
+            if (options.length === 0) {
+                console.error('❌ 혈액형 옵션이 없습니다!');
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * options.length);
+            bloodTypeElement.selectedIndex = randomIndex;
+            console.log('✅ 혈액형 랜덤 선택:', options[randomIndex].text, '(index:', randomIndex, ')');
         }
 
         function randomizeFamily() {
@@ -18003,6 +18219,57 @@
             // Basic Info
             'student': '학생',
             'female': '여성',
+
+            // Education (학력)
+            'high_school': '고등학교 졸업',
+            'college_dropout': '대학교 중퇴',
+            'college_graduate': '대학교 졸업',
+            'masters': '석사 졸업',
+            'phd': '박사 졸업',
+            'technical_school': '전문학교 졸업',
+            'art_school': '예술대학 졸업',
+
+            // Location (거주지역)
+            'gangnam': '강남구',
+            'hongdae': '홍대',
+            'itaewon': '이태원',
+            'jongno': '종로구',
+            'mapo': '마포구',
+            'seocho': '서초구',
+            'yongsan': '용산구',
+
+            // Hometown (출신지역)
+            'seoul': '서울',
+            'busan': '부산',
+            'daegu': '대구',
+            'incheon': '인천',
+            'gwangju': '광주',
+            'daejeon': '대전',
+            'ulsan': '울산',
+            'jeju': '제주도',
+
+            // Family Structure (가족구성)
+            'nuclear_family': '핵가족',
+            'extended_family': '대가족',
+            'single_parent': '한부모 가정',
+            'grandparents': '조부모님과 함께',
+            'alone': '독거',
+            'roommate': '룸메이트와 함께',
+
+            // Pets (반려동물)
+            'dog': '강아지',
+            'cat': '고양이',
+            'hamster': '햄스터',
+            'bird': '새',
+            'fish': '물고기',
+            'rabbit': '토끼',
+            'none': '없음',
+
+            // Blood Type (혈액형)
+            'A': 'A형',
+            'B': 'B형',
+            'AB': 'AB형',
+            'O': 'O형',
 
             // Appeal Profile
             'warm_nurturing': '따뜻하고 배려심 있는',
