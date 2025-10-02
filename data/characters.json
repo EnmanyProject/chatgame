@@ -842,9 +842,8 @@
       "appeal_profile": {
         "seduction_style": "warm_nurturing",
         "charm_points": [
-          "confident_touch",
-          "graceful_movements",
-          "expressive_eyes"
+          "infectious_smile",
+          "witty_banter"
         ],
         "emotional_intelligence": 4,
         "confidence_level": 4,
@@ -852,9 +851,9 @@
         "sexual_curiosity": 1,
         "sexual_comfort": 8,
         "hobbies": [
-          "drawing",
+          "reading",
           "music",
-          "photography"
+          "movies"
         ]
       },
       "physical_allure": {
@@ -862,27 +861,27 @@
           "hair": "shoulder_wave",
           "eyes": "almond_elegant",
           "body": "average_attractive",
-          "bust": "E",
+          "bust": "A",
           "waist_hip": "운동체형",
           "style": "트렌디"
         },
         "feature_elements": [
           "seductive_eyes",
-          "sexy_lips",
-          "long_legs"
+          "slim_waist"
         ],
         "sensual_habits": [
-          "윙크하기"
+          "입술깨물기",
+          "유혹적시선"
         ],
         "body_language": [
-          "눈동자흔들림",
-          "몸떨림"
+          "얼굴발그레짐",
+          "심장두근거림"
         ]
       },
       "psychological_depth": {
         "core_desires": [
           "meaningful_connection",
-          "adventure_excitement"
+          "personal_growth"
         ],
         "vulnerabilities": [
           "perfectionism",
@@ -894,12 +893,13 @@
           "escalation_pace": "moderate_pace",
           "sexual_tone_band": "moderate"
         },
-        "sexual_freedom": 3
+        "sexual_freedom": 4
       },
       "conversation_dynamics": {
         "speech_style": "mysterious_seductive",
         "flirting_patterns": [
-          "eye_contact"
+          "subtle_teasing",
+          "playful_banter"
         ],
         "reaction_tendencies": {
           "humor": "giggles_easily",
@@ -907,52 +907,47 @@
           "interest_expression": "enthusiastic_sharing"
         },
         "conversation_hooks": [
-          "life_philosophy",
-          "future_dreams",
-          "childhood_memories"
+          "travel_stories",
+          "music_movies"
         ],
         "speech_habits": [
-          "cute_ending",
-          "english_mix"
+          "polite_ending",
+          "frequent_emoji"
         ],
         "vocabulary_register": "casual_friendly",
         "allowed_motifs": [
           "romance_love",
-          "art_creativity"
+          "daily_life"
         ],
-        "forbidden_terms": [
-          "military",
-          "family"
-        ]
+        "forbidden_terms": []
       },
       "past_history": {
         "boyfriend_count": 2,
         "preferred_skinship": [
-          "light_hugs",
-          "intimate_cuddling",
-          "passionate_kiss"
+          "hand_holding",
+          "cheek_kiss"
         ],
         "relationship_experience": "beginner",
         "first_experience_age": "early_teens"
       },
       "favorite_gifts": [
-        "luxury_lingerie",
-        "designer_bag",
-        "wine"
+        "flowers",
+        "chocolate",
+        "perfume"
       ],
       "male_priorities": [
         "humor",
-        "ambition"
+        "communication"
       ],
       "future_goals": {
-        "asset_goal": "5_billion",
+        "asset_goal": "1_billion",
         "future_careers": [
           "restaurant_owner",
           "entrepreneur"
         ]
       },
-      "created_at": "2025-10-02T09:01:53.831Z",
-      "updated_at": "2025-10-02T09:01:55.046Z",
+      "created_at": "2025-10-02T09:03:42.483Z",
+      "updated_at": "2025-10-02T09:03:44.396Z",
       "source": "scenario_admin_v2",
       "active": true,
       "version": "2.0"
@@ -963,7 +958,7 @@
     "total_characters": 7,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "stable_github_direct",
-    "last_updated": "2025-10-02T09:01:55.046Z",
-    "last_accessed": "2025-10-02T09:01:55.046Z"
+    "last_updated": "2025-10-02T09:03:44.396Z",
+    "last_accessed": "2025-10-02T09:03:44.396Z"
   }
 }
