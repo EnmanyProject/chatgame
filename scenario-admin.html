@@ -1193,6 +1193,15 @@
             height: 100%;
             background: rgba(0,0,0,0.5);
             backdrop-filter: blur(5px);
+            overflow: hidden; /* 모달 자체에서 스크롤 방지 */
+        }
+
+        /* 모달이 활성화될 때 body 스크롤 방지 */
+        body.modal-open {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
         }
 
         .modal-content {
@@ -3930,7 +3939,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.4.4</span>
+                <span id="systemVersion">v1.4.5</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -8248,6 +8257,9 @@
                 });
             }
 
+            // 백그라운드 스크롤 비활성화
+            document.body.style.overflow = 'hidden';
+
             document.getElementById('scenarioModal').style.display = 'block';
         }
 
@@ -9055,6 +9067,9 @@
             document.getElementById('dialogueNumber').value = '';
             document.getElementById('difficulty').value = 'easy';
 
+            // 백그라운드 스크롤 비활성화
+            document.body.style.overflow = 'hidden';
+
             document.getElementById('dialogueModal').style.display = 'block';
         }
 
@@ -9279,7 +9294,10 @@
                 document.getElementById('customDialogue').value = custom.dialogue || '';
                 document.getElementById('customNarration').value = custom.narration || '';
             }
-            
+
+            // 백그라운드 스크롤 비활성화
+            document.body.style.overflow = 'hidden';
+
             document.getElementById('dialogueModal').style.display = 'block';
         }
 
@@ -11047,7 +11065,10 @@
             if (randomStatusEl) {
                 randomStatusEl.innerHTML = '';
             }
-            
+
+            // 백그라운드 스크롤 비활성화
+            document.body.style.overflow = 'hidden';
+
             document.getElementById('characterModal').style.display = 'block';
         }
 
@@ -11131,6 +11152,9 @@
             // ✅ 모든 폼 필드는 위의 fillCharacterForm(character) 호출로 이미 처리됨
             // (체크박스, 라디오 버튼, 셀렉트박스 포함)
             console.log('✅ 편집 모드: fillCharacterForm v2.0으로 모든 데이터 채움 완료');
+
+            // 백그라운드 스크롤 비활성화
+            document.body.style.overflow = 'hidden';
 
             // 모달 표시
             document.getElementById('characterModal').style.display = 'block';
@@ -12294,6 +12318,10 @@
         // === 공통 함수들 ===
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
+
+            // 백그라운드 스크롤 활성화
+            document.body.style.overflow = 'auto';
+
             if (modalId === 'scenarioModal') {
                 document.getElementById('scenarioForm').reset();
                 selectedCharacters.clear();
@@ -12332,6 +12360,9 @@
 
             // 기존 사진 데이터 로드 (V2.3)
             await loadCharacterPhotosV2(characterId);
+
+            // 백그라운드 스크롤 비활성화
+            document.body.style.overflow = 'hidden';
 
             // 모달 표시
             document.getElementById('photoManagerModal').style.display = 'block';
