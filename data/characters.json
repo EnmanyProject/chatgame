@@ -814,14 +814,64 @@
       "source": "scenario_admin_v2",
       "active": true,
       "version": "2.0"
+    },
+    "�翡��_infp_1759390044410": {
+      "name": "�翡��",
+      "mbti": "INFP",
+      "age": 36,
+      "occupation": "housewife",
+      "gender": "female",
+      "education": "college_graduate",
+      "location": "gangnam",
+      "hometown": "seoul",
+      "family_structure": "nuclear_family",
+      "pets": "cat",
+      "bloodtype": "B",
+      "relationship": "friend",
+      "seduction_style": "warm_nurturing",
+      "charm_points": [
+        "infectious_smile",
+        "witty_banter"
+      ],
+      "emotional_intelligence": 8,
+      "confidence_level": 1,
+      "mystery_factor": 3,
+      "sexual_curiosity": 1,
+      "sexual_comfort": 1,
+      "hobbies": [
+        "reading",
+        "music",
+        "movies"
+      ],
+      "hair": "ponytail",
+      "eyes": "seductive_eyes",
+      "body": "petite_sexy",
+      "bust": "D",
+      "waist_hip": "����",
+      "style": "���",
+      "feature_elements": [
+        "seductive_eyes",
+        "slim_waist"
+      ],
+      "sensual_habits": [
+        "�Լ�������",
+        "��Ȥ���ü�"
+      ],
+      "body_language": [
+        "�󱼹߱׷���",
+        "����αٰŸ�"
+      ],
+      "id": "�翡��_infp_1759390044410",
+      "created_at": "2025-10-02T07:27:24.504Z",
+      "updated_at": "2025-10-02T07:27:24.504Z"
     }
   },
   "metadata": {
     "version": "4.1.0",
-    "total_characters": 6,
+    "total_characters": 7,
     "created": "2025-09-28T10:43:23.975Z",
-    "storage_type": "github_api_only",
-    "last_updated": "2025-10-02T07:13:53.909Z",
-    "last_accessed": "2025-10-02T07:13:53.909Z"
+    "storage_type": "stable_github_direct",
+    "last_updated": "2025-10-02T07:27:24.504Z",
+    "last_accessed": "2025-10-02T07:27:24.504Z"
   }
 }
