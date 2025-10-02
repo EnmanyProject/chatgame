@@ -11,7 +11,9 @@
   "dependencies": {
     "@octokit/rest": "^20.0.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@playwright/test": "^1.55.1"
+  },
   "keywords": [
     "chat",
     "game",
