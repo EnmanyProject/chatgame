@@ -41,6 +41,11 @@
    - 업데이트 후 새로고침하여 버전 변경 확인
 
 #### 📝 **버전 히스토리 기록**
+- **v1.3.2** (2025-10-02): JavaScript 초기화 오류 수정
+  - "clearAllData is not defined" ReferenceError 해결
+  - 미사용 함수 참조 제거로 콘솔 오류 완전 해결
+  - 페이지 로딩 시 JavaScript 오류 없는 깔끔한 시작
+
 - **v1.3.1** (2025-10-02): AI 소개 수정 기능 버그 수정
   - "캐릭터 정보를 찾을 수 없습니다" 오류 해결
   - getCurrentDetailCharacter 함수에서 characters 전역 변수 올바른 참조 수정
