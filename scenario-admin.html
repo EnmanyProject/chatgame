@@ -4047,7 +4047,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.6.1</span>
+                <span id="systemVersion">v1.6.2</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -13766,8 +13766,11 @@
             }
         };
 
-        // LocalStorage 사용 중단 경고
-        if (localStorage.getItem('chatgame_characters') || localStorage.getItem('scenarios')) {
+        // LocalStorage 사용 중단 경고 (한 번만 실행)
+        const migrationCompleted = localStorage.getItem('migration_completed');
+        const hasLocalData = localStorage.getItem('chatgame_characters') || localStorage.getItem('scenarios');
+
+        if (hasLocalData && !migrationCompleted) {
             console.warn('⚠️ 기존 LocalStorage 데이터 발견 - 온라인 동기화 필요');
 
             // 기존 데이터 마이그레이션 알림
@@ -13783,10 +13786,16 @@
 - 협업 및 공유 가능
 - 버전 관리 지원
 
-기존 데이터를 온라인으로 이전하시겠습니까?`);
+기존 데이터를 온라인으로 이전하시겠습니까?
+
+※ '취소'를 누르면 다시 묻지 않습니다.`);
 
             if (migrationConfirm) {
                 migrateLocalToOnline();
+            } else {
+                // 사용자가 거부한 경우에도 플래그 설정 (다시 묻지 않음)
+                localStorage.setItem('migration_completed', 'skipped');
+                console.log('ℹ️ 마이그레이션 건너뛰기 - 다시 묻지 않음');
             }
         }
 
@@ -13853,13 +13862,17 @@
 
                 alert(`✅ 마이그레이션 완료!\n\n${migratedCount}개 항목이 온라인으로 이전되었습니다.\n\n이제 GitHub에서 데이터를 관리합니다.`);
 
+                // 마이그레이션 완료 플래그 설정
+                localStorage.setItem('migration_completed', 'true');
+
                 // 로컬 데이터 백업 후 제거 (선택사항)
-                const backupConfirm = confirm('로컬 데이터를 백업 파일로 저장 후 제거하시겠습니까?');
+                const backupConfirm = confirm('로컬 데이터를 백업 파일로 저장 후 제거하시겠습니까?\n\n※ 백업하면 JSON 파일로 다운로드됩니다.');
                 if (backupConfirm) {
                     createLocalBackup(localCharacters, localScenarios);
                     localStorage.removeItem('chatgame_characters');
                     localStorage.removeItem('scenarios');
                     console.log('🧹 로컬 데이터 정리 완료');
+                    alert('✅ 백업 완료 및 로컬 데이터 제거됨\n\n다운로드된 백업 파일을 안전한 곳에 보관하세요.');
                 }
 
             } catch (error) {
