@@ -4047,7 +4047,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.6.4</span>
+                <span id="systemVersion">v1.6.5</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -8053,21 +8053,21 @@
             if (mode === 'create') {
                 document.getElementById('scenarioModalTitle').textContent = '새 시나리오 만들기';
                 document.getElementById('scenarioForm').reset();
-                document.getElementById('aiContext').innerHTML = `
-                    <div class="no-context">
-                        <div class="no-context-message">
-                            💡 AI 컨텍스트를 생성해주세요
-                        </div>
-                        <div class="no-context-help">
-                            위의 "🤖 AI 컨텍스트 생성" 버튼을 클릭하여 소설풍 시나리오 컨텍스트를 생성하세요
-                        </div>
-                    </div>
-                `;
-                selectedCharacters.clear();
+
                 // Acts & Beats 구조 초기화
                 currentScenarioStructure = { acts: [] };
-                // 캐릭터 선택기를 다시 로딩하여 최신 캐릭터 목록 표시
-                loadCharacterSelector();
+
+                // Acts 컨테이너 초기화
+                const actsContainer = document.getElementById('acts-container');
+                if (actsContainer) {
+                    actsContainer.innerHTML = `
+                        <div class="empty-structure" style="text-align: center; padding: 40px; color: #999; border: 2px dashed #ddd; border-radius: 10px;">
+                            <p style="font-size: 16px; margin: 10px 0;">아직 Act가 없습니다</p>
+                            <p style="font-size: 14px; margin: 5px 0;">위의 "➕ Act 추가" 버튼을 클릭하여 시작하세요</p>
+                            <p style="font-size: 12px; color: #bbb; margin-top: 15px;">Act는 시나리오의 큰 단계를 나타냅니다 (예: 만남, 친밀해짐, 고백)</p>
+                        </div>
+                    `;
+                }
             } else if (mode === 'edit' && scenarioId) {
                 editScenario(scenarioId);
                 return;
