@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scenario Builder - 시나리오 빌더</title>
+  <link rel="stylesheet" href="css/scenario-builder.css">
+</head>
+<body>
+  <!-- Main 3-Column Layout -->
+  <div class="builder-container">
+
+    <!-- Left Panel: Scenario List -->
+    <div class="left-panel">
+      <div class="panel-header">
+        <h2>시나리오 목록</h2>
+        <div class="flex gap-2">
+          <button class="btn btn-primary" onclick="createScenario()">
+            ➕ 새 시나리오
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="importScenario()">
+            📥 가져오기
+          </button>
+        </div>
+      </div>
+      <div class="scenario-list" id="scenario-list">
+        <!-- Scenario items will be rendered here -->
+        <div class="text-center text-secondary mt-4">로딩 중...</div>
+      </div>
+    </div>
+
+    <!-- Center Panel: Editor -->
+    <div class="center-panel">
+      <div class="editor-header">
+        <div class="flex justify-between items-center">
+          <h1>Scenario Builder</h1>
+          <div class="flex gap-2">
+            <button class="btn btn-secondary" onclick="saveScenario()" title="저장">
+              💾 저장
+            </button>
+            <button class="btn btn-secondary" onclick="exportScenario()" title="내보내기">
+              📤 내보내기
+            </button>
+            <button class="btn btn-success" onclick="testScenario()" title="테스트">
+              ▶️ 테스트
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="editor-tabs">
+          <button class="tab-button active" data-tab="metadata" onclick="switchTab('metadata')">
+            📋 메타데이터
+          </button>
+          <button class="tab-button" data-tab="structure" onclick="switchTab('structure')">
+            🏗️ 구조 (Acts & Beats)
+          </button>
+          <button class="tab-button" data-tab="compatibility" onclick="switchTab('compatibility')">
+            🎯 호환성
+          </button>
+        </div>
+      </div>
+
+      <div class="editor-content">
+        <!-- Metadata Tab -->
+        <div id="tab-metadata" class="tab-panel active">
+          <div class="text-center text-secondary mt-4">
+            시나리오를 선택하거나 새로 생성하세요
+          </div>
+        </div>
+
+        <!-- Structure Tab -->
+        <div id="tab-structure" class="tab-panel">
+          <div class="text-center text-secondary mt-4">
+            시나리오를 선택하거나 새로 생성하세요
+          </div>
+        </div>
+
+        <!-- Compatibility Tab -->
+        <div id="tab-compatibility" class="tab-panel">
+          <div class="text-center text-secondary mt-4">
+            시나리오를 선택하거나 새로 생성하세요
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel: Preview -->
+    <div class="right-panel">
+      <div class="panel-header">
+        <h2>실시간 미리보기</h2>
+      </div>
+      <div class="preview-container" id="preview-container">
+        <!-- Phone mockup preview will be rendered here -->
+        <div style="text-align: center; padding: 48px 16px; color: #6b7280;">
+          <div style="font-size: 48px; margin-bottom: 16px;">📱</div>
+          <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
+            미리보기 준비 중
+          </div>
+          <div style="font-size: 14px;">
+            시나리오를 선택하거나<br>
+            Beat를 추가해주세요
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <!-- Phase 1: Engine & Validator -->
+  <script src="lib/scenario-engine.js"></script>
+  <script src="lib/scenario-validator.js"></script>
+
+  <!-- Phase 2: UI & Preview -->
+  <script src="js/scenario-ui-components.js"></script>
+  <script src="js/scenario-preview.js"></script>
+  <script src="js/scenario-builder.js"></script>
+
+  <!-- Initialize -->
+  <script>
+    // Initialize builder when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeBuilder();
+      showToast('info', '환영합니다', 'Scenario Builder에 오신 것을 환영합니다!');
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Ctrl+S: Save
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        saveScenario();
+      }
+
+      // Ctrl+E: Export
+      if (e.ctrlKey && e.key === 'e') {
+        e.preventDefault();
+        exportScenario();
+      }
+
+      // Ctrl+N: New Scenario
+      if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        createScenario();
+      }
+
+      // Ctrl+T: Test
+      if (e.ctrlKey && e.key === 't') {
+        e.preventDefault();
+        testScenario();
+      }
+    });
+
+    // Auto-save every 30 seconds
+    setInterval(() => {
+      if (window.currentScenario) {
+        saveScenario();
+      }
+    }, 30000);
+  </script>
+</body>
+</html>
