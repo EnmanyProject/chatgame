@@ -8093,43 +8093,21 @@
             document.getElementById('scenarioId').value = scenarioId;
             document.getElementById('scenarioTitle').value = scenario.title;
             document.getElementById('scenarioDescription').value = scenario.description;
-            // backgroundSetting 필드 제거됨 - 메신저 대화로 고정
-            document.getElementById('mood').value = scenario.mood;
-            // AI 생성 컨텍스트 표시 개선
-            const aiContextDiv = document.getElementById('aiContext');
-            if (scenario.ai_generated_context && scenario.ai_generated_context.trim()) {
-                aiContextDiv.innerHTML = `
-                    <div class="existing-context">
-                        <div class="context-header">
-                            <span class="context-label">📖 기존 생성된 컨텍스트</span>
-                            <span class="context-date">${scenario.updated_at ? new Date(scenario.updated_at).toLocaleString('ko-KR') : ''}</span>
-                        </div>
-                        <div class="context-content">${scenario.ai_generated_context}</div>
-                    </div>
-                `;
-            } else {
-                aiContextDiv.innerHTML = `
-                    <div class="no-context">
-                        <div class="no-context-message">
-                            ⚠️ 아직 AI 컨텍스트가 생성되지 않았습니다
-                        </div>
-                        <div class="no-context-help">
-                            위의 "🤖 AI 컨텍스트 생성" 버튼을 클릭하여 컨텍스트를 생성하세요
-                        </div>
-                    </div>
-                `;
-            }
-            document.getElementById('customContext').value = scenario.custom_context || '';
 
-            // 캐릭터 선택 상태 복원
-            selectedCharacters.clear();
-            document.querySelectorAll('.character-option').forEach(opt => opt.classList.remove('selected'));
-            
-            if (scenario.available_characters) {
-                scenario.available_characters.forEach(charId => {
-                    selectedCharacters.add(charId);
-                    document.querySelector(`.character-option[data-id="${charId}"]`)?.classList.add('selected');
-                });
+            // 메타데이터 로드
+            if (scenario.metadata) {
+                document.getElementById('scenarioGenre').value = scenario.metadata.genre || 'sweet_romance';
+                document.getElementById('scenarioSexyLevel').value = scenario.metadata.sexy_level || 5;
+                document.getElementById('sexyLevelValue').textContent = scenario.metadata.sexy_level || 5;
+                document.getElementById('scenarioTags').value = scenario.metadata.tags ? scenario.metadata.tags.join(', ') : '';
+                document.getElementById('scenarioDuration').value = scenario.metadata.estimated_duration || 'medium';
+            } else {
+                // 기본값 설정
+                document.getElementById('scenarioGenre').value = 'sweet_romance';
+                document.getElementById('scenarioSexyLevel').value = 5;
+                document.getElementById('sexyLevelValue').textContent = 5;
+                document.getElementById('scenarioTags').value = '';
+                document.getElementById('scenarioDuration').value = 'medium';
             }
 
             // Acts & Beats 구조 로드
@@ -8291,22 +8269,79 @@
             currentScenarioStructure.acts[actIndex].beats[beatIndex].description = value;
         }
 
+        // 빠른 시작 템플릿 적용 함수
+        function applyTemplate(templateType) {
+            const templates = {
+                campus: {
+                    title: '학교 도서관에서의 운명적 만남',
+                    genre: 'campus_romance',
+                    sexyLevel: 3,
+                    tags: '캠퍼스, 도서관, 설렘, 첫만남',
+                    duration: 'medium',
+                    description: '조용한 도서관에서 우연히 같은 책을 집으려다 손이 마주친 순간, 두 사람의 특별한 이야기가 시작됩니다.'
+                },
+                office: {
+                    title: '야근 중 시작된 로맨스',
+                    genre: 'office_romance',
+                    sexyLevel: 6,
+                    tags: '직장, 야근, 긴장감, 설렘',
+                    duration: 'medium',
+                    description: '늦은 밤 사무실, 둘만 남은 공간에서 커피를 나누며 조금씩 가까워지는 두 사람.'
+                },
+                reunion: {
+                    title: '10년 만의 재회',
+                    genre: 'reunion',
+                    sexyLevel: 5,
+                    tags: '재회, 추억, 설렘, 그리움',
+                    duration: 'long',
+                    description: '10년 전 헤어진 첫사랑과 우연히 마주친 날, 잊었던 감정들이 다시 살아납니다.'
+                },
+                firstlove: {
+                    title: '두근거리는 첫사랑의 시작',
+                    genre: 'first_love',
+                    sexyLevel: 2,
+                    tags: '첫사랑, 순수, 설렘, 떨림',
+                    duration: 'short',
+                    description: '생애 처음 느껴보는 이 떨림, 그 사람만 보면 심장이 터질 것 같은 그 느낌.'
+                }
+            };
+
+            const template = templates[templateType];
+            if (!template) return;
+
+            document.getElementById('scenarioTitle').value = template.title;
+            document.getElementById('scenarioGenre').value = template.genre;
+            document.getElementById('scenarioSexyLevel').value = template.sexyLevel;
+            document.getElementById('sexyLevelValue').textContent = template.sexyLevel;
+            document.getElementById('scenarioTags').value = template.tags;
+            document.getElementById('scenarioDuration').value = template.duration;
+            document.getElementById('scenarioDescription').value = template.description;
+        }
+
         async function saveScenario() {
             const title = document.getElementById('scenarioTitle').value;
             const description = document.getElementById('scenarioDescription').value;
-            const mood = document.getElementById('mood').value;
+            const genre = document.getElementById('scenarioGenre').value;
+            const sexyLevel = parseInt(document.getElementById('scenarioSexyLevel').value);
+            const tagsInput = document.getElementById('scenarioTags').value;
+            const duration = document.getElementById('scenarioDuration').value;
 
-            if (!title || !description || !mood) {
-                alert('모든 필수 항목을 입력해주세요.');
+            if (!title || !description || !genre) {
+                alert('제목, 설명, 장르는 필수 항목입니다.');
                 return;
             }
+
+            const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
 
             const scenarioData = {
                 title,
                 description,
-                background_setting: '메신저 대화', // 메신저 기반으로 고정
-                mood,
-                available_characters: Array.from(selectedCharacters),
+                metadata: {
+                    genre,
+                    sexy_level: sexyLevel,
+                    tags,
+                    estimated_duration: duration
+                },
                 structure: currentScenarioStructure, // Acts & Beats 구조 추가
                 action: 'create' // 🔧 기본값으로 create 설정
             };
