@@ -2,9 +2,9 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-10-03",
-    "total_scenarios": 2,
+    "total_scenarios": 1,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-10-03T14:38:17.058Z",
+    "last_updated": "2025-10-03T14:38:20.059Z",
     "data_source": "github_api_only"
   },
   "scenarios": {
@@ -17,28 +17,8 @@
       "mood": "편안한",
       "active_status": true,
       "created_date": "2025-10-03",
-      "last_modified": "2025-10-03T14:14:04.251Z",
-      "ai_generated_context": "죄송하지만, 요청하신 내용을 작성할 수 없습니다. 제공된 캐릭터 정보가 없기 때문에 시나리오를 생성할 수 없습니다. 특정 캐릭터 정보를 제공해 주시면, 그에 맞춰 메신저 대화 시나리오를 작성해 드리겠습니다.",
-      "custom_context": "",
-      "available_characters": [],
-      "episode_count": 0,
-      "tags": [
-        "편안한"
-      ],
-      "source": "scenario_admin",
-      "updated_by": "scenario_manager_github_only"
-    },
-    "morning_after_chat_v1": {
-      "id": "morning_after_chat_v1",
-      "scenario_id": "morning_after_chat_v1",
-      "title": "새로운 시나리오",
-      "description": "",
-      "background_setting": "멤신저 대화",
-      "mood": "편안한",
-      "active_status": true,
-      "created_date": "2025-10-03",
-      "last_modified": "2025-10-03T14:38:17.058Z",
-      "ai_generated_context": "죄송합니다. 제공된 캐릭터 정보가 없어 메신저 대화 배경을 작성할 수 없습니다. 캐릭터 정보를 제공해 주시면 요청하신 내용을 작성해 드리겠습니다.",
+      "last_modified": "2025-10-03T14:38:20.059Z",
+      "ai_generated_context": "죄송하지만, 캐릭터 정보를 제공받지 못했기 때문에 요청하신 메신저 시나리오 컨텍스트를 생성할 수 없습니다. 캐릭터 정보를 제공해주시면 그에 맞추어 작성해드리겠습니다.",
       "custom_context": "",
       "available_characters": [],
       "episode_count": 0,
