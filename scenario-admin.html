@@ -4638,10 +4638,18 @@
                 </div>
             </div>
 
-            <div class="action-buttons">
+            <div class="action-buttons" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <button class="btn btn-primary" onclick="openScenarioModal('create')" style="background: linear-gradient(135deg, #667eea, #764ba2); font-size: 16px; padding: 15px 25px;">
                     ✨ 새 시나리오 만들기
                 </button>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <label style="font-weight: 600; color: #3A3A3A;">🤖 AI 모델:</label>
+                    <select id="scenario-ai-model-selector" style="padding: 12px 16px; border-radius: 8px; border: 2px solid #ddd; background: white; cursor: pointer; font-size: 14px; font-weight: 500;">
+                        <option value="claude">Claude 3.5 Sonnet</option>
+                        <option value="openai">OpenAI GPT-4</option>
+                        <option value="llama">Llama 3.1 (Groq)</option>
+                    </select>
+                </div>
                 <button class="btn btn-secondary" onclick="loadScenarios()">
                     🔄 새로고침
                 </button>
@@ -8131,6 +8139,7 @@
                         <div class="actions">
                             <button class="btn btn-success" onclick="editScenario('${scenarioId}')">수정</button>
                             <button class="btn btn-primary" onclick="manageDialogues('${scenarioId}')">에피소드</button>
+                            <button class="btn btn-info" onclick="testScenarioWithModel('${scenarioId}')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">▶️ 테스트</button>
                             <button class="btn btn-danger" onclick="deleteScenario('${scenarioId}')">삭제</button>
                         </div>
                     </div>
@@ -8369,6 +8378,83 @@
                 alert('⚠️ 네트워크 오류가 발생했지만 로컬에서 확인 가능합니다!\n\n시나리오 목록에서 확인하세요!\n\n오류: ' + error.message);
                 closeModal('scenarioModal');
             }
+        }
+
+        function testScenarioWithModel(scenarioId) {
+            console.log('🎮 시나리오 테스트 시작:', scenarioId);
+
+            // AI 모델 선택값 가져오기
+            const modelSelector = document.getElementById('scenario-ai-model-selector');
+            const selectedModel = modelSelector ? modelSelector.value : 'claude';
+
+            console.log('🤖 선택된 AI 모델:', selectedModel);
+
+            // 시나리오 데이터 가져오기
+            const scenariosData = window.scenarios || scenarios || {};
+            const scenario = scenariosData[scenarioId];
+
+            if (!scenario) {
+                alert('시나리오를 찾을 수 없습니다.');
+                console.error('❌ 시나리오 없음:', scenarioId);
+                return;
+            }
+
+            // 테스트 캐릭터 생성 (시나리오의 첫 번째 캐릭터 또는 기본 캐릭터)
+            const characterId = scenario.available_characters && scenario.available_characters.length > 0
+                ? scenario.available_characters[0]
+                : 'test_character';
+
+            let testCharacter;
+
+            // 실제 캐릭터 데이터 로드 시도
+            if (window.characters && window.characters[characterId]) {
+                testCharacter = window.characters[characterId];
+                console.log('✅ 실제 캐릭터 사용:', characterId);
+            } else {
+                // 기본 테스트 캐릭터 생성
+                testCharacter = {
+                    id: 'test_character',
+                    basic_info: {
+                        name: "테스트 캐릭터",
+                        age: 22,
+                        mbti: "INFP",
+                        gender: "여성",
+                        occupation: "대학생"
+                    },
+                    personality_traits: ["감성적", "내향적", "이상주의적"],
+                    appeal_profile: {
+                        charm_points: ["미소", "눈빛"],
+                        style: "자연스러운",
+                        attractive_features: ["친근함"]
+                    },
+                    conversation_dynamics: {
+                        speech_style: "부드럽고 따뜻한 말투",
+                        emoji_usage: "자주 사용",
+                        response_speed: "보통"
+                    }
+                };
+                console.log('⚠️ 기본 테스트 캐릭터 생성');
+            }
+
+            // 로컬 스토리지에 테스트 데이터 저장
+            localStorage.setItem('test-scenario', JSON.stringify(scenario));
+            localStorage.setItem('test-character', JSON.stringify(testCharacter));
+
+            // 에피소드 플레이어 URL 생성
+            const playerUrl = `episode-player-test.html?scenario=${scenarioId}&character=${characterId}&model=${selectedModel}`;
+
+            // 새 창으로 열기
+            window.open(playerUrl, '_blank');
+
+            // 사용자 피드백
+            const modelNames = {
+                'claude': 'Claude 3.5 Sonnet',
+                'openai': 'OpenAI GPT-4 Turbo',
+                'llama': 'Llama 3.1 8B (Groq)'
+            };
+
+            console.log(`✅ 테스트 창 열림: ${modelNames[selectedModel] || selectedModel}`);
+            alert(`🎮 ${modelNames[selectedModel] || selectedModel} 모델로 테스트를 시작합니다!`);
         }
 
         async function deleteScenario(scenarioId) {
