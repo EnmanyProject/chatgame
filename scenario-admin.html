@@ -4047,7 +4047,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.6.3</span>
+                <span id="systemVersion">v1.6.4</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -4112,9 +4112,6 @@
                 </button>
                 <button class="btn btn-secondary" onclick="loadCharacters()">
                     🔄 새로고침
-                </button>
-                <button class="btn btn-warning" onclick="resetAllCharacters()" style="background: #ff9800; color: white;">
-                    🗑️ 모든 더미 데이터 삭제
                 </button>
             </div>
 
@@ -9970,49 +9967,6 @@
 
 
 
-
-        // === 더미 데이터 삭제 기능 ===
-        async function resetAllCharacters() {
-            if (!confirm('⚠️ 주의: 모든 캐릭터 데이터가 영구적으로 삭제됩니다.\n\n정말로 계속하시겠습니까?')) {
-                return;
-            }
-            
-            if (!confirm('한 번 더 확인합니다. 모든 캐릭터 데이터가 완전히 삭제됩니다!')) {
-                return;
-            }
-            
-            try {
-                console.log('🗑️ 모든 캐릭터 데이터 삭제 시작...');
-                
-                const response = await fetch('/api/character-ai-generator', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'reset_all_characters'
-                    })
-                });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    if (result.success) {
-                        alert('✅ 모든 캐릭터 데이터가 삭제되었습니다.');
-                        
-                        // 캐릭터 목록 새로고침
-                        setTimeout(() => {
-                            loadCharacters();
-                        }, 500);
-                    } else {
-                        throw new Error(result.message || '삭제 실패');
-                    }
-                } else {
-                    throw new Error('서버 오류: ' + response.status);
-                }
-                
-            } catch (error) {
-                console.error('❌ 데이터 삭제 오류:', error);
-                alert('데이터 삭제 중 오류가 발생했습니다: ' + error.message);
-            }
-        }
 
         window.displayCharacters = function displayCharacters() {
             console.log('🎨 === 캐릭터 표시 함수 시작 ===');
