@@ -4047,7 +4047,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.6.7</span>
+                <span id="systemVersion">v1.7.0</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -7986,15 +7986,28 @@
                 const scenarioId = scenario.id;
                 console.log(`🎯 시나리오 카드 생성: ${scenario.title} (ID: ${scenarioId})`);
 
+                // AI 모델 정보 가져오기
+                const aiModel = scenario.metadata?.ai_model || 'claude';
+                const aiModelName = {
+                    'claude': 'Claude 3.5 Sonnet',
+                    'openai': 'OpenAI GPT-4',
+                    'llama': 'Llama 3.1 (Groq)'
+                }[aiModel] || 'Claude 3.5 Sonnet';
+
+                // 메타데이터 정보
+                const genre = scenario.metadata?.genre || scenario.background_setting || 'unknown';
+                const sexyLevel = scenario.metadata?.sexy_level || 5;
+                const tags = scenario.metadata?.tags || scenario.tags || [];
+
                 return `
                     <div class="scenario-card">
                         <h3>${scenario.title}</h3>
                         <p class="description">${scenario.description}</p>
                         <div class="metadata">
-                            <span class="tag">배경: ${scenario.background_setting || 'unknown'}</span>
-                            <span class="tag">분위기: ${scenario.mood || 'unknown'}</span>
-                            ${scenario.tags ? scenario.tags.slice(0, 3).map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
-                            <span class="tag">캐릭터: ${scenario.available_characters && scenario.available_characters.length > 0 ? scenario.available_characters.length + '명' : '없음'}</span>
+                            <span class="tag" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">🤖 ${aiModelName}</span>
+                            <span class="tag">🎭 ${genre}</span>
+                            <span class="tag">🔥 레벨 ${sexyLevel}</span>
+                            ${tags.slice(0, 2).map(tag => `<span class="tag">${tag}</span>`).join('')}
                             <span class="tag">에피소드: ${scenario.dialogue_count || 0}개</span>
                         </div>
                         <div class="actions">
@@ -8334,6 +8347,10 @@
             const tagsInput = document.getElementById('scenarioTags').value;
             const duration = document.getElementById('scenarioDuration').value;
 
+            // AI 모델 선택값 가져오기
+            const modelSelector = document.getElementById('scenario-ai-model-selector');
+            const selectedModel = modelSelector ? modelSelector.value : 'claude';
+
             if (!title || !description || !genre) {
                 alert('제목, 설명, 장르는 필수 항목입니다.');
                 return;
@@ -8341,97 +8358,88 @@
 
             const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
 
+            // 제목을 기반으로 고유한 ID 생성
+            const titleKey = title.toLowerCase()
+                .replace(/[^a-zA-Z가-힣0-9]/g, '_')
+                .replace(/_+/g, '_')
+                .replace(/^_|_$/g, '');
+            const scenarioId = currentMode === 'create'
+                ? `scenario_${titleKey}_${Date.now()}`
+                : document.getElementById('scenarioId').value;
+
             const scenarioData = {
+                scenario_id: scenarioId,
                 title,
                 description,
                 metadata: {
                     genre,
                     sexy_level: sexyLevel,
                     tags,
-                    estimated_duration: duration
+                    estimated_duration: duration,
+                    ai_model: selectedModel // AI 모델 정보 저장
                 },
-                structure: currentScenarioStructure, // Acts & Beats 구조 추가
-                action: 'create' // 🔧 기본값으로 create 설정
+                structure: currentScenarioStructure,
+                created_date: new Date().toISOString().split('T')[0],
+                dialogue_count: 0,
+                action: currentMode === 'create' ? 'create' : 'update'
             };
 
-            if (currentMode === 'create') {
-                // 제목을 기반으로 고유한 ID 생성
-                const titleKey = title.toLowerCase()
-                    .replace(/[^a-zA-Z가-힣0-9]/g, '_') // 특수문자를 _로 변경
-                    .replace(/_+/g, '_') // 연속된 _를 하나로
-                    .replace(/^_|_$/g, ''); // 앞뒤 _제거
-                scenarioData.scenario_id = `scenario_${titleKey}_${Date.now()}`;
-                scenarioData.action = 'create';
-                
-                console.log('🔧 시나리오 ID 생성:', scenarioData.scenario_id);
-            } else {
-                scenarioData.scenario_id = document.getElementById('scenarioId').value;
-                scenarioData.action = 'update';
-            }
+            console.log('💾 시나리오 저장 시작:', {
+                id: scenarioId,
+                title,
+                model: selectedModel,
+                mode: currentMode
+            });
 
             try {
-                // 🚀 즉시 UI 업데이트 (사용자 경험 개선)
-                console.log('⚡ 즉시 로컬 시나리오 목록 업데이트...');
-                
-                // 시나리오 ID 확보
-                const scenarioId = scenarioData.scenario_id;
-                
-                // 로컬 시나리오 객체에 즉시 추가 (UI 반응성 개선)
-                const globalScenarios = window.scenarios || {};
-                globalScenarios[scenarioId] = {
-                    id: scenarioId,
-                    ...scenarioData,
-                    created_date: new Date().toISOString().split('T')[0],
-                    dialogue_count: 0,
-                    tags: [scenarioData.mood]
-                };
-                window.scenarios = globalScenarios;
-                
-                // 즉시 화면 업데이트
-                displayScenarios();
-                updateScenarioStats();
-                console.log('✅ 즉시 UI 업데이트 완료');
+                // 🌐 GitHub API를 통한 저장
+                console.log('📡 GitHub API로 시나리오 저장 중...');
 
-                // 💾 LocalStorage 직접 저장 (확실한 방법!)
-                console.log('💾 LocalStorage에 직접 저장 시도...');
-                try {
-                    // 현재 저장된 시나리오들을 가져옴
-                    const existingScenarios = localStorage.getItem('scenarios');
-                    const scenariosData = existingScenarios ? JSON.parse(existingScenarios) : {};
-                    
-                    // 새 시나리오 추가/수정
-                    scenariosData[scenarioId] = globalScenarios[scenarioId];
-                    
-                    // LocalStorage에 저장
-                    localStorage.setItem('scenarios', JSON.stringify(scenariosData));
-                    console.log('✅ LocalStorage 저장 성공! 총', Object.keys(scenariosData).length, '개 시나리오');
-                    
-                    // 저장 성공 메시지
-                    const successMessage = currentMode === 'create' ? 
-                        `💖 새로운 시나리오 '${title}'가 생성되었습니다!\n✅ 시나리오 목록에서 확인하세요!` :
-                        `✨시나리오 '${title}'가 수정되었습니다!`;
-                    
+                const response = await fetch('/api/scenario-manager', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(scenarioData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API 호출 실패: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log('✅ GitHub API 저장 성공:', result);
+
+                    // 로컬 시나리오 목록 업데이트
+                    const globalScenarios = window.scenarios || {};
+                    globalScenarios[scenarioId] = {
+                        id: scenarioId,
+                        ...scenarioData
+                    };
+                    window.scenarios = globalScenarios;
+
+                    // UI 업데이트
+                    displayScenarios();
+                    updateScenarioStats();
+
+                    // 성공 메시지
+                    const successMessage = currentMode === 'create'
+                        ? `✅ 시나리오 '${title}'가 생성되었습니다!\n\n🤖 AI 모델: ${selectedModel}\n📊 장르: ${genre}\n🔥 섹시 레벨: ${sexyLevel}`
+                        : `✅ 시나리오 '${title}'가 수정되었습니다!`;
+
                     alert(successMessage);
                     closeModal('scenarioModal');
-                    
-                    // UI 최종 업데이트
-                    console.log('🔄 저장 후 최종 UI 동기화...');
-                    await loadAllData(); // 새로운 통합 로딩 함수 사용
-                    
-                    // 캐릭터 선택기도 갱신 (새로 생성된 캐릭터 반영)
-                    await loadCharacterSelector();
-                    
-                    console.log('✅ 시나리오 저장 프로세스 완료!');
-                    
-                } catch (storageError) {
-                    console.error('❌ LocalStorage 저장 실패:', storageError);
-                    alert('저장 중 오류가 발생했습니다: ' + storageError.message);
+
+                    // 시나리오 목록 새로고침
+                    await loadScenarios();
+
+                    console.log('✅ 시나리오 저장 완료!');
+                } else {
+                    throw new Error(result.error || '저장 실패');
                 }
             } catch (error) {
-                console.error('시나리오 저장 오류:', error);
-                // 네트워크 오류여도 로컬 UI는 이미 업데이트됨
-                alert('⚠️ 네트워크 오류가 발생했지만 로컬에서 확인 가능합니다!\n\n시나리오 목록에서 확인하세요!\n\n오류: ' + error.message);
-                closeModal('scenarioModal');
+                console.error('❌ 시나리오 저장 오류:', error);
+                alert('시나리오 저장 중 오류가 발생했습니다:\n\n' + error.message);
             }
         }
 
