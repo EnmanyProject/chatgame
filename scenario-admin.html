@@ -1403,6 +1403,114 @@
             font-size: 14px;
         }
 
+        /* 시나리오 탭 스타일 */
+        .scenario-tabs {
+            display: flex;
+            border-bottom: 2px solid #e0e0e0;
+            margin: 0 20px;
+            gap: 5px;
+        }
+
+        .scenario-tab {
+            padding: 12px 24px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .scenario-tab:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .scenario-tab.active {
+            color: #667eea !important;
+            border-bottom: 3px solid #667eea !important;
+        }
+
+        .scenario-tab-content {
+            display: none;
+        }
+
+        .scenario-tab-content.active {
+            display: block;
+        }
+
+        /* Acts & Beats 구조 스타일 */
+        .structure-editor {
+            padding: 10px 0;
+        }
+
+        .act-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            background: white;
+            margin-bottom: 15px;
+        }
+
+        .act-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .act-header input {
+            font-size: 18px;
+            font-weight: bold;
+            border: 1px solid #ddd;
+            padding: 8px;
+            border-radius: 5px;
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .beats-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-left: 20px;
+        }
+
+        .beat-item {
+            border-left: 3px solid #667eea;
+            padding: 10px;
+            background: #f8f9ff;
+            border-radius: 5px;
+        }
+
+        .beat-item input,
+        .beat-item textarea {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+
+        .beat-item input {
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .beat-item textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+
+        .empty-structure {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+        }
+
         /* 대화 미리보기 */
         .dialogue-preview {
             background: #f8f9ff;
@@ -7973,7 +8081,7 @@
         function openScenarioModal(mode, scenarioId = null) {
             currentMode = mode;
             const modal = document.getElementById('scenarioModal');
-            
+
             if (mode === 'create') {
                 document.getElementById('scenarioModalTitle').textContent = '새 시나리오 만들기';
                 document.getElementById('scenarioForm').reset();
@@ -7996,7 +8104,10 @@
                 editScenario(scenarioId);
                 return;
             }
-            
+
+            // 항상 기본 탭(기본 정보)으로 시작
+            switchScenarioTab('basic');
+
             modal.style.display = 'block';
         }
 
