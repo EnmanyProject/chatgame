@@ -4,7 +4,7 @@
     "created_date": "2025-09-29",
     "total_scenarios": 2,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-10-03T12:58:49.593Z",
+    "last_updated": "2025-10-03T12:58:51.821Z",
     "data_source": "github_api_only"
   },
   "scenarios": {
@@ -28,17 +28,17 @@
       "source": "scenario_admin",
       "updated_by": "scenario_manager_github_only"
     },
-    "late_night_confession_v1": {
-      "id": "late_night_confession_v1",
-      "scenario_id": "late_night_confession_v1",
+    "morning_after_chat_v1": {
+      "id": "morning_after_chat_v1",
+      "scenario_id": "morning_after_chat_v1",
       "title": "새로운 시나리오",
       "description": "",
       "background_setting": "멤신저 대화",
       "mood": "편안한",
       "active_status": true,
       "created_date": "2025-10-03",
-      "last_modified": "2025-10-03T12:58:49.593Z",
-      "ai_generated_context": "죄송하지만, 제공된 캐릭터 정보가 없습니다. 캐릭터 이름과 성격, MBTI 정보를 제공해 주시면 그에 맞춰 메신저 대화 시나리오를 작성해드릴 수 있습니다.",
+      "last_modified": "2025-10-03T12:58:51.821Z",
+      "ai_generated_context": "죄송하지만, 제공된 캐릭터 정보가 없습니다. 캐릭터 정보를 제공해주시면 그에 맞는 메신저 대화 배경을 작성할 수 있습니다.",
       "custom_context": "",
       "available_characters": [],
       "episode_count": 0,
