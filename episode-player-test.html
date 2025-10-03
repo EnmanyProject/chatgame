@@ -103,7 +103,12 @@
         console.log('캐릭터:', testCharacter);
 
         // Display AI model info
-        const modelInfo = model === 'claude' ? 'Claude 3.5 Sonnet' : 'OpenAI GPT-4 Turbo';
+        const modelNames = {
+          'claude': 'Claude 3.5 Sonnet',
+          'openai': 'OpenAI GPT-4 Turbo',
+          'llama': 'Llama 3.1 8B (Groq)'
+        };
+        const modelInfo = modelNames[model] || model;
         const messagesContainer = document.getElementById('messages-container');
         const infoDiv = document.createElement('div');
         infoDiv.className = 'message-narration';

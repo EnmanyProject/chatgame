@@ -522,7 +522,13 @@ function testScenario() {
   localStorage.setItem('test-scenario', JSON.stringify(currentScenario));
   localStorage.setItem('test-character', JSON.stringify(testCharacter));
   window.open(playerUrl, '_blank');
-  showToast('info', '테스트 시작', `${selectedModel === 'claude' ? 'Claude 3.5' : 'OpenAI GPT-4'} 모델로 테스트를 시작합니다`);
+
+  const modelNames = {
+    'claude': 'Claude 3.5 Sonnet',
+    'openai': 'OpenAI GPT-4',
+    'llama': 'Llama 3.1 (Groq)'
+  };
+  showToast('info', '테스트 시작', `${modelNames[selectedModel] || selectedModel} 모델로 테스트를 시작합니다`);
 }
 
 // ========== UI Refresh ==========
