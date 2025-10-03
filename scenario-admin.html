@@ -4047,7 +4047,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.5.0</span>
+                <span id="systemVersion">v1.6.1</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -4664,6 +4664,17 @@
                             <div class="info-character">캐릭터: </div>
                         </div>
                         <small class="form-text">위 시나리오와 캐릭터로 대화가 자동 생성됩니다.</small>
+                    </div>
+
+                    <!-- 캐릭터 선택기 -->
+                    <div class="form-group">
+                        <label>👤 캐릭터 선택</label>
+                        <div id="characterLoadingMsg" style="text-align: center; padding: 20px; color: #666;">
+                            캐릭터 로딩 중...
+                        </div>
+                        <div id="characterSelector" style="display: none; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
+                            <!-- 캐릭터 옵션이 동적으로 로드됩니다 -->
+                        </div>
                     </div>
 
                     <div class="form-group">

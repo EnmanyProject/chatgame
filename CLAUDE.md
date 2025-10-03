@@ -63,6 +63,13 @@
 >   - [사용자에게 미치는 영향]
 > ```
 
+- **v1.6.1** (2025-10-03): 대화 모달 캐릭터 선택기 오류 수정 (Patch Update)
+  - 🐛 **JavaScript 오류 해결**: loadCharacterSelector 함수의 null 참조 오류 완전 해결
+  - 📋 **캐릭터 선택기 추가**: 대화 모달에 characterSelector와 characterLoadingMsg 요소 추가
+  - ✅ **콘솔 에러 제거**: "Cannot set properties of null (setting 'innerHTML')" 에러 완전 제거
+  - 🎯 **사용자 경험 개선**: 대화 생성 시 캐릭터 선택 UI 정상 작동
+  - 🚀 **초기화 완료**: 모든 캐릭터 데이터 정상 로드 및 표시
+
 - **v1.6.0** (2025-10-03): 시나리오 빌더 통합 완료 - 메타데이터 기반 생성 시스템 (Minor Update)
   - 🏗️ **Scenario Builder 완전 통합**: scenario-builder.html 기능을 scenario-admin.html로 완전 이전
   - 🗑️ **불필요한 요소 제거**: 외부 링크 버튼 및 작동하지 않는 AI 성능 튜닝 섹션 삭제
