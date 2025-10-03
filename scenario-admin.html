@@ -4047,7 +4047,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.7.0</span>
+                <span id="systemVersion">v1.7.1</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -4582,6 +4582,16 @@
                             <option value="medium" selected>보통 (20-30분)</option>
                             <option value="long">길게 (40분 이상)</option>
                         </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="scenarioAiModel">🤖 AI 모델 선택 *</label>
+                        <select id="scenarioAiModel" required>
+                            <option value="claude" selected>Claude 3.5 Sonnet</option>
+                            <option value="openai">OpenAI GPT-4</option>
+                            <option value="llama">Llama 3.1 (Groq)</option>
+                        </select>
+                        <small>시나리오 생성에 사용할 AI 모델을 선택하세요</small>
                     </div>
 
                     <div class="form-group">
@@ -8347,8 +8357,8 @@
             const tagsInput = document.getElementById('scenarioTags').value;
             const duration = document.getElementById('scenarioDuration').value;
 
-            // AI 모델 선택값 가져오기
-            const modelSelector = document.getElementById('scenario-ai-model-selector');
+            // AI 모델 선택값 가져오기 (모달 내 select 필드)
+            const modelSelector = document.getElementById('scenarioAiModel');
             const selectedModel = modelSelector ? modelSelector.value : 'claude';
 
             if (!title || !description || !genre) {
@@ -8446,7 +8456,7 @@
         function testScenarioWithModel(scenarioId) {
             console.log('🎮 시나리오 테스트 시작:', scenarioId);
 
-            // AI 모델 선택값 가져오기
+            // AI 모델 선택값 가져오기 (메인 페이지 select 필드)
             const modelSelector = document.getElementById('scenario-ai-model-selector');
             const selectedModel = modelSelector ? modelSelector.value : 'claude';
 
