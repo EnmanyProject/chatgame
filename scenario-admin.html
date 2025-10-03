@@ -4410,12 +4410,25 @@
 
     <!-- 시나리오 모달 -->
     <div id="scenarioModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 1000px; max-height: 90vh;">
             <div class="modal-header">
                 <span class="close" onclick="closeModal('scenarioModal')">&times;</span>
                 <h2 id="scenarioModalTitle">새 시나리오 만들기</h2>
             </div>
+
+            <!-- 시나리오 편집 탭 -->
+            <div class="scenario-tabs" style="display: flex; border-bottom: 2px solid #e0e0e0; margin: 0 20px; gap: 5px;">
+                <button class="scenario-tab active" onclick="switchScenarioTab('basic')" data-tab="basic" style="padding: 12px 24px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666; border-bottom: 3px solid transparent; transition: all 0.3s;">
+                    📋 기본 정보
+                </button>
+                <button class="scenario-tab" onclick="switchScenarioTab('structure')" data-tab="structure" style="padding: 12px 24px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666; border-bottom: 3px solid transparent; transition: all 0.3s;">
+                    🏗️ Acts & Beats
+                </button>
+            </div>
+
             <div class="modal-body">
+                <!-- 기본 정보 탭 -->
+                <div id="scenario-tab-basic" class="scenario-tab-content">
                 <form id="scenarioForm">
                     <input type="hidden" id="scenarioId" />
 
@@ -4530,7 +4543,32 @@
                         <textarea id="customContext" placeholder="AI 컨텍스트를 수정하거나 직접 작성할 수 있습니다"></textarea>
                     </div>
                 </form>
+                </div>
+                <!-- 기본 정보 탭 끝 -->
+
+                <!-- Acts & Beats 구조 탭 -->
+                <div id="scenario-tab-structure" class="scenario-tab-content" style="display: none;">
+                    <div class="structure-editor">
+                        <div class="structure-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="margin: 0;">🏗️ 시나리오 구조 편집</h3>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addAct()">
+                                ➕ Act 추가
+                            </button>
+                        </div>
+
+                        <div id="acts-container" style="display: flex; flex-direction: column; gap: 15px;">
+                            <!-- Acts will be rendered here -->
+                            <div class="empty-structure" style="text-align: center; padding: 40px; color: #999; border: 2px dashed #ddd; border-radius: 10px;">
+                                <p style="font-size: 16px; margin: 10px 0;">아직 Act가 없습니다</p>
+                                <p style="font-size: 14px; margin: 5px 0;">위의 "➕ Act 추가" 버튼을 클릭하여 시작하세요</p>
+                                <p style="font-size: 12px; color: #bbb; margin-top: 15px;">Act는 시나리오의 큰 단계를 나타냅니다 (예: 만남, 친밀해짐, 고백)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Acts & Beats 탭 끝 -->
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('scenarioModal')">취소</button>
                 <button type="button" class="btn btn-primary" onclick="saveScenario()">저장</button>
@@ -7950,6 +7988,8 @@
                     </div>
                 `;
                 selectedCharacters.clear();
+                // Acts & Beats 구조 초기화
+                currentScenarioStructure = { acts: [] };
                 // 캐릭터 선택기를 다시 로딩하여 최신 캐릭터 목록 표시
                 loadCharacterSelector();
             } else if (mode === 'edit' && scenarioId) {
@@ -8021,10 +8061,163 @@
                 });
             }
 
+            // Acts & Beats 구조 로드
+            if (scenario.structure) {
+                currentScenarioStructure = scenario.structure;
+            } else {
+                currentScenarioStructure = { acts: [] };
+            }
+
             // 백그라운드 스크롤 비활성화
             document.body.style.overflow = 'hidden';
 
             document.getElementById('scenarioModal').style.display = 'block';
+        }
+
+        // ========== 시나리오 탭 전환 ==========
+        function switchScenarioTab(tabName) {
+            // 모든 탭 버튼 비활성화
+            document.querySelectorAll('.scenario-tab').forEach(tab => {
+                tab.classList.remove('active');
+                tab.style.color = '#666';
+                tab.style.borderBottom = '3px solid transparent';
+            });
+
+            // 모든 탭 콘텐츠 숨김
+            document.querySelectorAll('.scenario-tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+
+            // 선택된 탭 활성화
+            const selectedTab = document.querySelector(`.scenario-tab[data-tab="${tabName}"]`);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+                selectedTab.style.color = '#667eea';
+                selectedTab.style.borderBottom = '3px solid #667eea';
+            }
+
+            // 선택된 콘텐츠 표시
+            const selectedContent = document.getElementById(`scenario-tab-${tabName}`);
+            if (selectedContent) {
+                selectedContent.style.display = 'block';
+            }
+
+            // structure 탭 선택 시 Acts 렌더링
+            if (tabName === 'structure') {
+                renderActsStructure();
+            }
+        }
+
+        // ========== Acts & Beats 관리 ==========
+        let currentScenarioStructure = {
+            acts: []
+        };
+
+        function renderActsStructure() {
+            const container = document.getElementById('acts-container');
+
+            if (!currentScenarioStructure.acts || currentScenarioStructure.acts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-structure" style="text-align: center; padding: 40px; color: #999; border: 2px dashed #ddd; border-radius: 10px;">
+                        <p style="font-size: 16px; margin: 10px 0;">아직 Act가 없습니다</p>
+                        <p style="font-size: 14px; margin: 5px 0;">위의 "➕ Act 추가" 버튼을 클릭하여 시작하세요</p>
+                        <p style="font-size: 12px; color: #bbb; margin-top: 15px;">Act는 시나리오의 큰 단계를 나타냅니다 (예: 만남, 친밀해짐, 고백)</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = currentScenarioStructure.acts.map((act, actIndex) => `
+                <div class="act-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; background: white;">
+                    <div class="act-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <input type="text" value="${act.name || `Act ${actIndex + 1}`}"
+                               onchange="updateActName(${actIndex}, this.value)"
+                               style="font-size: 18px; font-weight: bold; border: 1px solid #ddd; padding: 8px; border-radius: 5px; flex: 1; margin-right: 10px;">
+                        <div style="display: flex; gap: 5px;">
+                            <button type="button" class="btn btn-sm btn-primary" onclick="addBeat(${actIndex})" style="padding: 6px 12px;">
+                                ➕ Beat
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="deleteAct(${actIndex})" style="padding: 6px 12px;">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="beats-container" style="display: flex; flex-direction: column; gap: 10px; margin-left: 20px;">
+                        ${act.beats && act.beats.length > 0 ? act.beats.map((beat, beatIndex) => `
+                            <div class="beat-item" style="border-left: 3px solid #667eea; padding: 10px; background: #f8f9ff; border-radius: 5px;">
+                                <div style="display: flex; justify-content: between; align-items: start; gap: 10px;">
+                                    <div style="flex: 1;">
+                                        <input type="text" value="${beat.name || `Beat ${beatIndex + 1}`}"
+                                               onchange="updateBeatName(${actIndex}, ${beatIndex}, this.value)"
+                                               style="width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 3px; margin-bottom: 5px; font-weight: 600;">
+                                        <textarea onchange="updateBeatDescription(${actIndex}, ${beatIndex}, this.value)"
+                                                  placeholder="Beat 설명 (선택사항)"
+                                                  style="width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 3px; min-height: 60px; font-size: 13px;">${beat.description || ''}</textarea>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteBeat(${actIndex}, ${beatIndex})" style="padding: 4px 8px;">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('') : '<p style="color: #999; font-size: 13px; margin-left: 10px;">아직 Beat가 없습니다. "➕ Beat" 버튼을 클릭하세요</p>'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addAct() {
+            if (!currentScenarioStructure.acts) {
+                currentScenarioStructure.acts = [];
+            }
+
+            const actNumber = currentScenarioStructure.acts.length + 1;
+            currentScenarioStructure.acts.push({
+                name: `Act ${actNumber}`,
+                beats: []
+            });
+
+            renderActsStructure();
+        }
+
+        function deleteAct(actIndex) {
+            if (confirm('이 Act를 삭제하시겠습니까?')) {
+                currentScenarioStructure.acts.splice(actIndex, 1);
+                renderActsStructure();
+            }
+        }
+
+        function addBeat(actIndex) {
+            if (!currentScenarioStructure.acts[actIndex].beats) {
+                currentScenarioStructure.acts[actIndex].beats = [];
+            }
+
+            const beatNumber = currentScenarioStructure.acts[actIndex].beats.length + 1;
+            currentScenarioStructure.acts[actIndex].beats.push({
+                name: `Beat ${beatNumber}`,
+                description: ''
+            });
+
+            renderActsStructure();
+        }
+
+        function deleteBeat(actIndex, beatIndex) {
+            if (confirm('이 Beat를 삭제하시겠습니까?')) {
+                currentScenarioStructure.acts[actIndex].beats.splice(beatIndex, 1);
+                renderActsStructure();
+            }
+        }
+
+        function updateActName(actIndex, value) {
+            currentScenarioStructure.acts[actIndex].name = value;
+        }
+
+        function updateBeatName(actIndex, beatIndex, value) {
+            currentScenarioStructure.acts[actIndex].beats[beatIndex].name = value;
+        }
+
+        function updateBeatDescription(actIndex, beatIndex, value) {
+            currentScenarioStructure.acts[actIndex].beats[beatIndex].description = value;
         }
 
         async function saveScenario() {
@@ -8043,6 +8236,7 @@
                 background_setting: '메신저 대화', // 메신저 기반으로 고정
                 mood,
                 available_characters: Array.from(selectedCharacters),
+                structure: currentScenarioStructure, // Acts & Beats 구조 추가
                 action: 'create' // 🔧 기본값으로 create 설정
             };
 
