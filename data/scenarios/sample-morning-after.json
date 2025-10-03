@@ -1,0 +1,189 @@
+{
+  "id": "morning_after_chat_v1",
+  "metadata": {
+    "title": "아침의 달콤한 여운",
+    "genre": "passionate_love",
+    "sexy_level": 7,
+    "tags": ["아침", "전날밤", "설렘", "메신저", "진전"],
+    "estimated_duration": "6-9분"
+  },
+  "structure": {
+    "acts": [
+      {
+        "act_number": 1,
+        "act_title": "잠에서 깬 첫 메시지",
+        "beats": [
+          {
+            "beat_number": 1,
+            "beat_type": "introduction",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 오빠... 일어났어? 🌞 어젯밤 생각나? ㅎㅎ",
+              "narration_template": "${char_name}(이)가 아침 10시에 장난스럽게 메시지를 보낸다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"어제? 무슨 일 있었어?\" 기억 안 나는 척한다",
+                  "affection_range": "low",
+                  "tone": "playful"
+                },
+                {
+                  "text_template": "\"당연히 기억하지... 잠이 안 왔어\" 솔직하게 말한다",
+                  "affection_range": "high",
+                  "tone": "passionate"
+                },
+                {
+                  "text_template": "\"넌 어때? 잘 잤어?\" 부드럽게 물어본다",
+                  "affection_range": "medium",
+                  "tone": "caring"
+                }
+              ],
+              "emotion_hint": "장난스러움, 설렘, 기대"
+            }
+          },
+          {
+            "beat_number": 2,
+            "beat_type": "flirtation",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 나? 오빠 생각에 새벽 3시까지 뒤척였는걸~ 💭✨",
+              "narration_template": "${char_name}(이)가 대담하게 마음을 표현한다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"나도 똑같았어... 네 생각뿐이었어\"",
+                  "affection_range": "critical",
+                  "tone": "passionate"
+                },
+                {
+                  "text_template": "\"그럼 오늘 만나서 얘기할까?\"",
+                  "affection_range": "high",
+                  "tone": "bold"
+                },
+                {
+                  "text_template": "\"귀여워... 그렇게 생각해줘서 고마워\"",
+                  "affection_range": "medium",
+                  "tone": "gentle"
+                }
+              ],
+              "emotion_hint": "대담함, 설렘, 기대"
+            }
+          },
+          {
+            "beat_number": 3,
+            "beat_type": "escalation",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 어젯밤... 오빠가 날 안아줬을 때 심장 터질 뻔했어 💓😳",
+              "narration_template": "${char_name}(이)가 얼굴을 붉히며 어젯밤을 회상한다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"나도... 너무 떨렸어\"",
+                  "affection_range": "high",
+                  "tone": "passionate"
+                },
+                {
+                  "text_template": "\"오늘도 안아줄까?\" 대담하게 제안한다",
+                  "affection_range": "critical",
+                  "tone": "bold"
+                },
+                {
+                  "text_template": "\"그때 표정 너무 예뻤어\"",
+                  "affection_range": "medium",
+                  "tone": "caring"
+                }
+              ],
+              "emotion_hint": "떨림, 수줍음, 열정"
+            }
+          }
+        ]
+      },
+      {
+        "act_number": 2,
+        "act_title": "더 깊어지는 관계",
+        "beats": [
+          {
+            "beat_number": 1,
+            "beat_type": "confession",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 오빠... 솔직히 말해도 돼? 난 오빠가 정말... 좋아 ❤️",
+              "narration_template": "${char_name}(이)가 용기를 내어 진심을 고백한다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"나도 너 정말 좋아해... 많이\"",
+                  "affection_range": "critical",
+                  "tone": "passionate"
+                },
+                {
+                  "text_template": "\"우리... 사귈래?\"",
+                  "affection_range": "critical",
+                  "tone": "bold"
+                },
+                {
+                  "text_template": "\"고마워... 네 마음 소중하게 받을게\"",
+                  "affection_range": "high",
+                  "tone": "caring"
+                }
+              ],
+              "emotion_hint": "진심, 떨림, 기대"
+            }
+          },
+          {
+            "beat_number": 2,
+            "beat_type": "resolution",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 와... 진짜야? 😍 이거 꿈 아니지? 오빠 손 잡아도 돼?",
+              "narration_template": "${char_name}(이)가 행복에 겨워 메시지를 보낸다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"당연하지... 지금 바로 보러 갈까?\"",
+                  "affection_range": "critical",
+                  "tone": "bold"
+                },
+                {
+                  "text_template": "\"손만? 안아줘도 되는데 💕\"",
+                  "affection_range": "critical",
+                  "tone": "passionate"
+                },
+                {
+                  "text_template": "\"우리 천천히 시작해보자 😊\"",
+                  "affection_range": "high",
+                  "tone": "gentle"
+                }
+              ],
+              "emotion_hint": "행복, 설렘, 기쁨"
+            }
+          },
+          {
+            "beat_number": 3,
+            "beat_type": "response",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 오빠 💕 오늘 하루 종일 행복할 것 같아... 사랑해 ~~",
+              "narration_template": "${char_name}(이)가 달콤한 마무리 메시지를 보낸다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"나도 사랑해... 평생\"",
+                  "affection_range": "critical",
+                  "tone": "passionate"
+                },
+                {
+                  "text_template": "\"저녁에 꼭 보자. 보고 싶어\"",
+                  "affection_range": "high",
+                  "tone": "caring"
+                },
+                {
+                  "text_template": "\"우리 앞으로 좋은 일만 있을 거야 💕\"",
+                  "affection_range": "high",
+                  "tone": "gentle"
+                }
+              ],
+              "emotion_hint": "사랑, 행복, 안정"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "compatibility": {
+    "mbti_best_fit": ["ENFP", "ESFP", "ENFJ", "ESTP"],
+    "personality_requirements": {
+      "min_sexual_comfort": 6,
+      "min_confidence": 5
+    }
+  }
+}

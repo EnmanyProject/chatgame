@@ -1,0 +1,195 @@
+{
+  "id": "late_night_confession_v1",
+  "metadata": {
+    "title": "늦은 밤의 고백",
+    "genre": "sensual_romance",
+    "sexy_level": 6,
+    "tags": ["술", "고백", "메신저", "밤", "진심"],
+    "estimated_duration": "7-10분"
+  },
+  "structure": {
+    "acts": [
+      {
+        "act_number": 1,
+        "act_title": "어색한 아침 인사",
+        "beats": [
+          {
+            "beat_number": 1,
+            "beat_type": "introduction",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 오빠... 어제 술 마시고 한 말 기억나? 😳",
+              "narration_template": "${char_name}(이)가 부끄러워하며 오전 11시에 메시지를 보낸다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"무슨 말? 기억 안 나는데...\" 솔직하게 말한다",
+                  "affection_range": "neutral",
+                  "tone": "respectful"
+                },
+                {
+                  "text_template": "\"무슨 말 했는데? ㅋㅋ\" 장난스럽게 묻는다",
+                  "affection_range": "low",
+                  "tone": "playful"
+                },
+                {
+                  "text_template": "\"다 기억해... 너도 진심이었어?\"",
+                  "affection_range": "high",
+                  "tone": "caring"
+                }
+              ],
+              "emotion_hint": "부끄러움, 설렘, 긴장"
+            }
+          },
+          {
+            "beat_number": 2,
+            "beat_type": "flirtation",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 아... 그럼 내가 먼저 말할게. 나 오빠한테 관심 있어 💕",
+              "narration_template": "${char_name}(이)가 용기를 내어 고백한다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"나도 너한테 관심 있었어\"",
+                  "affection_range": "high",
+                  "tone": "passionate"
+                },
+                {
+                  "text_template": "\"진짜? 언제부터?\"",
+                  "affection_range": "medium",
+                  "tone": "gentle"
+                },
+                {
+                  "text_template": "\"우리 천천히 알아가보자\"",
+                  "affection_range": "medium",
+                  "tone": "respectful"
+                }
+              ],
+              "emotion_hint": "떨림, 기대, 설렘"
+            }
+          },
+          {
+            "beat_number": 3,
+            "beat_type": "confession",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 사실... 오빠 ${char_style} 스타일도 좋고, 대화할 때마다 편했어 😊",
+              "narration_template": "${char_name}(이)가 솔직한 마음을 털어놓는다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"나도 너랑 있으면 편해\"",
+                  "affection_range": "high",
+                  "tone": "caring"
+                },
+                {
+                  "text_template": "\"그런 말 들으니 기분 좋다\"",
+                  "affection_range": "medium",
+                  "tone": "gentle"
+                },
+                {
+                  "text_template": "\"우리 오늘 저녁에 만날래?\"",
+                  "affection_range": "critical",
+                  "tone": "bold"
+                }
+              ],
+              "emotion_hint": "설렘, 기대, 행복"
+            }
+          }
+        ]
+      },
+      {
+        "act_number": 2,
+        "act_title": "깊어지는 감정",
+        "beats": [
+          {
+            "beat_number": 1,
+            "beat_type": "escalation",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 오빠... 너무 설레서 잠이 안 올 것 같아 🌙",
+              "narration_template": "${char_name}(이)가 밤늦게 메시지를 보낸다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"나도 그래... 자꾸 네 생각나\"",
+                  "affection_range": "high",
+                  "tone": "passionate"
+                },
+                {
+                  "text_template": "\"전화할까?\"",
+                  "affection_range": "critical",
+                  "tone": "bold"
+                },
+                {
+                  "text_template": "\"좋은 꿈 꾸라고 자장가 불러줄까? ㅎㅎ\"",
+                  "affection_range": "medium",
+                  "tone": "playful"
+                }
+              ],
+              "emotion_hint": "설렘, 두근거림, 그리움"
+            }
+          },
+          {
+            "beat_number": 2,
+            "beat_type": "resolution",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 오빠 목소리 들으니까... 더 보고 싶어져 😳💕",
+              "narration_template": "${char_name}(이)가 수줍게 마음을 표현한다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"지금 나와. 잠깐만 보고 싶어\"",
+                  "affection_range": "critical",
+                  "tone": "bold"
+                },
+                {
+                  "text_template": "\"나도... 너무 보고 싶다\"",
+                  "affection_range": "high",
+                  "tone": "passionate"
+                },
+                {
+                  "text_template": "\"내일 꼭 보자. 오늘은 푹 쉬어\"",
+                  "affection_range": "medium",
+                  "tone": "caring"
+                }
+              ],
+              "emotion_hint": "그리움, 애틋함, 떨림"
+            }
+          }
+        ]
+      },
+      {
+        "act_number": 3,
+        "act_title": "달콤한 마무리",
+        "beats": [
+          {
+            "beat_number": 1,
+            "beat_type": "response",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 오빠 덕분에 오늘 하루 행복했어 💖 잘자 오빠 ~~",
+              "narration_template": "${char_name}(이)가 행복한 마음으로 잠자리에 든다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"꿈에서 봐 💕\"",
+                  "affection_range": "high",
+                  "tone": "gentle"
+                },
+                {
+                  "text_template": "\"좋은 꿈 꿔. 내 꿈 꿔도 돼 ㅎㅎ\"",
+                  "affection_range": "medium",
+                  "tone": "playful"
+                },
+                {
+                  "text_template": "\"나도 너 때문에 행복해. 잘자 💕\"",
+                  "affection_range": "critical",
+                  "tone": "passionate"
+                }
+              ],
+              "emotion_hint": "행복, 안정, 설렘"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "compatibility": {
+    "mbti_best_fit": ["INFP", "ENFP", "ISFJ", "INFJ"],
+    "personality_requirements": {
+      "min_sexual_comfort": 5,
+      "min_confidence": 3
+    }
+  }
+}

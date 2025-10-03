@@ -1,0 +1,189 @@
+{
+  "id": "date_planning_chat_v1",
+  "metadata": {
+    "title": "데이트 약속 잡기",
+    "genre": "sweet_romance",
+    "sexy_level": 4,
+    "tags": ["데이트", "약속", "설렘", "메신저", "계획"],
+    "estimated_duration": "5-8분"
+  },
+  "structure": {
+    "acts": [
+      {
+        "act_number": 1,
+        "act_title": "데이트 제안하기",
+        "beats": [
+          {
+            "beat_number": 1,
+            "beat_type": "introduction",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 오빠 😊 이번 주말에 시간 있어?",
+              "narration_template": "${char_name}(이)가 조심스럽게 주말 계획을 물어본다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"응! 왜? 뭐 계획 있어?\"",
+                  "affection_range": "medium",
+                  "tone": "gentle"
+                },
+                {
+                  "text_template": "\"너랑 시간 보내고 싶은데 어때?\"",
+                  "affection_range": "high",
+                  "tone": "caring"
+                },
+                {
+                  "text_template": "\"주말? 같이 뭐 할래?\"",
+                  "affection_range": "low",
+                  "tone": "playful"
+                }
+              ],
+              "emotion_hint": "기대, 설렘, 조심스러움"
+            }
+          },
+          {
+            "beat_number": 2,
+            "beat_type": "flirtation",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 음... 오빠랑 ${char_hobby} 하고 싶어서 ㅎㅎ 괜찮아?",
+              "narration_template": "${char_name}(이)가 자신의 취미를 공유하며 데이트를 제안한다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"좋아! 그거 재밌을 것 같은데\"",
+                  "affection_range": "medium",
+                  "tone": "playful"
+                },
+                {
+                  "text_template": "\"너랑 함께라면 뭐든 좋아\"",
+                  "affection_range": "high",
+                  "tone": "caring"
+                },
+                {
+                  "text_template": "\"오 그것도 좋지만, 다른 것도 해볼까?\"",
+                  "affection_range": "neutral",
+                  "tone": "respectful"
+                }
+              ],
+              "emotion_hint": "설렘, 기대, 즐거움"
+            }
+          },
+          {
+            "beat_number": 3,
+            "beat_type": "escalation",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 그럼 ${char_style} 스타일로 입고 나갈게! 기대해도 돼? 😊✨",
+              "narration_template": "${char_name}(이)가 설레는 마음으로 준비할 것을 이야기한다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"와... 벌써 기대돼\"",
+                  "affection_range": "high",
+                  "tone": "passionate"
+                },
+                {
+                  "text_template": "\"너는 뭘 입어도 예쁠 것 같아\"",
+                  "affection_range": "medium",
+                  "tone": "caring"
+                },
+                {
+                  "text_template": "\"ㅋㅋ 기대할게! 나도 멋지게 입을게\"",
+                  "affection_range": "medium",
+                  "tone": "playful"
+                }
+              ],
+              "emotion_hint": "설렘, 기대, 행복"
+            }
+          }
+        ]
+      },
+      {
+        "act_number": 2,
+        "act_title": "구체적인 계획 세우기",
+        "beats": [
+          {
+            "beat_number": 1,
+            "beat_type": "response",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 시간은 몇 시에 만날까? 오후 2시쯤 어때? 🕐",
+              "narration_template": "${char_name}(이)가 만남 시간을 제안한다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"2시 좋아! 어디서 만날까?\"",
+                  "affection_range": "medium",
+                  "tone": "respectful"
+                },
+                {
+                  "text_template": "\"더 일찍 만나면 안 돼? 빨리 보고 싶은데\"",
+                  "affection_range": "high",
+                  "tone": "passionate"
+                },
+                {
+                  "text_template": "\"2시 완벽해. 점심 먹고 만나자\"",
+                  "affection_range": "medium",
+                  "tone": "gentle"
+                }
+              ],
+              "emotion_hint": "설렘, 기대, 계획"
+            }
+          },
+          {
+            "beat_number": 2,
+            "beat_type": "confession",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 사실 오빠 보는 게 너무 좋아서... 주말이 기다려져 😊💕",
+              "narration_template": "${char_name}(이)가 솔직한 마음을 표현한다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"나도 너 보는 게 제일 좋아\"",
+                  "affection_range": "high",
+                  "tone": "passionate"
+                },
+                {
+                  "text_template": "\"귀엽다 ㅎㅎ 나도 기대돼\"",
+                  "affection_range": "medium",
+                  "tone": "playful"
+                },
+                {
+                  "text_template": "\"우리 좋은 시간 보내자\"",
+                  "affection_range": "medium",
+                  "tone": "caring"
+                }
+              ],
+              "emotion_hint": "진심, 설렘, 행복"
+            }
+          },
+          {
+            "beat_number": 3,
+            "beat_type": "resolution",
+            "template": {
+              "npc_dialogue_template": "${char_name}: 그럼 주말에 봐! 오빤 내 ${time_of_day} 생각해 💭✨",
+              "narration_template": "${char_name}(이)가 행복한 마음으로 약속을 확정짓는다.",
+              "choice_templates": [
+                {
+                  "text_template": "\"당연하지. 주말까지 잘 지내\"",
+                  "affection_range": "medium",
+                  "tone": "gentle"
+                },
+                {
+                  "text_template": "\"넌 내 매일 생각이야 💕\"",
+                  "affection_range": "high",
+                  "tone": "passionate"
+                },
+                {
+                  "text_template": "\"주말 빨리 왔으면 좋겠다\"",
+                  "affection_range": "medium",
+                  "tone": "caring"
+                }
+              ],
+              "emotion_hint": "행복, 기대, 설렘"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "compatibility": {
+    "mbti_best_fit": ["INFP", "ENFP", "INTJ", "ENTJ", "INFJ", "ENFJ", "INTP", "ENTP", "ISFP", "ESFP", "ISTP", "ESTP", "ISFJ", "ESFJ", "ISTJ", "ESTJ"],
+    "personality_requirements": {
+      "min_sexual_comfort": 3,
+      "min_confidence": 2
+    }
+  }
+}
