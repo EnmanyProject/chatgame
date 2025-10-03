@@ -4540,19 +4540,7 @@
                 <form id="scenarioForm">
                     <input type="hidden" id="scenarioId" />
 
-                    <!-- 1단계: 캐릭터 선택 (최우선) -->
-                    <div class="form-group priority-section" style="border: 2px solid #667eea; border-radius: 10px; padding: 20px; margin-bottom: 25px; background: linear-gradient(135deg, #f8f9ff 0%, #e3e7ff 100%);">
-                        <label style="font-size: 1.2em; color: #667eea; font-weight: bold;">🎭 1단계: 대화할 캐릭터 선택 *</label>
-                        <div id="characterLoadingMsg" style="padding: 20px; text-align: center; color: #666;">
-                            캐릭터 목록을 로딩 중입니다...
-                        </div>
-                        <div class="character-selector" id="characterSelector" style="display: none;">
-                            <!-- 동적으로 로드됩니다 -->
-                        </div>
-                        <small style="color: #666; font-size: 12px;">💡 먼저 대화할 캐릭터를 선택하세요</small>
-                    </div>
-
-                    <!-- 2단계: 메신저 상황 제목 선택 -->
+                    <!-- 시나리오 제목 -->
                     <div class="form-group">
                         <label for="scenarioTitle" style="font-size: 1.1em; color: #333; font-weight: bold;">📱 2단계: 메신저 상황 제목 *</label>
                         <input type="text" id="scenarioTitle" required placeholder="클릭해서 상황 선택" onchange="updateSituationPreview()" />
