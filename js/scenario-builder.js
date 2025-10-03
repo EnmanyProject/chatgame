@@ -503,9 +503,26 @@ function testScenario() {
     return;
   }
 
-  // test-scenario.html로 이동하면서 시나리오 데이터 전달
+  // Get selected AI model
+  const modelSelector = document.getElementById('ai-model-selector');
+  const selectedModel = modelSelector ? modelSelector.value : 'claude';
+
+  // Mock character for testing
+  const testCharacter = {
+    id: 'test_character',
+    basic_info: { name: "테스트 캐릭터", age: 22, mbti: "INFP" },
+    personality_traits: ["감성적", "따뜻함"],
+    appeal_profile: { charm_points: ["미소"] },
+    conversation_dynamics: { speech_style: "부드럽고 따뜻한" },
+    photo: "/assets/default-avatar.png"
+  };
+
+  // Open episode player with scenario, character, and model
+  const playerUrl = `episode-player-test.html?scenario=${currentScenario.id}&character=${testCharacter.id}&model=${selectedModel}`;
   localStorage.setItem('test-scenario', JSON.stringify(currentScenario));
-  window.open('test-scenario.html', '_blank');
+  localStorage.setItem('test-character', JSON.stringify(testCharacter));
+  window.open(playerUrl, '_blank');
+  showToast('info', '테스트 시작', `${selectedModel === 'claude' ? 'Claude 3.5' : 'OpenAI GPT-4'} 모델로 테스트를 시작합니다`);
 }
 
 // ========== UI Refresh ==========
