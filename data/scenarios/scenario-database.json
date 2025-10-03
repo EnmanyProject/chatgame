@@ -2,12 +2,33 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-09-29",
-    "total_scenarios": 0,
+    "total_scenarios": 1,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-09-29T08:47:42.335Z",
+    "last_updated": "2025-10-03T12:44:05.219Z",
     "data_source": "github_api_only"
   },
-  "scenarios": {},
+  "scenarios": {
+    "late_night_confession_v1": {
+      "id": "late_night_confession_v1",
+      "scenario_id": "late_night_confession_v1",
+      "title": "새로운 시나리오",
+      "description": "",
+      "background_setting": "멤신저 대화",
+      "mood": "편안한",
+      "active_status": true,
+      "created_date": "2025-10-03",
+      "last_modified": "2025-10-03T12:44:05.219Z",
+      "ai_generated_context": "죄송하지만, 제공된 캐릭터 정보가 없으므로 요청하신 메신저 대화 시나리오를 작성할 수 없습니다. 캐릭터 정보를 제공해주시면 그에 맞춰 상세한 시나리오를 생성해드리겠습니다.",
+      "custom_context": "",
+      "available_characters": [],
+      "episode_count": 0,
+      "tags": [
+        "편안한"
+      ],
+      "source": "scenario_admin",
+      "updated_by": "scenario_manager_github_only"
+    }
+  },
   "scenario_templates": {
     "romance_template": {
       "mood_options": [
