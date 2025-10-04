@@ -65,6 +65,27 @@
 
 ---
 
+- **v1.8.0** (2025-10-04): Phase 1-C 멀티 캐릭터 동시 채팅 시스템 완성 (Minor Update)
+  - 💬 **대화방 리스트 UI**: character-list-ui.html 신규 생성 (KakaoTalk 스타일)
+  - 📱 **대화방 관리 시스템**: js/chat-room-manager.js 신규 생성
+    - 캐릭터별 독립적인 대화방 생성/관리
+    - 마지막 메시지 및 시간 자동 추적
+    - 안읽은 메시지 수 카운트 시스템
+    - LocalStorage 기반 영구 저장
+  - 🎮 **멀티 캐릭터 상태 관리**: js/multi-character-state.js 신규 생성
+    - 캐릭터별 완전 독립적인 상태 관리
+    - 호감도, 관계, 대화 히스토리 개별 추적
+    - 에피소드 완료, 선택지 기록 분리
+    - 통계 및 진행도 시스템
+  - 🔗 **기존 시스템 연동**: chat-ui.html, episode-trigger-engine.js 수정
+    - URL 파라미터 (?character=<id>) 처리
+    - MultiCharacterState 완전 연동
+    - 하위 호환성 유지 (기존 CharacterStateManager)
+  - ✨ **핵심 기능**: 여러 캐릭터와 동시에 독립적인 대화 진행 가능
+  - 🚀 **사용자 경험**: character-list-ui.html → 캐릭터 선택 → 개별 대화방 진입
+
+---
+
 ## 📅 **2025-10-03 작업 요약**
 
 ### 🎯 **오늘의 주요 성과**
