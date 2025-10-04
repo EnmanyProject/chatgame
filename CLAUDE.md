@@ -65,6 +65,25 @@
 
 ---
 
+- **v2.0.0** (2025-10-04): Phase 2-A 톤 변화 시스템 구축 완료 (Major Update)
+  - 🎭 **ToneVariationEngine 신규 생성**: js/tone-variation-engine.js (457줄)
+    - 호감도 기반 5단계 톤 레벨 자동 계산 (1-2: 존댓말, 3-4: 반말, 5-6: 애교, 7-8: 애정표현, 9-10: 적극적)
+    - 어미 변환, 이모티콘 추가, 말투 특성 적용
+    - MBTI별 스타일 적용 (INFP: 시적, ENFP: 에너지, INTJ: 간결, ESFJ: 배려, ISTP: 쿨)
+    - 글자 늘이기, 반복, 간투사, 애교 표현 자동 추가
+  - 📊 **tone-templates.json 신규 생성**: data/tone-templates.json (433줄)
+    - 5개 톤 레벨 완전 정의 (특성, 어미, 이모티콘, 말투 패턴)
+    - 5개 MBTI 스타일 변형 (tone_modifiers)
+    - 톤 전환 메시지 (1→2, 2→3, 3→4, 4→5)
+    - 예시 메시지 및 감정 표현
+  - 🔗 **기존 시스템 톤 연동**:
+    - chat-ui.html: 환영 메시지, AI 응답, 폴백 응답에 톤 적용
+    - episode-trigger-engine.js: 자동 트리거 메시지에 톤 적용
+    - 캐릭터 MBTI 및 호감도 기반 실시간 톤 변화
+  - ✨ **핵심 기능**: 호감도가 오르면 존댓말 → 반말 → 애교 → 애정표현 → 적극적으로 자연스럽게 변화
+  - 🚀 **사용자 경험**: 수치 숨김, 몰입도 극대화, 자연스러운 관계 발전
+  - 📈 **버전 의미**: Phase 2 시작 (보상 시스템), 주요 기능 추가로 Major 버전업
+
 - **v1.9.0** (2025-10-04): Phase 1-D 통합 테스트 및 Phase 1 완료 (Minor Update)
   - 🧪 **통합 테스트 시스템**: test/integration-test.html, test/test-scenarios.js 신규 생성
     - 10개 시나리오 자동 테스트

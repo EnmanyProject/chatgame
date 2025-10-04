@@ -456,13 +456,35 @@ class EpisodeTriggerEngine {
      * 트리거 메시지 전송
      */
     async sendTriggerMessage(text) {
-        console.log(`[트리거 메시지] ${text}`);
+        console.log(`[트리거 메시지 원본] ${text}`);
+
+        // 톤 적용
+        let tonedMessage = text;
+        try {
+            if (typeof applyToneToMessage === 'function' && this.multiCharacterState) {
+                const state = this.multiCharacterState.getState(this.characterId);
+
+                // 캐릭터 정보 가져오기
+                const character = await this.getCharacterInfo();
+                const mbti = character?.mbti || 'INFP';
+
+                tonedMessage = await applyToneToMessage(
+                    this.characterId,
+                    text,
+                    state.affection,
+                    mbti
+                );
+                console.log(`[트리거 메시지 톤 적용] ${tonedMessage}`);
+            }
+        } catch (e) {
+            console.warn('톤 적용 실패:', e);
+        }
 
         // EpisodeDeliverySystem 사용 가능하면 큐에 추가
         if (typeof EpisodeDeliverySystem !== 'undefined') {
             try {
                 const delivery = new EpisodeDeliverySystem(this.characterId);
-                const episode = createMessageEpisode(text);
+                const episode = createMessageEpisode(tonedMessage);
                 delivery.addToQueue(episode);
                 return;
             } catch (e) {
@@ -474,7 +496,7 @@ class EpisodeTriggerEngine {
         if (typeof displayMessage === 'function') {
             const message = {
                 type: 'character',
-                text: text,
+                text: tonedMessage,
                 timestamp: new Date().toISOString()
             };
 
@@ -484,6 +506,28 @@ class EpisodeTriggerEngine {
                 saveMessage(this.characterId, message);
             }
         }
+    }
+
+    /**
+     * 캐릭터 정보 가져오기
+     */
+    async getCharacterInfo() {
+        try {
+            // 전역 characters 배열에서 찾기
+            if (typeof characters !== 'undefined' && Array.isArray(characters)) {
+                return characters.find(c => c.id === this.characterId);
+            }
+
+            // localStorage에서 찾기
+            const stored = localStorage.getItem('chatgame_characters');
+            if (stored) {
+                const chars = JSON.parse(stored);
+                return chars.find(c => c.id === this.characterId);
+            }
+        } catch (e) {
+            console.error('캐릭터 정보 조회 실패:', e);
+        }
+        return null;
     }
 
     /**

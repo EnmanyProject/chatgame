@@ -501,6 +501,7 @@
     <script src="/js/multi-character-state.js"></script>
     <script src="/js/episode-delivery-system.js"></script>
     <script src="/js/episode-trigger-engine.js"></script>
+    <script src="/js/tone-variation-engine.js"></script>
     <script>
         // 전역 변수
         let currentCharacterId = null;
@@ -798,20 +799,33 @@
         // 환영 메시지
         async function sendWelcomeMessage(character) {
             const characterName = character.basic_info?.name || character.name || '캐릭터';
-            
+
             showTyping(true);
             await delay(1000);
-            
+
+            // 기본 환영 메시지
+            let baseMessage = `안녕하세요! ${characterName}입니다 😊\n오늘 하루 어떠셨어요?`;
+
+            // 톤 적용
+            const state = multiCharacterState.getState(currentCharacterId);
+            const mbti = character.mbti || 'INFP';
+            const tonedMessage = await applyToneToMessage(
+                currentCharacterId,
+                baseMessage,
+                state.affection,
+                mbti
+            );
+
             const welcomeMsg = {
                 type: 'character',
-                text: `안녕하세요! ${characterName}입니다 😊\n오늘 하루 어떠셨어요?`,
+                text: tonedMessage,
                 timestamp: new Date().toISOString()
             };
-            
+
             saveMessage(currentCharacterId, welcomeMsg);
             displayMessage(welcomeMsg);
             showTyping(false);
-            
+
             // 선택지 표시
             setTimeout(() => {
                 showChoices([
@@ -887,10 +901,10 @@
         async function generateAIResponse(userChoice) {
             const character = characters.find(c => c.id === currentCharacterId);
             if (!character) return;
-            
+
             showTyping(true);
             await delay(1500);
-            
+
             try {
                 const response = await fetch('/api/ai-response-engine', {
                     method: 'POST',
@@ -902,16 +916,26 @@
                         engine: 'gpt4'
                     })
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
+                    // AI 응답에 톤 적용
+                    const state = multiCharacterState.getState(currentCharacterId);
+                    const mbti = character.mbti || 'INFP';
+                    const tonedResponse = await applyToneToMessage(
+                        currentCharacterId,
+                        result.response,
+                        state.affection,
+                        mbti
+                    );
+
                     const aiMsg = {
                         type: 'character',
-                        text: result.response,
+                        text: tonedResponse,
                         timestamp: new Date().toISOString()
                     };
-                    
+
                     saveMessage(currentCharacterId, aiMsg);
                     displayMessage(aiMsg);
                 } else {
@@ -919,17 +943,27 @@
                 }
             } catch (error) {
                 console.error('AI 응답 생성 실패:', error);
-                // 폴백 응답
+                // 폴백 응답에도 톤 적용
+                const state = multiCharacterState.getState(currentCharacterId);
+                const mbti = character.mbti || 'INFP';
+                const baseFallback = getFallbackResponse(userChoice.value);
+                const tonedFallback = await applyToneToMessage(
+                    currentCharacterId,
+                    baseFallback,
+                    state.affection,
+                    mbti
+                );
+
                 const fallbackMsg = {
                     type: 'character',
-                    text: getFallbackResponse(userChoice.value),
+                    text: tonedFallback,
                     timestamp: new Date().toISOString()
                 };
-                
+
                 saveMessage(currentCharacterId, fallbackMsg);
                 displayMessage(fallbackMsg);
             }
-            
+
             showTyping(false);
         }
 
