@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>채팅 - 연애 어드벤처</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #b2c7d9;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 대화방 리스트 화면 */
+        .chat-list-container {
+            background: white;
+            height: 100vh;
+            max-width: 480px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-list-header {
+            background: #7c95b0;
+            color: white;
+            padding: 16px 20px;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .user-mbti {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .chat-rooms {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .chat-room-item {
+            display: flex;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .chat-room-item:hover {
+            background: #f8f9fa;
+        }
+
+        .chat-room-item:active {
+            background: #e9ecef;
+        }
+
+        .character-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #dee2e6;
+            margin-right: 14px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .character-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .chat-room-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-room-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .character-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #212529;
+        }
+
+        .last-message-time {
+            font-size: 12px;
+            color: #868e96;
+        }
+
+        .chat-room-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .last-message {
+            font-size: 14px;
+            color: #868e96;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .unread-badge {
+            background: #ff6b6b;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+
+        /* 채팅 화면 */
+        .chat-container {
+            background: #b2c7d9;
+            height: 100vh;
+            max-width: 480px;
+            margin: 0 auto;
+            display: none;
+            flex-direction: column;
+        }
+
+        .chat-container.active {
+            display: flex;
+        }
+
+        .chat-header {
+            background: #7c95b0;
+            color: white;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-header-info {
+            flex: 1;
+        }
+
+        .chat-header-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .chat-header-status {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .message {
+            display: flex;
+            gap: 8px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #dee2e6;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .message-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .message.user .message-avatar {
+            display: none;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            background: white;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-bubble {
+            background: #ffeb33;
+        }
+
+        .message-text {
+            font-size: 15px;
+            line-height: 1.4;
+            color: #212529;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #868e96;
+            margin-top: 4px;
+        }
+
+        .message-narration {
+            text-align: center;
+            padding: 12px;
+            color: #495057;
+            font-size: 13px;
+            font-style: italic;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            margin: 8px 0;
+        }
+
+        .message-photo {
+            max-width: 200px;
+            border-radius: 12px;
+            margin-top: 6px;
+            cursor: pointer;
+        }
+
+        .choices-container {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .choice-button {
+            background: white;
+            border: 1px solid #dee2e6;
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .choice-button:hover {
+            background: #f8f9fa;
+            border-color: #7c95b0;
+        }
+
+        .choice-button:active {
+            transform: scale(0.98);
+        }
+
+        .input-container {
+            background: white;
+            padding: 12px 16px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .input-field {
+            flex: 1;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            padding: 10px 16px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .input-field:focus {
+            border-color: #7c95b0;
+        }
+
+        .send-button {
+            background: #7c95b0;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .send-button:hover {
+            background: #6a8399;
+        }
+
+        .send-button:disabled {
+            background: #ced4da;
+            cursor: not-allowed;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 8px 16px;
+            color: #868e96;
+            font-size: 13px;
+        }
+
+        .typing-indicator.active {
+            display: block;
+        }
+
+        .typing-dots {
+            display: inline-block;
+        }
+
+        .typing-dots span {
+            animation: blink 1.4s infinite;
+            animation-fill-mode: both;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes blink {
+            0%, 80%, 100% { opacity: 0; }
+            40% { opacity: 1; }
+        }
+
+        .loading-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-screen.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 스크롤바 스타일 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ced4da;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #adb5bd;
+        }
+    </style>
+</head>
+<body>
+    <!-- 대화방 리스트 화면 -->
+    <div class="chat-list-container" id="chatListView">
+        <div class="chat-list-header">
+            <div>채팅</div>
+            <div class="user-info">
+                <span id="userName">사용자</span>
+                <span class="user-mbti" id="userMBTI">ENFP</span>
+            </div>
+        </div>
+        <div class="chat-rooms" id="chatRoomsList">
+            <!-- 대화방 목록이 여기에 동적으로 추가됩니다 -->
+        </div>
+    </div>
+
+    <!-- 채팅 화면 -->
+    <div class="chat-container" id="chatView">
+        <div class="chat-header">
+            <button class="back-button" onclick="backToList()">←</button>
+            <div class="chat-header-info">
+                <div class="chat-header-name" id="currentCharacterName">윤아</div>
+                <div class="chat-header-status" id="currentCharacterStatus">온라인</div>
+            </div>
+        </div>
+        <div class="messages-container" id="messagesContainer">
+            <!-- 메시지가 여기에 동적으로 추가됩니다 -->
+        </div>
+        <div class="typing-indicator" id="typingIndicator">
+            <span id="typingCharacterName">윤아</span>님이 입력 중<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>
+        </div>
+        <div class="choices-container" id="choicesContainer">
+            <!-- 선택지가 여기에 동적으로 추가됩니다 -->
+        </div>
+        <div class="input-container">
+            <input type="text" class="input-field" id="messageInput" placeholder="메시지를 입력하세요..." />
+            <button class="send-button" id="sendButton" onclick="sendMessage()">➤</button>
+        </div>
+    </div>
+
+    <!-- 로딩 화면 -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script src="/js/character-state-manager.js"></script>
+    <script src="/js/episode-delivery-system.js"></script>
+    <script>
+        // 전역 변수
+        let currentCharacterId = null;
+        let characters = [];
+        let userName = '사용자';
+        let userMBTI = 'ENFP';
+
+        // 초기화
+        async function init() {
+            // 유저 정보 로드
+            loadUserInfo();
+            
+            // 캐릭터 목록 로드
+            await loadCharacters();
+            
+            // 대화방 리스트 렌더링
+            renderChatRooms();
+        }
+
+        // 유저 정보 로드
+        function loadUserInfo() {
+            const savedUser = localStorage.getItem('user_info');
+            if (savedUser) {
+                const user = JSON.parse(savedUser);
+                userName = user.name || '사용자';
+                userMBTI = user.mbti || 'ENFP';
+            }
+            
+            document.getElementById('userName').textContent = userName;
+            document.getElementById('userMBTI').textContent = userMBTI;
+        }
+
+        // 캐릭터 목록 로드 (GitHub)
+        async function loadCharacters() {
+            try {
+                const response = await fetch('/api/character-ai-generator?action=list_characters');
+                const result = await response.json();
+                
+                if (result.success) {
+                    characters = result.data.characters || result.data || [];
+                    console.log('캐릭터 로드 완료:', characters.length + '명');
+                } else {
+                    console.error('캐릭터 로드 실패:', result.error);
+                    // 테스트용 더미 데이터
+                    characters = getDummyCharacters();
+                }
+            } catch (error) {
+                console.error('캐릭터 로드 에러:', error);
+                // 테스트용 더미 데이터
+                characters = getDummyCharacters();
+            }
+        }
+
+        // 테스트용 더미 캐릭터
+        function getDummyCharacters() {
+            return [
+                {
+                    id: 'yuna_infp',
+                    basic_info: {
+                        name: '윤아',
+                        age: 22,
+                        mbti: 'INFP'
+                    },
+                    photo: '/assets/default-avatar.png'
+                },
+                {
+                    id: 'mina_enfp',
+                    basic_info: {
+                        name: '미나',
+                        age: 24,
+                        mbti: 'ENFP'
+                    },
+                    photo: '/assets/default-avatar.png'
+                },
+                {
+                    id: 'seoyeon_intj',
+                    basic_info: {
+                        name: '서연',
+                        age: 26,
+                        mbti: 'INTJ'
+                    },
+                    photo: '/assets/default-avatar.png'
+                }
+            ];
+        }
+
+        // 대화방 리스트 렌더링
+        function renderChatRooms() {
+            const container = document.getElementById('chatRoomsList');
+            container.innerHTML = '';
+
+            characters.forEach(character => {
+                const characterName = character.basic_info?.name || character.name || '캐릭터';
+                const characterId = character.id;
+                const characterPhoto = character.photo || '/assets/default-avatar.png';
+                
+                // 마지막 메시지 가져오기
+                const lastMessage = getLastMessage(characterId);
+                const unreadCount = getUnreadCount(characterId);
+
+                const roomDiv = document.createElement('div');
+                roomDiv.className = 'chat-room-item';
+                roomDiv.onclick = () => openChat(characterId);
+                
+                roomDiv.innerHTML = `
+                    <div class="character-avatar">
+                        <img src="${characterPhoto}" alt="${characterName}" onerror="this.src='/assets/default-avatar.png'">
+                    </div>
+                    <div class="chat-room-content">
+                        <div class="chat-room-top">
+                            <span class="character-name">${characterName}</span>
+                            <span class="last-message-time">${lastMessage.time}</span>
+                        </div>
+                        <div class="chat-room-bottom">
+                            <span class="last-message">${lastMessage.text}</span>
+                            ${unreadCount > 0 ? `<span class="unread-badge">${unreadCount}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(roomDiv);
+            });
+        }
+
+        // 마지막 메시지 가져오기
+        function getLastMessage(characterId) {
+            const saved = localStorage.getItem(`chat_${characterId}`);
+            if (saved) {
+                const chatData = JSON.parse(saved);
+                const messages = chatData.messages || [];
+                if (messages.length > 0) {
+                    const lastMsg = messages[messages.length - 1];
+                    return {
+                        text: lastMsg.text.substring(0, 30) + (lastMsg.text.length > 30 ? '...' : ''),
+                        time: formatTime(lastMsg.timestamp)
+                    };
+                }
+            }
+            return {
+                text: '새로운 대화를 시작해보세요!',
+                time: ''
+            };
+        }
+
+        // 읽지 않은 메시지 수
+        function getUnreadCount(characterId) {
+            const saved = localStorage.getItem(`chat_${characterId}`);
+            if (saved) {
+                const chatData = JSON.parse(saved);
+                return chatData.unreadCount || 0;
+            }
+            return 0;
+        }
+
+        // 시간 포맷
+        function formatTime(timestamp) {
+            if (!timestamp) return '';
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return '방금';
+            if (diff < 3600000) return Math.floor(diff / 60000) + '분 전';
+            if (diff < 86400000) return date.toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'});
+            return date.toLocaleDateString('ko-KR', {month: 'long', day: 'numeric'});
+        }
+
+        // 채팅방 열기
+        async function openChat(characterId) {
+            currentCharacterId = characterId;
+            const character = characters.find(c => c.id === characterId);
+            
+            if (!character) {
+                alert('캐릭터를 찾을 수 없습니다.');
+                return;
+            }
+
+            const characterName = character.basic_info?.name || character.name || '캐릭터';
+            
+            // UI 전환
+            document.getElementById('chatListView').style.display = 'none';
+            document.getElementById('chatView').classList.add('active');
+            
+            // 헤더 정보 업데이트
+            document.getElementById('currentCharacterName').textContent = characterName;
+            document.getElementById('currentCharacterStatus').textContent = '온라인';
+            document.getElementById('typingCharacterName').textContent = characterName;
+            
+            // 메시지 로드
+            loadMessages(characterId);
+            
+            // 읽음 처리
+            markAsRead(characterId);
+            
+            // 첫 메시지가 없으면 환영 메시지 전송
+            const saved = localStorage.getItem(`chat_${characterId}`);
+            if (!saved || JSON.parse(saved).messages.length === 0) {
+                setTimeout(() => {
+                    sendWelcomeMessage(character);
+                }, 500);
+            }
+        }
+
+        // 메시지 로드
+        function loadMessages(characterId) {
+            const container = document.getElementById('messagesContainer');
+            container.innerHTML = '';
+            
+            const saved = localStorage.getItem(`chat_${characterId}`);
+            if (saved) {
+                const chatData = JSON.parse(saved);
+                const messages = chatData.messages || [];
+                
+                messages.forEach(msg => {
+                    displayMessage(msg);
+                });
+            }
+            
+            scrollToBottom();
+        }
+
+        // 메시지 표시
+        function displayMessage(message) {
+            const container = document.getElementById('messagesContainer');
+            const msgDiv = document.createElement('div');
+            
+            if (message.type === 'narration') {
+                msgDiv.className = 'message-narration';
+                msgDiv.textContent = message.text;
+            } else {
+                msgDiv.className = `message ${message.type}`;
+                const character = characters.find(c => c.id === currentCharacterId);
+                const characterPhoto = character?.photo || '/assets/default-avatar.png';
+                
+                msgDiv.innerHTML = `
+                    ${message.type === 'character' ? `
+                        <div class="message-avatar">
+                            <img src="${characterPhoto}" alt="캐릭터" onerror="this.src='/assets/default-avatar.png'">
+                        </div>
+                    ` : ''}
+                    <div class="message-bubble">
+                        <div class="message-text">${message.text}</div>
+                        ${message.photo ? `<img src="${message.photo}" class="message-photo" onclick="openPhoto('${message.photo}')">` : ''}
+                        <div class="message-time">${new Date(message.timestamp).toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'})}</div>
+                    </div>
+                `;
+            }
+            
+            container.appendChild(msgDiv);
+            scrollToBottom();
+        }
+
+        // 환영 메시지
+        async function sendWelcomeMessage(character) {
+            const characterName = character.basic_info?.name || character.name || '캐릭터';
+            
+            showTyping(true);
+            await delay(1000);
+            
+            const welcomeMsg = {
+                type: 'character',
+                text: `안녕하세요! ${characterName}입니다 😊\n오늘 하루 어떠셨어요?`,
+                timestamp: new Date().toISOString()
+            };
+            
+            saveMessage(currentCharacterId, welcomeMsg);
+            displayMessage(welcomeMsg);
+            showTyping(false);
+            
+            // 선택지 표시
+            setTimeout(() => {
+                showChoices([
+                    {text: '좋았어요!', value: 'good'},
+                    {text: '그냥 그랬어요', value: 'normal'},
+                    {text: '힘든 하루였어요', value: 'tired'}
+                ]);
+            }, 500);
+        }
+
+        // 선택지 표시
+        function showChoices(choices) {
+            const container = document.getElementById('choicesContainer');
+            container.innerHTML = '';
+            
+            choices.forEach(choice => {
+                const button = document.createElement('button');
+                button.className = 'choice-button';
+                button.textContent = choice.text;
+                button.onclick = () => handleChoice(choice);
+                container.appendChild(button);
+            });
+        }
+
+        // 선택지 처리
+        async function handleChoice(choice) {
+            // 선택지 숨기기
+            document.getElementById('choicesContainer').innerHTML = '';
+            
+            // 유저 메시지 표시
+            const userMsg = {
+                type: 'user',
+                text: choice.text,
+                timestamp: new Date().toISOString()
+            };
+            
+            saveMessage(currentCharacterId, userMsg);
+            displayMessage(userMsg);
+            
+            // AI 응답 생성
+            await generateAIResponse(choice);
+        }
+
+        // 메시지 전송
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            
+            if (!text) return;
+            
+            input.value = '';
+            
+            const userMsg = {
+                type: 'user',
+                text: text,
+                timestamp: new Date().toISOString()
+            };
+            
+            saveMessage(currentCharacterId, userMsg);
+            displayMessage(userMsg);
+            
+            // AI 응답 생성
+            await generateAIResponse({text: text, value: 'text_input'});
+        }
+
+        // AI 응답 생성
+        async function generateAIResponse(userChoice) {
+            const character = characters.find(c => c.id === currentCharacterId);
+            if (!character) return;
+            
+            showTyping(true);
+            await delay(1500);
+            
+            try {
+                const response = await fetch('/api/ai-response-engine', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        character_id: currentCharacterId,
+                        user_input: userChoice.text,
+                        choice_value: userChoice.value,
+                        engine: 'gpt4'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const aiMsg = {
+                        type: 'character',
+                        text: result.response,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    saveMessage(currentCharacterId, aiMsg);
+                    displayMessage(aiMsg);
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('AI 응답 생성 실패:', error);
+                // 폴백 응답
+                const fallbackMsg = {
+                    type: 'character',
+                    text: getFallbackResponse(userChoice.value),
+                    timestamp: new Date().toISOString()
+                };
+                
+                saveMessage(currentCharacterId, fallbackMsg);
+                displayMessage(fallbackMsg);
+            }
+            
+            showTyping(false);
+        }
+
+        // 폴백 응답
+        function getFallbackResponse(value) {
+            const responses = {
+                good: '그렇구나! 좋은 하루 보내셨다니 저도 기분이 좋아요 😊',
+                normal: '그래도 무사히 하루 마무리하셨네요! 고생하셨어요~',
+                tired: '오늘 많이 힘드셨나봐요ㅠㅠ 괜찮으세요? 푹 쉬세요!',
+                text_input: '그렇군요! 재미있는 얘기 더 들려주세요~'
+            };
+            
+            return responses[value] || responses.text_input;
+        }
+
+        // 메시지 저장
+        function saveMessage(characterId, message) {
+            const key = `chat_${characterId}`;
+            let chatData = {messages: [], unreadCount: 0};
+            
+            const saved = localStorage.getItem(key);
+            if (saved) {
+                chatData = JSON.parse(saved);
+            }
+            
+            chatData.messages.push(message);
+            localStorage.setItem(key, JSON.stringify(chatData));
+        }
+
+        // 읽음 처리
+        function markAsRead(characterId) {
+            const key = `chat_${characterId}`;
+            const saved = localStorage.getItem(key);
+            if (saved) {
+                const chatData = JSON.parse(saved);
+                chatData.unreadCount = 0;
+                localStorage.setItem(key, JSON.stringify(chatData));
+            }
+        }
+
+        // 타이핑 표시
+        function showTyping(show) {
+            const indicator = document.getElementById('typingIndicator');
+            if (show) {
+                indicator.classList.add('active');
+            } else {
+                indicator.classList.remove('active');
+            }
+        }
+
+        // 리스트로 돌아가기
+        function backToList() {
+            document.getElementById('chatView').classList.remove('active');
+            document.getElementById('chatListView').style.display = 'flex';
+            renderChatRooms();
+        }
+
+        // 스크롤 하단으로
+        function scrollToBottom() {
+            const container = document.getElementById('messagesContainer');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // 딜레이
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // 사진 열기
+        function openPhoto(url) {
+            window.open(url, '_blank');
+        }
+
+        // Enter 키로 전송
+        document.getElementById('messageInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // 초기화 실행
+        init();
+    </script>
+</body>
+</html>

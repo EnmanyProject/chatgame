@@ -1,225 +1,185 @@
-# 🎯 현재 작업: Phase 1.2 데이터 스키마 모듈 완성
+# 🎯 현재 작업: Phase 1-A 채팅 엔진 기초 구축
 
 ## 📅 작업 일시
-- **시작**: 2025-09-01 00:10
-- **완료**: 2025-09-01 00:25
-- **소요시간**: 15분
+- **시작**: 2025-10-04
+- **예상 완료**: 2025-10-04 (4-5시간)
 - **작업자**: dosik + Claude (웹)
 
-## ✅ 완성된 작업
+---
 
-### 1. DataSchemaModule 클래스 (dataSchema.js)
+## 🎮 **새 프로젝트 컨셉**
+
+### 서비스명: 연애 어드벤처 시뮬레이션 (채팅형)
+
+**핵심 컨셉:**
+- 타겟: 남성 전용
+- 스타일: 카카오톡 느낌의 실시간 채팅
+- 보상: 대화 톤 변화, 사진, 애정 표현
+- 수익: 선물하기 (관계 회복)
+
+**차별점:**
+- 숨겨진 수치 (호감도/애정도 1-10)
+- AI 기반 직접 입력 판단
+- 무한 에피소드 추가 가능
+- 멀티 캐릭터 동시 진행
+
+---
+
+## ✅ **Phase 1-A 작업 목록**
+
+### 작업 1: 유저 채팅 UI ⏳
+```
+파일: chat-ui.html
+- 카카오톡 스타일 인터페이스
+- 캐릭터 선택 화면
+- 메시지 타이핑 효과
+- 선택지 + 직접 입력
+- 모바일 반응형
+```
+
+### 작업 2: 수치 관리 시스템 ⏳
+```
+파일: js/character-state-manager.js
+- 호감도/애정도 (1-10) 숨김
+- 대화 톤 레벨 (1-5)
+- 답장 속도 계산
+- localStorage 저장
+```
+
+### 작업 3: AI 엔진 통합 ⏳
+```
+파일: api/ai-response-engine.js
+- GPT-4 기본 (유연하게 전환 가능)
+- Claude, Llama 지원
+- 유저 입력 판단 (-3 ~ +3점)
+- 캐릭터 성격 반영
+```
+
+### 작업 4: 에피소드 전달 시스템 ⏳
+```
+파일: js/episode-delivery-system.js
+- 3가지 타입 (대사/선택지/퀴즈)
+- 큐 관리
+- 타이밍 계산
+```
+
+### 작업 5: 기존 시스템 연동 ⏳
+```
+- GitHub 캐릭터 데이터 로드
+- 사진 시스템 개선 (갤러리 배열)
+- Vercel API 라우팅
+```
+
+---
+
+## 🔧 **기술 스펙**
+
+### AI 엔진 (유연한 구조)
 ```javascript
-// 위치: dataSchema.js:8-65
-class DataSchemaModule extends BaseModule {
-    constructor()           // 스키마/검증기/팩토리 초기화
-    initializeSchemas()     // 4개 핵심 스키마 등록
-    registerSchema()        // 스키마 동적 등록
-    getSchema()            // 스키마 조회
-    create()               // 데이터 생성 (팩토리)
-    validate()             // 데이터 검증
-    validateAllSchemas()   // 모든 스키마 검증
+class AIResponseEngine {
+  engine: 'gpt4' | 'claude' | 'llama'
+  
+  // 엔진 전환 가능
+  switchEngine(newEngine)
+  
+  // 통합 판단 인터페이스
+  judgeUserInput(text, character, context)
 }
 ```
 
-### 2. 4개 핵심 데이터 스키마
+### 숨겨진 수치
 ```javascript
-CHARACTER_SCHEMA    // 캐릭터 데이터 구조 (ID/이름/MBTI/성격/호감도)
-EPISODE_SCHEMA      // 에피소드 데이터 구조 (36퀘스트 관리)
-CHOICE_SCHEMA       // 선택지 데이터 구조 (호감도 변화/조건)
-SAVE_DATA_SCHEMA    // 저장 데이터 구조 (진행도/설정)
-```
-
-### 3. 팩토리 함수 시스템
-```javascript
-createCharacter()   // 캐릭터 기본값 생성
-createEpisode()     // 에피소드 기본값 생성  
-createChoice()      // 선택지 기본값 생성
-createSaveData()    // 저장 데이터 기본값 생성
-```
-
-### 4. 검증 시스템
-```javascript
-validateCharacter() // 캐릭터 데이터 유효성 검증
-validateEpisode()   // 에피소드 데이터 검증
-validateChoice()    // 선택지 데이터 검증
-validateSaveData()  // 저장 데이터 검증
-```
-
-### 5. 샘플 데이터
-```javascript
-SAMPLE_DATA = {
-    character: 윤아(INFP, 20세) 완전 구현,
-    episode: "어색한 아침 인사" 에피소드,
-    choice: 호감도 +3 선택지,
-    saveData: 기본 게임 진행 데이터
+{
+  호감도: 1-10,
+  애정도: 1-10,
+  대화톤레벨: 1-5,
+  답장속도: 1-5,
+  먼저연락확률: 0-100%,
+  사진레벨: 1-5
 }
 ```
 
-### 6. 종합 테스트 페이지 (dataSchema-test.html)
-- **자동 테스트**: 스키마/팩토리/검증/샘플 4개 영역
-- **수동 테스트**: 9개 개별 기능 테스트 버튼
-- **실시간 모니터링**: 상태 카드 + 진행률 표시
-- **데이터 표시**: JSON 형태로 생성 데이터 확인
-- **검증 결과**: 성공/실패 상태별 색상 구분
-
-## 🧪 테스트 현황
-
-### 스키마 모듈: dataSchema-test.html
-- **자동 실행**: 페이지 로드 시 스키마 모듈 초기화
-- **상태 모니터링**: 4개 상태 카드 (스키마/팩토리/검증기/샘플)
-- **종합 테스트**: 5개 테스트 버튼 + 4개 생성 버튼
-- **검증 테스트**: 올바른/잘못된 데이터 검증
-
-### 배포 준비: deploy-dataSchema.bat
-- Git 자동 커밋 + 태그 생성
-- Vercel 자동 배포 트리거  
-- 테스트 URL 제공
-
-## 🔧 Claude Code 작업 권장사항
-
-### 즉시 가능한 개선 작업들:
-
-#### 1. 스키마 검증 강화
+### 에피소드 타입
 ```javascript
-// 현재: 기본 타입 검증만
-validateCharacter(data) { /* 기본 검증 */ }
-
-// 개선: 상세 스키마 검증
-validateSchema(data, schema) {
-    // JSON Schema 표준 검증
-    // 중첩 객체 검증
-    // 정규식 패턴 검증
-}
+Type 1: character_message (대사)
+Type 2: choice_question (선택지)
+Type 3: text_quiz (직접 입력)
 ```
 
-#### 2. 성능 최적화
-```javascript  
-// 스키마 캐싱 시스템
-const schemaCache = new Map();
+---
 
-// 검증 결과 캐싱
-const validationCache = new LRUCache(1000);
+## 📊 **완료 기준**
+
+### 테스트 시나리오:
+```
+1. chat-ui.html 접속
+2. 윤아 캐릭터 선택
+3. 첫 메시지 수신
+4. 선택지 응답 → 호감도 변화 (숨김)
+5. 직접 입력 → AI 판단 → 적절한 반응
+6. 수치 저장/로드 확인
 ```
 
-#### 3. 마이그레이션 시스템
-```javascript
-// 스키마 버전 관리
-const SCHEMA_VERSION = '1.0.0';
+### 성공 조건:
+- ✅ 채팅 UI 작동
+- ✅ 선택지 점수 반영
+- ✅ AI 직접 입력 판단 (GPT-4)
+- ✅ 호감도 숨김 처리
+- ✅ 기존 캐릭터 데이터 활용
 
-// 데이터 마이그레이션 함수
-migrate(data, fromVersion, toVersion) { ... }
-```
+---
 
-#### 4. TypeScript 타입 정의
-```typescript
-interface CharacterData {
-    id: string;
-    name: string;
-    mbti: MBTI_TYPE;
-    age: number;
-    // ...
-}
-```
+## 🔄 **기존 시스템 유지**
 
-## 🎯 다음 단계 (Phase 1.3)
+### 유지할 것:
+- ✅ scenario-admin.html (관리자)
+- ✅ GitHub 데이터 저장
+- ✅ Vercel 배포 환경
+- ✅ OpenAI API 연동
 
-### 게임 로직 모듈 요구사항
-```javascript
-// 목표 파일: gameLogic.js (100-150줄)
+### 개선할 것:
+- 🔄 캐릭터 스키마 (사진 배열 추가)
+- 🔄 API 엔진 선택 시스템
+- 🔄 에피소드 구조 확장
 
-class GameLogicModule extends BaseModule {
-    // 선택지 처리 로직
-    processChoice(choiceId, gameState) { ... }
-    
-    // 호감도 계산 시스템
-    calculateAffection(current, change, conditions) { ... }
-    
-    // 직접 입력 처리
-    processTextInput(input, context) { ... }
-    
-    // 게임 진행 상태 관리
-    updateGameProgress(episodeId, choice) { ... }
-    
-    // 조건부 분기 처리
-    evaluateConditions(conditions, gameState) { ... }
-}
-```
+---
 
-## 📋 인수인계 체크리스트
+## 🎯 **다음 단계 (Phase 1-B)**
 
-### Claude Code 작업 시작 전 확인
-- [ ] `git pull origin main` 실행 완료
-- [ ] `dataSchema.js` 파일 존재 및 정상 동작 확인
-- [ ] `dataSchema-test.html` 배포 상태 확인
-- [ ] architecture.js와 dataSchema.js 연동 확인
+### 예정 작업:
+- 에피소드 트리거 엔진
+- 시간 기반 알림
+- 사진 전송 시스템
+- 선물하기 기초
 
-### 작업 완료 후 체크리스트  
-- [ ] 새로운 코드 테스트 통과
-- [ ] 기존 파일들과 호환성 확인
-- [ ] 문서 업데이트 완료
-- [ ] Git 커밋 메시지 명확히 작성
-- [ ] `.claude-code/handoff-notes.md` 업데이트
+---
 
-## 📊 코드 품질 지표
+## 📝 **작업 완료 보고 양식**
 
-### 현재 dataSchema.js 모듈
-- **코드 라인**: 147줄 (목표 100-150줄 ✅)
-- **클래스 수**: 1개 (DataSchemaModule)
-- **함수 수**: 16개 (적정 수준)  
-- **스키마 수**: 4개 (요구사항 충족)
-- **샘플 데이터**: 4개 타입 모두 구현
-- **검증 시스템**: 모든 타입별 검증기 구현
+```markdown
+Phase 1-A 완료 보고
 
-### 목표 품질 기준 달성도
-- **코드 품질**: JSDoc 주석 90% (우수) ✅
-- **기능 완성도**: 요구사항 100% 구현 ✅
-- **테스트 커버리지**: 수동 테스트 완료 ✅
-- **성능**: 스키마 검증 평균 <1ms ✅
-
-## 🎮 기존 게임과 연동 현황
-
-### architecture.js 연동 완료
-- DataSchemaModule이 기본 아키텍처에 등록됨
-- BaseModule 상속으로 일관된 모듈 인터페이스
-- 이벤트 버스 및 로깅 시스템 연동
-
-### 다음 연동 대상
-- multi-scenario-game.html (기존 메인 게임)
-- api/scenario.js (Claude API 래퍼)
-- scenario-admin.html (관리자 인터페이스)
-
-## 💬 웹 Claude 복귀 시 보고 양식
-
-작업 완료 후 다음 형식으로 보고:
-
-```
-"Phase 1.2 데이터 스키마 모듈 완성
-
-✅ 완성 기능:
-- DataSchemaModule 클래스 (147줄)
-- 4개 핵심 스키마 (Character/Episode/Choice/SaveData)
-- 팩토리 함수 시스템 (4개)
-- 검증 시스템 (4개 검증기)  
-- 샘플 데이터 (윤아 캐릭터 포함)
-- 종합 테스트 페이지 (dataSchema-test.html)
+✅ 완성 파일:
+- chat-ui.html (카카오톡 스타일 UI)
+- js/character-state-manager.js (수치 관리)
+- api/ai-response-engine.js (AI 판단)
+- js/episode-delivery-system.js (에피소드 전달)
 
 🧪 테스트 결과:
-- 스키마 등록: 4/4개 통과
-- 팩토리 함수: 4/4개 통과
-- 검증 시스템: 4/4개 통과
-- 샘플 데이터: 4/4개 통과
+- 선택지 응답: 통과
+- 직접 입력 AI 판단: 통과
+- 호감도 숨김 처리: 통과
+- 기존 캐릭터 연동: 통과
 
 📊 코드 품질:
-- 코드 라인 수: 147줄 (목표 달성)
-- 주석 포함도: 90% (우수)
+- 총 코드: ~500줄
+- 주석 포함: 80%
 - 에러 처리: 완료
-- 성능: <1ms 검증 속도
+- 모바일 반응형: 완료
 
-🔄 다음 연동:
-- architecture.js와 통합 확인됨
-- Phase 1.3 gameLogic 모듈 준비 완료
+🔄 Git Push:
+- 커밋 메시지: "Phase 1-A: 채팅 엔진 기초 완성"
+- 태그: v2.0.0-alpha.1
 
-🎯 다음 단계 요청:
-- Phase 1.3 게임 로직 모듈 개발 시작"
+🎯 다음: Phase 1-B 트리거 시스템
 ```
