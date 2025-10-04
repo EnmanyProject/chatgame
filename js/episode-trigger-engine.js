@@ -6,8 +6,9 @@
  */
 
 class EpisodeTriggerEngine {
-    constructor(characterId) {
+    constructor(characterId, multiCharacterState = null) {
         this.characterId = characterId;
+        this.multiCharacterState = multiCharacterState;  // 멀티 캐릭터 상태 관리자
         this.isRunning = false;
         this.checkInterval = null;
         this.lastCheckTime = Date.now();
@@ -20,6 +21,8 @@ class EpisodeTriggerEngine {
 
         // 오늘의 카운트
         this.todayCounts = this.loadTodayCounts();
+
+        console.log(`[트리거 엔진] 초기화 완료 - 캐릭터: ${characterId}, 멀티상태: ${multiCharacterState ? '활성' : '비활성'}`);
     }
 
     /**
@@ -229,9 +232,16 @@ class EpisodeTriggerEngine {
      * 호감도 기반 트리거
      */
     async checkAffectionTriggers() {
-        const stateManager = new CharacterStateManager(this.characterId);
-        const state = stateManager.getState();
-        const 호감도 = state.호감도 || 5;
+        // MultiCharacterState 사용 (있으면) 또는 기존 CharacterStateManager 사용
+        let 호감도 = 5;
+        if (this.multiCharacterState) {
+            const state = this.multiCharacterState.getState(this.characterId);
+            호감도 = Math.round(state.affection / 10);  // -100~100을 -10~10으로 변환
+        } else {
+            const stateManager = new CharacterStateManager(this.characterId);
+            const state = stateManager.getState();
+            호감도 = state.호감도 || 5;
+        }
 
         // 호감도 변화 감지
         const lastAffection = this.getLastAffection();
@@ -282,9 +292,16 @@ class EpisodeTriggerEngine {
 
         const hoursSinceLastMessage = (Date.now() - lastUserMessageTime) / (1000 * 60 * 60);
 
-        const stateManager = new CharacterStateManager(this.characterId);
-        const state = stateManager.getState();
-        const 호감도 = state.호감도 || 5;
+        // MultiCharacterState 사용 (있으면) 또는 기존 CharacterStateManager 사용
+        let 호감도 = 5;
+        if (this.multiCharacterState) {
+            const state = this.multiCharacterState.getState(this.characterId);
+            호감도 = Math.round(state.affection / 10);  // -100~100을 -10~10으로 변환
+        } else {
+            const stateManager = new CharacterStateManager(this.characterId);
+            const state = stateManager.getState();
+            호감도 = state.호감도 || 5;
+        }
 
         // 호감도가 높을수록 빨리 걱정함
         const worryThreshold = 호감도 >= 7 ? 3 : 6;  // 호감도 7 이상이면 3시간, 아니면 6시간
