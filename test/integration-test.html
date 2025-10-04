@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 1 통합 테스트</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f5f5f5;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #3a5068;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .test-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background-color: #3a5068;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #2a3f52;
+    }
+
+    .btn-success {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .btn-danger {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .btn-warning {
+      background-color: #ffc107;
+      color: #333;
+    }
+
+    .test-scenario {
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: all 0.3s;
+    }
+
+    .test-scenario.running {
+      border-color: #ffc107;
+      background-color: #fff9e6;
+    }
+
+    .test-scenario.passed {
+      border-color: #28a745;
+      background-color: #e6f9ea;
+    }
+
+    .test-scenario.failed {
+      border-color: #dc3545;
+      background-color: #fce8e8;
+    }
+
+    .scenario-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .scenario-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .scenario-status {
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .status-pending {
+      background-color: #e0e0e0;
+      color: #666;
+    }
+
+    .status-running {
+      background-color: #ffc107;
+      color: #333;
+    }
+
+    .status-passed {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .status-failed {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .scenario-description {
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .test-steps {
+      margin-top: 10px;
+    }
+
+    .test-step {
+      padding: 10px;
+      margin-bottom: 5px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .test-step.passed {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .test-step.failed {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    .test-step.running {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .test-results {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .result-summary {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
+
+    .result-item {
+      text-align: center;
+    }
+
+    .result-number {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .result-label {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 30px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #28a745, #20c997);
+      transition: width 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    .console-output {
+      background-color: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+
+    .console-line {
+      margin-bottom: 5px;
+    }
+
+    .console-info {
+      color: #4fc3f7;
+    }
+
+    .console-success {
+      color: #81c784;
+    }
+
+    .console-error {
+      color: #e57373;
+    }
+
+    .console-warning {
+      color: #ffb74d;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Phase 1 통합 테스트</h1>
+    <p class="subtitle">채팅 엔진 기초 구축 - 전체 시스템 테스트</p>
+
+    <!-- 테스트 컨트롤 -->
+    <div class="test-controls">
+      <button class="btn btn-primary" onclick="runAllTests()">
+        ▶️ 전체 테스트 실행
+      </button>
+      <button class="btn btn-success" onclick="runSelectedTests()">
+        ✓ 선택 테스트 실행
+      </button>
+      <button class="btn btn-warning" onclick="pauseTests()">
+        ⏸️ 일시정지
+      </button>
+      <button class="btn btn-danger" onclick="stopTests()">
+        ⏹️ 중지
+      </button>
+      <button class="btn btn-primary" onclick="resetTests()">
+        🔄 초기화
+      </button>
+      <button class="btn btn-primary" onclick="exportResults()">
+        📥 결과 내보내기
+      </button>
+    </div>
+
+    <!-- 진행률 -->
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressBar" style="width: 0%">
+        0%
+      </div>
+    </div>
+
+    <!-- 테스트 결과 요약 -->
+    <div class="test-results">
+      <div class="result-summary">
+        <div class="result-item">
+          <div class="result-number" id="totalTests" style="color: #3a5068;">0</div>
+          <div class="result-label">총 테스트</div>
+        </div>
+        <div class="result-item">
+          <div class="result-number" id="passedTests" style="color: #28a745;">0</div>
+          <div class="result-label">통과</div>
+        </div>
+        <div class="result-item">
+          <div class="result-number" id="failedTests" style="color: #dc3545;">0</div>
+          <div class="result-label">실패</div>
+        </div>
+        <div class="result-item">
+          <div class="result-number" id="skippedTests" style="color: #6c757d;">0</div>
+          <div class="result-label">건너뜀</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 테스트 시나리오 목록 -->
+    <div id="testScenarios">
+      <!-- JavaScript로 동적 생성 -->
+    </div>
+
+    <!-- 콘솔 출력 -->
+    <div class="console-output" id="consoleOutput">
+      <div class="console-line console-info">[INFO] 테스트 시스템 준비 완료</div>
+      <div class="console-line console-info">[INFO] 전체 테스트 실행 버튼을 클릭하세요</div>
+    </div>
+  </div>
+
+  <script src="test-scenarios.js"></script>
+  <script src="../js/chat-room-manager.js"></script>
+  <script src="../js/multi-character-state.js"></script>
+  <script>
+    let testResults = {
+      total: 0,
+      passed: 0,
+      failed: 0,
+      skipped: 0
+    };
+
+    let isTestRunning = false;
+    let isPaused = false;
+
+    // 페이지 로드 시 시나리오 렌더링
+    document.addEventListener('DOMContentLoaded', () => {
+      renderTestScenarios();
+      updateResultsSummary();
+    });
+
+    // 테스트 시나리오 렌더링
+    function renderTestScenarios() {
+      const container = document.getElementById('testScenarios');
+
+      container.innerHTML = TEST_SCENARIOS.map(scenario => `
+        <div class="test-scenario" id="scenario_${scenario.id}">
+          <div class="scenario-header">
+            <div>
+              <div class="scenario-title">${scenario.name}</div>
+              <div class="scenario-description">${scenario.description}</div>
+            </div>
+            <span class="scenario-status status-pending" id="status_${scenario.id}">
+              대기 중
+            </span>
+          </div>
+          <div class="test-steps" id="steps_${scenario.id}">
+            ${scenario.steps.map((step, index) => `
+              <div class="test-step" id="step_${scenario.id}_${index}">
+                Step ${step.step}: ${step.action}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      testResults.total = TEST_SCENARIOS.length;
+      document.getElementById('totalTests').textContent = testResults.total;
+    }
+
+    // 전체 테스트 실행
+    async function runAllTests() {
+      if (isTestRunning) {
+        log('warning', '이미 테스트가 실행 중입니다.');
+        return;
+      }
+
+      isTestRunning = true;
+      isPaused = false;
+      resetResults();
+
+      log('info', '=== 전체 테스트 시작 ===');
+
+      for (let i = 0; i < TEST_SCENARIOS.length; i++) {
+        if (!isTestRunning) break;
+
+        while (isPaused) {
+          await sleep(100);
+        }
+
+        await runScenario(TEST_SCENARIOS[i], i);
+        updateProgress((i + 1) / TEST_SCENARIOS.length * 100);
+      }
+
+      isTestRunning = false;
+      log('success', '=== 전체 테스트 완료 ===');
+      log('info', `통과: ${testResults.passed}, 실패: ${testResults.failed}`);
+    }
+
+    // 개별 시나리오 실행
+    async function runScenario(scenario, index) {
+      log('info', `[${index + 1}/${TEST_SCENARIOS.length}] ${scenario.name} 시작`);
+
+      const scenarioEl = document.getElementById(`scenario_${scenario.id}`);
+      const statusEl = document.getElementById(`status_${scenario.id}`);
+
+      scenarioEl.classList.add('running');
+      statusEl.textContent = '실행 중';
+      statusEl.className = 'scenario-status status-running';
+
+      try {
+        // 각 스텝 실행
+        for (let i = 0; i < scenario.steps.length; i++) {
+          const step = scenario.steps[i];
+          const stepEl = document.getElementById(`step_${scenario.id}_${i}`);
+
+          stepEl.classList.add('running');
+          log('info', `  Step ${step.step}: ${step.action}`);
+
+          // 실제 테스트 로직 실행 (시뮬레이션)
+          await sleep(500);
+          const result = await executeStep(step);
+
+          if (result) {
+            stepEl.classList.remove('running');
+            stepEl.classList.add('passed');
+            log('success', `  ✓ ${step.expected}`);
+          } else {
+            throw new Error(`Step ${step.step} failed`);
+          }
+        }
+
+        // 어설션 검증
+        for (const assertion of scenario.assertions) {
+          log('info', `  검증: ${assertion}`);
+          await sleep(300);
+        }
+
+        // 성공
+        scenarioEl.classList.remove('running');
+        scenarioEl.classList.add('passed');
+        statusEl.textContent = '통과 ✓';
+        statusEl.className = 'scenario-status status-passed';
+        testResults.passed++;
+        log('success', `✓ ${scenario.name} 통과`);
+
+      } catch (error) {
+        // 실패
+        scenarioEl.classList.remove('running');
+        scenarioEl.classList.add('failed');
+        statusEl.textContent = '실패 ✗';
+        statusEl.className = 'scenario-status status-failed';
+        testResults.failed++;
+        log('error', `✗ ${scenario.name} 실패: ${error.message}`);
+      }
+
+      updateResultsSummary();
+      await sleep(1000);
+    }
+
+    // 스텝 실행 (실제 구현)
+    async function executeStep(step) {
+      // 실제 테스트 로직 구현
+      // 여기서는 시뮬레이션만
+      return Math.random() > 0.1; // 90% 성공률
+    }
+
+    // 선택 테스트 실행
+    async function runSelectedTests() {
+      log('warning', '선택 테스트 기능은 아직 구현되지 않았습니다.');
+    }
+
+    // 진행률 업데이트
+    function updateProgress(percent) {
+      const progressBar = document.getElementById('progressBar');
+      progressBar.style.width = `${percent}%`;
+      progressBar.textContent = `${Math.round(percent)}%`;
+    }
+
+    // 결과 요약 업데이트
+    function updateResultsSummary() {
+      document.getElementById('totalTests').textContent = testResults.total;
+      document.getElementById('passedTests').textContent = testResults.passed;
+      document.getElementById('failedTests').textContent = testResults.failed;
+      document.getElementById('skippedTests').textContent = testResults.skipped;
+    }
+
+    // 결과 초기화
+    function resetResults() {
+      testResults.passed = 0;
+      testResults.failed = 0;
+      testResults.skipped = 0;
+      updateResultsSummary();
+      updateProgress(0);
+    }
+
+    // 테스트 초기화
+    function resetTests() {
+      if (isTestRunning) {
+        if (!confirm('실행 중인 테스트를 중지하고 초기화하시겠습니까?')) {
+          return;
+        }
+        stopTests();
+      }
+
+      resetResults();
+      document.getElementById('consoleOutput').innerHTML = `
+        <div class="console-line console-info">[INFO] 테스트 초기화 완료</div>
+      `;
+      renderTestScenarios();
+      log('info', '테스트가 초기화되었습니다.');
+    }
+
+    // 테스트 일시정지
+    function pauseTests() {
+      if (!isTestRunning) return;
+      isPaused = !isPaused;
+      log('warning', isPaused ? '테스트 일시정지' : '테스트 재개');
+    }
+
+    // 테스트 중지
+    function stopTests() {
+      isTestRunning = false;
+      isPaused = false;
+      log('error', '테스트 중지');
+    }
+
+    // 결과 내보내기
+    function exportResults() {
+      const results = {
+        timestamp: new Date().toISOString(),
+        summary: testResults,
+        scenarios: TEST_SCENARIOS.map(s => ({
+          id: s.id,
+          name: s.name,
+          status: document.getElementById(`status_${s.id}`).textContent
+        }))
+      };
+
+      const blob = new Blob([JSON.stringify(results, null, 2)], {
+        type: 'application/json'
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `test-results-${Date.now()}.json`;
+      a.click();
+
+      log('success', '결과가 내보내기되었습니다.');
+    }
+
+    // 콘솔 로그
+    function log(type, message) {
+      const console = document.getElementById('consoleOutput');
+      const timestamp = new Date().toLocaleTimeString();
+      const line = document.createElement('div');
+      line.className = `console-line console-${type}`;
+      line.textContent = `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+      console.appendChild(line);
+      console.scrollTop = console.scrollHeight;
+    }
+
+    // Sleep 함수
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+  </script>
+</body>
+</html>

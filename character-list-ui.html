@@ -520,23 +520,31 @@
             return emojiMap[characterId] || '👤';
         }
 
-        // 시간 포맷팅
+        // 시간 포맷팅 (버그 수정 및 개선)
         function formatTime(timestamp) {
-            const now = new Date();
-            const messageTime = new Date(timestamp);
-            const diffMs = now - messageTime;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMs / 3600000);
-            const diffDays = Math.floor(diffMs / 86400000);
+            if (!timestamp || isNaN(timestamp)) return '';
 
-            if (diffMins < 1) return '방금';
-            if (diffMins < 60) return `${diffMins}분 전`;
-            if (diffHours < 24) return `${diffHours}시간 전`;
-            if (diffDays < 7) return `${diffDays}일 전`;
+            const now = Date.now();
+            const diff = now - timestamp;
 
-            const month = messageTime.getMonth() + 1;
-            const day = messageTime.getDate();
-            return `${month}/${day}`;
+            // 음수 방지 (미래 시간)
+            if (diff < 0) return '방금';
+
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return '방금';
+            if (minutes < 60) return `${minutes}분 전`;
+            if (hours < 24) {
+                const date = new Date(timestamp);
+                return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+            }
+            if (days === 1) return '어제';
+            if (days < 7) return `${days}일 전`;
+
+            const date = new Date(timestamp);
+            return `${date.getMonth() + 1}/${date.getDate()}`;
         }
 
         // 캐릭터 선택 모달 열기

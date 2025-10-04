@@ -186,6 +186,11 @@ class MultiCharacterState {
             affectionImpact: choice.affection_impact || 0
         });
 
+        // 최근 50개만 유지 (localStorage 용량 절약)
+        if (state.choicesMade.length > 50) {
+            state.choicesMade = state.choicesMade.slice(-50);
+        }
+
         state.messageCount++;
 
         // 통계 업데이트
