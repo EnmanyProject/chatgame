@@ -476,9 +476,11 @@
 
     <script src="/js/character-state-manager.js"></script>
     <script src="/js/episode-delivery-system.js"></script>
+    <script src="/js/episode-trigger-engine.js"></script>
     <script>
         // 전역 변수
         let currentCharacterId = null;
+        let currentTriggerEngine = null;  // 트리거 엔진 인스턴스
         let characters = [];
         let userName = '사용자';
         let userMBTI = 'ENFP';
@@ -647,29 +649,32 @@
         async function openChat(characterId) {
             currentCharacterId = characterId;
             const character = characters.find(c => c.id === characterId);
-            
+
             if (!character) {
                 alert('캐릭터를 찾을 수 없습니다.');
                 return;
             }
 
             const characterName = character.basic_info?.name || character.name || '캐릭터';
-            
+
             // UI 전환
             document.getElementById('chatListView').style.display = 'none';
             document.getElementById('chatView').classList.add('active');
-            
+
             // 헤더 정보 업데이트
             document.getElementById('currentCharacterName').textContent = characterName;
             document.getElementById('currentCharacterStatus').textContent = '온라인';
             document.getElementById('typingCharacterName').textContent = characterName;
-            
+
             // 메시지 로드
             loadMessages(characterId);
-            
+
             // 읽음 처리
             markAsRead(characterId);
-            
+
+            // 트리거 엔진 시작
+            startTriggerEngine(characterId);
+
             // 첫 메시지가 없으면 환영 메시지 전송
             const saved = localStorage.getItem(`chat_${characterId}`);
             if (!saved || JSON.parse(saved).messages.length === 0) {
@@ -773,17 +778,20 @@
         async function handleChoice(choice) {
             // 선택지 숨기기
             document.getElementById('choicesContainer').innerHTML = '';
-            
+
             // 유저 메시지 표시
             const userMsg = {
                 type: 'user',
                 text: choice.text,
                 timestamp: new Date().toISOString()
             };
-            
+
             saveMessage(currentCharacterId, userMsg);
             displayMessage(userMsg);
-            
+
+            // 유저 응답 시 행동 플래그 초기화
+            resetBehaviorFlagsOnUserMessage();
+
             // AI 응답 생성
             await generateAIResponse(choice);
         }
@@ -792,20 +800,23 @@
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
-            
+
             if (!text) return;
-            
+
             input.value = '';
-            
+
             const userMsg = {
                 type: 'user',
                 text: text,
                 timestamp: new Date().toISOString()
             };
-            
+
             saveMessage(currentCharacterId, userMsg);
             displayMessage(userMsg);
-            
+
+            // 유저 응답 시 행동 플래그 초기화
+            resetBehaviorFlagsOnUserMessage();
+
             // AI 응답 생성
             await generateAIResponse({text: text, value: 'text_input'});
         }
@@ -909,6 +920,9 @@
 
         // 리스트로 돌아가기
         function backToList() {
+            // 트리거 엔진 중지
+            stopTriggerEngine();
+
             document.getElementById('chatView').classList.remove('active');
             document.getElementById('chatListView').style.display = 'flex';
             renderChatRooms();
@@ -928,6 +942,34 @@
         // 사진 열기
         function openPhoto(url) {
             window.open(url, '_blank');
+        }
+
+        // 트리거 엔진 시작
+        function startTriggerEngine(characterId) {
+            // 기존 엔진 중지
+            stopTriggerEngine();
+
+            // 새 엔진 시작
+            currentTriggerEngine = new EpisodeTriggerEngine(characterId);
+            currentTriggerEngine.start();
+
+            console.log('[채팅 UI] 트리거 엔진 시작됨');
+        }
+
+        // 트리거 엔진 중지
+        function stopTriggerEngine() {
+            if (currentTriggerEngine) {
+                currentTriggerEngine.stop();
+                currentTriggerEngine = null;
+                console.log('[채팅 UI] 트리거 엔진 중지됨');
+            }
+        }
+
+        // 유저 응답 시 행동 플래그 초기화
+        function resetBehaviorFlagsOnUserMessage() {
+            if (currentTriggerEngine && currentCharacterId) {
+                currentTriggerEngine.resetBehaviorFlags();
+            }
         }
 
         // Enter 키로 전송
