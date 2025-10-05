@@ -12,7 +12,28 @@ class MultiCharacterState {
     constructor() {
         this.STORAGE_KEY = 'chatgame_multi_character_states';
         this.states = this.loadStates();
+
+        // Phase 3 Milestone 1: 통계 시스템 통합
+        this.statisticsManager = null;
+        this.achievementSystem = null;
+        this.initializeStatsSystems();
+
         console.log('🎮 MultiCharacterState 초기화 완료');
+    }
+
+    /**
+     * Phase 3: 통계 시스템 초기화
+     */
+    initializeStatsSystems() {
+        if (typeof StatisticsManager !== 'undefined') {
+            this.statisticsManager = new StatisticsManager();
+            console.log('✅ StatisticsManager 통합 완료');
+        }
+
+        if (typeof AchievementSystem !== 'undefined' && this.statisticsManager) {
+            this.achievementSystem = new AchievementSystem(this.statisticsManager);
+            console.log('✅ AchievementSystem 통합 완료');
+        }
     }
 
     /**
@@ -141,6 +162,16 @@ class MultiCharacterState {
         // 관계 단계 자동 업데이트
         this.updateRelationshipStage(characterId);
 
+        // Phase 3: 통계 시스템 연동
+        if (this.statisticsManager) {
+            this.statisticsManager.recordAffectionChange(characterId, state.affection);
+        }
+
+        // Phase 3: 업적 체크
+        if (this.achievementSystem) {
+            this.achievementSystem.checkAllAchievements();
+        }
+
         this.saveStates();
         console.log(`💕 ${characterId} 호감도: ${oldAffection} → ${state.affection} (${delta > 0 ? '+' : ''}${delta})`);
 
@@ -200,6 +231,16 @@ class MultiCharacterState {
             state.stats.negativeChoices++;
         } else {
             state.stats.neutralChoices++;
+        }
+
+        // Phase 3: 통계 시스템 연동
+        if (this.statisticsManager) {
+            this.statisticsManager.recordChoice(characterId, choice.affection_impact || 0);
+        }
+
+        // Phase 3: 업적 체크
+        if (this.achievementSystem) {
+            this.achievementSystem.checkAllAchievements();
         }
 
         this.saveStates();
@@ -336,6 +377,70 @@ class MultiCharacterState {
             } catch (error) {
                 console.error('[무응답 추적] 오류:', error);
             }
+        }
+
+        // Phase 3: 메시지 기록
+        if (this.statisticsManager) {
+            this.statisticsManager.recordMessage(characterId, true); // true = 유저 메시지
+        }
+    }
+
+    /**
+     * Phase 3: 캐릭터 메시지 수신 기록
+     * @param {string} characterId - 캐릭터 ID
+     */
+    notifyCharacterMessage(characterId) {
+        if (this.statisticsManager) {
+            this.statisticsManager.recordMessage(characterId, false); // false = 캐릭터 메시지
+        }
+    }
+
+    /**
+     * Phase 3: 사진 수신 기록
+     * @param {string} characterId - 캐릭터 ID
+     */
+    notifyPhotoReceived(characterId) {
+        if (this.statisticsManager) {
+            this.statisticsManager.recordPhotoReceived(characterId);
+        }
+
+        // 업적 체크
+        if (this.achievementSystem) {
+            this.achievementSystem.checkAllAchievements();
+        }
+    }
+
+    /**
+     * Phase 3: 먼저 연락 수신 기록
+     * @param {string} characterId - 캐릭터 ID
+     */
+    notifyProactiveContact(characterId) {
+        if (this.statisticsManager) {
+            this.statisticsManager.recordProactiveContact(characterId);
+        }
+
+        // 업적 체크
+        if (this.achievementSystem) {
+            this.achievementSystem.checkAllAchievements();
+        }
+    }
+
+    /**
+     * Phase 3: 세션 시작
+     */
+    startSession() {
+        if (this.statisticsManager) {
+            this.statisticsManager.startSession();
+        }
+    }
+
+    /**
+     * Phase 3: 세션 종료
+     * @param {string} characterId - 캐릭터 ID (optional)
+     */
+    endSession(characterId = null) {
+        if (this.statisticsManager) {
+            this.statisticsManager.endSession(characterId);
         }
     }
 

@@ -1,0 +1,223 @@
+{
+  "version": "3.1.0",
+  "achievements": [
+    {
+      "id": "first_message",
+      "name": "첫 만남",
+      "description": "첫 대화를 시작했습니다",
+      "icon": "🎊",
+      "category": "basic",
+      "condition": {
+        "type": "first_message"
+      }
+    },
+    {
+      "id": "affection_10",
+      "name": "마음이 통하다",
+      "description": "호감도 10 달성",
+      "icon": "💖",
+      "category": "relationship",
+      "condition": {
+        "type": "affection_milestone",
+        "value": 10
+      }
+    },
+    {
+      "id": "affection_30",
+      "name": "설레는 감정",
+      "description": "호감도 30 달성",
+      "icon": "💕",
+      "category": "relationship",
+      "condition": {
+        "type": "affection_milestone",
+        "value": 30
+      }
+    },
+    {
+      "id": "affection_50",
+      "name": "깊어지는 관계",
+      "description": "호감도 50 달성",
+      "icon": "💗",
+      "category": "relationship",
+      "condition": {
+        "type": "affection_milestone",
+        "value": 50
+      }
+    },
+    {
+      "id": "affection_70",
+      "name": "특별한 사이",
+      "description": "호감도 70 달성",
+      "icon": "💝",
+      "category": "relationship",
+      "condition": {
+        "type": "affection_milestone",
+        "value": 70
+      }
+    },
+    {
+      "id": "affection_100",
+      "name": "완벽한 이해",
+      "description": "호감도 100 달성",
+      "icon": "💞",
+      "category": "relationship",
+      "condition": {
+        "type": "affection_milestone",
+        "value": 100
+      }
+    },
+    {
+      "id": "messages_50",
+      "name": "수다쟁이",
+      "description": "총 50개의 메시지 주고받기",
+      "icon": "💬",
+      "category": "activity",
+      "condition": {
+        "type": "total_messages",
+        "value": 50
+      }
+    },
+    {
+      "id": "messages_100",
+      "name": "대화의 달인",
+      "description": "총 100개의 메시지 주고받기",
+      "icon": "💭",
+      "category": "activity",
+      "condition": {
+        "type": "total_messages",
+        "value": 100
+      }
+    },
+    {
+      "id": "photo_first",
+      "name": "소중한 순간",
+      "description": "첫 사진을 받았습니다",
+      "icon": "📸",
+      "category": "activity",
+      "condition": {
+        "type": "photo_received",
+        "value": 1
+      }
+    },
+    {
+      "id": "photo_5",
+      "name": "추억 수집가",
+      "description": "5장의 사진을 받았습니다",
+      "icon": "📷",
+      "category": "activity",
+      "condition": {
+        "type": "photo_received",
+        "value": 5
+      }
+    },
+    {
+      "id": "proactive_first",
+      "name": "먼저 연락이 왔어요",
+      "description": "캐릭터가 먼저 연락했습니다",
+      "icon": "📱",
+      "category": "activity",
+      "condition": {
+        "type": "proactive_contact",
+        "value": 1
+      }
+    },
+    {
+      "id": "consecutive_3",
+      "name": "꾸준한 만남",
+      "description": "3일 연속 플레이",
+      "icon": "🔥",
+      "category": "activity",
+      "condition": {
+        "type": "consecutive_days",
+        "value": 3
+      }
+    },
+    {
+      "id": "consecutive_7",
+      "name": "일주일의 기록",
+      "description": "7일 연속 플레이",
+      "icon": "⭐",
+      "category": "activity",
+      "condition": {
+        "type": "consecutive_days",
+        "value": 7
+      }
+    },
+    {
+      "id": "consecutive_30",
+      "name": "한 달의 여정",
+      "description": "30일 연속 플레이",
+      "icon": "🏆",
+      "category": "master",
+      "condition": {
+        "type": "consecutive_days",
+        "value": 30
+      }
+    },
+    {
+      "id": "play_time_1h",
+      "name": "시간 가는 줄 몰랐어요",
+      "description": "총 플레이 시간 1시간 달성",
+      "icon": "⏰",
+      "category": "activity",
+      "condition": {
+        "type": "play_time",
+        "value": 3600
+      }
+    },
+    {
+      "id": "play_time_5h",
+      "name": "함께한 시간들",
+      "description": "총 플레이 시간 5시간 달성",
+      "icon": "⌛",
+      "category": "activity",
+      "condition": {
+        "type": "play_time",
+        "value": 18000
+      }
+    },
+    {
+      "id": "multi_characters_3",
+      "name": "인기쟁이",
+      "description": "3명의 캐릭터와 대화",
+      "icon": "👥",
+      "category": "activity",
+      "condition": {
+        "type": "multiple_characters",
+        "value": 3
+      }
+    },
+    {
+      "id": "positive_choices_80",
+      "name": "긍정적인 사람",
+      "description": "긍정 선택지 80% 이상",
+      "icon": "😊",
+      "category": "activity",
+      "condition": {
+        "type": "positive_choices",
+        "value": 80
+      }
+    },
+    {
+      "id": "tone_level_5",
+      "name": "완벽한 관계",
+      "description": "톤 레벨 5 달성 (호감도 9+)",
+      "icon": "💫",
+      "category": "relationship",
+      "condition": {
+        "type": "tone_level",
+        "value": 5
+      }
+    },
+    {
+      "id": "master_all",
+      "name": "마스터",
+      "description": "모든 업적 달성",
+      "icon": "👑",
+      "category": "master",
+      "condition": {
+        "type": "all_achievements"
+      }
+    }
+  ]
+}
