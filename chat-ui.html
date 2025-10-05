@@ -503,6 +503,7 @@
     <script src="/js/episode-trigger-engine.js"></script>
     <script src="/js/tone-variation-engine.js"></script>
     <script src="/js/photo-sending-system.js"></script>
+    <script src="/js/proactive-contact-system.js"></script>
     <script>
         // 전역 변수
         let currentCharacterId = null;
@@ -869,6 +870,11 @@
             // 유저 응답 시 행동 플래그 초기화
             resetBehaviorFlagsOnUserMessage();
 
+            // Phase 2-C: 유저 응답 기록 (먼저 연락 시스템)
+            if (multiCharacterState && currentCharacterId) {
+                multiCharacterState.notifyUserResponse(currentCharacterId);
+            }
+
             // AI 응답 생성
             await generateAIResponse(choice);
         }
@@ -893,6 +899,11 @@
 
             // 유저 응답 시 행동 플래그 초기화
             resetBehaviorFlagsOnUserMessage();
+
+            // Phase 2-C: 유저 응답 기록 (먼저 연락 시스템)
+            if (multiCharacterState && currentCharacterId) {
+                multiCharacterState.notifyUserResponse(currentCharacterId);
+            }
 
             // AI 응답 생성
             await generateAIResponse({text: text, value: 'text_input'});

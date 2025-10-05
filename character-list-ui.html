@@ -391,6 +391,7 @@
         // 전역 변수
         let chatRoomManager;
         let availableCharacters = [];
+        let autoUpdateInterval = null;
 
         // 페이지 로드 시 초기화
         window.addEventListener('DOMContentLoaded', async () => {
@@ -405,7 +406,33 @@
             // 대화방 목록 렌더링
             renderChatRooms();
 
-            console.log('✅ 초기화 완료');
+            // 자동 업데이트 시작 (1분마다)
+            startAutoUpdate();
+
+            console.log('✅ 초기화 완료 (자동 업데이트 활성화)');
+        });
+
+        // 자동 업데이트 시작
+        function startAutoUpdate() {
+            // 기존 인터벌 정리
+            if (autoUpdateInterval) {
+                clearInterval(autoUpdateInterval);
+            }
+
+            // 1분마다 자동 업데이트
+            autoUpdateInterval = setInterval(() => {
+                console.log('🔄 대화방 목록 자동 업데이트');
+                renderChatRooms();
+            }, 60000); // 60초
+
+            console.log('✅ 자동 업데이트 시작 (60초마다)');
+        }
+
+        // 페이지 떠날 때 인터벌 정리
+        window.addEventListener('beforeunload', () => {
+            if (autoUpdateInterval) {
+                clearInterval(autoUpdateInterval);
+            }
         });
 
         // 사용 가능한 캐릭터 목록 로드

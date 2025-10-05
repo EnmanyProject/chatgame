@@ -1,7 +1,7 @@
 /**
  * Episode Trigger Engine
  * @description 자동 에피소드 트리거 시스템 - 시간/호감도/행동 기반
- * @version 2.1.0 - Phase 2-B: 사진 전송 트리거 추가
+ * @version 2.2.0 - Phase 2-C: 먼저 연락 시스템 추가
  * @concept 연애 시뮬레이션 - 수치 숨김, 자연스러운 몰입
  */
 
@@ -66,6 +66,9 @@ class EpisodeTriggerEngine {
 
         // 날짜 변경 체크 (자정 넘어가면 카운트 초기화)
         this.checkDateChange();
+
+        // 0. 먼저 연락 트리거 (Phase 2-C) - 최우선
+        await this.checkProactiveContact();
 
         // 1. 시간 기반 트리거
         await this.checkTimeTriggers();
@@ -726,6 +729,99 @@ class EpisodeTriggerEngine {
         };
         localStorage.setItem(`behavior_flags_${this.characterId}`, JSON.stringify(flags));
         console.log('[트리거 엔진] 행동 플래그 초기화');
+    }
+
+    /**
+     * Phase 2-C: 먼저 연락 트리거
+     */
+    async checkProactiveContact() {
+        console.log('[먼저 연락] 체크 시작...');
+
+        // ProactiveContactSystem 필요
+        if (typeof ProactiveContactSystem === 'undefined') {
+            console.warn('[먼저 연락] ProactiveContactSystem이 로드되지 않음');
+            return;
+        }
+
+        // 멀티 캐릭터 상태 필요
+        if (!this.multiCharacterState) {
+            console.warn('[먼저 연락] multiCharacterState 없음');
+            return;
+        }
+
+        try {
+            // 캐릭터 상태 조회
+            const state = this.multiCharacterState.getState(this.characterId);
+            if (!state) {
+                console.warn(`[먼저 연락] ${this.characterId} 상태 없음`);
+                return;
+            }
+
+            const affection = state.affection || 0;
+            const mbti = state.character?.mbti || 'INFP';
+
+            // 먼저 연락 시스템 초기화
+            if (!this.proactiveContactSystem) {
+                this.proactiveContactSystem = new ProactiveContactSystem(this.characterId);
+            }
+
+            // 1. 일반 먼저 연락 메시지 체크
+            const contactMessage = this.proactiveContactSystem.shouldContact(affection, mbti);
+            if (contactMessage) {
+                console.log('[먼저 연락] 메시지 전송:', contactMessage.text);
+                await this.deliverProactiveMessage(contactMessage);
+                return;
+            }
+
+            // 2. 무응답 반응 메시지 체크
+            const reactionMessage = this.proactiveContactSystem.checkReactionMessage(affection, mbti);
+            if (reactionMessage) {
+                console.log('[먼저 연락] 반응 메시지:', reactionMessage.message);
+
+                // 호감도 변화 적용
+                if (reactionMessage.affectionChange !== 0) {
+                    this.multiCharacterState.updateAffection(
+                        this.characterId,
+                        reactionMessage.affectionChange
+                    );
+                }
+
+                // 메시지 전달
+                await this.deliverProactiveMessage({
+                    type: 'character_message',
+                    text: reactionMessage.message,
+                    timestamp: new Date().toISOString(),
+                    isReaction: true
+                });
+            }
+
+        } catch (error) {
+            console.error('[먼저 연락] 오류:', error);
+        }
+    }
+
+    /**
+     * 먼저 연락 메시지 전달
+     */
+    async deliverProactiveMessage(message) {
+        // EpisodeDeliverySystem이 있다면 사용
+        if (typeof EpisodeDeliverySystem !== 'undefined') {
+            const deliverySystem = new EpisodeDeliverySystem(this.characterId);
+            deliverySystem.addToQueue(message);
+            console.log('[먼저 연락] EpisodeDeliverySystem으로 전달');
+        } else {
+            // 직접 전달
+            console.log('[먼저 연락] 직접 메시지 표시:', message.text);
+
+            // ChatRoomManager 업데이트
+            if (typeof ChatRoomManager !== 'undefined' && window.chatRoomManager) {
+                window.chatRoomManager.updateLastMessage(
+                    this.characterId,
+                    message.text,
+                    false // 캐릭터 메시지
+                );
+            }
+        }
     }
 
     /**

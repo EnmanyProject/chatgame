@@ -323,6 +323,23 @@ class MultiCharacterState {
     }
 
     /**
+     * Phase 2-C: 유저 응답 시 호출 (먼저 연락 시스템 알림)
+     * @param {string} characterId - 캐릭터 ID
+     */
+    notifyUserResponse(characterId) {
+        // ProactiveContactSystem이 있다면 응답 기록
+        if (typeof ProactiveContactSystem !== 'undefined') {
+            try {
+                const system = new ProactiveContactSystem(characterId);
+                system.onUserResponse();
+                console.log(`[무응답 추적] ${characterId} - 유저 응답 기록`);
+            } catch (error) {
+                console.error('[무응답 추적] 오류:', error);
+            }
+        }
+    }
+
+    /**
      * 상태 정보 출력 (디버깅용)
      */
     debugStates() {
