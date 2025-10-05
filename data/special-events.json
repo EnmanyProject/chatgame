@@ -1,0 +1,503 @@
+{
+  "version": "3.2.0",
+  "events": [
+    {
+      "id": "first_date",
+      "name": "첫 데이트 제안",
+      "category": "relationship",
+      "condition": {
+        "type": "affection",
+        "min": 30,
+        "max": 39
+      },
+      "once": true,
+      "message": "저기... 다음 주말에 시간 있어? 같이 카페 가지 않을래? ☕",
+      "emotionChange": { "emotion": "excited", "intensity": 0.9 },
+      "affectionChange": 0,
+      "choices": [
+        { "text": "좋아! 어디로 갈까?", "affection_impact": 5 },
+        { "text": "카페 말고 다른 데는?", "affection_impact": 2 },
+        { "text": "다음에 가자", "affection_impact": -3 }
+      ]
+    },
+    {
+      "id": "confession_moment",
+      "name": "고백의 순간",
+      "category": "relationship",
+      "condition": {
+        "type": "affection",
+        "min": 60,
+        "max": 69
+      },
+      "once": true,
+      "message": "있잖아... 너한테 할 말이 있어. 나 너 좋아해. 진심이야 💕",
+      "emotionChange": { "emotion": "excited", "intensity": 1.0 },
+      "affectionChange": 0,
+      "choices": [
+        { "text": "나도 좋아해!", "affection_impact": 10 },
+        { "text": "고마워, 천천히 생각해볼게", "affection_impact": 3 },
+        { "text": "미안해...", "affection_impact": -10 }
+      ]
+    },
+    {
+      "id": "holding_hands",
+      "name": "처음 손 잡기",
+      "category": "relationship",
+      "condition": {
+        "type": "affection",
+        "min": 40,
+        "max": 49
+      },
+      "once": true,
+      "message": "야, 손 좀 잡아도 돼? 추워서... 😳",
+      "emotionChange": { "emotion": "excited", "intensity": 0.8 },
+      "affectionChange": 0,
+      "choices": [
+        { "text": "당연하지! (손 잡기)", "affection_impact": 7 },
+        { "text": "내 재킷 입을래?", "affection_impact": 4 },
+        { "text": "조금만 참아", "affection_impact": -2 }
+      ]
+    },
+    {
+      "id": "anniversary_100",
+      "name": "100일 기념일",
+      "category": "anniversary",
+      "condition": {
+        "type": "date",
+        "daysAfterMeet": 100
+      },
+      "once": true,
+      "message": "오늘이 우리 만난 지 100일째야! 🎉 깜빡한 거 아니지?",
+      "emotionChange": { "emotion": "happy", "intensity": 0.9 },
+      "affectionChange": 5,
+      "choices": [
+        { "text": "당연히 기억하지! 선물 준비했어", "affection_impact": 10 },
+        { "text": "오늘이었구나! 저녁 먹으러 가자", "affection_impact": 5 },
+        { "text": "아... 깜빡했어", "affection_impact": -5 }
+      ]
+    },
+    {
+      "id": "christmas",
+      "name": "크리스마스 특별",
+      "category": "holiday",
+      "condition": {
+        "type": "date",
+        "date": "12-25"
+      },
+      "once": false,
+      "message": "메리 크리스마스! 🎄 오늘 뭐 해? 같이 보낼 수 있어?",
+      "emotionChange": { "emotion": "excited", "intensity": 0.8 },
+      "affectionChange": 3,
+      "choices": [
+        { "text": "당연하지! 데이트하자", "affection_impact": 8 },
+        { "text": "집에서 영화 볼래?", "affection_impact": 5 },
+        { "text": "가족들이랑 있어야 해", "affection_impact": -2 }
+      ]
+    },
+    {
+      "id": "valentine",
+      "name": "발렌타인데이",
+      "category": "holiday",
+      "condition": {
+        "type": "date",
+        "date": "02-14"
+      },
+      "once": false,
+      "message": "발렌타인데이인데... 혹시 나한테 줄 거 없어? 😊 농담이야ㅋㅋ",
+      "emotionChange": { "emotion": "excited", "intensity": 0.7 },
+      "affectionChange": 0,
+      "choices": [
+        { "text": "준비했지! (초콜릿 주기)", "affection_impact": 10 },
+        { "text": "같이 만들러 가자", "affection_impact": 6 },
+        { "text": "오늘 그런 날이야?", "affection_impact": -4 }
+      ]
+    },
+    {
+      "id": "white_day",
+      "name": "화이트데이",
+      "category": "holiday",
+      "condition": {
+        "type": "date",
+        "date": "03-14"
+      },
+      "once": false,
+      "message": "화이트데이라서 준비했어! 받아줄 거지? 💝",
+      "emotionChange": { "emotion": "happy", "intensity": 0.8 },
+      "affectionChange": 5,
+      "choices": [
+        { "text": "고마워! 너무 좋아", "affection_impact": 7 },
+        { "text": "뭐야 부담스러운데ㅋㅋ", "affection_impact": 2 },
+        { "text": "괜히 그랬어", "affection_impact": -3 }
+      ]
+    },
+    {
+      "id": "worried_no_response",
+      "name": "걱정되어서 연락",
+      "category": "concern",
+      "condition": {
+        "type": "behavior",
+        "noResponseHours": 12
+      },
+      "once": false,
+      "message": "괜찮아? 하루 종일 연락 없어서 걱정됐어... 😢",
+      "emotionChange": { "emotion": "anxious", "intensity": 0.7 },
+      "affectionChange": 0,
+      "choices": [
+        { "text": "미안해, 바빴어. 걱정 끼쳐서 미안", "affection_impact": 4 },
+        { "text": "괜찮아, 뭐하고 있었어?", "affection_impact": 1 },
+        { "text": "그 정도로 걱정할 일이야?", "affection_impact": -5 }
+      ]
+    },
+    {
+      "id": "happy_streak",
+      "name": "행복한 연속",
+      "category": "positive",
+      "condition": {
+        "type": "behavior",
+        "consecutivePositive": 10
+      },
+      "once": false,
+      "message": "요즘 너랑 있으면 너무 행복해! 😊 매일매일이 즐거워",
+      "emotionChange": { "emotion": "happy", "intensity": 0.9 },
+      "affectionChange": 5,
+      "choices": [
+        { "text": "나도 같은 마음이야!", "affection_impact": 5 },
+        { "text": "앞으로도 계속 행복하자", "affection_impact": 4 },
+        { "text": "그래? 다행이다", "affection_impact": 1 }
+      ]
+    },
+    {
+      "id": "random_cafe",
+      "name": "우연히 근처 카페",
+      "category": "random",
+      "condition": {
+        "type": "combo",
+        "conditions": [
+          { "type": "affection", "min": 20 },
+          { "type": "time", "hourMin": 14, "hourMax": 18 },
+          { "type": "random", "chance": 0.15 }
+        ]
+      },
+      "once": false,
+      "message": "어? 너 지금 어디야? 나 ○○ 카페인데 혹시 근처면 올래?",
+      "emotionChange": { "emotion": "excited", "intensity": 0.6 },
+      "affectionChange": 0,
+      "choices": [
+        { "text": "바로 갈게!", "affection_impact": 7 },
+        { "text": "30분 후에 가도 돼?", "affection_impact": 4 },
+        { "text": "지금은 못 가", "affection_impact": -2 }
+      ]
+    },
+    {
+      "id": "dream_about_you",
+      "name": "꿈 이야기",
+      "category": "random",
+      "condition": {
+        "type": "combo",
+        "conditions": [
+          { "type": "affection", "min": 25 },
+          { "type": "time", "hourMin": 7, "hourMax": 10 },
+          { "type": "random", "chance": 0.2 }
+        ]
+      },
+      "once": false,
+      "message": "어제 꿈에 네가 나왔어 ㅋㅋ 우리 둘이서 놀이공원 갔는데 진짜 재밌었어",
+      "emotionChange": { "emotion": "happy", "intensity": 0.6 },
+      "affectionChange": 2,
+      "choices": [
+        { "text": "어떤 꿈이었는지 더 말해줘!", "affection_impact": 3 },
+        { "text": "나도 같은 꿈 꿨으면 좋겠다", "affection_impact": 4 },
+        { "text": "꿈이잖아ㅋㅋ", "affection_impact": -1 }
+      ]
+    },
+    {
+      "id": "friend_talk",
+      "name": "친구에게 말했어",
+      "category": "random",
+      "condition": {
+        "type": "combo",
+        "conditions": [
+          { "type": "affection", "min": 35 },
+          { "type": "random", "chance": 0.1 }
+        ]
+      },
+      "once": false,
+      "message": "친구한테 너 얘기 했더니 언제 소개시켜달래 ㅋㅋ",
+      "emotionChange": { "emotion": "happy", "intensity": 0.5 },
+      "affectionChange": 3,
+      "choices": [
+        { "text": "좋은 얘기만 해줬겠지?", "affection_impact": 3 },
+        { "text": "나도 내 친구들한테 네 얘기 했어", "affection_impact": 5 },
+        { "text": "괜히 그랬어", "affection_impact": -2 }
+      ]
+    },
+    {
+      "id": "rainy_day",
+      "name": "비 오는 날",
+      "category": "weather",
+      "condition": {
+        "type": "combo",
+        "conditions": [
+          { "type": "affection", "min": 15 },
+          { "type": "random", "chance": 0.25 }
+        ]
+      },
+      "once": false,
+      "message": "오늘 비 오는데... 이런 날엔 파전이랑 막걸리지~ 같이 먹을래?",
+      "emotionChange": { "emotion": "calm", "intensity": 0.6 },
+      "affectionChange": 0,
+      "choices": [
+        { "text": "좋아! 어디서 만날까?", "affection_impact": 5 },
+        { "text": "배달 시켜서 집에서 먹자", "affection_impact": 6 },
+        { "text": "다음에 먹자", "affection_impact": -1 }
+      ]
+    },
+    {
+      "id": "photo_request",
+      "name": "사진 보여줘",
+      "category": "request",
+      "condition": {
+        "type": "combo",
+        "conditions": [
+          { "type": "affection", "min": 30 },
+          { "type": "behavior", "totalMessages": 50 }
+        ]
+      },
+      "once": false,
+      "message": "오늘 뭐 했어? 사진 있으면 보여줘! 궁금해 ㅎㅎ",
+      "emotionChange": { "emotion": "excited", "intensity": 0.5 },
+      "affectionChange": 0,
+      "choices": [
+        { "text": "(사진 보내기)", "affection_impact": 5 },
+        { "text": "나중에 직접 보여줄게", "affection_impact": 3 },
+        { "text": "부끄러운데...", "affection_impact": 1 }
+      ]
+    },
+    {
+      "id": "sick_day",
+      "name": "아픈 날",
+      "category": "concern",
+      "condition": {
+        "type": "random",
+        "chance": 0.05
+      },
+      "once": false,
+      "message": "으... 오늘 몸이 안 좋아서 누워있어 😷 걱정 안 해도 돼, 좀 쉬면 괜찮을 거야",
+      "emotionChange": { "emotion": "sad", "intensity": 0.6 },
+      "affectionChange": 0,
+      "choices": [
+        { "text": "내가 약이랑 죽 사다줄게!", "affection_impact": 10 },
+        { "text": "푹 쉬고 나으면 연락해", "affection_impact": 5 },
+        { "text": "괜찮겠지?", "affection_impact": -3 }
+      ]
+    },
+    {
+      "id": "movie_together",
+      "name": "영화 보자",
+      "category": "activity",
+      "condition": {
+        "type": "combo",
+        "conditions": [
+          { "type": "affection", "min": 25 },
+          { "type": "time", "hourMin": 18, "hourMax": 22 }
+        ]
+      },
+      "once": false,
+      "message": "요새 재밌는 영화 많이 나왔던데 같이 볼래? 🎬",
+      "emotionChange": { "emotion": "excited", "intensity": 0.6 },
+      "affectionChange": 0,
+      "choices": [
+        { "text": "좋아! 무슨 영화 볼까?", "affection_impact": 5 },
+        { "text": "넷플릭스 보는 게 어때?", "affection_impact": 4 },
+        { "text": "영화 별로 안 좋아해", "affection_impact": -2 }
+      ]
+    },
+    {
+      "id": "late_night_call",
+      "name": "늦은 밤 전화",
+      "category": "intimate",
+      "condition": {
+        "type": "combo",
+        "conditions": [
+          { "type": "affection", "min": 50 },
+          { "type": "time", "hourMin": 23, "hourMax": 2 }
+        ]
+      },
+      "once": false,
+      "message": "자려고 했는데 자꾸 네 생각나... 전화해도 돼? 목소리 듣고 싶어 🌙",
+      "emotionChange": { "emotion": "excited", "intensity": 0.8 },
+      "affectionChange": 3,
+      "choices": [
+        { "text": "나도 네 목소리 듣고 싶었어", "affection_impact": 7 },
+        { "text": "잠깐만 통화하자", "affection_impact": 4 },
+        { "text": "내일 통화하자, 피곤해", "affection_impact": -3 }
+      ]
+    },
+    {
+      "id": "surprise_gift",
+      "name": "깜짝 선물",
+      "category": "surprise",
+      "condition": {
+        "type": "combo",
+        "conditions": [
+          { "type": "affection", "min": 45 },
+          { "type": "random", "chance": 0.08 }
+        ]
+      },
+      "once": false,
+      "message": "짜잔! 너 주려고 준비한 거야 🎁 놀랐지? ㅎㅎ",
+      "emotionChange": { "emotion": "excited", "intensity": 0.9 },
+      "affectionChange": 5,
+      "choices": [
+        { "text": "와! 고마워, 너무 좋아!", "affection_impact": 8 },
+        { "text": "어떻게 알았어? 이거 갖고 싶었는데!", "affection_impact": 10 },
+        { "text": "괜히 돈 쓰게 해서 미안해", "affection_impact": 2 }
+      ]
+    },
+    {
+      "id": "jealous_moment",
+      "name": "질투하는 순간",
+      "category": "emotion",
+      "condition": {
+        "type": "combo",
+        "conditions": [
+          { "type": "affection", "min": 40 },
+          { "type": "random", "chance": 0.1 }
+        ]
+      },
+      "once": false,
+      "message": "너... 요즘 다른 사람이랑 친하게 지내는 거 같은데 기분 이상하다 😒",
+      "emotionChange": { "emotion": "anxious", "intensity": 0.7 },
+      "affectionChange": 0,
+      "choices": [
+        { "text": "그냥 친구일 뿐이야, 걱정 마", "affection_impact": 5 },
+        { "text": "질투하는 거야? 귀엽네", "affection_impact": 3 },
+        { "text": "왜 그런 생각을 해?", "affection_impact": -4 }
+      ]
+    },
+    {
+      "id": "future_talk",
+      "name": "미래 이야기",
+      "category": "intimate",
+      "condition": {
+        "type": "affection",
+        "min": 70
+      },
+      "once": false,
+      "message": "있잖아... 우리 나중에도 계속 같이 있을 거지? 💕",
+      "emotionChange": { "emotion": "excited", "intensity": 0.8 },
+      "affectionChange": 0,
+      "choices": [
+        { "text": "당연하지! 평생 같이 있자", "affection_impact": 10 },
+        { "text": "좋은 방향으로 노력하자", "affection_impact": 5 },
+        { "text": "그건 나중에 생각하자", "affection_impact": -3 }
+      ]
+    },
+    {
+      "id": "morning_message",
+      "name": "굿모닝 메시지",
+      "category": "daily",
+      "condition": {
+        "type": "combo",
+        "conditions": [
+          { "type": "affection", "min": 20 },
+          { "type": "time", "hourMin": 6, "hourMax": 9 },
+          { "type": "random", "chance": 0.3 }
+        ]
+      },
+      "once": false,
+      "message": "좋은 아침! ☀️ 오늘도 화이팅! 점심 뭐 먹을지 벌써 생각중ㅋㅋ",
+      "emotionChange": { "emotion": "happy", "intensity": 0.6 },
+      "affectionChange": 2,
+      "choices": [
+        { "text": "좋은 아침! 나도 잘 먹고 다녀", "affection_impact": 3 },
+        { "text": "점심 같이 먹자!", "affection_impact": 5 },
+        { "text": "아직 자고 싶은데...", "affection_impact": -1 }
+      ]
+    },
+    {
+      "id": "thank_you",
+      "name": "고마워",
+      "category": "emotion",
+      "condition": {
+        "type": "combo",
+        "conditions": [
+          { "type": "affection", "min": 35 },
+          { "type": "behavior", "totalMessages": 100 }
+        ]
+      },
+      "once": false,
+      "message": "있잖아, 너랑 알게 돼서 정말 다행이야. 고마워 💝",
+      "emotionChange": { "emotion": "happy", "intensity": 0.8 },
+      "affectionChange": 5,
+      "choices": [
+        { "text": "나도 정말 고마워", "affection_impact": 6 },
+        { "text": "나야말로 행운이지", "affection_impact": 7 },
+        { "text": "별말씀을ㅋㅋ", "affection_impact": 2 }
+      ]
+    },
+    {
+      "id": "study_date",
+      "name": "같이 공부하자",
+      "category": "activity",
+      "condition": {
+        "type": "combo",
+        "conditions": [
+          { "type": "affection", "min": 20 },
+          { "type": "time", "hourMin": 13, "hourMax": 19 }
+        ]
+      },
+      "once": false,
+      "message": "카페에서 같이 공부할래? 혼자 하니까 집중이 안 돼 📚",
+      "emotionChange": { "emotion": "calm", "intensity": 0.5 },
+      "affectionChange": 0,
+      "choices": [
+        { "text": "좋아! 어디서 만날까?", "affection_impact": 4 },
+        { "text": "우리 집에서 하는 건 어때?", "affection_impact": 5 },
+        { "text": "나도 집중 안 될 것 같은데", "affection_impact": -1 }
+      ]
+    },
+    {
+      "id": "comfort_needed",
+      "name": "위로가 필요해",
+      "category": "concern",
+      "condition": {
+        "type": "combo",
+        "conditions": [
+          { "type": "affection", "min": 30 },
+          { "type": "random", "chance": 0.07 }
+        ]
+      },
+      "once": false,
+      "message": "오늘 힘든 일이 있었어... 네 목소리 듣고 싶다 😢",
+      "emotionChange": { "emotion": "sad", "intensity": 0.7 },
+      "affectionChange": 0,
+      "choices": [
+        { "text": "무슨 일이야? 들어줄게", "affection_impact": 8 },
+        { "text": "내가 지금 갈게!", "affection_impact": 10 },
+        { "text": "힘내, 괜찮아질 거야", "affection_impact": 4 }
+      ]
+    },
+    {
+      "id": "weekend_plan",
+      "name": "주말 계획",
+      "category": "activity",
+      "condition": {
+        "type": "combo",
+        "conditions": [
+          { "type": "affection", "min": 25 },
+          { "type": "random", "chance": 0.2 }
+        ]
+      },
+      "once": false,
+      "message": "이번 주말에 뭐 할 거야? 같이 시간 보낼 수 있으면 좋겠는데 😊",
+      "emotionChange": { "emotion": "excited", "intensity": 0.6 },
+      "affectionChange": 0,
+      "choices": [
+        { "text": "같이 보내자! 뭐 하고 싶어?", "affection_impact": 6 },
+        { "text": "나도 너 보고 싶었어", "affection_impact": 7 },
+        { "text": "이번 주말은 좀 바빠", "affection_impact": -2 }
+      ]
+    }
+  ]
+}

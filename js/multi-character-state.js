@@ -18,11 +18,16 @@ class MultiCharacterState {
         this.achievementSystem = null;
         this.initializeStatsSystems();
 
+        // Phase 3 Milestone 2: 감정/이벤트 시스템 통합
+        this.emotionSystems = {};      // 캐릭터별 EmotionStateSystem
+        this.eventSystems = {};         // 캐릭터별 SpecialEventSystem
+        this.initializeEmotionEventSystems();
+
         console.log('🎮 MultiCharacterState 초기화 완료');
     }
 
     /**
-     * Phase 3: 통계 시스템 초기화
+     * Phase 3 Milestone 1: 통계 시스템 초기화
      */
     initializeStatsSystems() {
         if (typeof StatisticsManager !== 'undefined') {
@@ -34,6 +39,43 @@ class MultiCharacterState {
             this.achievementSystem = new AchievementSystem(this.statisticsManager);
             console.log('✅ AchievementSystem 통합 완료');
         }
+    }
+
+    /**
+     * Phase 3 Milestone 2: 감정/이벤트 시스템 초기화
+     */
+    initializeEmotionEventSystems() {
+        // 감정/이벤트 시스템은 캐릭터별로 동적 생성됨
+        console.log('✅ 감정/이벤트 시스템 준비 완료');
+    }
+
+    /**
+     * Phase 3 Milestone 2: 캐릭터별 감정 시스템 가져오기
+     * @param {string} characterId - 캐릭터 ID
+     * @param {string} mbtiType - MBTI 타입
+     */
+    getEmotionSystem(characterId, mbtiType = 'ENFP') {
+        if (!this.emotionSystems[characterId]) {
+            if (typeof EmotionStateSystem !== 'undefined') {
+                this.emotionSystems[characterId] = new EmotionStateSystem(characterId, mbtiType);
+                console.log(`😊 ${characterId} 감정 시스템 생성 (${mbtiType})`);
+            }
+        }
+        return this.emotionSystems[characterId];
+    }
+
+    /**
+     * Phase 3 Milestone 2: 캐릭터별 이벤트 시스템 가져오기
+     * @param {string} characterId - 캐릭터 ID
+     */
+    getEventSystem(characterId) {
+        if (!this.eventSystems[characterId]) {
+            if (typeof SpecialEventSystem !== 'undefined') {
+                this.eventSystems[characterId] = new SpecialEventSystem(characterId, this);
+                console.log(`🎉 ${characterId} 이벤트 시스템 생성`);
+            }
+        }
+        return this.eventSystems[characterId];
     }
 
     /**
@@ -154,7 +196,7 @@ class MultiCharacterState {
      * @param {string} characterId - 캐릭터 ID
      * @param {number} delta - 변경량 (-100 ~ 100)
      */
-    changeAffection(characterId, delta) {
+    changeAffection(characterId, delta, mbtiType = 'ENFP') {
         const state = this.getState(characterId);
         const oldAffection = state.affection;
         state.affection = Math.max(-100, Math.min(100, state.affection + delta));
@@ -162,14 +204,20 @@ class MultiCharacterState {
         // 관계 단계 자동 업데이트
         this.updateRelationshipStage(characterId);
 
-        // Phase 3: 통계 시스템 연동
+        // Phase 3 Milestone 1: 통계 시스템 연동
         if (this.statisticsManager) {
             this.statisticsManager.recordAffectionChange(characterId, state.affection);
         }
 
-        // Phase 3: 업적 체크
+        // Phase 3 Milestone 1: 업적 체크
         if (this.achievementSystem) {
             this.achievementSystem.checkAllAchievements();
+        }
+
+        // Phase 3 Milestone 2: 감정 시스템 연동
+        const emotionSystem = this.getEmotionSystem(characterId, mbtiType);
+        if (emotionSystem) {
+            emotionSystem.onAffectionChange(delta);
         }
 
         this.saveStates();
