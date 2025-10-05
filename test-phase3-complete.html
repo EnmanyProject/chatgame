@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 3 완전 통합 테스트</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .system-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .status-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .status-card.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .status-card h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .status-card .value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .test-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        .test-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .test-section h2 {
+            color: #667eea;
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .test-button {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .test-button.secondary {
+            background: #6c757d;
+        }
+
+        .test-button.success {
+            background: #28a745;
+        }
+
+        .test-button.danger {
+            background: #dc3545;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .log-box {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-left: 3px solid #667eea;
+            padding-left: 10px;
+        }
+
+        .log-entry.success {
+            border-left-color: #28a745;
+            color: #4dff88;
+        }
+
+        .log-entry.error {
+            border-left-color: #dc3545;
+            color: #ff6b6b;
+        }
+
+        .log-entry.info {
+            border-left-color: #17a2b8;
+            color: #4fc3f7;
+        }
+
+        .character-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .character-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .character-btn.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .stat-item .label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-item .value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .achievement-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            max-width: 300px;
+            animation: slideIn 0.5s ease;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quick-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <div class="header">
+            <h1>🎮 Phase 3 완전 통합 테스트</h1>
+            <p>모든 시스템을 테스트하고 게임 상태를 확인하세요</p>
+        </div>
+
+        <!-- 시스템 상태 -->
+        <div class="system-status" id="systemStatus">
+            <!-- 동적 생성 -->
+        </div>
+
+        <!-- 캐릭터 선택 -->
+        <div class="test-section" style="grid-column: 1 / -1;">
+            <h2>🎯 테스트할 캐릭터 선택</h2>
+            <div class="character-selector">
+                <button class="character-btn" onclick="selectCharacter('test_enfp')">ENFP 캐릭터</button>
+                <button class="character-btn" onclick="selectCharacter('test_infp')">INFP 캐릭터</button>
+                <button class="character-btn" onclick="selectCharacter('test_intj')">INTJ 캐릭터</button>
+                <button class="character-btn" onclick="createNewCharacter()">+ 새 캐릭터 생성</button>
+            </div>
+            <div id="selectedCharacterInfo"></div>
+        </div>
+
+        <!-- 테스트 섹션들 -->
+        <div class="test-sections">
+            <!-- 1. 통계 & 업적 테스트 -->
+            <div class="test-section">
+                <h2>📊 통계 & 업적 시스템</h2>
+                <button class="test-button" onclick="testStatistics()">📈 통계 조회</button>
+                <button class="test-button" onclick="testAchievements()">🏆 업적 체크</button>
+                <button class="test-button secondary" onclick="simulatePlaySession()">🎮 플레이 세션 시뮬레이션</button>
+                <div id="statsResult" class="result-box" style="display: none;"></div>
+            </div>
+
+            <!-- 2. 감정 & 이벤트 테스트 -->
+            <div class="test-section">
+                <h2>😊 감정 & 이벤트 시스템</h2>
+                <button class="test-button" onclick="testEmotionSystem()">😊 감정 상태 조회</button>
+                <button class="test-button" onclick="changeEmotion()">🎭 감정 변경 테스트</button>
+                <button class="test-button" onclick="checkSpecialEvents()">🎉 특별 이벤트 체크</button>
+                <button class="test-button secondary" onclick="triggerRandomEvent()">🎲 랜덤 이벤트 발동</button>
+                <div id="emotionResult" class="result-box" style="display: none;"></div>
+            </div>
+
+            <!-- 3. 메모리 시스템 테스트 -->
+            <div class="test-section">
+                <h2>🧠 대화 기억 시스템</h2>
+                <div class="input-group">
+                    <label>테스트 메시지 입력</label>
+                    <textarea id="testMessage" rows="3" placeholder="예: 나는 영화 보는 걸 정말 좋아해"></textarea>
+                </div>
+                <button class="test-button" onclick="testMemoryAdd()">💬 메시지 추가</button>
+                <button class="test-button" onclick="testMemorySearch()">🔍 메모리 검색</button>
+                <button class="test-button" onclick="testMemoryContext()">📝 AI 컨텍스트 생성</button>
+                <div id="memoryResult" class="result-box" style="display: none;"></div>
+            </div>
+
+            <!-- 4. 엔딩 시스템 테스트 -->
+            <div class="test-section">
+                <h2>🏁 엔딩 시스템</h2>
+                <div class="input-group">
+                    <label>호감도 설정 (-100 ~ 100)</label>
+                    <input type="number" id="affectionInput" min="-100" max="100" value="0">
+                </div>
+                <button class="test-button" onclick="setAffection()">💕 호감도 설정</button>
+                <button class="test-button" onclick="checkEnding()">🏁 엔딩 조건 체크</button>
+                <button class="test-button success" onclick="testTrueEnding()">💖 트루 엔딩 시뮬레이션</button>
+                <div id="endingResult" class="result-box" style="display: none;"></div>
+            </div>
+
+            <!-- 5. 통합 관리자 테스트 -->
+            <div class="test-section">
+                <h2>🎮 통합 관리 시스템</h2>
+                <button class="test-button" onclick="testIntegration()">🔄 통합 이벤트 처리</button>
+                <button class="test-button" onclick="testFullGameState()">📊 전체 게임 상태</button>
+                <button class="test-button" onclick="testPerformance()">⚡ 성능 메트릭</button>
+                <button class="test-button danger" onclick="testSystemHealth()">🏥 시스템 헬스 체크</button>
+                <div id="integrationResult" class="result-box" style="display: none;"></div>
+            </div>
+
+            <!-- 6. 종합 시나리오 테스트 -->
+            <div class="test-section">
+                <h2>🎬 종합 시나리오</h2>
+                <button class="test-button" onclick="runFullScenario()">🎯 완전한 게임 플로우</button>
+                <button class="test-button secondary" onclick="runSpeedrunScenario()">⚡ 스피드런 시나리오</button>
+                <button class="test-button secondary" onclick="runBadEndingScenario()">💔 배드엔딩 시나리오</button>
+                <div id="scenarioResult" class="result-box" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- 실시간 로그 -->
+        <div class="test-section" style="margin-top: 20px;">
+            <h2>📝 실시간 시스템 로그</h2>
+            <div class="quick-actions">
+                <button onclick="clearLog()">🗑️ 로그 지우기</button>
+                <button onclick="exportLog()">💾 로그 저장</button>
+            </div>
+            <div id="systemLog" class="log-box"></div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/multi-character-state.js"></script>
+    <script src="js/statistics-manager.js"></script>
+    <script src="js/achievement-system.js"></script>
+    <script src="js/emotion-state-system.js"></script>
+    <script src="js/special-event-system.js"></script>
+    <script src="js/conversation-memory-system.js"></script>
+    <script src="js/memory-keywords.js"></script>
+    <script src="js/ending-system.js"></script>
+    <script src="js/game-integration-manager.js"></script>
+
+    <script>
+        // 전역 변수
+        let multiCharacterState;
+        let selectedCharacterId = null;
+
+        // 초기화
+        window.onload = function() {
+            log('🎮 Phase 3 통합 테스트 시작', 'info');
+
+            // MultiCharacterState 초기화
+            multiCharacterState = new MultiCharacterState();
+
+            // 시스템 상태 표시
+            updateSystemStatus();
+
+            log('✅ 모든 시스템 초기화 완료', 'success');
+        };
+
+        // 시스템 상태 업데이트
+        function updateSystemStatus() {
+            const systems = {
+                'StatisticsManager': !!multiCharacterState.statisticsManager,
+                'AchievementSystem': !!multiCharacterState.achievementSystem,
+                'EmotionSystem': Object.keys(multiCharacterState.emotionSystems).length > 0,
+                'EventSystem': Object.keys(multiCharacterState.eventSystems).length > 0,
+                'MemorySystem': Object.keys(multiCharacterState.memorySystems).length > 0,
+                'EndingManager': !!multiCharacterState.endingManager,
+                'IntegrationManager': !!multiCharacterState.integrationManager
+            };
+
+            const statusHtml = Object.entries(systems).map(([name, active]) => `
+                <div class="status-card ${active ? 'active' : ''}">
+                    <h3>${name}</h3>
+                    <div class="value">${active ? '✅ 활성' : '❌ 비활성'}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('systemStatus').innerHTML = statusHtml;
+        }
+
+        // 캐릭터 선택
+        function selectCharacter(characterId) {
+            selectedCharacterId = characterId;
+
+            // 캐릭터가 없으면 생성
+            if (!multiCharacterState.getState(characterId)) {
+                const mbtiType = characterId.includes('enfp') ? 'ENFP' :
+                               characterId.includes('infp') ? 'INFP' : 'INTJ';
+                multiCharacterState.createState(characterId, mbtiType);
+                log(`새 캐릭터 생성: ${characterId} (${mbtiType})`, 'success');
+            }
+
+            // UI 업데이트
+            document.querySelectorAll('.character-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+
+            // 캐릭터 정보 표시
+            const state = multiCharacterState.getState(characterId);
+            document.getElementById('selectedCharacterInfo').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="label">호감도</div>
+                        <div class="value">${state.affection}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="label">메시지 수</div>
+                        <div class="value">${state.messageCount}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="label">관계 단계</div>
+                        <div class="value">${state.relationshipStage}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="label">MBTI</div>
+                        <div class="value">${state.mbtiType || 'ENFP'}</div>
+                    </div>
+                </div>
+            `;
+
+            log(`캐릭터 선택: ${characterId}`, 'info');
+        }
+
+        // 새 캐릭터 생성
+        function createNewCharacter() {
+            const id = `test_${Date.now()}`;
+            const mbti = prompt('MBTI 타입을 입력하세요 (ENFP, INFP, INTJ 등):', 'ENFP');
+            if (mbti) {
+                multiCharacterState.createState(id, mbti.toUpperCase());
+                log(`새 캐릭터 생성: ${id} (${mbti})`, 'success');
+                alert(`캐릭터 생성 완료: ${id}`);
+            }
+        }
+
+        // 1. 통계 테스트
+        function testStatistics() {
+            if (!selectedCharacterId) {
+                alert('캐릭터를 먼저 선택하세요!');
+                return;
+            }
+
+            const stats = multiCharacterState.statisticsManager.getCharacterStats(selectedCharacterId);
+            showResult('statsResult', JSON.stringify(stats, null, 2));
+            log('통계 조회 완료', 'success');
+        }
+
+        function testAchievements() {
+            if (!multiCharacterState.achievementSystem) {
+                alert('AchievementSystem이 초기화되지 않았습니다.');
+                return;
+            }
+
+            multiCharacterState.achievementSystem.checkAllAchievements();
+            const achievements = multiCharacterState.achievementSystem.getAchievementStats();
+            showResult('statsResult', JSON.stringify(achievements, null, 2));
+            log('업적 체크 완료', 'success');
+        }
+
+        function simulatePlaySession() {
+            if (!selectedCharacterId) {
+                alert('캐릭터를 먼저 선택하세요!');
+                return;
+            }
+
+            log('플레이 세션 시뮬레이션 시작...', 'info');
+
+            // 세션 시작
+            multiCharacterState.startSession();
+
+            // 10번 메시지 시뮬레이션
+            for (let i = 0; i < 10; i++) {
+                multiCharacterState.notifyUserResponse(
+                    selectedCharacterId,
+                    `테스트 메시지 ${i + 1}`,
+                    { affectionChange: Math.random() > 0.5 ? 2 : -1 }
+                );
+                multiCharacterState.notifyCharacterMessage(
+                    selectedCharacterId,
+                    `응답 메시지 ${i + 1}`
+                );
+            }
+
+            // 세션 종료
+            multiCharacterState.endSession(selectedCharacterId);
+
+            const stats = multiCharacterState.statisticsManager.getCharacterStats(selectedCharacterId);
+            showResult('statsResult', `세션 완료!\n\n${JSON.stringify(stats, null, 2)}`);
+            log('플레이 세션 시뮬레이션 완료', 'success');
+        }
+
+        // 2. 감정 & 이벤트 테스트
+        function testEmotionSystem() {
+            if (!selectedCharacterId) {
+                alert('캐릭터를 먼저 선택하세요!');
+                return;
+            }
+
+            const emotionSystem = multiCharacterState.getEmotionSystem(selectedCharacterId);
+            if (!emotionSystem) {
+                showResult('emotionResult', '감정 시스템이 초기화되지 않았습니다.');
+                return;
+            }
+
+            const state = emotionSystem.getState();
+            showResult('emotionResult', JSON.stringify(state, null, 2));
+            log('감정 상태 조회 완료', 'success');
+        }
+
+        function changeEmotion() {
+            if (!selectedCharacterId) {
+                alert('캐릭터를 먼저 선택하세요!');
+                return;
+            }
+
+            const emotions = ['happy', 'excited', 'calm', 'sad', 'anxious', 'angry'];
+            const emotion = emotions[Math.floor(Math.random() * emotions.length)];
+            const intensity = Math.random();
+
+            const emotionSystem = multiCharacterState.getEmotionSystem(selectedCharacterId);
+            if (emotionSystem) {
+                emotionSystem.changeEmotion(emotion, intensity, 'test');
+                showResult('emotionResult', `감정 변경: ${emotion} (강도: ${intensity.toFixed(2)})`);
+                log(`감정 변경: ${emotion}`, 'success');
+            }
+        }
+
+        function checkSpecialEvents() {
+            if (!selectedCharacterId) {
+                alert('캐릭터를 먼저 선택하세요!');
+                return;
+            }
+
+            const eventSystem = multiCharacterState.getEventSystem(selectedCharacterId);
+            if (!eventSystem) {
+                showResult('emotionResult', '이벤트 시스템이 초기화되지 않았습니다.');
+                return;
+            }
+
+            const event = eventSystem.checkAllEvents();
+            if (event) {
+                showResult('emotionResult', `특별 이벤트 발생!\n\n${JSON.stringify(event, null, 2)}`);
+                log(`특별 이벤트: ${event.name}`, 'success');
+            } else {
+                showResult('emotionResult', '발동 가능한 이벤트가 없습니다.');
+                log('이벤트 없음', 'info');
+            }
+        }
+
+        function triggerRandomEvent() {
+            if (!selectedCharacterId) {
+                alert('캐릭터를 먼저 선택하세요!');
+                return;
+            }
+
+            // 호감도를 랜덤하게 설정
+            const randomAffection = Math.floor(Math.random() * 100);
+            multiCharacterState.changeAffection(selectedCharacterId, randomAffection);
+
+            checkSpecialEvents();
+        }
+
+        // 3. 메모리 시스템 테스트
+        function testMemoryAdd() {
+            if (!selectedCharacterId) {
+                alert('캐릭터를 먼저 선택하세요!');
+                return;
+            }
+
+            const message = document.getElementById('testMessage').value;
+            if (!message) {
+                alert('메시지를 입력하세요!');
+                return;
+            }
+
+            multiCharacterState.notifyUserResponse(
+                selectedCharacterId,
+                message,
+                { affectionChange: 2 }
+            );
+
+            const memorySystem = multiCharacterState.getMemorySystem(selectedCharacterId);
+            const stats = memorySystem.getStats();
+            showResult('memoryResult', `메시지 추가 완료!\n\n${JSON.stringify(stats, null, 2)}`);
+            log('메모리에 메시지 추가', 'success');
+        }
+
+        function testMemorySearch() {
+            if (!selectedCharacterId) {
+                alert('캐릭터를 먼저 선택하세요!');
+                return;
+            }
+
+            const query = document.getElementById('testMessage').value || '좋아';
+            const memorySystem = multiCharacterState.getMemorySystem(selectedCharacterId);
+
+            if (!memorySystem) {
+                showResult('memoryResult', '메모리 시스템이 초기화되지 않았습니다.');
+                return;
+            }
+
+            const results = memorySystem.searchMemory(query, 5);
+            showResult('memoryResult', `검색 결과 (${query}):\n\n${JSON.stringify(results, null, 2)}`);
+            log(`메모리 검색: ${query}`, 'success');
+        }
+
+        function testMemoryContext() {
+            if (!selectedCharacterId) {
+                alert('캐릭터를 먼저 선택하세요!');
+                return;
+            }
+
+            const context = multiCharacterState.generateMemoryContext(selectedCharacterId);
+            showResult('memoryResult', JSON.stringify(context, null, 2));
+            log('AI 컨텍스트 생성 완료', 'success');
+        }
+
+        // 4. 엔딩 시스템 테스트
+        function setAffection() {
+            if (!selectedCharacterId) {
+                alert('캐릭터를 먼저 선택하세요!');
+                return;
+            }
+
+            const value = parseInt(document.getElementById('affectionInput').value);
+            const state = multiCharacterState.getState(selectedCharacterId);
+            const delta = value - state.affection;
+
+            multiCharacterState.changeAffection(selectedCharacterId, delta);
+            showResult('endingResult', `호감도 설정 완료: ${state.affection} → ${value}`);
+            log(`호감도 변경: ${delta > 0 ? '+' : ''}${delta}`, 'success');
+
+            // 캐릭터 정보 업데이트
+            selectCharacter(selectedCharacterId);
+        }
+
+        function checkEnding() {
+            if (!selectedCharacterId) {
+                alert('캐릭터를 먼저 선택하세요!');
+                return;
+            }
+
+            const ending = multiCharacterState.checkEndingConditions(selectedCharacterId);
+
+            if (ending) {
+                showResult('endingResult', `달성 가능한 엔딩:\n\n${JSON.stringify(ending, null, 2)}`);
+                log(`엔딩 발견: ${ending.name}`, 'success');
+            } else {
+                showResult('endingResult', '아직 달성 가능한 엔딩이 없습니다.\n\n더 많은 대화와 호감도가 필요합니다.');
+                log('엔딩 조건 미달', 'info');
+            }
+        }
+
+        function testTrueEnding() {
+            if (!selectedCharacterId) {
+                alert('캐릭터를 먼저 선택하세요!');
+                return;
+            }
+
+            log('트루 엔딩 시뮬레이션 시작...', 'info');
+
+            // 호감도 95로 설정
+            const state = multiCharacterState.getState(selectedCharacterId);
+            multiCharacterState.changeAffection(selectedCharacterId, 95 - state.affection);
+
+            // 메시지 100개 시뮬레이션
+            for (let i = 0; i < 100; i++) {
+                state.messageCount++;
+            }
+
+            // 연속 14일 설정
+            if (multiCharacterState.statisticsManager) {
+                const stats = multiCharacterState.statisticsManager.getCharacterStats(selectedCharacterId);
+                // 임시로 통계 수정 (실제로는 14일 플레이 필요)
+            }
+
+            // 엔딩 체크
+            const ending = multiCharacterState.checkEndingConditions(selectedCharacterId);
+
+            if (ending) {
+                const result = multiCharacterState.triggerEnding(selectedCharacterId, ending);
+                showResult('endingResult', `🎉 엔딩 달성!\n\n${JSON.stringify(result, null, 2)}`);
+                log(`엔딩 달성: ${ending.name}`, 'success');
+            } else {
+                showResult('endingResult', '엔딩 조건을 만족하지 못했습니다.');
+            }
+        }
+
+        // 5. 통합 관리자 테스트
+        function testIntegration() {
+            if (!selectedCharacterId || !multiCharacterState.integrationManager) {
+                alert('캐릭터를 선택하고 통합 관리자를 확인하세요!');
+                return;
+            }
+
+            // 통합 이벤트 처리 테스트
+            multiCharacterState.integrationManager.onAffectionChange(
+                selectedCharacterId,
+                5,
+                'ENFP',
+                { test: true }
+            );
+
+            const report = multiCharacterState.integrationManager.getPerformanceReport();
+            showResult('integrationResult', JSON.stringify(report, null, 2));
+            log('통합 이벤트 처리 완료', 'success');
+        }
+
+        function testFullGameState() {
+            if (!selectedCharacterId) {
+                alert('캐릭터를 먼저 선택하세요!');
+                return;
+            }
+
+            const fullState = multiCharacterState.getFullGameState(selectedCharacterId);
+            showResult('integrationResult', JSON.stringify(fullState, null, 2));
+            log('전체 게임 상태 조회 완료', 'success');
+        }
+
+        function testPerformance() {
+            if (!multiCharacterState.integrationManager) {
+                alert('통합 관리자가 초기화되지 않았습니다.');
+                return;
+            }
+
+            const report = multiCharacterState.integrationManager.getPerformanceReport();
+            showResult('integrationResult', JSON.stringify(report, null, 2));
+            log('성능 메트릭 조회 완료', 'success');
+        }
+
+        function testSystemHealth() {
+            if (!multiCharacterState.integrationManager) {
+                alert('통합 관리자가 초기화되지 않았습니다.');
+                return;
+            }
+
+            const health = multiCharacterState.integrationManager.checkSystemHealth();
+            showResult('integrationResult', JSON.stringify(health, null, 2));
+
+            if (health.healthy) {
+                log('시스템 정상 ✅', 'success');
+            } else {
+                log('시스템 문제 발견 ⚠️', 'error');
+            }
+        }
+
+        // 6. 종합 시나리오
+        function runFullScenario() {
+            if (!selectedCharacterId) {
+                alert('캐릭터를 먼저 선택하세요!');
+                return;
+            }
+
+            log('=== 완전한 게임 플로우 시작 ===', 'info');
+            let result = '';
+
+            // 1단계: 첫 만남
+            result += '1️⃣ 첫 만남\n';
+            multiCharacterState.notifyUserResponse(selectedCharacterId, '안녕하세요!', {});
+            multiCharacterState.changeAffection(selectedCharacterId, 5);
+            result += `   호감도: ${multiCharacterState.getState(selectedCharacterId).affection}\n\n`;
+
+            // 2단계: 대화 진행
+            result += '2️⃣ 대화 진행 (20회)\n';
+            for (let i = 0; i < 20; i++) {
+                multiCharacterState.notifyUserResponse(
+                    selectedCharacterId,
+                    `대화 ${i + 1}`,
+                    { affectionChange: Math.random() > 0.3 ? 2 : -1 }
+                );
+            }
+            result += `   호감도: ${multiCharacterState.getState(selectedCharacterId).affection}\n\n`;
+
+            // 3단계: 감정 변화
+            result += '3️⃣ 감정 변화\n';
+            const emotionSystem = multiCharacterState.getEmotionSystem(selectedCharacterId);
+            if (emotionSystem) {
+                emotionSystem.changeEmotion('happy', 0.8, 'conversation');
+                result += `   현재 감정: ${emotionSystem.getState().currentEmotion}\n\n`;
+            }
+
+            // 4단계: 특별 이벤트
+            result += '4️⃣ 특별 이벤트 체크\n';
+            const event = multiCharacterState.getEventSystem(selectedCharacterId)?.checkAllEvents();
+            result += event ? `   발생: ${event.name}\n\n` : '   없음\n\n';
+
+            // 5단계: 업적 체크
+            result += '5️⃣ 업적 체크\n';
+            multiCharacterState.achievementSystem?.checkAllAchievements();
+            const achievements = multiCharacterState.achievementSystem?.getAchievementStats();
+            result += `   해제된 업적: ${achievements?.unlockedCount || 0}개\n\n`;
+
+            // 6단계: 엔딩 조건
+            result += '6️⃣ 엔딩 조건 체크\n';
+            const ending = multiCharacterState.checkEndingConditions(selectedCharacterId);
+            result += ending ? `   달성 가능: ${ending.name}\n` : '   아직 없음\n';
+
+            showResult('scenarioResult', result);
+            log('완전한 게임 플로우 완료', 'success');
+        }
+
+        function runSpeedrunScenario() {
+            if (!selectedCharacterId) {
+                alert('캐릭터를 먼저 선택하세요!');
+                return;
+            }
+
+            log('=== 스피드런 시나리오 시작 ===', 'info');
+
+            // 빠르게 호감도 80 달성
+            multiCharacterState.changeAffection(selectedCharacterId, 80);
+
+            // 30개 메시지
+            const state = multiCharacterState.getState(selectedCharacterId);
+            state.messageCount = 30;
+
+            // 엔딩 체크
+            const ending = multiCharacterState.checkEndingConditions(selectedCharacterId);
+
+            let result = '⚡ 스피드런 결과\n\n';
+            result += `호감도: ${state.affection}\n`;
+            result += `메시지: ${state.messageCount}\n`;
+            result += `경과 시간: 3일 미만\n\n`;
+            result += ending ? `엔딩: ${ending.name}` : '엔딩 없음';
+
+            showResult('scenarioResult', result);
+            log('스피드런 시나리오 완료', 'success');
+        }
+
+        function runBadEndingScenario() {
+            if (!selectedCharacterId) {
+                alert('캐릭터를 먼저 선택하세요!');
+                return;
+            }
+
+            log('=== 배드엔딩 시나리오 시작 ===', 'info');
+
+            // 호감도 -50으로 하락
+            const state = multiCharacterState.getState(selectedCharacterId);
+            multiCharacterState.changeAffection(selectedCharacterId, -50 - state.affection);
+
+            // 20개 메시지
+            state.messageCount = 20;
+
+            // 엔딩 체크
+            const ending = multiCharacterState.checkEndingConditions(selectedCharacterId);
+
+            let result = '💔 배드엔딩 결과\n\n';
+            result += `호감도: ${state.affection}\n`;
+            result += `메시지: ${state.messageCount}\n\n`;
+            result += ending ? `엔딩: ${ending.name}\n\n${ending.description}` : '엔딩 없음';
+
+            showResult('scenarioResult', result);
+            log('배드엔딩 시나리오 완료', 'success');
+        }
+
+        // 유틸리티 함수
+        function showResult(elementId, content) {
+            const element = document.getElementById(elementId);
+            element.textContent = content;
+            element.style.display = 'block';
+        }
+
+        function log(message, type = 'info') {
+            const logBox = document.getElementById('systemLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${timestamp}] ${message}`;
+            logBox.insertBefore(entry, logBox.firstChild);
+
+            // 콘솔에도 출력
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function clearLog() {
+            document.getElementById('systemLog').innerHTML = '';
+            log('로그 초기화 완료', 'info');
+        }
+
+        function exportLog() {
+            const logBox = document.getElementById('systemLog');
+            const text = logBox.textContent;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `phase3-test-log-${Date.now()}.txt`;
+            a.click();
+            log('로그 파일 저장 완료', 'success');
+        }
+    </script>
+</body>
+</html>
