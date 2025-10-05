@@ -16,6 +16,14 @@
 
 ## ✅ 최근 완료 작업
 
+### 문서 구조 재정비 ✅ (2025-10-05)
+- `.claude-code/` 폴더 정리 (15개 → 3개 핵심 문서)
+- `PROJECT.md` 생성 및 게임 컨셉 업데이트
+- `MASTER.md` 생성 (현재 작업 가이드)
+- `CLAUDE.md` 역할 재정의 (버전 히스토리 전용)
+- `.claude-code/archive/` 생성 및 5개 Phase 문서 보관
+- 11개 구버전 문서 삭제
+
 ### Phase 2-B: 사진 전송 시스템 ✅ (2025-10-05)
 - `js/photo-sending-system.js` 생성 (500줄)
 - `js/episode-delivery-system.js` 사진 표시 기능 추가
