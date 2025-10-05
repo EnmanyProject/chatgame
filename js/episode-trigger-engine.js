@@ -1,7 +1,7 @@
 /**
  * Episode Trigger Engine
  * @description 자동 에피소드 트리거 시스템 - 시간/호감도/행동 기반
- * @version 2.0.0
+ * @version 2.1.0 - Phase 2-B: 사진 전송 트리거 추가
  * @concept 연애 시뮬레이션 - 수치 숨김, 자연스러운 몰입
  */
 
@@ -280,6 +280,60 @@ class EpisodeTriggerEngine {
             await this.sendTriggerMessage(message);
             this.todayCounts.proactiveMessages++;
             this.saveTodayCounts();
+
+            // 호감도 레벨업 시 사진 전송 시도 (Phase 2-B)
+            await this.tryPhotoSending(newLevel);
+        }
+    }
+
+    /**
+     * 사진 전송 시도 (Phase 2-B)
+     */
+    async tryPhotoSending(affectionLevel) {
+        // PhotoSendingSystem 확인
+        if (typeof window.photoSendingSystem === 'undefined') {
+            console.warn('[사진 트리거] PhotoSendingSystem 미초기화');
+            return;
+        }
+
+        try {
+            // 캐릭터 MBTI 가져오기
+            let characterData = null;
+            if (typeof multiCharacterState !== 'undefined' && multiCharacterState) {
+                const state = multiCharacterState.getState(this.characterId);
+                characterData = state.character;
+            }
+
+            if (!characterData) {
+                console.warn('[사진 트리거] 캐릭터 데이터 없음');
+                return;
+            }
+
+            const mbti = characterData.mbti || characterData.basic_info?.mbti || 'INFP';
+
+            // 호감도 증가 트리거 실행
+            const result = await window.photoSendingSystem.triggerByAffectionIncrease(
+                this.characterId,
+                mbti,
+                affectionLevel,
+                affectionLevel - 1
+            );
+
+            if (result) {
+                console.log('[사진 트리거] 사진 전송 성공:', result.category);
+
+                // 에피소드로 전달
+                if (typeof createPhotoEpisode === 'function' && this.deliverySystem) {
+                    const episode = createPhotoEpisode(
+                        result.photo.photo_data,
+                        result.message,
+                        result.category
+                    );
+                    this.deliverySystem.addToQueue(episode);
+                }
+            }
+        } catch (error) {
+            console.error('[사진 트리거] 오류:', error);
         }
     }
 

@@ -502,6 +502,7 @@
     <script src="/js/episode-delivery-system.js"></script>
     <script src="/js/episode-trigger-engine.js"></script>
     <script src="/js/tone-variation-engine.js"></script>
+    <script src="/js/photo-sending-system.js"></script>
     <script>
         // 전역 변수
         let currentCharacterId = null;
@@ -1077,6 +1078,67 @@
 
         // 초기화 실행
         init();
+
+        /**
+         * 사진 모달 관련 함수들
+         */
+        function openPhotoModal(photoData, category) {
+            const modal = document.getElementById('photoModal');
+            const modalImg = document.getElementById('modalPhoto');
+            const modalCategory = document.getElementById('modalCategory');
+
+            if (!modal || !modalImg) {
+                console.error('[모달] 모달 요소를 찾을 수 없음');
+                return;
+            }
+
+            modalImg.src = photoData;
+            if (modalCategory) {
+                const categoryNames = {
+                    'profile': '프로필',
+                    'casual': '일상',
+                    'romantic': '로맨틱',
+                    'emotional': '감정 표현',
+                    'special': '특별한 순간'
+                };
+                modalCategory.textContent = categoryNames[category] || category;
+            }
+
+            modal.style.display = 'flex';
+            console.log('[모달] 사진 모달 열림:', category);
+        }
+
+        function closePhotoModal() {
+            const modal = document.getElementById('photoModal');
+            if (modal) {
+                modal.style.display = 'none';
+                console.log('[모달] 사진 모달 닫힘');
+            }
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.addEventListener('click', (event) => {
+            const modal = document.getElementById('photoModal');
+            if (event.target === modal) {
+                closePhotoModal();
+            }
+        });
+
+        // ESC 키로 모달 닫기
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closePhotoModal();
+            }
+        });
     </script>
+
+    <!-- 사진 모달 -->
+    <div id="photoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="position: relative; max-width: 90%; max-height: 90%; background: white; border-radius: 12px; overflow: hidden;">
+            <button onclick="closePhotoModal()" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 20px; z-index: 10001;">&times;</button>
+            <img id="modalPhoto" src="" alt="사진" style="width: 100%; height: auto; display: block;">
+            <div id="modalCategory" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); color: white; padding: 20px; text-align: center; font-size: 16px;"></div>
+        </div>
+    </div>
 </body>
 </html>

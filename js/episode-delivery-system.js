@@ -1,7 +1,7 @@
 /**
  * Episode Delivery System
  * @description 에피소드 전달 및 타이밍 관리 시스템
- * @version 2.0.0
+ * @version 2.1.0 - Phase 2-B: 사진 전송 시스템 추가
  */
 
 class EpisodeDeliverySystem {
@@ -258,12 +258,108 @@ function createTextQuizEpisode(text, context = {}, photo = null) {
     };
 }
 
+/**
+ * 사진 메시지 에피소드 생성
+ * @param {string} photoData - base64 사진 데이터
+ * @param {string} message - 사진과 함께 보낼 메시지
+ * @param {string} category - 사진 카테고리
+ * @returns {Object} 사진 에피소드
+ */
+function createPhotoEpisode(photoData, message, category = 'casual') {
+    return {
+        type: 'character_message',
+        text: message,
+        photo: {
+            data: photoData,
+            category: category
+        },
+        requires_response: false
+    };
+}
+
+/**
+ * 사진 표시 함수
+ * @param {Object} photoInfo - 사진 정보 객체
+ * @param {HTMLElement} messageElement - 메시지 요소
+ */
+function displayPhoto(photoInfo, messageElement) {
+    if (!photoInfo || !photoInfo.data) {
+        console.warn('[사진 표시] 사진 데이터 없음');
+        return;
+    }
+
+    // 사진 컨테이너 생성
+    const photoContainer = document.createElement('div');
+    photoContainer.className = 'photo-container';
+    photoContainer.style.cssText = `
+        margin: 10px 0;
+        border-radius: 12px;
+        overflow: hidden;
+        max-width: 300px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    `;
+
+    // 사진 이미지 생성
+    const img = document.createElement('img');
+    img.src = photoInfo.data;
+    img.alt = `사진 (${photoInfo.category || 'unknown'})`;
+    img.style.cssText = `
+        width: 100%;
+        height: auto;
+        display: block;
+    `;
+
+    // 클릭 시 모달 열기
+    img.addEventListener('click', () => {
+        if (typeof openPhotoModal === 'function') {
+            openPhotoModal(photoInfo.data, photoInfo.category);
+        } else {
+            // Fallback: 새 창으로 열기
+            window.open(photoInfo.data, '_blank');
+        }
+    });
+
+    photoContainer.appendChild(img);
+    messageElement.appendChild(photoContainer);
+
+    console.log('[사진 표시] 성공:', photoInfo.category);
+}
+
+/**
+ * 사진 전송 에피소드 생성 (PhotoSendingSystem 연동)
+ * @param {string} characterId - 캐릭터 ID
+ * @param {string} mbti - MBTI 타입
+ * @param {number} affection - 호감도
+ * @returns {Promise<Object|null>} 사진 에피소드
+ */
+async function createPhotoSendingEpisode(characterId, mbti, affection) {
+    // PhotoSendingSystem 확인
+    if (typeof window.photoSendingSystem === 'undefined') {
+        console.warn('[사진 전송] PhotoSendingSystem 미초기화');
+        return null;
+    }
+
+    // 사진 전송 시도
+    const result = await window.photoSendingSystem.attemptPhotoSend(characterId, mbti, affection);
+
+    if (!result) {
+        return null;
+    }
+
+    // 사진 에피소드 생성
+    return createPhotoEpisode(result.photo.photo_data, result.message, result.category);
+}
+
 // Export for use
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         EpisodeDeliverySystem,
         createMessageEpisode,
         createChoiceEpisode,
-        createTextQuizEpisode
+        createTextQuizEpisode,
+        createPhotoEpisode,
+        displayPhoto,
+        createPhotoSendingEpisode
     };
 }
