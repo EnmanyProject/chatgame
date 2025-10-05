@@ -23,6 +23,11 @@ class MultiCharacterState {
         this.eventSystems = {};         // 캐릭터별 SpecialEventSystem
         this.initializeEmotionEventSystems();
 
+        // Phase 3 Milestone 3: 대화 기억 시스템 통합
+        this.memorySystems = {};        // 캐릭터별 ConversationMemorySystem
+        this.memoryExtractor = null;    // 공통 MemoryExtractor
+        this.initializeMemorySystems();
+
         console.log('🎮 MultiCharacterState 초기화 완료');
     }
 
@@ -47,6 +52,20 @@ class MultiCharacterState {
     initializeEmotionEventSystems() {
         // 감정/이벤트 시스템은 캐릭터별로 동적 생성됨
         console.log('✅ 감정/이벤트 시스템 준비 완료');
+    }
+
+    /**
+     * Phase 3 Milestone 3: 대화 기억 시스템 초기화
+     */
+    initializeMemorySystems() {
+        // 공통 MemoryExtractor 생성
+        if (typeof MemoryExtractor !== 'undefined') {
+            this.memoryExtractor = new MemoryExtractor();
+            console.log('✅ MemoryExtractor 통합 완료');
+        }
+
+        // 메모리 시스템은 캐릭터별로 동적 생성됨
+        console.log('✅ 대화 기억 시스템 준비 완료');
     }
 
     /**
@@ -76,6 +95,20 @@ class MultiCharacterState {
             }
         }
         return this.eventSystems[characterId];
+    }
+
+    /**
+     * Phase 3 Milestone 3: 캐릭터별 메모리 시스템 가져오기
+     * @param {string} characterId - 캐릭터 ID
+     */
+    getMemorySystem(characterId) {
+        if (!this.memorySystems[characterId]) {
+            if (typeof ConversationMemorySystem !== 'undefined') {
+                this.memorySystems[characterId] = new ConversationMemorySystem(characterId);
+                console.log(`🧠 ${characterId} 메모리 시스템 생성`);
+            }
+        }
+        return this.memorySystems[characterId];
     }
 
     /**
@@ -414,8 +447,10 @@ class MultiCharacterState {
     /**
      * Phase 2-C: 유저 응답 시 호출 (먼저 연락 시스템 알림)
      * @param {string} characterId - 캐릭터 ID
+     * @param {string} message - 유저 메시지 내용 (Phase 3 Milestone 3)
+     * @param {object} context - 추가 컨텍스트 (Phase 3 Milestone 3)
      */
-    notifyUserResponse(characterId) {
+    notifyUserResponse(characterId, message = '', context = {}) {
         // ProactiveContactSystem이 있다면 응답 기록
         if (typeof ProactiveContactSystem !== 'undefined') {
             try {
@@ -427,19 +462,34 @@ class MultiCharacterState {
             }
         }
 
-        // Phase 3: 메시지 기록
+        // Phase 3 Milestone 1: 메시지 기록
         if (this.statisticsManager) {
             this.statisticsManager.recordMessage(characterId, true); // true = 유저 메시지
+        }
+
+        // Phase 3 Milestone 3: 메모리 시스템에 유저 메시지 기록
+        const memorySystem = this.getMemorySystem(characterId);
+        if (memorySystem && message) {
+            memorySystem.addMessage('user', message, context);
         }
     }
 
     /**
      * Phase 3: 캐릭터 메시지 수신 기록
      * @param {string} characterId - 캐릭터 ID
+     * @param {string} message - 캐릭터 메시지 내용 (Phase 3 Milestone 3)
+     * @param {object} context - 추가 컨텍스트 (Phase 3 Milestone 3)
      */
-    notifyCharacterMessage(characterId) {
+    notifyCharacterMessage(characterId, message = '', context = {}) {
+        // Phase 3 Milestone 1: 메시지 기록
         if (this.statisticsManager) {
             this.statisticsManager.recordMessage(characterId, false); // false = 캐릭터 메시지
+        }
+
+        // Phase 3 Milestone 3: 메모리 시스템에 캐릭터 메시지 기록
+        const memorySystem = this.getMemorySystem(characterId);
+        if (memorySystem && message) {
+            memorySystem.addMessage('character', message, context);
         }
     }
 
@@ -490,6 +540,45 @@ class MultiCharacterState {
         if (this.statisticsManager) {
             this.statisticsManager.endSession(characterId);
         }
+
+        // Phase 3 Milestone 3: 메모리 세션 정리
+        if (characterId) {
+            const memorySystem = this.getMemorySystem(characterId);
+            if (memorySystem) {
+                memorySystem.cleanupSession();
+            }
+        }
+    }
+
+    /**
+     * Phase 3 Milestone 3: AI 프롬프트용 메모리 컨텍스트 생성
+     * @param {string} characterId - 캐릭터 ID
+     * @param {string} currentMessage - 현재 유저 메시지
+     */
+    generateMemoryContext(characterId, currentMessage = '') {
+        const memorySystem = this.getMemorySystem(characterId);
+        if (!memorySystem) {
+            return {
+                longTermFacts: [],
+                recentContext: [],
+                relevantMemories: []
+            };
+        }
+
+        return memorySystem.generateContext(currentMessage);
+    }
+
+    /**
+     * Phase 3 Milestone 3: 메모리 통계 조회
+     * @param {string} characterId - 캐릭터 ID
+     */
+    getMemoryStats(characterId) {
+        const memorySystem = this.getMemorySystem(characterId);
+        if (!memorySystem) {
+            return null;
+        }
+
+        return memorySystem.getStats();
     }
 
     /**
