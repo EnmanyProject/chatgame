@@ -28,6 +28,11 @@ class MultiCharacterState {
         this.memoryExtractor = null;    // 공통 MemoryExtractor
         this.initializeMemorySystems();
 
+        // Phase 3 Milestone 4: 엔딩 + 통합 관리 시스템
+        this.endingManager = null;      // EndingManager
+        this.integrationManager = null; // GameIntegrationManager
+        this.initializeEndingAndIntegration();
+
         console.log('🎮 MultiCharacterState 초기화 완료');
     }
 
@@ -66,6 +71,25 @@ class MultiCharacterState {
 
         // 메모리 시스템은 캐릭터별로 동적 생성됨
         console.log('✅ 대화 기억 시스템 준비 완료');
+    }
+
+    /**
+     * Phase 3 Milestone 4: 엔딩 + 통합 관리 시스템 초기화
+     */
+    initializeEndingAndIntegration() {
+        // EndingManager 생성
+        if (typeof EndingManager !== 'undefined') {
+            this.endingManager = new EndingManager();
+            console.log('✅ EndingManager 통합 완료');
+        }
+
+        // GameIntegrationManager 생성
+        if (typeof GameIntegrationManager !== 'undefined') {
+            this.integrationManager = new GameIntegrationManager(this);
+            console.log('✅ GameIntegrationManager 통합 완료');
+        }
+
+        console.log('✅ 엔딩 + 통합 관리 시스템 준비 완료');
     }
 
     /**
@@ -229,7 +253,7 @@ class MultiCharacterState {
      * @param {string} characterId - 캐릭터 ID
      * @param {number} delta - 변경량 (-100 ~ 100)
      */
-    changeAffection(characterId, delta, mbtiType = 'ENFP') {
+    changeAffection(characterId, delta, mbtiType = 'ENFP', context = {}) {
         const state = this.getState(characterId);
         const oldAffection = state.affection;
         state.affection = Math.max(-100, Math.min(100, state.affection + delta));
@@ -242,15 +266,22 @@ class MultiCharacterState {
             this.statisticsManager.recordAffectionChange(characterId, state.affection);
         }
 
-        // Phase 3 Milestone 1: 업적 체크
-        if (this.achievementSystem) {
-            this.achievementSystem.checkAllAchievements();
-        }
+        // Phase 3 Milestone 4: 통합 관리자를 통한 이벤트 처리
+        if (this.integrationManager) {
+            context.affectionChange = delta;
+            this.integrationManager.onAffectionChange(characterId, delta, mbtiType, context);
+        } else {
+            // 통합 관리자가 없으면 개별 시스템 직접 호출 (하위 호환)
+            // Phase 3 Milestone 1: 업적 체크
+            if (this.achievementSystem) {
+                this.achievementSystem.checkAllAchievements();
+            }
 
-        // Phase 3 Milestone 2: 감정 시스템 연동
-        const emotionSystem = this.getEmotionSystem(characterId, mbtiType);
-        if (emotionSystem) {
-            emotionSystem.onAffectionChange(delta);
+            // Phase 3 Milestone 2: 감정 시스템 연동
+            const emotionSystem = this.getEmotionSystem(characterId, mbtiType);
+            if (emotionSystem) {
+                emotionSystem.onAffectionChange(delta);
+            }
         }
 
         this.saveStates();
@@ -579,6 +610,65 @@ class MultiCharacterState {
         }
 
         return memorySystem.getStats();
+    }
+
+    /**
+     * Phase 3 Milestone 4: 엔딩 조건 체크
+     * @param {string} characterId - 캐릭터 ID
+     */
+    checkEndingConditions(characterId) {
+        if (!this.integrationManager) {
+            return null;
+        }
+
+        return this.integrationManager.checkEndingConditions(characterId);
+    }
+
+    /**
+     * Phase 3 Milestone 4: 엔딩 트리거
+     * @param {string} characterId - 캐릭터 ID
+     * @param {object} ending - 엔딩 데이터
+     */
+    triggerEnding(characterId, ending) {
+        if (!this.integrationManager) {
+            return null;
+        }
+
+        return this.integrationManager.triggerEnding(characterId, ending);
+    }
+
+    /**
+     * Phase 3 Milestone 4: AI 프롬프트용 통합 컨텍스트 생성
+     * @param {string} characterId - 캐릭터 ID
+     * @param {string} currentMessage - 현재 유저 메시지
+     */
+    generateAIContext(characterId, currentMessage = '') {
+        if (!this.integrationManager) {
+            // 통합 관리자가 없으면 기본 메모리 컨텍스트만 반환
+            return {
+                characterState: this.getState(characterId),
+                memory: this.generateMemoryContext(characterId, currentMessage)
+            };
+        }
+
+        return this.integrationManager.generateAIContext(characterId, currentMessage);
+    }
+
+    /**
+     * Phase 3 Milestone 4: 전체 게임 상태 조회
+     * @param {string} characterId - 캐릭터 ID
+     */
+    getFullGameState(characterId) {
+        if (!this.integrationManager) {
+            return {
+                character: this.getState(characterId),
+                statistics: this.statisticsManager
+                    ? this.statisticsManager.getCharacterStats(characterId)
+                    : null
+            };
+        }
+
+        return this.integrationManager.getFullGameState(characterId);
     }
 
     /**

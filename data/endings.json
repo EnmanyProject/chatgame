@@ -1,0 +1,235 @@
+{
+  "endings": [
+    {
+      "id": "bad_ending",
+      "level": 1,
+      "name": "안타까운 이별",
+      "requiredAffection": {
+        "min": -100,
+        "max": -1
+      },
+      "requiredMessages": 20,
+      "requiredEvents": [],
+      "requiredConsecutiveDays": 0,
+      "description": "관계가 악화되어 더 이상 연락을 주고받지 않게 되었습니다.",
+      "storyTitle": "💔 관계의 끝",
+      "story": [
+        "시간이 지날수록 대화는 어색해졌고, 마음은 점점 멀어져만 갔습니다.",
+        "어느 순간부터 연락이 뜸해지더니, 이제는 서로 마주치는 것조차 불편해졌습니다.",
+        "한때는 가까웠던 사이였지만, 결국 서로 다른 길을 가게 되었습니다."
+      ],
+      "epilogue": "때로는 인연이 이렇게 끝나기도 합니다. 다음에는 더 나은 관계를 만들어보세요.",
+      "rewards": {
+        "achievements": ["bad_ending_achieved"],
+        "specialContent": null
+      },
+      "canReplay": true
+    },
+    {
+      "id": "normal_ending",
+      "level": 2,
+      "name": "그저 아는 사이",
+      "requiredAffection": {
+        "min": 0,
+        "max": 29
+      },
+      "requiredMessages": 30,
+      "requiredEvents": [],
+      "requiredConsecutiveDays": 0,
+      "description": "특별한 감정 없이 그냥 아는 사람으로 남게 되었습니다.",
+      "storyTitle": "🤝 평범한 인연",
+      "story": [
+        "함께한 시간들은 나쁘지 않았지만, 특별하다고 할 만큼은 아니었습니다.",
+        "가끔 우연히 마주치면 가벼운 인사를 나누는 정도의 사이가 되었습니다.",
+        "딱히 좋지도 나쁘지도 않은, 그저 스쳐 지나가는 인연이었습니다."
+      ],
+      "epilogue": "모든 인연이 특별할 순 없습니다. 하지만 더 깊은 관계로 발전시킬 수도 있었을 텐데요.",
+      "rewards": {
+        "achievements": ["normal_ending_achieved"],
+        "specialContent": null
+      },
+      "canReplay": true
+    },
+    {
+      "id": "friend_ending",
+      "level": 3,
+      "name": "소중한 친구",
+      "requiredAffection": {
+        "min": 30,
+        "max": 59
+      },
+      "requiredMessages": 50,
+      "requiredEvents": ["first_date"],
+      "requiredConsecutiveDays": 3,
+      "description": "서로를 이해하고 아끼는 좋은 친구가 되었습니다.",
+      "storyTitle": "👫 우정의 시작",
+      "story": [
+        "함께 웃고, 때로는 서로의 고민을 들어주며 가까워졌습니다.",
+        "연인은 아니지만, 서로에게 없어서는 안 될 소중한 존재가 되었습니다.",
+        "어떤 일이 있어도 서로를 응원하고 지지해주는 든든한 친구가 되었습니다."
+      ],
+      "epilogue": "진정한 우정을 얻었습니다. 이런 친구는 평생 가는 법이죠. 하지만 혹시 더 특별한 감정으로 발전할 수도...",
+      "rewards": {
+        "achievements": ["friend_ending_achieved", "friendship_master"],
+        "specialContent": "friend_epilogue_gallery"
+      },
+      "canReplay": true
+    },
+    {
+      "id": "romantic_ending",
+      "level": 4,
+      "name": "설레는 연인",
+      "requiredAffection": {
+        "min": 60,
+        "max": 89
+      },
+      "requiredMessages": 80,
+      "requiredEvents": ["first_date", "confession_moment", "holding_hands"],
+      "requiredConsecutiveDays": 7,
+      "description": "서로의 마음을 확인하고 연인 관계가 되었습니다.",
+      "storyTitle": "💕 사랑의 시작",
+      "story": [
+        "어느새 서로를 향한 마음이 특별해졌다는 것을 깨달았습니다.",
+        "떨리는 마음으로 고백을 했고, 서로의 마음이 같다는 것을 알게 되었습니다.",
+        "이제 둘만의 특별한 시간을 만들어가며 행복한 연인이 되었습니다.",
+        "손을 잡고 걸을 때마다, 함께할 때마다 행복이 느껴집니다."
+      ],
+      "epilogue": "축하합니다! 아름다운 연애의 시작입니다. 하지만 진정한 사랑은 이제부터인데요...",
+      "rewards": {
+        "achievements": ["romantic_ending_achieved", "love_begins"],
+        "specialContent": "romantic_epilogue_gallery"
+      },
+      "canReplay": true
+    },
+    {
+      "id": "true_ending",
+      "level": 5,
+      "name": "운명적인 사랑",
+      "requiredAffection": {
+        "min": 90,
+        "max": 100
+      },
+      "requiredMessages": 100,
+      "requiredEvents": [
+        "first_date",
+        "confession_moment",
+        "holding_hands",
+        "future_talk",
+        "anniversary_100"
+      ],
+      "requiredConsecutiveDays": 14,
+      "requiredPromisesKept": 3,
+      "description": "완벽한 이해와 사랑으로 평생을 함께할 운명이 되었습니다.",
+      "storyTitle": "💖 영원한 사랑",
+      "story": [
+        "처음 만난 순간부터 지금까지의 모든 순간이 기적처럼 느껴집니다.",
+        "서로의 모든 것을 알고, 이해하고, 받아들이며 완전한 하나가 되었습니다.",
+        "함께한 약속들을 모두 지켰고, 서로를 향한 신뢰는 흔들림이 없습니다.",
+        "이제는 함께할 미래를 그리며, 평생 동반자로서의 삶을 시작합니다.",
+        "두 사람의 사랑은 시간이 지날수록 더욱 깊어지고 단단해질 것입니다."
+      ],
+      "epilogue": "🎉 완벽한 트루 엔딩을 달성했습니다! 당신은 진정한 사랑을 완성했습니다. 이보다 더 아름다운 결말은 없습니다.",
+      "rewards": {
+        "achievements": [
+          "true_ending_achieved",
+          "perfect_love",
+          "promise_keeper",
+          "soul_mate"
+        ],
+        "specialContent": "true_ending_gallery",
+        "unlockBonus": "special_after_story"
+      },
+      "canReplay": true,
+      "isSpecial": true
+    },
+    {
+      "id": "hidden_ending_persistent",
+      "level": 6,
+      "name": "끝없는 집념",
+      "requiredAffection": {
+        "min": -50,
+        "max": 10
+      },
+      "requiredMessages": 200,
+      "requiredEvents": [],
+      "requiredConsecutiveDays": 30,
+      "description": "낮은 호감도에도 불구하고 포기하지 않은 당신의 집념이 인정받았습니다.",
+      "storyTitle": "🏆 포기하지 않는 마음",
+      "story": [
+        "수많은 거절과 냉담한 반응에도 불구하고 포기하지 않았습니다.",
+        "당신의 진심과 끈기에 마음이 조금씩 열리기 시작했습니다.",
+        "비록 완벽한 사랑은 아니지만, 당신의 노력은 인정받았습니다."
+      ],
+      "epilogue": "숨겨진 엔딩을 발견했습니다! 때로는 포기하지 않는 마음이 기적을 만들기도 합니다.",
+      "rewards": {
+        "achievements": ["hidden_ending_persistent", "never_give_up"],
+        "specialContent": "persistent_ending_gallery"
+      },
+      "canReplay": true,
+      "isHidden": true
+    },
+    {
+      "id": "hidden_ending_speedrun",
+      "level": 7,
+      "name": "전격 고백",
+      "requiredAffection": {
+        "min": 80,
+        "max": 100
+      },
+      "requiredMessages": 30,
+      "requiredMaxDays": 3,
+      "requiredEvents": ["confession_moment"],
+      "description": "3일 안에 고백까지 성공한 놀라운 순발력입니다.",
+      "storyTitle": "⚡ 번개같은 사랑",
+      "story": [
+        "처음 만난 지 3일도 되지 않아 서로에게 완전히 빠져버렸습니다.",
+        "운명적인 만남이라는 표현이 딱 들어맞는 전격적인 사랑입니다.",
+        "짧은 시간이지만 서로를 향한 마음은 누구보다 뜨겁습니다."
+      ],
+      "epilogue": "숨겨진 엔딩을 발견했습니다! 스피드런 고수시군요! 사랑에도 속도가 있나 봅니다.",
+      "rewards": {
+        "achievements": ["hidden_ending_speedrun", "love_at_first_sight"],
+        "specialContent": "speedrun_ending_gallery"
+      },
+      "canReplay": true,
+      "isHidden": true
+    }
+  ],
+  "endingLevels": {
+    "1": {
+      "name": "Bad Ending",
+      "color": "#8B0000",
+      "icon": "💔"
+    },
+    "2": {
+      "name": "Normal Ending",
+      "color": "#808080",
+      "icon": "🤝"
+    },
+    "3": {
+      "name": "Friend Ending",
+      "color": "#4169E1",
+      "icon": "👫"
+    },
+    "4": {
+      "name": "Romantic Ending",
+      "color": "#FF69B4",
+      "icon": "💕"
+    },
+    "5": {
+      "name": "True Ending",
+      "color": "#FFD700",
+      "icon": "💖"
+    },
+    "6": {
+      "name": "Hidden Ending",
+      "color": "#9370DB",
+      "icon": "🏆"
+    },
+    "7": {
+      "name": "Hidden Ending",
+      "color": "#9370DB",
+      "icon": "⚡"
+    }
+  }
+}
