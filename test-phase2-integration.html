@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 2 통합 테스트</title>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        h1 { color: #333; }
+        h2 {
+            color: #666;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .status {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .status.warning {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .icon {
+            font-size: 20px;
+            margin-right: 10px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border-left: 4px solid #2196F3;
+        }
+        .code {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Phase 2 통합 테스트</h1>
+
+    <div class="container">
+        <h2>📋 시스템 로딩 상태</h2>
+        <div id="loading-status"></div>
+        <button onclick="checkSystemLoading()">시스템 로딩 체크</button>
+    </div>
+
+    <div class="container">
+        <h2>🎨 Phase 2-A: 톤 변화 시스템</h2>
+        <div id="tone-status"></div>
+        <button onclick="testToneSystem()">톤 시스템 테스트</button>
+    </div>
+
+    <div class="container">
+        <h2>📸 Phase 2-B: 사진 전송 시스템</h2>
+        <div id="photo-status"></div>
+        <button onclick="testPhotoSystem()">사진 시스템 테스트</button>
+    </div>
+
+    <div class="container">
+        <h2>💬 Phase 2-C: 먼저 연락 시스템</h2>
+        <div id="proactive-status"></div>
+        <button onclick="testProactiveSystem()">먼저 연락 시스템 테스트</button>
+    </div>
+
+    <div class="container">
+        <h2>🔄 트리거 엔진 통합</h2>
+        <div id="trigger-status"></div>
+        <button onclick="testTriggerEngine()">트리거 엔진 테스트</button>
+    </div>
+
+    <div class="container">
+        <h2>📊 전체 워크플로우 테스트</h2>
+        <div id="workflow-status"></div>
+        <button onclick="testFullWorkflow()">전체 워크플로우 실행</button>
+    </div>
+
+    <!-- 시스템 로드 -->
+    <script src="/js/multi-character-state.js"></script>
+    <script src="/js/tone-variation-engine.js"></script>
+    <script src="/js/photo-sending-system.js"></script>
+    <script src="/js/proactive-contact-system.js"></script>
+    <script src="/js/episode-trigger-engine.js"></script>
+
+    <script>
+        // 테스트 결과 표시 함수
+        function showStatus(elementId, success, message) {
+            const statusClass = success ? 'success' : 'error';
+            const icon = success ? '✅' : '❌';
+            document.getElementById(elementId).innerHTML = `
+                <div class="status ${statusClass}">
+                    <span class="icon">${icon}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+        }
+
+        // 시스템 로딩 체크
+        function checkSystemLoading() {
+            const systems = {
+                'MultiCharacterState': typeof MultiCharacterState !== 'undefined',
+                'ToneVariationEngine': typeof ToneVariationEngine !== 'undefined',
+                'PhotoSendingSystem': typeof PhotoSendingSystem !== 'undefined',
+                'ProactiveContactSystem': typeof ProactiveContactSystem !== 'undefined',
+                'EpisodeTriggerEngine': typeof EpisodeTriggerEngine !== 'undefined'
+            };
+
+            let html = '';
+            let allLoaded = true;
+
+            for (const [name, loaded] of Object.entries(systems)) {
+                const status = loaded ? 'success' : 'error';
+                const icon = loaded ? '✅' : '❌';
+                html += `<div class="status ${status}"><span class="icon">${icon}</span><span>${name}</span></div>`;
+                if (!loaded) allLoaded = false;
+            }
+
+            document.getElementById('loading-status').innerHTML = html;
+
+            if (allLoaded) {
+                console.log('✅ 모든 시스템 로드 완료');
+            } else {
+                console.error('❌ 일부 시스템 로드 실패');
+            }
+        }
+
+        // 톤 시스템 테스트
+        function testToneSystem() {
+            try {
+                const toneEngine = new ToneVariationEngine('test_character');
+
+                const tests = [];
+
+                // 호감도별 톤 레벨 테스트
+                for (let affection = 1; affection <= 10; affection++) {
+                    const level = toneEngine.calculateToneLevel(affection);
+                    tests.push({
+                        affection,
+                        level,
+                        expected: affection <= 2 ? 1 : affection <= 4 ? 2 : affection <= 6 ? 3 : affection <= 8 ? 4 : 5
+                    });
+                }
+
+                const allPassed = tests.every(t => t.level === t.expected);
+
+                let html = `<div class="test-result">
+                    <strong>호감도별 톤 레벨 매핑:</strong>
+                    <div class="code">`;
+
+                tests.forEach(t => {
+                    const status = t.level === t.expected ? '✅' : '❌';
+                    html += `${status} 호감도 ${t.affection} → 레벨 ${t.level} (예상: ${t.expected})\n`;
+                });
+
+                html += `</div></div>`;
+
+                document.getElementById('tone-status').innerHTML = html;
+                showStatus('tone-status', allPassed, allPassed ? '톤 시스템 정상 작동' : '톤 시스템 오류');
+
+            } catch (error) {
+                showStatus('tone-status', false, `오류: ${error.message}`);
+            }
+        }
+
+        // 사진 시스템 테스트
+        async function testPhotoSystem() {
+            try {
+                const photoSystem = new PhotoSendingSystem();
+
+                // 초기화 대기
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                const results = {
+                    dbLoaded: photoSystem.photoDB !== null,
+                    hasPhotos: photoSystem.photoDB && Object.keys(photoSystem.photoDB.photos || {}).length > 0
+                };
+
+                let html = `<div class="test-result">
+                    <strong>사진 시스템 상태:</strong>
+                    <div class="code">`;
+
+                html += `${results.dbLoaded ? '✅' : '❌'} 사진 DB 로드: ${results.dbLoaded}\n`;
+                html += `${results.hasPhotos ? '✅' : '❌'} 사진 데이터 존재: ${results.hasPhotos}\n`;
+
+                if (results.hasPhotos) {
+                    const photoCount = photoSystem.photoDB.metadata?.total_photos || 0;
+                    const charCount = Object.keys(photoSystem.photoDB.photos).length;
+                    html += `📊 캐릭터 수: ${charCount}\n`;
+                    html += `📸 총 사진 수: ${photoCount}\n`;
+                }
+
+                html += `</div></div>`;
+
+                document.getElementById('photo-status').innerHTML = html;
+                const success = results.dbLoaded && results.hasPhotos;
+                showStatus('photo-status', success, success ? '사진 시스템 정상 작동' : '사진 시스템 오류');
+
+            } catch (error) {
+                showStatus('photo-status', false, `오류: ${error.message}`);
+            }
+        }
+
+        // 먼저 연락 시스템 테스트
+        function testProactiveSystem() {
+            try {
+                const proactiveSystem = new ProactiveContactSystem('test_character');
+
+                let html = `<div class="test-result">
+                    <strong>호감도별 연락 주기:</strong>
+                    <div class="code">`;
+
+                for (let affection = 0; affection <= 10; affection++) {
+                    const interval = proactiveSystem.getContactInterval(affection);
+                    const display = interval === Infinity ? '연락 중지' : `${interval}분`;
+                    html += `호감도 ${affection}: ${display}\n`;
+                }
+
+                html += `\n<strong>MBTI별 인내심 패턴:</strong>\n`;
+
+                const mbtiTypes = ['INFP', 'ENFP', 'INTJ', 'ENTJ', 'INFJ', 'ENFJ',
+                                   'INTP', 'ENTP', 'ISFP', 'ESFP', 'ISTP', 'ESTP',
+                                   'ISFJ', 'ESFJ', 'ISTJ', 'ESTJ'];
+
+                mbtiTypes.forEach(mbti => {
+                    const pattern = proactiveSystem.getPatiencePattern(mbti);
+                    if (pattern) {
+                        html += `${mbti}: ${pattern.name} (${pattern.reactions.length}단계)\n`;
+                    }
+                });
+
+                html += `</div></div>`;
+
+                document.getElementById('proactive-status').innerHTML = html;
+                showStatus('proactive-status', true, '먼저 연락 시스템 정상 작동');
+
+            } catch (error) {
+                showStatus('proactive-status', false, `오류: ${error.message}`);
+            }
+        }
+
+        // 트리거 엔진 테스트
+        function testTriggerEngine() {
+            try {
+                const multiState = new MultiCharacterState();
+                const testCharId = 'test_character';
+
+                // 테스트 캐릭터 초기화
+                multiState.initializeCharacter(testCharId);
+
+                const triggerEngine = new EpisodeTriggerEngine(testCharId, multiState);
+
+                let html = `<div class="test-result">
+                    <strong>트리거 엔진 상태:</strong>
+                    <div class="code">`;
+
+                html += `✅ 트리거 엔진 초기화 완료\n`;
+                html += `✅ 캐릭터 ID: ${triggerEngine.characterId}\n`;
+                html += `✅ 실행 상태: ${triggerEngine.isRunning ? '실행 중' : '중지'}\n`;
+                html += `\n<strong>통합된 시스템:</strong>\n`;
+                html += `✅ ProactiveContactSystem: ${typeof ProactiveContactSystem !== 'undefined' ? '로드됨' : '미로드'}\n`;
+                html += `✅ PhotoSendingSystem: ${typeof PhotoSendingSystem !== 'undefined' ? '로드됨' : '미로드'}\n`;
+                html += `✅ ToneVariationEngine: ${typeof ToneVariationEngine !== 'undefined' ? '로드됨' : '미로드'}\n`;
+
+                html += `</div></div>`;
+
+                document.getElementById('trigger-status').innerHTML = html;
+                showStatus('trigger-status', true, '트리거 엔진 정상 작동');
+
+            } catch (error) {
+                showStatus('trigger-status', false, `오류: ${error.message}`);
+            }
+        }
+
+        // 전체 워크플로우 테스트
+        async function testFullWorkflow() {
+            try {
+                let html = `<div class="test-result">
+                    <strong>전체 워크플로우 테스트:</strong>
+                    <div class="code">`;
+
+                // 1. MultiCharacterState 초기화
+                html += `\n[1/6] MultiCharacterState 초기화...\n`;
+                const multiState = new MultiCharacterState();
+                const testCharId = 'workflow_test';
+                multiState.initializeCharacter(testCharId);
+                html += `✅ 캐릭터 초기화 완료\n`;
+
+                // 2. 호감도 변경 테스트
+                html += `\n[2/6] 호감도 시스템 테스트...\n`;
+                multiState.changeAffection(testCharId, 5);
+                const state = multiState.getState(testCharId);
+                html += `✅ 호감도 변경: ${state.affection}\n`;
+                html += `✅ 관계 단계: ${state.relationshipStage}\n`;
+
+                // 3. 톤 시스템 테스트
+                html += `\n[3/6] 톤 변화 시스템 테스트...\n`;
+                const toneEngine = new ToneVariationEngine(testCharId);
+                const toneLevel = toneEngine.calculateToneLevel(state.affection);
+                html += `✅ 현재 톤 레벨: ${toneLevel}\n`;
+
+                // 4. 먼저 연락 시스템 테스트
+                html += `\n[4/6] 먼저 연락 시스템 테스트...\n`;
+                const proactiveSystem = new ProactiveContactSystem(testCharId);
+                const interval = proactiveSystem.getContactInterval(state.affection);
+                html += `✅ 연락 주기: ${interval}분\n`;
+
+                // 5. 트리거 엔진 테스트
+                html += `\n[5/6] 트리거 엔진 통합 테스트...\n`;
+                const triggerEngine = new EpisodeTriggerEngine(testCharId, multiState);
+                html += `✅ 트리거 엔진 초기화\n`;
+
+                // 6. 유저 응답 추적 테스트
+                html += `\n[6/6] 유저 응답 추적 테스트...\n`;
+                multiState.notifyUserResponse(testCharId);
+                html += `✅ 유저 응답 기록 완료\n`;
+
+                html += `\n━━━━━━━━━━━━━━━━━━━━━━\n`;
+                html += `🎉 전체 워크플로우 테스트 성공!\n`;
+                html += `</div></div>`;
+
+                document.getElementById('workflow-status').innerHTML = html;
+                showStatus('workflow-status', true, '전체 워크플로우 정상 작동');
+
+            } catch (error) {
+                showStatus('workflow-status', false, `오류: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        // 페이지 로드 시 자동 체크
+        window.addEventListener('DOMContentLoaded', () => {
+            checkSystemLoading();
+        });
+    </script>
+</body>
+</html>
