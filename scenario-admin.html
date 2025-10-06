@@ -7490,6 +7490,14 @@
         }
 
         // 탭 전환 (전역 함수)
+        // 최상단으로 스크롤
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
         function switchTab(tabName) {
             // 모든 탭과 섹션 비활성화
             document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
@@ -8010,7 +8018,7 @@
                 const tags = scenario.metadata?.tags || scenario.tags || [];
 
                 return `
-                    <div class="scenario-card">
+                    <div class="scenario-card" onclick="scrollToTop()" style="cursor: pointer;">
                         <h3>${scenario.title}</h3>
                         <p class="description">${scenario.description}</p>
                         <div class="metadata">
@@ -8020,7 +8028,7 @@
                             ${tags.slice(0, 2).map(tag => `<span class="tag">${tag}</span>`).join('')}
                             <span class="tag">에피소드: ${scenario.dialogue_count || 0}개</span>
                         </div>
-                        <div class="actions">
+                        <div class="actions" onclick="event.stopPropagation()">
                             <button class="btn btn-success" onclick="editScenario('${scenarioId}')">수정</button>
                             <button class="btn btn-primary" onclick="manageDialogues('${scenarioId}')">에피소드</button>
                             <button class="btn btn-info" onclick="testScenarioWithModel('${scenarioId}')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">▶️ 테스트</button>
