@@ -567,21 +567,25 @@
                     return;
                 }
 
-                const data = await response.json();
-                console.log('📸 사진 데이터:', data);
+                const apiData = await response.json();
+                console.log('📸 사진 데이터:', apiData);
 
-                // profile 카테고리 사진 찾기
-                if (data.success && data.photos && data.photos.profile && data.photos.profile.length > 0) {
-                    const profilePhoto = data.photos.profile[0];
-                    const container = document.getElementById('profilePhotoContainer');
+                // API 응답 구조: { success: true, data: [...photos array...] }
+                if (apiData.success && apiData.data && Array.isArray(apiData.data)) {
+                    // profile 카테고리 사진 찾기
+                    const profilePhoto = apiData.data.find(photo => photo.category === 'profile');
+                    if (profilePhoto && profilePhoto.photo_data) {
+                        const container = document.getElementById('profilePhotoContainer');
 
-                    // 이미지로 교체
-                    container.outerHTML = `<img id="profilePhotoContainer" class="profile-photo" src="${profilePhoto.data}" alt="프로필 사진">`;
-                    console.log('✅ 프로필 사진 표시 완료');
-                } else {
-                    console.log('ℹ️ 프로필 사진 없음 - placeholder 사용');
-                    setPlaceholderPhoto();
+                        // 이미지로 교체
+                        container.outerHTML = `<img id="profilePhotoContainer" class="profile-photo" src="${profilePhoto.photo_data}" alt="프로필 사진">`;
+                        console.log('✅ 프로필 사진 표시 완료');
+                        return;
+                    }
                 }
+
+                console.log('ℹ️ 프로필 사진 없음 - placeholder 사용');
+                setPlaceholderPhoto();
             } catch (error) {
                 console.error('❌ 프로필 사진 로드 에러:', error);
                 setPlaceholderPhoto();

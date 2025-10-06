@@ -490,17 +490,21 @@
                     return null;
                 }
 
-                const data = await response.json();
-                console.log('📸 사진 데이터 응답:', data);
+                const apiData = await response.json();
+                console.log('📸 사진 데이터 응답:', apiData);
 
-                // profile 카테고리의 첫 번째 사진 사용
-                if (data.success && data.photos && data.photos.profile && data.photos.profile.length > 0) {
-                    console.log('✅ 프로필 사진 찾음:', characterId);
-                    return data.photos.profile[0].data;
-                } else {
-                    console.log('ℹ️ 프로필 사진 없음:', characterId);
-                    return null;
+                // API 응답 구조: { success: true, data: [...photos array...] }
+                if (apiData.success && apiData.data && Array.isArray(apiData.data)) {
+                    // profile 카테고리 사진 찾기
+                    const profilePhoto = apiData.data.find(photo => photo.category === 'profile');
+                    if (profilePhoto && profilePhoto.photo_data) {
+                        console.log('✅ 프로필 사진 찾음:', characterId);
+                        return profilePhoto.photo_data;
+                    }
                 }
+
+                console.log('ℹ️ 프로필 사진 없음:', characterId);
+                return null;
             } catch (error) {
                 console.error('❌ 프로필 사진 로드 에러:', characterId, error);
                 return null;
