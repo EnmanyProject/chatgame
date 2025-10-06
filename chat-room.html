@@ -57,6 +57,30 @@
             color: #000;
         }
 
+        /* 프로필 사진 */
+        .profile-photo {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            object-fit: cover;
+            border: 2px solid rgba(60, 30, 30, 0.1);
+            background-color: #fff;
+        }
+
+        .profile-photo-placeholder {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            border: 2px solid rgba(60, 30, 30, 0.1);
+        }
+
         .character-info {
             flex: 1;
         }
@@ -344,6 +368,7 @@
     <!-- 헤더 -->
     <div class="chat-header">
         <button class="back-btn" onclick="goBack()">←</button>
+        <div id="profilePhotoContainer" class="profile-photo-placeholder">?</div>
         <div class="character-info">
             <div class="character-name">
                 <span id="characterName">로딩 중...</span>
@@ -406,8 +431,14 @@
         async function init() {
             currentCharacterId = getCharacterIdFromUrl();
             if (!currentCharacterId) {
-                alert('캐릭터 ID가 없습니다.');
-                goBack();
+                document.getElementById('messagesContainer').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⚠️</div>
+                        <div class="empty-message">캐릭터 ID가 없습니다</div>
+                        <div class="empty-description">대화방 리스트로 돌아가주세요</div>
+                    </div>
+                `;
+                console.error('❌ 캐릭터 ID가 없습니다');
                 return;
             }
 
@@ -415,7 +446,11 @@
             initPhase3Systems();
 
             // 캐릭터 정보 로드
-            await loadCharacter();
+            const characterLoaded = await loadCharacter();
+            if (!characterLoaded) {
+                console.error('❌ 캐릭터 로드 실패 - 초기화 중단');
+                return;
+            }
 
             // 대화방 데이터 로드
             await loadChatRoom();
@@ -453,6 +488,8 @@
                 console.log('🔍 찾는 캐릭터 ID:', currentCharacterId);
 
                 const response = await fetch('/api/character-ai-generator?action=list_characters');
+                console.log('📡 API 응답 상태:', response.status, response.statusText);
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -470,6 +507,9 @@
                     document.getElementById('characterStatus').textContent =
                         `${currentCharacter.basic_info.age}세 · ${translateOccupation(currentCharacter.basic_info.occupation)}`;
 
+                    // 프로필 사진 로드
+                    await loadProfilePhoto(currentCharacterId);
+
                     // Phase 3 캐릭터 상태 초기화
                     if (multiCharacterState) {
                         multiCharacterState.initCharacterState(
@@ -478,15 +518,82 @@
                         );
                         console.log('✅ Phase 3 캐릭터 상태 초기화:', currentCharacterId);
                     }
+
+                    return true; // 성공
                 } else {
                     console.error('❌ 캐릭터를 찾을 수 없음');
                     console.log('사용 가능한 캐릭터 ID:', Object.keys(data.characters || {}));
-                    throw new Error('캐릭터를 찾을 수 없습니다.');
+
+                    // 에러 상태 표시
+                    document.getElementById('messagesContainer').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">❌</div>
+                            <div class="empty-message">캐릭터를 찾을 수 없습니다</div>
+                            <div class="empty-description">캐릭터 ID: ${currentCharacterId}<br>사용 가능한 ID를 콘솔에서 확인하세요</div>
+                        </div>
+                    `;
+                    return false;
                 }
             } catch (error) {
                 console.error('❌ 캐릭터 로드 실패:', error);
-                alert('캐릭터 정보를 불러올 수 없습니다.\n캐릭터 ID: ' + currentCharacterId + '\nGitHub API 연결을 확인해주세요.');
-                goBack();
+                console.error('에러 상세:', error.message, error.stack);
+
+                // 에러 상태 표시 (페이지는 유지)
+                document.getElementById('messagesContainer').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⚠️</div>
+                        <div class="empty-message">캐릭터 정보를 불러올 수 없습니다</div>
+                        <div class="empty-description">
+                            캐릭터 ID: ${currentCharacterId}<br>
+                            에러: ${error.message}<br>
+                            <br>
+                            콘솔(F12)에서 상세 정보를 확인하세요
+                        </div>
+                    </div>
+                `;
+                return false;
+            }
+        }
+
+        // 프로필 사진 로드
+        async function loadProfilePhoto(characterId) {
+            try {
+                console.log('🖼️ 프로필 사진 로드 중...');
+                const response = await fetch('/api/character-ai-generator?action=get_photos&character_id=' + characterId);
+
+                if (!response.ok) {
+                    console.warn('⚠️ 프로필 사진 로드 실패:', response.status);
+                    setPlaceholderPhoto();
+                    return;
+                }
+
+                const data = await response.json();
+                console.log('📸 사진 데이터:', data);
+
+                // profile 카테고리 사진 찾기
+                if (data.photos && data.photos.profile && data.photos.profile.length > 0) {
+                    const profilePhoto = data.photos.profile[0];
+                    const container = document.getElementById('profilePhotoContainer');
+
+                    // 이미지로 교체
+                    container.outerHTML = `<img id="profilePhotoContainer" class="profile-photo" src="${profilePhoto.data}" alt="프로필 사진">`;
+                    console.log('✅ 프로필 사진 표시 완료');
+                } else {
+                    console.log('ℹ️ 프로필 사진 없음 - placeholder 사용');
+                    setPlaceholderPhoto();
+                }
+            } catch (error) {
+                console.error('❌ 프로필 사진 로드 에러:', error);
+                setPlaceholderPhoto();
+            }
+        }
+
+        // Placeholder 프로필 사진 설정
+        function setPlaceholderPhoto() {
+            const container = document.getElementById('profilePhotoContainer');
+            if (currentCharacter && currentCharacter.basic_info) {
+                const initial = currentCharacter.basic_info.name ? currentCharacter.basic_info.name[0] : '?';
+                container.textContent = initial;
             }
         }
 

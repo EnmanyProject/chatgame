@@ -98,6 +98,16 @@
             width: 50px;
             height: 50px;
             border-radius: 25px;
+            object-fit: cover;
+            flex-shrink: 0;
+            margin-right: 15px;
+            border: 2px solid #f0f0f0;
+        }
+
+        .profile-image-placeholder {
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
@@ -107,6 +117,7 @@
             font-weight: 600;
             flex-shrink: 0;
             margin-right: 15px;
+            border: 2px solid #f0f0f0;
         }
 
         .profile-image.mbti-enfp {
@@ -410,7 +421,7 @@
         }
 
         // 대화방 리스트 렌더링
-        function renderChatList() {
+        async function renderChatList() {
             const container = document.getElementById('chatListContainer');
 
             if (chatRooms.length === 0) {
@@ -431,17 +442,27 @@
                 return new Date(b.lastMessageTime) - new Date(a.lastMessageTime);
             });
 
-            container.innerHTML = sortedRooms.map(room => {
+            // 프로필 사진 데이터 미리 로드
+            const photoPromises = sortedRooms.map(room => loadCharacterPhoto(room.characterId));
+            const photos = await Promise.all(photoPromises);
+
+            container.innerHTML = sortedRooms.map((room, index) => {
                 const hasUnread = room.unreadCount > 0;
                 const mbtiClass = room.characterMbti ? `mbti-${room.characterMbti.toLowerCase()}` : '';
                 const initial = room.characterName ? room.characterName[0] : '?';
                 const timeStr = room.lastMessageTime ? formatTime(room.lastMessageTime) : '';
                 const previewText = room.lastMessage || '대화를 시작해보세요!';
 
+                // 프로필 사진 또는 플레이스홀더
+                const photoData = photos[index];
+                const profileImageHtml = photoData
+                    ? `<img class="profile-image" src="${photoData}" alt="${room.characterName}">`
+                    : `<div class="profile-image-placeholder ${mbtiClass}">${initial}</div>`;
+
                 return `
                     <div class="chat-room-item ${hasUnread ? 'has-unread' : ''}"
                          onclick="openChatRoom('${room.characterId}')">
-                        <div class="profile-image ${mbtiClass}">${initial}</div>
+                        ${profileImageHtml}
                         <div class="chat-info">
                             <div class="chat-header">
                                 <div class="chat-name">
@@ -456,6 +477,33 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // 캐릭터 프로필 사진 로드
+        async function loadCharacterPhoto(characterId) {
+            try {
+                console.log('🖼️ 프로필 사진 로드 중:', characterId);
+                const response = await fetch('/api/character-ai-generator?action=get_photos&character_id=' + characterId);
+
+                if (!response.ok) {
+                    console.warn('⚠️ 프로필 사진 로드 실패:', characterId, response.status);
+                    return null;
+                }
+
+                const data = await response.json();
+
+                // profile 카테고리의 첫 번째 사진 사용
+                if (data.photos && data.photos.profile && data.photos.profile.length > 0) {
+                    console.log('✅ 프로필 사진 찾음:', characterId);
+                    return data.photos.profile[0].data;
+                } else {
+                    console.log('ℹ️ 프로필 사진 없음:', characterId);
+                    return null;
+                }
+            } catch (error) {
+                console.error('❌ 프로필 사진 로드 에러:', characterId, error);
+                return null;
+            }
         }
 
         // 시간 포맷팅
