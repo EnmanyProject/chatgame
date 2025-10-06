@@ -2,32 +2,12 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-10-03",
-    "total_scenarios": 2,
+    "total_scenarios": 1,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-10-03T15:12:03.813Z",
+    "last_updated": "2025-10-06T06:32:03.521Z",
     "data_source": "github_api_only"
   },
   "scenarios": {
-    "date_planning_chat_v1": {
-      "id": "date_planning_chat_v1",
-      "scenario_id": "date_planning_chat_v1",
-      "title": "새로운 시나리오",
-      "description": "",
-      "background_setting": "멤신저 대화",
-      "mood": "편안한",
-      "active_status": true,
-      "created_date": "2025-10-03",
-      "last_modified": "2025-10-03T14:41:33.851Z",
-      "ai_generated_context": "죄송하지만 요청하신 내용을 작성할 수 없습니다. 제공된 캐릭터 정보가 없기 때문에 정확한 이름이나 성격을 반영할 수 없습니다. 캐릭터 정보가 제공되면 기꺼이 도와드리겠습니다.",
-      "custom_context": "",
-      "available_characters": [],
-      "episode_count": 0,
-      "tags": [
-        "편안한"
-      ],
-      "source": "scenario_admin",
-      "updated_by": "scenario_manager_github_only"
-    },
     "scenario_학교_도서관에서의_운명적_만남_1759504291627": {
       "id": "scenario_학교_도서관에서의_운명적_만남_1759504291627",
       "scenario_id": "scenario_학교_도서관에서의_운명적_만남_1759504291627",
