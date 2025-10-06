@@ -3073,10 +3073,12 @@ async function loadPhotosFromGitHub() {
   try {
     console.log('📸 GitHub에서 사진 데이터 로드 시도...');
 
-    const getFileUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${PHOTOS_FILE_PATH}`;
+    // 대용량 파일(8MB+)은 GitHub API 대신 Raw URL 사용
+    const rawFileUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${PHOTOS_FILE_PATH}`;
+    console.log('🌐 Raw URL 사용:', rawFileUrl);
 
     const headers = {
-      'Accept': 'application/vnd.github.v3+json',
+      'Accept': 'application/json',
       'User-Agent': 'ChatGame-Photo-Loader'
     };
 
@@ -3084,16 +3086,16 @@ async function loadPhotosFromGitHub() {
       headers['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
     }
 
-    const response = await fetch(getFileUrl, {
+    const response = await fetch(rawFileUrl, {
       method: 'GET',
       headers: headers
     });
 
     if (response.ok) {
       const data = await response.json();
-      const content = Buffer.from(data.content, 'base64').toString('utf-8');
       console.log('✅ 사진 데이터 로드 성공');
-      return JSON.parse(content);
+      console.log('📊 데이터 크기:', JSON.stringify(data).length, 'bytes');
+      return data;
     } else if (response.status === 404) {
       console.log('📸 사진 데이터베이스가 없습니다. 새로 생성합니다.');
       return {
