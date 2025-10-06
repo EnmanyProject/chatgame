@@ -354,7 +354,87 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(102, 126, 234, 0.8);
         }
+
+        /* 엔딩 알림 모달 */
+        .ending-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        .ending-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 40px 30px;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: endingPop 0.5s ease-out;
+        }
+        @keyframes endingPop {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .ending-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        .ending-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .ending-level {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        .ending-description {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            opacity: 0.95;
+        }
+        .ending-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 5px;
+        }
+        .ending-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
     </style>
+
+    <!-- Phase 3 시스템 스크립트 로드 -->
+    <script src="js/statistics-manager.js"></script>
+    <script src="js/achievement-system.js"></script>
+    <script src="js/emotion-state-system.js"></script>
+    <script src="js/special-event-system.js"></script>
+    <script src="js/memory-keywords.js"></script>
+    <script src="js/conversation-memory-system.js"></script>
+    <script src="js/ending-system.js"></script>
+    <script src="js/multi-character-state.js"></script>
+    <script src="js/game-integration-manager.js"></script>
 </head>
 <body>
     <div class="game-container">
@@ -417,6 +497,20 @@
                 <span id="gameProgress">진행도: 0%</span>
             </div>
         </div>
+
+        <!-- 엔딩 알림 모달 -->
+        <div id="endingModal" class="ending-modal">
+            <div class="ending-content">
+                <div id="endingIcon" class="ending-icon">🎊</div>
+                <div id="endingTitle" class="ending-title">엔딩 달성!</div>
+                <div id="endingLevel" class="ending-level">Level 5</div>
+                <div id="endingDescription" class="ending-description"></div>
+                <div>
+                    <button class="ending-btn" onclick="triggerEnding()">엔딩 보기</button>
+                    <button class="ending-btn" onclick="closeEndingModal()">계속 플레이</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -429,8 +523,37 @@
             currentDialogue: null,
             affection: 0,
             messageCount: 0,
-            conversationHistory: []
+            conversationHistory: [],
+            characterId: null  // Phase 3 시스템용 캐릭터 ID
         };
+
+        // Phase 3 시스템 전역 변수
+        let multiCharacterState = null;
+
+        // Phase 3 시스템 초기화
+        function initPhase3Systems() {
+            try {
+                if (typeof MultiCharacterState === 'undefined') {
+                    console.warn('⚠️ Phase 3 시스템이 로드되지 않았습니다');
+                    return false;
+                }
+
+                // MultiCharacterState 인스턴스 생성
+                multiCharacterState = new MultiCharacterState();
+                console.log('✅ Phase 3 시스템 초기화 완료');
+
+                // 시스템 상태 확인
+                if (multiCharacterState.integrationManager) {
+                    const health = multiCharacterState.integrationManager.checkSystemHealth();
+                    console.log('🏥 시스템 상태:', health);
+                }
+
+                return true;
+            } catch (error) {
+                console.error('❌ Phase 3 시스템 초기화 실패:', error);
+                return false;
+            }
+        }
 
         // DOM 요소들
         const elements = {
@@ -458,6 +581,9 @@
             console.log('🎮 게임 초기화 시작...');
 
             try {
+                elements.loadingStatus.textContent = 'Phase 3 시스템 초기화 중...';
+                initPhase3Systems();
+
                 elements.loadingStatus.textContent = '시나리오 데이터 로딩 중...';
                 await loadScenarios();
 
@@ -617,10 +743,25 @@
 
             console.log('🎮 게임 시작:', gameState.selectedScenario.title, '-', gameState.selectedCharacter.name);
 
+            // 캐릭터 ID 설정 (Phase 3 시스템용)
+            gameState.characterId = gameState.selectedCharacter.id || gameState.selectedCharacter.name;
+
             // 초기화
             gameState.affection = 0;
             gameState.messageCount = 0;
             gameState.conversationHistory = [];
+
+            // Phase 3: 캐릭터 상태 초기화
+            if (multiCharacterState) {
+                const mbtiType = gameState.selectedCharacter.mbti || 'ENFP';
+                multiCharacterState.initializeCharacter(gameState.characterId, mbtiType);
+                console.log('✅ Phase 3 캐릭터 상태 초기화:', gameState.characterId);
+
+                // 세션 시작 기록
+                if (multiCharacterState.statisticsManager) {
+                    multiCharacterState.statisticsManager.startSession();
+                }
+            }
 
             // UI 업데이트
             elements.currentScenario.textContent = gameState.selectedScenario.title;
@@ -678,6 +819,15 @@
             // AI 메시지 표시
             if (dialogue.dialogue) {
                 addMessage(dialogue.dialogue, 'ai');
+
+                // Phase 3: AI 메시지를 메모리 시스템에 기록
+                if (multiCharacterState) {
+                    multiCharacterState.notifyCharacterMessage(
+                        gameState.characterId,
+                        dialogue.dialogue,
+                        { narration: dialogue.narration, hasChoices: !!dialogue.choices }
+                    );
+                }
             }
 
             // 상황 설명 표시
@@ -688,6 +838,15 @@
             // 선택지 표시
             if (dialogue.choices && dialogue.choices.length > 0) {
                 showChoices(dialogue.choices);
+            }
+
+            // Phase 3: 엔딩 조건 체크 (메시지 수가 많아졌을 때)
+            if (multiCharacterState && gameState.messageCount > 0 && gameState.messageCount % 10 === 0) {
+                const ending = multiCharacterState.checkEndingConditions(gameState.characterId);
+                if (ending) {
+                    console.log('🎊 엔딩 조건 충족:', ending.name);
+                    showEndingNotification(ending);
+                }
             }
         }
 
@@ -737,10 +896,33 @@
             // 선택지 숨김
             elements.choicesContainer.style.display = 'none';
 
+            // Phase 3: 선택지 이벤트 처리 (호감도 변경 전)
+            if (multiCharacterState && multiCharacterState.integrationManager) {
+                const mbtiType = gameState.selectedCharacter.mbti || 'ENFP';
+                multiCharacterState.integrationManager.onChoice(
+                    gameState.characterId,
+                    choice,
+                    { mbtiType: mbtiType }
+                );
+            }
+
             // 호감도 업데이트
+            const oldAffection = gameState.affection;
             gameState.affection += affectionImpact;
             if (gameState.affection < 0) gameState.affection = 0;
             elements.affectionScore.textContent = `❤️ ${gameState.affection}`;
+
+            // Phase 3: MultiCharacterState 호감도 동기화
+            if (multiCharacterState && affectionImpact !== 0) {
+                const mbtiType = gameState.selectedCharacter.mbti || 'ENFP';
+                multiCharacterState.changeAffection(
+                    gameState.characterId,
+                    affectionImpact,
+                    mbtiType,
+                    { source: 'choice', choice: choice }
+                );
+                console.log(`🎯 Phase 3 호감도 동기화: ${oldAffection} → ${gameState.affection}`);
+            }
 
             // 대화 히스토리에 추가
             gameState.conversationHistory.push({
@@ -751,6 +933,15 @@
             });
 
             console.log(`💬 선택: "${choiceText}" (호감도 ${affectionImpact > 0 ? '+' : ''}${affectionImpact})`);
+
+            // Phase 3: 메모리 시스템에 기록
+            if (multiCharacterState) {
+                multiCharacterState.notifyUserResponse(
+                    gameState.characterId,
+                    choiceText,
+                    { isChoice: true, affectionChange: affectionImpact }
+                );
+            }
 
             // 다음 대화 생성
             await generateDialogue(choiceText);
@@ -811,6 +1002,69 @@
             elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
         }
 
+        // Phase 3: 엔딩 알림 표시
+        let currentEnding = null;
+
+        function showEndingNotification(ending) {
+            currentEnding = ending;
+
+            // 엔딩 레벨별 아이콘
+            const icons = {
+                1: '💔', // Bad Ending
+                2: '😊', // Normal Ending
+                3: '💕', // Friend Ending
+                4: '💖', // Romantic Ending
+                5: '✨'  // True Ending
+            };
+
+            document.getElementById('endingIcon').textContent = icons[ending.level] || '🎊';
+            document.getElementById('endingTitle').textContent = ending.name;
+            document.getElementById('endingLevel').textContent = `Level ${ending.level} 엔딩`;
+            document.getElementById('endingDescription').textContent =
+                ending.story[0] || '엔딩 스토리를 확인하세요!';
+
+            // 모달 표시
+            document.getElementById('endingModal').style.display = 'flex';
+        }
+
+        function closeEndingModal() {
+            document.getElementById('endingModal').style.display = 'none';
+            currentEnding = null;
+        }
+
+        function triggerEnding() {
+            if (!currentEnding) return;
+
+            // Phase 3: 엔딩 발동
+            if (multiCharacterState && multiCharacterState.integrationManager) {
+                const result = multiCharacterState.integrationManager.triggerEnding(
+                    gameState.characterId,
+                    currentEnding
+                );
+
+                console.log('🎊 엔딩 발동:', result);
+
+                // 엔딩 스토리 표시
+                if (currentEnding.story && currentEnding.story.length > 0) {
+                    addNarration('━━━ 엔딩 ━━━');
+                    currentEnding.story.forEach((line, index) => {
+                        setTimeout(() => {
+                            addMessage(line, 'ai');
+                        }, index * 1500);
+                    });
+                }
+
+                // 보상 알림
+                if (result && result.rewards) {
+                    setTimeout(() => {
+                        addNarration(`✨ 보상: ${result.rewards.achievements?.join(', ') || '없음'}`);
+                    }, currentEnding.story.length * 1500 + 1000);
+                }
+            }
+
+            closeEndingModal();
+        }
+
         // 이벤트 리스너
         elements.startGameBtn.onclick = startGame;
         elements.adminBtn.onclick = () => window.open('/scenario-admin.html', '_blank');
@@ -819,7 +1073,7 @@
         // 페이지 로드 시 초기화
         window.addEventListener('load', initGame);
 
-        console.log('🎭 채팅 기술 훈련 시스템 v3.0.0 - 어드민 연동 버전');
+        console.log('🎭 채팅 기술 훈련 시스템 v3.0.0 - Phase 3 통합 버전');
     </script>
 </body>
 </html>
