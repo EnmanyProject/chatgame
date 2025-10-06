@@ -699,26 +699,23 @@ module.exports = async function handler(req, res) {
         if (photosData[character_id]) {
           characterPhotos = photosData[character_id];
           console.log('✅ 직접 접근으로 캐릭터 사진 데이터 발견');
+          console.log('📊 데이터 타입:', Array.isArray(characterPhotos) ? '배열' : '객체');
+          console.log('📊 데이터 길이:', Array.isArray(characterPhotos) ? characterPhotos.length : 'N/A');
         }
         // 구조 2: photosData.photos[character_id] (기존 구조)
         else if (photosData.photos && photosData.photos[character_id]) {
           characterPhotos = photosData.photos[character_id];
           console.log('✅ photos 속성 내에서 캐릭터 사진 데이터 발견');
+          console.log('📊 데이터 타입:', Array.isArray(characterPhotos) ? '배열' : '객체');
+          console.log('📊 데이터 길이:', Array.isArray(characterPhotos) ? characterPhotos.length : 'N/A');
         }
-        // 구조 3: 데이터 없음 - 기본값
+        // 구조 3: 데이터 없음 - 기본값을 빈 배열로 반환
         else {
-          characterPhotos = {
-            character_id,
-            photos: Object.keys(PHOTO_CATEGORIES).reduce((acc, cat) => {
-              acc[cat] = cat === 'profile' ? null : [];
-              return acc;
-            }, {}),
-            photo_count: 0
-          };
-          console.log('❌ 캐릭터 사진 데이터 없음 - 기본값 사용');
+          characterPhotos = [];
+          console.log('❌ 캐릭터 사진 데이터 없음 - 빈 배열 반환');
         }
 
-        console.log(`📊 캐릭터 ${character_id} 사진 개수:`, characterPhotos.photo_count);
+        console.log(`📊 캐릭터 ${character_id} 사진 개수:`, Array.isArray(characterPhotos) ? characterPhotos.length : 0);
 
         // 대용량 데이터로 인한 JSON 직렬화 에러 방지 - 사진 데이터 크기 확인
         const photoDataSize = JSON.stringify(characterPhotos).length;
