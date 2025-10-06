@@ -2,9 +2,9 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-10-03",
-    "total_scenarios": 1,
+    "total_scenarios": 2,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-10-06T11:48:59.404Z",
+    "last_updated": "2025-10-06T11:52:36.707Z",
     "data_source": "github_api_only"
   },
   "scenarios": {
@@ -112,6 +112,115 @@
                 "emotion": "기대감 → 행복감",
                 "affection_change": 10,
                 "character_reaction": "상대방이 긍정적으로 반응하며 기뻐하는 모습을 보고 행복감을 느끼게 됨"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "scenario_원나잇스탠드_1759751555235": {
+      "id": "scenario_원나잇스탠드_1759751555235",
+      "scenario_id": "scenario_원나잇스탠드_1759751555235",
+      "title": "원나잇스탠드",
+      "description": "술김에 눈이 맞아서 모델을 다녀온 다음날 대화 ",
+      "background_setting": "멤신저 대화",
+      "mood": "편안한",
+      "active_status": true,
+      "created_date": "2025-10-06",
+      "last_modified": "2025-10-06T11:52:36.707Z",
+      "ai_generated_context": "죄송하지만, 제공된 캐릭터 정보가 없습니다. 캐릭터 정보를 제공해 주시면 요청하신 메신저 대화 시나리오를 작성해 드리겠습니다.",
+      "custom_context": "",
+      "available_characters": [],
+      "episode_count": 0,
+      "tags": [
+        "술김에",
+        "눈이",
+        "맞아서",
+        "모델을",
+        "다녀온",
+        "다음날",
+        "대화",
+        "편안한"
+      ],
+      "source": "scenario_admin",
+      "updated_by": "scenario_manager_github_only",
+      "metadata": {
+        "genre": "sweet_romance",
+        "sexy_level": 10,
+        "tags": [
+          "섹시"
+        ],
+        "estimated_duration": "long",
+        "ai_model": "llama"
+      },
+      "structure": {
+        "acts": [
+          {
+            "name": "어색한 시작",
+            "beats": [
+              {
+                "name": "첫 인사",
+                "location": "메신저",
+                "time": "오전 10시",
+                "topic": "어제 일어난 일에 대한 언급",
+                "emotion": "어색함 → 부끄러움",
+                "affection_change": 2,
+                "character_reaction": "조심스럽게 어제의 일을 언급하며 말을 꺼내는 모습"
+              },
+              {
+                "name": "서로의 기분 확인",
+                "location": "메신저",
+                "time": "오전 10시 15분",
+                "topic": "어제의 감정과 현재 기분",
+                "emotion": "부끄러움 → 긴장",
+                "affection_change": 3,
+                "character_reaction": "서로의 반응을 살피며 긴장하는 모습"
+              }
+            ]
+          },
+          {
+            "name": "진심 확인",
+            "beats": [
+              {
+                "name": "서로의 솔직한 감정",
+                "location": "메신저",
+                "time": "오전 11시",
+                "topic": "이 일이 서로에게 의미가 있었는지 확인",
+                "emotion": "긴장 → 안도",
+                "affection_change": 6,
+                "character_reaction": "서로의 진심을 확인하며 안도하는 모습"
+              },
+              {
+                "name": "앞으로의 관계 논의",
+                "location": "메신저",
+                "time": "오전 11시 15분",
+                "topic": "앞으로의 관계에 대한 기대",
+                "emotion": "안도 → 설렘",
+                "affection_change": 7,
+                "character_reaction": "앞으로의 관계에 대한 긍정적인 기대를 표현하며 설레는 모습"
+              }
+            ]
+          },
+          {
+            "name": "미래의 계획",
+            "beats": [
+              {
+                "name": "다음 만남 제안",
+                "location": "메신저",
+                "time": "오후 12시",
+                "topic": "다음 만남에 대한 제안",
+                "emotion": "설렘 → 기대",
+                "affection_change": 8,
+                "character_reaction": "다음 만남에 대한 의지를 보이며 기대하는 모습"
+              },
+              {
+                "name": "마무리 인사",
+                "location": "메신저",
+                "time": "오후 12시 30분",
+                "topic": "긍정적인 인사로 대화 마무리",
+                "emotion": "기대 → 행복",
+                "affection_change": 9,
+                "character_reaction": "따뜻한 말로 마무리하며 행복한 기분이 드는 모습"
               }
             ]
           }
