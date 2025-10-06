@@ -4337,7 +4337,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.7.3</span>
+                <span id="systemVersion">v1.7.4</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -4915,6 +4915,14 @@
                         <label for="scenarioDescription">📖 시나리오 설명 *</label>
                         <textarea id="scenarioDescription" required rows="4"
                                   placeholder="이 시나리오의 전반적인 분위기와 진행 방향을 설명하세요"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="aiGeneratedStory">📚 AI 생성 스토리 (자동 생성됨)</label>
+                        <textarea id="aiGeneratedStory" rows="8" readonly
+                                  placeholder="'🤖 AI 자동 생성' 버튼을 클릭하면 여기에 소설풍 배경 스토리가 자동으로 생성됩니다..."
+                                  style="background-color: #f8f9fa; border: 2px dashed #dee2e6;"></textarea>
+                        <small style="color: #6c757d;">Acts & Beats 구조를 바탕으로 자동 생성되는 소설풍 배경 스토리입니다.</small>
                     </div>
 
                     <div class="form-group">
@@ -8817,10 +8825,12 @@
             const button = event.target;
             const originalText = button.innerHTML;
             button.disabled = true;
-            button.innerHTML = '🤖 생성 중...';
+            button.innerHTML = '🤖 구조 생성 중...';
 
             try {
-                const response = await fetch('/api/scenario-manager', {
+                // 1단계: Acts & Beats 구조 생성
+                console.log('📋 1단계: Acts & Beats 구조 생성 시작...');
+                const structureResponse = await fetch('/api/scenario-manager', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -8832,22 +8842,54 @@
                     })
                 });
 
-                const result = await response.json();
+                const structureResult = await structureResponse.json();
 
-                if (result.success) {
-                    // 생성된 구조를 현재 구조에 적용
-                    currentScenarioStructure = result.structure;
-
-                    // Acts 렌더링
-                    renderActsStructure();
-
-                    alert('✅ Acts & Beats 구조가 자동 생성되었습니다!');
-                } else {
-                    throw new Error(result.message || 'AI 생성 실패');
+                if (!structureResult.success) {
+                    throw new Error(structureResult.message || 'AI 구조 생성 실패');
                 }
+
+                // 생성된 구조를 현재 구조에 적용
+                currentScenarioStructure = structureResult.structure;
+
+                // Acts 렌더링
+                renderActsStructure();
+
+                console.log('✅ 1단계 완료: Acts & Beats 구조 생성됨');
+
+                // 2단계: 소설풍 스토리 생성
+                button.innerHTML = '📖 스토리 생성 중...';
+                console.log('📖 2단계: 소설풍 스토리 생성 시작...');
+
+                const storyResponse = await fetch('/api/scenario-manager', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'generate_story_from_structure',
+                        title,
+                        description,
+                        structure: currentScenarioStructure
+                    })
+                });
+
+                const storyResult = await storyResponse.json();
+
+                if (!storyResult.success) {
+                    throw new Error(storyResult.message || 'AI 스토리 생성 실패');
+                }
+
+                // 생성된 스토리를 텍스트 영역에 표시
+                const storyTextarea = document.getElementById('aiGeneratedStory');
+                storyTextarea.value = storyResult.story;
+                storyTextarea.style.backgroundColor = '#e7f3ff'; // 생성 완료 표시
+
+                console.log('✅ 2단계 완료: 소설풍 스토리 생성됨');
+
+                alert('✅ Acts & Beats 구조와 소설풍 스토리가 모두 생성되었습니다!\n\n확인 후 저장 버튼을 눌러주세요.');
             } catch (error) {
-                console.error('❌ AI 구조 생성 오류:', error);
-                alert(`AI 구조 생성에 실패했습니다:\n${error.message}`);
+                console.error('❌ AI 생성 오류:', error);
+                alert(`AI 생성에 실패했습니다:\n${error.message}`);
             } finally {
                 button.disabled = false;
                 button.innerHTML = originalText;
@@ -8873,6 +8915,9 @@
 
             const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
 
+            // AI 생성 스토리 가져오기
+            const aiGeneratedStory = document.getElementById('aiGeneratedStory').value;
+
             // 제목을 기반으로 고유한 ID 생성
             const titleKey = title.toLowerCase()
                 .replace(/[^a-zA-Z가-힣0-9]/g, '_')
@@ -8886,6 +8931,7 @@
                 scenario_id: scenarioId,
                 title,
                 description,
+                ai_generated_context: aiGeneratedStory || '', // AI 생성 스토리 저장
                 metadata: {
                     genre,
                     sexy_level: sexyLevel,

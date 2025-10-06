@@ -194,6 +194,38 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // Acts & Beats 기반 소설풍 스토리 생성
+    if (action === 'generate_story_from_structure') {
+      try {
+        console.log('📖 Acts & Beats 기반 스토리 생성 시작...');
+
+        const { title, description, structure } = req.body;
+
+        if (!title || !structure || !structure.acts) {
+          return res.status(400).json({
+            success: false,
+            message: '제목과 Acts & Beats 구조가 필요합니다'
+          });
+        }
+
+        const story = await generateStoryFromStructure({ title, description, structure });
+
+        console.log('✅ 소설풍 스토리 생성 완료');
+        return res.json({
+          success: true,
+          story,
+          message: 'Acts & Beats 기반 소설풍 스토리가 생성되었습니다'
+        });
+      } catch (error) {
+        console.error('❌ 스토리 생성 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: `스토리 생성 실패: ${error.message}`,
+          error_details: error.stack?.split('\n').slice(0, 5).join('\n')
+        });
+      }
+    }
+
     return res.status(400).json({ success: false, message: 'Unknown action' });
 
   } catch (error) {
@@ -1088,6 +1120,96 @@ async function generateScenarioStructure({ title, description }) {
 
     console.log('✅ AI 구조 생성 성공:', JSON.stringify(structure, null, 2));
     return structure;
+
+  } catch (error) {
+    console.error('❌ OpenAI API 호출 실패:', error);
+    throw error;
+  }
+}
+
+// Acts & Beats 기반 소설풍 스토리 생성 함수
+async function generateStoryFromStructure({ title, description, structure }) {
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+  if (!OPENAI_API_KEY) {
+    throw new Error('OpenAI API 키가 설정되지 않았습니다');
+  }
+
+  // Acts & Beats를 텍스트로 변환
+  const actsDescription = structure.acts.map((act, actIndex) => {
+    const beatsDescription = act.beats.map((beat, beatIndex) => {
+      return `  Beat ${beatIndex + 1}: ${beat.name}
+    - 장소: ${beat.location || '메신저'}
+    - 시간: ${beat.time || '미정'}
+    - 주제: ${beat.topic || '대화 진행'}
+    - 감정: ${beat.emotion || '평온'}
+    - 캐릭터 반응: ${beat.character_reaction || '자연스럽게 반응'}`;
+    }).join('\n\n');
+
+    return `Act ${actIndex + 1}: ${act.name}
+${beatsDescription}`;
+  }).join('\n\n');
+
+  const prompt = `당신은 로맨스 소설 작가입니다.
+
+**시나리오 정보**:
+- 제목: ${title}
+- 설명: ${description}
+
+**Acts & Beats 구조**:
+${actsDescription}
+
+**목표**: 위 Acts & Beats 구조를 바탕으로 **소설풍의 배경 스토리**를 작성하세요.
+
+**작성 규칙**:
+1. 분량: 800-1200자 정도
+2. 문체: 소설처럼 서술적이고 감성적으로
+3. 포함 요소:
+   - 두 사람이 어떤 상황에서 만났는지
+   - 각 Act에서 어떤 일이 벌어지는지 흐름
+   - 감정의 변화와 분위기
+   - 독자가 설렘을 느낄 수 있는 표현
+4. 제외 요소:
+   - Acts, Beats 같은 용어 사용 금지
+   - 구조적인 설명 금지
+   - 순수한 이야기만
+
+**출력**: 순수한 소설 텍스트만 (JSON이나 다른 형식 없이)`;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: '당신은 로맨스 소설 작가입니다. 감성적이고 몰입감 있는 배경 스토리를 작성하세요.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.9,
+        max_tokens: 1500
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`OpenAI API 오류: ${errorData.error?.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+    const story = data.choices[0].message.content.trim();
+
+    console.log('✅ 소설풍 스토리 생성 성공 (길이:', story.length, '자)');
+    return story;
 
   } catch (error) {
     console.error('❌ OpenAI API 호출 실패:', error);
