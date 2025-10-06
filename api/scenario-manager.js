@@ -199,7 +199,9 @@ async function createNewScenario(data) {
     source = 'scenario_admin',
     active = true,
     ai_generated_context = '',
-    custom_context = ''
+    custom_context = '',
+    metadata = {}, // 메타데이터 (장르, 섹시 레벨, AI 모델 등)
+    structure = {} // Acts & Beats 구조
   } = data;
 
   console.log('📝 시나리오 생성 데이터:', {
@@ -238,7 +240,9 @@ async function createNewScenario(data) {
     episode_count,
     tags: tags.length > 0 ? tags : extractTags(description, mood),
     source,
-    updated_by: 'scenario_manager_github_only'
+    updated_by: 'scenario_manager_github_only',
+    metadata: metadata || {}, // 메타데이터 저장
+    structure: structure || {} // Acts & Beats 구조 저장
   };
 
   // 데이터베이스에 저장
