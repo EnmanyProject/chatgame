@@ -4761,6 +4761,45 @@
 
         <!-- 시나리오 관리 섹션 -->
         <div id="scenarios-section" class="content-section">
+            <!-- 시나리오 상세 정보 표시 영역 -->
+            <div id="scenario-detail-view" style="display: none; margin-bottom: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; padding: 30px; color: white; box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
+                    <div style="flex: 1;">
+                        <h2 id="detail-scenario-title" style="margin: 0 0 10px 0; font-size: 28px;">시나리오 제목</h2>
+                        <p id="detail-scenario-description" style="margin: 0; opacity: 0.9; font-size: 16px; line-height: 1.6;">시나리오 설명</p>
+                    </div>
+                    <button onclick="closeScenarioDetail()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                        ✕ 닫기
+                    </button>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">AI 모델</div>
+                        <div id="detail-ai-model" style="font-size: 18px; font-weight: 600;">-</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">장르</div>
+                        <div id="detail-genre" style="font-size: 18px; font-weight: 600;">-</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">섹시 레벨</div>
+                        <div id="detail-sexy-level" style="font-size: 18px; font-weight: 600;">-</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">에피소드</div>
+                        <div id="detail-episode-count" style="font-size: 18px; font-weight: 600;">-</div>
+                    </div>
+                </div>
+
+                <div id="detail-acts-structure" style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px);">
+                    <h3 style="margin: 0 0 15px 0; font-size: 18px;">🎬 Acts & Beats 구조</h3>
+                    <div id="detail-acts-content" style="display: flex; flex-direction: column; gap: 10px;">
+                        <p style="margin: 0; opacity: 0.7;">구조 정보가 없습니다</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="stats-row">
                 <div class="stat-card">
                     <h3>전체 시나리오</h3>
@@ -8312,7 +8351,7 @@
                 const tags = scenario.metadata?.tags || scenario.tags || [];
 
                 return `
-                    <div class="scenario-card" onclick="scrollToTop()" style="cursor: pointer;">
+                    <div class="scenario-card" onclick="showScenarioDetail('${scenarioId}')" style="cursor: pointer;">
                         <h3>${scenario.title}</h3>
                         <p class="description">${scenario.description}</p>
                         <div class="metadata">
@@ -8605,6 +8644,77 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // 시나리오 상세 정보 표시
+        function showScenarioDetail(scenarioId) {
+            console.log('📋 시나리오 상세 정보 표시:', scenarioId);
+
+            const scenariosData = window.scenarios || scenarios || {};
+            const scenario = scenariosData[scenarioId];
+
+            if (!scenario) {
+                console.error('❌ 시나리오를 찾을 수 없음:', scenarioId);
+                return;
+            }
+
+            // AI 모델 정보
+            const aiModel = scenario.metadata?.ai_model || 'claude';
+            const aiModelName = {
+                'claude': 'Claude 3.5 Sonnet',
+                'openai': 'OpenAI GPT-4',
+                'llama': 'Llama 3.1 (Groq)'
+            }[aiModel] || 'Claude 3.5 Sonnet';
+
+            // 메타데이터
+            const genre = scenario.metadata?.genre || scenario.background_setting || '-';
+            const sexyLevel = scenario.metadata?.sexy_level || 5;
+            const episodeCount = scenario.dialogue_count || 0;
+
+            // 기본 정보 표시
+            document.getElementById('detail-scenario-title').textContent = scenario.title;
+            document.getElementById('detail-scenario-description').textContent = scenario.description;
+            document.getElementById('detail-ai-model').textContent = aiModelName;
+            document.getElementById('detail-genre').textContent = genre;
+            document.getElementById('detail-sexy-level').textContent = `🔥 ${sexyLevel}`;
+            document.getElementById('detail-episode-count').textContent = `${episodeCount}개`;
+
+            // Acts & Beats 구조 표시
+            const actsContent = document.getElementById('detail-acts-content');
+            if (scenario.structure && scenario.structure.acts && scenario.structure.acts.length > 0) {
+                actsContent.innerHTML = scenario.structure.acts.map((act, actIndex) => `
+                    <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                        <div style="font-weight: 600; font-size: 16px; margin-bottom: 8px;">
+                            ${actIndex + 1}. ${act.name || `Act ${actIndex + 1}`}
+                        </div>
+                        ${act.beats && act.beats.length > 0 ? `
+                            <div style="margin-left: 20px; display: flex; flex-direction: column; gap: 5px;">
+                                ${act.beats.map((beat, beatIndex) => `
+                                    <div style="font-size: 14px; opacity: 0.9;">
+                                        ▶ ${beat.name || `Beat ${beatIndex + 1}`}
+                                        ${beat.description ? `<span style="opacity: 0.7; font-size: 13px;"> - ${beat.description}</span>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : '<div style="margin-left: 20px; opacity: 0.6; font-size: 13px;">Beat가 없습니다</div>'}
+                    </div>
+                `).join('');
+            } else {
+                actsContent.innerHTML = '<p style="margin: 0; opacity: 0.7;">구조 정보가 없습니다</p>';
+            }
+
+            // 상세 정보 영역 표시
+            const detailView = document.getElementById('scenario-detail-view');
+            detailView.style.display = 'block';
+
+            // 부드럽게 스크롤
+            scrollToTop();
+        }
+
+        // 시나리오 상세 정보 닫기
+        function closeScenarioDetail() {
+            const detailView = document.getElementById('scenario-detail-view');
+            detailView.style.display = 'none';
         }
 
         function addAct() {
