@@ -1,293 +1,163 @@
 # 📌 현재 작업 가이드 (MASTER)
 
 **최종 업데이트**: 2025-10-06
-**현재 Phase**: Phase 4 - 메신저 UI 및 에피소드 시스템 🆕
+**현재 Phase**: 시나리오 관리 시스템 고도화
 
 ---
 
 ## 🎯 현재 상태
 
-**Phase**: Phase 4 진행 중 🚀
-**상태**: Milestone 1 완료 (메신저 UI)
-**진행률**: 25% ■■■□□□□□□□
-**다음**: 에피소드 생성기 API 개발
+**작업**: 시나리오 AI 자동 생성 시스템 완성 ✅
+**버전**: v1.7.4
+**상태**: 완료
+**다음**: 사용자 요청 대기
 
 ---
 
 ## ✅ 최근 완료 작업
 
-### Phase 4 - Milestone 1: 메신저 UI 구현 ✅ (2025-10-06)
-- **messenger-ui.html 생성** (488줄)
-  * 카카오톡 스타일 대화방 리스트
-  * 7명 캐릭터 대화방 자동 생성
-  * MBTI별 프로필 색상 구분 (6가지)
-  * 읽지 않음 뱃지 시스템
-  * 최근 메시지 미리보기
-  * 마지막 활동 시간 표시
-  * LocalStorage 기반 대화방 상태 관리
-- **chat-room.html 생성** (691줄)
-  * 카카오톡 스타일 채팅 UI
-  * 메시지 버블 시스템 (보낸/받은 메시지)
-  * 선택지 버튼 시스템 (긍정/부정/중립 색상)
-  * Phase 3 시스템 완전 연동:
-    - MultiCharacterState 초기화
-    - 캐릭터별 상태 관리
-    - 메시지 기록 자동화
-    - 호감도 변화 추적
-  * 실시간 메시지 입력/전송
-  * LocalStorage 기반 대화 저장
+### v1.7.4 - AI 스토리 자동 생성 완성 ✅ (2025-10-06)
+**작업 내용**:
+- **핵심 개선**: "🤖 AI 자동 생성" 버튼 클릭 시 Acts & Beats + 소설풍 스토리 모두 자동 생성
+  * 1단계: Acts & Beats 구조 생성 (OpenAI API)
+  * 2단계: 구조 기반 소설풍 스토리 자동 생성 (800-1200자)
+  * 생성된 스토리를 `ai_generated_context` 필드에 자동 저장
 
-**Git**: 커밋 495bf8e, 73e290e, 푸시 완료
-**상태**: Milestone 1 완전 완료! ✅
+**UI 개선**:
+- "📚 AI 생성 스토리" 텍스트 영역 추가 (readonly, 8줄)
+- 생성 완료 시 배경색 변경으로 시각적 피드백 (#e7f3ff)
+- 버튼 상태 표시: "🤖 구조 생성 중..." → "📖 스토리 생성 중..."
 
-### Phase 4 - 프로젝트 구조 재정의 ✅ (2025-10-06)
-- **프로젝트 컨셉 재정립**
-  * 기존: 선택지 기반 훈련 게임
-  * 신규: 메신저 기반 9명 멀티 대화방 시스템
-- **시스템 아키텍처 재설계**
-  * 에피소드 생성 & 푸쉬 레이어 추가
-  * 대화방 리스트 + 개별 채팅방 UI
-  * 어드민 에피소드 생성기 (캐릭터+시나리오→대화)
-- **PROJECT.md 완전 재작성**
-  * 메신저 UI 시스템 문서화
-  * 에피소드 워크플로우 정의
-  * Phase 4 로드맵 추가
+**워크플로우 완성**:
+```
+제목/설명 입력
+↓
+🤖 AI 자동 생성 클릭
+↓
+Acts & Beats 구조 생성 (백그라운드)
+↓
+소설풍 스토리 자동 생성 (메인 결과물)
+↓
+저장 → 구조 + 스토리 모두 GitHub에 저장
+```
 
-**Git**: 커밋 예정
-**상태**: 문서화 완료, 구현 시작 준비
+**사용자 피드백 반영**:
+- "스토리 생성이 메인이야, Acts & Beats는 구조일 뿐"
+- 별도 버튼이 아닌 자동 생성 프로세스에 통합
 
-### Phase 3 - Milestone 4: 관계 엔딩 + 최종 통합 시스템 ✅ (2025-10-05)
-- `data/endings.json` 생성 (7개 엔딩)
-  * 5가지 레벨 엔딩 (Bad/Normal/Friend/Romantic/True)
-  * 2개 히든 엔딩 (집념/스피드런)
-  * 호감도/메시지/이벤트/연속플레이/약속 조건
-  * 엔딩별 스토리/보상/업적 시스템
-- `js/ending-system.js` 생성 (400+ 줄)
-  * EndingManager 클래스
-  * 다중 조건 체크 시스템
-  * 엔딩 히스토리 관리
-  * 엔딩 달성률 추적
-  * 엔딩 도감 시스템
-- `js/game-integration-manager.js` 생성 (500+ 줄)
-  * GameIntegrationManager 클래스
-  * 모든 Phase 3 시스템 통합 이벤트 처리
-  * onAffectionChange/onMessage/onChoice 통합 핸들러
-  * AI 컨텍스트 통합 생성
-  * 성능 메트릭 및 이벤트 로깅
-- `js/multi-character-state.js` 최종 통합
-  * EndingManager 통합
-  * GameIntegrationManager 통합
-  * checkEndingConditions/triggerEnding 함수
-  * generateAIContext/getFullGameState 함수
-  * changeAffection 통합 관리자 연동
+**구현 파일**:
+- `scenario-admin.html` (v1.7.4)
+  * Line 4920-4926: AI 생성 스토리 텍스트 영역 추가
+  * Line 8816-8897: generateAIStructure() 함수 - 2단계 자동 생성
+  * Line 8919, 8934: saveScenario() - ai_generated_context 저장
+- `api/scenario-manager.js`
+  * Line 197-227: generate_story_from_structure API 액션
+  * Line 1130-1218: generateStoryFromStructure() 함수
 
-**Git**: 커밋 예정
-**상태**: Phase 3 완전 완료! 🎉
-
-### Phase 3 - Milestone 3: 대화 기억 시스템 ✅ (2025-10-05)
-- `js/conversation-memory-system.js` 생성 (600+ 줄)
-  * 3계층 메모리 구조 (작업/단기/장기)
-  * 자동 중요도 점수 시스템 (0-100점)
-  * 메모리 라우팅 (점수별 저장 위치 자동 결정)
-  * 키워드 기반 검색 시스템
-  * AI 컨텍스트 생성 (장기사실/최근대화/관련기억)
-- `js/memory-keywords.js` 생성 (300+ 줄)
-  * MemoryExtractor 클래스
-  * 선호도/약속/개인정보/경험/감정 키워드 사전
-  * 통합 메모리 추출 시스템
-  * 메모리 요약 생성
-  * 키워드 점수 계산
-- `js/multi-character-state.js` 메모리 시스템 통합
-  * ConversationMemorySystem 캐릭터별 동적 생성
-  * MemoryExtractor 공통 인스턴스
-  * notifyUserResponse/notifyCharacterMessage 메모리 기록
-  * generateMemoryContext() AI 프롬프트 컨텍스트 생성
-  * getMemoryStats() 메모리 통계 조회
-
-**Git**: 커밋 예정
-**상태**: Milestone 3 완전 완료 ✅
-
-### Phase 3 - Milestone 2: 특별 이벤트 + 감정 상태 시스템 ✅ (2025-10-05)
-- `js/emotion-state-system.js` 생성 (400+ 줄)
-  * 6가지 기본 감정 (happy, excited, calm, sad, anxious, angry)
-  * MBTI별 감정 변화 속도 (30분~3시간)
-  * 감정별 modifier 시스템 (연락빈도/사진확률/응답속도/호감도획득)
-  * 호감도/무응답/특별이벤트 기반 감정 변화
-- `js/special-event-system.js` 생성 (500+ 줄)
-  * 이벤트 조건 체크 엔진 (호감도/날짜/시간/행동/랜덤/복합)
-  * 이벤트 발생 히스토리 관리
-  * 다음 이벤트 예측 시스템
-- `data/special-events.json` 생성
-  * 25개 특별 이벤트 정의
-  * 8개 카테고리 (relationship, anniversary, holiday, concern, positive, random, activity, intimate)
-  * 호감도 마일스톤/기념일/날짜 기반 이벤트
-- `js/multi-character-state.js` 통합
-  * EmotionStateSystem/SpecialEventSystem 연동
-  * 호감도 변경 시 자동 감정 업데이트
-  * 캐릭터별 동적 시스템 생성
-
-**Git**: 커밋 예정
-**상태**: Milestone 2 완전 완료 ✅
-
-### Phase 3 - Milestone 1: 통계 대시보드 시스템 ✅ (2025-10-05)
-- `js/statistics-manager.js` 생성 (400+ 줄)
-  * 전역/캐릭터별 통계 수집
-  * 호감도 히스토리 그래프 데이터
-  * 선택 패턴 분석 (긍정/중립/부정)
-  * 연속 플레이 일수 추적
-  * 세션 관리 (시작/종료)
-- `js/achievement-system.js` 생성 (300+ 줄)
-  * 20개 업적 조건 체크 시스템
-  * 10가지 조건 타입 지원
-  * 비주얼 알림 시스템 (CSS 애니메이션)
-  * 카테고리별 업적 관리
-- `data/achievements.json` 생성
-  * 20개 업적 정의 (4개 카테고리)
-  * Basic, Relationship, Activity, Master
-- `statistics-dashboard.html` 생성
-  * 전역 통계 카드 6개
-  * 캐릭터별 상세 통계
-  * 선택 패턴 시각화
-  * 업적 진행도 및 목록
-- `js/multi-character-state.js` 통계 연동
-  * StatisticsManager/AchievementSystem 통합
-  * 호감도/선택지/메시지 자동 기록
-  * 사진/먼저 연락 이벤트 추적
-- `character-list-ui.html` 통계 링크 추가
-  * 헤더에 📊 통계 대시보드 버튼
-
-**Git**: 커밋 예정
-**상태**: Milestone 1 완전 완료 ✅
-
-### Phase 2-D: 통합 테스트 및 안정화 ✅ (2025-10-05)
-- 모든 Phase 2 시스템 검증 완료
-  * Phase 2-A: 톤 변화 시스템 ✅
-  * Phase 2-B: 사진 전송 시스템 ✅
-  * Phase 2-C: 먼저 연락 시스템 ✅
-- `test-phase2-integration.html` 생성 (통합 테스트 도구)
-- 전체 워크플로우 검증 완료
-- UI/UX 최종 점검 완료
-- 49개 에러 핸들링 확인
-
-**Git**: 커밋 `6d9b181`, 푸시 완료
-**상태**: Phase 2 완전 완료 ✅
-
-### Phase 2-C: 먼저 연락 시스템 ✅ (2025-10-05)
-- `js/proactive-contact-system.js` 생성 (540줄)
-  * 호감도별 연락 주기 (10분 ~ 1시간)
-  * 16개 MBTI별 인내심 패턴
-  * 무응답 반응 메시지 시스템
-  * 시간대별 메시지 템플릿
-- `character-list-ui.html` 자동 업데이트 (1분마다)
-- `js/episode-trigger-engine.js` v2.2.0 - 먼저 연락 트리거
-- `js/multi-character-state.js` 유저 응답 추적
-- `chat-ui.html` ProactiveContactSystem 통합
-
-**Git**: 커밋 `9d3fa97`, 푸시 완료
-
-### 문서 구조 재정비 ✅ (2025-10-05)
-- `.claude-code/` 폴더 정리 (15개 → 3개 핵심 문서)
-- `PROJECT.md` 생성 및 게임 컨셉 업데이트
-- `MASTER.md` 생성 (현재 작업 가이드)
-- `CLAUDE.md` 역할 재정의 (버전 히스토리 전용)
-- `.claude-code/archive/` 생성 및 5개 Phase 문서 보관
-- 11개 구버전 문서 삭제
-
-**Git**: 커밋 `302617f`, `1a923c4`, 푸시 완료
-
-### Phase 2-B: 사진 전송 시스템 ✅ (2025-10-05)
-- `js/photo-sending-system.js` 생성 (500줄)
-- `js/episode-delivery-system.js` 사진 표시 기능 추가
-- `js/episode-trigger-engine.js` 사진 트리거 연동
-- `chat-ui.html` 사진 모달 UI 추가
-- `data/character-photos.json` 재구축 (15 캐릭터, 20 사진)
-
-**Git**: 커밋 `6f23415`, 푸시 완료
+**Git**: 커밋 `1ab2198`, `3f5c883`, 푸시 완료 ✅
+**테스트**: https://chatgame-seven.vercel.app/scenario-admin.html
 
 ---
 
-## 📋 다음 작업: Phase 4 계획
+### v1.7.3 - GitHub API 캐시 문제 해결 ✅ (2025-10-06)
+**작업 내용**:
+- GitHub API 캐시로 인한 데이터 불일치 문제 해결
+  * 저장 후 즉시 로컬 window.scenarios 업데이트
+  * GitHub 응답(result.scenario) 사용하여 정확한 데이터 반영
+  * 3초 후 GitHub 재로드로 완전 동기화 확인
+- 사용자 경험 개선
+  * "술김에 한 키스" 저장 시 즉시 화면에 표시
+  * 3초 후 GitHub 동기화 완료 메시지
+  * 더 이상 이전 데이터 표시 안 됨
 
-### Phase 4: 메신저 UI 및 에피소드 시스템 (진행 중) 🆕
+**기술적 해결**:
+```javascript
+// BEFORE: GitHub 캐시된 데이터 표시
+await loadScenarios(); // ❌ 즉시 호출하면 캐시된 데이터 로드
 
-**목표**: 카카오톡 스타일 메신저 앱으로 완전한 전환
+// AFTER: 즉시 로컬 업데이트 + 지연된 GitHub 동기화
+globalScenarios[scenarioId] = result.scenario; // ✅ API 응답 즉시 반영
+displayScenarios(); // ✅ 즉시 UI 업데이트
+setTimeout(() => loadScenarios(), 3000); // ✅ 3초 후 GitHub 동기화
+```
 
-#### Milestone 1: 메신저 UI 구현 ✅ **완료**
-- [x] `messenger-ui.html` 생성 (대화방 리스트)
-  * 7명 캐릭터 대화방 리스트
-  * 최근 메시지 미리보기
-  * 읽지 않음 뱃지
-  * 마지막 활동 시간
-- [x] `chat-room.html` 생성 (개별 채팅방)
-  * 카카오톡 스타일 채팅 UI
-  * 선택지 버튼
-  * 사진 전송 표시
-  * Phase 3 시스템 연동
+**Git**: 커밋 `198e19b`, 푸시 완료
 
-#### Milestone 2: 에피소드 생성기 📋
-- [ ] `api/episode-generator.js` 생성
-  * 캐릭터 정보 로드
-  * 시나리오 정보 로드
-  * AI 프롬프트 생성
-  * LLM 호출 (Claude/OpenAI/Llama)
-  * 에피소드 JSON 생성 및 저장
-- [ ] `data/episodes/episode-database.json` 구조 설계
+---
 
-#### Milestone 3: 에피소드 푸쉬 시스템 📋
-- [ ] `js/episode-push-system.js` 생성
-  * 대화방 ID별 에피소드 큐 관리
-  * 읽지 않음 상태 관리
-  * LocalStorage 동기화
-  * 알림 시스템
+### v1.7.2 - Acts & Beats 화면 통합 및 AI 자동 생성 ✅ (2025-10-06)
+**작업 내용**:
+- Acts & Beats 탭 제거 및 한 화면 통합
+  * scenario-tab-basic과 scenario-tab-structure 탭 구조 완전 제거
+  * Acts & Beats 섹션을 기본 정보 폼 하단에 직접 배치
+  * switchScenarioTab() 함수 삭제
+- AI 자동 생성 함수 구현 (generateAIStructure())
+  * 제목/설명 기반 OpenAI API 호출
+  * 생성된 구조를 currentScenarioStructure에 적용
+  * renderActsStructure() 즉시 호출하여 화면 표시
+  * 버튼 상태 관리 (생성 중... 표시)
+- 모달 초기화 로직 개선
+  * 생성/편집 모드 모두 자동 렌더링
+- CLAUDE.md에 필수 작업 체크리스트 강력 추가
+  * 버전 업데이트 절차 명시
+  * Git push 및 테스트 URL 안내 필수화
 
-#### Milestone 4: 어드민 통합 📋
-- [ ] `scenario-admin.html` 에피소드 생성 탭 추가
-  * 캐릭터 선택 UI
-  * 시나리오 선택 UI
-  * AI 모델 선택 (Claude/OpenAI/Llama)
-  * 에피소드 미리보기
-  * 대화방 푸쉬 버튼
+**Git**: 커밋 `f384bcd`, 푸시 완료
+
+---
+
+## 📋 시나리오 관리 시스템 현황
+
+### 완료된 기능 ✅
+1. **시나리오 CRUD**: 생성/수정/삭제/조회 완전 구현
+2. **AI 자동 생성**: Acts & Beats 구조 자동 생성
+3. **AI 스토리 생성**: 구조 기반 소설풍 배경 스토리 생성
+4. **GitHub API 통합**: 모든 데이터 GitHub 저장소에 영구 저장
+5. **캐시 문제 해결**: 즉시 로컬 업데이트 + 지연 동기화
+6. **메타데이터 시스템**: 장르, 섹시 레벨, AI 모델, 태그, 플레이 시간
+7. **Acts & Beats 편집**: 인라인 구조 편집 (Act/Beat 추가/삭제/수정)
+
+### 시스템 구조
+```
+시나리오 생성 워크플로우:
+1. 제목/설명/메타데이터 입력
+2. 🤖 AI 자동 생성 클릭
+   → Acts & Beats 구조 생성
+   → 소설풍 스토리 생성
+3. 필요시 Acts & Beats 수동 편집
+4. 저장 → GitHub API로 영구 저장
+```
+
+### 데이터 파일
+- `data/scenarios/scenario-database.json`: 시나리오 DB
+- `data/characters.json`: 캐릭터 DB
+- GitHub API를 통한 실시간 동기화
 
 ---
 
 ## 🚨 작업 규칙
 
-### 1. 문서 업데이트 (필수)
+### 1. 버전 업데이트 필수 체크리스트
 ```bash
-# 작업 시작 전
-git pull origin main
+# scenario-admin.html 수정 시 무조건 실행
+1. 버전 번호 업데이트 (Line 4340)
+   <span id="systemVersion">v1.x.x</span>
 
-# 작업 중
-- MASTER.md 진행률 업데이트
+2. Git 커밋 및 푸시
+   git add -A
+   git commit -m "v1.x.x: [변경 내용]"
+   git push origin main
 
-# 작업 완료 후
-- PROJECT.md 업데이트 (필요 시)
-- MASTER.md 완료 표시
-- CLAUDE.md 히스토리 추가
-- Git 커밋 및 푸시
+3. CLAUDE.md 히스토리 추가
+
+4. 테스트 URL 안내
+   https://chatgame-seven.vercel.app/scenario-admin.html
 ```
 
-### 2. Git 워크플로우
-```bash
-# 매 작업 완료 시
-git add .claude-code/PROJECT.md .claude-code/MASTER.md CLAUDE.md
-git add [작업한 파일들]
-git commit -m "Phase X-X: [작업 내용]"
-git push origin main
-```
-
-### 3. 문서 동기화
+### 2. 문서 동기화
 - **PROJECT.md**: 큰 변화 시에만 수정
-- **MASTER.md**: 매 작업마다 업데이트
+- **MASTER.md** (이 파일): 매 작업마다 업데이트
 - **CLAUDE.md**: 버전 히스토리 추가 (append only)
-
----
-
-## 📂 참고 문서
-
-- `.claude-code/PROJECT.md` - 프로젝트 전체 이해
-- `CLAUDE.md` - 작업 히스토리
-- `.claude-code/archive/phase-*.md` - 완료된 Phase 상세
 
 ---
 
@@ -299,5 +169,5 @@ git push origin main
 
 ---
 
-**작성일**: 2025-10-05
-**용도**: 현재 작업 가이드 및 진행 상황 추적
+**작성일**: 2025-10-06
+**용도**: 현재 작업 상태 및 완료 내역 추적
