@@ -559,7 +559,7 @@
         async function loadProfilePhoto(characterId) {
             try {
                 console.log('🖼️ 프로필 사진 로드 중...');
-                const response = await fetch('/api/character-ai-generator?action=get_photos&character_id=' + characterId);
+                const response = await fetch('/api/character-ai-generator?action=get_character_photos&character_id=' + characterId);
 
                 if (!response.ok) {
                     console.warn('⚠️ 프로필 사진 로드 실패:', response.status);
@@ -571,7 +571,7 @@
                 console.log('📸 사진 데이터:', data);
 
                 // profile 카테고리 사진 찾기
-                if (data.photos && data.photos.profile && data.photos.profile.length > 0) {
+                if (data.success && data.photos && data.photos.profile && data.photos.profile.length > 0) {
                     const profilePhoto = data.photos.profile[0];
                     const container = document.getElementById('profilePhotoContainer');
 
