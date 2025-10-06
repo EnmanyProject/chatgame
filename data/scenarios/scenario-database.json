@@ -2,9 +2,9 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-10-03",
-    "total_scenarios": 1,
+    "total_scenarios": 2,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-10-06T11:40:10.110Z",
+    "last_updated": "2025-10-06T11:42:19.982Z",
     "data_source": "github_api_only"
   },
   "scenarios": {
@@ -54,6 +54,116 @@
       },
       "structure": {
         "acts": []
+      }
+    },
+    "scenario_술김에_한_키스_1759750936630": {
+      "id": "scenario_술김에_한_키스_1759750936630",
+      "scenario_id": "scenario_술김에_한_키스_1759750936630",
+      "title": "술김에 한 키스 ",
+      "description": "술김에 키스를 한 사건이 있었고 그 이후의 대화 ",
+      "background_setting": "멤신저 대화",
+      "mood": "편안한",
+      "active_status": true,
+      "created_date": "2025-10-06",
+      "last_modified": "2025-10-06T11:42:19.982Z",
+      "ai_generated_context": "죄송하지만, 제공된 캐릭터 정보가 없어 시나리오를 작성할 수 없습니다. 캐릭터 정보를 제공해 주시면, 그에 맞춰 메신저 대화 배경을 생성해 드리겠습니다.",
+      "custom_context": "",
+      "available_characters": [],
+      "episode_count": 0,
+      "tags": [
+        "술김에",
+        "키스를",
+        "사건이",
+        "있었고",
+        "이후의",
+        "대화",
+        "편안한"
+      ],
+      "source": "scenario_admin",
+      "updated_by": "scenario_manager_github_only",
+      "metadata": {
+        "genre": "campus_romance",
+        "sexy_level": 10,
+        "tags": [
+          "술자리",
+          "설렘",
+          "첫만남"
+        ],
+        "estimated_duration": "medium",
+        "ai_model": "openai"
+      },
+      "structure": {
+        "acts": [
+          {
+            "name": "어색한 시작",
+            "beats": [
+              {
+                "name": "술자리 후 대화 시작",
+                "location": "메신저",
+                "time": "다음 날 아침 10시",
+                "topic": "어제의 키스 언급",
+                "emotion": "어색함 → 긴장감",
+                "affection_change": 3,
+                "character_reaction": "조심스럽게 키스를 언급하며 상대방의 반응을 살핌"
+              },
+              {
+                "name": "상대방의 반응 확인",
+                "location": "메신저",
+                "time": "다음 날 아침 10시 15분",
+                "topic": "어제의 기억 회상",
+                "emotion": "긴장감 → 불안감",
+                "affection_change": -1,
+                "character_reaction": "상대방의 대답에 긴장하며 불안해함"
+              }
+            ]
+          },
+          {
+            "name": "진심 확인",
+            "beats": [
+              {
+                "name": "솔직한 감정 공유",
+                "location": "메신저",
+                "time": "다음 날 오후 1시",
+                "topic": "키스의 의미에 대한 질문",
+                "emotion": "불안감 → 설렘",
+                "affection_change": 5,
+                "character_reaction": "상대방의 진솔한 답변에 설렘을 느끼며 용기를 내어 나도 내 감정을 이야기함"
+              },
+              {
+                "name": "서로의 감정 확정",
+                "location": "메신저",
+                "time": "다음 날 오후 1시 30분",
+                "topic": "앞으로의 관계에 대한 이야기",
+                "emotion": "설렘 → 확신",
+                "affection_change": 7,
+                "character_reaction": "상대방과의 관계를 진지하게 고려하며 확신을 느끼게 됨"
+              }
+            ]
+          },
+          {
+            "name": "관계의 변화",
+            "beats": [
+              {
+                "name": "새로운 시작 제안",
+                "location": "메신저",
+                "time": "다음 날 오후 3시",
+                "topic": "다음 만남 계획",
+                "emotion": "확신 → 기대감",
+                "affection_change": 8,
+                "character_reaction": "상대방에게 다음 만남을 제안하며 기대감을 느끼고 흥미를 표출"
+              },
+              {
+                "name": "긍정적인 반응",
+                "location": "메신저",
+                "time": "다음 날 오후 3시 20분",
+                "topic": "재미있는 활동 아이디어 공유",
+                "emotion": "기대감 → 행복감",
+                "affection_change": 10,
+                "character_reaction": "상대방이 긍정적으로 반응하며 기뻐하는 모습을 보고 행복감을 느끼게 됨"
+              }
+            ]
+          }
+        ]
       }
     }
   },
