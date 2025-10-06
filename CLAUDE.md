@@ -121,7 +121,7 @@ grep "systemVersion" scenario-admin.html
 - "스토리 생성이 메인이야, Acts & Beats는 구조일 뿐"
 - 별도 버튼이 아닌 자동 생성 프로세스에 통합
 
-**Git**: 커밋 예정, 푸시 완료 예정
+**Git**: 커밋 `3f5c883`, 푸시 완료 ✅
 **테스트**: https://chatgame-seven.vercel.app/scenario-admin.html
 
 ---
