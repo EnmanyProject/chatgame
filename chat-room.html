@@ -512,10 +512,7 @@
 
                     // Phase 3 캐릭터 상태 초기화
                     if (multiCharacterState) {
-                        multiCharacterState.initCharacterState(
-                            currentCharacterId,
-                            currentCharacter.basic_info.mbti
-                        );
+                        multiCharacterState.initializeCharacter(currentCharacterId);
                         console.log('✅ Phase 3 캐릭터 상태 초기화:', currentCharacterId);
                     }
 
