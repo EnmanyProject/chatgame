@@ -2,9 +2,9 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-10-03",
-    "total_scenarios": 2,
+    "total_scenarios": 1,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-10-06T06:33:40.193Z",
+    "last_updated": "2025-10-06T11:40:05.066Z",
     "data_source": "github_api_only"
   },
   "scenarios": {
@@ -27,54 +27,6 @@
       ],
       "source": "scenario_admin",
       "updated_by": "scenario_manager_github_only"
-    },
-    "scenario_비오는날_생긴일_1759732416755": {
-      "id": "scenario_비오는날_생긴일_1759732416755",
-      "scenario_id": "scenario_비오는날_생긴일_1759732416755",
-      "title": "비오는날 생긴일 ",
-      "description": "비오는날 우산이 없어서 같이 쓰게된 얘기, 둘이 나란히 걸으면서 향수냄새를 맡은 얘기 고맙다고 헤어질때 악수한 얘기",
-      "background_setting": "멤신저 대화",
-      "mood": "편안한",
-      "active_status": true,
-      "created_date": "2025-10-06",
-      "last_modified": "2025-10-06T06:33:40.193Z",
-      "ai_generated_context": "죄송합니다. 요청하신 내용을 작성할 수 없습니다. 제공된 캐릭터 정보가 없기 때문에, 메신저 대화 배경을 구성할 수 없습니다. 정확한 캐릭터 정보를 제공해 주시면, 그에 맞춰 요청하신 내용을 작성해 드리겠습니다.",
-      "custom_context": "",
-      "available_characters": [],
-      "episode_count": 0,
-      "tags": [
-        "비오는날",
-        "우산이",
-        "없어서",
-        "같이",
-        "쓰게된",
-        "얘기",
-        "둘이",
-        "나란히",
-        "걸으면서",
-        "향수냄새를",
-        "맡은",
-        "얘기",
-        "고맙다고",
-        "헤어질때",
-        "악수한",
-        "얘기",
-        "편안한"
-      ],
-      "source": "scenario_admin",
-      "updated_by": "scenario_manager_github_only",
-      "metadata": {
-        "genre": "office_romance",
-        "sexy_level": 9,
-        "tags": [
-          "첫만남"
-        ],
-        "estimated_duration": "short",
-        "ai_model": "llama"
-      },
-      "structure": {
-        "acts": []
-      }
     }
   },
   "scenario_templates": {
