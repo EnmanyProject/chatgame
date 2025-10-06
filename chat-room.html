@@ -446,16 +446,19 @@
             }
         }
 
-        // 캐릭터 정보 로드
+        // 캐릭터 정보 로드 (GitHub API)
         async function loadCharacter() {
             try {
-                const response = await fetch('data/characters.json');
+                console.log('🔄 GitHub API에서 캐릭터 데이터 로드 중...');
+                console.log('🔍 찾는 캐릭터 ID:', currentCharacterId);
+
+                const response = await fetch('/api/character-ai-generator?action=list_characters');
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
+
                 const data = await response.json();
-                console.log('📥 캐릭터 데이터 로드:', data);
-                console.log('🔍 찾는 캐릭터 ID:', currentCharacterId);
+                console.log('📥 GitHub API 응답:', data);
 
                 if (data.characters && data.characters[currentCharacterId]) {
                     currentCharacter = data.characters[currentCharacterId];
@@ -482,7 +485,7 @@
                 }
             } catch (error) {
                 console.error('❌ 캐릭터 로드 실패:', error);
-                alert('캐릭터 정보를 불러올 수 없습니다.\n캐릭터 ID: ' + currentCharacterId);
+                alert('캐릭터 정보를 불러올 수 없습니다.\n캐릭터 ID: ' + currentCharacterId + '\nGitHub API 연결을 확인해주세요.');
                 goBack();
             }
         }

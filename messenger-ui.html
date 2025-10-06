@@ -352,15 +352,18 @@
             renderChatList();
         }
 
-        // 캐릭터 데이터 로드
+        // 캐릭터 데이터 로드 (GitHub API)
         async function loadCharacters() {
             try {
-                const response = await fetch('data/characters.json');
+                console.log('🔄 GitHub API에서 캐릭터 데이터 로드 중...');
+                const response = await fetch('/api/character-ai-generator?action=list_characters');
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
+
                 const data = await response.json();
-                console.log('📥 받은 데이터:', data);
+                console.log('📥 GitHub API 응답:', data);
 
                 // characters 객체를 배열로 변환
                 if (data.characters) {
@@ -376,7 +379,7 @@
                 }
             } catch (error) {
                 console.error('❌ 캐릭터 로드 실패:', error);
-                alert('캐릭터 데이터를 불러올 수 없습니다. 콘솔을 확인해주세요.');
+                alert('캐릭터 데이터를 불러올 수 없습니다.\nGitHub API 연결을 확인해주세요.');
             }
         }
 
