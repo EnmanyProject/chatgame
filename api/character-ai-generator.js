@@ -695,6 +695,26 @@ module.exports = async function handler(req, res) {
         // 올바른 데이터 구조로 캐릭터 사진 조회 - 두 가지 가능한 구조 처리
         let characterPhotos;
 
+        // 디버깅: 실제 키들 확인
+        if (photosData.photos) {
+          const allKeys = Object.keys(photosData.photos);
+          console.log('🔑 사진 데이터베이스의 실제 캐릭터 ID 목록 (처음 5개):', allKeys.slice(0, 5));
+          console.log('🔍 검색 중인 캐릭터 ID:', character_id);
+
+          // 정확한 매칭 시도
+          const exactMatch = allKeys.find(key => key === character_id);
+          console.log('🎯 정확한 매칭 결과:', exactMatch || '없음');
+
+          // URL 디코딩된 ID로도 시도
+          try {
+            const decodedId = decodeURIComponent(character_id);
+            const decodedMatch = allKeys.find(key => key === decodedId);
+            console.log('🌐 디코딩 후 매칭 결과:', decodedMatch || '없음');
+          } catch (e) {
+            console.log('⚠️ URL 디코딩 실패');
+          }
+        }
+
         // 구조 1: photosData[character_id] (현재 character-photos.json 구조)
         if (photosData[character_id]) {
           characterPhotos = photosData[character_id];
