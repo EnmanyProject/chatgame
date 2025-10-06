@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메신저 - MBTI 로맨스</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 헤더 */
+        .header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 5px;
+        }
+
+        .icon-btn:hover {
+            color: #333;
+        }
+
+        /* 대화방 리스트 */
+        .chat-list-container {
+            background-color: #ffffff;
+            height: calc(100vh - 110px);
+            overflow-y: auto;
+        }
+
+        .chat-room-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            position: relative;
+        }
+
+        .chat-room-item:hover {
+            background-color: #f8f8f8;
+        }
+
+        .chat-room-item.has-unread {
+            background-color: #fefdf8;
+        }
+
+        /* 프로필 이미지 */
+        .profile-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+            flex-shrink: 0;
+            margin-right: 15px;
+        }
+
+        .profile-image.mbti-enfp {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .profile-image.mbti-infp {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .profile-image.mbti-estj {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .profile-image.mbti-intp {
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        .profile-image.mbti-isfj {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .profile-image.mbti-estp {
+            background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%);
+        }
+
+        /* 대화방 정보 */
+        .chat-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .chat-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mbti-badge {
+            font-size: 11px;
+            font-weight: 500;
+            padding: 2px 6px;
+            border-radius: 8px;
+            background-color: #f0f0f0;
+            color: #666;
+        }
+
+        .chat-time {
+            font-size: 13px;
+            color: #999;
+            white-space: nowrap;
+        }
+
+        .chat-preview {
+            font-size: 14px;
+            color: #666;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .chat-preview.unread {
+            font-weight: 500;
+            color: #333;
+        }
+
+        /* 읽지 않음 뱃지 */
+        .unread-badge {
+            background-color: #ff4757;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 12px;
+            min-width: 20px;
+            text-align: center;
+            margin-left: 10px;
+        }
+
+        /* 하단 네비게이션 */
+        .bottom-nav {
+            background-color: #ffffff;
+            border-top: 1px solid #e0e0e0;
+            padding: 8px 0;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 0;
+            cursor: pointer;
+            color: #999;
+            font-size: 12px;
+            flex: 1;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: #333;
+        }
+
+        .nav-item:hover {
+            color: #333;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        /* 빈 상태 */
+        .empty-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .empty-state.visible {
+            display: flex;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-message {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .empty-description {
+            font-size: 14px;
+            color: #bbb;
+        }
+
+        /* 스크롤바 스타일 */
+        .chat-list-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-list-container::-webkit-scrollbar-thumb {
+            background-color: #ddd;
+            border-radius: 3px;
+        }
+
+        .chat-list-container::-webkit-scrollbar-thumb:hover {
+            background-color: #ccc;
+        }
+
+        /* 로딩 상태 */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f0f0f0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <div class="header">
+        <div class="header-title">채팅</div>
+        <div class="header-icons">
+            <button class="icon-btn" id="searchBtn" title="검색">🔍</button>
+            <button class="icon-btn" id="settingsBtn" title="설정">⚙️</button>
+        </div>
+    </div>
+
+    <!-- 대화방 리스트 -->
+    <div class="chat-list-container" id="chatListContainer">
+        <div class="loading">
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <!-- 하단 네비게이션 -->
+    <div class="bottom-nav">
+        <div class="nav-item">
+            <div class="nav-icon">👥</div>
+            <div>친구</div>
+        </div>
+        <div class="nav-item active">
+            <div class="nav-icon">💬</div>
+            <div>채팅</div>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">📊</div>
+            <div>통계</div>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">⚙️</div>
+            <div>더보기</div>
+        </div>
+    </div>
+
+    <script>
+        // 캐릭터 데이터 로드
+        let characters = [];
+        let chatRooms = [];
+
+        // 초기화
+        async function init() {
+            await loadCharacters();
+            await loadChatRooms();
+            renderChatList();
+        }
+
+        // 캐릭터 데이터 로드
+        async function loadCharacters() {
+            try {
+                const response = await fetch('data/characters.json');
+                const data = await response.json();
+
+                // characters 객체를 배열로 변환
+                if (data.characters) {
+                    characters = Object.values(data.characters).filter(char => char.active !== false);
+                }
+                console.log('✅ 캐릭터 로드 완료:', characters.length + '명');
+            } catch (error) {
+                console.error('❌ 캐릭터 로드 실패:', error);
+            }
+        }
+
+        // 대화방 데이터 로드 (LocalStorage)
+        async function loadChatRooms() {
+            const stored = localStorage.getItem('chatRooms');
+            if (stored) {
+                chatRooms = JSON.parse(stored);
+            } else {
+                // 초기화: 모든 캐릭터에 대해 빈 대화방 생성
+                chatRooms = characters.map(char => ({
+                    characterId: char.id,
+                    characterName: char.basic_info.name,
+                    characterMbti: char.basic_info.mbti,
+                    lastMessage: null,
+                    lastMessageTime: null,
+                    unreadCount: 0,
+                    messages: []
+                }));
+                saveChatRooms();
+            }
+            console.log('✅ 대화방 로드 완료:', chatRooms.length + '개');
+        }
+
+        // 대화방 데이터 저장
+        function saveChatRooms() {
+            localStorage.setItem('chatRooms', JSON.stringify(chatRooms));
+        }
+
+        // 대화방 리스트 렌더링
+        function renderChatList() {
+            const container = document.getElementById('chatListContainer');
+
+            if (chatRooms.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state visible">
+                        <div class="empty-icon">💬</div>
+                        <div class="empty-message">대화방이 없습니다</div>
+                        <div class="empty-description">캐릭터 데이터를 로드하는 중입니다...</div>
+                    </div>
+                `;
+                return;
+            }
+
+            // 대화방 정렬: 최근 메시지 순
+            const sortedRooms = [...chatRooms].sort((a, b) => {
+                if (!a.lastMessageTime) return 1;
+                if (!b.lastMessageTime) return -1;
+                return new Date(b.lastMessageTime) - new Date(a.lastMessageTime);
+            });
+
+            container.innerHTML = sortedRooms.map(room => {
+                const hasUnread = room.unreadCount > 0;
+                const mbtiClass = room.characterMbti ? `mbti-${room.characterMbti.toLowerCase()}` : '';
+                const initial = room.characterName ? room.characterName[0] : '?';
+                const timeStr = room.lastMessageTime ? formatTime(room.lastMessageTime) : '';
+                const previewText = room.lastMessage || '대화를 시작해보세요!';
+
+                return `
+                    <div class="chat-room-item ${hasUnread ? 'has-unread' : ''}"
+                         onclick="openChatRoom('${room.characterId}')">
+                        <div class="profile-image ${mbtiClass}">${initial}</div>
+                        <div class="chat-info">
+                            <div class="chat-header">
+                                <div class="chat-name">
+                                    ${room.characterName}
+                                    <span class="mbti-badge">${room.characterMbti || 'MBTI'}</span>
+                                </div>
+                                <div class="chat-time">${timeStr}</div>
+                            </div>
+                            <div class="chat-preview ${hasUnread ? 'unread' : ''}">${previewText}</div>
+                        </div>
+                        ${hasUnread ? `<div class="unread-badge">${room.unreadCount}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 시간 포맷팅
+        function formatTime(timestamp) {
+            if (!timestamp) return '';
+
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            const diffMinutes = Math.floor(diff / 60000);
+            const diffHours = Math.floor(diff / 3600000);
+            const diffDays = Math.floor(diff / 86400000);
+
+            if (diffMinutes < 1) return '방금';
+            if (diffMinutes < 60) return `${diffMinutes}분 전`;
+            if (diffHours < 24) return `${diffHours}시간 전`;
+            if (diffDays < 7) return `${diffDays}일 전`;
+
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            return `${month}/${day}`;
+        }
+
+        // 대화방 열기
+        function openChatRoom(characterId) {
+            // 읽지 않음 카운트 리셋
+            const room = chatRooms.find(r => r.characterId === characterId);
+            if (room) {
+                room.unreadCount = 0;
+                saveChatRooms();
+            }
+
+            // chat-room.html로 이동
+            window.location.href = `chat-room.html?characterId=${characterId}`;
+        }
+
+        // 헤더 버튼 이벤트
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            alert('🔍 검색 기능은 추후 구현 예정입니다.');
+        });
+
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+            window.location.href = 'scenario-admin.html';
+        });
+
+        // 하단 네비게이션 이벤트
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const text = this.querySelector('div:last-child').textContent;
+                if (text === '친구') {
+                    alert('👥 친구 기능은 추후 구현 예정입니다.');
+                } else if (text === '통계') {
+                    window.location.href = 'statistics-dashboard.html';
+                } else if (text === '더보기') {
+                    alert('⚙️ 더보기 기능은 추후 구현 예정입니다.');
+                }
+            });
+        });
+
+        // 페이지 로드 시 초기화
+        init();
+    </script>
+</body>
+</html>
