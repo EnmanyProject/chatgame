@@ -1440,75 +1440,365 @@
             display: block;
         }
 
-        /* Acts & Beats 구조 스타일 */
+        /* ========== Acts & Beats 타임라인 컨트롤 패널 ========== */
         .structure-editor {
-            padding: 10px 0;
-        }
-
-        .act-card {
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
             padding: 20px;
-            background: white;
-            margin-bottom: 15px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf2 100%);
+            border-radius: 15px;
         }
 
+        /* 타임라인 컨테이너 */
+        .timeline-container {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        /* 타임라인 라인 */
+        .timeline-line {
+            position: absolute;
+            left: 40px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Act 카드 */
+        .act-card {
+            position: relative;
+            margin-left: 60px;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            overflow: hidden;
+        }
+
+        .act-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+            border-color: #667eea;
+        }
+
+        /* Act 카드 상태 인디케이터 */
+        .act-card::before {
+            content: '';
+            position: absolute;
+            left: -23px;
+            top: 30px;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+            z-index: 2;
+        }
+
+        /* Act 번호 표시 */
+        .act-card::after {
+            content: attr(data-act-number);
+            position: absolute;
+            left: -15px;
+            top: 35px;
+            color: white;
+            font-weight: bold;
+            font-size: 11px;
+            z-index: 3;
+        }
+
+        /* Act 헤더 */
         .act-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            padding: 20px 20px 15px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
 
         .act-header input {
-            font-size: 18px;
-            font-weight: bold;
-            border: 1px solid #ddd;
-            padding: 8px;
-            border-radius: 5px;
             flex: 1;
+            font-size: 18px;
+            font-weight: 700;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
             margin-right: 10px;
+            transition: all 0.3s;
         }
 
+        .act-header input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .act-header input:focus {
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Act 액션 버튼 */
+        .act-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .act-actions button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .act-actions button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .act-actions .btn-danger {
+            background: rgba(231, 76, 60, 0.8);
+        }
+
+        .act-actions .btn-danger:hover {
+            background: rgba(231, 76, 60, 1);
+        }
+
+        /* Beats 컨테이너 */
         .beats-container {
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-left: 20px;
-        }
-
-        .beat-item {
-            border-left: 3px solid #667eea;
-            padding: 10px;
+            gap: 12px;
             background: #f8f9ff;
-            border-radius: 5px;
         }
 
-        .beat-item input,
-        .beat-item textarea {
-            width: 100%;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            font-size: 13px;
+        .beats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .beats-header h4 {
+            margin: 0;
+            color: #667eea;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .beats-count {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* Beat 아이템 */
+        .beat-item {
+            position: relative;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .beat-item:hover {
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            transform: translateX(2px);
+        }
+
+        .beat-item::before {
+            content: '▶';
+            position: absolute;
+            left: -12px;
+            top: 18px;
+            color: #667eea;
+            font-size: 10px;
+        }
+
+        .beat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 8px;
         }
 
         .beat-item input {
-            margin-bottom: 5px;
+            flex: 1;
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
             font-weight: 600;
+            color: #333;
+            transition: all 0.3s;
+        }
+
+        .beat-item input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .beat-item textarea {
-            min-height: 60px;
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #666;
+            min-height: 70px;
             resize: vertical;
+            transition: all 0.3s;
         }
 
+        .beat-item textarea:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .beat-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .beat-actions button {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .beat-actions .btn-danger {
+            background: #fee;
+            color: #e74c3c;
+        }
+
+        .beat-actions .btn-danger:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        /* 빈 상태 */
         .empty-structure {
             text-align: center;
-            padding: 40px;
+            padding: 60px 40px;
+            background: white;
+            border: 3px dashed #ddd;
+            border-radius: 15px;
             color: #999;
-            border: 2px dashed #ddd;
+        }
+
+        .empty-structure-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .empty-structure-text {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .empty-structure-hint {
+            font-size: 13px;
+            color: #bbb;
+        }
+
+        /* 추가 버튼 */
+        .btn-add-act {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
             border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-add-act:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-add-beat {
+            width: 100%;
+            padding: 10px;
+            background: white;
+            color: #667eea;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-add-beat:hover {
+            background: #667eea;
+            color: white;
+            border-style: solid;
+        }
+
+        /* 진행도 표시 */
+        .act-progress {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 4px;
         }
 
         /* 대화 미리보기 */
@@ -4625,18 +4915,22 @@
                 <div id="scenario-tab-structure" class="scenario-tab-content" style="display: none;">
                     <div class="structure-editor">
                         <div class="structure-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <h3 style="margin: 0;">🏗️ 시나리오 구조 편집</h3>
-                            <button type="button" class="btn btn-primary btn-sm" onclick="addAct()">
+                            <div>
+                                <h3 style="margin: 0; color: #333;">🎬 시나리오 타임라인</h3>
+                                <p style="margin: 5px 0 0 0; font-size: 13px; color: #999;">Acts와 Beats로 시나리오 흐름을 설계하세요</p>
+                            </div>
+                            <button type="button" class="btn-add-act" onclick="addAct()" style="width: auto; min-width: 150px;">
                                 ➕ Act 추가
                             </button>
                         </div>
 
-                        <div id="acts-container" style="display: flex; flex-direction: column; gap: 15px;">
+                        <div id="acts-container">
                             <!-- Acts will be rendered here -->
-                            <div class="empty-structure" style="text-align: center; padding: 40px; color: #999; border: 2px dashed #ddd; border-radius: 10px;">
-                                <p style="font-size: 16px; margin: 10px 0;">아직 Act가 없습니다</p>
-                                <p style="font-size: 14px; margin: 5px 0;">위의 "➕ Act 추가" 버튼을 클릭하여 시작하세요</p>
-                                <p style="font-size: 12px; color: #bbb; margin-top: 15px;">Act는 시나리오의 큰 단계를 나타냅니다 (예: 만남, 친밀해짐, 고백)</p>
+                            <div class="empty-structure">
+                                <div class="empty-structure-icon">🎬</div>
+                                <div class="empty-structure-text">아직 Act가 없습니다</div>
+                                <div class="empty-structure-hint">위의 "➕ Act 추가" 버튼을 클릭하여 시작하세요</div>
+                                <div class="empty-structure-hint" style="margin-top: 10px;">Act는 시나리오의 큰 단계를 나타냅니다 (예: 만남, 친밀해짐, 고백)</div>
                             </div>
                         </div>
                     </div>
@@ -8206,52 +8500,111 @@
 
             if (!currentScenarioStructure.acts || currentScenarioStructure.acts.length === 0) {
                 container.innerHTML = `
-                    <div class="empty-structure" style="text-align: center; padding: 40px; color: #999; border: 2px dashed #ddd; border-radius: 10px;">
-                        <p style="font-size: 16px; margin: 10px 0;">아직 Act가 없습니다</p>
-                        <p style="font-size: 14px; margin: 5px 0;">위의 "➕ Act 추가" 버튼을 클릭하여 시작하세요</p>
-                        <p style="font-size: 12px; color: #bbb; margin-top: 15px;">Act는 시나리오의 큰 단계를 나타냅니다 (예: 만남, 친밀해짐, 고백)</p>
+                    <div class="empty-structure">
+                        <div class="empty-structure-icon">🎬</div>
+                        <div class="empty-structure-text">아직 Act가 없습니다</div>
+                        <div class="empty-structure-hint">위의 "➕ Act 추가" 버튼을 클릭하여 시작하세요</div>
+                        <div class="empty-structure-hint" style="margin-top: 10px;">Act는 시나리오의 큰 단계를 나타냅니다 (예: 만남, 친밀해짐, 고백)</div>
                     </div>
                 `;
                 return;
             }
 
-            container.innerHTML = currentScenarioStructure.acts.map((act, actIndex) => `
-                <div class="act-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; background: white;">
-                    <div class="act-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <input type="text" value="${act.name || `Act ${actIndex + 1}`}"
-                               onchange="updateActName(${actIndex}, this.value)"
-                               style="font-size: 18px; font-weight: bold; border: 1px solid #ddd; padding: 8px; border-radius: 5px; flex: 1; margin-right: 10px;">
-                        <div style="display: flex; gap: 5px;">
-                            <button type="button" class="btn btn-sm btn-primary" onclick="addBeat(${actIndex})" style="padding: 6px 12px;">
-                                ➕ Beat
-                            </button>
-                            <button type="button" class="btn btn-sm btn-danger" onclick="deleteAct(${actIndex})" style="padding: 6px 12px;">
-                                🗑️
-                            </button>
-                        </div>
-                    </div>
+            // 타임라인 컨테이너 생성
+            const timelineHTML = `
+                <div class="timeline-container">
+                    <div class="timeline-line"></div>
+                    ${currentScenarioStructure.acts.map((act, actIndex) => {
+                        // Beat 완성도 계산
+                        const totalBeats = act.beats?.length || 0;
+                        const filledBeats = act.beats?.filter(b => b.name && b.description).length || 0;
+                        const progressPercent = totalBeats > 0 ? Math.round((filledBeats / totalBeats) * 100) : 0;
 
-                    <div class="beats-container" style="display: flex; flex-direction: column; gap: 10px; margin-left: 20px;">
-                        ${act.beats && act.beats.length > 0 ? act.beats.map((beat, beatIndex) => `
-                            <div class="beat-item" style="border-left: 3px solid #667eea; padding: 10px; background: #f8f9ff; border-radius: 5px;">
-                                <div style="display: flex; justify-content: between; align-items: start; gap: 10px;">
-                                    <div style="flex: 1;">
-                                        <input type="text" value="${beat.name || `Beat ${beatIndex + 1}`}"
-                                               onchange="updateBeatName(${actIndex}, ${beatIndex}, this.value)"
-                                               style="width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 3px; margin-bottom: 5px; font-weight: 600;">
-                                        <textarea onchange="updateBeatDescription(${actIndex}, ${beatIndex}, this.value)"
-                                                  placeholder="Beat 설명 (선택사항)"
-                                                  style="width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 3px; min-height: 60px; font-size: 13px;">${beat.description || ''}</textarea>
+                        return `
+                            <div class="act-card" data-act-number="${actIndex + 1}">
+                                <!-- Act 헤더 -->
+                                <div class="act-header">
+                                    <input type="text"
+                                           value="${escapeHtml(act.name || `Act ${actIndex + 1}`)}"
+                                           onchange="updateActName(${actIndex}, this.value)"
+                                           placeholder="Act 이름 입력...">
+
+                                    <div class="act-actions">
+                                        <button type="button" onclick="addBeat(${actIndex})">
+                                            ➕ Beat
+                                        </button>
+                                        <button type="button" class="btn-danger" onclick="deleteAct(${actIndex})">
+                                            🗑️ 삭제
+                                        </button>
                                     </div>
-                                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteBeat(${actIndex}, ${beatIndex})" style="padding: 4px 8px;">
-                                        🗑️
+                                </div>
+
+                                <!-- Beat 진행도 -->
+                                ${totalBeats > 0 ? `
+                                <div class="act-progress">
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar" style="width: ${progressPercent}%"></div>
+                                    </div>
+                                    <div class="progress-label">
+                                        📊 완성도: ${progressPercent}% (${filledBeats}/${totalBeats} Beats)
+                                    </div>
+                                </div>
+                                ` : ''}
+
+                                <!-- Beats 컨테이너 -->
+                                <div class="beats-container">
+                                    ${totalBeats > 0 ? `
+                                    <div class="beats-header">
+                                        <h4>
+                                            🎯 Scene Beats
+                                            <span class="beats-count">${totalBeats}</span>
+                                        </h4>
+                                    </div>
+                                    ` : ''}
+
+                                    ${act.beats && act.beats.length > 0 ?
+                                        act.beats.map((beat, beatIndex) => `
+                                            <div class="beat-item">
+                                                <div class="beat-header">
+                                                    <input type="text"
+                                                           value="${escapeHtml(beat.name || `Beat ${beatIndex + 1}`)}"
+                                                           onchange="updateBeatName(${actIndex}, ${beatIndex}, this.value)"
+                                                           placeholder="Beat 이름 입력...">
+                                                    <div class="beat-actions">
+                                                        <button type="button" class="btn-danger" onclick="deleteBeat(${actIndex}, ${beatIndex})">
+                                                            🗑️
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <textarea onchange="updateBeatDescription(${actIndex}, ${beatIndex}, this.value)"
+                                                          placeholder="Beat 설명: 이 장면에서 무슨 일이 일어나나요?">${escapeHtml(beat.description || '')}</textarea>
+                                            </div>
+                                        `).join('')
+                                    :
+                                        `<div style="text-align: center; padding: 20px; color: #999;">
+                                            <p style="margin: 0; font-size: 13px;">아직 Beat가 없습니다</p>
+                                        </div>`
+                                    }
+
+                                    <!-- Beat 추가 버튼 -->
+                                    <button type="button" class="btn-add-beat" onclick="addBeat(${actIndex})">
+                                        ➕ Beat 추가
                                     </button>
                                 </div>
                             </div>
-                        `).join('') : '<p style="color: #999; font-size: 13px; margin-left: 10px;">아직 Beat가 없습니다. "➕ Beat" 버튼을 클릭하세요</p>'}
-                    </div>
+                        `;
+                    }).join('')}
                 </div>
-            `).join('');
+            `;
+
+            container.innerHTML = timelineHTML;
+        }
+
+        // HTML 이스케이프 헬퍼 함수
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         function addAct() {

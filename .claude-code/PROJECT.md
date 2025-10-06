@@ -6,6 +6,17 @@
 **버전**: v3.0.0 (Phase 3 완료)
 **최종 업데이트**: 2025-10-06
 
+## 🌐 테스트 주소 (항상 확인)
+
+**배포 URL**: https://chatgame-seven.vercel.app
+
+**주요 페이지**:
+- 메신저 UI: https://chatgame-seven.vercel.app/messenger-ui.html
+- 채팅방: https://chatgame-seven.vercel.app/chat-room.html
+- 어드민: https://chatgame-seven.vercel.app/scenario-admin.html (비밀번호: a6979)
+
+**⚠️ 작업 완료 시 항상 테스트 주소 제공 필수**
+
 ---
 
 ## 🎯 게임 컨셉 (핵심 설계)
