@@ -4337,7 +4337,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.7.2</span>
+                <span id="systemVersion">v1.7.3</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -8925,30 +8925,35 @@
                 if (result.success) {
                     console.log('✅ GitHub API 저장 성공:', result);
 
-                    // 로컬 시나리오 목록 업데이트
+                    // 로컬 시나리오 목록 즉시 업데이트 (GitHub 응답 사용)
                     const globalScenarios = window.scenarios || {};
-                    globalScenarios[scenarioId] = {
+                    globalScenarios[scenarioId] = result.scenario || {
                         id: scenarioId,
                         ...scenarioData
                     };
                     window.scenarios = globalScenarios;
 
-                    // UI 업데이트
+                    // UI 즉시 업데이트
                     displayScenarios();
                     updateScenarioStats();
 
                     // 성공 메시지
                     const successMessage = currentMode === 'create'
-                        ? `✅ 시나리오 '${title}'가 생성되었습니다!\n\n🤖 AI 모델: ${selectedModel}\n📊 장르: ${genre}\n🔥 섹시 레벨: ${sexyLevel}`
-                        : `✅ 시나리오 '${title}'가 수정되었습니다!`;
+                        ? `✅ 시나리오 '${title}'가 생성되었습니다!\n\n🤖 AI 모델: ${selectedModel}\n📊 장르: ${genre}\n🔥 섹시 레벨: ${sexyLevel}\n\n⏳ GitHub 동기화는 3초 후 완료됩니다.`
+                        : `✅ 시나리오 '${title}'가 수정되었습니다!\n\n⏳ GitHub 동기화는 3초 후 완료됩니다.`;
 
                     alert(successMessage);
                     closeModal('scenarioModal');
 
-                    // 시나리오 목록 새로고침
-                    await loadScenarios();
+                    // GitHub 동기화 대기 후 재로드 (캐시 무효화 시간 확보)
+                    console.log('⏳ GitHub API 캐시 무효화를 위해 3초 대기...');
+                    setTimeout(async () => {
+                        console.log('🔄 GitHub에서 최신 데이터 로드...');
+                        await loadScenarios();
+                        console.log('✅ GitHub 동기화 완료!');
+                    }, 3000);
 
-                    console.log('✅ 시나리오 저장 완료!');
+                    console.log('✅ 시나리오 로컬 저장 완료!');
                 } else {
                     throw new Error(result.error || '저장 실패');
                 }
