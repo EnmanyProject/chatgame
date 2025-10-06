@@ -9,20 +9,77 @@
 
 ---
 
+## 🚨🚨🚨 **절대 잊지 말 것 - 필수 작업 체크리스트** 🚨🚨🚨
+
+### **scenario-admin.html 수정 시 무조건 실행**
+
+#### 1️⃣ **버전 번호 업데이트** (scenario-admin.html)
+```html
+<!-- Line 4784 근처 -->
+<span id="systemVersion">v1.7.2</span>  ← 이 버전 번호 반드시 변경!
+```
+
+**버전 규칙**:
+- **v1.x.0** = 새 기능 추가 (Minor Update)
+- **v1.x.y** = 버그 수정, 개선 (Patch Update)
+- **v2.0.0** = 대규모 변경 (Major Update)
+
+#### 2️⃣ **Git 커밋 및 푸시** (자동 배포 트리거)
+```bash
+git add -A
+git commit -m "v1.7.x: [변경 내용 명확히 기술]"
+git push origin main
+```
+
+#### 3️⃣ **테스트 URL 확인 및 안내**
+```
+🌐 배포 완료 후 반드시 테스트:
+https://chatgame-seven.vercel.app/scenario-admin.html
+
+⏱️ Vercel 자동 배포: 1-2분 소요
+✅ 브라우저 새로고침 (Ctrl+F5)으로 버전 확인
+```
+
+#### 4️⃣ **CLAUDE.md에 버전 히스토리 추가**
+```markdown
+### v1.7.x (2025-10-06) - [작업 제목]
+**작업 내용**:
+- 변경사항 1
+- 변경사항 2
+- 해결한 문제
+
+**Git**: 커밋 `[해시]`, 푸시 완료
+**테스트**: https://chatgame-seven.vercel.app/scenario-admin.html
+```
+
+### ❌ **이 절차를 건너뛰면 안 되는 이유**
+1. **버전 미표시** → 사용자가 최신 버전인지 알 수 없음
+2. **Git push 누락** → Vercel 배포 안 됨 = 변경사항 반영 안 됨
+3. **테스트 URL 미제공** → 사용자가 직접 찾아야 함
+4. **히스토리 누락** → 나중에 무엇을 왜 바꿨는지 모름
+
+---
+
 ## 🔄 문서 동기화 프로세스
 
 ### 작업 완료 시 (Claude Code가 자동 실행)
 ```bash
-# 1. 문서 업데이트
+# 1. 버전 번호 업데이트
+scenario-admin.html Line 4784 <span id="systemVersion">v1.x.x</span>
+
+# 2. 문서 업데이트
 .claude-code/PROJECT.md 수정 (필요 시)
 .claude-code/MASTER.md 업데이트
 CLAUDE.md 버전 히스토리 추가
 
-# 2. Git 커밋 (문서 포함)
+# 3. Git 커밋 (문서 포함)
 git add .claude-code/PROJECT.md .claude-code/MASTER.md CLAUDE.md
 git add [작업한 파일들]
-git commit -m "Phase X-X: [작업 내용]"
+git commit -m "v1.x.x: [작업 내용]"
 git push origin main
+
+# 4. 테스트 URL 안내
+echo "🌐 테스트: https://chatgame-seven.vercel.app/scenario-admin.html"
 ```
 
 ### 다른 환경/LLM에서 시작 시
@@ -34,11 +91,36 @@ git pull origin main
 .claude-code/PROJECT.md (프로젝트 이해)
 .claude-code/MASTER.md (현재 작업)
 CLAUDE.md (히스토리)
+
+# 3. 현재 버전 확인
+grep "systemVersion" scenario-admin.html
 ```
 
 ---
 
 ## 📊 버전 히스토리
+
+### v1.7.2 (2025-10-06) - Acts & Beats 화면 통합 및 AI 자동 생성 완성
+**작업 내용**:
+- Acts & Beats 탭 제거 및 한 화면 통합
+  * scenario-tab-basic과 scenario-tab-structure 탭 구조 완전 제거
+  * Acts & Beats 섹션을 기본 정보 폼 하단에 직접 배치
+  * switchScenarioTab() 함수 삭제
+- AI 자동 생성 함수 구현 (generateAIStructure())
+  * 제목/설명 기반 OpenAI API 호출
+  * 생성된 구조를 currentScenarioStructure에 적용
+  * renderActsStructure() 즉시 호출하여 화면 표시
+  * 버튼 상태 관리 (생성 중... 표시)
+- 모달 초기화 로직 개선
+  * 생성/편집 모드 모두 자동 렌더링
+- CLAUDE.md에 필수 작업 체크리스트 강력 추가
+  * 버전 업데이트 절차 명시
+  * Git push 및 테스트 URL 안내 필수화
+
+**Git**: 커밋 `f384bcd`, 푸시 완료
+**테스트**: https://chatgame-seven.vercel.app/scenario-admin.html
+
+---
 
 ### v2.3.0 (2025-10-05) - Phase 2-D: 통합 테스트 및 안정화 완료 ✅
 **작업 내용**:
