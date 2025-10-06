@@ -161,6 +161,39 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // AI 시나리오 구조 자동 생성
+    if (action === 'generate_scenario_structure') {
+      try {
+        console.log('🤖 AI 시나리오 구조 생성 시작...');
+        console.log('📥 받은 데이터:', JSON.stringify(req.body, null, 2));
+
+        const { title, description } = req.body;
+
+        if (!title || !description) {
+          return res.status(400).json({
+            success: false,
+            message: '제목과 설명이 필요합니다'
+          });
+        }
+
+        const structure = await generateScenarioStructure({ title, description });
+
+        console.log('✅ AI 시나리오 구조 생성 완료');
+        return res.json({
+          success: true,
+          structure,
+          message: 'Acts & Beats 구조가 자동 생성되었습니다'
+        });
+      } catch (error) {
+        console.error('❌ AI 시나리오 구조 생성 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: `AI 시나리오 구조 생성 실패: ${error.message}`,
+          error_details: error.stack?.split('\n').slice(0, 5).join('\n')
+        });
+      }
+    }
+
     return res.status(400).json({ success: false, message: 'Unknown action' });
 
   } catch (error) {
@@ -962,4 +995,102 @@ function extractTags(description, mood) {
 
   const keywords = [...desc.split(' '), ...moodStr.split(', ')];
   return keywords.map(word => word.toLowerCase().replace(/[^a-zA-Z가-힣]/g, '')).filter(tag => tag.length > 1);
+}
+
+// AI 시나리오 구조 자동 생성 함수
+async function generateScenarioStructure({ title, description }) {
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+  if (!OPENAI_API_KEY) {
+    throw new Error('OpenAI API 키가 설정되지 않았습니다');
+  }
+
+  const prompt = `당신은 로맨스 메신저 대화 시나리오 전문 작가입니다.
+
+**시나리오 정보**:
+- 제목: ${title}
+- 설명: ${description}
+
+**목표**: 위 정보를 바탕으로 메신저 대화 시나리오의 Acts & Beats 구조를 생성하세요.
+
+**출력 형식** (반드시 JSON으로):
+{
+  "acts": [
+    {
+      "name": "Act 이름 (예: 어색한 시작, 진심 확인)",
+      "beats": [
+        {
+          "name": "Beat 이름 (예: 첫 인사, 향수 냄새 회상)",
+          "location": "장소 (예: 각자 집 (메신저), 회사 복도)",
+          "time": "시간 (예: 아침 8시, 점심시간)",
+          "topic": "대화 주제 (예: 어제 같이 우산 쓴 일 언급, 향수 냄새가 기억난다고 고백)",
+          "emotion": "감정 흐름 (예: 어색함 → 부끄러움, 호기심 → 설렘)",
+          "affection_change": 호감도변화숫자 (예: 2, 5, 3),
+          "character_reaction": "캐릭터 반응 (예: ENFP 특성으로 밝게 먼저 말을 건넴, 향수 냄새를 기억하고 있었다는 사실에 놀람)"
+        }
+      ]
+    }
+  ]
+}
+
+**중요 규칙**:
+1. Acts는 3-5개 정도
+2. 각 Act마다 Beats는 2-4개 정도
+3. 모든 필드를 구체적으로 작성
+4. 감정 흐름은 "시작감정 → 끝감정" 형식
+5. 호감도 변화는 -5 ~ +10 범위
+6. 메신저 대화 특성을 고려 (장소는 주로 "메신저", "각자 집" 등)
+7. 순수 JSON만 출력 (설명 없이)`;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: '당신은 로맨스 메신저 대화 시나리오 전문 작가입니다. 순수 JSON 형식으로만 응답하세요.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.8,
+        max_tokens: 2000
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`OpenAI API 오류: ${errorData.error?.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices[0].message.content.trim();
+
+    // JSON 파싱
+    let structure;
+    try {
+      // 코드 블록 제거 (```json ... ``` 형식일 경우)
+      const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/);
+      const jsonStr = jsonMatch ? jsonMatch[1] : content;
+      structure = JSON.parse(jsonStr);
+    } catch (parseError) {
+      console.error('JSON 파싱 실패:', content);
+      throw new Error('AI 응답을 JSON으로 파싱할 수 없습니다');
+    }
+
+    console.log('✅ AI 구조 생성 성공:', JSON.stringify(structure, null, 2));
+    return structure;
+
+  } catch (error) {
+    console.error('❌ OpenAI API 호출 실패:', error);
+    throw error;
+  }
 }

@@ -4850,19 +4850,7 @@
                 <h2 id="scenarioModalTitle">새 시나리오 만들기</h2>
             </div>
 
-            <!-- 시나리오 편집 탭 -->
-            <div class="scenario-tabs" style="display: flex; border-bottom: 2px solid #e0e0e0; margin: 0 20px; gap: 5px;">
-                <button class="scenario-tab active" onclick="switchScenarioTab('basic')" data-tab="basic" style="padding: 12px 24px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666; border-bottom: 3px solid transparent; transition: all 0.3s;">
-                    📋 기본 정보
-                </button>
-                <button class="scenario-tab" onclick="switchScenarioTab('structure')" data-tab="structure" style="padding: 12px 24px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666; border-bottom: 3px solid transparent; transition: all 0.3s;">
-                    🏗️ Acts & Beats
-                </button>
-            </div>
-
             <div class="modal-body">
-                <!-- 기본 정보 탭 -->
-                <div id="scenario-tab-basic" class="scenario-tab-content">
                 <form id="scenarioForm">
                     <input type="hidden" id="scenarioId" />
 
@@ -4946,21 +4934,22 @@
                             </button>
                         </div>
                     </div>
-                </form>
-                </div>
-                <!-- 기본 정보 탭 끝 -->
 
-                <!-- Acts & Beats 구조 탭 -->
-                <div id="scenario-tab-structure" class="scenario-tab-content" style="display: none;">
-                    <div class="structure-editor">
+                    <!-- Acts & Beats 구조 섹션 -->
+                    <div class="form-group" style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #eee;">
                         <div class="structure-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                             <div>
                                 <h3 style="margin: 0; color: #333;">🎬 시나리오 타임라인</h3>
                                 <p style="margin: 5px 0 0 0; font-size: 13px; color: #999;">Acts와 Beats로 시나리오 흐름을 설계하세요</p>
                             </div>
-                            <button type="button" class="btn-add-act" onclick="addAct()" style="width: auto; min-width: 150px;">
-                                ➕ Act 추가
-                            </button>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="button" onclick="generateAIStructure()" style="padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.3s;">
+                                    🤖 AI 자동 생성
+                                </button>
+                                <button type="button" class="btn-add-act" onclick="addAct()" style="width: auto; min-width: 150px;">
+                                    ➕ Act 추가
+                                </button>
+                            </div>
                         </div>
 
                         <div id="acts-container">
@@ -4973,8 +4962,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <!-- Acts & Beats 탭 끝 -->
+                </form>
             </div>
 
             <div class="modal-footer">
@@ -8421,24 +8409,12 @@
                 // Acts & Beats 구조 초기화
                 currentScenarioStructure = { acts: [] };
 
-                // Acts 컨테이너 초기화
-                const actsContainer = document.getElementById('acts-container');
-                if (actsContainer) {
-                    actsContainer.innerHTML = `
-                        <div class="empty-structure" style="text-align: center; padding: 40px; color: #999; border: 2px dashed #ddd; border-radius: 10px;">
-                            <p style="font-size: 16px; margin: 10px 0;">아직 Act가 없습니다</p>
-                            <p style="font-size: 14px; margin: 5px 0;">위의 "➕ Act 추가" 버튼을 클릭하여 시작하세요</p>
-                            <p style="font-size: 12px; color: #bbb; margin-top: 15px;">Act는 시나리오의 큰 단계를 나타냅니다 (예: 만남, 친밀해짐, 고백)</p>
-                        </div>
-                    `;
-                }
+                // Acts 렌더링
+                renderActsStructure();
             } else if (mode === 'edit' && scenarioId) {
                 editScenario(scenarioId);
                 return;
             }
-
-            // 항상 기본 탭(기본 정보)으로 시작
-            switchScenarioTab('basic');
 
             modal.style.display = 'block';
         }
@@ -8489,45 +8465,15 @@
                 currentScenarioStructure = { acts: [] };
             }
 
+            // Acts 렌더링
+            renderActsStructure();
+
             // 백그라운드 스크롤 비활성화
             document.body.style.overflow = 'hidden';
 
             document.getElementById('scenarioModal').style.display = 'block';
         }
 
-        // ========== 시나리오 탭 전환 ==========
-        function switchScenarioTab(tabName) {
-            // 모든 탭 버튼 비활성화
-            document.querySelectorAll('.scenario-tab').forEach(tab => {
-                tab.classList.remove('active');
-                tab.style.color = '#666';
-                tab.style.borderBottom = '3px solid transparent';
-            });
-
-            // 모든 탭 콘텐츠 숨김
-            document.querySelectorAll('.scenario-tab-content').forEach(content => {
-                content.style.display = 'none';
-            });
-
-            // 선택된 탭 활성화
-            const selectedTab = document.querySelector(`.scenario-tab[data-tab="${tabName}"]`);
-            if (selectedTab) {
-                selectedTab.classList.add('active');
-                selectedTab.style.color = '#667eea';
-                selectedTab.style.borderBottom = '3px solid #667eea';
-            }
-
-            // 선택된 콘텐츠 표시
-            const selectedContent = document.getElementById(`scenario-tab-${tabName}`);
-            if (selectedContent) {
-                selectedContent.style.display = 'block';
-            }
-
-            // structure 탭 선택 시 Acts 렌더링
-            if (tabName === 'structure') {
-                renderActsStructure();
-            }
-        }
 
         // ========== Acts & Beats 관리 ==========
         let currentScenarioStructure = {
@@ -8608,15 +8554,49 @@
                                                     <input type="text"
                                                            value="${escapeHtml(beat.name || `Beat ${beatIndex + 1}`)}"
                                                            onchange="updateBeatName(${actIndex}, ${beatIndex}, this.value)"
-                                                           placeholder="Beat 이름 입력...">
+                                                           placeholder="Beat 이름 (예: 첫 만남, 점심 같이 먹기)">
                                                     <div class="beat-actions">
                                                         <button type="button" class="btn-danger" onclick="deleteBeat(${actIndex}, ${beatIndex})">
                                                             🗑️
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <textarea onchange="updateBeatDescription(${actIndex}, ${beatIndex}, this.value)"
-                                                          placeholder="Beat 설명: 이 장면에서 무슨 일이 일어나나요?">${escapeHtml(beat.description || '')}</textarea>
+
+                                                <!-- Beat 상세 정보 입력 -->
+                                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                                                    <input type="text"
+                                                           value="${escapeHtml(beat.location || '')}"
+                                                           onchange="updateBeatField(${actIndex}, ${beatIndex}, 'location', this.value)"
+                                                           placeholder="📍 장소 (예: 회사 복도, 카페)"
+                                                           style="padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 13px;">
+                                                    <input type="text"
+                                                           value="${escapeHtml(beat.time || '')}"
+                                                           onchange="updateBeatField(${actIndex}, ${beatIndex}, 'time', this.value)"
+                                                           placeholder="⏰ 시간 (예: 점심시간, 퇴근 후)"
+                                                           style="padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 13px;">
+                                                </div>
+
+                                                <textarea onchange="updateBeatField(${actIndex}, ${beatIndex}, 'topic', this.value)"
+                                                          placeholder="💬 대화 주제: 무엇에 대해 이야기하나요? (예: 오늘 회의 내용, 취미 공유)"
+                                                          style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 13px; min-height: 60px; margin-bottom: 8px;">${escapeHtml(beat.topic || '')}</textarea>
+
+                                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                                                    <input type="text"
+                                                           value="${escapeHtml(beat.emotion || '')}"
+                                                           onchange="updateBeatField(${actIndex}, ${beatIndex}, 'emotion', this.value)"
+                                                           placeholder="💓 감정 흐름 (예: 어색함 → 호기심)"
+                                                           style="padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 13px;">
+                                                    <input type="number"
+                                                           value="${beat.affection_change || 0}"
+                                                           onchange="updateBeatField(${actIndex}, ${beatIndex}, 'affection_change', parseInt(this.value))"
+                                                           placeholder="🎯 목표 호감도 변화"
+                                                           min="-10" max="15"
+                                                           style="padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 13px;">
+                                                </div>
+
+                                                <textarea onchange="updateBeatField(${actIndex}, ${beatIndex}, 'character_reaction', this.value)"
+                                                          placeholder="🎭 캐릭터 반응: 이 상황에서 캐릭터가 어떻게 반응하나요? (MBTI 특성 활용)"
+                                                          style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 13px; min-height: 60px;">${escapeHtml(beat.character_reaction || '')}</textarea>
                                             </div>
                                         `).join('')
                                     :
@@ -8771,6 +8751,10 @@
             currentScenarioStructure.acts[actIndex].beats[beatIndex].description = value;
         }
 
+        function updateBeatField(actIndex, beatIndex, field, value) {
+            currentScenarioStructure.acts[actIndex].beats[beatIndex][field] = value;
+        }
+
         // 빠른 시작 템플릿 적용 함수
         function applyTemplate(templateType) {
             const templates = {
@@ -8818,6 +8802,56 @@
             document.getElementById('scenarioTags').value = template.tags;
             document.getElementById('scenarioDuration').value = template.duration;
             document.getElementById('scenarioDescription').value = template.description;
+        }
+
+        // AI 자동 구조 생성
+        async function generateAIStructure() {
+            const title = document.getElementById('scenarioTitle').value;
+            const description = document.getElementById('scenarioDescription').value;
+
+            if (!title || !description) {
+                alert('제목과 설명을 먼저 입력해주세요.');
+                return;
+            }
+
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '🤖 생성 중...';
+
+            try {
+                const response = await fetch('/api/scenario-manager', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'generate_scenario_structure',
+                        title,
+                        description
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // 생성된 구조를 현재 구조에 적용
+                    currentScenarioStructure = result.structure;
+
+                    // Acts 렌더링
+                    renderActsStructure();
+
+                    alert('✅ Acts & Beats 구조가 자동 생성되었습니다!');
+                } else {
+                    throw new Error(result.message || 'AI 생성 실패');
+                }
+            } catch (error) {
+                console.error('❌ AI 구조 생성 오류:', error);
+                alert(`AI 구조 생성에 실패했습니다:\n${error.message}`);
+            } finally {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }
         }
 
         async function saveScenario() {
