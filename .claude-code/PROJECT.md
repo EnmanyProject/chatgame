@@ -1,41 +1,47 @@
 # 📘 프로젝트 전체 이해 문서
 
-**프로젝트명**: 로맨스 어드벤처 채팅 시뮬레이션
+**프로젝트명**: MBTI 메신저 로맨스 시뮬레이션
 **타겟**: 남성 전용 (섹시 코드 합법적 범위 허용)
-**목적**: MBTI 기반 여성 캐릭터와의 지속 가능한 채팅 관계 시뮬레이션
-**버전**: v2.1.0 (Phase 2-B 완료)
-**최종 업데이트**: 2025-10-05
+**목적**: 9명의 MBTI 캐릭터와의 동시 메신저 대화 시뮬레이션
+**버전**: v3.0.0 (Phase 3 완료)
+**최종 업데이트**: 2025-10-06
 
 ---
 
 ## 🎯 게임 컨셉 (핵심 설계)
 
+### 메신저 기반 멀티 대화방 시스템
+
+```
+📱 메신저 앱 (카카오톡 스타일)
+┌─────────────────────────┐
+│  💬 채팅 목록           │
+├─────────────────────────┤
+│ 😊 미화 (ENFP)         │ ← 대화방 1
+│ 최근: 오늘 뭐해? 🤗    │
+├─────────────────────────┤
+│ 😎 미진 (ESTJ)         │ ← 대화방 2
+│ 최근: 잘 지내?         │
+├─────────────────────────┤
+│ 🤔 소운 (INTP)         │ ← 대화방 3
+│ 최근: 재미있는 거...   │
+├─────────────────────────┤
+│ ... (총 9개 대화방)     │
+└─────────────────────────┘
+```
+
+### 핵심 철학
+- **유저 경험**: "진짜 카카오톡으로 대화하는 것처럼"
+- **수치 관리**: 있지만 유저에게 **완전 숨김** (Phase 3 시스템)
+- **게임 시스템**: 백그라운드에서 작동
+- **자연스러움**: 메신저 대화처럼
+- **멀티 대화방**: 9명과 동시 진행
+
 ### 타겟 및 방향성
 - **타겟**: 남성 only
 - **섹시 코드**: 합법적 선에서 허용 (노골적 표현 제외)
-- **엔딩**: 없음 (지속 가능한 콘텐츠)
-- **진행 방식**: 에피소드 추가를 통한 무한 대화
-
-### 핵심 철학
-- **유저 경험**: "그냥 채팅한다"고 느끼게
-- **수치 관리**: 있지만 유저에게 **완전 숨김**
-- **게임 시스템**: 백그라운드에서 작동
-- **자연스러움**: 메신저 대화처럼
-
-### 보상 시스템 (게임화 요소)
-유저는 다음으로 플레이 보상을 받음:
-1. **대화 톤 변화** (존댓말 → 애교 → 애정표현) ✅
-2. **사진 전송** (호감도별 카테고리) ✅
-3. **답장 빈도** (수치 높을수록 자주 답장) 🔄
-4. **먼저 말 걸기** (수치 높을수록 자주 연락) 🔄
-5. **애정 표현 강도** (애정도 기반) 📋
-
-### 차별화 포인트
-- ❌ 단순 채팅 게임이 아님
-- ✅ **감정 시뮬레이션**: 진짜 관계처럼
-- ✅ **AI 기반 콘텐츠**: 무한 시나리오/에피소드
-- ✅ **멀티 캐릭터**: 여러 대화방 동시 진행
-- ✅ **섹시 코드**: 타겟층 맞춤 콘텐츠
+- **엔딩**: 7가지 레벨 엔딩 시스템 (Phase 3)
+- **진행 방식**: 에피소드 푸쉬를 통한 대화 진행
 
 ---
 
@@ -43,34 +49,56 @@
 
 ### 전체 구조
 ```
-┌─────────────────────────────────────┐
-│         사용자 인터페이스            │
-│  (chat-ui.html, character-list)     │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│        핵심 엔진 레이어              │
-│  - MultiCharacterState (상태 관리)  │
-│  - EpisodeTriggerEngine (트리거)    │
-│  - EpisodeDeliverySystem (전달)    │
-│  - ToneVariationEngine (톤 변화)    │
-│  - PhotoSendingSystem (사진 전송)   │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│          데이터 레이어              │
-│  - characters.json (캐릭터)         │
-│  - tone-templates.json (톤)         │
-│  - character-photos.json (사진)     │
-│  - scenarios (시나리오)             │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│         외부 API 레이어             │
-│  - OpenAI GPT-4 (메시지 분석)       │
-│  - GitHub API (데이터 저장)         │
-│  - Vercel (배포)                    │
-└─────────────────────────────────────┘
+┌──────────────────────────────────────────────────┐
+│              사용자 인터페이스                    │
+│  - messenger-ui.html (대화방 리스트) 🆕           │
+│  - chat-room.html (개별 채팅방) 🆕                │
+│  - scenario-admin.html (관리자)                  │
+└───────────────┬──────────────────────────────────┘
+                │
+┌───────────────▼──────────────────────────────────┐
+│           에피소드 생성 & 푸쉬 레이어 🆕           │
+│  - EpisodeGenerator (캐릭터+시나리오→대화)       │
+│  - EpisodePushSystem (대화방에 푸쉬)             │
+│  - EpisodeTriggerEngine (자동 트리거)            │
+└───────────────┬──────────────────────────────────┘
+                │
+┌───────────────▼──────────────────────────────────┐
+│              핵심 엔진 레이어                     │
+│  - MultiCharacterState (9명 상태 관리) ⭐        │
+│  - GameIntegrationManager (Phase 3 통합) ⭐      │
+│  - ToneVariationEngine (톤 변화)                │
+│  - PhotoSendingSystem (사진 전송)               │
+│  - ProactiveContactSystem (먼저 연락)           │
+└───────────────┬──────────────────────────────────┘
+                │
+┌───────────────▼──────────────────────────────────┐
+│             Phase 3 시스템 레이어 ⭐              │
+│  - StatisticsManager (통계)                     │
+│  - AchievementSystem (업적)                     │
+│  - EmotionStateSystem (감정)                    │
+│  - SpecialEventSystem (이벤트)                  │
+│  - ConversationMemorySystem (메모리)            │
+│  - EndingManager (엔딩)                         │
+└───────────────┬──────────────────────────────────┘
+                │
+┌───────────────▼──────────────────────────────────┐
+│              데이터 레이어                        │
+│  - characters.json (9명 캐릭터)                  │
+│  - scenarios/ (시나리오)                         │
+│  - episodes/ (생성된 에피소드) 🆕                 │
+│  - tone-templates.json (톤)                     │
+│  - character-photos.json (사진)                 │
+│  - endings.json (엔딩)                          │
+└───────────────┬──────────────────────────────────┘
+                │
+┌───────────────▼──────────────────────────────────┐
+│           외부 API 레이어                         │
+│  - OpenAI GPT-4 (메시지 분석)                    │
+│  - Claude/Llama (시나리오 생성) 🆕                │
+│  - GitHub API (데이터 저장)                      │
+│  - Vercel (배포)                                 │
+└──────────────────────────────────────────────────┘
 ```
 
 ---
@@ -79,249 +107,293 @@
 
 ```
 chatgame/
-├── 📄 chat-ui.html                    # 메인 채팅 UI
-├── 📄 character-list-ui.html          # 대화방 리스트
-├── 📄 scenario-admin.html             # 관리자 패널 (비번: a6979)
-├── 📄 CLAUDE.md                       # 작업 노트 및 버전 히스토리
+├── 📄 messenger-ui.html              # 🆕 메신저 대화방 리스트
+├── 📄 chat-room.html                 # 🆕 개별 채팅방 UI
+├── 📄 scenario-admin.html            # 관리자 패널 (비번: a6979)
+├── 📄 CLAUDE.md                      # 작업 노트 및 버전 히스토리
 │
-├── 📂 api/                            # 서버리스 API
-│   ├── character-ai-generator.js     # 캐릭터 AI 생성
-│   ├── scenario-manager.js           # 시나리오 관리
-│   └── episode-manager.js            # 에피소드 관리
+├── 📂 api/                           # 서버리스 API
+│   ├── character-ai-generator.js    # 캐릭터 AI 생성
+│   ├── scenario-manager.js          # 시나리오 관리
+│   └── episode-generator.js         # 🆕 에피소드 생성기 (캐릭터+시나리오)
 │
-├── 📂 data/                           # 데이터베이스
-│   ├── characters.json               # 캐릭터 DB
-│   ├── tone-templates.json           # 톤 템플릿 (Phase 2-A)
-│   ├── character-photos.json         # 사진 DB (Phase 2-B)
-│   ├── photos/                       # 실제 사진 파일들
-│   └── scenarios/
-│       └── scenario-database.json    # 시나리오 DB
+├── 📂 data/                          # 데이터베이스
+│   ├── characters.json              # 캐릭터 DB (9명)
+│   ├── tone-templates.json          # 톤 템플릿 (Phase 2-A)
+│   ├── character-photos.json        # 사진 DB (Phase 2-B)
+│   ├── endings.json                 # 엔딩 DB (Phase 3)
+│   ├── achievements.json            # 업적 DB (Phase 3)
+│   ├── special-events.json          # 이벤트 DB (Phase 3)
+│   ├── scenarios/                   # 시나리오 DB
+│   │   └── scenario-database.json
+│   └── episodes/                    # 🆕 생성된 에피소드
+│       └── episode-database.json
 │
-├── 📂 js/                             # 핵심 엔진
-│   ├── character-state-manager.js    # 단일 캐릭터 상태
-│   ├── multi-character-state.js      # 멀티 캐릭터 상태 ⭐
-│   ├── chat-room-manager.js          # 대화방 관리
-│   ├── episode-trigger-engine.js     # 자동 트리거 ⭐
-│   ├── episode-delivery-system.js    # 에피소드 전달 ⭐
-│   ├── tone-variation-engine.js      # 톤 변화 (Phase 2-A) ⭐
-│   └── photo-sending-system.js       # 사진 전송 (Phase 2-B) ⭐
+├── 📂 js/                            # 핵심 엔진
+│   ├── multi-character-state.js     # 🌟 멀티 캐릭터 상태 (Phase 3 통합)
+│   ├── game-integration-manager.js  # 🌟 Phase 3 통합 관리자
+│   ├── episode-generator.js         # 🆕 에피소드 생성 엔진
+│   ├── episode-push-system.js       # 🆕 대화방 푸쉬 시스템
+│   ├── episode-trigger-engine.js    # 자동 트리거
+│   ├── tone-variation-engine.js     # 톤 변화 (Phase 2-A)
+│   ├── photo-sending-system.js      # 사진 전송 (Phase 2-B)
+│   ├── proactive-contact-system.js  # 먼저 연락 (Phase 2-C)
+│   │
+│   └── 📂 phase3/                   # Phase 3 시스템들
+│       ├── statistics-manager.js
+│       ├── achievement-system.js
+│       ├── emotion-state-system.js
+│       ├── special-event-system.js
+│       ├── memory-keywords.js
+│       ├── conversation-memory-system.js
+│       └── ending-system.js
 │
-└── 📂 .claude-code/                   # Claude Code 전용
-    ├── PROJECT.md                    # 👈 이 파일
-    ├── MASTER.md                     # 현재 작업 가이드
-    └── archive/                      # 완료된 Phase 보관
+└── 📂 .claude-code/                  # Claude Code 전용
+    ├── PROJECT.md                   # 👈 이 파일
+    ├── MASTER.md                    # 현재 작업 가이드
+    └── archive/                     # 완료된 Phase 보관
 ```
-
----
-
-## 🔧 핵심 기술 스택
-
-### 프론트엔드
-- **Vanilla JavaScript (ES6+)**: 순수 자바스크립트 기반
-- **HTML5 + CSS3**: 반응형 UI
-- **localStorage**: 클라이언트 데이터 저장
-
-### 백엔드
-- **Vercel Serverless Functions**: Node.js 기반 API
-- **GitHub API**: 데이터 저장소 역할
-- **OpenAI GPT-4**: AI 메시지 분석 및 피드백
-
-### 배포
-- **Git**: 버전 관리
-- **Vercel**: 자동 배포
-- **GitHub**: 코드 저장소 + 데이터 저장소
 
 ---
 
 ## 🎮 게임 시스템 상세
 
-### 2축 수치 관리 (유저에게 숨김)
+### 1. 메신저 UI 시스템 🆕
 
-#### 1. 호감도 (Affection) 1-10
+#### 대화방 리스트 (messenger-ui.html)
+```
+┌─────────────────────────┐
+│  💬 채팅 (9)            │
+├─────────────────────────┤
+│ 🔴 미화 (ENFP)         │ ← 읽지 않은 메시지
+│ 오늘 뭐해? 🤗          │   2분 전
+├─────────────────────────┤
+│ 😊 미진 (ESTJ)         │
+│ 잘 지내?               │   1시간 전
+├─────────────────────────┤
+│ ... 총 9개              │
+└─────────────────────────┘
+```
+
+**기능**:
+- 9명 캐릭터 리스트
+- 최근 메시지 미리보기
+- 읽지 않은 메시지 개수
+- 마지막 활동 시간
+- Phase 3 통계 요약 (숨김)
+
+#### 개별 채팅방 (chat-room.html)
+```
+┌─────────────────────────┐
+│ ← 미화 (ENFP)      ⚙️  │
+├─────────────────────────┤
+│                         │
+│  안녕! 오늘 뭐해? 🤗    │ ← AI
+│                         │
+│         나도 심심해 😊 │ ← User
+│                         │
+│  그럼 같이 뭐 할까? 💕 │ ← AI
+│                         │
+├─────────────────────────┤
+│ [선택지 1]              │
+│ [선택지 2]              │
+│ [선택지 3]              │
+└─────────────────────────┘
+```
+
+**기능**:
+- 카카오톡 스타일 채팅 UI
+- 선택지 표시
+- 사진 전송 표시
+- Phase 3 시스템 자동 작동
+
+### 2. 에피소드 생성 & 푸쉬 시스템 🆕
+
+#### 구조
+```
+어드민에서:
+1. 캐릭터 선택 (미화)
+2. 시나리오 선택 (카페에서 우연히)
+3. AI 모델 선택 (Claude/OpenAI/Llama)
+4. "에피소드 생성" 버튼 클릭
+
+↓ EpisodeGenerator
+
+생성된 에피소드:
+{
+  character_id: "미화_enfp",
+  scenario_id: "cafe_encounter",
+  dialogue: "어? 너 여기 자주 와?",
+  narration: "미화가 놀란 표정으로 다가온다",
+  choices: [
+    {text: "응, 자주 와", affection_impact: 2},
+    {text: "오늘 처음이야", affection_impact: 0},
+    {text: "너야말로 왜 여기 있어?", affection_impact: -1}
+  ]
+}
+
+↓ EpisodePushSystem
+
+"미화" 대화방에 푸쉬 → 사용자가 확인 → Phase 3 시스템 작동
+```
+
+#### 에피소드 타입
+1. **단순 메시지**: 캐릭터 대사만
+2. **선택지 질문**: 대사 + 선택지 3-4개
+3. **직접입력**: 대사 + 자유 입력
+
+### 3. Phase 3 시스템 (백그라운드)
+
+#### 7개 시스템 자동 작동
+1. **StatisticsManager**: 모든 행동 통계 수집
+2. **AchievementSystem**: 조건 충족 시 업적 해제
+3. **EmotionStateSystem**: MBTI별 감정 자동 변화
+4. **SpecialEventSystem**: 특별 이벤트 트리거
+5. **ConversationMemorySystem**: 대화 자동 기록 (3계층)
+6. **EndingManager**: 엔딩 조건 평가
+7. **GameIntegrationManager**: 모든 시스템 통합 관리
+
+#### 사용자는 모름
+- 호감도 수치 숨김
+- 통계 숨김
+- 감정 상태 숨김
+- 단, **결과**로 느낌:
+  - 말투 변화 (톤 시스템)
+  - 사진 전송 (호감도 높을수록 자주)
+  - 먼저 연락 (호감도 높을수록 자주)
+  - 엔딩 (조건 충족 시)
+
+### 4. 2축 수치 관리 (유저에게 숨김)
+
+#### 1. 호감도 (Affection) -100 ~ +100
 - **의미**: 전반적인 친밀도, 호의
 - **영향**: 톤 변화, 답장 빈도, 먼저 연락
-- **변화**: 대화 선택지, 직접입력 평가로 증감
-- **표시**: 유저에게 절대 보이지 않음
+- **변화**: 대화 선택지로 증감
+- **표시**: 절대 보이지 않음
 
-#### 2. 애정도 (Love) 1-10
+#### 2. 애정도 (Love) -100 ~ +100
 - **의미**: 로맨틱한 감정 깊이
-- **영향**: 애정 표현 강도, 사진 섹시도, 특별 이벤트
+- **영향**: 애정 표현 강도, 사진 섹시도
 - **변화**: 호감도 기반 + 특정 에피소드
-- **표시**: 유저에게 절대 보이지 않음
+- **표시**: 절대 보이지 않음
 
-### 에피소드 시스템
+---
 
-#### 3가지 에피소드 타입
-모든 타입은 캐릭터 대사를 상당 부분 포함:
+## 🔄 에피소드 워크플로우
 
-**1. 캐릭터 대사** ✅
-- 단순 메시지 전송
-- 응답 불필요
-- 분위기 조성, 일상 공유
+### 어드민 → 에피소드 생성 → 대화방 푸쉬
 
-**2. 선택지 질문** ✅
-- 캐릭터 질문 + 3-4개 선택지
-- 사전 설정된 점수 반영
-- 빠른 진행
+```
+1️⃣ 어드민 (scenario-admin.html)
+   ├─ 캐릭터 생성기 (9명 생성) ✅
+   ├─ 시나리오 생성기 (배경 생성) ✅
+   └─ 에피소드 생성기 (대화 생성) 🆕
+      ├─ 캐릭터 선택
+      ├─ 시나리오 선택
+      ├─ AI 모델 선택
+      └─ "생성" → API 호출
 
-**3. 직접입력 퀴즈** 📋
-- 캐릭터 질문 + 유저 자유 입력
-- AI가 캐릭터 정보 기반 평가
-- 점수 + 답변 생성
+2️⃣ API (api/episode-generator.js) 🆕
+   ├─ 캐릭터 정보 로드
+   ├─ 시나리오 정보 로드
+   ├─ AI 프롬프트 생성
+   ├─ LLM 호출 (Claude/OpenAI/Llama)
+   └─ 에피소드 JSON 생성
+      {
+        dialogue: "...",
+        narration: "...",
+        choices: [...]
+      }
 
-#### 에피소드 길이
-- **기본**: 짧은 대화
-- **가끔**: 캐릭터의 긴 메시지
-- **형태**: 하이브리드 타입
+3️⃣ 저장 (data/episodes/)
+   └─ episode-database.json에 저장
 
-### 시나리오 vs 에피소드
+4️⃣ 푸쉬 (js/episode-push-system.js) 🆕
+   ├─ 대화방 ID 확인
+   ├─ 읽지 않음 상태로 푸쉬
+   └─ 사용자 알림
 
-**시나리오 (배경)**:
-- 이야기의 뼈대
-- AI로 생성 (어드민)
-- 다양한 LLM 모델 사용 가능
-- 예: "재회한 첫사랑", "동네 카페 알바"
+5️⃣ 사용자 확인 (messenger-ui.html)
+   ├─ 대화방 리스트에 표시
+   ├─ 🔴 읽지 않음 표시
+   └─ 클릭 → chat-room.html
 
-**에피소드 (실제 대화)**:
-- 시나리오 기반 대화 콘텐츠
-- 유저 데이터 + 부가 정보 → AI 생성
-- 3가지 타입 중 하나
-- 채팅방으로 자동 전송
-
-### 2. MBTI 성격 유형
-- **16가지 타입**: INFP, ENFP, INTJ, ESTJ, ISFP, ESFP, INTP, ISTP, ISFJ, ESFJ, ISTJ, ENTJ, ENTP, INFJ, ENFJ
-- **활용**: 대화 스타일, 선호 주제, 반응 패턴 차별화
-
-### 3. 에피소드 시스템
-- **에피소드**: 대화의 최소 단위 (메시지, 선택지, 입력 등)
-- **트리거**: 시간/호감도/행동 기반 자동 발생
-- **전달**: 딜레이 계산 및 자연스러운 타이밍
-
-### 4. 톤 변화 (Phase 2-A)
-- **5단계**: 존댓말 → 반말 → 애교 → 애정표현 → 적극적
-- **자동 적용**: 호감도 증가 시 자연스러운 말투 변화
-- **MBTI별**: 성격 유형에 맞는 톤 스타일
-
-### 5. 사진 전송 (Phase 2-B)
-- **5가지 카테고리**: profile, casual, romantic, emotional, special
-- **호감도 기반**: 3+ ~ 9+ 레벨별 차등 전송
-- **MBTI 메시지**: 80개 패턴 (16 MBTI × 5 카테고리)
+6️⃣ 대화 진행 (chat-room.html)
+   ├─ 에피소드 표시
+   ├─ 선택지 클릭
+   ├─ Phase 3 시스템 자동 작동
+   │  ├─ 호감도 변경
+   │  ├─ 감정 업데이트
+   │  ├─ 메모리 기록
+   │  └─ 통계 수집
+   └─ 다음 에피소드 대기
+```
 
 ---
 
 ## 📊 Phase 로드맵
 
 ### ✅ Phase 1: 핵심 채팅 엔진 (완료)
-- **1-A**: 채팅 UI 및 기초 시스템
-- **1-B**: 에피소드 트리거 시스템
-- **1-C**: 멀티 캐릭터 동시 채팅
-- **1-D**: 통합 테스트 및 마무리
+- 1-A: 채팅 UI 및 기초 시스템
+- 1-B: 에피소드 트리거 시스템
+- 1-C: 멀티 캐릭터 동시 채팅
+- 1-D: 통합 테스트 및 마무리
 
 ### ✅ Phase 2-A: 톤 변화 시스템 (완료)
-- `js/tone-variation-engine.js` (457줄)
-- `data/tone-templates.json` (433줄)
-- 호감도 기반 5단계 말투 자동 변화
+- `js/tone-variation-engine.js`
+- `data/tone-templates.json`
+- 호감도 기반 5단계 말투 변화
 
 ### ✅ Phase 2-B: 사진 전송 시스템 (완료)
-- `js/photo-sending-system.js` (500줄)
-- `data/character-photos.json` (20개 사진)
-- 호감도/시간 기반 사진 자발적 전송
+- `js/photo-sending-system.js`
+- `data/character-photos.json`
+- 호감도/시간 기반 사진 전송
 
-### 📋 Phase 2-C: 먼저 연락 시스템 (예정)
-- 일정 시간 후 캐릭터가 먼저 메시지
-- 시간대/호감도/상황 기반 트리거
+### ✅ Phase 2-C: 먼저 연락 시스템 (완료)
+- `js/proactive-contact-system.js`
+- MBTI별 연락 패턴
 
-### 📋 Phase 2-D: 통합 테스트 (예정)
+### ✅ Phase 2-D: 통합 테스트 (완료)
 - Phase 2 전체 통합 및 안정화
 
-### 📋 Phase 3: 고급 인터랙션 (계획)
-- 음성 메시지
-- 영상 통화
-- 선물 시스템 등
+### ✅ Phase 3: 고급 상호작용 시스템 (완료)
+- **Milestone 1**: 통계 대시보드 + 업적
+- **Milestone 2**: 감정 상태 + 특별 이벤트
+- **Milestone 3**: 대화 기억 시스템 (3계층 메모리)
+- **Milestone 4**: 엔딩 시스템 + 통합 관리자
 
----
-
-## 🎮 사용자 플로우
-
-### 1. 캐릭터 선택
-```
-character-list-ui.html
-  ↓ 캐릭터 클릭
-chat-ui.html (해당 캐릭터)
-```
-
-### 2. 대화 진행
-```
-사용자 입력
-  ↓
-multiCharacterState.sendMessage()
-  ↓
-호감도 계산 및 업데이트
-  ↓
-AI 응답 생성 (톤 적용)
-  ↓
-화면에 표시
-```
-
-### 3. 자동 트리거
-```
-1분마다 체크
-  ↓
-시간/호감도/행동 조건 확인
-  ↓
-에피소드 생성 (메시지/사진)
-  ↓
-자연스러운 딜레이 후 전달
-```
+### 🔄 Phase 4: 메신저 UI 및 에피소드 시스템 (진행 중) 🆕
+- **Milestone 1**: 메신저 UI (대화방 리스트 + 개별 채팅방)
+- **Milestone 2**: 에피소드 생성기 (캐릭터+시나리오→대화)
+- **Milestone 3**: 에피소드 푸쉬 시스템
+- **Milestone 4**: 어드민 통합 및 테스트
 
 ---
 
 ## 🔗 중요 링크
 
 - **배포 URL**: https://chatgame-seven.vercel.app
-- **채팅 UI**: https://chatgame-seven.vercel.app/chat-ui.html
-- **캐릭터 리스트**: https://chatgame-seven.vercel.app/character-list-ui.html
+- **메신저 UI**: https://chatgame-seven.vercel.app/messenger-ui.html 🆕
 - **어드민**: https://chatgame-seven.vercel.app/scenario-admin.html (비번: a6979)
 - **Git 저장소**: https://github.com/EnmanyProject/chatgame
 
 ---
 
-## 📝 개발 철학
-
-### 원칙
-1. **실용성 우선**: 이론보다 실제 사용 가능한 채팅 기술
-2. **자연스러움**: 게임처럼 느껴지지 않는 리얼한 대화
-3. **개인화**: MBTI별 맞춤 훈련 및 피드백
-4. **점진적 발전**: 호감도 단계별 자연스러운 관계 진행
-
-### 코드 규칙
-- ES6+ 모던 JavaScript
-- 클래스 기반 모듈화
-- localStorage 기반 상태 관리
-- 비동기 처리 (async/await)
-
----
-
 ## 🚨 주의사항
 
-### 호감도 시스템
-- **범위**: -100 ~ +100 (내부)
-- **표시**: 0 ~ 10 레벨 (사용자에게)
-- **변환**: `Math.round(affection / 10)`
-
 ### 데이터 저장
-- **LocalStorage**: 대화 내역, 상태
-- **GitHub API**: 캐릭터, 시나리오, 사진 (영구)
+- **LocalStorage**: 대화 내역, 읽음 상태
+- **GitHub API**: 캐릭터, 시나리오, 에피소드 (영구)
 - **동기화**: 두 저장소 간 일관성 유지
 
 ### 버전 관리
 - **형식**: vX.Y.Z
-- **X**: Major (대규모 기능)
+- **X**: Major (대규모 구조 변경)
 - **Y**: Minor (Phase 완료)
 - **Z**: Patch (버그 수정)
 
 ---
 
-**작성일**: 2025-10-05
+**작성일**: 2025-10-06
 **작성자**: Claude Code
 **용도**: 프로젝트 전체 이해 (외부 LLM 포함)
