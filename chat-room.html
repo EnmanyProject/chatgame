@@ -450,10 +450,16 @@
         async function loadCharacter() {
             try {
                 const response = await fetch('data/characters.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const data = await response.json();
+                console.log('📥 캐릭터 데이터 로드:', data);
+                console.log('🔍 찾는 캐릭터 ID:', currentCharacterId);
 
                 if (data.characters && data.characters[currentCharacterId]) {
                     currentCharacter = data.characters[currentCharacterId];
+                    console.log('✅ 캐릭터 찾음:', currentCharacter);
 
                     // 헤더 업데이트
                     document.getElementById('characterName').textContent = currentCharacter.basic_info.name;
@@ -470,11 +476,13 @@
                         console.log('✅ Phase 3 캐릭터 상태 초기화:', currentCharacterId);
                     }
                 } else {
+                    console.error('❌ 캐릭터를 찾을 수 없음');
+                    console.log('사용 가능한 캐릭터 ID:', Object.keys(data.characters || {}));
                     throw new Error('캐릭터를 찾을 수 없습니다.');
                 }
             } catch (error) {
                 console.error('❌ 캐릭터 로드 실패:', error);
-                alert('캐릭터 정보를 불러올 수 없습니다.');
+                alert('캐릭터 정보를 불러올 수 없습니다.\n캐릭터 ID: ' + currentCharacterId);
                 goBack();
             }
         }

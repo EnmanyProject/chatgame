@@ -356,15 +356,27 @@
         async function loadCharacters() {
             try {
                 const response = await fetch('data/characters.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const data = await response.json();
+                console.log('📥 받은 데이터:', data);
 
                 // characters 객체를 배열로 변환
                 if (data.characters) {
-                    characters = Object.values(data.characters).filter(char => char.active !== false);
+                    characters = Object.values(data.characters).filter(char => {
+                        // active가 명시적으로 false가 아닌 경우만 포함
+                        return char.active !== false;
+                    });
+                    console.log('✅ 캐릭터 로드 완료:', characters.length + '명');
+                    console.log('캐릭터 목록:', characters.map(c => c.basic_info?.name || c.id));
+                } else {
+                    console.warn('⚠️ data.characters가 없습니다');
+                    characters = [];
                 }
-                console.log('✅ 캐릭터 로드 완료:', characters.length + '명');
             } catch (error) {
                 console.error('❌ 캐릭터 로드 실패:', error);
+                alert('캐릭터 데이터를 불러올 수 없습니다. 콘솔을 확인해주세요.');
             }
         }
 
