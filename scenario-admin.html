@@ -4337,7 +4337,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.8.6</span>
+                <span id="systemVersion">v1.9.0</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -4761,75 +4761,6 @@
 
         <!-- 시나리오 관리 섹션 -->
         <div id="scenarios-section" class="content-section">
-            <!-- 시나리오 상세 정보 표시 영역 -->
-            <div id="scenario-detail-view" style="display: none; margin-bottom: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; padding: 30px; color: white; box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
-                    <div style="flex: 1;">
-                        <h2 id="detail-scenario-title" style="margin: 0 0 10px 0; font-size: 28px;">시나리오 제목</h2>
-                        <p id="detail-scenario-description" style="margin: 0; opacity: 0.9; font-size: 16px; line-height: 1.6;">시나리오 설명</p>
-                    </div>
-                    <button onclick="closeScenarioDetail()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
-                        ✕ 닫기
-                    </button>
-                </div>
-
-                <!-- 메타데이터 그리드 -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                    <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
-                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">🤖 AI 모델</div>
-                        <div id="detail-ai-model" style="font-size: 16px; font-weight: 600;">-</div>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
-                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">🎭 장르</div>
-                        <div id="detail-genre" style="font-size: 16px; font-weight: 600;">-</div>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
-                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">🔥 섹시 레벨</div>
-                        <div id="detail-sexy-level" style="font-size: 16px; font-weight: 600;">-</div>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
-                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">😊 분위기</div>
-                        <div id="detail-mood" style="font-size: 16px; font-weight: 600;">-</div>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
-                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">📍 배경</div>
-                        <div id="detail-background" style="font-size: 16px; font-weight: 600;">-</div>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
-                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">⏱️ 예상 시간</div>
-                        <div id="detail-duration" style="font-size: 16px; font-weight: 600;">-</div>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
-                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">💕 목표 호감도</div>
-                        <div id="detail-target-affection" style="font-size: 16px; font-weight: 600;">-</div>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
-                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">📺 에피소드</div>
-                        <div id="detail-episode-count" style="font-size: 16px; font-weight: 600;">-</div>
-                    </div>
-                </div>
-
-                <!-- 태그 표시 -->
-                <div id="detail-tags-container" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; display: none;">
-                    <div style="font-size: 12px; opacity: 0.8; margin-bottom: 8px;">🏷️ 태그</div>
-                    <div id="detail-tags" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
-                </div>
-
-                <!-- AI 생성 컨텍스트 -->
-                <div id="detail-ai-context-container" style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px); margin-bottom: 20px; display: none;">
-                    <h3 style="margin: 0 0 12px 0; font-size: 16px;">📖 AI 생성 스토리</h3>
-                    <div id="detail-ai-context" style="line-height: 1.8; opacity: 0.9; white-space: pre-wrap; font-size: 14px;"></div>
-                </div>
-
-                <!-- Acts & Beats 구조 -->
-                <div id="detail-acts-structure" style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px);">
-                    <h3 style="margin: 0 0 15px 0; font-size: 18px;">🎬 Acts & Beats 구조</h3>
-                    <div id="detail-acts-content" style="display: flex; flex-direction: column; gap: 15px;">
-                        <p style="margin: 0; opacity: 0.7;">구조 정보가 없습니다</p>
-                    </div>
-                </div>
-            </div>
-
             <div class="stats-row">
                 <div class="stat-card">
                     <h3>전체 시나리오</h3>
@@ -6360,6 +6291,96 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('characterDetailModal')">닫기</button>
                 <button type="button" class="btn btn-primary" onclick="editCurrentCharacter()">✏️ 편집</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 시나리오 상세 정보 모달 -->
+    <div id="scenarioDetailModal" class="modal">
+        <div class="modal-content modal-large" style="max-width: 1000px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <span class="close" onclick="closeModal('scenarioDetailModal')">&times;</span>
+                <h2>📖 시나리오 상세 정보</h2>
+            </div>
+            <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
+                <!-- 제목과 설명 -->
+                <div style="margin-bottom: 25px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
+                    <h2 id="detail-scenario-title" style="margin: 0 0 10px 0; font-size: 26px;">시나리오 제목</h2>
+                    <p id="detail-scenario-description" style="margin: 0; opacity: 0.95; font-size: 15px; line-height: 1.7;">시나리오 설명</p>
+                </div>
+
+                <!-- 메타데이터 그리드 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 20px;">
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid #667eea;">
+                        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">🤖 AI 모델</div>
+                        <div id="detail-ai-model" style="font-size: 14px; font-weight: 600; color: #333;">-</div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid #764ba2;">
+                        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">🎭 장르</div>
+                        <div id="detail-genre" style="font-size: 14px; font-weight: 600; color: #333;">-</div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid #ff6b6b;">
+                        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">🔥 섹시 레벨</div>
+                        <div id="detail-sexy-level" style="font-size: 14px; font-weight: 600; color: #333;">-</div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid #ffd93d;">
+                        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">😊 분위기</div>
+                        <div id="detail-mood" style="font-size: 14px; font-weight: 600; color: #333;">-</div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid #4ecdc4;">
+                        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">📍 배경</div>
+                        <div id="detail-background" style="font-size: 14px; font-weight: 600; color: #333;">-</div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid #95e1d3;">
+                        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">⏱️ 예상 시간</div>
+                        <div id="detail-duration" style="font-size: 14px; font-weight: 600; color: #333;">-</div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid #ff9ff3;">
+                        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">💕 목표 호감도</div>
+                        <div id="detail-target-affection" style="font-size: 14px; font-weight: 600; color: #333;">-</div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid #a8dadc;">
+                        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">📺 에피소드</div>
+                        <div id="detail-episode-count" style="font-size: 14px; font-weight: 600; color: #333;">-</div>
+                    </div>
+                </div>
+
+                <!-- 태그 표시 -->
+                <div id="detail-tags-container" style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: none; border-left: 4px solid #667eea;">
+                    <div style="font-size: 12px; color: #666; font-weight: 600; margin-bottom: 10px;">🏷️ 태그</div>
+                    <div id="detail-tags" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                </div>
+
+                <!-- AI 생성 스토리 (중요!) -->
+                <div id="detail-ai-story-container" style="background: #fff8e1; padding: 20px; border-radius: 12px; border: 2px solid #ffd93d; margin-bottom: 20px; display: none;">
+                    <h3 style="margin: 0 0 15px 0; font-size: 17px; color: #f57c00; display: flex; align-items: center; gap: 8px;">
+                        <span>📖</span>
+                        <span>AI 생성 시나리오 스토리</span>
+                    </h3>
+                    <div id="detail-ai-story" style="line-height: 1.9; color: #333; white-space: pre-wrap; font-size: 14px; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #ffa726;"></div>
+                </div>
+
+                <!-- 기승전결 구조 (story_structure) -->
+                <div id="detail-story-structure-container" style="background: #e3f2fd; padding: 20px; border-radius: 12px; border: 2px solid #2196f3; margin-bottom: 20px; display: none;">
+                    <h3 style="margin: 0 0 15px 0; font-size: 17px; color: #1976d2;">📚 기승전결 구조</h3>
+                    <div id="detail-story-structure-content" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                </div>
+
+                <!-- Acts & Beats 구조 -->
+                <div id="detail-acts-structure" style="background: #f3e5f5; padding: 20px; border-radius: 12px; border: 2px solid #ab47bc; display: none;">
+                    <h3 style="margin: 0 0 15px 0; font-size: 17px; color: #7b1fa2;">🎬 Acts & Beats 구조</h3>
+                    <div id="detail-acts-content" style="display: flex; flex-direction: column; gap: 15px;"></div>
+                </div>
+
+                <!-- 구조 정보 없음 안내 -->
+                <div id="detail-no-structure" style="padding: 30px; text-align: center; background: #fff3cd; border-radius: 10px; border: 2px dashed #ffc107; display: none;">
+                    <p style="margin: 0 0 10px 0; font-size: 16px; color: #856404;">⚠️ 시나리오 구조 정보가 없습니다</p>
+                    <p style="margin: 0; font-size: 13px; color: #856404;">시나리오를 편집하여 기승전결 또는 Acts & Beats를 추가하세요.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('scenarioDetailModal')">닫기</button>
+                <button type="button" class="btn btn-primary" onclick="editCurrentScenario()">✏️ 편집</button>
             </div>
         </div>
     </div>
@@ -8464,7 +8485,7 @@
                 ` : '<div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 5px; font-size: 12px; color: #856404;">⚠️ 기승전결 구조가 없습니다. 수정하여 추가하세요.</div>';
 
                 return `
-                    <div class="scenario-card" onclick="showScenarioDetail('${scenarioId}')" style="cursor: pointer;">
+                    <div class="scenario-card" style="cursor: default;">
                         <h3>${scenario.title}</h3>
                         <p class="description">${scenario.description}</p>
                         <div class="metadata">
@@ -8475,11 +8496,14 @@
                             <span class="tag">에피소드: ${scenario.dialogue_count || 0}개</span>
                         </div>
                         ${structureHTML}
-                        <div class="actions" onclick="event.stopPropagation()" style="margin-top: 15px;">
-                            <button class="btn btn-success" onclick="editScenario('${scenarioId}')">수정</button>
-                            <button class="btn btn-primary" onclick="manageDialogues('${scenarioId}')">에피소드</button>
-                            <button class="btn btn-info" onclick="testScenarioWithModel('${scenarioId}')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">▶️ 테스트</button>
-                            <button class="btn btn-danger" onclick="deleteScenario('${scenarioId}')">삭제</button>
+                        <div class="actions" style="margin-top: 15px; display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button class="btn" onclick="showScenarioDetail('${scenarioId}')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; flex: 1; min-width: 100px; font-weight: 600;">
+                                📋 상세보기
+                            </button>
+                            <button class="btn btn-success" onclick="editScenario('${scenarioId}')">✏️ 수정</button>
+                            <button class="btn btn-primary" onclick="manageDialogues('${scenarioId}')">🎬 에피소드</button>
+                            <button class="btn btn-info" onclick="testScenarioWithModel('${scenarioId}')" style="background: #4ecdc4; color: white; border: none;">▶️ 테스트</button>
+                            <button class="btn btn-danger" onclick="deleteScenario('${scenarioId}')">🗑️ 삭제</button>
                         </div>
                     </div>
                 `;
@@ -8793,17 +8817,21 @@
             return div.innerHTML;
         }
 
-        // 시나리오 상세 정보 표시
+        // 시나리오 상세 정보 모달 표시
         function showScenarioDetail(scenarioId) {
-            console.log('📋 시나리오 상세 정보 표시:', scenarioId);
+            console.log('📋 시나리오 상세 정보 모달 열기:', scenarioId);
 
             const scenariosData = window.scenarios || scenarios || {};
             const scenario = scenariosData[scenarioId];
 
             if (!scenario) {
                 console.error('❌ 시나리오를 찾을 수 없음:', scenarioId);
+                alert('시나리오를 찾을 수 없습니다.');
                 return;
             }
+
+            // 현재 시나리오 ID 저장 (편집 버튼용)
+            window.currentDetailScenarioId = scenarioId;
 
             // AI 모델 정보
             const aiModel = scenario.metadata?.ai_model || 'claude';
@@ -8850,67 +8878,137 @@
             if (uniqueTags.length > 0) {
                 document.getElementById('detail-tags-container').style.display = 'block';
                 document.getElementById('detail-tags').innerHTML = uniqueTags.map(tag =>
-                    `<span style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 15px; font-size: 13px; font-weight: 500;">${tag}</span>`
+                    `<span style="background: #667eea; color: white; padding: 6px 12px; border-radius: 15px; font-size: 12px; font-weight: 500;">${tag}</span>`
                 ).join('');
             } else {
                 document.getElementById('detail-tags-container').style.display = 'none';
             }
 
-            // AI 생성 컨텍스트 표시 (에러 메시지가 아닌 경우만)
-            const aiContext = scenario.ai_generated_context || scenario.custom_context || '';
-            const isErrorMessage = aiContext.includes('죄송하지만') || aiContext.includes('제공되지 않아') || aiContext.includes('작성할 수 없습니다');
+            // AI 생성 스토리 표시 (중요!)
+            const aiStory = scenario.ai_generated_context || scenario.custom_context || '';
+            const isErrorMessage = aiStory.includes('죄송하지만') || aiStory.includes('제공되지 않아') || aiStory.includes('작성할 수 없습니다');
 
-            if (aiContext && !isErrorMessage) {
-                document.getElementById('detail-ai-context-container').style.display = 'block';
-                document.getElementById('detail-ai-context').textContent = aiContext;
+            const storyContainer = document.getElementById('detail-ai-story-container');
+            if (aiStory && !isErrorMessage) {
+                storyContainer.style.display = 'block';
+                document.getElementById('detail-ai-story').textContent = aiStory;
+                console.log('✅ AI 생성 스토리 표시됨:', aiStory.length, '자');
             } else {
-                document.getElementById('detail-ai-context-container').style.display = 'none';
+                storyContainer.style.display = 'none';
+                console.log('⚠️ AI 생성 스토리 없음 또는 에러 메시지');
             }
 
-            // Acts & Beats 구조 표시 (상세 정보 포함)
-            const actsContent = document.getElementById('detail-acts-content');
+            // 기승전결 구조 표시 (story_structure)
+            const storyStructure = scenario.story_structure || {};
+            const hasStoryStructure = storyStructure.ki || storyStructure.seung || storyStructure.jeon || storyStructure.gyeol;
+
+            const structureContainer = document.getElementById('detail-story-structure-container');
+            if (hasStoryStructure) {
+                structureContainer.style.display = 'block';
+                const structureContent = document.getElementById('detail-story-structure-content');
+                structureContent.innerHTML = '';
+
+                if (storyStructure.ki) {
+                    structureContent.innerHTML += `
+                        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
+                            <div style="font-size: 12px; color: #667eea; font-weight: 600; margin-bottom: 6px;">📌 기 (도입)</div>
+                            <div style="font-size: 15px; font-weight: 600; color: #333; margin-bottom: 6px;">${storyStructure.ki.title || ''}</div>
+                            <div style="font-size: 13px; color: #666; line-height: 1.6;">${storyStructure.ki.summary || ''}</div>
+                            ${storyStructure.ki.goal ? `<div style="font-size: 12px; color: #888; margin-top: 6px;">🎯 ${storyStructure.ki.goal}</div>` : ''}
+                        </div>
+                    `;
+                }
+                if (storyStructure.seung) {
+                    structureContent.innerHTML += `
+                        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #f093fb;">
+                            <div style="font-size: 12px; color: #f093fb; font-weight: 600; margin-bottom: 6px;">🔥 승 (전개)</div>
+                            <div style="font-size: 15px; font-weight: 600; color: #333; margin-bottom: 6px;">${storyStructure.seung.title || ''}</div>
+                            <div style="font-size: 13px; color: #666; line-height: 1.6;">${storyStructure.seung.summary || ''}</div>
+                            ${storyStructure.seung.goal ? `<div style="font-size: 12px; color: #888; margin-top: 6px;">🎯 ${storyStructure.seung.goal}</div>` : ''}
+                        </div>
+                    `;
+                }
+                if (storyStructure.jeon) {
+                    structureContent.innerHTML += `
+                        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #fa709a;">
+                            <div style="font-size: 12px; color: #fa709a; font-weight: 600; margin-bottom: 6px;">⚡ 전 (위기)</div>
+                            <div style="font-size: 15px; font-weight: 600; color: #333; margin-bottom: 6px;">${storyStructure.jeon.title || ''}</div>
+                            <div style="font-size: 13px; color: #666; line-height: 1.6;">${storyStructure.jeon.summary || ''}</div>
+                            ${storyStructure.jeon.goal ? `<div style="font-size: 12px; color: #888; margin-top: 6px;">🎯 ${storyStructure.jeon.goal}</div>` : ''}
+                        </div>
+                    `;
+                }
+                if (storyStructure.gyeol) {
+                    structureContent.innerHTML += `
+                        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #4facfe;">
+                            <div style="font-size: 12px; color: #4facfe; font-weight: 600; margin-bottom: 6px;">✨ 결 (결말)</div>
+                            <div style="font-size: 15px; font-weight: 600; color: #333; margin-bottom: 6px;">${storyStructure.gyeol.title || ''}</div>
+                            <div style="font-size: 13px; color: #666; line-height: 1.6;">${storyStructure.gyeol.summary || ''}</div>
+                            ${storyStructure.gyeol.goal ? `<div style="font-size: 12px; color: #888; margin-top: 6px;">🎯 ${storyStructure.gyeol.goal}</div>` : ''}
+                        </div>
+                    `;
+                }
+                console.log('✅ 기승전결 구조 표시됨');
+            } else {
+                structureContainer.style.display = 'none';
+                console.log('⚠️ 기승전결 구조 없음');
+            }
+
+            // Acts & Beats 구조 표시
+            const actsContainer = document.getElementById('detail-acts-structure');
             if (scenario.structure && scenario.structure.acts && scenario.structure.acts.length > 0) {
+                actsContainer.style.display = 'block';
+                const actsContent = document.getElementById('detail-acts-content');
                 actsContent.innerHTML = scenario.structure.acts.map((act, actIndex) => `
-                    <div style="background: rgba(255,255,255,0.12); padding: 20px; border-radius: 10px; border-left: 4px solid rgba(255,255,255,0.5);">
-                        <div style="font-weight: 600; font-size: 18px; margin-bottom: 12px; color: #fff;">
+                    <div style="background: white; padding: 18px; border-radius: 10px; border-left: 4px solid #ab47bc;">
+                        <div style="font-weight: 600; font-size: 17px; margin-bottom: 12px; color: #7b1fa2;">
                             ${actIndex + 1}. ${act.name || `Act ${actIndex + 1}`}
                         </div>
                         ${act.beats && act.beats.length > 0 ? `
                             <div style="display: flex; flex-direction: column; gap: 12px;">
                                 ${act.beats.map((beat, beatIndex) => `
-                                    <div style="background: rgba(0,0,0,0.15); padding: 15px; border-radius: 8px; border-left: 3px solid rgba(255,255,255,0.3);">
-                                        <div style="font-size: 15px; font-weight: 600; margin-bottom: 8px; color: #fff;">
+                                    <div style="background: #f3e5f5; padding: 14px; border-radius: 8px; border-left: 3px solid #ce93d8;">
+                                        <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #7b1fa2;">
                                             ▶ ${beat.name || `Beat ${beatIndex + 1}`}
                                         </div>
-                                        ${beat.location ? `<div style="font-size: 13px; margin-bottom: 4px; opacity: 0.85;">📍 장소: ${beat.location}</div>` : ''}
-                                        ${beat.time ? `<div style="font-size: 13px; margin-bottom: 4px; opacity: 0.85;">⏰ 시간: ${beat.time}</div>` : ''}
-                                        ${beat.topic ? `<div style="font-size: 13px; margin-bottom: 4px; opacity: 0.85;">💬 주제: ${beat.topic}</div>` : ''}
-                                        ${beat.emotion ? `<div style="font-size: 13px; margin-bottom: 4px; opacity: 0.85;">😊 감정: ${beat.emotion}</div>` : ''}
-                                        ${beat.affection_change ? `<div style="font-size: 13px; margin-bottom: 4px; opacity: 0.85;">💕 호감도: ${beat.affection_change > 0 ? '+' : ''}${beat.affection_change}</div>` : ''}
-                                        ${beat.character_reaction ? `<div style="font-size: 13px; margin-top: 6px; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 6px; opacity: 0.9;">🎭 ${beat.character_reaction}</div>` : ''}
-                                        ${beat.description ? `<div style="font-size: 13px; margin-top: 6px; opacity: 0.8; font-style: italic;">📝 ${beat.description}</div>` : ''}
+                                        ${beat.location ? `<div style="font-size: 12px; margin-bottom: 4px; color: #555;">📍 장소: ${beat.location}</div>` : ''}
+                                        ${beat.time ? `<div style="font-size: 12px; margin-bottom: 4px; color: #555;">⏰ 시간: ${beat.time}</div>` : ''}
+                                        ${beat.topic ? `<div style="font-size: 12px; margin-bottom: 4px; color: #555;">💬 주제: ${beat.topic}</div>` : ''}
+                                        ${beat.emotion ? `<div style="font-size: 12px; margin-bottom: 4px; color: #555;">😊 감정: ${beat.emotion}</div>` : ''}
+                                        ${beat.affection_change ? `<div style="font-size: 12px; margin-bottom: 4px; color: #555;">💕 호감도: ${beat.affection_change > 0 ? '+' : ''}${beat.affection_change}</div>` : ''}
+                                        ${beat.character_reaction ? `<div style="font-size: 12px; margin-top: 8px; padding: 10px; background: white; border-radius: 6px; color: #333; line-height: 1.6;">🎭 ${beat.character_reaction}</div>` : ''}
+                                        ${beat.description ? `<div style="font-size: 12px; margin-top: 6px; color: #666; font-style: italic;">📝 ${beat.description}</div>` : ''}
                                     </div>
                                 `).join('')}
                             </div>
-                        ` : '<div style="opacity: 0.6; font-size: 13px; margin-left: 10px;">Beat가 없습니다</div>'}
+                        ` : '<div style="font-size: 13px; color: #999; margin-left: 10px;">Beat가 없습니다</div>'}
                     </div>
                 `).join('');
+                console.log('✅ Acts & Beats 구조 표시됨');
             } else {
-                actsContent.innerHTML = '<p style="margin: 0; opacity: 0.7;">구조 정보가 없습니다. 시나리오를 편집하여 Acts & Beats를 추가하세요.</p>';
+                actsContainer.style.display = 'none';
+                console.log('⚠️ Acts & Beats 구조 없음');
             }
 
-            // 상세 정보 영역 표시
-            const detailView = document.getElementById('scenario-detail-view');
-            detailView.style.display = 'block';
+            // 구조 정보 없음 안내
+            const noStructureDiv = document.getElementById('detail-no-structure');
+            if (!hasStoryStructure && (!scenario.structure || !scenario.structure.acts || scenario.structure.acts.length === 0)) {
+                noStructureDiv.style.display = 'block';
+            } else {
+                noStructureDiv.style.display = 'none';
+            }
 
-            // 부드럽게 스크롤
-            scrollToTop();
+            // 모달 표시
+            document.getElementById('scenarioDetailModal').style.display = 'block';
+            console.log('✅ 시나리오 상세 정보 모달 표시 완료');
         }
 
-        // 시나리오 상세 정보 닫기
-        function closeScenarioDetail() {
-            const detailView = document.getElementById('scenario-detail-view');
-            detailView.style.display = 'none';
+        // 편집 버튼 클릭 시
+        function editCurrentScenario() {
+            if (window.currentDetailScenarioId) {
+                closeModal('scenarioDetailModal');
+                editScenario(window.currentDetailScenarioId);
+            }
         }
 
         function addAct() {
