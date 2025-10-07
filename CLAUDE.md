@@ -154,7 +154,7 @@ grep "systemVersion" scenario-admin.html
 - scenario-admin.html: 장르 select 옵션, 장르 표시 매핑
 - api/scenario-manager.js: AI 프롬프트 감정 흐름 추가
 
-**Git**: 커밋 `예정`, 푸시 완료 예정
+**Git**: 커밋 `e13a4aa` + merge `06615f1`, 푸시 완료 ✅
 **테스트**: https://chatgame-seven.vercel.app/scenario-admin.html
 
 ---
