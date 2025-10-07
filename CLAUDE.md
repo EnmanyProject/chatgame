@@ -100,6 +100,33 @@ grep "systemVersion" scenario-admin.html
 
 ## 📊 버전 히스토리
 
+### v1.7.5 (2025-10-07) - 콘솔 로그 메시지 정리 (Patch Update)
+**작업 내용**:
+- 🧹 **불필요한 로그 메시지 제거**: 에러스럽게 보이던 ❌ 표시 로그 정리
+  * Line 7075-7080: 8줄 → 1줄로 간소화
+  * Line 13055-13057, 13060: 5줄 → 1줄로 간소화
+- ✅ **초기화 메시지 개선**: "✅ 시나리오 관리 시스템 v1.7.5 초기화 완료"
+- 🎯 **개발자 경험 향상**: 혼란스러운 디버그 로그 제거
+- 🚀 **사용자 경험 향상**: 깔끔한 콘솔 출력
+
+**변경 전**:
+```javascript
+❌ character-photo-manager API 완전 삭제됨
+❌ [V2.3] character-photo-manager는 삭제됨!
+🔄 함수명 변경: loadCharacterPhotosV2...
+🎯 이제 모든 사진 기능이 통합 API를 사용합니다!
+```
+
+**변경 후**:
+```javascript
+✅ 시나리오 관리 시스템 v1.7.5 초기화 완료
+```
+
+**Git**: 커밋 `0df60e6`, `6a8a48a`, 푸시 완료 ✅
+**테스트**: https://chatgame-seven.vercel.app/scenario-admin.html
+
+---
+
 ### v1.7.4 (2025-10-06) - AI 스토리 자동 생성 완성 (메인 목적 달성)
 **작업 내용**:
 - **핵심 개선**: "🤖 AI 자동 생성" 버튼 클릭 시 Acts & Beats + 소설풍 스토리 모두 자동 생성
