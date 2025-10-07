@@ -4337,7 +4337,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.10.1</span>
+                <span id="systemVersion">v1.10.2</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -9285,7 +9285,46 @@
                 });
 
                 console.log('✅ 기승전결 구조 생성 완료');
-                alert('✅ 기승전결 구조가 자동으로 생성되었습니다!\n\n내용을 확인하고 수정한 후 저장하세요.');
+
+                // 📖 2단계: 기승전결 구조 → 장문 스토리 자동 생성
+                button.innerHTML = '📖 스토리 생성 중...';
+
+                try {
+                    console.log('📖 기승전결 기반 장문 스토리 생성 시작...');
+
+                    const storyResponse = await fetch('/api/scenario-manager', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'generate_story_from_ki_seung_jeon_gyeol',
+                            title,
+                            description,
+                            structure: selectedStructure
+                        })
+                    });
+
+                    const storyResult = await storyResponse.json();
+
+                    if (storyResult.success && storyResult.story) {
+                        // AI 생성 스토리를 textarea에 채움
+                        const storyTextarea = document.getElementById('aiGeneratedStory');
+                        if (storyTextarea) {
+                            storyTextarea.value = storyResult.story;
+                            // 시각적 피드백 (배경색 변경)
+                            storyTextarea.style.backgroundColor = '#e8f5e9';
+                            setTimeout(() => {
+                                storyTextarea.style.backgroundColor = '';
+                            }, 2000);
+                        }
+                        console.log('✅ 장문 스토리 생성 완료 (길이:', storyResult.story.length, '자)');
+                    } else {
+                        console.warn('⚠️ 스토리 생성 실패:', storyResult.message);
+                    }
+                } catch (storyError) {
+                    console.warn('⚠️ 스토리 생성 실패 (계속 진행):', storyError.message);
+                }
+
+                alert('✅ 기승전결 구조와 장문 스토리가 자동으로 생성되었습니다!\n\n내용을 확인하고 수정한 후 저장하세요.');
 
             } catch (error) {
                 console.error('❌ AI 생성 오류:', error);

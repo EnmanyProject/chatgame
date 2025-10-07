@@ -259,6 +259,38 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // 기승전결 기반 장문 소설풍 스토리 생성
+    if (action === 'generate_story_from_ki_seung_jeon_gyeol') {
+      try {
+        console.log('📖 기승전결 기반 장문 스토리 생성 시작...');
+
+        const { title, description, structure } = req.body;
+
+        if (!title || !structure || !structure.ki || !structure.seung || !structure.jeon || !structure.gyeol) {
+          return res.status(400).json({
+            success: false,
+            message: '제목과 완전한 기승전결 구조(ki, seung, jeon, gyeol)가 필요합니다'
+          });
+        }
+
+        const story = await generateStoryFromKiSeungJeonGyeol({ title, description, structure });
+
+        console.log('✅ 기승전결 기반 장문 스토리 생성 완료');
+        return res.json({
+          success: true,
+          story,
+          message: '기승전결 기반 장문 소설풍 스토리가 생성되었습니다'
+        });
+      } catch (error) {
+        console.error('❌ 기승전결 스토리 생성 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: `기승전결 스토리 생성 실패: ${error.message}`,
+          error_details: error.stack?.split('\n').slice(0, 5).join('\n')
+        });
+      }
+    }
+
     return res.status(400).json({ success: false, message: 'Unknown action' });
 
   } catch (error) {
@@ -1412,6 +1444,113 @@ ${actsDescription}
 
   } catch (error) {
     console.error('❌ OpenAI API 호출 실패:', error);
+    throw error;
+  }
+}
+
+/**
+ * 기승전결 구조를 바탕으로 장문의 소설풍 스토리 생성
+ */
+async function generateStoryFromKiSeungJeonGyeol({ title, description, structure }) {
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+  if (!OPENAI_API_KEY) {
+    throw new Error('OpenAI API 키가 설정되지 않았습니다');
+  }
+
+  // 기승전결을 텍스트로 변환
+  const kiDescription = `기(起) - ${structure.ki.summary}
+  목표: ${structure.ki.goal}
+  대화 흐름: ${structure.ki.beats.map(b => b.name).join(' → ')}`;
+
+  const seungDescription = `승(承) - ${structure.seung.summary}
+  목표: ${structure.seung.goal}
+  대화 흐름: ${structure.seung.beats.map(b => b.name).join(' → ')}`;
+
+  const jeonDescription = `전(轉) - ${structure.jeon.summary}
+  목표: ${structure.jeon.goal}
+  대화 흐름: ${structure.jeon.beats.map(b => b.name).join(' → ')}`;
+
+  const gyeolDescription = `결(結) - ${structure.gyeol.summary}
+  목표: ${structure.gyeol.goal}
+  대화 흐름: ${structure.gyeol.beats.map(b => b.name).join(' → ')}`;
+
+  const prompt = `당신은 로맨스 소설 작가입니다.
+
+**시나리오 정보**:
+- 제목: ${title}
+- 설명: ${description}
+
+**기승전결 구조**:
+${kiDescription}
+
+${seungDescription}
+
+${jeonDescription}
+
+${gyeolDescription}
+
+**핵심 컨셉**:
+이 시나리오는 "이미 벌어진 일"에 대한 메신저 대화를 다룹니다.
+사건이 벌어지는 과정이 아니라, 사건 후 두 사람이 메신저로 감정을 나누는 이야기입니다.
+
+**목표**: 위 기승전결 구조를 바탕으로 **자연스럽게 연결된 장문의 배경 스토리**를 작성하세요.
+
+**작성 규칙**:
+1. 분량: 800-1200자 정도의 한 덩어리 텍스트
+2. 문체: 소설처럼 서술적이고 감성적으로, 자연스럽게 흐르도록
+3. 포함 요소:
+   - 어떤 일이 벌어졌는지 (과거)
+   - 그 후 메신저로 어떻게 대화가 시작되는지
+   - 기승전결에 따라 감정이 어떻게 변화하는지
+   - 대화의 흐름과 분위기, 두 사람의 심리
+   - 독자가 설렘과 몰입을 느낄 수 있는 표현
+4. 제외 요소:
+   - "기승전결", "Beat" 같은 구조 용어 사용 금지
+   - 단계별 구분 표시 금지 (단락 나누기는 자연스럽게)
+   - 순수한 이야기 흐름만
+
+**중요**: 문단 구분 없이 자연스럽게 이어지는 하나의 긴 스토리로 작성하세요.
+
+**출력**: 순수한 소설 텍스트만 (JSON이나 다른 형식 없이)`;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: '당신은 로맨스 소설 작가입니다. 감성적이고 몰입감 있는 배경 스토리를 자연스럽게 연결하여 작성하세요.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.9,
+        max_tokens: 1500
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`OpenAI API 오류: ${errorData.error?.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+    const story = data.choices[0].message.content.trim();
+
+    console.log('✅ 기승전결 기반 장문 스토리 생성 성공 (길이:', story.length, '자)');
+    return story;
+
+  } catch (error) {
+    console.error('❌ 기승전결 스토리 생성 실패:', error);
     throw error;
   }
 }
