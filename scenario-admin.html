@@ -4337,7 +4337,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.8.4</span>
+                <span id="systemVersion">v1.8.5</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -9182,21 +9182,17 @@
 
                     // 성공 메시지
                     const successMessage = currentMode === 'create'
-                        ? `✅ 시나리오 '${title}'가 생성되었습니다!\n\n🤖 AI 모델: ${selectedModel}\n📊 장르: ${genre}\n🔥 섹시 레벨: ${sexyLevel}\n\n⏳ GitHub 동기화는 3초 후 완료됩니다.`
-                        : `✅ 시나리오 '${title}'가 수정되었습니다!\n\n⏳ GitHub 동기화는 3초 후 완료됩니다.`;
+                        ? `✅ 시나리오 '${title}'가 생성되었습니다!\n\n🤖 AI 모델: ${selectedModel}\n📊 장르: ${genre}\n🔥 섹시 레벨: ${sexyLevel}`
+                        : `✅ 시나리오 '${title}'가 수정되었습니다!`;
 
                     alert(successMessage);
                     closeModal('scenarioModal');
 
-                    // GitHub 동기화 대기 후 재로드 (캐시 무효화 시간 확보)
-                    console.log('⏳ GitHub API 캐시 무효화를 위해 3초 대기...');
-                    setTimeout(async () => {
-                        console.log('🔄 GitHub에서 최신 데이터 로드...');
-                        await loadScenarios();
-                        console.log('✅ GitHub 동기화 완료!');
-                    }, 3000);
-
-                    console.log('✅ 시나리오 로컬 저장 완료!');
+                    // ✅ 저장 API 응답 데이터를 신뢰 (GitHub 캐시 문제 완전 우회)
+                    // 이유: GitHub 서버 캐시 갱신에 5-10초 소요
+                    // 3초 후 동기화 시 캐시된 이전 데이터 로드 → 방금 저장한 데이터 사라짐
+                    // 해결: 저장 후 동기화하지 않고, 사용자가 수동 새로고침하거나 탭 전환 시 자동 로드
+                    console.log('✅ 시나리오 저장 완료! (저장 API 응답 데이터 사용)');
                 } else {
                     throw new Error(result.error || '저장 실패');
                 }
