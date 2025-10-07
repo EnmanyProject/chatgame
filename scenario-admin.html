@@ -4337,7 +4337,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.8.1</span>
+                <span id="systemVersion">v1.8.2</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -8960,55 +8960,71 @@
             try {
                 console.log('📖 기승전결 구조 AI 생성 시작...');
 
-                // TODO: API 연결 예정 - 현재는 예시 데이터 생성
-                // const response = await fetch('/api/scenario-manager', {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify({
-                //         action: 'generate_story_structure',
-                //         title, description, genre
-                //     })
-                // });
-
-                // 임시: 제목 기반 예시 데이터 생성
-                const exampleStructures = {
-                    '술': {
-                        ki: { title: '술자리의 설렘', summary: '친구들과의 술자리에서 분위기가 무르익고, 평소와 다른 특별한 느낌이 감돈다.', goal: '자연스러운 분위기 조성' },
-                        seung: { title: '순간의 선택', summary: '취기가 오르고 둘만 남게 된 순간, 순간적인 감정에 이끌려 키스를 하게 된다.', goal: '감정의 폭발' },
-                        jeon: { title: '다음날의 어색함', summary: '술에 취해 한 행동을 후회하며 어색해지고, 서로의 진심이 궁금해진다.', goal: '관계의 불확실성' },
-                        gyeol: { title: '진심의 확인', summary: '용기를 내어 서로의 진심을 확인하고, 관계가 새로운 단계로 발전한다.', goal: '호감도 상승 및 관계 진전' }
-                    },
-                    '도서관': {
-                        ki: { title: '우연한 만남', summary: '조용한 도서관에서 같은 책을 집으려다 손이 마주치는 우연한 순간.', goal: '첫 인상 형성' },
-                        seung: { title: '함께하는 시간', summary: '같은 테이블에 앉게 되고, 조심스럽게 대화를 시작한다.', goal: '친밀감 형성' },
-                        jeon: { title: '고백의 두려움', summary: '호감을 느끼지만 거절당할까 두려워 망설이게 된다.', goal: '감정의 갈등' },
-                        gyeol: { title: '용기 있는 고백', summary: '용기를 내어 마음을 전하고, 서로의 마음을 확인한다.', goal: '관계의 시작' }
-                    },
-                    '재회': {
-                        ki: { title: '오랜만의 재회', summary: '오랜 시간이 지나 우연히 다시 만나게 되고, 옛 감정이 되살아난다.', goal: '과거의 감정 회상' },
-                        seung: { title: '변한 모습, 변하지 않은 마음', summary: '많이 변한 모습이지만 여전히 설레는 마음을 느낀다.', goal: '감정 재확인' },
-                        jeon: { title: '과거의 상처', summary: '헤어졌던 이유를 떠올리며 다시 다가가는 것을 망설인다.', goal: '과거 극복' },
-                        gyeol: { title: '새로운 시작', summary: '과거를 뒤로하고 새로운 관계를 시작하기로 결심한다.', goal: '재회 성공' }
-                    }
-                };
-
-                // 제목에서 키워드 찾기
                 let selectedStructure = null;
-                for (const [keyword, structure] of Object.entries(exampleStructures)) {
-                    if (title.includes(keyword)) {
-                        selectedStructure = structure;
-                        break;
-                    }
-                }
 
-                // 기본 구조
-                if (!selectedStructure) {
-                    selectedStructure = {
-                        ki: { title: '도입', summary: '이야기의 시작과 상황 설정', goal: '배경 소개' },
-                        seung: { title: '전개', summary: '사건이 발생하고 관계가 발전', goal: '감정 형성' },
-                        jeon: { title: '위기', summary: '갈등이나 어색한 상황 발생', goal: '긴장감 조성' },
-                        gyeol: { title: '결말', summary: '문제 해결과 관계의 진전', goal: '호감도 상승' }
+                // 🤖 OpenAI API 호출
+                try {
+                    const response = await fetch('/api/scenario-manager', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'generate_story_structure',
+                            title,
+                            description,
+                            genre
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success && result.structure) {
+                        selectedStructure = result.structure;
+                        console.log('✅ AI로부터 기승전결 구조 생성 성공');
+                    } else {
+                        throw new Error(result.error || 'AI 생성 실패');
+                    }
+                } catch (apiError) {
+                    console.warn('⚠️ AI API 실패, Fallback 사용:', apiError.message);
+
+                    // Fallback: 키워드 기반 예시 데이터
+                    const exampleStructures = {
+                        '술': {
+                            ki: { title: '술자리의 설렘', summary: '친구들과의 술자리에서 분위기가 무르익고, 평소와 다른 특별한 느낌이 감돈다.', goal: '자연스러운 분위기 조성' },
+                            seung: { title: '순간의 선택', summary: '취기가 오르고 둘만 남게 된 순간, 순간적인 감정에 이끌려 키스를 하게 된다.', goal: '감정의 폭발' },
+                            jeon: { title: '다음날의 어색함', summary: '술에 취해 한 행동을 후회하며 어색해지고, 서로의 진심이 궁금해진다.', goal: '관계의 불확실성' },
+                            gyeol: { title: '진심의 확인', summary: '용기를 내어 서로의 진심을 확인하고, 관계가 새로운 단계로 발전한다.', goal: '호감도 상승 및 관계 진전' }
+                        },
+                        '도서관': {
+                            ki: { title: '우연한 만남', summary: '조용한 도서관에서 같은 책을 집으려다 손이 마주치는 우연한 순간.', goal: '첫 인상 형성' },
+                            seung: { title: '함께하는 시간', summary: '같은 테이블에 앉게 되고, 조심스럽게 대화를 시작한다.', goal: '친밀감 형성' },
+                            jeon: { title: '고백의 두려움', summary: '호감을 느끼지만 거절당할까 두려워 망설이게 된다.', goal: '감정의 갈등' },
+                            gyeol: { title: '용기 있는 고백', summary: '용기를 내어 마음을 전하고, 서로의 마음을 확인한다.', goal: '관계의 시작' }
+                        },
+                        '재회': {
+                            ki: { title: '오랜만의 재회', summary: '오랜 시간이 지나 우연히 다시 만나게 되고, 옛 감정이 되살아난다.', goal: '과거의 감정 회상' },
+                            seung: { title: '변한 모습, 변하지 않은 마음', summary: '많이 변한 모습이지만 여전히 설레는 마음을 느낀다.', goal: '감정 재확인' },
+                            jeon: { title: '과거의 상처', summary: '헤어졌던 이유를 떠올리며 다시 다가가는 것을 망설인다.', goal: '과거 극복' },
+                            gyeol: { title: '새로운 시작', summary: '과거를 뒤로하고 새로운 관계를 시작하기로 결심한다.', goal: '재회 성공' }
+                        }
                     };
+
+                    // 제목에서 키워드 찾기
+                    for (const [keyword, structure] of Object.entries(exampleStructures)) {
+                        if (title.includes(keyword)) {
+                            selectedStructure = structure;
+                            break;
+                        }
+                    }
+
+                    // 기본 구조
+                    if (!selectedStructure) {
+                        selectedStructure = {
+                            ki: { title: '도입', summary: '이야기의 시작과 상황 설정', goal: '배경 소개' },
+                            seung: { title: '전개', summary: '사건이 발생하고 관계가 발전', goal: '감정 형성' },
+                            jeon: { title: '위기', summary: '갈등이나 어색한 상황 발생', goal: '긴장감 조성' },
+                            gyeol: { title: '결말', summary: '문제 해결과 관계의 진전', goal: '호감도 상승' }
+                        };
+                    }
                 }
 
                 // 폼 필드에 데이터 입력

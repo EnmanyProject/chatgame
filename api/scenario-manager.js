@@ -194,6 +194,39 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // 📖 기승전결 구조 자동 생성 (신규 시스템)
+    if (action === 'generate_story_structure') {
+      try {
+        console.log('📖 기승전결 구조 AI 생성 시작...');
+        console.log('📥 받은 데이터:', JSON.stringify(req.body, null, 2));
+
+        const { title, description, genre } = req.body;
+
+        if (!title || !description) {
+          return res.status(400).json({
+            success: false,
+            message: '제목과 설명이 필요합니다'
+          });
+        }
+
+        const structure = await generateKiSeungJeonGyeolStructure({ title, description, genre });
+
+        console.log('✅ 기승전결 구조 생성 완료');
+        return res.json({
+          success: true,
+          structure,
+          message: '기승전결 구조가 자동 생성되었습니다'
+        });
+      } catch (error) {
+        console.error('❌ 기승전결 구조 생성 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: `기승전결 구조 생성 실패: ${error.message}`,
+          error_details: error.stack?.split('\n').slice(0, 5).join('\n')
+        });
+      }
+    }
+
     // Acts & Beats 기반 소설풍 스토리 생성
     if (action === 'generate_story_from_structure') {
       try {
@@ -1119,6 +1152,111 @@ async function generateScenarioStructure({ title, description }) {
     }
 
     console.log('✅ AI 구조 생성 성공:', JSON.stringify(structure, null, 2));
+    return structure;
+
+  } catch (error) {
+    console.error('❌ OpenAI API 호출 실패:', error);
+    throw error;
+  }
+}
+
+// 📖 기승전결 구조 생성 함수 (신규 시스템)
+async function generateKiSeungJeonGyeolStructure({ title, description, genre = '' }) {
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+  if (!OPENAI_API_KEY) {
+    throw new Error('OpenAI API 키가 설정되지 않았습니다');
+  }
+
+  const genreHint = genre ? `- 장르: ${genre}` : '';
+
+  const prompt = `당신은 로맨스 메신저 대화 시나리오 전문 작가입니다.
+
+**시나리오 정보**:
+- 제목: ${title}
+- 설명: ${description}
+${genreHint}
+
+**목표**: 위 정보를 바탕으로 기승전결 4단계 구조를 생성하세요.
+
+**출력 형식** (반드시 JSON으로):
+{
+  "ki": {
+    "title": "기(起) 단계 제목",
+    "summary": "기 단계 요약 (1-2문장, 상황 소개)",
+    "goal": "기 단계 목표"
+  },
+  "seung": {
+    "title": "승(承) 단계 제목",
+    "summary": "승 단계 요약 (1-2문장, 사건 전개)",
+    "goal": "승 단계 목표"
+  },
+  "jeon": {
+    "title": "전(轉) 단계 제목",
+    "summary": "전 단계 요약 (1-2문장, 갈등/위기)",
+    "goal": "전 단계 목표"
+  },
+  "gyeol": {
+    "title": "결(結) 단계 제목",
+    "summary": "결 단계 요약 (1-2문장, 해결/결말)",
+    "goal": "결 단계 목표"
+  }
+}
+
+**중요 규칙**:
+1. 기(起): 도입 - 상황 설정, 첫 만남이나 사건의 시작 (호감도 0~5)
+2. 승(承): 전개 - 관계 발전, 감정이 깊어지는 과정 (호감도 5~10)
+3. 전(轉): 위기 - 갈등, 오해, 어색한 순간 발생 (호감도 3~8)
+4. 결(結): 결말 - 문제 해결, 관계의 진전 (호감도 10~15)
+5. 각 단계는 구체적이고 감정적인 내용으로 작성
+6. 메신저 대화 시나리오에 적합하게 작성
+7. 순수 JSON만 출력 (설명 없이)`;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: '당신은 로맨스 메신저 대화 시나리오 전문 작가입니다. 순수 JSON 형식으로만 응답하세요.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.8,
+        max_tokens: 1000
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`OpenAI API 오류: ${errorData.error?.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices[0].message.content.trim();
+
+    // JSON 파싱
+    let structure;
+    try {
+      // 코드 블록 제거 (```json ... ``` 형식일 경우)
+      const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/);
+      const jsonStr = jsonMatch ? jsonMatch[1] : content;
+      structure = JSON.parse(jsonStr);
+    } catch (parseError) {
+      console.error('JSON 파싱 실패:', content);
+      throw new Error('AI 응답을 JSON으로 파싱할 수 없습니다');
+    }
+
+    console.log('✅ 기승전결 구조 생성 성공:', JSON.stringify(structure, null, 2));
     return structure;
 
   } catch (error) {
