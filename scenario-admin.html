@@ -8392,6 +8392,47 @@
                 const sexyLevel = scenario.metadata?.sexy_level || 5;
                 const tags = scenario.metadata?.tags || scenario.tags || [];
 
+                // 기승전결 구조 가져오기
+                const structure = scenario.story_structure || {};
+                const hasStructure = structure.ki || structure.seung || structure.jeon || structure.gyeol;
+
+                // 기승전결 HTML 생성
+                const structureHTML = hasStructure ? `
+                    <div class="story-structure-preview" style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #667eea;">
+                        <h4 style="margin: 0 0 12px 0; font-size: 14px; color: #333; font-weight: 600;">📖 스토리 구조</h4>
+                        <div style="display: grid; gap: 8px;">
+                            ${structure.ki?.title ? `
+                                <div style="padding: 8px; background: white; border-radius: 5px; border-left: 3px solid #667eea;">
+                                    <div style="font-size: 11px; color: #667eea; font-weight: 600; margin-bottom: 3px;">📌 기 (도입)</div>
+                                    <div style="font-size: 13px; font-weight: 600; color: #333; margin-bottom: 2px;">${structure.ki.title}</div>
+                                    <div style="font-size: 12px; color: #666; line-height: 1.4;">${structure.ki.summary || ''}</div>
+                                </div>
+                            ` : ''}
+                            ${structure.seung?.title ? `
+                                <div style="padding: 8px; background: white; border-radius: 5px; border-left: 3px solid #f093fb;">
+                                    <div style="font-size: 11px; color: #f093fb; font-weight: 600; margin-bottom: 3px;">🔥 승 (전개)</div>
+                                    <div style="font-size: 13px; font-weight: 600; color: #333; margin-bottom: 2px;">${structure.seung.title}</div>
+                                    <div style="font-size: 12px; color: #666; line-height: 1.4;">${structure.seung.summary || ''}</div>
+                                </div>
+                            ` : ''}
+                            ${structure.jeon?.title ? `
+                                <div style="padding: 8px; background: white; border-radius: 5px; border-left: 3px solid #fa709a;">
+                                    <div style="font-size: 11px; color: #fa709a; font-weight: 600; margin-bottom: 3px;">⚡ 전 (위기)</div>
+                                    <div style="font-size: 13px; font-weight: 600; color: #333; margin-bottom: 2px;">${structure.jeon.title}</div>
+                                    <div style="font-size: 12px; color: #666; line-height: 1.4;">${structure.jeon.summary || ''}</div>
+                                </div>
+                            ` : ''}
+                            ${structure.gyeol?.title ? `
+                                <div style="padding: 8px; background: white; border-radius: 5px; border-left: 3px solid #4facfe;">
+                                    <div style="font-size: 11px; color: #4facfe; font-weight: 600; margin-bottom: 3px;">✨ 결 (결말)</div>
+                                    <div style="font-size: 13px; font-weight: 600; color: #333; margin-bottom: 2px;">${structure.gyeol.title}</div>
+                                    <div style="font-size: 12px; color: #666; line-height: 1.4;">${structure.gyeol.summary || ''}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                ` : '<div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 5px; font-size: 12px; color: #856404;">⚠️ 기승전결 구조가 없습니다. 수정하여 추가하세요.</div>';
+
                 return `
                     <div class="scenario-card" onclick="showScenarioDetail('${scenarioId}')" style="cursor: pointer;">
                         <h3>${scenario.title}</h3>
@@ -8403,7 +8444,8 @@
                             ${tags.slice(0, 2).map(tag => `<span class="tag">${tag}</span>`).join('')}
                             <span class="tag">에피소드: ${scenario.dialogue_count || 0}개</span>
                         </div>
-                        <div class="actions" onclick="event.stopPropagation()">
+                        ${structureHTML}
+                        <div class="actions" onclick="event.stopPropagation()" style="margin-top: 15px;">
                             <button class="btn btn-success" onclick="editScenario('${scenarioId}')">수정</button>
                             <button class="btn btn-primary" onclick="manageDialogues('${scenarioId}')">에피소드</button>
                             <button class="btn btn-info" onclick="testScenarioWithModel('${scenarioId}')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">▶️ 테스트</button>
