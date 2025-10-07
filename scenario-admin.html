@@ -4337,7 +4337,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.9.0</span>
+                <span id="systemVersion">v1.9.1</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -8443,49 +8443,87 @@
                 const sexyLevel = scenario.metadata?.sexy_level || 5;
                 const tags = scenario.metadata?.tags || scenario.tags || [];
 
-                // 기승전결 구조 가져오기
+                // AI 생성 스토리 확인
+                const aiStory = scenario.ai_generated_context || scenario.custom_context || '';
+                const isErrorMessage = aiStory.includes('죄송하지만') || aiStory.includes('제공되지 않아') || aiStory.includes('작성할 수 없습니다');
+                const hasAIStory = aiStory && !isErrorMessage;
+
+                // 기승전결 구조 확인
                 const structure = scenario.story_structure || {};
                 const hasStructure = structure.ki || structure.seung || structure.jeon || structure.gyeol;
 
-                // 기승전결 HTML 생성
-                const structureHTML = hasStructure ? `
-                    <div class="story-structure-preview" style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #667eea;">
-                        <h4 style="margin: 0 0 12px 0; font-size: 14px; color: #333; font-weight: 600;">📖 스토리 구조</h4>
-                        <div style="display: grid; gap: 8px;">
-                            ${structure.ki?.title ? `
-                                <div style="padding: 8px; background: white; border-radius: 5px; border-left: 3px solid #667eea;">
-                                    <div style="font-size: 11px; color: #667eea; font-weight: 600; margin-bottom: 3px;">📌 기 (도입)</div>
-                                    <div style="font-size: 13px; font-weight: 600; color: #333; margin-bottom: 2px;">${structure.ki.title}</div>
-                                    <div style="font-size: 12px; color: #666; line-height: 1.4;">${structure.ki.summary || ''}</div>
-                                </div>
-                            ` : ''}
-                            ${structure.seung?.title ? `
-                                <div style="padding: 8px; background: white; border-radius: 5px; border-left: 3px solid #f093fb;">
-                                    <div style="font-size: 11px; color: #f093fb; font-weight: 600; margin-bottom: 3px;">🔥 승 (전개)</div>
-                                    <div style="font-size: 13px; font-weight: 600; color: #333; margin-bottom: 2px;">${structure.seung.title}</div>
-                                    <div style="font-size: 12px; color: #666; line-height: 1.4;">${structure.seung.summary || ''}</div>
-                                </div>
-                            ` : ''}
-                            ${structure.jeon?.title ? `
-                                <div style="padding: 8px; background: white; border-radius: 5px; border-left: 3px solid #fa709a;">
-                                    <div style="font-size: 11px; color: #fa709a; font-weight: 600; margin-bottom: 3px;">⚡ 전 (위기)</div>
-                                    <div style="font-size: 13px; font-weight: 600; color: #333; margin-bottom: 2px;">${structure.jeon.title}</div>
-                                    <div style="font-size: 12px; color: #666; line-height: 1.4;">${structure.jeon.summary || ''}</div>
-                                </div>
-                            ` : ''}
-                            ${structure.gyeol?.title ? `
-                                <div style="padding: 8px; background: white; border-radius: 5px; border-left: 3px solid #4facfe;">
-                                    <div style="font-size: 11px; color: #4facfe; font-weight: 600; margin-bottom: 3px;">✨ 결 (결말)</div>
-                                    <div style="font-size: 13px; font-weight: 600; color: #333; margin-bottom: 2px;">${structure.gyeol.title}</div>
-                                    <div style="font-size: 12px; color: #666; line-height: 1.4;">${structure.gyeol.summary || ''}</div>
-                                </div>
-                            ` : ''}
+                // Acts & Beats 구조 확인
+                const hasActsBeats = scenario.structure && scenario.structure.acts && scenario.structure.acts.length > 0;
+
+                // 시나리오 콘텐츠 HTML 생성
+                let contentHTML = '';
+
+                if (hasAIStory) {
+                    // AI 생성 스토리가 있으면 미리보기 표시
+                    const preview = aiStory.substring(0, 150) + (aiStory.length > 150 ? '...' : '');
+                    contentHTML = `
+                        <div class="story-preview" style="margin-top: 15px; padding: 15px; background: #fff8e1; border-radius: 8px; border-left: 4px solid #ffa726;">
+                            <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #f57c00; font-weight: 600;">📖 AI 생성 스토리</h4>
+                            <div style="font-size: 13px; color: #666; line-height: 1.6;">${preview}</div>
                         </div>
-                    </div>
-                ` : '<div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 5px; font-size: 12px; color: #856404;">⚠️ 기승전결 구조가 없습니다. 수정하여 추가하세요.</div>';
+                    `;
+                } else if (hasStructure) {
+                    // 기승전결 구조가 있으면 표시
+                    contentHTML = `
+                        <div class="story-structure-preview" style="margin-top: 15px; padding: 15px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+                            <h4 style="margin: 0 0 12px 0; font-size: 13px; color: #1976d2; font-weight: 600;">📚 기승전결 구조</h4>
+                            <div style="display: grid; gap: 8px;">
+                                ${structure.ki?.title ? `
+                                    <div style="padding: 8px; background: white; border-radius: 5px; border-left: 3px solid #667eea;">
+                                        <div style="font-size: 11px; color: #667eea; font-weight: 600; margin-bottom: 3px;">📌 기 (도입)</div>
+                                        <div style="font-size: 13px; font-weight: 600; color: #333;">${structure.ki.title}</div>
+                                    </div>
+                                ` : ''}
+                                ${structure.seung?.title ? `
+                                    <div style="padding: 8px; background: white; border-radius: 5px; border-left: 3px solid #f093fb;">
+                                        <div style="font-size: 11px; color: #f093fb; font-weight: 600; margin-bottom: 3px;">🔥 승 (전개)</div>
+                                        <div style="font-size: 13px; font-weight: 600; color: #333;">${structure.seung.title}</div>
+                                    </div>
+                                ` : ''}
+                                ${structure.jeon?.title ? `
+                                    <div style="padding: 8px; background: white; border-radius: 5px; border-left: 3px solid #fa709a;">
+                                        <div style="font-size: 11px; color: #fa709a; font-weight: 600; margin-bottom: 3px;">⚡ 전 (위기)</div>
+                                        <div style="font-size: 13px; font-weight: 600; color: #333;">${structure.jeon.title}</div>
+                                    </div>
+                                ` : ''}
+                                ${structure.gyeol?.title ? `
+                                    <div style="padding: 8px; background: white; border-radius: 5px; border-left: 3px solid #4facfe;">
+                                        <div style="font-size: 11px; color: #4facfe; font-weight: 600; margin-bottom: 3px;">✨ 결 (결말)</div>
+                                        <div style="font-size: 13px; font-weight: 600; color: #333;">${structure.gyeol.title}</div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                } else if (hasActsBeats) {
+                    // Acts & Beats 구조만 있으면 표시
+                    const acts = scenario.structure.acts;
+                    contentHTML = `
+                        <div class="acts-preview" style="margin-top: 15px; padding: 15px; background: #f3e5f5; border-radius: 8px; border-left: 4px solid #ab47bc;">
+                            <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #7b1fa2; font-weight: 600;">🎬 Acts & Beats (${acts.length}개)</h4>
+                            <div style="font-size: 12px; color: #666;">
+                                ${acts.slice(0, 3).map((act, i) => `${i + 1}. ${act.name || `Act ${i + 1}`}`).join(' • ')}
+                                ${acts.length > 3 ? ` 외 ${acts.length - 3}개` : ''}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // 아무것도 없으면 경고
+                    contentHTML = `
+                        <div style="margin-top: 10px; padding: 12px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
+                            <div style="font-size: 12px; color: #856404; font-weight: 600; margin-bottom: 4px;">⚠️ 시나리오 콘텐츠 미생성</div>
+                            <div style="font-size: 11px; color: #856404;">AI 스토리나 기승전결 구조를 생성해주세요.</div>
+                        </div>
+                    `;
+                }
 
                 return `
-                    <div class="scenario-card" style="cursor: default;">
+                    <div class="scenario-card" onclick="showScenarioDetail('${scenarioId}')" style="cursor: pointer;">
                         <h3>${scenario.title}</h3>
                         <p class="description">${scenario.description}</p>
                         <div class="metadata">
@@ -8495,11 +8533,8 @@
                             ${tags.slice(0, 2).map(tag => `<span class="tag">${tag}</span>`).join('')}
                             <span class="tag">에피소드: ${scenario.dialogue_count || 0}개</span>
                         </div>
-                        ${structureHTML}
-                        <div class="actions" style="margin-top: 15px; display: flex; gap: 8px; flex-wrap: wrap;">
-                            <button class="btn" onclick="showScenarioDetail('${scenarioId}')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; flex: 1; min-width: 100px; font-weight: 600;">
-                                📋 상세보기
-                            </button>
+                        ${contentHTML}
+                        <div class="actions" onclick="event.stopPropagation()" style="margin-top: 15px; display: flex; gap: 8px; flex-wrap: wrap;">
                             <button class="btn btn-success" onclick="editScenario('${scenarioId}')">✏️ 수정</button>
                             <button class="btn btn-primary" onclick="manageDialogues('${scenarioId}')">🎬 에피소드</button>
                             <button class="btn btn-info" onclick="testScenarioWithModel('${scenarioId}')" style="background: #4ecdc4; color: white; border: none;">▶️ 테스트</button>
