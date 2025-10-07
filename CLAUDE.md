@@ -130,7 +130,7 @@ grep "systemVersion" scenario-admin.html
   * Lines 1095-1139 (generateScenarioStructure)
   * Lines 1224-1275 (generateKiSeungJeonGyeolStructure)
 
-**Git**: 커밋 예정, 푸시 예정
+**Git**: 커밋 `3980b43`, 푸시 완료 ✅
 **테스트**: https://chatgame-seven.vercel.app/scenario-admin.html
 
 ---
