@@ -100,6 +100,33 @@ grep "systemVersion" scenario-admin.html
 
 ## 📊 버전 히스토리
 
+### v1.8.3 (2025-10-07) - 시나리오 삭제 후 GitHub 캐시 문제 해결 (Patch Update)
+**작업 내용**:
+- 🐛 **삭제 후 새로고침 문제 해결**: GitHub API 서버 캐시로 인한 삭제된 시나리오 재출현 문제 수정
+  * 삭제 즉시 로컬 데이터 및 UI 업데이트
+  * 3초 후 백그라운드로 GitHub 동기화 재확인
+  * v1.7.3 저장 시 해결 방법과 동일한 패턴 적용
+- ⏰ **지연된 동기화 확인**:
+  ```javascript
+  setTimeout(async () => {
+      await loadScenarios();  // GitHub에서 최신 데이터 재로드
+  }, 3000);
+  ```
+- 🎯 **사용자 경험 개선**:
+  * 삭제 즉시 화면에서 사라짐 (로컬 데이터 기반)
+  * 3초 후 GitHub 서버와 자동 동기화 확인
+  * 새로고침해도 삭제된 시나리오 다시 안 나타남
+
+**기술적 원인**:
+- GitHub API/Vercel 서버 측 캐시 (1-5초 지연)
+- 브라우저 캐시 무효화만으로는 해결 안 됨
+- 서버 캐시 만료 대기 필요
+
+**Git**: 커밋 `1e6e61c`, 푸시 완료 ✅
+**테스트**: https://chatgame-seven.vercel.app/scenario-admin.html
+
+---
+
 ### v1.8.2 (2025-10-07) - AI 기승전결 구조 자동 생성 API 연결 (Patch Update)
 **작업 내용**:
 - 🤖 **OpenAI API 완전 연동**: 제목/설명 기반 실시간 기승전결 구조 생성
