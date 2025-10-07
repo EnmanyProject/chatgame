@@ -4,10 +4,120 @@
     "created_date": "2025-10-03",
     "total_scenarios": 2,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-10-07T09:37:04.672Z",
+    "last_updated": "2025-10-07T09:37:08.183Z",
     "data_source": "github_api_only"
   },
   "scenarios": {
+    "scenario_술김에_한_키스_1759750936630": {
+      "id": "scenario_술김에_한_키스_1759750936630",
+      "scenario_id": "scenario_술김에_한_키스_1759750936630",
+      "title": "술김에 한 키스 ",
+      "description": "술김에 키스를 한 사건이 있었고 그 이후의 대화 ",
+      "background_setting": "멤신저 대화",
+      "mood": "편안한",
+      "active_status": true,
+      "created_date": "2025-10-06",
+      "last_modified": "2025-10-06T11:42:19.982Z",
+      "ai_generated_context": "죄송하지만, 제공된 캐릭터 정보가 없어 시나리오를 작성할 수 없습니다. 캐릭터 정보를 제공해 주시면, 그에 맞춰 메신저 대화 배경을 생성해 드리겠습니다.",
+      "custom_context": "",
+      "available_characters": [],
+      "episode_count": 0,
+      "tags": [
+        "술김에",
+        "키스를",
+        "사건이",
+        "있었고",
+        "이후의",
+        "대화",
+        "편안한"
+      ],
+      "source": "scenario_admin",
+      "updated_by": "scenario_manager_github_only",
+      "metadata": {
+        "genre": "campus_romance",
+        "sexy_level": 10,
+        "tags": [
+          "술자리",
+          "설렘",
+          "첫만남"
+        ],
+        "estimated_duration": "medium",
+        "ai_model": "openai"
+      },
+      "structure": {
+        "acts": [
+          {
+            "name": "어색한 시작",
+            "beats": [
+              {
+                "name": "술자리 후 대화 시작",
+                "location": "메신저",
+                "time": "다음 날 아침 10시",
+                "topic": "어제의 키스 언급",
+                "emotion": "어색함 → 긴장감",
+                "affection_change": 3,
+                "character_reaction": "조심스럽게 키스를 언급하며 상대방의 반응을 살핌"
+              },
+              {
+                "name": "상대방의 반응 확인",
+                "location": "메신저",
+                "time": "다음 날 아침 10시 15분",
+                "topic": "어제의 기억 회상",
+                "emotion": "긴장감 → 불안감",
+                "affection_change": -1,
+                "character_reaction": "상대방의 대답에 긴장하며 불안해함"
+              }
+            ]
+          },
+          {
+            "name": "진심 확인",
+            "beats": [
+              {
+                "name": "솔직한 감정 공유",
+                "location": "메신저",
+                "time": "다음 날 오후 1시",
+                "topic": "키스의 의미에 대한 질문",
+                "emotion": "불안감 → 설렘",
+                "affection_change": 5,
+                "character_reaction": "상대방의 진솔한 답변에 설렘을 느끼며 용기를 내어 나도 내 감정을 이야기함"
+              },
+              {
+                "name": "서로의 감정 확정",
+                "location": "메신저",
+                "time": "다음 날 오후 1시 30분",
+                "topic": "앞으로의 관계에 대한 이야기",
+                "emotion": "설렘 → 확신",
+                "affection_change": 7,
+                "character_reaction": "상대방과의 관계를 진지하게 고려하며 확신을 느끼게 됨"
+              }
+            ]
+          },
+          {
+            "name": "관계의 변화",
+            "beats": [
+              {
+                "name": "새로운 시작 제안",
+                "location": "메신저",
+                "time": "다음 날 오후 3시",
+                "topic": "다음 만남 계획",
+                "emotion": "확신 → 기대감",
+                "affection_change": 8,
+                "character_reaction": "상대방에게 다음 만남을 제안하며 기대감을 느끼고 흥미를 표출"
+              },
+              {
+                "name": "긍정적인 반응",
+                "location": "메신저",
+                "time": "다음 날 오후 3시 20분",
+                "topic": "재미있는 활동 아이디어 공유",
+                "emotion": "기대감 → 행복감",
+                "affection_change": 10,
+                "character_reaction": "상대방이 긍정적으로 반응하며 기뻐하는 모습을 보고 행복감을 느끼게 됨"
+              }
+            ]
+          }
+        ]
+      }
+    },
     "scenario_원나잇스탠드_1759751555235": {
       "id": "scenario_원나잇스탠드_1759751555235",
       "scenario_id": "scenario_원나잇스탠드_1759751555235",
@@ -111,115 +221,6 @@
                 "emotion": "기대 → 행복",
                 "affection_change": 9,
                 "character_reaction": "따뜻한 말로 마무리하며 행복한 기분이 드는 모습"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    "scenario_학교_도서관에서의_운명적_만남_1759753105153": {
-      "id": "scenario_학교_도서관에서의_운명적_만남_1759753105153",
-      "scenario_id": "scenario_학교_도서관에서의_운명적_만남_1759753105153",
-      "title": "학교 도서관에서의 운명적 만남",
-      "description": "학교도서관에서 우연히 옛 첫사랑을 만남 ",
-      "background_setting": "멤신저 대화",
-      "mood": "편안한",
-      "active_status": true,
-      "created_date": "2025-10-06",
-      "last_modified": "2025-10-06T12:18:27.492Z",
-      "ai_generated_context": "학교 도서관의 고요한 오후, 햇살이 창문으로 스며들며 책장 위에 따뜻한 빛을 드리우고 있었다. 그곳에서 한 남자가 책을 읽고 있었고, 그의 이름은 지민이었다. 그는 고등학교 시절의 기억을 더듬으며 낯익은 페이지의 향기를 맡고 있었다. 그러자 도서관의 조용한 분위기를 깨는 한 목소리가 그의 귀에 닿았다.\n\n\"지민? 너 맞지?\"\n\n이 목소리는 역동적으로 그를 잡아끌었다. 그리운 목소리의 주인공은 지나가던 은우였다. 그녀는 짙은 갈색 머리를 한 아름다운 여학생으로, 지민의 첫사랑이었다. 둘은 얼마 전까지도 서로의 존재를 알고 있었지만, 고등학교 졸업 이후로는 서로의 삶에서 완전히 사라져버린 듯했다. 지민은 순간적으로 놀라서 웃음을 지으며 대답했다.\n\n\"은우! 정말 오랜만이야.\"\n\n두 사람은 마치 과거에 함께했던 순간들로 돌아간 듯, 부드러운 미소로 서로를 바라보았다. 어색함이 감돌았지만, 그 속에서 잊지 못했던 소중한 기억들이 피어났다. 대화는 서서히 흘러갔고, 서로의 근황에 대해 이야기하기 시작했다. 대학생활, 친구들, 꿈과 목표에 대한 이야기가 오가며 두 사람의 간격은 점점 좁혀졌다.\n\n\"너, 기억나? 우리가 수업 끝나고 도서관에서 항상 함께 공부하던 날들?\" 은우가 물었다. 지민은 그 순간, 불현듯 그때의 기억이 떠올랐다. 지루했던 수업을 마치고 함께 머리를 맞대고 책을 읽던 날들, 그리고 푸른 하늘 아래 펼쳐진 젊음의 꿈들이. 그리움과 설렘이 교차하는 가슴 속에서, 그는 은우와의 모든 순간들이 소중했음을 깨달았다.\n\n\"응, 그때 너가 좋아하던 그 향수 기억나? 지금도 그 향수가 나면 네가 떠올라.\" 지민의 말에 은우는 놀란 듯 눈을 크게 떴다. 그들은 함께 웃었고, 웃음 속에서 그들의 마음이 서로를 향하고 있다는 것을 느꼈다. 과거의 향수 같은 사랑이 다시 피어나는 듯한 기분이었다.\n\n시간이 흐르면서, 두 사람은 서로의 마음을 솔직하게 드러내기 시작했다. 그들은 서로의 눈을 바라보며 떨리는 목소리로 말했다. \"나, 그때 정말 너를 좋아했어.\" 은우의 말에 지민의 심장은 빠르게 뛰었다. 모든 긴장감이 스러지며 안도감이 찾아왔다. 그들은 다시 만날 약속을 하기로 했다.\n\n“내일도 여기서 만나자, 할 말이 많아.” 지민이 조심스레 제안했다. 은우의 미소는 다시 설렘으로 물들었다. “당연하지, 나도 너무 기대돼.” 두 사람은 다시 만날 날짜를 마음속에 새기며, 서로를 향한 기대감에 가득 차 도서관을 나섰다. 그 순간, 운명적 만남의 시작을 알리는 평화로운 햇살이 그들을 비추고 있었다.",
-      "custom_context": "",
-      "available_characters": [],
-      "episode_count": 0,
-      "tags": [
-        "학교도서관에서",
-        "우연히",
-        "첫사랑을",
-        "만남",
-        "편안한"
-      ],
-      "source": "scenario_admin",
-      "updated_by": "scenario_manager_github_only",
-      "metadata": {
-        "genre": "sweet_romance",
-        "sexy_level": 9,
-        "tags": [
-          "캠퍼스",
-          "도서관",
-          "설렘",
-          "첫만남"
-        ],
-        "estimated_duration": "medium",
-        "ai_model": "openai"
-      },
-      "structure": {
-        "acts": [
-          {
-            "name": "어색한 시작",
-            "beats": [
-              {
-                "name": "우연한 재회",
-                "location": "학교 도서관",
-                "time": "오후 3시",
-                "topic": "옛 추억 이야기",
-                "emotion": "긴장감 → 부드러움",
-                "affection_change": 3,
-                "character_reaction": "서로 놀라며 웃으며 인사함"
-              },
-              {
-                "name": "첫 대화",
-                "location": "학교 도서관",
-                "time": "오후 3시 10분",
-                "topic": "서로의 근황",
-                "emotion": "어색함 → 호기심",
-                "affection_change": 2,
-                "character_reaction": "서로의 이야기를 듣고 관심을 보임"
-              }
-            ]
-          },
-          {
-            "name": "추억의 회상",
-            "beats": [
-              {
-                "name": "옛날 이야기",
-                "location": "학교 도서관",
-                "time": "오후 3시 20분",
-                "topic": "첫사랑의 추억",
-                "emotion": "그리움 → 설렘",
-                "affection_change": 4,
-                "character_reaction": "추억을 회상하며 웃음"
-              },
-              {
-                "name": "향수 냄새 언급",
-                "location": "학교 도서관",
-                "time": "오후 3시 30분",
-                "topic": "옛날 향수 냄새",
-                "emotion": "치유감 → 설렘",
-                "affection_change": 5,
-                "character_reaction": "추억의 향수 이야기에 서로 공감함"
-              }
-            ]
-          },
-          {
-            "name": "감정의 고백",
-            "beats": [
-              {
-                "name": "솔직한 마음",
-                "location": "학교 도서관",
-                "time": "오후 3시 45분",
-                "topic": "서로의 마음 확인",
-                "emotion": "긴장감 → 안도감",
-                "affection_change": 6,
-                "character_reaction": "서로의 마음을 솔직하게 표현함"
-              },
-              {
-                "name": "다시 만날 약속",
-                "location": "학교 도서관",
-                "time": "오후 4시",
-                "topic": "다음 만남 계획",
-                "emotion": "설렘 → 기대감",
-                "affection_change": 7,
-                "character_reaction": "다음 만남을 기대하며 약속함"
               }
             ]
           }
