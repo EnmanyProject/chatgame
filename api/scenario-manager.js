@@ -291,6 +291,87 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // AI 프롬프트 저장
+    if (action === 'save_ai_prompts') {
+      try {
+        console.log('💾 AI 프롬프트 저장 시작...');
+
+        const { prompts } = req.body;
+
+        if (!prompts) {
+          return res.status(400).json({
+            success: false,
+            message: 'AI 프롬프트 데이터가 필요합니다'
+          });
+        }
+
+        // GitHub API를 사용하여 저장
+        const owner = 'EnmanyProject';
+        const repo = 'chatgame';
+        const path = 'data/ai-prompts.json';
+        const githubToken = process.env.GITHUB_TOKEN;
+
+        if (!githubToken) {
+          throw new Error('GitHub Token이 설정되지 않았습니다');
+        }
+
+        // 현재 파일의 SHA 가져오기
+        const getFileResponse = await fetch(
+          `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+          {
+            headers: {
+              'Authorization': `token ${githubToken}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          }
+        );
+
+        const fileData = await getFileResponse.json();
+        const currentSha = fileData.sha;
+
+        // 새 데이터를 base64로 인코딩
+        const content = Buffer.from(JSON.stringify(prompts, null, 2)).toString('base64');
+
+        // GitHub에 파일 업데이트
+        const updateResponse = await fetch(
+          `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Authorization': `token ${githubToken}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: `Update AI prompts - ${new Date().toISOString()}`,
+              content,
+              sha: currentSha
+            })
+          }
+        );
+
+        if (!updateResponse.ok) {
+          const errorData = await updateResponse.json();
+          throw new Error(`GitHub 업데이트 실패: ${errorData.message}`);
+        }
+
+        console.log('✅ AI 프롬프트 GitHub 저장 완료');
+        return res.json({
+          success: true,
+          message: 'AI 프롬프트가 성공적으로 저장되었습니다',
+          prompts
+        });
+
+      } catch (error) {
+        console.error('❌ AI 프롬프트 저장 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: `AI 프롬프트 저장 실패: ${error.message}`,
+          error_details: error.stack?.split('\n').slice(0, 5).join('\n')
+        });
+      }
+    }
+
     return res.status(400).json({ success: false, message: 'Unknown action' });
 
   } catch (error) {
