@@ -4337,7 +4337,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.8.3</span>
+                <span id="systemVersion">v1.8.4</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -9317,47 +9317,21 @@
 
                 console.log('✅ 서버에서 시나리오 삭제 완료 (GitHub 동기화 포함)');
 
-                // 2. 로컬 전역 변수에서도 삭제 (UI 즉시 업데이트용)
-                console.log('🔄 로컬 데이터 동기화...');
-                if (scenarios && scenarios[scenarioId]) {
-                    delete scenarios[scenarioId];
-                    console.log('✅ scenarios 전역 변수에서 삭제');
-                }
-                if (window.scenarios && window.scenarios[scenarioId]) {
-                    delete window.scenarios[scenarioId];
-                    console.log('✅ window.scenarios에서 삭제');
-                }
+                // 2. 즉시 서버에서 최신 데이터 로드 (가장 확실한 방법)
+                console.log('🔄 서버에서 즉시 최신 데이터 로드...');
+                await loadScenarios();
+                console.log('✅ UI 즉시 업데이트 완료');
 
-                // 3. LocalStorage 정리 (필요한 경우)
-                try {
-                    const existingScenarios = localStorage.getItem('scenarios');
-                    if (existingScenarios) {
-                        const scenariosData = JSON.parse(existingScenarios);
-                        if (scenariosData[scenarioId]) {
-                            delete scenariosData[scenarioId];
-                            localStorage.setItem('scenarios', JSON.stringify(scenariosData));
-                            console.log('✅ LocalStorage 정리 완료');
-                        }
-                    }
-                } catch (localError) {
-                    console.warn('⚠️ LocalStorage 정리 실패 (무시):', localError.message);
-                }
-
-                // 4. UI 즉시 업데이트 (로컬 데이터 기반)
-                console.log('🎨 UI 즉시 업데이트...');
-                displayScenarios();
-                updateScenarioStats();
-
-                // 5. 성공 메시지
+                // 3. 성공 메시지
                 alert('✅ 시나리오가 성공적으로 삭제되었습니다.');
                 console.log('🎉 === 시나리오 삭제 완료 ===');
 
-                // 6. 3초 후 GitHub 동기화 확인 (서버 캐시 대응)
-                console.log('⏰ 3초 후 GitHub 동기화 확인 예약...');
+                // 4. 3초 후 GitHub 동기화 최종 확인 (서버 캐시 만료 대응)
+                console.log('⏰ 3초 후 GitHub 동기화 최종 확인 예약...');
                 setTimeout(async () => {
-                    console.log('🔄 GitHub 동기화 확인 시작...');
+                    console.log('🔄 GitHub 동기화 최종 확인 시작...');
                     await loadScenarios();
-                    console.log('✅ GitHub 동기화 확인 완료');
+                    console.log('✅ GitHub 동기화 최종 확인 완료');
                 }, 3000);
 
             } catch (error) {
