@@ -1459,21 +1459,21 @@ async function generateStoryFromKiSeungJeonGyeol({ title, description, structure
   }
 
   // 기승전결을 텍스트로 변환
-  const kiDescription = `기(起) - ${structure.ki.summary}
-  목표: ${structure.ki.goal}
-  대화 흐름: ${structure.ki.beats.map(b => b.name).join(' → ')}`;
+  const kiDescription = structure.ki.beats && structure.ki.beats.length > 0
+    ? `기(起) - ${structure.ki.summary}\n  목표: ${structure.ki.goal}\n  대화 흐름: ${structure.ki.beats.map(b => b.name).join(' → ')}`
+    : `기(起) - ${structure.ki.title || '도입'}\n  요약: ${structure.ki.summary}\n  목표: ${structure.ki.goal}`;
 
-  const seungDescription = `승(承) - ${structure.seung.summary}
-  목표: ${structure.seung.goal}
-  대화 흐름: ${structure.seung.beats.map(b => b.name).join(' → ')}`;
+  const seungDescription = structure.seung.beats && structure.seung.beats.length > 0
+    ? `승(承) - ${structure.seung.summary}\n  목표: ${structure.seung.goal}\n  대화 흐름: ${structure.seung.beats.map(b => b.name).join(' → ')}`
+    : `승(承) - ${structure.seung.title || '전개'}\n  요약: ${structure.seung.summary}\n  목표: ${structure.seung.goal}`;
 
-  const jeonDescription = `전(轉) - ${structure.jeon.summary}
-  목표: ${structure.jeon.goal}
-  대화 흐름: ${structure.jeon.beats.map(b => b.name).join(' → ')}`;
+  const jeonDescription = structure.jeon.beats && structure.jeon.beats.length > 0
+    ? `전(轉) - ${structure.jeon.summary}\n  목표: ${structure.jeon.goal}\n  대화 흐름: ${structure.jeon.beats.map(b => b.name).join(' → ')}`
+    : `전(轉) - ${structure.jeon.title || '위기'}\n  요약: ${structure.jeon.summary}\n  목표: ${structure.jeon.goal}`;
 
-  const gyeolDescription = `결(結) - ${structure.gyeol.summary}
-  목표: ${structure.gyeol.goal}
-  대화 흐름: ${structure.gyeol.beats.map(b => b.name).join(' → ')}`;
+  const gyeolDescription = structure.gyeol.beats && structure.gyeol.beats.length > 0
+    ? `결(結) - ${structure.gyeol.summary}\n  목표: ${structure.gyeol.goal}\n  대화 흐름: ${structure.gyeol.beats.map(b => b.name).join(' → ')}`
+    : `결(結) - ${structure.gyeol.title || '결말'}\n  요약: ${structure.gyeol.summary}\n  목표: ${structure.gyeol.goal}`;
 
   const prompt = `당신은 로맨스 소설 작가입니다.
 
