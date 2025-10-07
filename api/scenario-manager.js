@@ -194,13 +194,13 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    // 📖 기승전결 구조 자동 생성 (신규 시스템)
+    // 📖 기승전결 구조 자동 생성 (신규 시스템 + 멀티 AI 모델)
     if (action === 'generate_story_structure') {
       try {
         console.log('📖 기승전결 구조 AI 생성 시작...');
         console.log('📥 받은 데이터:', JSON.stringify(req.body, null, 2));
 
-        const { title, description, genre } = req.body;
+        const { title, description, genre, ai_model } = req.body;
 
         if (!title || !description) {
           return res.status(400).json({
@@ -209,7 +209,12 @@ module.exports = async function handler(req, res) {
           });
         }
 
-        const structure = await generateKiSeungJeonGyeolStructure({ title, description, genre });
+        const structure = await generateKiSeungJeonGyeolStructure({
+          title,
+          description,
+          genre,
+          aiModel: ai_model || 'openai'
+        });
 
         console.log('✅ 기승전결 구조 생성 완료');
         return res.json({
@@ -259,12 +264,12 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    // 기승전결 기반 장문 소설풍 스토리 생성
+    // 기승전결 기반 장문 소설풍 스토리 생성 (멀티 AI 모델)
     if (action === 'generate_story_from_ki_seung_jeon_gyeol') {
       try {
         console.log('📖 기승전결 기반 장문 스토리 생성 시작...');
 
-        const { title, description, structure } = req.body;
+        const { title, description, structure, ai_model } = req.body;
 
         if (!title || !structure || !structure.ki || !structure.seung || !structure.jeon || !structure.gyeol) {
           return res.status(400).json({
@@ -273,7 +278,12 @@ module.exports = async function handler(req, res) {
           });
         }
 
-        const story = await generateStoryFromKiSeungJeonGyeol({ title, description, structure });
+        const story = await generateStoryFromKiSeungJeonGyeol({
+          title,
+          description,
+          structure,
+          aiModel: ai_model || 'openai'
+        });
 
         console.log('✅ 기승전결 기반 장문 스토리 생성 완료');
         return res.json({
@@ -751,6 +761,184 @@ VALIDATION: 작성 전에 반드시 확인하세요
 }
 
 // Fallback 제거됨 - AI 생성 실패 시 에러 처리로 대체
+
+// AI 프롬프트 로드 함수 (GitHub API에서 동적 로드)
+async function loadAIPrompts() {
+  try {
+    console.log('🎛️ AI 프롬프트 로드 시작...');
+
+    const owner = 'EnmanyProject';
+    const repo = 'chatgame';
+    const path = 'data/ai-prompts.json';
+    const githubToken = process.env.GITHUB_TOKEN;
+
+    if (!githubToken) {
+      console.warn('⚠️ GitHub Token 없음 - 기본 프롬프트 사용');
+      return null;
+    }
+
+    const response = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+      {
+        headers: {
+          'Authorization': `token ${githubToken}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      }
+    );
+
+    if (!response.ok) {
+      console.warn('⚠️ AI 프롬프트 로드 실패 - 기본 프롬프트 사용');
+      return null;
+    }
+
+    const fileData = await response.json();
+    const content = Buffer.from(fileData.content, 'base64').toString('utf-8');
+    const prompts = JSON.parse(content);
+
+    console.log('✅ AI 프롬프트 로드 완료:', prompts.metadata.version);
+    return prompts;
+
+  } catch (error) {
+    console.error('❌ AI 프롬프트 로드 실패:', error.message);
+    return null;
+  }
+}
+
+// OpenAI API 호출 함수
+async function callOpenAI({ systemPrompt, userPrompt, modelParams }) {
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+  if (!OPENAI_API_KEY) {
+    throw new Error('OpenAI API 키가 설정되지 않았습니다');
+  }
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${OPENAI_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: modelParams.model,
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
+          role: 'user',
+          content: userPrompt
+        }
+      ],
+      temperature: modelParams.temperature,
+      max_tokens: modelParams.max_tokens
+    })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(`OpenAI API 오류: ${errorData.error?.message || response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content.trim();
+}
+
+// Claude API 호출 함수
+async function callClaude({ systemPrompt, userPrompt, modelParams }) {
+  const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+
+  if (!ANTHROPIC_API_KEY) {
+    throw new Error('Claude API 키가 설정되지 않았습니다');
+  }
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: modelParams.model,
+      max_tokens: modelParams.max_tokens,
+      temperature: modelParams.temperature,
+      system: systemPrompt,
+      messages: [
+        {
+          role: 'user',
+          content: userPrompt
+        }
+      ]
+    })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(`Claude API 오류: ${errorData.error?.message || response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.content[0].text;
+}
+
+// Groq (Llama) API 호출 함수
+async function callGroq({ systemPrompt, userPrompt, modelParams }) {
+  const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
+  if (!GROQ_API_KEY) {
+    throw new Error('Groq API 키가 설정되지 않았습니다');
+  }
+
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${GROQ_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: modelParams.model,
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
+          role: 'user',
+          content: userPrompt
+        }
+      ],
+      temperature: modelParams.temperature,
+      max_tokens: modelParams.max_tokens
+    })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(`Groq API 오류: ${errorData.error?.message || response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content.trim();
+}
+
+// AI 모델 라우팅 함수
+async function callAI({ aiModel, systemPrompt, userPrompt, modelParams }) {
+  console.log(`🤖 AI 모델 호출: ${aiModel}`);
+
+  switch (aiModel) {
+    case 'openai':
+      return await callOpenAI({ systemPrompt, userPrompt, modelParams });
+    case 'claude':
+      return await callClaude({ systemPrompt, userPrompt, modelParams });
+    case 'llama':
+      return await callGroq({ systemPrompt, userPrompt, modelParams });
+    default:
+      console.warn(`⚠️ 알 수 없는 AI 모델: ${aiModel}, OpenAI로 대체`);
+      return await callOpenAI({ systemPrompt, userPrompt, modelParams });
+  }
+}
 
 // 시나리오 데이터베이스 로드 (GitHub API 우선)
 async function loadScenarioDatabase() {
@@ -1304,21 +1492,41 @@ async function generateScenarioStructure({ title, description, genre }) {
   }
 }
 
-// 📖 기승전결 구조 생성 함수 (신규 시스템)
-async function generateKiSeungJeonGyeolStructure({ title, description, genre = '' }) {
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+// 📖 기승전결 구조 생성 함수 (신규 시스템 - 동적 프롬프트 로드 + 멀티 AI 모델)
+async function generateKiSeungJeonGyeolStructure({ title, description, genre = '', aiModel = 'openai' }) {
+  console.log(`📖 기승전결 구조 생성 시작 - AI 모델: ${aiModel}`);
 
-  if (!OPENAI_API_KEY) {
-    throw new Error('OpenAI API 키가 설정되지 않았습니다');
-  }
+  // AI 프롬프트를 동적으로 로드
+  const aiPrompts = await loadAIPrompts();
 
-  // 장르별 감정 흐름 매핑
-  const emotionFlows = {
-    anger: '폭발 → 침묵 → 후회 → 진심 노출',
-    jealousy: '의심 → 방어 → 솔직함 → 안도',
-    unrequited: '망설임 → 표현 → 거절/희망 → 수용',
-    temptation: '긴장 → 접근 → 흔들림 → 유예',
-    longing: '회상 → 공백 → 연락 → 여운',
+  let systemPrompt, userPromptTemplate, modelParams, emotionFlows;
+
+  if (aiPrompts) {
+    // 동적으로 로드된 프롬프트 사용
+    console.log('✅ 동적 프롬프트 사용 (ai-prompts.json)');
+    const structurePrompt = aiPrompts.prompts.structure_generation;
+    systemPrompt = structurePrompt.system_prompt;
+    userPromptTemplate = structurePrompt.user_prompt_template;
+
+    // AI 모델별 파라미터 선택
+    modelParams = structurePrompt.parameters[aiModel] || structurePrompt.parameters.openai;
+    emotionFlows = structurePrompt.emotion_flows;
+  } else {
+    // 기본 프롬프트 사용 (폴백)
+    console.log('⚠️ 기본 프롬프트 사용 (ai-prompts.json 로드 실패)');
+    systemPrompt = '당신은 로맨스 메신저 대화 시나리오 전문 작가입니다. 순수 JSON 형식으로만 응답하세요.';
+    modelParams = {
+      model: 'gpt-4o-mini',
+      temperature: 0.8,
+      max_tokens: 1000
+    };
+    // 장르별 감정 흐름 매핑 (기본값)
+    emotionFlows = {
+      anger: '폭발 → 침묵 → 후회 → 진심 노출',
+      jealousy: '의심 → 방어 → 솔직함 → 안도',
+      unrequited: '망설임 → 표현 → 거절/희망 → 수용',
+      temptation: '긴장 → 접근 → 흔들림 → 유예',
+      longing: '회상 → 공백 → 연락 → 여운',
     reconciliation: '대립 → 사과 → 이해 → 포옹(심리적)',
     flutter: '호감 → 시선 교환 → 미소 → 약속',
     anxiety: '거리감 → 불신 → 대화 → 안도',
@@ -1331,15 +1539,13 @@ async function generateKiSeungJeonGyeolStructure({ title, description, genre = '
     avoidance: '질문 회피 → 억눌림 → 혼란 → 침묵'
   };
 
-  const emotionFlow = emotionFlows[genre] || '감정 시작 → 감정 전개 → 감정 절정 → 감정 마무리';
-  const genreInfo = genre ? `- 장르: ${genre}\n- 감정 흐름: ${emotionFlow}` : '';
-
-  const prompt = `당신은 로맨스 메신저 대화 시나리오 전문 작가입니다.
+    // 기본 userPromptTemplate (폴백용 - 템플릿 변수 사용)
+    userPromptTemplate = `당신은 로맨스 메신저 대화 시나리오 전문 작가입니다.
 
 **시나리오 정보**:
-- 제목: ${title}
-- 설명: ${description}
-${genreInfo}
+- 제목: {{title}}
+- 설명: {{description}}
+{{genre_info}}
 
 **핵심 컨셉**:
 설명에 나온 일은 **이미 벌어진 일**입니다.
@@ -1388,42 +1594,38 @@ ${genreInfo}
 2. 승(承): 전개 - 그때의 감정과 생각 공유 (호감도 5~10)
 3. 전(轉): 위기 - 관계 정의나 앞으로에 대한 고민 (호감도 3~8)
 4. 결(結): 결말 - 감정 정리 및 다음 만남 약속 (호감도 10~15)
-5. **감정 흐름은 반드시 "${emotionFlow}" 패턴을 따라 구성**
+5. **감정 흐름은 반드시 "{{emotion_flow}}" 패턴을 따라 구성**
 6. **모든 단계는 메신저 대화 내용이어야 함 (사건 전개가 아니라 대화)**
 7. summary와 goal은 "~한다"가 아니라 "~에 대해 이야기한다" 형식
 8. 순수 JSON만 출력 (설명 없이)`;
+  }
+
+  // 템플릿 변수 치환
+  const emotionFlow = emotionFlows[genre] || '감정 시작 → 감정 전개 → 감정 절정 → 감정 마무리';
+  const genreInfo = genre ? `- 장르: ${genre}\n- 감정 흐름: ${emotionFlow}` : '';
+
+  const prompt = userPromptTemplate
+    .replace(/\{\{title\}\}/g, title)
+    .replace(/\{\{description\}\}/g, description)
+    .replace(/\{\{genre_info\}\}/g, genreInfo)
+    .replace(/\{\{emotion_flow\}\}/g, emotionFlow);
+
+  console.log('📝 사용된 프롬프트 설정:', {
+    ai_model: aiModel,
+    model: modelParams.model,
+    temperature: modelParams.temperature,
+    max_tokens: modelParams.max_tokens,
+    prompt_source: aiPrompts ? 'ai-prompts.json' : 'fallback'
+  });
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: '당신은 로맨스 메신저 대화 시나리오 전문 작가입니다. 순수 JSON 형식으로만 응답하세요.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.8,
-        max_tokens: 1000
-      })
+    // AI 모델 라우팅을 통한 호출
+    const content = await callAI({
+      aiModel,
+      systemPrompt,
+      userPrompt: prompt,
+      modelParams
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`OpenAI API 오류: ${errorData.error?.message || response.statusText}`);
-    }
-
-    const data = await response.json();
-    const content = data.choices[0].message.content.trim();
 
     // JSON 파싱
     let structure;
@@ -1441,7 +1643,7 @@ ${genreInfo}
     return structure;
 
   } catch (error) {
-    console.error('❌ OpenAI API 호출 실패:', error);
+    console.error(`❌ ${aiModel} AI API 호출 실패:`, error);
     throw error;
   }
 }
@@ -1538,44 +1740,48 @@ ${actsDescription}
 /**
  * 기승전결 구조를 바탕으로 장문의 소설풍 스토리 생성
  */
-async function generateStoryFromKiSeungJeonGyeol({ title, description, structure }) {
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+async function generateStoryFromKiSeungJeonGyeol({ title, description, structure, aiModel = 'openai' }) {
+  console.log(`📖 장문 스토리 생성 시작 - AI 모델: ${aiModel}`);
 
-  if (!OPENAI_API_KEY) {
-    throw new Error('OpenAI API 키가 설정되지 않았습니다');
-  }
+  // AI 프롬프트를 동적으로 로드
+  const aiPrompts = await loadAIPrompts();
 
-  // 기승전결을 텍스트로 변환
-  const kiDescription = structure.ki.beats && structure.ki.beats.length > 0
-    ? `기(起) - ${structure.ki.summary}\n  목표: ${structure.ki.goal}\n  대화 흐름: ${structure.ki.beats.map(b => b.name).join(' → ')}`
-    : `기(起) - ${structure.ki.title || '도입'}\n  요약: ${structure.ki.summary}\n  목표: ${structure.ki.goal}`;
+  let systemPrompt, userPromptTemplate, modelParams;
 
-  const seungDescription = structure.seung.beats && structure.seung.beats.length > 0
-    ? `승(承) - ${structure.seung.summary}\n  목표: ${structure.seung.goal}\n  대화 흐름: ${structure.seung.beats.map(b => b.name).join(' → ')}`
-    : `승(承) - ${structure.seung.title || '전개'}\n  요약: ${structure.seung.summary}\n  목표: ${structure.seung.goal}`;
+  if (aiPrompts) {
+    // 동적으로 로드된 프롬프트 사용
+    console.log('✅ 동적 프롬프트 사용 (ai-prompts.json - story generation)');
+    const storyPrompt = aiPrompts.prompts.story_generation;
+    systemPrompt = storyPrompt.system_prompt;
+    userPromptTemplate = storyPrompt.user_prompt_template;
 
-  const jeonDescription = structure.jeon.beats && structure.jeon.beats.length > 0
-    ? `전(轉) - ${structure.jeon.summary}\n  목표: ${structure.jeon.goal}\n  대화 흐름: ${structure.jeon.beats.map(b => b.name).join(' → ')}`
-    : `전(轉) - ${structure.jeon.title || '위기'}\n  요약: ${structure.jeon.summary}\n  목표: ${structure.jeon.goal}`;
+    // AI 모델별 파라미터 선택
+    modelParams = storyPrompt.parameters[aiModel] || storyPrompt.parameters.openai;
+  } else {
+    // 기본 프롬프트 사용 (폴백)
+    console.log('⚠️ 기본 프롬프트 사용 (ai-prompts.json 로드 실패 - story generation)');
+    systemPrompt = '당신은 로맨스 소설 작가입니다. 감성적이고 몰입감 있는 배경 스토리를 자연스럽게 연결하여 작성하세요.';
+    modelParams = {
+      model: 'gpt-4o-mini',
+      temperature: 0.9,
+      max_tokens: 1000
+    };
 
-  const gyeolDescription = structure.gyeol.beats && structure.gyeol.beats.length > 0
-    ? `결(結) - ${structure.gyeol.summary}\n  목표: ${structure.gyeol.goal}\n  대화 흐름: ${structure.gyeol.beats.map(b => b.name).join(' → ')}`
-    : `결(結) - ${structure.gyeol.title || '결말'}\n  요약: ${structure.gyeol.summary}\n  목표: ${structure.gyeol.goal}`;
-
-  const prompt = `당신은 로맨스 소설 작가입니다.
+    // 기본 userPromptTemplate (폴백용 - 템플릿 변수 사용)
+    userPromptTemplate = `당신은 로맨스 소설 작가입니다.
 
 **시나리오 정보**:
-- 제목: ${title}
-- 설명: ${description}
+- 제목: {{title}}
+- 설명: {{description}}
 
 **기승전결 구조**:
-${kiDescription}
+{{ki_description}}
 
-${seungDescription}
+{{seung_description}}
 
-${jeonDescription}
+{{jeon_description}}
 
-${gyeolDescription}
+{{gyeol_description}}
 
 **핵심 컨셉**:
 이 시나리오는 "이미 벌어진 일"에 대한 메신저 대화를 다룹니다.
@@ -1606,44 +1812,56 @@ ${gyeolDescription}
 **중요**: 문단 구분 없이 자연스럽게 이어지는 하나의 긴 스토리로 작성하세요.
 
 **출력**: 순수한 소설 텍스트만 (JSON이나 다른 형식 없이)`;
+  }
+
+  // 기승전결을 텍스트로 변환
+  const kiDescription = structure.ki.beats && structure.ki.beats.length > 0
+    ? `기(起) - ${structure.ki.summary}\n  목표: ${structure.ki.goal}\n  대화 흐름: ${structure.ki.beats.map(b => b.name).join(' → ')}`
+    : `기(起) - ${structure.ki.title || '도입'}\n  요약: ${structure.ki.summary}\n  목표: ${structure.ki.goal}`;
+
+  const seungDescription = structure.seung.beats && structure.seung.beats.length > 0
+    ? `승(承) - ${structure.seung.summary}\n  목표: ${structure.seung.goal}\n  대화 흐름: ${structure.seung.beats.map(b => b.name).join(' → ')}`
+    : `승(承) - ${structure.seung.title || '전개'}\n  요약: ${structure.seung.summary}\n  목표: ${structure.seung.goal}`;
+
+  const jeonDescription = structure.jeon.beats && structure.jeon.beats.length > 0
+    ? `전(轉) - ${structure.jeon.summary}\n  목표: ${structure.jeon.goal}\n  대화 흐름: ${structure.jeon.beats.map(b => b.name).join(' → ')}`
+    : `전(轉) - ${structure.jeon.title || '위기'}\n  요약: ${structure.jeon.summary}\n  목표: ${structure.jeon.goal}`;
+
+  const gyeolDescription = structure.gyeol.beats && structure.gyeol.beats.length > 0
+    ? `결(結) - ${structure.gyeol.summary}\n  목표: ${structure.gyeol.goal}\n  대화 흐름: ${structure.gyeol.beats.map(b => b.name).join(' → ')}`
+    : `결(結) - ${structure.gyeol.title || '결말'}\n  요약: ${structure.gyeol.summary}\n  목표: ${structure.gyeol.goal}`;
+
+  // 템플릿 변수 치환
+  const prompt = userPromptTemplate
+    .replace(/\{\{title\}\}/g, title)
+    .replace(/\{\{description\}\}/g, description)
+    .replace(/\{\{ki_description\}\}/g, kiDescription)
+    .replace(/\{\{seung_description\}\}/g, seungDescription)
+    .replace(/\{\{jeon_description\}\}/g, jeonDescription)
+    .replace(/\{\{gyeol_description\}\}/g, gyeolDescription);
+
+  console.log('📝 사용된 프롬프트 설정 (story generation):', {
+    ai_model: aiModel,
+    model: modelParams.model,
+    temperature: modelParams.temperature,
+    max_tokens: modelParams.max_tokens,
+    prompt_source: aiPrompts ? 'ai-prompts.json' : 'fallback'
+  });
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: '당신은 로맨스 소설 작가입니다. 감성적이고 몰입감 있는 배경 스토리를 자연스럽게 연결하여 작성하세요.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.9,
-        max_tokens: 1000  // 타임아웃 방지: 1500 → 1000 (응답 시간 ~30% 단축)
-      })
+    // AI 모델 라우팅을 통한 호출
+    const story = await callAI({
+      aiModel,
+      systemPrompt,
+      userPrompt: prompt,
+      modelParams
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`OpenAI API 오류: ${errorData.error?.message || response.statusText}`);
-    }
-
-    const data = await response.json();
-    const story = data.choices[0].message.content.trim();
 
     console.log('✅ 기승전결 기반 장문 스토리 생성 성공 (길이:', story.length, '자)');
     return story;
 
   } catch (error) {
-    console.error('❌ 기승전결 스토리 생성 실패:', error);
+    console.error(`❌ ${aiModel} 스토리 생성 실패:`, error);
     throw error;
   }
 }
