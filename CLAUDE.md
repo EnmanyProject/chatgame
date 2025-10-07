@@ -100,6 +100,47 @@ grep "systemVersion" scenario-admin.html
 
 ## 📊 버전 히스토리
 
+### v1.8.2 (2025-10-07) - AI 기승전결 구조 자동 생성 API 연결 (Patch Update)
+**작업 내용**:
+- 🤖 **OpenAI API 완전 연동**: 제목/설명 기반 실시간 기승전결 구조 생성
+  * 프론트엔드: `generateAIStoryStructure()` → API 호출
+  * 백엔드: `generate_story_structure` 액션 추가
+  * 신규 함수: `generateKiSeungJeonGyeolStructure()` (Lines 1163-1266)
+- 📡 **API 통신 구조**:
+  * POST `/api/scenario-manager` with `action=generate_story_structure`
+  * Request: `{ title, description, genre }`
+  * Response: `{ success, structure: { ki, seung, jeon, gyeol }, message }`
+- 🎯 **GPT-4o-mini 활용**: 로맨스 시나리오 전문 프롬프트
+  * 기승전결 각 단계 자동 생성 (title, summary, goal)
+  * 메신저 대화 시나리오에 최적화된 콘텐츠
+  * 순수 JSON 응답, 코드 블록 자동 파싱
+- 🔄 **Fallback 시스템**: API 실패 시 키워드 기반 예시 데이터
+  * 술/도서관/재회 등 키워드별 템플릿
+  * 사용자 경험 중단 방지
+- ✅ **완전한 워크플로우**:
+  * 제목/설명 입력 → "🤖 AI 자동 생성" 클릭
+  * OpenAI API 호출 → 기승전결 4단계 자동 생성
+  * 폼 필드 자동 입력 → 확인/수정 → 저장
+
+**기술적 세부사항**:
+- **프론트엔드** (scenario-admin.html):
+  * Lines 8965-9028: API 호출 및 fallback 로직
+  * fetch → JSON 파싱 → 폼 필드 입력
+- **백엔드** (api/scenario-manager.js):
+  * Lines 197-228: 액션 처리 엔드포인트
+  * Lines 1163-1266: OpenAI API 호출 함수
+  * gpt-4o-mini 모델, temperature 0.8, max_tokens 1000
+
+**사용자 가치**:
+- ⚡ **시간 절약**: 수동 작성 10분 → AI 자동 생성 10초
+- 🎨 **품질 향상**: 일관된 스토리 구조와 감정 흐름
+- 🚀 **생산성**: 아이디어만 있으면 즉시 시나리오 생성
+
+**Git**: 커밋 `0ffbb1c`, `936107f`, 푸시 완료 ✅
+**테스트**: https://chatgame-seven.vercel.app/scenario-admin.html
+
+---
+
 ### v1.8.1 (2025-10-07) - 시나리오 카드 기승전결 전체 표시 (Patch Update)
 **작업 내용**:
 - 📋 **카드 표시 완전 개선**: displayScenarios() 함수에서 기승전결 전체 구조 표시
