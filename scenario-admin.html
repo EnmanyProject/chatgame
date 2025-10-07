@@ -4337,7 +4337,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.8.2</span>
+                <span id="systemVersion">v1.8.3</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -9343,14 +9343,22 @@
                     console.warn('⚠️ LocalStorage 정리 실패 (무시):', localError.message);
                 }
 
-                // 4. UI 즉시 업데이트
-                console.log('🎨 UI 업데이트...');
+                // 4. UI 즉시 업데이트 (로컬 데이터 기반)
+                console.log('🎨 UI 즉시 업데이트...');
                 displayScenarios();
                 updateScenarioStats();
 
                 // 5. 성공 메시지
                 alert('✅ 시나리오가 성공적으로 삭제되었습니다.');
                 console.log('🎉 === 시나리오 삭제 완료 ===');
+
+                // 6. 3초 후 GitHub 동기화 확인 (서버 캐시 대응)
+                console.log('⏰ 3초 후 GitHub 동기화 확인 예약...');
+                setTimeout(async () => {
+                    console.log('🔄 GitHub 동기화 확인 시작...');
+                    await loadScenarios();
+                    console.log('✅ GitHub 동기화 확인 완료');
+                }, 3000);
 
             } catch (error) {
                 console.error('❌ === 시나리오 삭제 실패 ===');
