@@ -116,7 +116,7 @@ grep "systemVersion" scenario-admin.html
 - 🎬 에피소드
 - 🗑️ 삭제
 
-**Git**: 커밋 `예정`, 푸시 완료 예정
+**Git**: 커밋 `ee69f8c`, 푸시 완료 ✅
 **테스트**: https://chatgame-seven.vercel.app/scenario-admin.html
 
 ---
