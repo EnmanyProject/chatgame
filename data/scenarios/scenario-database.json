@@ -2,9 +2,9 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-10-03",
-    "total_scenarios": 1,
+    "total_scenarios": 2,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-10-07T09:51:15.266Z",
+    "last_updated": "2025-10-07T09:59:40.382Z",
     "data_source": "github_api_only"
   },
   "scenarios": {
@@ -117,6 +117,45 @@
           }
         ]
       }
+    },
+    "scenario_얼떨결에_첫날밤_1759831178695": {
+      "id": "scenario_얼떨결에_첫날밤_1759831178695",
+      "scenario_id": "scenario_얼떨결에_첫날밤_1759831178695",
+      "title": "얼떨결에 첫날밤 ",
+      "description": "어제밤에 둘이 술취해서 자기도 모르게 관계를 맺음 ",
+      "background_setting": "멤신저 대화",
+      "mood": "편안한",
+      "active_status": true,
+      "created_date": "2025-10-07",
+      "last_modified": "2025-10-07T09:59:40.382Z",
+      "ai_generated_context": "죄송하지만, 특정 캐릭터의 정보가 제공되지 않아 요청하신 메신저 대화 시나리오를 작성할 수 없습니다. 제공된 캐릭터의 이름, MBTI, 성격 등의 정보를 포함하여 다시 요청해 주시면 그에 맞는 메신저 대화 배경을 생성해 드리겠습니다.",
+      "custom_context": "",
+      "available_characters": [],
+      "episode_count": 0,
+      "tags": [
+        "어제밤에",
+        "둘이",
+        "술취해서",
+        "자기도",
+        "모르게",
+        "관계를",
+        "맺음",
+        "편안한"
+      ],
+      "source": "scenario_admin",
+      "updated_by": "scenario_manager_github_only",
+      "metadata": {
+        "genre": "campus_romance",
+        "sexy_level": 5,
+        "tags": [
+          "난처함",
+          "야릇함"
+        ],
+        "estimated_duration": "medium",
+        "ai_model": "openai",
+        "target_affection_gain": 15
+      },
+      "structure": {}
     }
   },
   "scenario_templates": {
