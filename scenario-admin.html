@@ -4337,7 +4337,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.7.4</span>
+                <span id="systemVersion">v1.7.5</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -7072,12 +7072,7 @@
 
         // 페이지 초기화
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 통합 관리 시스템 v2.3-FUNCTION-RENAME 초기화');
-            console.log('🔧 사진 API: character-ai-generator 통합 버전 사용');
-            console.log('❌ character-photo-manager API 완전 삭제됨');
-            console.log('🔄 함수명 변경: loadCharacterPhotosV2, uploadPhotoToServerV2, deletePhotoV2');
-            console.log('🎯 이제 모든 사진 기능이 통합 API를 사용합니다!');
-            console.log('🎭 캐릭터 프롬프트 생성 시스템 초기화');
+            console.log('✅ 시나리오 관리 시스템 v1.7.5 초기화 완료');
 
             // 🔐 로그인 시스템 초기화
             initializeAuth();
@@ -13054,15 +13049,10 @@
             updatePhotoStats();
         }
 
-        // 📸 캐릭터 사진 데이터 로드 (통합 API v2.3 - RENAMED FUNCTION)
+        // 📸 캐릭터 사진 데이터 로드
         async function loadCharacterPhotosV2(characterId) {
             try {
-                console.log('📂 [V2.3] 캐릭터 사진 로드 중 (통합 API):', characterId);
-                console.log('🔧 [V2.3] API 엔드포인트: /api/character-ai-generator');
-                console.log('❌ [V2.3] character-photo-manager는 삭제됨!');
-
                 const apiUrl = `/api/character-ai-generator?action=get_character_photos&character_id=${characterId}&_t=${Date.now()}`;
-                console.log('🌐 [V2.3] 호출 URL:', apiUrl);
 
                 const response = await fetch(apiUrl);
                 const result = await response.json();
