@@ -4337,7 +4337,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.7.5</span>
+                <span id="systemVersion">v1.8.0</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -4943,30 +4943,81 @@
                         </div>
                     </div>
 
-                    <!-- Acts & Beats 구조 섹션 -->
+                    <!-- 기승전결 구조 섹션 -->
                     <div class="form-group" style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #eee;">
                         <div class="structure-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                             <div>
-                                <h3 style="margin: 0; color: #333;">🎬 시나리오 타임라인</h3>
-                                <p style="margin: 5px 0 0 0; font-size: 13px; color: #999;">Acts와 Beats로 시나리오 흐름을 설계하세요</p>
+                                <h3 style="margin: 0; color: #333;">📖 기승전결 구조</h3>
+                                <p style="margin: 5px 0 0 0; font-size: 13px; color: #999;">대화의 뼈대가 되는 4단계 스토리 구조를 설계하세요</p>
                             </div>
-                            <div style="display: flex; gap: 10px;">
-                                <button type="button" onclick="generateAIStructure()" style="padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.3s;">
-                                    🤖 AI 자동 생성
-                                </button>
-                                <button type="button" class="btn-add-act" onclick="addAct()" style="width: auto; min-width: 150px;">
-                                    ➕ Act 추가
-                                </button>
-                            </div>
+                            <button type="button" onclick="generateAIStoryStructure()" style="padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.3s;">
+                                🤖 AI 자동 생성
+                            </button>
                         </div>
 
-                        <div id="acts-container">
-                            <!-- Acts will be rendered here -->
-                            <div class="empty-structure">
-                                <div class="empty-structure-icon">🎬</div>
-                                <div class="empty-structure-text">아직 Act가 없습니다</div>
-                                <div class="empty-structure-hint">위의 "➕ Act 추가" 버튼을 클릭하여 시작하세요</div>
-                                <div class="empty-structure-hint" style="margin-top: 10px;">Act는 시나리오의 큰 단계를 나타냅니다 (예: 만남, 친밀해짐, 고백)</div>
+                        <div id="story-structure-container" style="display: grid; gap: 20px;">
+                            <!-- 기 (도입) -->
+                            <div class="story-stage-card" data-stage="ki">
+                                <div class="stage-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 15px; border-radius: 8px 8px 0 0; font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
+                                    <span>📌 기 (起) - 도입</span>
+                                    <span style="font-size: 11px; opacity: 0.9;">호감도 목표: 0~5</span>
+                                </div>
+                                <div class="stage-body" style="padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 8px 8px;">
+                                    <input type="text" id="ki-title" placeholder="제목 (예: 술자리의 설렘)"
+                                           style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px; font-weight: 600;">
+                                    <textarea id="ki-summary" rows="2" placeholder="요약 (1-2문장, 예: 친구들과 술자리에서 분위기가 무르익고...)"
+                                              style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px; resize: vertical;"></textarea>
+                                    <input type="text" id="ki-goal" placeholder="목표 (예: 자연스러운 분위기 조성)"
+                                           style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px;">
+                                </div>
+                            </div>
+
+                            <!-- 승 (전개) -->
+                            <div class="story-stage-card" data-stage="seung">
+                                <div class="stage-header" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 12px 15px; border-radius: 8px 8px 0 0; font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
+                                    <span>🔥 승 (承) - 전개</span>
+                                    <span style="font-size: 11px; opacity: 0.9;">호감도 목표: 5~10</span>
+                                </div>
+                                <div class="stage-body" style="padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 8px 8px;">
+                                    <input type="text" id="seung-title" placeholder="제목 (예: 순간의 선택)"
+                                           style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px; font-weight: 600;">
+                                    <textarea id="seung-summary" rows="2" placeholder="요약 (예: 취기가 오르고 순간적으로 키스를...)"
+                                              style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px; resize: vertical;"></textarea>
+                                    <input type="text" id="seung-goal" placeholder="목표 (예: 감정의 폭발)"
+                                           style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px;">
+                                </div>
+                            </div>
+
+                            <!-- 전 (위기) -->
+                            <div class="story-stage-card" data-stage="jeon">
+                                <div class="stage-header" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 12px 15px; border-radius: 8px 8px 0 0; font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
+                                    <span>⚡ 전 (轉) - 위기</span>
+                                    <span style="font-size: 11px; opacity: 0.9;">호감도 목표: 3~8</span>
+                                </div>
+                                <div class="stage-body" style="padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 8px 8px;">
+                                    <input type="text" id="jeon-title" placeholder="제목 (예: 다음날의 어색함)"
+                                           style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px; font-weight: 600;">
+                                    <textarea id="jeon-summary" rows="2" placeholder="요약 (예: 후회와 어색함, 진심이 궁금해짐)"
+                                              style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px; resize: vertical;"></textarea>
+                                    <input type="text" id="jeon-goal" placeholder="목표 (예: 관계의 불확실성)"
+                                           style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px;">
+                                </div>
+                            </div>
+
+                            <!-- 결 (결말) -->
+                            <div class="story-stage-card" data-stage="gyeol">
+                                <div class="stage-header" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 12px 15px; border-radius: 8px 8px 0 0; font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
+                                    <span>✨ 결 (結) - 결말</span>
+                                    <span style="font-size: 11px; opacity: 0.9;">호감도 목표: 10~15</span>
+                                </div>
+                                <div class="stage-body" style="padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 8px 8px;">
+                                    <input type="text" id="gyeol-title" placeholder="제목 (예: 진심의 확인)"
+                                           style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px; font-weight: 600;">
+                                    <textarea id="gyeol-summary" rows="2" placeholder="요약 (예: 용기내어 진심 확인, 관계 발전)"
+                                              style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px; resize: vertical;"></textarea>
+                                    <input type="text" id="gyeol-goal" placeholder="목표 (예: 호감도 상승 및 관계 진전)"
+                                           style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px;">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -8409,11 +8460,12 @@
                 document.getElementById('scenarioModalTitle').textContent = '새 시나리오 만들기';
                 document.getElementById('scenarioForm').reset();
 
-                // Acts & Beats 구조 초기화
-                currentScenarioStructure = { acts: [] };
-
-                // Acts 렌더링
-                renderActsStructure();
+                // 기승전결 구조 초기화 (필드 비우기)
+                ['ki', 'seung', 'jeon', 'gyeol'].forEach(stage => {
+                    document.getElementById(`${stage}-title`).value = '';
+                    document.getElementById(`${stage}-summary`).value = '';
+                    document.getElementById(`${stage}-goal`).value = '';
+                });
             } else if (mode === 'edit' && scenarioId) {
                 editScenario(scenarioId);
                 return;
@@ -8461,15 +8513,55 @@
                 document.getElementById('scenarioDuration').value = 'medium';
             }
 
-            // Acts & Beats 구조 로드
-            if (scenario.structure) {
-                currentScenarioStructure = scenario.structure;
-            } else {
-                currentScenarioStructure = { acts: [] };
+            // AI 생성 스토리 로드
+            if (scenario.ai_generated_context) {
+                document.getElementById('aiGeneratedStory').value = scenario.ai_generated_context;
             }
 
-            // Acts 렌더링
-            renderActsStructure();
+            // AI 모델 로드
+            if (scenario.metadata && scenario.metadata.ai_model) {
+                document.getElementById('scenarioAiModel').value = scenario.metadata.ai_model;
+            }
+
+            // 기승전결 구조 로드
+            if (scenario.story_structure) {
+                const structure = scenario.story_structure;
+
+                // 기
+                if (structure.ki) {
+                    document.getElementById('ki-title').value = structure.ki.title || '';
+                    document.getElementById('ki-summary').value = structure.ki.summary || '';
+                    document.getElementById('ki-goal').value = structure.ki.goal || '';
+                }
+
+                // 승
+                if (structure.seung) {
+                    document.getElementById('seung-title').value = structure.seung.title || '';
+                    document.getElementById('seung-summary').value = structure.seung.summary || '';
+                    document.getElementById('seung-goal').value = structure.seung.goal || '';
+                }
+
+                // 전
+                if (structure.jeon) {
+                    document.getElementById('jeon-title').value = structure.jeon.title || '';
+                    document.getElementById('jeon-summary').value = structure.jeon.summary || '';
+                    document.getElementById('jeon-goal').value = structure.jeon.goal || '';
+                }
+
+                // 결
+                if (structure.gyeol) {
+                    document.getElementById('gyeol-title').value = structure.gyeol.title || '';
+                    document.getElementById('gyeol-summary').value = structure.gyeol.summary || '';
+                    document.getElementById('gyeol-goal').value = structure.gyeol.goal || '';
+                }
+            } else {
+                // 기본값으로 초기화
+                ['ki', 'seung', 'jeon', 'gyeol'].forEach(stage => {
+                    document.getElementById(`${stage}-title`).value = '';
+                    document.getElementById(`${stage}-summary`).value = '';
+                    document.getElementById(`${stage}-goal`).value = '';
+                });
+            }
 
             // 백그라운드 스크롤 비활성화
             document.body.style.overflow = 'hidden';
@@ -8807,10 +8899,11 @@
             document.getElementById('scenarioDescription').value = template.description;
         }
 
-        // AI 자동 구조 생성
-        async function generateAIStructure() {
+        // 📖 AI 기승전결 구조 자동 생성
+        async function generateAIStoryStructure() {
             const title = document.getElementById('scenarioTitle').value;
             const description = document.getElementById('scenarioDescription').value;
+            const genre = document.getElementById('scenarioGenre').value;
 
             if (!title || !description) {
                 alert('제목과 설명을 먼저 입력해주세요.');
@@ -8820,68 +8913,88 @@
             const button = event.target;
             const originalText = button.innerHTML;
             button.disabled = true;
-            button.innerHTML = '🤖 구조 생성 중...';
+            button.innerHTML = '🤖 AI 생성 중...';
 
             try {
-                // 1단계: Acts & Beats 구조 생성
-                console.log('📋 1단계: Acts & Beats 구조 생성 시작...');
-                const structureResponse = await fetch('/api/scenario-manager', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
+                console.log('📖 기승전결 구조 AI 생성 시작...');
+
+                // TODO: API 연결 예정 - 현재는 예시 데이터 생성
+                // const response = await fetch('/api/scenario-manager', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({
+                //         action: 'generate_story_structure',
+                //         title, description, genre
+                //     })
+                // });
+
+                // 임시: 제목 기반 예시 데이터 생성
+                const exampleStructures = {
+                    '술': {
+                        ki: { title: '술자리의 설렘', summary: '친구들과의 술자리에서 분위기가 무르익고, 평소와 다른 특별한 느낌이 감돈다.', goal: '자연스러운 분위기 조성' },
+                        seung: { title: '순간의 선택', summary: '취기가 오르고 둘만 남게 된 순간, 순간적인 감정에 이끌려 키스를 하게 된다.', goal: '감정의 폭발' },
+                        jeon: { title: '다음날의 어색함', summary: '술에 취해 한 행동을 후회하며 어색해지고, 서로의 진심이 궁금해진다.', goal: '관계의 불확실성' },
+                        gyeol: { title: '진심의 확인', summary: '용기를 내어 서로의 진심을 확인하고, 관계가 새로운 단계로 발전한다.', goal: '호감도 상승 및 관계 진전' }
                     },
-                    body: JSON.stringify({
-                        action: 'generate_scenario_structure',
-                        title,
-                        description
-                    })
-                });
+                    '도서관': {
+                        ki: { title: '우연한 만남', summary: '조용한 도서관에서 같은 책을 집으려다 손이 마주치는 우연한 순간.', goal: '첫 인상 형성' },
+                        seung: { title: '함께하는 시간', summary: '같은 테이블에 앉게 되고, 조심스럽게 대화를 시작한다.', goal: '친밀감 형성' },
+                        jeon: { title: '고백의 두려움', summary: '호감을 느끼지만 거절당할까 두려워 망설이게 된다.', goal: '감정의 갈등' },
+                        gyeol: { title: '용기 있는 고백', summary: '용기를 내어 마음을 전하고, 서로의 마음을 확인한다.', goal: '관계의 시작' }
+                    },
+                    '재회': {
+                        ki: { title: '오랜만의 재회', summary: '오랜 시간이 지나 우연히 다시 만나게 되고, 옛 감정이 되살아난다.', goal: '과거의 감정 회상' },
+                        seung: { title: '변한 모습, 변하지 않은 마음', summary: '많이 변한 모습이지만 여전히 설레는 마음을 느낀다.', goal: '감정 재확인' },
+                        jeon: { title: '과거의 상처', summary: '헤어졌던 이유를 떠올리며 다시 다가가는 것을 망설인다.', goal: '과거 극복' },
+                        gyeol: { title: '새로운 시작', summary: '과거를 뒤로하고 새로운 관계를 시작하기로 결심한다.', goal: '재회 성공' }
+                    }
+                };
 
-                const structureResult = await structureResponse.json();
-
-                if (!structureResult.success) {
-                    throw new Error(structureResult.message || 'AI 구조 생성 실패');
+                // 제목에서 키워드 찾기
+                let selectedStructure = null;
+                for (const [keyword, structure] of Object.entries(exampleStructures)) {
+                    if (title.includes(keyword)) {
+                        selectedStructure = structure;
+                        break;
+                    }
                 }
 
-                // 생성된 구조를 현재 구조에 적용
-                currentScenarioStructure = structureResult.structure;
-
-                // Acts 렌더링
-                renderActsStructure();
-
-                console.log('✅ 1단계 완료: Acts & Beats 구조 생성됨');
-
-                // 2단계: 소설풍 스토리 생성
-                button.innerHTML = '📖 스토리 생성 중...';
-                console.log('📖 2단계: 소설풍 스토리 생성 시작...');
-
-                const storyResponse = await fetch('/api/scenario-manager', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        action: 'generate_story_from_structure',
-                        title,
-                        description,
-                        structure: currentScenarioStructure
-                    })
-                });
-
-                const storyResult = await storyResponse.json();
-
-                if (!storyResult.success) {
-                    throw new Error(storyResult.message || 'AI 스토리 생성 실패');
+                // 기본 구조
+                if (!selectedStructure) {
+                    selectedStructure = {
+                        ki: { title: '도입', summary: '이야기의 시작과 상황 설정', goal: '배경 소개' },
+                        seung: { title: '전개', summary: '사건이 발생하고 관계가 발전', goal: '감정 형성' },
+                        jeon: { title: '위기', summary: '갈등이나 어색한 상황 발생', goal: '긴장감 조성' },
+                        gyeol: { title: '결말', summary: '문제 해결과 관계의 진전', goal: '호감도 상승' }
+                    };
                 }
 
-                // 생성된 스토리를 텍스트 영역에 표시
-                const storyTextarea = document.getElementById('aiGeneratedStory');
-                storyTextarea.value = storyResult.story;
-                storyTextarea.style.backgroundColor = '#e7f3ff'; // 생성 완료 표시
+                // 폼 필드에 데이터 입력
+                document.getElementById('ki-title').value = selectedStructure.ki.title;
+                document.getElementById('ki-summary').value = selectedStructure.ki.summary;
+                document.getElementById('ki-goal').value = selectedStructure.ki.goal;
 
-                console.log('✅ 2단계 완료: 소설풍 스토리 생성됨');
+                document.getElementById('seung-title').value = selectedStructure.seung.title;
+                document.getElementById('seung-summary').value = selectedStructure.seung.summary;
+                document.getElementById('seung-goal').value = selectedStructure.seung.goal;
 
-                alert('✅ Acts & Beats 구조와 소설풍 스토리가 모두 생성되었습니다!\n\n확인 후 저장 버튼을 눌러주세요.');
+                document.getElementById('jeon-title').value = selectedStructure.jeon.title;
+                document.getElementById('jeon-summary').value = selectedStructure.jeon.summary;
+                document.getElementById('jeon-goal').value = selectedStructure.jeon.goal;
+
+                document.getElementById('gyeol-title').value = selectedStructure.gyeol.title;
+                document.getElementById('gyeol-summary').value = selectedStructure.gyeol.summary;
+                document.getElementById('gyeol-goal').value = selectedStructure.gyeol.goal;
+
+                // 시각적 피드백
+                const stageCards = document.querySelectorAll('.story-stage-card');
+                stageCards.forEach(card => {
+                    card.style.animation = 'fadeIn 0.5s ease';
+                });
+
+                console.log('✅ 기승전결 구조 생성 완료');
+                alert('✅ 기승전결 구조가 자동으로 생성되었습니다!\n\n내용을 확인하고 수정한 후 저장하세요.');
+
             } catch (error) {
                 console.error('❌ AI 생성 오류:', error);
                 alert(`AI 생성에 실패했습니다:\n${error.message}`);
@@ -8913,6 +9026,36 @@
             // AI 생성 스토리 가져오기
             const aiGeneratedStory = document.getElementById('aiGeneratedStory').value;
 
+            // 📖 기승전결 구조 데이터 수집
+            const storyStructure = {
+                ki: {
+                    title: document.getElementById('ki-title')?.value || '',
+                    summary: document.getElementById('ki-summary')?.value || '',
+                    goal: document.getElementById('ki-goal')?.value || '',
+                    affection_range: "0~5"
+                },
+                seung: {
+                    title: document.getElementById('seung-title')?.value || '',
+                    summary: document.getElementById('seung-summary')?.value || '',
+                    goal: document.getElementById('seung-goal')?.value || '',
+                    affection_range: "5~10"
+                },
+                jeon: {
+                    title: document.getElementById('jeon-title')?.value || '',
+                    summary: document.getElementById('jeon-summary')?.value || '',
+                    goal: document.getElementById('jeon-goal')?.value || '',
+                    affection_range: "3~8"
+                },
+                gyeol: {
+                    title: document.getElementById('gyeol-title')?.value || '',
+                    summary: document.getElementById('gyeol-summary')?.value || '',
+                    goal: document.getElementById('gyeol-goal')?.value || '',
+                    affection_range: "10~15"
+                }
+            };
+
+            console.log('📖 기승전결 구조 수집:', storyStructure);
+
             // 제목을 기반으로 고유한 ID 생성
             const titleKey = title.toLowerCase()
                 .replace(/[^a-zA-Z가-힣0-9]/g, '_')
@@ -8932,9 +9075,10 @@
                     sexy_level: sexyLevel,
                     tags,
                     estimated_duration: duration,
-                    ai_model: selectedModel // AI 모델 정보 저장
+                    ai_model: selectedModel, // AI 모델 정보 저장
+                    target_affection_gain: 15 // 기본 목표 호감도
                 },
-                structure: currentScenarioStructure,
+                story_structure: storyStructure, // 기승전결 구조 저장
                 created_date: new Date().toISOString().split('T')[0],
                 dialogue_count: 0,
                 action: currentMode === 'create' ? 'create' : 'update'
