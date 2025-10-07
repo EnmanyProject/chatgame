@@ -4337,7 +4337,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.8.5</span>
+                <span id="systemVersion">v1.8.6</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -4773,28 +4773,58 @@
                     </button>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                <!-- 메타데이터 그리드 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;">
                     <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
-                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">AI 모델</div>
-                        <div id="detail-ai-model" style="font-size: 18px; font-weight: 600;">-</div>
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">🤖 AI 모델</div>
+                        <div id="detail-ai-model" style="font-size: 16px; font-weight: 600;">-</div>
                     </div>
                     <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
-                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">장르</div>
-                        <div id="detail-genre" style="font-size: 18px; font-weight: 600;">-</div>
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">🎭 장르</div>
+                        <div id="detail-genre" style="font-size: 16px; font-weight: 600;">-</div>
                     </div>
                     <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
-                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">섹시 레벨</div>
-                        <div id="detail-sexy-level" style="font-size: 18px; font-weight: 600;">-</div>
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">🔥 섹시 레벨</div>
+                        <div id="detail-sexy-level" style="font-size: 16px; font-weight: 600;">-</div>
                     </div>
                     <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
-                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">에피소드</div>
-                        <div id="detail-episode-count" style="font-size: 18px; font-weight: 600;">-</div>
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">😊 분위기</div>
+                        <div id="detail-mood" style="font-size: 16px; font-weight: 600;">-</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">📍 배경</div>
+                        <div id="detail-background" style="font-size: 16px; font-weight: 600;">-</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">⏱️ 예상 시간</div>
+                        <div id="detail-duration" style="font-size: 16px; font-weight: 600;">-</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">💕 목표 호감도</div>
+                        <div id="detail-target-affection" style="font-size: 16px; font-weight: 600;">-</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">📺 에피소드</div>
+                        <div id="detail-episode-count" style="font-size: 16px; font-weight: 600;">-</div>
                     </div>
                 </div>
 
+                <!-- 태그 표시 -->
+                <div id="detail-tags-container" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; display: none;">
+                    <div style="font-size: 12px; opacity: 0.8; margin-bottom: 8px;">🏷️ 태그</div>
+                    <div id="detail-tags" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                </div>
+
+                <!-- AI 생성 컨텍스트 -->
+                <div id="detail-ai-context-container" style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px); margin-bottom: 20px; display: none;">
+                    <h3 style="margin: 0 0 12px 0; font-size: 16px;">📖 AI 생성 스토리</h3>
+                    <div id="detail-ai-context" style="line-height: 1.8; opacity: 0.9; white-space: pre-wrap; font-size: 14px;"></div>
+                </div>
+
+                <!-- Acts & Beats 구조 -->
                 <div id="detail-acts-structure" style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px);">
                     <h3 style="margin: 0 0 15px 0; font-size: 18px;">🎬 Acts & Beats 구조</h3>
-                    <div id="detail-acts-content" style="display: flex; flex-direction: column; gap: 10px;">
+                    <div id="detail-acts-content" style="display: flex; flex-direction: column; gap: 15px;">
                         <p style="margin: 0; opacity: 0.7;">구조 정보가 없습니다</p>
                     </div>
                 </div>
@@ -8786,38 +8816,87 @@
             // 메타데이터
             const genre = scenario.metadata?.genre || scenario.background_setting || '-';
             const sexyLevel = scenario.metadata?.sexy_level || 5;
-            const episodeCount = scenario.dialogue_count || 0;
+            const episodeCount = scenario.dialogue_count || scenario.episode_count || 0;
+            const mood = scenario.mood || '-';
+            const backgroundSetting = scenario.background_setting || '-';
+
+            // 예상 시간 한글 변환
+            const durationMap = {
+                'short': '짧음 (10-15분)',
+                'medium': '보통 (20-30분)',
+                'long': '김 (40-60분)'
+            };
+            const duration = durationMap[scenario.metadata?.estimated_duration] || scenario.metadata?.estimated_duration || '-';
+
+            // 목표 호감도
+            const targetAffection = scenario.metadata?.target_affection_gain || '-';
 
             // 기본 정보 표시
             document.getElementById('detail-scenario-title').textContent = scenario.title;
             document.getElementById('detail-scenario-description').textContent = scenario.description;
             document.getElementById('detail-ai-model').textContent = aiModelName;
             document.getElementById('detail-genre').textContent = genre;
-            document.getElementById('detail-sexy-level').textContent = `🔥 ${sexyLevel}`;
+            document.getElementById('detail-sexy-level').textContent = sexyLevel;
+            document.getElementById('detail-mood').textContent = mood;
+            document.getElementById('detail-background').textContent = backgroundSetting;
+            document.getElementById('detail-duration').textContent = duration;
+            document.getElementById('detail-target-affection').textContent = targetAffection === '-' ? '-' : `+${targetAffection}`;
             document.getElementById('detail-episode-count').textContent = `${episodeCount}개`;
 
-            // Acts & Beats 구조 표시
+            // 태그 표시
+            const allTags = [...(scenario.tags || []), ...(scenario.metadata?.tags || [])];
+            const uniqueTags = [...new Set(allTags)].filter(tag => tag && tag.trim());
+
+            if (uniqueTags.length > 0) {
+                document.getElementById('detail-tags-container').style.display = 'block';
+                document.getElementById('detail-tags').innerHTML = uniqueTags.map(tag =>
+                    `<span style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 15px; font-size: 13px; font-weight: 500;">${tag}</span>`
+                ).join('');
+            } else {
+                document.getElementById('detail-tags-container').style.display = 'none';
+            }
+
+            // AI 생성 컨텍스트 표시 (에러 메시지가 아닌 경우만)
+            const aiContext = scenario.ai_generated_context || scenario.custom_context || '';
+            const isErrorMessage = aiContext.includes('죄송하지만') || aiContext.includes('제공되지 않아') || aiContext.includes('작성할 수 없습니다');
+
+            if (aiContext && !isErrorMessage) {
+                document.getElementById('detail-ai-context-container').style.display = 'block';
+                document.getElementById('detail-ai-context').textContent = aiContext;
+            } else {
+                document.getElementById('detail-ai-context-container').style.display = 'none';
+            }
+
+            // Acts & Beats 구조 표시 (상세 정보 포함)
             const actsContent = document.getElementById('detail-acts-content');
             if (scenario.structure && scenario.structure.acts && scenario.structure.acts.length > 0) {
                 actsContent.innerHTML = scenario.structure.acts.map((act, actIndex) => `
-                    <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
-                        <div style="font-weight: 600; font-size: 16px; margin-bottom: 8px;">
+                    <div style="background: rgba(255,255,255,0.12); padding: 20px; border-radius: 10px; border-left: 4px solid rgba(255,255,255,0.5);">
+                        <div style="font-weight: 600; font-size: 18px; margin-bottom: 12px; color: #fff;">
                             ${actIndex + 1}. ${act.name || `Act ${actIndex + 1}`}
                         </div>
                         ${act.beats && act.beats.length > 0 ? `
-                            <div style="margin-left: 20px; display: flex; flex-direction: column; gap: 5px;">
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
                                 ${act.beats.map((beat, beatIndex) => `
-                                    <div style="font-size: 14px; opacity: 0.9;">
-                                        ▶ ${beat.name || `Beat ${beatIndex + 1}`}
-                                        ${beat.description ? `<span style="opacity: 0.7; font-size: 13px;"> - ${beat.description}</span>` : ''}
+                                    <div style="background: rgba(0,0,0,0.15); padding: 15px; border-radius: 8px; border-left: 3px solid rgba(255,255,255,0.3);">
+                                        <div style="font-size: 15px; font-weight: 600; margin-bottom: 8px; color: #fff;">
+                                            ▶ ${beat.name || `Beat ${beatIndex + 1}`}
+                                        </div>
+                                        ${beat.location ? `<div style="font-size: 13px; margin-bottom: 4px; opacity: 0.85;">📍 장소: ${beat.location}</div>` : ''}
+                                        ${beat.time ? `<div style="font-size: 13px; margin-bottom: 4px; opacity: 0.85;">⏰ 시간: ${beat.time}</div>` : ''}
+                                        ${beat.topic ? `<div style="font-size: 13px; margin-bottom: 4px; opacity: 0.85;">💬 주제: ${beat.topic}</div>` : ''}
+                                        ${beat.emotion ? `<div style="font-size: 13px; margin-bottom: 4px; opacity: 0.85;">😊 감정: ${beat.emotion}</div>` : ''}
+                                        ${beat.affection_change ? `<div style="font-size: 13px; margin-bottom: 4px; opacity: 0.85;">💕 호감도: ${beat.affection_change > 0 ? '+' : ''}${beat.affection_change}</div>` : ''}
+                                        ${beat.character_reaction ? `<div style="font-size: 13px; margin-top: 6px; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 6px; opacity: 0.9;">🎭 ${beat.character_reaction}</div>` : ''}
+                                        ${beat.description ? `<div style="font-size: 13px; margin-top: 6px; opacity: 0.8; font-style: italic;">📝 ${beat.description}</div>` : ''}
                                     </div>
                                 `).join('')}
                             </div>
-                        ` : '<div style="margin-left: 20px; opacity: 0.6; font-size: 13px;">Beat가 없습니다</div>'}
+                        ` : '<div style="opacity: 0.6; font-size: 13px; margin-left: 10px;">Beat가 없습니다</div>'}
                     </div>
                 `).join('');
             } else {
-                actsContent.innerHTML = '<p style="margin: 0; opacity: 0.7;">구조 정보가 없습니다</p>';
+                actsContent.innerHTML = '<p style="margin: 0; opacity: 0.7;">구조 정보가 없습니다. 시나리오를 편집하여 Acts & Beats를 추가하세요.</p>';
             }
 
             // 상세 정보 영역 표시
