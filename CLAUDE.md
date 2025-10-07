@@ -119,7 +119,7 @@ grep "systemVersion" scenario-admin.html
 - scenario-admin.html: Beat 편집 폼, 상세 모달
 - api/scenario-manager.js: AI 생성 프롬프트, Beat 텍스트 변환
 
-**Git**: 커밋 `예정`, 푸시 완료 예정
+**Git**: 커밋 `0a5fdfb`, 푸시 완료 ✅
 **테스트**: https://chatgame-seven.vercel.app/scenario-admin.html
 
 ---
