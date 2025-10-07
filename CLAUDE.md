@@ -100,6 +100,76 @@ grep "systemVersion" scenario-admin.html
 
 ## 📊 버전 히스토리
 
+### v1.10.6 (2025-10-07) - AI 프롬프트 개선: 캐릭터 정보 불필요 명시 (Patch Update)
+**작업 내용**:
+- 🐛 **문제 발견**: GPT가 "캐릭터 정보가 없다"며 스켈레톤 구조 생성 거부
+  * "질투" 시나리오 생성 시: "캐릭터 정보가 없기 때문에 작성할 수 없습니다" 에러
+  * GPT가 스스로 판단해서 특정 캐릭터 이름, 성격 등이 필요하다고 생각
+- ✅ **해결**: AI 프롬프트에 명확한 지시 추가
+  * "이 작업은 스켈레톤 구조만 만드는 것"
+  * "캐릭터 정보는 나중에 채워질 것"
+  * "'그/그녀', '상대방', '남자/여자' 같은 일반 표현 사용"
+  * "캐릭터 정보 없다고 거부 금지"
+- 📝 **적용 범위**:
+  * `generateKiSeungJeonGyeolStructure()` 함수
+  * `generateStoryFromKiSeungJeonGyeol()` 함수
+- 🎯 **결과**: 캐릭터 정보 없이도 기승전결 구조 및 스토리 생성 가능
+
+**Git**: 커밋 `fbe15cb`, 푸시 완료 ✅
+**영향**: api/scenario-manager.js Lines 1256-1278, 1484-1509
+
+---
+
+### v1.10.5 (2025-10-07) - AI 생성 거부 메시지 카드 표시 (Patch Update)
+**작업 내용**:
+- 🎨 **UI 개선**: AI가 거부한 경우 시나리오 카드에 명확히 표시
+  * 빨간색 경고 박스 (배경: #ffebee, 테두리: #e53935)
+  * "🚫 AI 생성 거부" 헤더
+  * 거부 이유 전체 텍스트 표시
+  * 해결 방법 안내: "더 완곡한 표현으로 수정" 가이드
+- 🔍 **감지 로직**: 에러 메시지 패턴 매칭
+  * "죄송하지만" || "제공되지 않아" || "작성할 수 없습니다"
+- 📌 **위치**: `displayScenarios()` 함수 (scenario-admin.html)
+
+**Git**: 커밋 `40a0908` + merge `2a91a64`, 푸시 완료 ✅
+**영향**: scenario-admin.html Lines 8499-8511, 버전 v1.10.5
+
+---
+
+### v1.10.4 (2025-10-07) - Vercel 타임아웃 문제 해결 (Patch Update)
+**작업 내용**:
+- 🐛 **문제**: Step 2 (스토리 생성) 시 `FUNCTION_INVOCATION_TIMEOUT` 발생
+  * Vercel Hobby 플랜: 10초 제한
+  * OpenAI API 호출 (max_tokens: 1500): ~10-15초 소요
+- ✅ **해결**: API 파라미터 최적화
+  * `max_tokens`: 1500 → 1000 (~30% 응답 시간 단축)
+  * 목표 스토리 길이: 800-1200자 → 600-900자
+- 📊 **테스트 결과** (TEST_REPORT_v1.10.4.md):
+  * Step 1 (구조): ✅ 성공 (~3-5초)
+  * Step 2 (스토리): ✅ 성공 (타임아웃 해결, <10초)
+  * 실제 생성 길이: 1499자 (목표 초과지만 품질 우수)
+- 🚀 **영향**: Vercel Hobby 플랜에서 완전 작동
+
+**Git**: 커밋 `7a4480c`, 푸시 완료 ✅
+**영향**: api/scenario-manager.js Lines 1500, 1537
+
+---
+
+### v1.10.3 (2025-10-07) - beats 배열 옵셔널 처리 (Patch Update)
+**작업 내용**:
+- 🐛 **버그 발견**: `Cannot read properties of undefined (reading 'map')`
+  * `generateStoryFromKiSeungJeonGyeol()` 함수가 `structure.ki.beats.map()` 호출
+  * `generateKiSeungJeonGyeolStructure()`는 beats 배열 없이 title/summary/goal만 반환
+- ✅ **해결**: beats 배열 옵셔널 처리
+  * beats 존재 시: beats.map()으로 대화 흐름 표시
+  * beats 없을 시: title/summary/goal만 사용
+- 📝 **적용**: ki, seung, jeon, gyeol 모든 단계에 적용
+
+**Git**: 커밋 `7507f6b`, 푸시 완료 ✅
+**영향**: api/scenario-manager.js Lines 1468-1482
+
+---
+
 ### v1.10.2 (2025-10-07) - 기승전결 → 장문 스토리 자동 생성 완성 (Patch Update)
 **작업 내용**:
 - 🎯 **2단계 자동 생성 시스템 완성**:
