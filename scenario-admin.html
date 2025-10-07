@@ -4337,7 +4337,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.9.1</span>
+                <span id="systemVersion">v1.9.2</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -8789,17 +8789,12 @@
                                                 </div>
 
                                                 <!-- Beat 상세 정보 입력 -->
-                                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-                                                    <input type="text"
-                                                           value="${escapeHtml(beat.location || '')}"
-                                                           onchange="updateBeatField(${actIndex}, ${beatIndex}, 'location', this.value)"
-                                                           placeholder="📍 장소 (예: 회사 복도, 카페)"
-                                                           style="padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 13px;">
+                                                <div style="margin-bottom: 8px;">
                                                     <input type="text"
                                                            value="${escapeHtml(beat.time || '')}"
                                                            onchange="updateBeatField(${actIndex}, ${beatIndex}, 'time', this.value)"
                                                            placeholder="⏰ 시간 (예: 점심시간, 퇴근 후)"
-                                                           style="padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 13px;">
+                                                           style="width: 100%; padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 13px;">
                                                 </div>
 
                                                 <textarea onchange="updateBeatField(${actIndex}, ${beatIndex}, 'topic', this.value)"
@@ -9006,7 +9001,6 @@
                                         <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #7b1fa2;">
                                             ▶ ${beat.name || `Beat ${beatIndex + 1}`}
                                         </div>
-                                        ${beat.location ? `<div style="font-size: 12px; margin-bottom: 4px; color: #555;">📍 장소: ${beat.location}</div>` : ''}
                                         ${beat.time ? `<div style="font-size: 12px; margin-bottom: 4px; color: #555;">⏰ 시간: ${beat.time}</div>` : ''}
                                         ${beat.topic ? `<div style="font-size: 12px; margin-bottom: 4px; color: #555;">💬 주제: ${beat.topic}</div>` : ''}
                                         ${beat.emotion ? `<div style="font-size: 12px; margin-bottom: 4px; color: #555;">😊 감정: ${beat.emotion}</div>` : ''}

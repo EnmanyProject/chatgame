@@ -1086,7 +1086,6 @@ async function generateScenarioStructure({ title, description }) {
       "beats": [
         {
           "name": "Beat 이름 (예: 첫 인사, 향수 냄새 회상)",
-          "location": "장소 (예: 각자 집 (메신저), 회사 복도)",
           "time": "시간 (예: 아침 8시, 점심시간)",
           "topic": "대화 주제 (예: 어제 같이 우산 쓴 일 언급, 향수 냄새가 기억난다고 고백)",
           "emotion": "감정 흐름 (예: 어색함 → 부끄러움, 호기심 → 설렘)",
@@ -1104,7 +1103,7 @@ async function generateScenarioStructure({ title, description }) {
 3. 모든 필드를 구체적으로 작성
 4. 감정 흐름은 "시작감정 → 끝감정" 형식
 5. 호감도 변화는 -5 ~ +10 범위
-6. 메신저 대화 특성을 고려 (장소는 주로 "메신저", "각자 집" 등)
+6. 메신저 대화이므로 모든 상황은 메신저 내에서 발생
 7. 순수 JSON만 출력 (설명 없이)`;
 
   try {
@@ -1277,7 +1276,6 @@ async function generateStoryFromStructure({ title, description, structure }) {
   const actsDescription = structure.acts.map((act, actIndex) => {
     const beatsDescription = act.beats.map((beat, beatIndex) => {
       return `  Beat ${beatIndex + 1}: ${beat.name}
-    - 장소: ${beat.location || '메신저'}
     - 시간: ${beat.time || '미정'}
     - 주제: ${beat.topic || '대화 진행'}
     - 감정: ${beat.emotion || '평온'}
