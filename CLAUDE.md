@@ -136,7 +136,7 @@ grep "systemVersion" scenario-admin.html
   * Lines 9287-9327 (2단계 자동 생성 로직)
   * Line 4340 (버전 v1.10.2)
 
-**Git**: 커밋 예정, 푸시 예정
+**Git**: 커밋 `42008c3` + merge `556cad5`, 푸시 완료 ✅
 **테스트**: https://chatgame-seven.vercel.app/scenario-admin.html
 
 ---
