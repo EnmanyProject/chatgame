@@ -4337,7 +4337,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.9.3</span>
+                <span id="systemVersion">v1.10.0</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -4823,17 +4823,24 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="scenarioGenre">🎭 장르 *</label>
+                        <label for="scenarioGenre">🎭 장르 (감정 기반) *</label>
                         <select id="scenarioGenre" required>
                             <option value="">장르 선택</option>
-                            <option value="sweet_romance">달콤한 로맨스</option>
-                            <option value="campus_romance">캠퍼스 로맨스</option>
-                            <option value="office_romance">직장 로맨스</option>
-                            <option value="childhood_friend">소꿉친구</option>
-                            <option value="first_love">첫사랑</option>
-                            <option value="reunion">재회</option>
-                            <option value="secret_crush">짝사랑</option>
-                            <option value="enemies_to_lovers">앙숙에서 연인으로</option>
+                            <option value="anger">① 분노 (Anger) - 상처, 오해, 폭발, 후회</option>
+                            <option value="jealousy">② 질투 (Jealousy) - 불안, 시선, 비교, 의심</option>
+                            <option value="unrequited">③ 짝사랑 (Unrequited) - 망설임, 설렘, 단념, 기대</option>
+                            <option value="temptation">④ 유혹 (Temptation) - 긴장, 거리, 미묘함, 금지</option>
+                            <option value="longing">⑤ 그리움 (Longing) - 추억, 후회, 기억, 회상</option>
+                            <option value="reconciliation">⑥ 화해 (Reconciliation) - 용서, 진심, 이해, 안도</option>
+                            <option value="flutter">⑦ 설렘 (Flutter) - 첫인상, 기대, 미묘한 호감</option>
+                            <option value="anxiety">⑧ 불안 (Anxiety) - 거리감, 의심, 불확실, 외로움</option>
+                            <option value="obsession">⑨ 집착 (Obsession) - 독점, 의존, 불균형, 강박</option>
+                            <option value="resignation">⑩ 체념 (Resignation) - 포기, 이별, 무력감, 수용</option>
+                            <option value="courage">⑪ 용기 (Courage) - 고백, 결심, 변화, 성장</option>
+                            <option value="bond">⑫ 유대 (Bond) - 믿음, 안정, 회복, 따뜻함</option>
+                            <option value="guilt">⑬ 죄책감 (Guilt) - 실수, 후회, 사과, 상처</option>
+                            <option value="rejection">⑭ 거절 (Rejection) - 단념, 슬픔, 존중, 자기보호</option>
+                            <option value="avoidance">⑮ 회피 (Avoidance) - 도망, 무감정, 두려움, 방어</option>
                         </select>
                     </div>
 
@@ -8439,7 +8446,29 @@
                 }[aiModel] || 'Claude 3.5 Sonnet';
 
                 // 메타데이터 정보
-                const genre = scenario.metadata?.genre || scenario.background_setting || 'unknown';
+                const genreCode = scenario.metadata?.genre || scenario.background_setting || 'unknown';
+
+                // 장르 한글 이름 매핑
+                const genreNames = {
+                    'anger': '분노 (Anger)',
+                    'jealousy': '질투 (Jealousy)',
+                    'unrequited': '짝사랑 (Unrequited)',
+                    'temptation': '유혹 (Temptation)',
+                    'longing': '그리움 (Longing)',
+                    'reconciliation': '화해 (Reconciliation)',
+                    'flutter': '설렘 (Flutter)',
+                    'anxiety': '불안 (Anxiety)',
+                    'obsession': '집착 (Obsession)',
+                    'resignation': '체념 (Resignation)',
+                    'courage': '용기 (Courage)',
+                    'bond': '유대 (Bond)',
+                    'guilt': '죄책감 (Guilt)',
+                    'rejection': '거절 (Rejection)',
+                    'avoidance': '회피 (Avoidance)',
+                    'unknown': '미지정'
+                };
+                const genre = genreNames[genreCode] || genreCode;
+
                 const sexyLevel = scenario.metadata?.sexy_level || 5;
                 const tags = scenario.metadata?.tags || scenario.tags || [];
 

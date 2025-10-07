@@ -1063,18 +1063,40 @@ function extractTags(description, mood) {
 }
 
 // AI 시나리오 구조 자동 생성 함수
-async function generateScenarioStructure({ title, description }) {
+async function generateScenarioStructure({ title, description, genre }) {
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
   if (!OPENAI_API_KEY) {
     throw new Error('OpenAI API 키가 설정되지 않았습니다');
   }
 
+  // 장르별 감정 흐름 매핑
+  const emotionFlows = {
+    anger: '폭발 → 침묵 → 후회 → 진심 노출',
+    jealousy: '의심 → 방어 → 솔직함 → 안도',
+    unrequited: '망설임 → 표현 → 거절/희망 → 수용',
+    temptation: '긴장 → 접근 → 흔들림 → 유예',
+    longing: '회상 → 공백 → 연락 → 여운',
+    reconciliation: '대립 → 사과 → 이해 → 포옹(심리적)',
+    flutter: '호감 → 시선 교환 → 미소 → 약속',
+    anxiety: '거리감 → 불신 → 대화 → 안도',
+    obsession: '독점 → 불안 → 붕괴 → 깨달음',
+    resignation: '미련 → 인식 → 포기 → 수용',
+    courage: '두려움 → 결심 → 표현 → 해방',
+    bond: '갈등 → 신뢰 회복 → 따뜻함',
+    guilt: '사과 → 침묵 → 용서 → 안도',
+    rejection: '고백 → 머뭇 → 단호함 → 존중',
+    avoidance: '질문 회피 → 억눌림 → 혼란 → 침묵'
+  };
+
+  const emotionFlow = emotionFlows[genre] || '감정 시작 → 감정 전개 → 감정 절정 → 감정 마무리';
+  const genreInfo = genre ? `\n- 장르: ${genre}\n- 감정 흐름: ${emotionFlow}` : '';
+
   const prompt = `당신은 로맨스 메신저 대화 시나리오 전문 작가입니다.
 
 **시나리오 정보**:
 - 제목: ${title}
-- 설명: ${description}
+- 설명: ${description}${genreInfo}
 
 **목표**: 위 정보를 바탕으로 메신저 대화 시나리오의 Acts & Beats 구조를 생성하세요.
 
@@ -1087,7 +1109,7 @@ async function generateScenarioStructure({ title, description }) {
         {
           "name": "Beat 이름 (예: 첫 인사, 향수 냄새 회상)",
           "time": "시간 (예: 아침 8시, 점심시간)",
-          "topic": "대화 주제 (예: 어제 같이 우산 쓴 일 언급, 향수 냄새가 기억난다고 고백)",
+          "topic": "대화 주제 (예: 어제 같이 우산 쓴 일 언급, 향수 냄새가 기억한다고 고백)",
           "emotion": "감정 흐름 (예: 어색함 → 부끄러움, 호기심 → 설렘)",
           "affection_change": 호감도변화숫자 (예: 2, 5, 3),
           "character_reaction": "캐릭터 반응 (예: ENFP 특성으로 밝게 먼저 말을 건넴, 향수 냄새를 기억하고 있었다는 사실에 놀람)"
@@ -1101,7 +1123,7 @@ async function generateScenarioStructure({ title, description }) {
 1. Acts는 3-5개 정도
 2. 각 Act마다 Beats는 2-4개 정도
 3. 모든 필드를 구체적으로 작성
-4. 감정 흐름은 "시작감정 → 끝감정" 형식
+4. **감정 흐름은 반드시 "${emotionFlow}" 패턴을 따라 구성**
 5. 호감도 변화는 -5 ~ +10 범위
 6. 메신저 대화이므로 모든 상황은 메신저 내에서 발생
 7. 순수 JSON만 출력 (설명 없이)`;
@@ -1167,14 +1189,34 @@ async function generateKiSeungJeonGyeolStructure({ title, description, genre = '
     throw new Error('OpenAI API 키가 설정되지 않았습니다');
   }
 
-  const genreHint = genre ? `- 장르: ${genre}` : '';
+  // 장르별 감정 흐름 매핑
+  const emotionFlows = {
+    anger: '폭발 → 침묵 → 후회 → 진심 노출',
+    jealousy: '의심 → 방어 → 솔직함 → 안도',
+    unrequited: '망설임 → 표현 → 거절/희망 → 수용',
+    temptation: '긴장 → 접근 → 흔들림 → 유예',
+    longing: '회상 → 공백 → 연락 → 여운',
+    reconciliation: '대립 → 사과 → 이해 → 포옹(심리적)',
+    flutter: '호감 → 시선 교환 → 미소 → 약속',
+    anxiety: '거리감 → 불신 → 대화 → 안도',
+    obsession: '독점 → 불안 → 붕괴 → 깨달음',
+    resignation: '미련 → 인식 → 포기 → 수용',
+    courage: '두려움 → 결심 → 표현 → 해방',
+    bond: '갈등 → 신뢰 회복 → 따뜻함',
+    guilt: '사과 → 침묵 → 용서 → 안도',
+    rejection: '고백 → 머뭇 → 단호함 → 존중',
+    avoidance: '질문 회피 → 억눌림 → 혼란 → 침묵'
+  };
+
+  const emotionFlow = emotionFlows[genre] || '감정 시작 → 감정 전개 → 감정 절정 → 감정 마무리';
+  const genreInfo = genre ? `- 장르: ${genre}\n- 감정 흐름: ${emotionFlow}` : '';
 
   const prompt = `당신은 로맨스 메신저 대화 시나리오 전문 작가입니다.
 
 **시나리오 정보**:
 - 제목: ${title}
 - 설명: ${description}
-${genreHint}
+${genreInfo}
 
 **목표**: 위 정보를 바탕으로 기승전결 4단계 구조를 생성하세요.
 
@@ -1207,9 +1249,10 @@ ${genreHint}
 2. 승(承): 전개 - 관계 발전, 감정이 깊어지는 과정 (호감도 5~10)
 3. 전(轉): 위기 - 갈등, 오해, 어색한 순간 발생 (호감도 3~8)
 4. 결(結): 결말 - 문제 해결, 관계의 진전 (호감도 10~15)
-5. 각 단계는 구체적이고 감정적인 내용으로 작성
-6. 메신저 대화 시나리오에 적합하게 작성
-7. 순수 JSON만 출력 (설명 없이)`;
+5. **감정 흐름은 반드시 "${emotionFlow}" 패턴을 따라 구성**
+6. 각 단계는 구체적이고 감정적인 내용으로 작성
+7. 메신저 대화 시나리오에 적합하게 작성
+8. 순수 JSON만 출력 (설명 없이)`;
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
