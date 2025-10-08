@@ -2,9 +2,9 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-10-03",
-    "total_scenarios": 2,
+    "total_scenarios": 3,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-10-08T00:12:10.775Z",
+    "last_updated": "2025-10-08T00:26:29.227Z",
     "data_source": "github_api_only"
   },
   "scenarios": {
@@ -106,6 +106,46 @@
           "플러팅",
           "유혹",
           "만남"
+        ],
+        "estimated_duration": "medium",
+        "ai_model": "openai",
+        "target_affection_gain": 15
+      },
+      "structure": {}
+    },
+    "scenario_헤어짐_1759883187555": {
+      "id": "scenario_헤어짐_1759883187555",
+      "scenario_id": "scenario_헤어짐_1759883187555",
+      "title": "헤어짐",
+      "description": "여자가 헤어지자고 한다 남자는 설득해야한다 최종적으로는 설득성공 ",
+      "background_setting": "멤신저 대화",
+      "mood": "편안한",
+      "active_status": true,
+      "created_date": "2025-10-08",
+      "last_modified": "2025-10-08T00:26:29.227Z",
+      "ai_generated_context": "죄송하지만 요청하신 시나리오를 작성할 수 없습니다. 캐릭터 이름이나 정보가 제공되지 않아 해당 조건을 충족할 수 없습니다. 다른 요청이나 추가 정보가 있으시면 알려주세요.",
+      "custom_context": "",
+      "available_characters": [],
+      "episode_count": 0,
+      "tags": [
+        "여자가",
+        "헤어지자고",
+        "한다",
+        "남자는",
+        "설득해야한다",
+        "최종적으로는",
+        "설득성공",
+        "편안한"
+      ],
+      "source": "scenario_admin",
+      "updated_by": "scenario_manager_github_only",
+      "metadata": {
+        "genre": "rejection",
+        "sexy_level": 7,
+        "tags": [
+          "변심",
+          "헤어지자고 요구",
+          "설득"
         ],
         "estimated_duration": "medium",
         "ai_model": "openai",
