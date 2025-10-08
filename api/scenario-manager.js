@@ -271,10 +271,10 @@ module.exports = async function handler(req, res) {
 
         const { title, description, structure, ai_model } = req.body;
 
-        if (!title || !structure || !structure.ki || !structure.seung || !structure.jeon || !structure.gyeol) {
+        if (!title || !structure || !structure.beginning || !structure.buildup || !structure.climax || !structure.resolution) {
           return res.status(400).json({
             success: false,
-            message: '제목과 완전한 기승전결 구조(ki, seung, jeon, gyeol)가 필요합니다'
+            message: '제목과 완전한 기승전결 구조(beginning, buildup, climax, resolution)가 필요합니다'
           });
         }
 
@@ -1567,22 +1567,22 @@ async function generateKiSeungJeonGyeolStructure({ title, description, genre = '
 
 **출력 형식** (반드시 JSON으로):
 {
-  "ki": {
+  "beginning": {
     "title": "기(起) 단계 제목 (예: 어색한 대화 시작)",
     "summary": "기 단계 요약 (1-2문장, 일어난 일에 대한 대화 시작)",
     "goal": "기 단계 목표 (예: 어젯밤 일에 대해 꺼내기)"
   },
-  "seung": {
+  "buildup": {
     "title": "승(承) 단계 제목 (예: 그때 감정 확인)",
     "summary": "승 단계 요약 (1-2문장, 그때의 감정과 생각 나누기)",
     "goal": "승 단계 목표 (예: 서로의 진심 알아가기)"
   },
-  "jeon": {
+  "climax": {
     "title": "전(轉) 단계 제목 (예: 관계 정의 고민)",
     "summary": "전 단계 요약 (1-2문장, 앞으로 어떻게 할지 갈등)",
     "goal": "전 단계 목표 (예: 솔직한 마음 표현하기)"
   },
-  "gyeol": {
+  "resolution": {
     "title": "결(結) 단계 제목 (예: 새로운 관계 시작)",
     "summary": "결 단계 요약 (1-2문장, 감정 정리 및 다음 약속)",
     "goal": "결 단계 목표 (예: 다시 만나기로 약속)"
@@ -1814,22 +1814,22 @@ async function generateStoryFromKiSeungJeonGyeol({ title, description, structure
 **출력**: 순수한 소설 텍스트만 (JSON이나 다른 형식 없이)`;
   }
 
-  // 기승전결을 텍스트로 변환
-  const kiDescription = structure.ki.beats && structure.ki.beats.length > 0
-    ? `기(起) - ${structure.ki.summary}\n  목표: ${structure.ki.goal}\n  대화 흐름: ${structure.ki.beats.map(b => b.name).join(' → ')}`
-    : `기(起) - ${structure.ki.title || '도입'}\n  요약: ${structure.ki.summary}\n  목표: ${structure.ki.goal}`;
+  // 기승전결을 텍스트로 변환 (영어 속성명 사용)
+  const kiDescription = structure.beginning.beats && structure.beginning.beats.length > 0
+    ? `기(起) - ${structure.beginning.summary}\n  목표: ${structure.beginning.goal}\n  대화 흐름: ${structure.beginning.beats.map(b => b.name).join(' → ')}`
+    : `기(起) - ${structure.beginning.title || '도입'}\n  요약: ${structure.beginning.summary}\n  목표: ${structure.beginning.goal}`;
 
-  const seungDescription = structure.seung.beats && structure.seung.beats.length > 0
-    ? `승(承) - ${structure.seung.summary}\n  목표: ${structure.seung.goal}\n  대화 흐름: ${structure.seung.beats.map(b => b.name).join(' → ')}`
-    : `승(承) - ${structure.seung.title || '전개'}\n  요약: ${structure.seung.summary}\n  목표: ${structure.seung.goal}`;
+  const seungDescription = structure.buildup.beats && structure.buildup.beats.length > 0
+    ? `승(承) - ${structure.buildup.summary}\n  목표: ${structure.buildup.goal}\n  대화 흐름: ${structure.buildup.beats.map(b => b.name).join(' → ')}`
+    : `승(承) - ${structure.buildup.title || '전개'}\n  요약: ${structure.buildup.summary}\n  목표: ${structure.buildup.goal}`;
 
-  const jeonDescription = structure.jeon.beats && structure.jeon.beats.length > 0
-    ? `전(轉) - ${structure.jeon.summary}\n  목표: ${structure.jeon.goal}\n  대화 흐름: ${structure.jeon.beats.map(b => b.name).join(' → ')}`
-    : `전(轉) - ${structure.jeon.title || '위기'}\n  요약: ${structure.jeon.summary}\n  목표: ${structure.jeon.goal}`;
+  const jeonDescription = structure.climax.beats && structure.climax.beats.length > 0
+    ? `전(轉) - ${structure.climax.summary}\n  목표: ${structure.climax.goal}\n  대화 흐름: ${structure.climax.beats.map(b => b.name).join(' → ')}`
+    : `전(轉) - ${structure.climax.title || '위기'}\n  요약: ${structure.climax.summary}\n  목표: ${structure.climax.goal}`;
 
-  const gyeolDescription = structure.gyeol.beats && structure.gyeol.beats.length > 0
-    ? `결(結) - ${structure.gyeol.summary}\n  목표: ${structure.gyeol.goal}\n  대화 흐름: ${structure.gyeol.beats.map(b => b.name).join(' → ')}`
-    : `결(結) - ${structure.gyeol.title || '결말'}\n  요약: ${structure.gyeol.summary}\n  목표: ${structure.gyeol.goal}`;
+  const gyeolDescription = structure.resolution.beats && structure.resolution.beats.length > 0
+    ? `결(結) - ${structure.resolution.summary}\n  목표: ${structure.resolution.goal}\n  대화 흐름: ${structure.resolution.beats.map(b => b.name).join(' → ')}`
+    : `결(結) - ${structure.resolution.title || '결말'}\n  요약: ${structure.resolution.summary}\n  목표: ${structure.resolution.goal}`;
 
   // 템플릿 변수 치환
   const prompt = userPromptTemplate
