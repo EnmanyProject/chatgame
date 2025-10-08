@@ -4,7 +4,7 @@
     "created_date": "2025-10-03",
     "total_scenarios": 3,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-10-08T00:26:29.227Z",
+    "last_updated": "2025-10-08T00:26:51.499Z",
     "data_source": "github_api_only"
   },
   "scenarios": {
@@ -122,7 +122,7 @@
       "mood": "편안한",
       "active_status": true,
       "created_date": "2025-10-08",
-      "last_modified": "2025-10-08T00:26:29.227Z",
+      "last_modified": "2025-10-08T00:26:51.499Z",
       "ai_generated_context": "죄송하지만 요청하신 시나리오를 작성할 수 없습니다. 캐릭터 이름이나 정보가 제공되지 않아 해당 조건을 충족할 수 없습니다. 다른 요청이나 추가 정보가 있으시면 알려주세요.",
       "custom_context": "",
       "available_characters": [],
@@ -148,10 +148,38 @@
           "설득"
         ],
         "estimated_duration": "medium",
-        "ai_model": "openai",
+        "ai_model": "llama",
         "target_affection_gain": 15
       },
-      "structure": {}
+      "structure": {},
+      "story_structure": {
+        "ki": {
+          "title": "",
+          "summary": "",
+          "goal": "",
+          "affection_range": "0~5"
+        },
+        "seung": {
+          "title": "",
+          "summary": "",
+          "goal": "",
+          "affection_range": "5~10"
+        },
+        "jeon": {
+          "title": "",
+          "summary": "",
+          "goal": "",
+          "affection_range": "3~8"
+        },
+        "gyeol": {
+          "title": "",
+          "summary": "",
+          "goal": "",
+          "affection_range": "10~15"
+        }
+      },
+      "dialogue_count": 0,
+      "action": "update"
     }
   },
   "scenario_templates": {
