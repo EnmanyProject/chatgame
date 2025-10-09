@@ -4557,7 +4557,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.13.0</span>
+                <span id="systemVersion">v1.13.1</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -9570,15 +9570,19 @@
                     });
 
                     const result = await response.json();
+                    console.log('📥 API 응답:', result);
 
                     if (result.success && result.structure) {
                         selectedStructure = result.structure;
                         console.log('✅ AI로부터 기승전결 구조 생성 성공');
+                        console.log('📦 생성된 구조:', selectedStructure);
                     } else {
-                        throw new Error(result.error || 'AI 생성 실패');
+                        console.error('❌ API 응답 실패:', result);
+                        throw new Error(result.message || result.error || 'AI 생성 실패');
                     }
                 } catch (apiError) {
                     console.warn('⚠️ AI API 실패, Fallback 사용:', apiError.message);
+                    console.error('🔍 전체 에러:', apiError);
 
                     // Fallback: 키워드 기반 예시 데이터 (영어 속성명 사용)
                     const exampleStructures = {
@@ -9619,6 +9623,11 @@
                             resolution: { title: '결말', summary: '문제 해결과 관계의 진전', goal: '호감도 상승' }
                         };
                     }
+                }
+
+                // 안전 체크: selectedStructure가 없으면 에러
+                if (!selectedStructure || !selectedStructure.beginning) {
+                    throw new Error('구조 생성 실패: AI 응답 및 Fallback 모두 실패했습니다.');
                 }
 
                 // 폼 필드에 데이터 입력 (영어 속성명 사용)
