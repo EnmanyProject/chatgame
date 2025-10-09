@@ -656,22 +656,13 @@ async function loadCharacterEpisodes(character_id) {
     if (response.status === 404) {
       console.log(`📄 에피소드 파일 없음, 빈 구조 생성: ${character_id}`);
 
-      // 캐릭터 정보 로드하여 이름 가져오기 (실패 시 기본값 사용)
-      let characterInfo;
-      try {
-        characterInfo = await loadCharacterInfo(character_id);
-      } catch (error) {
-        console.warn(`⚠️ 캐릭터 정보 로드 실패, 기본값 사용: ${character_id}`);
-        characterInfo = {
-          name: character_id.split('_')[0] || 'Unknown',
-          mbti: 'INFP'
-        };
-      }
+      // 캐릭터 이름 추출 (ID에서 첫 부분) - 에러 없이 안전하게
+      const nameFromId = character_id.split('_')[0] || 'Unknown';
 
       return {
         character_id: character_id,
-        character_name: characterInfo.name,
-        character_mbti: characterInfo.mbti,
+        character_name: nameFromId,
+        character_mbti: 'INFP',
         total_episodes: 0,
         metadata: {
           version: '2.1.0',
@@ -716,22 +707,13 @@ async function loadCharacterEpisodes(character_id) {
     // 어떤 에러가 발생하든 빈 에피소드 구조 반환 (안전성 우선)
     console.warn(`⚠️ 캐릭터 에피소드 로드 실패, 빈 구조 반환 (${character_id}):`, error.message);
 
-    // 캐릭터 정보 로드 시도 (실패 시 기본값)
-    let characterInfo;
-    try {
-      characterInfo = await loadCharacterInfo(character_id);
-    } catch (charError) {
-      console.warn(`⚠️ 캐릭터 정보 로드 실패, 기본값 사용: ${character_id}`);
-      characterInfo = {
-        name: character_id.split('_')[0] || 'Unknown',
-        mbti: 'INFP'
-      };
-    }
+    // 캐릭터 이름 추출 (ID에서 첫 부분) - 에러 없이 안전하게
+    const nameFromId = character_id.split('_')[0] || 'Unknown';
 
     return {
       character_id: character_id,
-      character_name: characterInfo.name,
-      character_mbti: characterInfo.mbti,
+      character_name: nameFromId,
+      character_mbti: 'INFP',
       total_episodes: 0,
       metadata: {
         version: '2.1.0',
