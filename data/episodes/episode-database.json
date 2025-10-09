@@ -2,9 +2,9 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-09-29",
-    "total_episodes": 1,
+    "total_episodes": 2,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-10-09T06:04:02.364Z",
+    "last_updated": "2025-10-09T06:09:35.213Z",
     "data_source": "episode_manager_api",
     "deleted_episodes_count": 5,
     "force_cleared": true
@@ -17,6 +17,17 @@
       "difficulty": "Hard",
       "dialogue_count": 10,
       "created_at": "2025-10-09T06:04:02.364Z",
+      "character_id": null,
+      "character_name": null,
+      "dialogues": []
+    },
+    "ep_mgj0pii4_gx81hh": {
+      "id": "ep_mgj0pii4_gx81hh",
+      "scenario_id": "scenario_도와줘_1759987337551",
+      "title": "바퀴벌레 대소동",
+      "difficulty": "Easy",
+      "dialogue_count": 5,
+      "created_at": "2025-10-09T06:09:35.213Z",
       "character_id": null,
       "character_name": null,
       "dialogues": []
