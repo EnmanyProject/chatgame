@@ -4705,13 +4705,13 @@
                 <!-- 2단계: 시나리오 템플릿 -->
                 <div class="form-group" style="margin-bottom: 25px;">
                     <label style="font-size: 1.1em; font-weight: 600; margin-bottom: 10px; display: block;">
-                        📖 2. 시나리오 템플릿
+                        📖 2. 시나리오 선택
                     </label>
-                    <input type="text" id="episodeTemplateInput" class="form-control"
-                           placeholder="예: 첫_만남, 재회, 고백, 데이트, 갈등, 화해..."
-                           style="font-size: 1.05em; padding: 12px;">
+                    <select id="episodeTemplateSelect" class="form-control" style="font-size: 1.05em; padding: 12px;">
+                        <option value="">시나리오를 선택하세요...</option>
+                    </select>
                     <small style="color: #666; margin-top: 5px; display: block;">
-                        💡 Tip: 간결한 키워드로 입력하세요 (예: 첫_만남, 술자리_키스, 우연한_재회)
+                        💡 Tip: 기존 시나리오를 선택하거나, 직접 입력할 수도 있습니다
                     </small>
                 </div>
 
@@ -20848,7 +20848,7 @@
         // AI 에피소드 생성 함수
         async function generateEpisodeWithAI() {
             const characterId = document.getElementById('episodeCharacterSelect').value;
-            const template = document.getElementById('episodeTemplateInput').value;
+            const template = document.getElementById('episodeTemplateSelect').value;
             const title = document.getElementById('episodeTitleInput').value;
             const length = document.getElementById('episodeLengthSelect').value;
             const affection = parseInt(document.getElementById('affectionSlider').value);
@@ -20861,7 +20861,7 @@
             }
 
             if (!template) {
-                alert('시나리오 템플릿을 입력하세요! (예: 첫_만남, 재회, 고백)');
+                alert('시나리오를 선택하세요!');
                 return;
             }
 
@@ -21087,27 +21087,64 @@
             }
         }
 
-        // 캐릭터 선택기 초기화 (페이지 로드 시)
-        function initializeEpisodeCharacterSelect() {
+        // 캐릭터 선택기 초기화
+        async function initializeEpisodeCharacterSelect() {
             const select = document.getElementById('episodeCharacterSelect');
             if (!select) return;
 
             select.innerHTML = '<option value="">캐릭터를 선택하세요...</option>';
 
+            // 캐릭터가 아직 로드되지 않았으면 먼저 로드
+            if (!characters || Object.keys(characters).length === 0) {
+                console.log('📥 캐릭터 데이터 로드 중...');
+                await loadCharacters();
+            }
+
             const charactersArray = Object.values(characters || {});
             charactersArray.forEach(char => {
                 const id = char.id || char.character_id;
                 const name = char.name || char.character_name;
-                select.innerHTML += `<option value="${id}">${name} (${char.mbti || 'MBTI'})</option>`;
+                const mbti = char.mbti || 'MBTI';
+                select.innerHTML += `<option value="${id}">${name} (${mbti})</option>`;
             });
 
             console.log(`✅ 캐릭터 선택기 초기화: ${charactersArray.length}개`);
         }
 
+        // 시나리오 선택기 초기화
+        async function initializeEpisodeScenarioSelect() {
+            const select = document.getElementById('episodeTemplateSelect');
+            if (!select) return;
+
+            select.innerHTML = '<option value="">시나리오를 선택하세요...</option>';
+
+            // 시나리오가 아직 로드되지 않았으면 먼저 로드
+            if (!globalScenarios || Object.keys(globalScenarios).length === 0) {
+                console.log('📥 시나리오 데이터 로드 중...');
+                await loadScenarios();
+            }
+
+            // 시나리오 목록 추가
+            const scenariosArray = Object.values(globalScenarios || {});
+            scenariosArray.forEach(scenario => {
+                const id = scenario.id;
+                const title = scenario.title || id;
+                select.innerHTML += `<option value="${id}">${title}</option>`;
+            });
+
+            console.log(`✅ 시나리오 선택기 초기화: ${scenariosArray.length}개`);
+        }
+
         // 에피소드 탭 진입 시 초기화
         async function initializeEpisodeTab() {
             console.log('🔄 에피소드 탭 초기화 중...');
-            initializeEpisodeCharacterSelect();
+
+            // 캐릭터와 시나리오를 병렬로 로드
+            await Promise.all([
+                initializeEpisodeCharacterSelect(),
+                initializeEpisodeScenarioSelect()
+            ]);
+
             await loadAllEpisodes();
             console.log('✅ 에피소드 탭 초기화 완료');
         }
