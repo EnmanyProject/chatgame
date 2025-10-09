@@ -1054,7 +1054,7 @@ async function handleEvaluateUserInput(req, res) {
       targetDialogue.context || episode.title
     );
 
-    console.log(`✅ AI 평가 완료: ${evaluation.score} (호감도 ${evaluation.affection_change:+d}, 애정도 ${evaluation.intimacy_change:+d})`);
+    console.log(`✅ AI 평가 완료: ${evaluation.score} (호감도 ${evaluation.affection_change > 0 ? '+' : ''}${evaluation.affection_change}, 애정도 ${evaluation.intimacy_change > 0 ? '+' : ''}${evaluation.intimacy_change})`);
 
     return res.status(200).json({
       success: true,
