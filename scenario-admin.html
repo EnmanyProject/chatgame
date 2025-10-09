@@ -20931,7 +20931,7 @@
                 container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px;"><div class="spinner"></div><p>로딩 중...</p></div>';
 
                 // 모든 캐릭터 ID 가져오기
-                const charactersArray = Object.values(charactersData || {});
+                const charactersArray = Object.values(characters || {});
                 console.log(`📊 캐릭터 수: ${charactersArray.length}`);
 
                 let allEpisodes = [];
@@ -21094,14 +21094,14 @@
 
             select.innerHTML = '<option value="">캐릭터를 선택하세요...</option>';
 
-            const characters = Object.values(charactersData || {});
-            characters.forEach(char => {
+            const charactersArray = Object.values(characters || {});
+            charactersArray.forEach(char => {
                 const id = char.id || char.character_id;
                 const name = char.name || char.character_name;
                 select.innerHTML += `<option value="${id}">${name} (${char.mbti || 'MBTI'})</option>`;
             });
 
-            console.log(`✅ 캐릭터 선택기 초기화: ${characters.length}개`);
+            console.log(`✅ 캐릭터 선택기 초기화: ${charactersArray.length}개`);
         }
 
         // 에피소드 탭 진입 시 초기화
