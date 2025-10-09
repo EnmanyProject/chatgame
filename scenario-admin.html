@@ -21242,8 +21242,65 @@
         }
 
         // 에피소드 상세보기
-        function viewEpisodeDetail(episodeId, characterId) {
-            alert(`에피소드 상세보기 기능은 곧 추가됩니다!\n\nEpisode ID: ${episodeId}\nCharacter ID: ${characterId}`);
+        async function viewEpisodeDetail(episodeId, characterId) {
+            try {
+                console.log('📖 에피소드 상세보기 요청:', episodeId, characterId);
+
+                // API에서 에피소드 데이터 가져오기
+                const response = await fetch(`/api/episode-manager?action=get&episode_id=${encodeURIComponent(episodeId)}&character_id=${encodeURIComponent(characterId)}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                }
+
+                const result = await response.json();
+
+                if (!result.success || !result.episode) {
+                    throw new Error(result.message || '에피소드를 불러올 수 없습니다');
+                }
+
+                const episode = result.episode;
+                console.log('✅ 에피소드 로드 완료:', episode);
+
+                // 모달 제목 설정
+                document.getElementById('dialoguePreviewTitle').textContent = `📖 ${episode.title || '에피소드 상세보기'}`;
+
+                // 메타데이터 표시
+                const metadataHtml = `
+                    <div style="background: #f0f4ff; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                            <div><strong>🎯 난이도:</strong> ${episode.difficulty || 'Medium'}</div>
+                            <div><strong>⏱️ 예상 시간:</strong> ${episode.estimated_duration || '10-15분'}</div>
+                            <div><strong>📊 상태:</strong> ${getStatusLabel(episode.status)}</div>
+                            <div><strong>🤖 AI 모델:</strong> ${episode.generation_context?.ai_model || 'gpt-4o-mini'}</div>
+                        </div>
+                        <div style="margin-top: 10px;"><strong>📝 설명:</strong> ${episode.description || '설명 없음'}</div>
+                    </div>
+                `;
+                document.getElementById('dialogueMetadata').innerHTML = metadataHtml;
+
+                // dialogue_flow 표시 (v1.19.3에서 구현한 함수 사용)
+                displayDialogueContent(episode);
+
+                // 모달 표시
+                document.getElementById('dialoguePreviewModal').style.display = 'block';
+                document.body.style.overflow = 'hidden';
+
+            } catch (error) {
+                console.error('❌ 에피소드 상세보기 실패:', error);
+                alert(`에피소드 상세보기 실패:\n${error.message}`);
+            }
+        }
+
+        // 상태 라벨 변환
+        function getStatusLabel(status) {
+            const labels = {
+                'pending': '⏳ 대기 중',
+                'sent': '📤 전송됨',
+                'playing': '🎮 플레이 중',
+                'completed': '✅ 완료됨'
+            };
+            return labels[status] || status;
         }
 
         // 에피소드 삭제
