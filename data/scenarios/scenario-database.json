@@ -2,9 +2,9 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-10-03",
-    "total_scenarios": 1,
+    "total_scenarios": 2,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-10-09T05:34:34.117Z",
+    "last_updated": "2025-10-09T05:46:55.816Z",
     "data_source": "github_api_only"
   },
   "scenarios": {
@@ -46,6 +46,51 @@
           "유혹"
         ],
         "estimated_duration": "short",
+        "ai_model": "openai",
+        "target_affection_gain": 15
+      },
+      "structure": {}
+    },
+    "scenario_자기야_1759988816785": {
+      "id": "scenario_자기야_1759988816785",
+      "scenario_id": "scenario_자기야_1759988816785",
+      "title": "자기야 ",
+      "description": "어떤 여자가 자신한테 메세지를 잘못보냈는데 내용이 애인을 유혹하는 내용으로 보냄 그러다가 친해지는 스토리  ",
+      "background_setting": "멤신저 대화",
+      "mood": "편안한",
+      "active_status": true,
+      "created_date": "2025-10-09",
+      "last_modified": "2025-10-09T05:46:55.816Z",
+      "ai_generated_context": "여자는 아침 햇살 아래에서 메신저 앱을 열었다. 어제의 사건이 아직도 머릿속에서 맴돌고, 자신이 잘못 보낸 메시지가 생각났다. \"네가 그렇게 유혹하면 안 돼!\"라는 내용이 그에게 전송된 것이었다. 그녀는 그 메시지가 그의 눈에 어떻게 비칠지 상상하며, 은근히 긴장감이 돌았다. \"어떡해, 두근거려…\" 그녀는 웃음을 참을 수 없었다.\n\n그녀는 망설임 속에서 메시지를 작성했다. \"안녕! 어제 그 메시지… 다들 붙잡고 잔소리하더라고! 😅\" 그러자 곧바로 그가 반응할지 설레는 마음으로 기다렸다.\n\n잠시 후, 그의 답장이 도착했다. \"그 메시지? 흠... 나쁜 생각은 아니었는데?\" 이 말에 그녀는 얼굴이 붉어졌다. '어머, 내가 뭘 했지?' 하는 생각이 스치며 기분이 두둥실 올라갔다. \"아하! 유혹은 예술이니까?\" 그녀는 농담으로 화답했고, 그의 웃음소리가 귀에 쏙 들어왔다.\n\n이윽고 그녀는 솔직한 질문을 던졌다. \"그럼, 혹시 그런 메시지 좋아해? 😊\" 긴장감이 흐르지 않고, 오히려 즐거움만 가득한 대화가 이어졌다. 서로의 마음을 확인하며, 두 사람의 감정이 더욱 가까워지는 느낌을 받았다.\n\n마지막으로 그녀는 조심스럽게 다음 만남을 제안했다. \"그럼 우리 조만간 커피 한 잔 할래? 다음엔 제대로 이야기하고 싶어!\" 기분 좋은 설렘이 가득한 채로 대화는 마무리됐다.",
+      "custom_context": "",
+      "available_characters": [],
+      "episode_count": 0,
+      "tags": [
+        "어떤",
+        "여자가",
+        "자신한테",
+        "메세지를",
+        "잘못보냈는데",
+        "내용이",
+        "애인을",
+        "유혹하는",
+        "내용으로",
+        "보냄",
+        "그러다가",
+        "친해지는",
+        "스토리",
+        "편안한"
+      ],
+      "source": "scenario_admin",
+      "updated_by": "scenario_manager_github_only",
+      "metadata": {
+        "genre": "temptation",
+        "sexy_level": 10,
+        "tags": [
+          "자기야",
+          "귀가확인"
+        ],
+        "estimated_duration": "long",
         "ai_model": "openai",
         "target_affection_gain": 15
       },
