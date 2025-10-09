@@ -4253,6 +4253,54 @@
             border-color: #28a745;
         }
 
+        .dialogue-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .dialogue-card-header h5 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #28a745;
+        }
+
+        .dialogue-difficulty-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #ffc107;
+            color: white;
+        }
+
+        .dialogue-card-body {
+            margin-bottom: 12px;
+        }
+
+        .dialogue-card-body p {
+            margin: 0 0 8px 0;
+        }
+
+        .dialogue-card-body .text-muted {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .dialogue-card-footer {
+            padding-top: 8px;
+            border-top: 1px solid #f1f3f5;
+        }
+
+        .dialogue-card-footer small {
+            color: #868e96;
+            font-size: 12px;
+        }
+
         /* 대화 내용 표시 */
         .dialogue-content-display {
             background: white;
@@ -16638,6 +16686,77 @@
             document.getElementById('selectedEpisodeTitle').textContent = `에피소드 ${episodeId.substring(0, 8)}`;
 
             loadEpisodeDialogues(episodeId);
+        }
+
+        // 에피소드의 대화 목록 로드
+        async function loadEpisodeDialogues(episodeId) {
+            console.log('📚 대화 목록 로드:', episodeId);
+
+            try {
+                const response = await fetch(`/api/dialogue-manager?action=get_episode_dialogues&episode_id=${episodeId}`);
+                const result = await response.json();
+
+                console.log('✨ 대화 목록 응답:', result);
+
+                if (result.success) {
+                    const dialogues = result.dialogues || [];
+
+                    // 에피소드 정보 업데이트
+                    document.getElementById('selectedEpisodeTitle').textContent = result.episode_title || `에피소드 ${episodeId.substring(0, 8)}`;
+                    document.getElementById('selectedEpisodeDescription').textContent = `대화 개수: ${dialogues.length}개`;
+
+                    // 대화 카드 표시
+                    displayDialogueCards(dialogues);
+                } else {
+                    console.error('❌ 대화 목록 로드 실패:', result.message);
+                    alert('대화 목록을 불러올 수 없습니다: ' + result.message);
+                }
+
+            } catch (error) {
+                console.error('❌ 대화 목록 로드 오류:', error);
+                alert('대화 목록 로드 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        // 대화 카드들 표시
+        function displayDialogueCards(dialogues) {
+            console.log('🎴 대화 카드 표시:', dialogues.length, '개');
+
+            const container = document.getElementById('episodeDialoguesContainer');
+
+            if (!dialogues || dialogues.length === 0) {
+                container.innerHTML = `
+                    <div class="no-data-message">
+                        <p>⚠️ 이 에피소드에는 아직 대화가 없습니다.</p>
+                        <p>대화를 생성하려면 "💬 새 대화 생성" 버튼을 클릭하세요.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let dialogueCards = '';
+            dialogues.forEach((dialogue, index) => {
+                const dialogueTitle = dialogue.title || `대화 ${index + 1}`;
+                const dialogueNumber = dialogue.dialogue_number || (index + 1);
+
+                dialogueCards += `
+                    <div class="dialogue-card" onclick="selectDialogue('${dialogue.id}')">
+                        <div class="dialogue-card-header">
+                            <h5>💬 대화 ${dialogueNumber}</h5>
+                            <span class="dialogue-difficulty-badge">${dialogue.difficulty || 'Easy'}</span>
+                        </div>
+                        <div class="dialogue-card-body">
+                            <p><strong>${dialogueTitle}</strong></p>
+                            ${dialogue.user_input_prompt ? `<p class="text-muted">📝 ${dialogue.user_input_prompt}</p>` : ''}
+                        </div>
+                        <div class="dialogue-card-footer">
+                            <small>생성일: ${new Date(dialogue.created_at).toLocaleDateString()}</small>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = dialogueCards;
         }
 
         // 에피소드 목록으로 돌아가기
