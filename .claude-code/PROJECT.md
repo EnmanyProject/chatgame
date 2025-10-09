@@ -497,6 +497,46 @@ scenario-admin.html 통합 관리
 
 ---
 
+## 📦 백업 및 버전 관리 (v1.19.6)
+
+### 3대 문서 백업 시스템
+프로젝트의 핵심 문서들을 주요 마일스톤마다 백업하여 안정성과 버전 추적을 보장합니다.
+
+**백업 디렉토리**: `.claude-code/backup/`
+
+**백업 파일 형식**: `{문서명}_v{버전}_{날짜}.md`
+
+**백업 대상 문서**:
+1. `PROJECT.md` - 프로젝트 전체 개요
+2. `MASTER.md` - 현재 작업 상태
+3. `CLAUDE.md` - 버전 히스토리
+
+**v1.19.5 백업 (2025-10-09)**:
+```
+.claude-code/backup/
+├── PROJECT_v1.19.5_2025-10-09.md   (21KB)
+├── MASTER_v1.19.5_2025-10-09.md    (7.1KB)
+└── CLAUDE_v1.19.5_2025-10-09.md    (80KB)
+
+총 크기: 108KB (2,352줄)
+```
+
+**백업 시점 주요 내용**:
+- 시나리오 관리 시스템 완성
+- 에피소드 관리 시스템 완성 (dialogue_flow 4가지 타입)
+- 상세보기 모달 연결 완료
+- GitHub API 완전 통합
+
+**복구 방법**:
+```bash
+# 특정 버전으로 복구
+cp .claude-code/backup/PROJECT_v1.19.5_2025-10-09.md .claude-code/PROJECT.md
+cp .claude-code/backup/MASTER_v1.19.5_2025-10-09.md .claude-code/MASTER.md
+cp .claude-code/backup/CLAUDE_v1.19.5_2025-10-09.md CLAUDE.md
+```
+
+---
+
 ## 🚨 주의사항
 
 ### 데이터 저장
