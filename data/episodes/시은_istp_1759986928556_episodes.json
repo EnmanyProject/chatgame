@@ -2,14 +2,137 @@
   "character_id": "시은_istp_1759986928556",
   "character_name": "시은",
   "character_mbti": "ISTP",
-  "total_episodes": 0,
+  "total_episodes": 1,
   "metadata": {
     "version": "2.1.0",
     "schema_type": "character_based_dialogue",
     "created_at": "2025-10-09T06:30:00.000Z",
-    "last_updated": "2025-10-09T07:00:00.000Z"
+    "last_updated": "2025-10-09T12:03:07.512Z"
   },
-  "episodes": {},
+  "episodes": {
+    "ep_시은_scenario_도와줘_1759987337551_c8xaf4": {
+      "id": "ep_시은_scenario_도와줘_1759987337551_c8xaf4",
+      "character_id": "시은_istp_1759986928556",
+      "scenario_template_id": "scenario_도와줘_1759987337551",
+      "title": "바퀴벌레 대소동",
+      "description": "호감도 6, 애정도 7 기반",
+      "trigger_conditions": {
+        "affection_min": 1,
+        "affection_max": 11,
+        "intimacy_min": 2,
+        "intimacy_max": 12,
+        "time_based": null,
+        "event_based": null,
+        "priority": 5
+      },
+      "generation_context": {
+        "base_affection": 6,
+        "base_intimacy": 7,
+        "tone_style": "cold",
+        "formality": "formal",
+        "scenario_length": "short"
+      },
+      "status": "pending",
+      "difficulty": "Easy",
+      "estimated_duration": "5-10분",
+      "created_at": "2025-10-09T12:03:07.421Z",
+      "last_edited_at": null,
+      "dialogue_flow": [
+        {
+          "sequence": 1,
+          "type": "narration",
+          "content": "밤늦게 메신저가 울리며 당신은 메시지를 확인합니다. 상대방은 '너 지금 괜찮아?'라는 짧은 메시지를 보냈습니다."
+        },
+        {
+          "sequence": 2,
+          "type": "character_dialogue",
+          "speaker": "상대방",
+          "text": "네, 괜찮아. 좀 늦게 말이야. 무슨 일 있어?",
+          "emotion": "친근함",
+          "narration": "당신은 조금 당황한 채로 키보드를 두드립니다."
+        },
+        {
+          "sequence": 3,
+          "type": "multiple_choice",
+          "question": "너무 늦은 시간에 뭐하는 거야?",
+          "choices": [
+            {
+              "id": "choice_1",
+              "text": "잠이 안 와서 좀 책을 읽고 있어.",
+              "affection_change": 2,
+              "intimacy_change": 1,
+              "consequence": "상대방은 당신의 관심을 공유하는 모습을 보고 호감을 가집니다."
+            },
+            {
+              "id": "choice_2",
+              "text": "그냥 생각이 많아서 잠이 안 와서.",
+              "affection_change": 0,
+              "intimacy_change": 0,
+              "consequence": "상대방은 당신의 대답에 조금 거리를 두는 듯한 반응을 합니다."
+            },
+            {
+              "id": "choice_3",
+              "text": "너에게 연락하고 싶어서.",
+              "affection_change": 3,
+              "intimacy_change": 2,
+              "consequence": "상대방은 당신의 진솔한 마음에 감동을 받습니다."
+            }
+          ]
+        },
+        {
+          "sequence": 5,
+          "type": "free_input",
+          "question": "너무 늦은 시간에 연락해서 미안해. 근데 뭘 생각하고 있었어?",
+          "prompt_hint": "당신의 속마음을 털어놓는 질문",
+          "context": "밤늦은 시간의 대화",
+          "ai_evaluation": {
+            "model": "gpt-4o-mini",
+            "criteria": [
+              "적절한 호칭 사용",
+              "대화 맥락 일치",
+              "예의 바른 표현"
+            ],
+            "scoring": {
+              "excellent": {
+                "affection": 5,
+                "intimacy": 3
+              },
+              "good": {
+                "affection": 3,
+                "intimacy": 2
+              },
+              "normal": {
+                "affection": 1,
+                "intimacy": 1
+              },
+              "poor": {
+                "affection": -1,
+                "intimacy": 0
+              },
+              "inappropriate": {
+                "affection": -3,
+                "intimacy": -2
+              }
+            }
+          }
+        }
+      ],
+      "statistics": {
+        "total_dialogues": 4,
+        "choice_points": 1,
+        "free_input_points": 1,
+        "max_affection_gain": 8,
+        "max_intimacy_gain": 5,
+        "average_play_time": "5-10분"
+      },
+      "play_stats": {
+        "played_count": 0,
+        "best_affection_gain": 0,
+        "best_intimacy_gain": 0,
+        "completion_rate": 0
+      }
+    }
+  },
   "schema_description": {
     "purpose": "캐릭터 대화 콘텐츠 관리 (호감도/애정도 기반)",
     "episode_structure": [
