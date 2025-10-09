@@ -4557,7 +4557,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.15.0</span>
+                <span id="systemVersion">v1.16.0</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -15044,20 +15044,20 @@
             // 기승전결 구조 생성 프롬프트
             document.getElementById('structure-system-prompt').value = structurePrompt.system_prompt;
             document.getElementById('structure-user-prompt').value = structurePrompt.user_prompt_template;
-            document.getElementById('structure-model').value = structurePrompt.parameters.model;
-            document.getElementById('structure-temperature').value = structurePrompt.parameters.temperature;
-            document.getElementById('structure-temp-value').textContent = structurePrompt.parameters.temperature;
-            document.getElementById('structure-max-tokens').value = structurePrompt.parameters.max_tokens;
-            document.getElementById('structure-tokens-value').textContent = structurePrompt.parameters.max_tokens;
+            document.getElementById('structure-model').value = structurePrompt.parameters.openai.model;
+            document.getElementById('structure-temperature').value = structurePrompt.parameters.openai.temperature;
+            document.getElementById('structure-temp-value').textContent = structurePrompt.parameters.openai.temperature;
+            document.getElementById('structure-max-tokens').value = structurePrompt.parameters.openai.max_tokens;
+            document.getElementById('structure-tokens-value').textContent = structurePrompt.parameters.openai.max_tokens;
 
             // 장문 스토리 생성 프롬프트
             document.getElementById('story-system-prompt').value = storyPrompt.system_prompt;
             document.getElementById('story-user-prompt').value = storyPrompt.user_prompt_template;
-            document.getElementById('story-model').value = storyPrompt.parameters.model;
-            document.getElementById('story-temperature').value = storyPrompt.parameters.temperature;
-            document.getElementById('story-temp-value').textContent = storyPrompt.parameters.temperature;
-            document.getElementById('story-max-tokens').value = storyPrompt.parameters.max_tokens;
-            document.getElementById('story-tokens-value').textContent = storyPrompt.parameters.max_tokens;
+            document.getElementById('story-model').value = storyPrompt.parameters.openai.model;
+            document.getElementById('story-temperature').value = storyPrompt.parameters.openai.temperature;
+            document.getElementById('story-temp-value').textContent = storyPrompt.parameters.openai.temperature;
+            document.getElementById('story-max-tokens').value = storyPrompt.parameters.openai.max_tokens;
+            document.getElementById('story-tokens-value').textContent = storyPrompt.parameters.openai.max_tokens;
 
             // 감정 흐름 패턴 표시
             displayEmotionFlows(structurePrompt.emotion_flows);
@@ -15117,6 +15117,7 @@
                 // UI에서 값 수집
                 const updatedPrompts = {
                     metadata: currentAIPrompts.metadata,
+                    tone_settings: currentAIPrompts.tone_settings, // 분위기 설정 유지
                     prompts: {
                         structure_generation: {
                             name: currentAIPrompts.prompts.structure_generation.name,
@@ -15124,9 +15125,13 @@
                             system_prompt: document.getElementById('structure-system-prompt').value,
                             user_prompt_template: document.getElementById('structure-user-prompt').value,
                             parameters: {
-                                model: document.getElementById('structure-model').value,
-                                temperature: parseFloat(document.getElementById('structure-temperature').value),
-                                max_tokens: parseInt(document.getElementById('structure-max-tokens').value)
+                                openai: {
+                                    model: document.getElementById('structure-model').value,
+                                    temperature: parseFloat(document.getElementById('structure-temperature').value),
+                                    max_tokens: parseInt(document.getElementById('structure-max-tokens').value)
+                                },
+                                claude: currentAIPrompts.prompts.structure_generation.parameters.claude,
+                                llama: currentAIPrompts.prompts.structure_generation.parameters.llama
                             },
                             emotion_flows: currentAIPrompts.prompts.structure_generation.emotion_flows
                         },
@@ -15136,9 +15141,13 @@
                             system_prompt: document.getElementById('story-system-prompt').value,
                             user_prompt_template: document.getElementById('story-user-prompt').value,
                             parameters: {
-                                model: document.getElementById('story-model').value,
-                                temperature: parseFloat(document.getElementById('story-temperature').value),
-                                max_tokens: parseInt(document.getElementById('story-max-tokens').value)
+                                openai: {
+                                    model: document.getElementById('story-model').value,
+                                    temperature: parseFloat(document.getElementById('story-temperature').value),
+                                    max_tokens: parseInt(document.getElementById('story-max-tokens').value)
+                                },
+                                claude: currentAIPrompts.prompts.story_generation.parameters.claude,
+                                llama: currentAIPrompts.prompts.story_generation.parameters.llama
                             }
                         }
                     }
