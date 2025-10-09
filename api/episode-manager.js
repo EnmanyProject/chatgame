@@ -656,8 +656,17 @@ async function loadCharacterEpisodes(character_id) {
     if (response.status === 404) {
       console.log(`📄 에피소드 파일 없음, 빈 구조 생성: ${character_id}`);
 
-      // 캐릭터 정보 로드하여 이름 가져오기
-      const characterInfo = await loadCharacterInfo(character_id);
+      // 캐릭터 정보 로드하여 이름 가져오기 (실패 시 기본값 사용)
+      let characterInfo;
+      try {
+        characterInfo = await loadCharacterInfo(character_id);
+      } catch (error) {
+        console.warn(`⚠️ 캐릭터 정보 로드 실패, 기본값 사용: ${character_id}`);
+        characterInfo = {
+          name: character_id.split('_')[0] || 'Unknown',
+          mbti: 'INFP'
+        };
+      }
 
       return {
         character_id: character_id,
