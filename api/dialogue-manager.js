@@ -1101,18 +1101,27 @@ async function createEpisode(data) {
 async function saveEpisodeDatabase(database) {
   try {
     console.log('🐙 GitHub API를 통한 에피소드 저장 시작...');
+    console.log('📊 저장할 데이터:', {
+      total_episodes: Object.keys(database.episodes || {}).length,
+      metadata: database.metadata
+    });
 
     // GitHub API를 통해 저장 (시나리오와 동일한 방식)
     const result = await saveToGitHub('data/episodes/episode-database.json', database);
 
+    console.log('🔍 GitHub API 저장 결과:', result);
+
     if (result.success) {
       console.log('✅ GitHub API를 통한 에피소드 저장 완료');
+      return true;
     } else {
+      console.error('❌ GitHub API 저장 실패 - 상세 에러:', result.error);
       throw new Error(`GitHub API 저장 실패: ${result.error}`);
     }
 
   } catch (error) {
-    console.error('❌ GitHub API 에피소드 저장 실패:', error);
+    console.error('❌ GitHub API 에피소드 저장 실패 (catch):', error.message);
+    console.error('❌ 전체 에러 객체:', error);
     throw error;
   }
 }
@@ -1176,6 +1185,11 @@ async function saveToGitHub(filePath, data) {
 
     if (!saveResponse.ok) {
       const errorText = await saveResponse.text();
+      console.error('❌ GitHub API 응답 실패:', {
+        status: saveResponse.status,
+        statusText: saveResponse.statusText,
+        errorText: errorText
+      });
       throw new Error(`GitHub API 오류: ${saveResponse.status} - ${errorText}`);
     }
 
@@ -1185,7 +1199,11 @@ async function saveToGitHub(filePath, data) {
     return { success: true, commit: result.commit };
 
   } catch (error) {
-    console.error('❌ GitHub API 저장 실패:', error);
+    console.error('❌ GitHub API 저장 실패 (상세):', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     return { success: false, error: error.message };
   }
 }
