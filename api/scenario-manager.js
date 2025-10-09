@@ -1618,10 +1618,10 @@ async function generateKiSeungJeonGyeolStructure({ title, description, genre = '
 
   console.log(`🎨 적용된 분위기: ${selectedTone.name} (${tone})`);
 
-  // 분위기 지시문을 프롬프트에 추가
-  const toneInstruction = `\n\n**🎨 분위기 조절 (${selectedTone.name})**:\n${selectedTone.instruction}`;
+  // 분위기 지시문을 프롬프트 맨 앞에 추가 (최우선 적용)
+  const toneInstruction = `**🎨 분위기 조절 (${selectedTone.name}) - 최우선 준수**:\n${selectedTone.instruction}\n\n`;
 
-  const prompt = (userPromptTemplate + toneInstruction)
+  const prompt = (toneInstruction + userPromptTemplate)
     .replace(/\{\{title\}\}/g, title)
     .replace(/\{\{description\}\}/g, description)
     .replace(/\{\{genre_info\}\}/g, genreInfo)
@@ -1865,11 +1865,11 @@ async function generateStoryFromKiSeungJeonGyeol({ title, description, structure
 
   console.log(`🎨 적용된 분위기: ${selectedTone.name} (${tone})`);
 
-  // 분위기 지시문을 프롬프트에 추가
-  const toneInstruction = `\n\n**🎨 분위기 조절 (${selectedTone.name})**:\n${selectedTone.instruction}`;
+  // 분위기 지시문을 프롬프트 맨 앞에 추가 (최우선 적용)
+  const toneInstruction = `**🎨 분위기 조절 (${selectedTone.name}) - 최우선 준수**:\n${selectedTone.instruction}\n\n`;
 
   // 템플릿 변수 치환
-  const prompt = (userPromptTemplate + toneInstruction)
+  const prompt = (toneInstruction + userPromptTemplate)
     .replace(/\{\{title\}\}/g, title)
     .replace(/\{\{description\}\}/g, description)
     .replace(/\{\{ki_description\}\}/g, kiDescription)
