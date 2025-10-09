@@ -21253,10 +21253,10 @@
             }
 
             try {
-                const response = await fetch(`/api/episode-manager?action=delete&episode_id=${encodeURIComponent(episodeId)}`, {
+                // ✅ character_id도 쿼리 파라미터로 전송 (DELETE는 body 사용 안 함)
+                const response = await fetch(`/api/episode-manager?action=delete&episode_id=${encodeURIComponent(episodeId)}&character_id=${encodeURIComponent(characterId)}`, {
                     method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ character_id: characterId })
+                    headers: { 'Content-Type': 'application/json' }
                 });
 
                 const result = await response.json();

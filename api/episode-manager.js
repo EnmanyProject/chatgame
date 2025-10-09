@@ -37,7 +37,8 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { action, character_id, episode_id } = req.method === 'GET' ? req.query : req.body;
+    // ✅ DELETE도 쿼리 파라미터에서 읽음 (GET, DELETE → query / POST, PUT → body)
+    const { action, character_id, episode_id } = (req.method === 'GET' || req.method === 'DELETE') ? req.query : req.body;
 
     console.log(`📥 Episode Manager API v2.1 - Action: ${action}`);
 
@@ -60,7 +61,7 @@ module.exports = async function handler(req, res) {
 
       // 에피소드 삭제
       case 'delete':
-        return await handleDelete(req, res, episode_id);
+        return await handleDelete(req, res, episode_id, character_id);
 
       // 트리거 조건 체크 (활성화할 에피소드 찾기)
       case 'check_triggers':
@@ -288,8 +289,8 @@ async function handleUpdate(req, res) {
 /**
  * 에피소드 삭제
  */
-async function handleDelete(req, res, episode_id) {
-  const { character_id } = req.method === 'DELETE' ? req.query : req.body;
+async function handleDelete(req, res, episode_id, character_id) {
+  // ✅ character_id는 이미 쿼리 파라미터에서 추출됨 (line 41)
 
   if (!episode_id || !character_id) {
     return res.status(400).json({
