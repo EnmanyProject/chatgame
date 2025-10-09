@@ -100,6 +100,30 @@ grep "systemVersion" scenario-admin.html
 
 ## 📊 버전 히스토리
 
+### v1.19.3 (2025-10-09) - 에피소드 상세보기 dialogue_flow 완전 표시 (Patch Update)
+**작업 내용**:
+- 📖 **dialogue_flow 전용 표시 함수 추가**: displayDialogueFlow() 함수 신규 구현 (Lines 10846-10944)
+- 🎨 **4가지 대화 타입 색상 구분**:
+  * `narration` (상황 설명) - 노란색 배경
+  * `character_dialogue` (캐릭터 대사) - 파란색 배경
+  * `multiple_choice` (객관식 선택지) - 보라색 배경
+  * `free_input` (주관식 입력) - 초록색 배경
+- 💕 **호감도/친밀도 시스템 표시**: 각 선택지의 affection_change, intimacy_change 값 표시
+- 🤖 **AI 평가 기준 표시**: 주관식 문제의 평가 기준(keyword_match, emotional_tone, context_awareness) 완전 표시
+- 📊 **에피소드 통계 표시**: 총 대화 수, 선택지 개수, 최대 호감도/친밀도 획득, 예상 플레이 시간, 난이도, AI 모델
+- 🔍 **우선 순위 감지**: displayDialogueContent() 함수에서 dialogue_flow 구조를 최우선 감지 (Lines 10762-10767)
+
+**기술적 개선**:
+- Episode Manager가 생성하는 dialogue_flow 구조 완전 지원
+- 선택지별 호감도/친밀도 변화량 시각적 표시
+- AI 평가 기준 상세 표시로 주관식 문제 학습 향상
+- 색상 코딩으로 대화 흐름 가독성 극대화
+
+**Git**: 커밋 `cd72858`, 푸시 완료 ✅
+**영향**: scenario-admin.html Lines 10762-10767, 10846-10944
+
+---
+
 ### v1.19.2 (2025-10-09) - 504 Gateway Timeout 에러 처리 개선 (Patch Update)
 **작업 내용**:
 - ⏱️ **504 에러 감지**: 504 Gateway Timeout 상태 코드를 감지하고 명확한 에러 메시지 표시
