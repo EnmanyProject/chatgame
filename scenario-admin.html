@@ -21119,13 +21119,13 @@
             select.innerHTML = '<option value="">시나리오를 선택하세요...</option>';
 
             // 시나리오가 아직 로드되지 않았으면 먼저 로드
-            if (!globalScenarios || Object.keys(globalScenarios).length === 0) {
+            if (!window.scenarios || Object.keys(window.scenarios).length === 0) {
                 console.log('📥 시나리오 데이터 로드 중...');
                 await loadScenarios();
             }
 
             // 시나리오 목록 추가
-            const scenariosArray = Object.values(globalScenarios || {});
+            const scenariosArray = Object.values(window.scenarios || {});
             scenariosArray.forEach(scenario => {
                 const id = scenario.id;
                 const title = scenario.title || id;
