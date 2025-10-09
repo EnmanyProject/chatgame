@@ -100,6 +100,26 @@ grep "systemVersion" scenario-admin.html
 
 ## 📊 버전 히스토리
 
+### v1.19.5 (2025-10-09) - 에피소드 상세보기 기능 연결 완성 (Patch Update)
+**작업 내용**:
+- 🔗 **상세보기 버튼 연결**: stub 함수를 실제 상세보기 기능으로 교체
+- 📖 **API 통합**: Episode Manager의 `get` 액션으로 에피소드 데이터 로드
+- 🎨 **메타데이터 표시**: 난이도, 예상 시간, 상태, AI 모델, 설명 표시
+- 📊 **상태 라벨 변환**: pending → "⏳ 대기 중", sent → "📤 전송됨" 등 한글 변환
+- 🔄 **dialogue_flow 표시**: v1.19.3에서 구현한 displayDialogueContent() 함수 재사용
+- 🪟 **모달 연동**: 기존 dialoguePreviewModal을 재사용하여 통일된 UI
+
+**기술적 개선**:
+- viewEpisodeDetail() 함수 완전 구현 (Lines 21245-21293)
+- getStatusLabel() 헬퍼 함수 추가 (Lines 21296-21304)
+- API GET 요청으로 실시간 에피소드 데이터 로드
+- 색상 구분된 dialogue_flow 완전 표시
+
+**Git**: 커밋 `165715e`, 푸시 완료 ✅
+**영향**: scenario-admin.html Lines 21245-21304
+
+---
+
 ### v1.19.4 (2025-10-09) - 에피소드 삭제 400 Bad Request 오류 수정 (Patch Update)
 **작업 내용**:
 - 🐛 **DELETE 요청 오류 해결**: 400 Bad Request 및 "알 수 없는 액션: undefined" 오류 완전 해결
