@@ -4707,12 +4707,48 @@
                     <label style="font-size: 1.1em; font-weight: 600; margin-bottom: 10px; display: block;">
                         📖 2. 시나리오 선택
                     </label>
-                    <select id="episodeTemplateSelect" class="form-control" style="font-size: 1.05em; padding: 12px;">
+                    <select id="episodeTemplateSelect" class="form-control" style="font-size: 1.05em; padding: 12px;" onchange="showSelectedScenarioDetail()">
                         <option value="">시나리오를 선택하세요...</option>
                     </select>
                     <small style="color: #666; margin-top: 5px; display: block;">
                         💡 Tip: 기존 시나리오를 선택하거나, 직접 입력할 수도 있습니다
                     </small>
+
+                    <!-- 선택된 시나리오 상세 정보 -->
+                    <div id="selectedScenarioDetail" style="display: none; margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border-radius: 10px; border: 2px solid #667eea;">
+                        <h4 style="margin: 0 0 15px 0; color: #667eea; font-size: 1.1em;">
+                            📋 <span id="scenarioDetailTitle">시나리오 제목</span>
+                        </h4>
+
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <div style="display: grid; grid-template-columns: 120px 1fr; gap: 10px; font-size: 0.95em;">
+                                <div style="font-weight: 600; color: #555;">🎭 장르:</div>
+                                <div id="scenarioDetailGenre">-</div>
+
+                                <div style="font-weight: 600; color: #555;">🔥 섹시 레벨:</div>
+                                <div id="scenarioDetailSexyLevel">-</div>
+
+                                <div style="font-weight: 600; color: #555;">😊 분위기:</div>
+                                <div id="scenarioDetailMood">-</div>
+
+                                <div style="font-weight: 600; color: #555;">📍 배경:</div>
+                                <div id="scenarioDetailSetting">-</div>
+
+                                <div style="font-weight: 600; color: #555;">⏱️ 예상 시간:</div>
+                                <div id="scenarioDetailDuration">-</div>
+                            </div>
+                        </div>
+
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <div style="font-weight: 600; color: #555; margin-bottom: 8px;">📝 시나리오 설명</div>
+                            <div id="scenarioDetailDescription" style="color: #333; line-height: 1.6;">-</div>
+                        </div>
+
+                        <div style="background: white; padding: 15px; border-radius: 8px;">
+                            <div style="font-weight: 600; color: #555; margin-bottom: 8px;">📖 AI 생성 스토리 (참고)</div>
+                            <div id="scenarioDetailStory" style="color: #666; line-height: 1.6; max-height: 200px; overflow-y: auto; font-size: 0.9em;">-</div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 3단계: 제목 및 설명 -->
@@ -21164,6 +21200,89 @@
             });
 
             console.log(`✅ 시나리오 선택기 초기화: ${scenariosArray.length}개`);
+        }
+
+        // 선택된 시나리오 상세 정보 표시
+        function showSelectedScenarioDetail() {
+            const select = document.getElementById('episodeTemplateSelect');
+            const detailDiv = document.getElementById('selectedScenarioDetail');
+            const scenarioId = select.value;
+
+            if (!scenarioId) {
+                // 선택 해제 시 숨기기
+                detailDiv.style.display = 'none';
+                return;
+            }
+
+            // 시나리오 찾기
+            const scenario = window.scenarios?.[scenarioId];
+            if (!scenario) {
+                console.error('❌ 시나리오를 찾을 수 없습니다:', scenarioId);
+                detailDiv.style.display = 'none';
+                return;
+            }
+
+            console.log('📋 시나리오 상세 정보 표시:', scenario);
+
+            // 장르 한글 변환
+            const genreNames = {
+                'anger': '분노 (Anger)',
+                'jealousy': '질투 (Jealousy)',
+                'unrequited': '짝사랑 (Unrequited)',
+                'temptation': '유혹 (Temptation)',
+                'longing': '그리움 (Longing)',
+                'reconciliation': '화해 (Reconciliation)',
+                'flutter': '설렘 (Flutter)',
+                'anxiety': '불안 (Anxiety)',
+                'obsession': '집착 (Obsession)',
+                'resignation': '체념 (Resignation)',
+                'courage': '용기 (Courage)',
+                'bond': '유대 (Bond)',
+                'guilt': '죄책감 (Guilt)',
+                'rejection': '거절 (Rejection)',
+                'avoidance': '회피 (Avoidance)'
+            };
+
+            // 예상 시간 한글 변환
+            const durationNames = {
+                'short': '짧음 (10-15분)',
+                'medium': '보통 (20-30분)',
+                'long': '김 (40-60분)'
+            };
+
+            // 정보 채우기
+            document.getElementById('scenarioDetailTitle').textContent = scenario.title || '제목 없음';
+            document.getElementById('scenarioDetailGenre').textContent = genreNames[scenario.metadata?.genre] || scenario.metadata?.genre || '-';
+            document.getElementById('scenarioDetailSexyLevel').textContent = scenario.metadata?.sexy_level ? `${scenario.metadata.sexy_level}/10` : '-';
+            document.getElementById('scenarioDetailMood').textContent = scenario.mood || '-';
+            document.getElementById('scenarioDetailSetting').textContent = scenario.background_setting || '-';
+            document.getElementById('scenarioDetailDuration').textContent = durationNames[scenario.metadata?.estimated_duration] || scenario.metadata?.estimated_duration || '-';
+            document.getElementById('scenarioDetailDescription').textContent = scenario.description || '설명이 없습니다.';
+
+            // AI 생성 스토리 표시 (있는 경우)
+            const storyElement = document.getElementById('scenarioDetailStory');
+            if (scenario.ai_generated_context && scenario.ai_generated_context.length > 0) {
+                // 에러 메시지 필터링
+                const isError = scenario.ai_generated_context.includes('죄송하지만') ||
+                               scenario.ai_generated_context.includes('제공되지 않아') ||
+                               scenario.ai_generated_context.includes('작성할 수 없습니다');
+
+                if (isError) {
+                    storyElement.innerHTML = '<span style="color: #f44336;">⚠️ AI 생성 스토리가 없습니다</span>';
+                } else {
+                    storyElement.textContent = scenario.ai_generated_context;
+                }
+            } else {
+                storyElement.innerHTML = '<span style="color: #999;">AI 생성 스토리가 없습니다</span>';
+            }
+
+            // 상세 정보 표시
+            detailDiv.style.display = 'block';
+
+            // 부드러운 스크롤
+            setTimeout(() => {
+                detailDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
         }
 
         // 에피소드 탭 진입 시 초기화
