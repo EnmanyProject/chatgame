@@ -4771,14 +4771,23 @@
                     </div>
                 </div>
 
-                <!-- 생성 버튼 -->
-                <div style="text-align: center;">
-                    <button class="btn btn-primary" onclick="generateEpisodeWithAI()"
-                            style="font-size: 1.2em; padding: 15px 40px; border-radius: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+                <!-- AI 모델 선택 및 생성 버튼 -->
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <label style="font-weight: 600; margin-bottom: 10px; display: block;">
+                        🤖 AI 모델 선택
+                    </label>
+                    <select id="episodeAiModelSelect" class="form-control" style="font-size: 1em; padding: 10px; margin-bottom: 15px;">
+                        <option value="gpt-4o-mini" selected>OpenAI GPT-4o-mini (추천 - 빠르고 저렴)</option>
+                        <option value="gpt-4o">OpenAI GPT-4o (더 정교한 대화)</option>
+                        <option value="gpt-3.5-turbo">OpenAI GPT-3.5 Turbo (가장 빠름)</option>
+                    </select>
+
+                    <button id="generateEpisodeBtn" class="btn btn-primary" onclick="generateEpisodeWithAI(event)"
+                            style="width: 100%; font-size: 1.2em; padding: 15px; border-radius: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
                         🤖 AI로 에피소드 자동 생성
                     </button>
-                    <p style="margin-top: 10px; color: #666; font-size: 0.95em;">
-                        ⏱️ 약 10-20초 소요 (OpenAI GPT-4o-mini)
+                    <p style="margin-top: 10px; color: #666; font-size: 0.95em; text-align: center;">
+                        ⏱️ 약 10-20초 소요
                     </p>
                 </div>
             </div>
@@ -20846,13 +20855,14 @@
         }
 
         // AI 에피소드 생성 함수
-        async function generateEpisodeWithAI() {
+        async function generateEpisodeWithAI(event) {
             const characterId = document.getElementById('episodeCharacterSelect').value;
             const template = document.getElementById('episodeTemplateSelect').value;
             const title = document.getElementById('episodeTitleInput').value;
             const length = document.getElementById('episodeLengthSelect').value;
             const affection = parseInt(document.getElementById('affectionSlider').value);
             const intimacy = parseInt(document.getElementById('intimacySlider').value);
+            const aiModel = document.getElementById('episodeAiModelSelect')?.value || 'gpt-4o-mini';
 
             // 필수 필드 검증
             if (!characterId) {
@@ -20865,14 +20875,20 @@
                 return;
             }
 
+            // 버튼 참조 (try 블록 밖에서 선언하여 finally에서 접근 가능하도록)
+            const btn = event?.target || document.getElementById('generateEpisodeBtn');
+            if (!btn) {
+                console.error('❌ 생성 버튼을 찾을 수 없습니다');
+                return;
+            }
+
             try {
                 // 생성 버튼 비활성화
-                const btn = event.target;
                 btn.disabled = true;
                 btn.textContent = '🤖 AI 생성 중... (10-20초 소요)';
 
                 console.log('🤖 AI 에피소드 생성 요청:', {
-                    characterId, template, title, affection, intimacy, length
+                    characterId, template, title, affection, intimacy, length, aiModel
                 });
 
                 // API 호출
@@ -20885,6 +20901,7 @@
                         scenario_template_id: template,
                         title: title || `${template} 에피소드`,
                         description: `호감도 ${affection}, 애정도 ${intimacy} 기반`,
+                        ai_model: aiModel,
                         generation_context: {
                             base_affection: affection,
                             base_intimacy: intimacy,
@@ -20895,17 +20912,28 @@
 
                 const result = await response.json();
 
+                // AI 모델 거부 메시지 처리
                 if (!result.success) {
-                    throw new Error(result.message || 'API 오류');
+                    const errorMsg = result.message || 'API 오류';
+
+                    // OpenAI content policy 거부 메시지 감지
+                    if (errorMsg.includes('content policy') ||
+                        errorMsg.includes('policy violation') ||
+                        errorMsg.includes('inappropriate') ||
+                        errorMsg.includes('refused')) {
+                        throw new Error(`🚫 AI 모델이 요청을 거부했습니다.\n\n사유: 콘텐츠 정책 위반 가능성\n\n해결 방법:\n- 더 건전한 주제나 표현으로 수정해보세요\n- 섹시 레벨을 낮춰보세요\n- 다른 시나리오 템플릿을 선택해보세요`);
+                    }
+
+                    throw new Error(errorMsg);
                 }
 
                 console.log('✅ AI 에피소드 생성 완료:', result.episode);
 
                 // 성공 알림
-                alert(`✅ 에피소드 생성 완료!\n\nID: ${result.episode.id}\n대화 수: ${result.episode.statistics.total_dialogues}개\n선택지: ${result.episode.statistics.choice_points}개\n주관식: ${result.episode.statistics.free_input_points}개`);
+                alert(`✅ 에피소드 생성 완료!\n\n모델: ${aiModel}\nID: ${result.episode.id}\n대화 수: ${result.episode.statistics.total_dialogues}개\n선택지: ${result.episode.statistics.choice_points}개\n주관식: ${result.episode.statistics.free_input_points}개`);
 
-                // 폼 초기화
-                document.getElementById('episodeTemplateInput').value = '';
+                // 폼 초기화 (올바른 element ID 사용)
+                document.getElementById('episodeTemplateSelect').value = '';
                 document.getElementById('episodeTitleInput').value = '';
 
                 // 에피소드 목록 새로고침
@@ -20913,9 +20941,9 @@
 
             } catch (error) {
                 console.error('❌ AI 에피소드 생성 실패:', error);
-                alert(`에피소드 생성 실패:\n${error.message}`);
+                alert(`에피소드 생성 실패:\n\n${error.message}`);
             } finally {
-                // 버튼 복원
+                // 버튼 복원 (btn이 try 블록 밖에서 선언되어 접근 가능)
                 btn.disabled = false;
                 btn.textContent = '🤖 AI로 에피소드 자동 생성';
             }
