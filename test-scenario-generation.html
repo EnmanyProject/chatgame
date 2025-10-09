@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시나리오 생성 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .log {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 시나리오 생성 API 테스트</h1>
+
+    <div class="test-section">
+        <h2>1. 기승전결 구조 생성 테스트</h2>
+        <input type="text" id="title" placeholder="시나리오 제목" value="술김에 한 키스">
+        <textarea id="description" rows="3" placeholder="시나리오 설명">친구들과 술자리에서 분위기가 좋아져서 둘이 키스를 했다. 다음날 그 일에 대해 메신저로 대화한다.</textarea>
+        <input type="text" id="genre" placeholder="장르 (예: temptation)" value="temptation">
+        <button onclick="testStructureGeneration()">🤖 구조 생성 테스트</button>
+        <div id="structure-log" class="log"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. 스토리 생성 테스트</h2>
+        <button onclick="testStoryGeneration()">📖 스토리 생성 테스트 (위 구조 사용)</button>
+        <div id="story-log" class="log"></div>
+    </div>
+
+    <script>
+        let generatedStructure = null;
+
+        function log(elementId, message, type = 'info') {
+            const logElement = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+            logElement.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        async function testStructureGeneration() {
+            const logId = 'structure-log';
+            document.getElementById(logId).innerHTML = '';
+
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            const genre = document.getElementById('genre').value;
+
+            log(logId, '📤 API 요청 시작...');
+            log(logId, `제목: ${title}`);
+            log(logId, `설명: ${description}`);
+            log(logId, `장르: ${genre}`);
+
+            try {
+                const response = await fetch('/api/scenario-manager', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generate_story_structure',
+                        title,
+                        description,
+                        genre
+                    })
+                });
+
+                log(logId, `응답 상태: ${response.status} ${response.statusText}`);
+
+                const result = await response.json();
+
+                if (result.success) {
+                    generatedStructure = result.structure;
+                    log(logId, '✅ 구조 생성 성공!', 'success');
+                    log(logId, JSON.stringify(result.structure, null, 2), 'success');
+                } else {
+                    log(logId, `❌ 실패: ${result.message}`, 'error');
+                    if (result.error_details) {
+                        log(logId, result.error_details, 'error');
+                    }
+                }
+            } catch (error) {
+                log(logId, `❌ 에러 발생: ${error.message}`, 'error');
+                log(logId, error.stack, 'error');
+            }
+        }
+
+        async function testStoryGeneration() {
+            const logId = 'story-log';
+            document.getElementById(logId).innerHTML = '';
+
+            if (!generatedStructure) {
+                log(logId, '⚠️ 먼저 구조를 생성해주세요.', 'error');
+                return;
+            }
+
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+
+            log(logId, '📤 스토리 생성 API 요청 시작...');
+
+            try {
+                const response = await fetch('/api/scenario-manager', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generate_story_from_ki_seung_jeon_gyeol',
+                        title,
+                        description,
+                        structure: generatedStructure
+                    })
+                });
+
+                log(logId, `응답 상태: ${response.status} ${response.statusText}`);
+
+                const result = await response.json();
+
+                if (result.success) {
+                    log(logId, '✅ 스토리 생성 성공!', 'success');
+                    log(logId, `스토리 길이: ${result.story.length}자`, 'success');
+                    log(logId, result.story, 'success');
+                } else {
+                    log(logId, `❌ 실패: ${result.message}`, 'error');
+                    if (result.error_details) {
+                        log(logId, result.error_details, 'error');
+                    }
+                }
+            } catch (error) {
+                log(logId, `❌ 에러 발생: ${error.message}`, 'error');
+                log(logId, error.stack, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
