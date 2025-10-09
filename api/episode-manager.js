@@ -652,6 +652,48 @@ async function loadCharacterEpisodes(character_id) {
       }
     });
 
+    // 파일이 없으면 (404) 빈 에피소드 구조 반환
+    if (response.status === 404) {
+      console.log(`📄 에피소드 파일 없음, 빈 구조 생성: ${character_id}`);
+
+      // 캐릭터 정보 로드하여 이름 가져오기
+      const characterInfo = await loadCharacterInfo(character_id);
+
+      return {
+        character_id: character_id,
+        character_name: characterInfo.name,
+        character_mbti: characterInfo.mbti,
+        total_episodes: 0,
+        metadata: {
+          version: '2.1.0',
+          schema_type: 'character_based_dialogue',
+          created_at: new Date().toISOString(),
+          last_updated: new Date().toISOString()
+        },
+        episodes: {},
+        schema_description: {
+          purpose: '캐릭터 대화 콘텐츠 관리 (호감도/애정도 기반)',
+          episode_structure: [
+            '에피소드 = 대사 + 객관식 선택지 + 주관식 입력',
+            '호감도: 대화 톤/표현에 영향',
+            '애정도: 호칭/허용 답변에 영향'
+          ],
+          dialogue_flow: [
+            'narration - 상황 설명',
+            'character_dialogue - 캐릭터 대사',
+            'multiple_choice - 객관식 선택지 (호감도/애정도 변화)',
+            'free_input - 주관식 입력 (AI 판정)'
+          ],
+          lifecycle: [
+            'pending - 생성됨, 트리거 대기',
+            'sent - 채팅방 전송됨',
+            'playing - 유저 플레이 중',
+            'completed - 완료됨'
+          ]
+        }
+      };
+    }
+
     if (!response.ok) {
       throw new Error(`GitHub API 오류: ${response.status}`);
     }
@@ -662,6 +704,11 @@ async function loadCharacterEpisodes(character_id) {
     return JSON.parse(content);
 
   } catch (error) {
+    // 404는 이미 위에서 처리했으므로 여기서는 다른 에러만 throw
+    if (error.message?.includes('404')) {
+      console.error(`❌ 캐릭터 에피소드 로드 실패 (${character_id}):`, error);
+      throw error;
+    }
     console.error(`❌ 캐릭터 에피소드 로드 실패 (${character_id}):`, error);
     throw error;
   }
