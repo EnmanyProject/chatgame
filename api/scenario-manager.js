@@ -200,7 +200,7 @@ module.exports = async function handler(req, res) {
         console.log('📖 기승전결 구조 AI 생성 시작...');
         console.log('📥 받은 데이터:', JSON.stringify(req.body, null, 2));
 
-        const { title, description, genre, ai_model, tone } = req.body;
+        const { title, description, genre, ai_model, tone, sexy_level } = req.body;
 
         if (!title || !description) {
           return res.status(400).json({
@@ -210,13 +210,15 @@ module.exports = async function handler(req, res) {
         }
 
         console.log('🎨 선택된 분위기:', tone || 'balanced (기본)');
+        console.log('🔥 섹시 레벨:', sexy_level || '5 (기본)');
 
         const structure = await generateKiSeungJeonGyeolStructure({
           title,
           description,
           genre,
           aiModel: ai_model || 'openai',
-          tone: tone || 'balanced'  // 분위기 파라미터 추가
+          tone: tone || 'balanced',  // 분위기 파라미터 추가
+          sexyLevel: sexy_level || 5  // 섹시 레벨 파라미터 추가
         });
 
         console.log('✅ 기승전결 구조 생성 완료');
@@ -765,6 +767,55 @@ VALIDATION: 작성 전에 반드시 확인하세요
 }
 
 // Fallback 제거됨 - AI 생성 실패 시 에러 처리로 대체
+
+// 🔥 섹시 레벨 지시문 생성 함수
+function getSexyLevelInstruction(level) {
+  const levelInt = parseInt(level) || 5;
+
+  if (levelInt <= 2) {
+    return {
+      name: '순수한 로맨스',
+      instruction: `- 감정 표현: 순수하고 따뜻한 감정 중심
+- 스킨십: 언급 금지 (손잡기, 포옹도 암시만)
+- 표현: "설렘", "두근거림", "행복", "따뜻함" 같은 순수한 감정
+- 분위기: 청순하고 로맨틱한 첫사랑 같은 느낌`
+    };
+  } else if (levelInt <= 4) {
+    return {
+      name: '일반 로맨스',
+      instruction: `- 감정 표현: 자연스러운 애정 표현
+- 스킨십: 가벼운 스킨십 가능 (손잡기, 어깨 기대기, 볼 키스)
+- 표현: "보고 싶어", "안아주고 싶어", "따뜻해" 같은 자연스러운 감정
+- 분위기: 편안하고 달콤한 연인 사이`
+    };
+  } else if (levelInt <= 6) {
+    return {
+      name: '달콤한 로맨스',
+      instruction: `- 감정 표현: 애정이 담긴 직접적 표현
+- 스킨십: 자연스러운 스킨십 (포옹, 키스 언급 가능)
+- 표현: "보고싶어 미치겠어", "안고 싶어", "키스하고 싶어" 같은 솔직한 감정
+- 분위기: 달콤하고 로맨틱한 연인`
+    };
+  } else if (levelInt <= 8) {
+    return {
+      name: '관능적 로맨스',
+      instruction: `- 감정 표현: 강렬하고 진한 애정 표현
+- 스킨십: 진한 스킨십 암시 가능 (키스, 포옹의 구체적 묘사)
+- 표현: "너무 원해", "참기 힘들어", "더 가까이" 같은 강렬한 감정
+- 분위기: 열정적이고 관능적인 연인
+- 주의: 직접적인 성적 표현은 피하되 강렬한 욕망과 끌림 표현`
+    };
+  } else {
+    return {
+      name: '매우 관능적',
+      instruction: `- 감정 표현: 매우 강렬하고 노골적인 애정 표현
+- 스킨십: 진한 스킨십의 구체적 묘사
+- 표현: "미칠 것 같아", "지금 당장", "너만 생각나" 같은 매우 강렬한 욕망
+- 분위기: 열정적이고 강렬한 끌림
+- 경계: 선정적이지만 품위를 유지 (노골적 성행위 묘사는 피함)`
+    };
+  }
+}
 
 // AI 프롬프트 로드 함수 (GitHub API에서 동적 로드)
 async function loadAIPrompts() {
@@ -1497,8 +1548,8 @@ async function generateScenarioStructure({ title, description, genre }) {
 }
 
 // 📖 기승전결 구조 생성 함수 (신규 시스템 - 동적 프롬프트 로드 + 멀티 AI 모델 + 분위기 조절)
-async function generateKiSeungJeonGyeolStructure({ title, description, genre = '', aiModel = 'openai', tone = 'balanced' }) {
-  console.log(`📖 기승전결 구조 생성 시작 - AI 모델: ${aiModel}, 분위기: ${tone}`);
+async function generateKiSeungJeonGyeolStructure({ title, description, genre = '', aiModel = 'openai', tone = 'balanced', sexyLevel = 5 }) {
+  console.log(`📖 기승전결 구조 생성 시작 - AI 모델: ${aiModel}, 분위기: ${tone}, 섹시 레벨: ${sexyLevel}`);
 
   // AI 프롬프트를 동적으로 로드
   const aiPrompts = await loadAIPrompts();
@@ -1618,10 +1669,17 @@ async function generateKiSeungJeonGyeolStructure({ title, description, genre = '
 
   console.log(`🎨 적용된 분위기: ${selectedTone.name} (${tone})`);
 
+  // 🔥 섹시 레벨 지시문 생성
+  const sexyLevelInstruction = getSexyLevelInstruction(sexyLevel);
+  console.log(`🔥 섹시 레벨: ${sexyLevel}/10 - ${sexyLevelInstruction.name}`);
+
   // 분위기 지시문을 프롬프트 맨 앞에 추가 (최우선 적용)
   const toneInstruction = `**🎨 분위기 조절 (${selectedTone.name}) - 최우선 준수**:\n${selectedTone.instruction}\n\n`;
 
-  const prompt = (toneInstruction + userPromptTemplate)
+  // 섹시 레벨 지시문 추가
+  const sexyInstruction = `**🔥 섹시 레벨 (${sexyLevel}/10) - ${sexyLevelInstruction.name}**:\n${sexyLevelInstruction.instruction}\n\n`;
+
+  const prompt = (toneInstruction + sexyInstruction + userPromptTemplate)
     .replace(/\{\{title\}\}/g, title)
     .replace(/\{\{description\}\}/g, description)
     .replace(/\{\{genre_info\}\}/g, genreInfo)

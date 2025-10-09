@@ -4557,7 +4557,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.17.1</span>
+                <span id="systemVersion">v1.18.0</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -5162,6 +5162,13 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="scenarioDescription">📖 시나리오 설명 *</label>
+                        <textarea id="scenarioDescription" required rows="4"
+                                  placeholder="이 시나리오의 전반적인 분위기와 진행 방향을 설명하세요"></textarea>
+                        <small>어떤 상황인지, 누구와의 대화인지 구체적으로 설명하세요</small>
+                    </div>
+
+                    <div class="form-group">
                         <label for="scenarioGenre">🎭 장르 (감정 기반) *</label>
                         <select id="scenarioGenre" required>
                             <option value="">장르 선택</option>
@@ -5226,12 +5233,6 @@
                             <option value="llama">Llama 3.1 (Groq)</option>
                         </select>
                         <small>시나리오 생성에 사용할 AI 모델을 선택하세요</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="scenarioDescription">📖 시나리오 설명 *</label>
-                        <textarea id="scenarioDescription" required rows="4"
-                                  placeholder="이 시나리오의 전반적인 분위기와 진행 방향을 설명하세요"></textarea>
                     </div>
 
                     <div class="form-group">
@@ -9559,6 +9560,7 @@
             const description = document.getElementById('scenarioDescription').value;
             const genre = document.getElementById('scenarioGenre').value;
             const tone = document.getElementById('scenarioTone').value || 'balanced'; // 분위기 (기본: 보통)
+            const sexyLevel = parseInt(document.getElementById('scenarioSexyLevel').value) || 5; // 섹시 레벨 (기본: 5)
 
             if (!title || !description) {
                 alert('제목과 설명을 먼저 입력해주세요.');
@@ -9566,6 +9568,7 @@
             }
 
             console.log('🎨 선택된 분위기:', tone);
+            console.log('🔥 섹시 레벨:', sexyLevel);
 
             const button = event.target;
             const originalText = button.innerHTML;
@@ -9587,7 +9590,8 @@
                             title,
                             description,
                             genre,
-                            tone  // 분위기 파라미터 추가
+                            tone,  // 분위기 파라미터 추가
+                            sexy_level: sexyLevel  // 섹시 레벨 파라미터 추가
                         })
                     });
 
