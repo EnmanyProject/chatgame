@@ -511,7 +511,7 @@
 
             chatList.innerHTML = rooms.map(room => {
                 const character = availableCharacters.find(c => c.id === room.characterId);
-                const characterName = character ? character.name : room.characterId;
+                const characterName = character ? (character.basic_info?.name || character.name) : room.characterId;
                 const profileEmoji = getProfileEmoji(room.characterId);
                 const timeDisplay = formatTime(room.lastMessageTime);
                 const unreadBadge = room.unreadCount > 0
@@ -598,8 +598,8 @@
                     <div class="character-item" onclick="startNewChat('${character.id}')">
                         <div class="character-profile">${emoji}</div>
                         <div class="character-details">
-                            <div class="character-name">${character.name} (${character.mbti})</div>
-                            <div class="character-desc">${character.description}</div>
+                            <div class="character-name">${character.basic_info?.name || character.name} (${character.basic_info?.mbti || character.mbti})</div>
+                            <div class="character-desc">${character.basic_info?.occupation || character.description || '직업 정보 없음'}</div>
                         </div>
                     </div>
                 `;
