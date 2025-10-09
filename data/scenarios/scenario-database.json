@@ -2,9 +2,9 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-10-03",
-    "total_scenarios": 2,
+    "total_scenarios": 3,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-10-09T05:46:55.816Z",
+    "last_updated": "2025-10-09T10:51:55.749Z",
     "data_source": "github_api_only"
   },
   "scenarios": {
@@ -89,6 +89,51 @@
         "tags": [
           "자기야",
           "귀가확인"
+        ],
+        "estimated_duration": "long",
+        "ai_model": "openai",
+        "target_affection_gain": 15
+      },
+      "structure": {}
+    },
+    "scenario_우리_사귈까_1760007114571": {
+      "id": "scenario_우리_사귈까_1760007114571",
+      "scenario_id": "scenario_우리_사귈까_1760007114571",
+      "title": "우리 사귈까?",
+      "description": "갑자기 캐릭터가 연락와서 평소에 좋아했다고 고백하면서 어떤 여자를 좋아했냐고 질문을 던지는 상황  ",
+      "background_setting": "멤신저 대화",
+      "mood": "편안한",
+      "active_status": true,
+      "created_date": "2025-10-09",
+      "last_modified": "2025-10-09T10:51:55.749Z",
+      "ai_generated_context": "여자는 평소 느끼던 미묘한 감정을 정리하기 위해 메신저를 열었다. 그의 이름을 눌렀을 때, 가슴이 두근거렸다. '뭐라고 시작해야 할까?' 고민하다가, 결국 \"안녕? 갑자기 연락해서 미안해\"라는 메시지를 보냈다. 그가 답장을 기다리는 동안, 과거의 여러 순간들이 떠올랐다. 그와 나눈 웃음, 눈빛, 그리고 그를 바라볼 때마다 느꼈던 설렘. \n\n그의 답변이 오자, 여자는 가슴속의 떨림이 커지는 것을 느꼈다. \"사실, 너한테 조금 호감이 있었어. 이렇게 말하는 게 어색하네.\" 그녀는 자신이 내뱉은 말이 그에게 어떤 의미일지 궁금했다. 그의 반응을 살피며, 마음속의 희망이 자라나기 시작했다.\n\n대화가 이어지면서, 여자는 그의 관심을 끌고 싶었다. \"그럼, 혹시 너는 어떤 여자를 좋아했어?\" 질문을 던지며 내심 긴장했다. 자신의 감정이 그에게 어떤 영향을 미칠지, 그의 대답이 어떤 기분을 가져올지 기대와 불안이 교차했다.\n\n마지막으로 그는 대답을 하며 그녀를 바라보았다. 여자는 그의 말에 미소 지으며, \"이번 주 토요일에 만날까? 좀 더 이야기 나누고 싶어.\"라고 제안했다. 그 순간, 그녀의 마음에 설렘이 가득 차오르며 새로운 시작을 꿈꾸었다.",
+      "custom_context": "",
+      "available_characters": [],
+      "episode_count": 0,
+      "tags": [
+        "갑자기",
+        "캐릭터가",
+        "연락와서",
+        "평소에",
+        "좋아했다고",
+        "고백하면서",
+        "어떤",
+        "여자를",
+        "좋아했냐고",
+        "질문을",
+        "던지는",
+        "상황",
+        "편안한"
+      ],
+      "source": "scenario_admin",
+      "updated_by": "scenario_manager_github_only",
+      "metadata": {
+        "genre": "flutter",
+        "sexy_level": 4,
+        "tags": [
+          "제안",
+          "사귐",
+          "질문"
         ],
         "estimated_duration": "long",
         "ai_model": "openai",
