@@ -21095,12 +21095,12 @@
             select.innerHTML = '<option value="">캐릭터를 선택하세요...</option>';
 
             // 캐릭터가 아직 로드되지 않았으면 먼저 로드
-            if (!characters || Object.keys(characters).length === 0) {
+            if (!window.characters || Object.keys(window.characters).length === 0) {
                 console.log('📥 캐릭터 데이터 로드 중...');
                 await loadCharacters();
             }
 
-            const charactersArray = Object.values(characters || {});
+            const charactersArray = Object.values(window.characters || {});
             charactersArray.forEach(char => {
                 const id = char.id || char.character_id;
                 const name = char.name || char.character_name;
