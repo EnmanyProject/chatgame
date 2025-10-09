@@ -4557,7 +4557,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.14.0</span>
+                <span id="systemVersion">v1.14.1</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -7725,6 +7725,13 @@
                         'Authorization': `Bearer ${currentAuthToken}`
                     }
                 });
+
+                // 401 에러는 정상 케이스 (API 키 미등록 상태)
+                if (response.status === 401) {
+                    console.log('ℹ️ API 키 미등록 상태 (정상)');
+                    return;
+                }
+
                 const data = await response.json();
 
                 if (data.success && data.hasApiKey) {
@@ -7744,7 +7751,8 @@
                     console.log('📝 사용자 API 키 없음');
                 }
             } catch (error) {
-                console.error('❌ API 키 로드 오류:', error);
+                // 네트워크 오류 등 실제 에러만 로그
+                console.warn('⚠️ API 키 로드 시도 실패 (정상 동작에는 영향 없음):', error.message);
             }
         }
 
