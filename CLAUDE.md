@@ -100,6 +100,26 @@ grep "systemVersion" scenario-admin.html
 
 ## 📊 버전 히스토리
 
+### v1.19.4 (2025-10-09) - 에피소드 삭제 400 Bad Request 오류 수정 (Patch Update)
+**작업 내용**:
+- 🐛 **DELETE 요청 오류 해결**: 400 Bad Request 및 "알 수 없는 액션: undefined" 오류 완전 해결
+- 🔧 **프론트엔드 수정** (scenario-admin.html Line 21257):
+  * `character_id`를 body가 아닌 쿼리 파라미터로 전송
+  * DELETE 요청에서 body 사용 제거 (RESTful API 표준 준수)
+- 🔧 **백엔드 수정** (api/episode-manager.js):
+  * Line 41: DELETE 요청도 쿼리 파라미터에서 `action` 읽도록 수정
+  * Line 64: `handleDelete`에 `character_id` 매개변수 전달
+  * Line 292: `handleDelete` 함수가 `character_id`를 매개변수로 받도록 시그니처 변경
+
+**근본 원인**:
+- DELETE 요청 시 action이 쿼리 파라미터로 전송되지만, 백엔드가 GET만 쿼리에서 읽도록 되어 있었음
+- character_id가 body로 전송되어 DELETE의 쿼리/body 혼용 문제 발생
+
+**Git**: 커밋 `8a73a1b`, 푸시 완료 ✅
+**영향**: scenario-admin.html Line 21257, api/episode-manager.js Lines 41, 64, 292
+
+---
+
 ### v1.19.3 (2025-10-09) - 에피소드 상세보기 dialogue_flow 완전 표시 (Patch Update)
 **작업 내용**:
 - 📖 **dialogue_flow 전용 표시 함수 추가**: displayDialogueFlow() 함수 신규 구현 (Lines 10846-10944)
