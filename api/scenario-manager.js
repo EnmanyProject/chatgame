@@ -200,7 +200,7 @@ module.exports = async function handler(req, res) {
         console.log('📖 기승전결 구조 AI 생성 시작...');
         console.log('📥 받은 데이터:', JSON.stringify(req.body, null, 2));
 
-        const { title, description, genre, ai_model } = req.body;
+        const { title, description, genre, ai_model, tone } = req.body;
 
         if (!title || !description) {
           return res.status(400).json({
@@ -209,11 +209,14 @@ module.exports = async function handler(req, res) {
           });
         }
 
+        console.log('🎨 선택된 분위기:', tone || 'balanced (기본)');
+
         const structure = await generateKiSeungJeonGyeolStructure({
           title,
           description,
           genre,
-          aiModel: ai_model || 'openai'
+          aiModel: ai_model || 'openai',
+          tone: tone || 'balanced'  // 분위기 파라미터 추가
         });
 
         console.log('✅ 기승전결 구조 생성 완료');
@@ -269,7 +272,7 @@ module.exports = async function handler(req, res) {
       try {
         console.log('📖 기승전결 기반 장문 스토리 생성 시작...');
 
-        const { title, description, structure, ai_model } = req.body;
+        const { title, description, structure, ai_model, tone } = req.body;
 
         if (!title || !structure || !structure.beginning || !structure.buildup || !structure.climax || !structure.resolution) {
           return res.status(400).json({
@@ -282,7 +285,8 @@ module.exports = async function handler(req, res) {
           title,
           description,
           structure,
-          aiModel: ai_model || 'openai'
+          aiModel: ai_model || 'openai',
+          tone: tone || 'balanced'  // 분위기 파라미터 추가
         });
 
         console.log('✅ 기승전결 기반 장문 스토리 생성 완료');
@@ -1492,14 +1496,14 @@ async function generateScenarioStructure({ title, description, genre }) {
   }
 }
 
-// 📖 기승전결 구조 생성 함수 (신규 시스템 - 동적 프롬프트 로드 + 멀티 AI 모델)
-async function generateKiSeungJeonGyeolStructure({ title, description, genre = '', aiModel = 'openai' }) {
-  console.log(`📖 기승전결 구조 생성 시작 - AI 모델: ${aiModel}`);
+// 📖 기승전결 구조 생성 함수 (신규 시스템 - 동적 프롬프트 로드 + 멀티 AI 모델 + 분위기 조절)
+async function generateKiSeungJeonGyeolStructure({ title, description, genre = '', aiModel = 'openai', tone = 'balanced' }) {
+  console.log(`📖 기승전결 구조 생성 시작 - AI 모델: ${aiModel}, 분위기: ${tone}`);
 
   // AI 프롬프트를 동적으로 로드
   const aiPrompts = await loadAIPrompts();
 
-  let systemPrompt, userPromptTemplate, modelParams, emotionFlows;
+  let systemPrompt, userPromptTemplate, modelParams, emotionFlows, toneSettings;
 
   if (aiPrompts) {
     // 동적으로 로드된 프롬프트 사용
@@ -1511,6 +1515,7 @@ async function generateKiSeungJeonGyeolStructure({ title, description, genre = '
     // AI 모델별 파라미터 선택
     modelParams = structurePrompt.parameters[aiModel] || structurePrompt.parameters.openai;
     emotionFlows = structurePrompt.emotion_flows;
+    toneSettings = aiPrompts.tone_settings || {};  // 분위기 설정 로드
   } else {
     // 기본 프롬프트 사용 (폴백)
     console.log('⚠️ 기본 프롬프트 사용 (ai-prompts.json 로드 실패)');
@@ -1604,27 +1609,46 @@ async function generateKiSeungJeonGyeolStructure({ title, description, genre = '
   const emotionFlow = emotionFlows[genre] || '감정 시작 → 감정 전개 → 감정 절정 → 감정 마무리';
   const genreInfo = genre ? `- 장르: ${genre}\n- 감정 흐름: ${emotionFlow}` : '';
 
-  const prompt = userPromptTemplate
+  // 🎨 분위기 설정 적용
+  const selectedTone = toneSettings[tone] || toneSettings['balanced'] || {
+    name: '보통',
+    instruction: '진솔하면서도 따뜻한 톤으로 작성하세요.',
+    temperature: 0.8
+  };
+
+  console.log(`🎨 적용된 분위기: ${selectedTone.name} (${tone})`);
+
+  // 분위기 지시문을 프롬프트에 추가
+  const toneInstruction = `\n\n**🎨 분위기 조절 (${selectedTone.name})**:\n${selectedTone.instruction}`;
+
+  const prompt = (userPromptTemplate + toneInstruction)
     .replace(/\{\{title\}\}/g, title)
     .replace(/\{\{description\}\}/g, description)
     .replace(/\{\{genre_info\}\}/g, genreInfo)
     .replace(/\{\{emotion_flow\}\}/g, emotionFlow);
 
+  // 분위기에 따른 temperature 적용
+  const finalTemperature = selectedTone.temperature || modelParams.temperature;
+
   console.log('📝 사용된 프롬프트 설정:', {
     ai_model: aiModel,
     model: modelParams.model,
-    temperature: modelParams.temperature,
+    temperature: finalTemperature,
+    tone: selectedTone.name,
     max_tokens: modelParams.max_tokens,
     prompt_source: aiPrompts ? 'ai-prompts.json' : 'fallback'
   });
 
   try {
-    // AI 모델 라우팅을 통한 호출
+    // AI 모델 라우팅을 통한 호출 (분위기 반영된 temperature 사용)
     const content = await callAI({
       aiModel,
       systemPrompt,
       userPrompt: prompt,
-      modelParams
+      modelParams: {
+        ...modelParams,
+        temperature: finalTemperature  // 분위기에 맞는 temperature 적용
+      }
     });
 
     // JSON 파싱
@@ -1740,13 +1764,13 @@ ${actsDescription}
 /**
  * 기승전결 구조를 바탕으로 장문의 소설풍 스토리 생성
  */
-async function generateStoryFromKiSeungJeonGyeol({ title, description, structure, aiModel = 'openai' }) {
-  console.log(`📖 장문 스토리 생성 시작 - AI 모델: ${aiModel}`);
+async function generateStoryFromKiSeungJeonGyeol({ title, description, structure, aiModel = 'openai', tone = 'balanced' }) {
+  console.log(`📖 장문 스토리 생성 시작 - AI 모델: ${aiModel}, 분위기: ${tone}`);
 
   // AI 프롬프트를 동적으로 로드
   const aiPrompts = await loadAIPrompts();
 
-  let systemPrompt, userPromptTemplate, modelParams;
+  let systemPrompt, userPromptTemplate, modelParams, toneSettings;
 
   if (aiPrompts) {
     // 동적으로 로드된 프롬프트 사용
@@ -1757,6 +1781,7 @@ async function generateStoryFromKiSeungJeonGyeol({ title, description, structure
 
     // AI 모델별 파라미터 선택
     modelParams = storyPrompt.parameters[aiModel] || storyPrompt.parameters.openai;
+    toneSettings = aiPrompts.tone_settings || {};  // 분위기 설정 로드
   } else {
     // 기본 프롬프트 사용 (폴백)
     console.log('⚠️ 기본 프롬프트 사용 (ai-prompts.json 로드 실패 - story generation)');
@@ -1831,8 +1856,20 @@ async function generateStoryFromKiSeungJeonGyeol({ title, description, structure
     ? `결(結) - ${structure.resolution.summary}\n  목표: ${structure.resolution.goal}\n  대화 흐름: ${structure.resolution.beats.map(b => b.name).join(' → ')}`
     : `결(結) - ${structure.resolution.title || '결말'}\n  요약: ${structure.resolution.summary}\n  목표: ${structure.resolution.goal}`;
 
+  // 🎨 분위기 설정 적용
+  const selectedTone = toneSettings[tone] || toneSettings['balanced'] || {
+    name: '보통',
+    instruction: '진솔하면서도 따뜻한 톤으로 작성하세요.',
+    temperature: 0.9
+  };
+
+  console.log(`🎨 적용된 분위기: ${selectedTone.name} (${tone})`);
+
+  // 분위기 지시문을 프롬프트에 추가
+  const toneInstruction = `\n\n**🎨 분위기 조절 (${selectedTone.name})**:\n${selectedTone.instruction}`;
+
   // 템플릿 변수 치환
-  const prompt = userPromptTemplate
+  const prompt = (userPromptTemplate + toneInstruction)
     .replace(/\{\{title\}\}/g, title)
     .replace(/\{\{description\}\}/g, description)
     .replace(/\{\{ki_description\}\}/g, kiDescription)
@@ -1840,21 +1877,28 @@ async function generateStoryFromKiSeungJeonGyeol({ title, description, structure
     .replace(/\{\{jeon_description\}\}/g, jeonDescription)
     .replace(/\{\{gyeol_description\}\}/g, gyeolDescription);
 
+  // 분위기에 따른 temperature 적용
+  const finalTemperature = selectedTone.temperature || modelParams.temperature;
+
   console.log('📝 사용된 프롬프트 설정 (story generation):', {
     ai_model: aiModel,
     model: modelParams.model,
-    temperature: modelParams.temperature,
+    temperature: finalTemperature,
+    tone: selectedTone.name,
     max_tokens: modelParams.max_tokens,
     prompt_source: aiPrompts ? 'ai-prompts.json' : 'fallback'
   });
 
   try {
-    // AI 모델 라우팅을 통한 호출
+    // AI 모델 라우팅을 통한 호출 (분위기 반영된 temperature 사용)
     const story = await callAI({
       aiModel,
       systemPrompt,
       userPrompt: prompt,
-      modelParams
+      modelParams: {
+        ...modelParams,
+        temperature: finalTemperature  // 분위기에 맞는 temperature 적용
+      }
     });
 
     console.log('✅ 기승전결 기반 장문 스토리 생성 성공 (길이:', story.length, '자)');

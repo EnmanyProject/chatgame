@@ -4557,7 +4557,7 @@
         <div class="header" style="position: relative;">
             <!-- 버전 정보 표시 (왼쪽 상단) -->
             <div class="version-info">
-                <span id="systemVersion">v1.13.1</span>
+                <span id="systemVersion">v1.14.0</span>
             </div>
 
             <!-- 사용자 정보 표시 -->
@@ -5181,6 +5181,16 @@
                             <option value="rejection">⑭ 거절 (Rejection) - 단념, 슬픔, 존중, 자기보호</option>
                             <option value="avoidance">⑮ 회피 (Avoidance) - 도망, 무감정, 두려움, 방어</option>
                         </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="scenarioTone">🎨 분위기 *</label>
+                        <select id="scenarioTone" required>
+                            <option value="balanced">보통 - 진솔하면서도 따뜻한 균형잡힌 분위기 (기본)</option>
+                            <option value="light">가벼움 - 밝고 귀엽고 장난스러운 분위기 ✨</option>
+                            <option value="serious">진지함 - 깊고 진지하며 성찰적인 분위기 🌙</option>
+                        </select>
+                        <small>💡 무거운 분위기가 싫다면 "가벼움"을 선택하세요!</small>
                     </div>
 
                     <div class="form-group">
@@ -9540,11 +9550,14 @@
             const title = document.getElementById('scenarioTitle').value;
             const description = document.getElementById('scenarioDescription').value;
             const genre = document.getElementById('scenarioGenre').value;
+            const tone = document.getElementById('scenarioTone').value || 'balanced'; // 분위기 (기본: 보통)
 
             if (!title || !description) {
                 alert('제목과 설명을 먼저 입력해주세요.');
                 return;
             }
+
+            console.log('🎨 선택된 분위기:', tone);
 
             const button = event.target;
             const originalText = button.innerHTML;
@@ -9565,7 +9578,8 @@
                             action: 'generate_story_structure',
                             title,
                             description,
-                            genre
+                            genre,
+                            tone  // 분위기 파라미터 추가
                         })
                     });
 
@@ -9668,7 +9682,8 @@
                             action: 'generate_story_from_ki_seung_jeon_gyeol',
                             title,
                             description,
-                            structure: selectedStructure
+                            structure: selectedStructure,
+                            tone  // 분위기 파라미터 추가
                         })
                     });
 
