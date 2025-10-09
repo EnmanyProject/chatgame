@@ -10757,10 +10757,18 @@
             const narrationDisplay = document.getElementById('narrationDisplay');
             const choicesDisplay = document.getElementById('choicesDisplay');
 
+            console.log('💬 에피소드 전체 데이터:', episode);
+
+            // 🆕 episode-manager로 생성된 dialogue_flow 확인 (최우선)
+            if (episode.dialogue_flow && Array.isArray(episode.dialogue_flow) && episode.dialogue_flow.length > 0) {
+                console.log('🎯 dialogue_flow 감지! Episode Manager 형식');
+                displayDialogueFlow(episode.dialogue_flow, characterMessage, narrationDisplay, choicesDisplay, episode);
+                return;
+            }
+
             // Get dialogue data - check all possible field names and structures
             let dialogueData = episode.dialogue || episode.generated_dialogue || episode.ai_generated_dialogue;
 
-            console.log('💬 에피소드 전체 데이터:', episode);
             console.log('💬 대화 데이터:', dialogueData);
 
             if (dialogueData) {
@@ -10833,6 +10841,106 @@
                 narrationDisplay.style.display = 'none';
                 choicesDisplay.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">대화 데이터가 없습니다.</div>';
             }
+        }
+
+        // 🆕 dialogue_flow 표시 함수 (episode-manager 형식)
+        function displayDialogueFlow(dialogueFlow, characterMessage, narrationDisplay, choicesDisplay, episode) {
+            let contentHtml = '<div style="background: #f0f4ff; padding: 20px; border-radius: 10px;">';
+            contentHtml += '<h4 style="margin-bottom: 15px; color: #667eea; font-size: 1.1em;">📖 대화 흐름 (Dialogue Flow)</h4>';
+
+            dialogueFlow.forEach((item, index) => {
+                const sequenceNum = item.sequence || index + 1;
+
+                if (item.type === 'narration') {
+                    // 상황 설명
+                    contentHtml += `
+                        <div style="margin-bottom: 15px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 6px;">
+                            <div style="font-weight: 600; color: #856404; margin-bottom: 8px;">📍 #${sequenceNum} 상황 설명</div>
+                            <div style="font-style: italic; color: #856404;">${item.content || '내용 없음'}</div>
+                        </div>
+                    `;
+                } else if (item.type === 'character_dialogue') {
+                    // 캐릭터 대사
+                    contentHtml += `
+                        <div style="margin-bottom: 15px; padding: 15px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 6px;">
+                            <div style="font-weight: 600; color: #1565c0; margin-bottom: 8px;">💬 #${sequenceNum} ${item.speaker || '캐릭터'}의 대사</div>
+                            ${item.narration ? `<div style="font-size: 0.9em; color: #424242; margin-bottom: 8px; font-style: italic;">(${item.narration})</div>` : ''}
+                            <div style="color: #1565c0; font-size: 1.05em;">"${item.text || '대사 없음'}"</div>
+                            ${item.emotion ? `<div style="margin-top: 8px; font-size: 0.85em; color: #666;">감정: ${item.emotion}</div>` : ''}
+                        </div>
+                    `;
+                } else if (item.type === 'multiple_choice') {
+                    // 객관식 선택지
+                    contentHtml += `
+                        <div style="margin-bottom: 15px; padding: 15px; background: #f3e5f5; border-left: 4px solid #9c27b0; border-radius: 6px;">
+                            <div style="font-weight: 600; color: #6a1b9a; margin-bottom: 12px;">🎯 #${sequenceNum} 선택지</div>
+                            <div style="margin-bottom: 10px; color: #6a1b9a;">${item.question || '질문 없음'}</div>
+                    `;
+
+                    if (item.choices && Array.isArray(item.choices)) {
+                        item.choices.forEach((choice, choiceIndex) => {
+                            const affectionChange = choice.affection_change || 0;
+                            const intimacyChange = choice.intimacy_change || 0;
+                            const affectionText = affectionChange > 0 ? `+${affectionChange}` : affectionChange;
+                            const intimacyText = intimacyChange > 0 ? `+${intimacyChange}` : intimacyChange;
+
+                            contentHtml += `
+                                <div style="margin-bottom: 8px; padding: 10px; background: white; border: 1px solid #d1c4e9; border-radius: 4px;">
+                                    <div style="font-weight: 500; color: #333; margin-bottom: 5px;">${choiceIndex + 1}. ${choice.text}</div>
+                                    <div style="font-size: 0.85em; color: #666;">
+                                        <span style="margin-right: 10px;">💕 호감도 ${affectionText}</span>
+                                        <span>💖 애정도 ${intimacyText}</span>
+                                    </div>
+                                    ${choice.consequence ? `<div style="font-size: 0.8em; color: #999; margin-top: 5px;">→ ${choice.consequence}</div>` : ''}
+                                </div>
+                            `;
+                        });
+                    }
+
+                    contentHtml += `</div>`;
+                } else if (item.type === 'free_input') {
+                    // 주관식 입력
+                    contentHtml += `
+                        <div style="margin-bottom: 15px; padding: 15px; background: #e8f5e9; border-left: 4px solid #4caf50; border-radius: 6px;">
+                            <div style="font-weight: 600; color: #2e7d32; margin-bottom: 12px;">✍️ #${sequenceNum} 주관식 답변</div>
+                            <div style="margin-bottom: 10px; color: #2e7d32;">${item.question || '질문 없음'}</div>
+                            ${item.prompt_hint ? `<div style="font-size: 0.9em; color: #558b2f; margin-bottom: 8px;">💡 힌트: ${item.prompt_hint}</div>` : ''}
+                            ${item.context ? `<div style="font-size: 0.85em; color: #666; margin-bottom: 8px;">상황: ${item.context}</div>` : ''}
+                            <div style="font-size: 0.85em; color: #666; margin-top: 10px;">
+                                <div style="font-weight: 600; margin-bottom: 5px;">📊 AI 평가 기준:</div>
+                                ${item.ai_evaluation?.criteria ? `<ul style="margin: 5px 0; padding-left: 20px;">${item.ai_evaluation.criteria.map(c => `<li>${c}</li>`).join('')}</ul>` : '<div>평가 기준 없음</div>'}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            contentHtml += '</div>';
+
+            // 한 번에 모든 내용 표시
+            characterMessage.innerHTML = contentHtml;
+            narrationDisplay.style.display = 'none';
+
+            // 에피소드 통계 표시
+            const stats = episode.statistics || {};
+            choicesDisplay.innerHTML = `
+                <div style="margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 6px;">
+                    <h4 style="margin-bottom: 10px; color: #495057;">📊 에피소드 통계</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.9em;">
+                        <div><strong>총 대화 수:</strong> ${stats.total_dialogues || dialogueFlow.length}개</div>
+                        <div><strong>선택지 개수:</strong> ${stats.choice_points || 0}개</div>
+                        <div><strong>주관식 개수:</strong> ${stats.free_input_points || 0}개</div>
+                        <div><strong>예상 플레이 타임:</strong> ${stats.average_play_time || episode.estimated_duration || '알 수 없음'}</div>
+                        <div><strong>최대 호감도 획득:</strong> +${stats.max_affection_gain || 0}</div>
+                        <div><strong>최대 애정도 획득:</strong> +${stats.max_intimacy_gain || 0}</div>
+                    </div>
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #dee2e6; font-size: 0.85em; color: #6c757d;">
+                        <div><strong>생성 일시:</strong> ${episode.created_at ? new Date(episode.created_at).toLocaleString() : '알 수 없음'}</div>
+                        <div><strong>난이도:</strong> ${episode.difficulty || 'Easy'}</div>
+                        <div><strong>AI 모델:</strong> ${episode.generation_context?.ai_model || 'gpt-4o-mini'}</div>
+                    </div>
+                </div>
+            `;
         }
 
         function editDialogueFromPreview() {
