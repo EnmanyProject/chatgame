@@ -1,13 +1,14 @@
 /**
- * Episode Manager API v2.0 - Character-Based Architecture
+ * Episode Manager API v2.1 - Dialogue Content & Affection System
  *
- * 캐릭터 중심 에피소드 관리 시스템
- * - 각 캐릭터의 에피소드 풀 관리
- * - 트리거 조건 체크 및 상태 관리
- * - 호감도 기반 에피소드 활성화
+ * 호감도/애정도 기반 대화 콘텐츠 관리
+ * - AI 기반 에피소드 생성 (대사 + 선택지)
+ * - 호감도/애정도에 따른 톤 조절
+ * - 주관식 답변 AI 평가
  *
- * @version 2.0.0
+ * @version 2.1.0
  * @created 2025-10-09
+ * @updated 2025-10-09
  */
 
 // GitHub API 설정
@@ -15,6 +16,9 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
 const GITHUB_OWNER = 'EnmanyProject';
 const GITHUB_REPO = 'chatgame';
 const GITHUB_BRANCH = 'main';
+
+// OpenAI API 설정
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
 
 // 기본 에피소드 디렉토리
 const EPISODES_DIR = 'data/episodes';
@@ -35,16 +39,20 @@ module.exports = async function handler(req, res) {
   try {
     const { action, character_id, episode_id } = req.method === 'GET' ? req.query : req.body;
 
-    console.log(`📥 Episode Manager API v2.0 - Action: ${action}`);
+    console.log(`📥 Episode Manager API v2.1 - Action: ${action}`);
 
     switch (action) {
       // 캐릭터의 모든 에피소드 조회
       case 'list':
         return await handleList(req, res, character_id);
 
-      // 새 에피소드 생성
+      // 새 에피소드 생성 (수동)
       case 'create':
         return await handleCreate(req, res);
+
+      // 🆕 AI 기반 에피소드 자동 생성
+      case 'generate_episode':
+        return await handleGenerateEpisode(req, res);
 
       // 에피소드 수정
       case 'update':
@@ -73,6 +81,10 @@ module.exports = async function handler(req, res) {
       // 에피소드 상세 정보 조회
       case 'get':
         return await handleGet(req, res, episode_id);
+
+      // 🆕 주관식 답변 AI 평가 (게임 플레이 중)
+      case 'evaluate_user_input':
+        return await handleEvaluateUserInput(req, res);
 
       default:
         return res.status(400).json({
@@ -765,4 +777,598 @@ function checkTimeCondition(current_time, time_condition) {
     default:
       return true; // 조건이 없으면 통과
   }
+}
+
+/**
+ * ===== AI Generation Functions =====
+ */
+
+/**
+ * 🆕 AI 기반 에피소드 자동 생성
+ *
+ * 캐릭터 정보와 호감도/애정도를 기반으로 대화 콘텐츠 생성
+ */
+async function handleGenerateEpisode(req, res) {
+  const {
+    character_id,
+    scenario_template_id,
+    generation_context,
+    trigger_conditions,
+    title,
+    description
+  } = req.body;
+
+  // 필수 필드 검증
+  if (!character_id || !scenario_template_id || !generation_context) {
+    return res.status(400).json({
+      success: false,
+      message: '필수 필드 누락: character_id, scenario_template_id, generation_context'
+    });
+  }
+
+  const { base_affection, base_intimacy, scenario_length } = generation_context;
+
+  if (base_affection === undefined || base_intimacy === undefined) {
+    return res.status(400).json({
+      success: false,
+      message: 'generation_context에 base_affection과 base_intimacy 필요'
+    });
+  }
+
+  try {
+    console.log(`🤖 AI 에피소드 생성 시작: ${character_id} - ${scenario_template_id}`);
+    console.log(`📊 호감도: ${base_affection}, 애정도: ${base_intimacy}`);
+
+    // 캐릭터 정보 로드
+    const characterInfo = await loadCharacterInfo(character_id);
+
+    // AI로 dialogue_flow 생성
+    const dialogueFlow = await generateDialogueFlowWithAI(
+      characterInfo,
+      scenario_template_id,
+      base_affection,
+      base_intimacy,
+      scenario_length || 'medium'
+    );
+
+    // 에피소드 객체 생성
+    const episode_id = generateEpisodeId(character_id, scenario_template_id);
+
+    const newEpisode = {
+      id: episode_id,
+      character_id,
+      scenario_template_id,
+      title: title || `${characterInfo.name}과의 ${scenario_template_id}`,
+      description: description || `호감도 ${base_affection}, 애정도 ${base_intimacy} 기반 에피소드`,
+
+      // 트리거 조건
+      trigger_conditions: trigger_conditions || {
+        affection_min: Math.max(0, base_affection - 5),
+        affection_max: Math.min(100, base_affection + 5),
+        intimacy_min: Math.max(0, base_intimacy - 5),
+        intimacy_max: Math.min(100, base_intimacy + 5),
+        time_based: null,
+        event_based: null,
+        priority: 5
+      },
+
+      // 생성 컨텍스트
+      generation_context: {
+        base_affection,
+        base_intimacy,
+        tone_style: getToneStyle(base_affection),
+        formality: getFormality(base_intimacy),
+        scenario_length: scenario_length || 'medium'
+      },
+
+      status: 'pending',
+      difficulty: getDifficulty(base_affection, base_intimacy),
+      estimated_duration: getEstimatedDuration(scenario_length),
+      created_at: new Date().toISOString(),
+      last_edited_at: null,
+
+      // AI 생성된 대화 플로우
+      dialogue_flow: dialogueFlow,
+
+      // 통계
+      statistics: {
+        total_dialogues: dialogueFlow.length,
+        choice_points: dialogueFlow.filter(d => d.type === 'multiple_choice').length,
+        free_input_points: dialogueFlow.filter(d => d.type === 'free_input').length,
+        max_affection_gain: calculateMaxAffectionGain(dialogueFlow),
+        max_intimacy_gain: calculateMaxIntimacyGain(dialogueFlow),
+        average_play_time: getEstimatedDuration(scenario_length)
+      },
+
+      play_stats: {
+        played_count: 0,
+        best_affection_gain: 0,
+        best_intimacy_gain: 0,
+        completion_rate: 0
+      }
+    };
+
+    // 캐릭터 에피소드 파일에 저장
+    const episodeData = await loadCharacterEpisodes(character_id);
+    episodeData.episodes[episode_id] = newEpisode;
+    episodeData.total_episodes = Object.keys(episodeData.episodes).length;
+    episodeData.metadata.last_updated = new Date().toISOString();
+
+    await saveCharacterEpisodes(character_id, episodeData);
+
+    console.log(`✅ AI 에피소드 생성 완료: ${episode_id}`);
+    console.log(`📝 대화 수: ${dialogueFlow.length}, 선택지: ${newEpisode.statistics.choice_points}, 주관식: ${newEpisode.statistics.free_input_points}`);
+
+    return res.status(200).json({
+      success: true,
+      message: 'AI 에피소드가 생성되었습니다',
+      episode: newEpisode
+    });
+
+  } catch (error) {
+    console.error('❌ AI 에피소드 생성 실패:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'AI 에피소드 생성에 실패했습니다',
+      error: error.message
+    });
+  }
+}
+
+/**
+ * 🆕 주관식 답변 AI 평가 (게임 플레이 중)
+ *
+ * 유저의 자유 입력 답변을 AI가 평가하여 호감도/애정도 변화 반환
+ */
+async function handleEvaluateUserInput(req, res) {
+  const {
+    episode_id,
+    character_id,
+    dialogue_sequence,
+    user_input,
+    current_affection,
+    current_intimacy
+  } = req.body;
+
+  // 필수 필드 검증
+  if (!episode_id || !character_id || !user_input || dialogue_sequence === undefined) {
+    return res.status(400).json({
+      success: false,
+      message: '필수 필드 누락: episode_id, character_id, dialogue_sequence, user_input'
+    });
+  }
+
+  try {
+    console.log(`🤖 AI 답변 평가 시작: ${episode_id} - sequence ${dialogue_sequence}`);
+    console.log(`💬 유저 입력: "${user_input}"`);
+
+    // 에피소드 및 캐릭터 정보 로드
+    const episodeData = await loadCharacterEpisodes(character_id);
+    const episode = episodeData.episodes[episode_id];
+
+    if (!episode) {
+      return res.status(404).json({
+        success: false,
+        message: '에피소드를 찾을 수 없습니다'
+      });
+    }
+
+    const characterInfo = await loadCharacterInfo(character_id);
+
+    // 해당 dialogue_sequence의 평가 기준 찾기
+    const targetDialogue = episode.dialogue_flow.find(d => d.sequence === dialogue_sequence);
+
+    if (!targetDialogue || targetDialogue.type !== 'free_input') {
+      return res.status(400).json({
+        success: false,
+        message: '해당 sequence는 주관식 입력이 아닙니다'
+      });
+    }
+
+    // AI 평가 실행
+    const evaluation = await evaluateUserInputWithAI(
+      user_input,
+      characterInfo,
+      current_affection || 0,
+      current_intimacy || 0,
+      targetDialogue.ai_evaluation.criteria,
+      targetDialogue.context || episode.title
+    );
+
+    console.log(`✅ AI 평가 완료: ${evaluation.score} (호감도 ${evaluation.affection_change:+d}, 애정도 ${evaluation.intimacy_change:+d})`);
+
+    return res.status(200).json({
+      success: true,
+      evaluation: {
+        score: evaluation.score,
+        affection_change: evaluation.affection_change,
+        intimacy_change: evaluation.intimacy_change,
+        feedback: evaluation.feedback,
+        character_response: evaluation.character_response
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ AI 답변 평가 실패:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'AI 답변 평가에 실패했습니다',
+      error: error.message
+    });
+  }
+}
+
+/**
+ * ===== AI Helper Functions =====
+ */
+
+/**
+ * OpenAI를 사용하여 dialogue_flow 생성
+ */
+async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseAffection, baseIntimacy, scenarioLength) {
+  if (!OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY가 설정되지 않았습니다');
+  }
+
+  const toneStyle = getToneStyle(baseAffection);
+  const formality = getFormality(baseIntimacy);
+
+  // 대화 수 결정
+  const dialogueCount = scenarioLength === 'short' ? 4 : scenarioLength === 'long' ? 8 : 6;
+
+  const prompt = `당신은 로맨스 채팅 게임의 대화 콘텐츠 작가입니다.
+
+**캐릭터 정보:**
+- 이름: ${characterInfo.name}
+- MBTI: ${characterInfo.mbti}
+- 성격: ${characterInfo.personality || '친근함'}
+- 말투: ${characterInfo.speech_style || '자연스러움'}
+
+**시나리오:** ${scenarioTemplate}
+
+**현재 관계 상태:**
+- 호감도: ${baseAffection}/100 (톤: ${toneStyle})
+- 애정도: ${baseIntimacy}/100 (호칭: ${formality})
+
+**생성 요구사항:**
+메신저 대화 형식으로 ${dialogueCount}개 정도의 대화 흐름을 만들어주세요.
+
+**대화 흐름 구조:**
+1. narration: 상황 설명
+2. character_dialogue: 캐릭터 대사
+3. multiple_choice: 객관식 선택지 3개 (각각 호감도/애정도 변화값 포함)
+4. character_dialogue: 선택에 따른 반응
+5. free_input: 주관식 입력 질문 (AI 평가 기준 포함)
+6. ...반복
+
+**톤 가이드 (호감도 ${baseAffection}):**
+- 0-20: 차갑고 무뚝뚝
+- 21-40: 정중하고 예의바름
+- 41-60: 친근하고 편안함
+- 61-80: 따뜻하고 다정함
+- 81-100: 애교 섞인 밝은 톤
+
+**호칭 가이드 (애정도 ${baseIntimacy}):**
+- 0-20: ~님, ~씨 (존칭)
+- 21-40: 이름 호칭
+- 41-60: 오빠, 언니 등
+- 61-80: 애칭
+- 81-100: 특별한 애칭
+
+다음 JSON 형식으로 응답해주세요:
+\`\`\`json
+[
+  {
+    "sequence": 1,
+    "type": "narration",
+    "content": "상황 설명"
+  },
+  {
+    "sequence": 2,
+    "type": "character_dialogue",
+    "speaker": "${characterInfo.name}",
+    "text": "대사 내용",
+    "emotion": "감정",
+    "narration": "행동 묘사"
+  },
+  {
+    "sequence": 3,
+    "type": "multiple_choice",
+    "question": "질문",
+    "choices": [
+      {
+        "id": "choice_1",
+        "text": "선택지 1",
+        "affection_change": 2,
+        "intimacy_change": 1,
+        "consequence": "결과 설명"
+      },
+      {
+        "id": "choice_2",
+        "text": "선택지 2",
+        "affection_change": 0,
+        "intimacy_change": 0,
+        "consequence": "결과 설명"
+      },
+      {
+        "id": "choice_3",
+        "text": "선택지 3",
+        "affection_change": 3,
+        "intimacy_change": 2,
+        "consequence": "결과 설명"
+      }
+    ]
+  },
+  {
+    "sequence": 5,
+    "type": "free_input",
+    "question": "자유롭게 답변해보세요",
+    "prompt_hint": "힌트",
+    "context": "상황",
+    "ai_evaluation": {
+      "model": "gpt-4o-mini",
+      "criteria": [
+        "적절한 호칭 사용",
+        "대화 맥락 일치",
+        "예의 바른 표현"
+      ],
+      "scoring": {
+        "excellent": { "affection": 5, "intimacy": 3 },
+        "good": { "affection": 3, "intimacy": 2 },
+        "normal": { "affection": 1, "intimacy": 1 },
+        "poor": { "affection": -1, "intimacy": 0 },
+        "inappropriate": { "affection": -3, "intimacy": -2 }
+      }
+    }
+  }
+]
+\`\`\``;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: '당신은 로맨스 채팅 게임의 전문 대화 작가입니다. 항상 JSON 형식으로만 응답합니다.' },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.8,
+        max_tokens: 2000
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OpenAI API 오류: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices[0].message.content;
+
+    // JSON 추출 (코드 블록 제거)
+    const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/\[[\s\S]*\]/);
+    const jsonText = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : content;
+
+    const dialogueFlow = JSON.parse(jsonText);
+
+    console.log(`✅ OpenAI dialogue_flow 생성 완료: ${dialogueFlow.length}개 대화`);
+
+    return dialogueFlow;
+
+  } catch (error) {
+    console.error('❌ OpenAI API 호출 실패:', error);
+    throw error;
+  }
+}
+
+/**
+ * OpenAI를 사용하여 유저 입력 평가
+ */
+async function evaluateUserInputWithAI(userInput, characterInfo, currentAffection, currentIntimacy, criteria, context) {
+  if (!OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY가 설정되지 않았습니다');
+  }
+
+  const prompt = `당신은 로맨스 채팅 게임의 답변 평가자입니다.
+
+**캐릭터 정보:**
+- 이름: ${characterInfo.name}
+- MBTI: ${characterInfo.mbti}
+- 성격: ${characterInfo.personality || '친근함'}
+
+**현재 관계:**
+- 호감도: ${currentAffection}/100
+- 애정도: ${currentIntimacy}/100
+
+**상황:** ${context}
+
+**유저 답변:** "${userInput}"
+
+**평가 기준:**
+${criteria.map((c, i) => `${i + 1}. ${c}`).join('\n')}
+
+다음 JSON 형식으로 평가 결과를 응답해주세요:
+\`\`\`json
+{
+  "score": "excellent|good|normal|poor|inappropriate",
+  "affection_change": 5,
+  "intimacy_change": 3,
+  "feedback": "평가 피드백",
+  "character_response": "캐릭터의 답변"
+}
+\`\`\`
+
+**점수 기준:**
+- excellent: 완벽한 답변 (호감도 +5, 애정도 +3)
+- good: 좋은 답변 (호감도 +3, 애정도 +2)
+- normal: 평범한 답변 (호감도 +1, 애정도 +1)
+- poor: 부적절한 답변 (호감도 -1, 애정도 0)
+- inappropriate: 매우 부적절 (호감도 -3, 애정도 -2)`;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: '당신은 로맨스 채팅 게임의 답변 평가 전문가입니다. 항상 JSON 형식으로만 응답합니다.' },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 500
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OpenAI API 오류: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices[0].message.content;
+
+    // JSON 추출
+    const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/\{[\s\S]*\}/);
+    const jsonText = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : content;
+
+    const evaluation = JSON.parse(jsonText);
+
+    console.log(`✅ OpenAI 평가 완료: ${evaluation.score}`);
+
+    return evaluation;
+
+  } catch (error) {
+    console.error('❌ OpenAI 평가 API 호출 실패:', error);
+    throw error;
+  }
+}
+
+/**
+ * 캐릭터 정보 로드 (characters.json)
+ */
+async function loadCharacterInfo(character_id) {
+  try {
+    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/data/characters.json?ref=${GITHUB_BRANCH}`;
+
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`캐릭터 정보 로드 실패: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = Buffer.from(data.content, 'base64').toString('utf8');
+    const charactersData = JSON.parse(content);
+
+    // characters 배열 또는 객체 처리
+    const characters = charactersData.characters || charactersData;
+    const characterList = Array.isArray(characters) ? characters : Object.values(characters);
+
+    const character = characterList.find(c => c.id === character_id || c.character_id === character_id);
+
+    if (!character) {
+      throw new Error(`캐릭터를 찾을 수 없습니다: ${character_id}`);
+    }
+
+    return {
+      id: character.id || character.character_id,
+      name: character.name || character.character_name,
+      mbti: character.mbti || 'INFP',
+      personality: character.personality_summary || character.personality || '',
+      speech_style: character.speech_style || ''
+    };
+
+  } catch (error) {
+    console.error(`❌ 캐릭터 정보 로드 실패 (${character_id}):`, error);
+    throw error;
+  }
+}
+
+/**
+ * 호감도 기반 톤 스타일 결정
+ */
+function getToneStyle(affection) {
+  if (affection <= 20) return 'cold';
+  if (affection <= 40) return 'polite';
+  if (affection <= 60) return 'friendly';
+  if (affection <= 80) return 'warm';
+  return 'intimate';
+}
+
+/**
+ * 애정도 기반 격식 수준 결정
+ */
+function getFormality(intimacy) {
+  if (intimacy <= 20) return 'formal';
+  if (intimacy <= 40) return 'polite';
+  if (intimacy <= 60) return 'casual';
+  return 'intimate';
+}
+
+/**
+ * 난이도 결정 (호감도 + 애정도 합)
+ */
+function getDifficulty(affection, intimacy) {
+  const total = affection + intimacy;
+  if (total <= 40) return 'Easy';
+  if (total <= 80) return 'Medium';
+  if (total <= 120) return 'Hard';
+  return 'Expert';
+}
+
+/**
+ * 예상 플레이 시간
+ */
+function getEstimatedDuration(scenarioLength) {
+  switch (scenarioLength) {
+    case 'short': return '5-10분';
+    case 'long': return '15-20분';
+    default: return '10-15분';
+  }
+}
+
+/**
+ * 최대 호감도 획득 계산
+ */
+function calculateMaxAffectionGain(dialogueFlow) {
+  let max = 0;
+  for (const dialogue of dialogueFlow) {
+    if (dialogue.type === 'multiple_choice') {
+      const maxChoice = Math.max(...dialogue.choices.map(c => c.affection_change || 0));
+      max += maxChoice;
+    } else if (dialogue.type === 'free_input') {
+      max += dialogue.ai_evaluation?.scoring?.excellent?.affection || 5;
+    }
+  }
+  return max;
+}
+
+/**
+ * 최대 애정도 획득 계산
+ */
+function calculateMaxIntimacyGain(dialogueFlow) {
+  let max = 0;
+  for (const dialogue of dialogueFlow) {
+    if (dialogue.type === 'multiple_choice') {
+      const maxChoice = Math.max(...dialogue.choices.map(c => c.intimacy_change || 0));
+      max += maxChoice;
+    } else if (dialogue.type === 'free_input') {
+      max += dialogue.ai_evaluation?.scoring?.excellent?.intimacy || 3;
+    }
+  }
+  return max;
 }

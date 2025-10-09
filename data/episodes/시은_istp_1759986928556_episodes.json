@@ -4,24 +4,30 @@
   "character_mbti": "ISTP",
   "total_episodes": 0,
   "metadata": {
-    "version": "2.0.0",
-    "schema_type": "character_based",
+    "version": "2.1.0",
+    "schema_type": "character_based_dialogue",
     "created_at": "2025-10-09T06:30:00.000Z",
-    "last_updated": "2025-10-09T06:30:00.000Z"
+    "last_updated": "2025-10-09T07:00:00.000Z"
   },
   "episodes": {},
   "schema_description": {
-    "purpose": "캐릭터 중심 에피소드 관리 시스템",
-    "episode_lifecycle": [
-      "pending - 생성됨, 트리거 대기 중",
-      "sent - 대화방으로 전송됨, 플레이 가능",
-      "playing - 유저가 플레이 중",
-      "completed - 플레이 완료"
+    "purpose": "캐릭터 대화 콘텐츠 관리 (호감도/애정도 기반)",
+    "episode_structure": [
+      "에피소드 = 대사 + 객관식 선택지 + 주관식 입력",
+      "호감도: 대화 톤/표현에 영향",
+      "애정도: 호칭/허용 답변에 영향"
     ],
-    "trigger_types": [
-      "affection_based - 호감도 범위 조건",
-      "time_based - 시간/요일 조건",
-      "event_based - 특정 이벤트 완료 후"
+    "dialogue_flow": [
+      "narration - 상황 설명",
+      "character_dialogue - 캐릭터 대사",
+      "multiple_choice - 객관식 선택지 (호감도/애정도 변화)",
+      "free_input - 주관식 입력 (AI 판정)"
+    ],
+    "lifecycle": [
+      "pending - 생성됨, 트리거 대기",
+      "sent - 채팅방 전송됨",
+      "playing - 유저 플레이 중",
+      "completed - 완료됨"
     ]
   }
 }
