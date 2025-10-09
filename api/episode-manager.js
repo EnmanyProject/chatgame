@@ -1,5 +1,27 @@
-// 에피소드 관리 API - GitHub API 전용 버전
+/**
+ * Episode Manager API v2.0 - Character-Based Architecture
+ *
+ * 캐릭터 중심 에피소드 관리 시스템
+ * - 각 캐릭터의 에피소드 풀 관리
+ * - 트리거 조건 체크 및 상태 관리
+ * - 호감도 기반 에피소드 활성화
+ *
+ * @version 2.0.0
+ * @created 2025-10-09
+ */
 
+// GitHub API 설정
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
+const GITHUB_OWNER = 'EnmanyProject';
+const GITHUB_REPO = 'chatgame';
+const GITHUB_BRANCH = 'main';
+
+// 기본 에피소드 디렉토리
+const EPISODES_DIR = 'data/episodes';
+
+/**
+ * Main API Handler
+ */
 module.exports = async function handler(req, res) {
   // CORS 헤더 설정
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -11,143 +33,607 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    console.log('🔧 Episode Manager API 호출:', {
-      method: req.method,
-      action: req.query.action,
-      scenario_id: req.query.scenario_id
-    });
+    const { action, character_id, episode_id } = req.method === 'GET' ? req.query : req.body;
 
-    const action = req.query.action;
+    console.log(`📥 Episode Manager API v2.0 - Action: ${action}`);
 
-    // API 테스트
-    if (action === 'test') {
-      return res.json({
-        success: true,
-        message: 'Episode Manager API 정상 작동',
-        timestamp: new Date().toISOString()
-      });
-    }
+    switch (action) {
+      // 캐릭터의 모든 에피소드 조회
+      case 'list':
+        return await handleList(req, res, character_id);
 
-    // 에피소드 목록 조회
-    if (action === 'list' && req.query.scenario_id) {
-      try {
-        console.log('📚 에피소드 목록 조회:', req.query.scenario_id);
+      // 새 에피소드 생성
+      case 'create':
+        return await handleCreate(req, res);
 
-        // 에피소드 데이터베이스 로드
-        const episodes = await loadEpisodeDatabase();
-        console.log('📊 에피소드 DB 로드 완료');
+      // 에피소드 수정
+      case 'update':
+        return await handleUpdate(req, res);
 
-        // 해당 시나리오의 에피소드 필터링
-        const scenarioEpisodes = filterEpisodesByScenario(episodes, req.query.scenario_id);
-        console.log('✅ 필터링 완료:', scenarioEpisodes.length, '개');
+      // 에피소드 삭제
+      case 'delete':
+        return await handleDelete(req, res, episode_id);
 
-        return res.json({
-          success: true,
-          episodes: scenarioEpisodes,
-          scenario_id: req.query.scenario_id,
-          total: scenarioEpisodes.length
-        });
+      // 트리거 조건 체크 (활성화할 에피소드 찾기)
+      case 'check_triggers':
+        return await handleCheckTriggers(req, res, character_id);
 
-      } catch (error) {
-        console.error('❌ 에피소드 목록 조회 실패:', error.message);
-        return res.status(500).json({
+      // 에피소드를 대화방으로 전송
+      case 'send_to_chatroom':
+        return await handleSendToChatroom(req, res, episode_id);
+
+      // 에피소드 완료 처리
+      case 'complete_episode':
+        return await handleCompleteEpisode(req, res);
+
+      // 에피소드 상태 변경
+      case 'change_status':
+        return await handleChangeStatus(req, res);
+
+      // 에피소드 상세 정보 조회
+      case 'get':
+        return await handleGet(req, res, episode_id);
+
+      default:
+        return res.status(400).json({
           success: false,
-          message: '에피소드 목록 조회 실패: ' + error.message
+          message: `알 수 없는 액션: ${action}`
         });
-      }
     }
-
-    // POST 요청 - 에피소드 생성
-    if (req.method === 'POST') {
-      const body = req.body;
-      console.log('📝 에피소드 생성 요청:', body);
-
-      if (body.action === 'create') {
-        try {
-          const newEpisode = await createEpisode(body);
-          return res.json({
-            success: true,
-            episode: newEpisode,
-            message: '에피소드가 성공적으로 생성되었습니다.'
-          });
-        } catch (error) {
-          console.error('❌ 에피소드 생성 실패:', error.message);
-          return res.status(500).json({
-            success: false,
-            message: '에피소드 생성 실패: ' + error.message
-          });
-        }
-      }
-    }
-
-    // 알 수 없는 액션
-    return res.status(400).json({
-      success: false,
-      message: 'Unknown action: ' + action
-    });
 
   } catch (error) {
-    console.error('❌ Episode Manager API 치명적 오류:', error);
+    console.error('❌ Episode Manager API 오류:', error);
     return res.status(500).json({
       success: false,
-      message: 'API 내부 서버 오류: ' + error.message,
-      timestamp: new Date().toISOString()
+      message: '서버 오류가 발생했습니다',
+      error: error.message
     });
   }
 };
 
-// 에피소드 데이터베이스 로드 (GitHub API 사용)
-async function loadEpisodeDatabase() {
+/**
+ * 캐릭터의 에피소드 목록 조회
+ */
+async function handleList(req, res, character_id) {
+  if (!character_id) {
+    return res.status(400).json({
+      success: false,
+      message: 'character_id가 필요합니다'
+    });
+  }
+
   try {
-    console.log('🐙 GitHub API를 통한 에피소드 DB 로드 시작...');
+    const episodeData = await loadCharacterEpisodes(character_id);
 
-    // GitHub API를 통해 로드
-    const result = await loadFromGitHub('data/episodes/episode-database.json');
-
-    if (result.success) {
-      console.log('✅ GitHub API를 통한 에피소드 DB 로드 성공');
-      return result.data;
-    } else {
-      console.log('📝 에피소드 DB 파일 없음 - 기본 구조 반환');
-      return {
-        metadata: {
-          version: "1.0.0",
-          total_episodes: 0,
-          created_date: new Date().toISOString().split('T')[0],
-          data_source: "github_api_only"
-        },
-        episodes: {}
-      };
-    }
+    return res.status(200).json({
+      success: true,
+      character_id: episodeData.character_id,
+      character_name: episodeData.character_name,
+      total_episodes: episodeData.total_episodes,
+      episodes: episodeData.episodes
+    });
 
   } catch (error) {
-    console.error('❌ 에피소드 DB 로드 오류:', error.message);
-    // 에러 시 기본 구조 반환
-    return {
-      metadata: {
-        error: error.message,
-        version: "1.0.0",
-        total_episodes: 0
-      },
-      episodes: {}
-    };
+    console.error(`❌ 에피소드 목록 로드 실패 (${character_id}):`, error);
+    return res.status(500).json({
+      success: false,
+      message: '에피소드 목록을 불러올 수 없습니다',
+      error: error.message
+    });
   }
 }
 
-// GitHub API 로드 함수
-async function loadFromGitHub(filePath) {
+/**
+ * 새 에피소드 생성
+ */
+async function handleCreate(req, res) {
+  const {
+    character_id,
+    scenario_template_id,
+    title,
+    description,
+    difficulty,
+    trigger_conditions,
+    dialogues
+  } = req.body;
+
+  // 필수 필드 검증
+  if (!character_id || !scenario_template_id || !title) {
+    return res.status(400).json({
+      success: false,
+      message: '필수 필드가 누락되었습니다 (character_id, scenario_template_id, title)'
+    });
+  }
+
   try {
-    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-    if (!GITHUB_TOKEN) {
-      throw new Error('GITHUB_TOKEN 환경변수가 설정되지 않았습니다');
+    // 캐릭터 에피소드 데이터 로드
+    const episodeData = await loadCharacterEpisodes(character_id);
+
+    // 새 에피소드 ID 생성
+    const episode_id = generateEpisodeId(character_id, scenario_template_id);
+
+    // 새 에피소드 객체 생성
+    const newEpisode = {
+      id: episode_id,
+      character_id,
+      scenario_template_id,
+      title,
+      description: description || '',
+      status: 'pending',
+      trigger_conditions: trigger_conditions || {
+        type: 'affection_based',
+        affection_min: 0,
+        affection_max: 100,
+        time_based: null,
+        event_based: null,
+        priority: 5
+      },
+      dialogue_count: dialogues ? dialogues.length : 0,
+      difficulty: difficulty || 'Easy',
+      created_at: new Date().toISOString(),
+      sent_at: null,
+      completed_at: null,
+      play_stats: {
+        played_count: 0,
+        last_played: null,
+        best_affection_gain: 0
+      },
+      dialogues: dialogues || []
+    };
+
+    // 에피소드 추가
+    episodeData.episodes[episode_id] = newEpisode;
+    episodeData.total_episodes = Object.keys(episodeData.episodes).length;
+    episodeData.metadata.last_updated = new Date().toISOString();
+
+    // GitHub에 저장
+    await saveCharacterEpisodes(character_id, episodeData);
+
+    console.log(`✅ 에피소드 생성 완료: ${episode_id}`);
+
+    return res.status(200).json({
+      success: true,
+      message: '에피소드가 생성되었습니다',
+      episode: newEpisode
+    });
+
+  } catch (error) {
+    console.error('❌ 에피소드 생성 실패:', error);
+    return res.status(500).json({
+      success: false,
+      message: '에피소드 생성에 실패했습니다',
+      error: error.message
+    });
+  }
+}
+
+/**
+ * 에피소드 수정
+ */
+async function handleUpdate(req, res) {
+  const {
+    episode_id,
+    character_id,
+    title,
+    description,
+    difficulty,
+    trigger_conditions,
+    dialogues
+  } = req.body;
+
+  if (!episode_id || !character_id) {
+    return res.status(400).json({
+      success: false,
+      message: 'episode_id와 character_id가 필요합니다'
+    });
+  }
+
+  try {
+    const episodeData = await loadCharacterEpisodes(character_id);
+
+    if (!episodeData.episodes[episode_id]) {
+      return res.status(404).json({
+        success: false,
+        message: '에피소드를 찾을 수 없습니다'
+      });
     }
 
-    const owner = 'EnmanyProject';
-    const repo = 'chatgame';
+    // 에피소드 업데이트
+    const episode = episodeData.episodes[episode_id];
 
-    console.log(`🐙 GitHub API 로드: ${filePath}`);
+    if (title) episode.title = title;
+    if (description !== undefined) episode.description = description;
+    if (difficulty) episode.difficulty = difficulty;
+    if (trigger_conditions) episode.trigger_conditions = trigger_conditions;
+    if (dialogues) {
+      episode.dialogues = dialogues;
+      episode.dialogue_count = dialogues.length;
+    }
 
-    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
+    episodeData.metadata.last_updated = new Date().toISOString();
+
+    // GitHub에 저장
+    await saveCharacterEpisodes(character_id, episodeData);
+
+    console.log(`✅ 에피소드 수정 완료: ${episode_id}`);
+
+    return res.status(200).json({
+      success: true,
+      message: '에피소드가 수정되었습니다',
+      episode: episode
+    });
+
+  } catch (error) {
+    console.error('❌ 에피소드 수정 실패:', error);
+    return res.status(500).json({
+      success: false,
+      message: '에피소드 수정에 실패했습니다',
+      error: error.message
+    });
+  }
+}
+
+/**
+ * 에피소드 삭제
+ */
+async function handleDelete(req, res, episode_id) {
+  const { character_id } = req.method === 'DELETE' ? req.query : req.body;
+
+  if (!episode_id || !character_id) {
+    return res.status(400).json({
+      success: false,
+      message: 'episode_id와 character_id가 필요합니다'
+    });
+  }
+
+  try {
+    const episodeData = await loadCharacterEpisodes(character_id);
+
+    if (!episodeData.episodes[episode_id]) {
+      return res.status(404).json({
+        success: false,
+        message: '에피소드를 찾을 수 없습니다'
+      });
+    }
+
+    // 에피소드 삭제
+    delete episodeData.episodes[episode_id];
+    episodeData.total_episodes = Object.keys(episodeData.episodes).length;
+    episodeData.metadata.last_updated = new Date().toISOString();
+
+    // GitHub에 저장
+    await saveCharacterEpisodes(character_id, episodeData);
+
+    console.log(`✅ 에피소드 삭제 완료: ${episode_id}`);
+
+    return res.status(200).json({
+      success: true,
+      message: '에피소드가 삭제되었습니다'
+    });
+
+  } catch (error) {
+    console.error('❌ 에피소드 삭제 실패:', error);
+    return res.status(500).json({
+      success: false,
+      message: '에피소드 삭제에 실패했습니다',
+      error: error.message
+    });
+  }
+}
+
+/**
+ * 트리거 조건 체크 - 활성화 가능한 에피소드 찾기
+ */
+async function handleCheckTriggers(req, res, character_id) {
+  const { current_affection, current_time, completed_events } = req.method === 'GET' ? req.query : req.body;
+
+  if (!character_id) {
+    return res.status(400).json({
+      success: false,
+      message: 'character_id가 필요합니다'
+    });
+  }
+
+  try {
+    const episodeData = await loadCharacterEpisodes(character_id);
+    const activatableEpisodes = [];
+
+    // pending 상태의 에피소드들 체크
+    for (const episode_id in episodeData.episodes) {
+      const episode = episodeData.episodes[episode_id];
+
+      if (episode.status !== 'pending') continue;
+
+      const triggers = episode.trigger_conditions;
+      let canActivate = true;
+
+      // 호감도 조건 체크
+      if (triggers.affection_min !== undefined && triggers.affection_max !== undefined) {
+        const affection = parseInt(current_affection) || 0;
+        if (affection < triggers.affection_min || affection > triggers.affection_max) {
+          canActivate = false;
+        }
+      }
+
+      // 시간 조건 체크
+      if (canActivate && triggers.time_based) {
+        const timeMatch = checkTimeCondition(current_time, triggers.time_based);
+        if (!timeMatch) {
+          canActivate = false;
+        }
+      }
+
+      // 이벤트 조건 체크
+      if (canActivate && triggers.event_based) {
+        const completedList = completed_events ? completed_events.split(',') : [];
+        if (!completedList.includes(triggers.event_based)) {
+          canActivate = false;
+        }
+      }
+
+      if (canActivate) {
+        activatableEpisodes.push({
+          episode_id: episode.id,
+          title: episode.title,
+          priority: triggers.priority || 5,
+          difficulty: episode.difficulty
+        });
+      }
+    }
+
+    // 우선순위 정렬
+    activatableEpisodes.sort((a, b) => b.priority - a.priority);
+
+    console.log(`✅ 트리거 체크 완료: ${activatableEpisodes.length}개 활성화 가능`);
+
+    return res.status(200).json({
+      success: true,
+      character_id,
+      activatable_count: activatableEpisodes.length,
+      episodes: activatableEpisodes
+    });
+
+  } catch (error) {
+    console.error('❌ 트리거 체크 실패:', error);
+    return res.status(500).json({
+      success: false,
+      message: '트리거 체크에 실패했습니다',
+      error: error.message
+    });
+  }
+}
+
+/**
+ * 에피소드를 대화방으로 전송
+ */
+async function handleSendToChatroom(req, res, episode_id) {
+  const { character_id } = req.body;
+
+  if (!episode_id || !character_id) {
+    return res.status(400).json({
+      success: false,
+      message: 'episode_id와 character_id가 필요합니다'
+    });
+  }
+
+  try {
+    const episodeData = await loadCharacterEpisodes(character_id);
+    const episode = episodeData.episodes[episode_id];
+
+    if (!episode) {
+      return res.status(404).json({
+        success: false,
+        message: '에피소드를 찾을 수 없습니다'
+      });
+    }
+
+    if (episode.status !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: `에피소드 상태가 pending이 아닙니다: ${episode.status}`
+      });
+    }
+
+    // 상태 변경
+    episode.status = 'sent';
+    episode.sent_at = new Date().toISOString();
+    episodeData.metadata.last_updated = new Date().toISOString();
+
+    // GitHub에 저장
+    await saveCharacterEpisodes(character_id, episodeData);
+
+    console.log(`✅ 에피소드 전송 완료: ${episode_id}`);
+
+    return res.status(200).json({
+      success: true,
+      message: '에피소드가 대화방으로 전송되었습니다',
+      episode: episode
+    });
+
+  } catch (error) {
+    console.error('❌ 에피소드 전송 실패:', error);
+    return res.status(500).json({
+      success: false,
+      message: '에피소드 전송에 실패했습니다',
+      error: error.message
+    });
+  }
+}
+
+/**
+ * 에피소드 완료 처리
+ */
+async function handleCompleteEpisode(req, res) {
+  const { episode_id, character_id, affection_gain } = req.body;
+
+  if (!episode_id || !character_id) {
+    return res.status(400).json({
+      success: false,
+      message: 'episode_id와 character_id가 필요합니다'
+    });
+  }
+
+  try {
+    const episodeData = await loadCharacterEpisodes(character_id);
+    const episode = episodeData.episodes[episode_id];
+
+    if (!episode) {
+      return res.status(404).json({
+        success: false,
+        message: '에피소드를 찾을 수 없습니다'
+      });
+    }
+
+    // 상태 변경
+    episode.status = 'completed';
+    episode.completed_at = new Date().toISOString();
+
+    // 플레이 통계 업데이트
+    episode.play_stats.played_count += 1;
+    episode.play_stats.last_played = new Date().toISOString();
+
+    if (affection_gain && affection_gain > episode.play_stats.best_affection_gain) {
+      episode.play_stats.best_affection_gain = affection_gain;
+    }
+
+    episodeData.metadata.last_updated = new Date().toISOString();
+
+    // GitHub에 저장
+    await saveCharacterEpisodes(character_id, episodeData);
+
+    console.log(`✅ 에피소드 완료 처리: ${episode_id}`);
+
+    return res.status(200).json({
+      success: true,
+      message: '에피소드가 완료되었습니다',
+      episode: episode
+    });
+
+  } catch (error) {
+    console.error('❌ 에피소드 완료 처리 실패:', error);
+    return res.status(500).json({
+      success: false,
+      message: '에피소드 완료 처리에 실패했습니다',
+      error: error.message
+    });
+  }
+}
+
+/**
+ * 에피소드 상태 변경
+ */
+async function handleChangeStatus(req, res) {
+  const { episode_id, character_id, new_status } = req.body;
+
+  const validStatuses = ['pending', 'sent', 'playing', 'completed'];
+
+  if (!episode_id || !character_id || !new_status) {
+    return res.status(400).json({
+      success: false,
+      message: 'episode_id, character_id, new_status가 필요합니다'
+    });
+  }
+
+  if (!validStatuses.includes(new_status)) {
+    return res.status(400).json({
+      success: false,
+      message: `유효하지 않은 상태: ${new_status}`
+    });
+  }
+
+  try {
+    const episodeData = await loadCharacterEpisodes(character_id);
+    const episode = episodeData.episodes[episode_id];
+
+    if (!episode) {
+      return res.status(404).json({
+        success: false,
+        message: '에피소드를 찾을 수 없습니다'
+      });
+    }
+
+    // 상태 변경
+    const oldStatus = episode.status;
+    episode.status = new_status;
+    episodeData.metadata.last_updated = new Date().toISOString();
+
+    // GitHub에 저장
+    await saveCharacterEpisodes(character_id, episodeData);
+
+    console.log(`✅ 에피소드 상태 변경: ${episode_id} (${oldStatus} → ${new_status})`);
+
+    return res.status(200).json({
+      success: true,
+      message: '에피소드 상태가 변경되었습니다',
+      old_status: oldStatus,
+      new_status: new_status,
+      episode: episode
+    });
+
+  } catch (error) {
+    console.error('❌ 에피소드 상태 변경 실패:', error);
+    return res.status(500).json({
+      success: false,
+      message: '에피소드 상태 변경에 실패했습니다',
+      error: error.message
+    });
+  }
+}
+
+/**
+ * 에피소드 상세 정보 조회
+ */
+async function handleGet(req, res, episode_id) {
+  const { character_id } = req.query;
+
+  if (!episode_id || !character_id) {
+    return res.status(400).json({
+      success: false,
+      message: 'episode_id와 character_id가 필요합니다'
+    });
+  }
+
+  try {
+    const episodeData = await loadCharacterEpisodes(character_id);
+    const episode = episodeData.episodes[episode_id];
+
+    if (!episode) {
+      return res.status(404).json({
+        success: false,
+        message: '에피소드를 찾을 수 없습니다'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      episode: episode
+    });
+
+  } catch (error) {
+    console.error('❌ 에피소드 조회 실패:', error);
+    return res.status(500).json({
+      success: false,
+      message: '에피소드 조회에 실패했습니다',
+      error: error.message
+    });
+  }
+}
+
+/**
+ * ===== Helper Functions =====
+ */
+
+/**
+ * 캐릭터 에피소드 데이터 로드 (GitHub)
+ */
+async function loadCharacterEpisodes(character_id) {
+  const fileName = `${character_id}_episodes.json`;
+  const filePath = `${EPISODES_DIR}/${fileName}`;
+
+  try {
+    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}?ref=${GITHUB_BRANCH}`;
+
+    const response = await fetch(url, {
       headers: {
         'Authorization': `token ${GITHUB_TOKEN}`,
         'Accept': 'application/vnd.github.v3+json'
@@ -155,230 +641,128 @@ async function loadFromGitHub(filePath) {
     });
 
     if (!response.ok) {
-      if (response.status === 404) {
-        console.log('📄 파일이 존재하지 않음 (404)');
-        return { success: false, error: 'File not found' };
-      }
       throw new Error(`GitHub API 오류: ${response.status}`);
     }
 
-    const fileData = await response.json();
-    const content = Buffer.from(fileData.content, 'base64').toString('utf8');
-    const data = JSON.parse(content);
+    const data = await response.json();
+    const content = Buffer.from(data.content, 'base64').toString('utf8');
 
-    console.log('✅ GitHub API 로드 성공');
-    return { success: true, data: data };
+    return JSON.parse(content);
 
   } catch (error) {
-    console.error('❌ GitHub API 로드 실패:', error);
-    return { success: false, error: error.message };
-  }
-}
-
-// 시나리오별 에피소드 필터링 (안전한 버전)
-function filterEpisodesByScenario(database, scenario_id) {
-  try {
-    console.log('🔍 에피소드 필터링 시작:', scenario_id);
-
-    // 안전한 데이터 검증
-    if (!database || !database.episodes) {
-      console.log('📝 에피소드 데이터 없음');
-      return [];
-    }
-
-    const episodes = database.episodes;
-    const episodeList = Object.values(episodes);
-
-    console.log('📋 총 에피소드 수:', episodeList.length);
-
-    if (episodeList.length === 0) {
-      return [];
-    }
-
-    // 안전한 필터링
-    const filtered = episodeList.filter(episode => {
-      if (!episode || typeof episode !== 'object') {
-        return false;
-      }
-      return episode.scenario_id === scenario_id;
-    });
-
-    console.log('✅ 필터링 결과:', filtered.length, '개');
-    return filtered;
-
-  } catch (error) {
-    console.error('❌ 필터링 오류:', error.message);
-    return [];
-  }
-}
-
-// 새 에피소드 생성 및 저장 (GitHub API 활용)
-async function createEpisode(data) {
-  try {
-    console.log('🎯 에피소드 생성 데이터 확인:', {
-      has_generated_dialogue: !!data.generated_dialogue,
-      has_ai_generated_dialogue: !!data.ai_generated_dialogue,
-      user_prompt: data.user_input_prompt,
-      character_id: data.character_id,
-      scenario_id: data.scenario_id
-    });
-
-    // AI 생성된 대화 확인 (generated_dialogue를 우선으로)
-    const dialogue = data.generated_dialogue || data.ai_generated_dialogue || {
-      story_flow: [
-        {
-          type: "dialogue",
-          speaker: data.character_name || "캐릭터",
-          text: "죄송해요, AI 대화 생성에 실패했습니다. 다시 시도해주세요.",
-          emotion: "당황",
-          narration: "시스템 오류로 인해 대화가 제대로 생성되지 않았습니다."
-        },
-        {
-          type: "choice_point",
-          situation: "시스템 오류가 발생했습니다. 어떻게 하시겠습니까?",
-          choices: [
-            { text: "다시 시도하기", affection_impact: 0, consequence: "새로운 대화를 생성합니다" },
-            { text: "나중에 다시 오기", affection_impact: 0, consequence: "에피소드를 종료합니다" }
-          ]
-        }
-      ],
-      episode_summary: "AI 대화 생성 실패로 기본 대화가 제공되었습니다."
-    };
-
-    if (data.generated_dialogue) {
-      console.log('✅ AI 생성된 대화 사용됨');
-    } else {
-      console.log('⚠️ AI 생성 실패, 기본 대화 사용됨');
-    }
-
-    const newEpisode = {
-      id: `episode_${data.scenario_id}_${Date.now()}`,
-      scenario_id: data.scenario_id,
-      episode_number: data.episode_number || 1,
-      title: data.title || `에피소드 ${data.episode_number || 1}번`,
-      character_id: data.character_id,
-      character_name: data.character_name,
-      difficulty: data.difficulty || 'Easy',
-      user_input_prompt: data.user_input_prompt,
-      created_at: new Date().toISOString(),
-      dialogue: dialogue
-    };
-
-    console.log('✅ 에피소드 객체 생성 완료:', newEpisode.id);
-
-    // 실제 저장 - 기존 데이터베이스 로드
-    const database = await loadEpisodeDatabase();
-
-    // 에피소드 추가
-    database.episodes = database.episodes || {};
-    database.episodes[newEpisode.id] = newEpisode;
-
-    // 메타데이터 업데이트
-    database.metadata = database.metadata || {};
-    database.metadata.total_episodes = Object.keys(database.episodes).length;
-    database.metadata.last_updated = new Date().toISOString();
-
-    // 파일에 저장
-    await saveEpisodeDatabase(database);
-
-    console.log('✅ 에피소드 데이터베이스 저장 완료:', newEpisode.id);
-    return newEpisode;
-
-  } catch (error) {
-    console.error('❌ 에피소드 생성 및 저장 오류:', error.message);
+    console.error(`❌ 캐릭터 에피소드 로드 실패 (${character_id}):`, error);
     throw error;
   }
 }
 
-// 에피소드 데이터베이스 저장 함수 (GitHub API 사용)
-async function saveEpisodeDatabase(database) {
+/**
+ * 캐릭터 에피소드 데이터 저장 (GitHub)
+ */
+async function saveCharacterEpisodes(character_id, episodeData) {
+  const fileName = `${character_id}_episodes.json`;
+  const filePath = `${EPISODES_DIR}/${fileName}`;
+
   try {
-    console.log('🐙 GitHub API를 통한 에피소드 저장 시작...');
+    // 현재 파일의 SHA 가져오기
+    const getUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}?ref=${GITHUB_BRANCH}`;
 
-    // GitHub API를 통해 저장 (시나리오와 동일한 방식)
-    const result = await saveToGitHub('data/episodes/episode-database.json', database);
-
-    if (result.success) {
-      console.log('✅ GitHub API를 통한 에피소드 저장 완료');
-    } else {
-      throw new Error(`GitHub API 저장 실패: ${result.error}`);
-    }
-
-  } catch (error) {
-    console.error('❌ GitHub API 에피소드 저장 실패:', error);
-    throw error;
-  }
-}
-
-// GitHub API 저장 함수 (시나리오 매니저에서 사용하는 것과 동일)
-async function saveToGitHub(filePath, data) {
-  try {
-    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-    if (!GITHUB_TOKEN) {
-      throw new Error('GITHUB_TOKEN 환경변수가 설정되지 않았습니다');
-    }
-
-    const owner = 'EnmanyProject';
-    const repo = 'chatgame';
-    const branch = 'main';
-
-    console.log(`🐙 GitHub API 저장: ${filePath}`);
-
-    // 현재 파일 정보 가져오기 (SHA 필요)
-    let currentSha = null;
-    try {
-      const getResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
-        headers: {
-          'Authorization': `token ${GITHUB_TOKEN}`,
-          'Accept': 'application/vnd.github.v3+json'
-        }
-      });
-
-      if (getResponse.ok) {
-        const currentFile = await getResponse.json();
-        currentSha = currentFile.sha;
-        console.log('📄 기존 파일 SHA:', currentSha);
+    const getResponse = await fetch(getUrl, {
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json'
       }
-    } catch (error) {
-      console.log('📝 새 파일 생성 (기존 파일 없음)');
+    });
+
+    let sha = null;
+    if (getResponse.ok) {
+      const getData = await getResponse.json();
+      sha = getData.sha;
     }
 
-    // 파일 내용을 Base64로 인코딩
-    const content = Buffer.from(JSON.stringify(data, null, 2), 'utf8').toString('base64');
+    // 파일 저장
+    const content = Buffer.from(JSON.stringify(episodeData, null, 2)).toString('base64');
 
-    // GitHub API를 통해 파일 저장/업데이트
-    const saveData = {
-      message: `Update episodes database - ${new Date().toISOString()}`,
+    const putUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}`;
+    const putData = {
+      message: `Update ${character_id} episodes`,
       content: content,
-      branch: branch
+      branch: GITHUB_BRANCH
     };
 
-    if (currentSha) {
-      saveData.sha = currentSha; // 기존 파일 업데이트
+    if (sha) {
+      putData.sha = sha;
     }
 
-    const saveResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
+    const putResponse = await fetch(putUrl, {
       method: 'PUT',
       headers: {
         'Authorization': `token ${GITHUB_TOKEN}`,
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(saveData)
+      body: JSON.stringify(putData)
     });
 
-    if (!saveResponse.ok) {
-      const errorText = await saveResponse.text();
-      throw new Error(`GitHub API 오류: ${saveResponse.status} - ${errorText}`);
+    if (!putResponse.ok) {
+      const errorText = await putResponse.text();
+      throw new Error(`GitHub API 저장 오류: ${putResponse.status} - ${errorText}`);
     }
 
-    const result = await saveResponse.json();
-    console.log('✅ GitHub API 저장 성공:', result.commit.sha);
+    const result = await putResponse.json();
+    console.log(`✅ GitHub 저장 성공: ${result.commit.sha}`);
 
-    return { success: true, commit: result.commit };
+    return { success: true };
 
   } catch (error) {
-    console.error('❌ GitHub API 저장 실패:', error);
-    return { success: false, error: error.message };
+    console.error(`❌ 캐릭터 에피소드 저장 실패 (${character_id}):`, error);
+    throw error;
+  }
+}
+
+/**
+ * 에피소드 ID 생성
+ */
+function generateEpisodeId(character_id, scenario_template_id) {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 8);
+
+  // 캐릭터 이름 추출 (ID에서 첫 부분)
+  const charName = character_id.split('_')[0];
+
+  return `ep_${charName}_${scenario_template_id}_${random}`;
+}
+
+/**
+ * 시간 조건 체크
+ */
+function checkTimeCondition(current_time, time_condition) {
+  if (!current_time) {
+    current_time = new Date();
+  } else if (typeof current_time === 'string') {
+    current_time = new Date(current_time);
+  }
+
+  const hour = current_time.getHours();
+  const day = current_time.getDay(); // 0 = Sunday, 6 = Saturday
+  const isWeekend = (day === 0 || day === 6);
+
+  switch (time_condition) {
+    case 'morning_weekday':
+      return !isWeekend && hour >= 6 && hour < 11;
+
+    case 'lunch_time':
+      return hour >= 11 && hour < 14;
+
+    case 'afternoon':
+      return hour >= 14 && hour < 18;
+
+    case 'evening_weekend':
+      return isWeekend && hour >= 18 && hour < 23;
+
+    case 'late_night':
+      return hour >= 23 || hour < 6;
+
+    default:
+      return true; // 조건이 없으면 통과
   }
 }
