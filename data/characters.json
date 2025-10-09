@@ -137,14 +137,140 @@
       "source": "scenario_admin_v2",
       "active": true,
       "version": "2.0"
+    },
+    "미나__isfp_1759987044060": {
+      "id": "미나__isfp_1759987044060",
+      "basic_info": {
+        "name": "미나 ",
+        "age": 26,
+        "mbti": "ISFP",
+        "occupation": "entrepreneur",
+        "gender": "female"
+      },
+      "personality_traits": [
+        "창의적"
+      ],
+      "appeal_profile": {
+        "seduction_style": "warm_nurturing",
+        "charm_points": [
+          "witty_banter"
+        ],
+        "emotional_intelligence": 4,
+        "confidence_level": 3,
+        "mystery_factor": 2,
+        "sexual_curiosity": 9,
+        "sexual_comfort": 4,
+        "hobbies": [
+          "music",
+          "cooking"
+        ]
+      },
+      "physical_allure": {
+        "appearance": {
+          "hair": "long_straight",
+          "eyes": "almond_elegant",
+          "body": "average_attractive",
+          "bust": "E",
+          "waist_hip": "풍만",
+          "style": "보헤미안"
+        },
+        "feature_elements": [
+          "attractive_chest",
+          "long_legs",
+          "soft_skin"
+        ],
+        "sensual_habits": [
+          "윙크하기"
+        ],
+        "body_language": [
+          "시선피함"
+        ]
+      },
+      "psychological_depth": {
+        "core_desires": [
+          "personal_growth"
+        ],
+        "vulnerabilities": [
+          "perfectionism",
+          "commitment_fear"
+        ],
+        "values": "love_family",
+        "boundaries": {
+          "comfort_level": "light_flirtation",
+          "escalation_pace": "very_gradual",
+          "sexual_tone_band": "moderate"
+        },
+        "sexual_freedom": 4
+      },
+      "conversation_dynamics": {
+        "speech_style": "sensual_whisper",
+        "flirting_patterns": [
+          "direct_compliments",
+          "gentle_touches"
+        ],
+        "reaction_tendencies": {
+          "humor": "giggles_easily",
+          "compliment": "gracefully_accepts",
+          "interest_expression": "enthusiastic_sharing"
+        },
+        "conversation_hooks": [
+          "music_movies",
+          "life_philosophy",
+          "childhood_memories",
+          "relationships"
+        ],
+        "speech_habits": [
+          "giggle_often",
+          "whisper_tone"
+        ],
+        "vocabulary_register": "casual_friendly",
+        "allowed_motifs": [
+          "romance_love",
+          "art_creativity",
+          "friendship",
+          "daily_life"
+        ],
+        "forbidden_terms": [
+          "religion",
+          "work_stress"
+        ]
+      },
+      "past_history": {
+        "boyfriend_count": 10,
+        "preferred_skinship": [
+          "cheek_kiss"
+        ],
+        "relationship_experience": "beginner",
+        "first_experience_age": "early_teens"
+      },
+      "favorite_gifts": [
+        "perfume",
+        "wine"
+      ],
+      "male_priorities": [
+        "humor",
+        "reliability"
+      ],
+      "future_goals": {
+        "asset_goal": "50_billion",
+        "future_careers": [
+          "freelancer",
+          "celebrity"
+        ]
+      },
+      "created_at": "2025-10-09T05:17:24.060Z",
+      "updated_at": "2025-10-09T05:17:23.266Z",
+      "source": "scenario_admin_v2",
+      "active": true,
+      "version": "2.0"
     }
   },
   "metadata": {
     "version": "4.1.0",
-    "total_characters": 1,
+    "total_characters": 2,
     "created": "2025-09-28T10:43:23.975Z",
     "storage_type": "stable_github_direct",
-    "last_updated": "2025-10-09T05:15:27.555Z",
-    "last_accessed": "2025-10-09T05:15:27.555Z"
+    "last_updated": "2025-10-09T05:17:23.266Z",
+    "last_accessed": "2025-10-09T05:17:23.266Z"
   }
 }
