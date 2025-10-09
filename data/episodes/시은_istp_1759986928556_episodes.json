@@ -2,12 +2,12 @@
   "character_id": "시은_istp_1759986928556",
   "character_name": "시은",
   "character_mbti": "ISTP",
-  "total_episodes": 2,
+  "total_episodes": 1,
   "metadata": {
     "version": "2.1.0",
     "schema_type": "character_based_dialogue",
     "created_at": "2025-10-09T06:30:00.000Z",
-    "last_updated": "2025-10-09T15:47:53.076Z"
+    "last_updated": "2025-10-09T15:48:02.109Z"
   },
   "episodes": {
     "ep_시은_scenario_도와줘_1759987337551_c8xaf4": {
@@ -124,128 +124,6 @@
         "max_affection_gain": 8,
         "max_intimacy_gain": 5,
         "average_play_time": "5-10분"
-      },
-      "play_stats": {
-        "played_count": 0,
-        "best_affection_gain": 0,
-        "best_intimacy_gain": 0,
-        "completion_rate": 0
-      }
-    },
-    "ep_시은_scenario_도와줘_1759987337551_rmq2rr": {
-      "id": "ep_시은_scenario_도와줘_1759987337551_rmq2rr",
-      "character_id": "시은_istp_1759986928556",
-      "scenario_template_id": "scenario_도와줘_1759987337551",
-      "title": "scenario_도와줘_1759987337551 에피소드",
-      "description": "호감도 36, 애정도 31 기반",
-      "trigger_conditions": {
-        "affection_min": 31,
-        "affection_max": 41,
-        "intimacy_min": 26,
-        "intimacy_max": 36,
-        "time_based": null,
-        "event_based": null,
-        "priority": 5
-      },
-      "generation_context": {
-        "base_affection": 36,
-        "base_intimacy": 31,
-        "tone_style": "polite",
-        "formality": "polite",
-        "scenario_length": "medium"
-      },
-      "status": "pending",
-      "difficulty": "Medium",
-      "estimated_duration": "10-15분",
-      "created_at": "2025-10-09T15:47:52.956Z",
-      "last_edited_at": null,
-      "dialogue_flow": [
-        {
-          "sequence": 1,
-          "type": "narration",
-          "content": "밤늦게 채팅을 시작하는데, 상대방이 약간 의기양양한 기분인 것 같습니다."
-        },
-        {
-          "sequence": 2,
-          "type": "character_dialogue",
-          "speaker": "상대방",
-          "text": "와, 이 시간에도 당신을 만나니 기분이 좋아요.",
-          "emotion": "기쁨",
-          "narration": "상대방이 자신의 감정을 표현합니다."
-        },
-        {
-          "sequence": 3,
-          "type": "multiple_choice",
-          "question": "어떻게 응답하시겠어요?",
-          "choices": [
-            {
-              "id": "choice_1",
-              "text": "같은 마음이에요. 함께 시간을 보내는 건 항상 즐거워요.",
-              "affection_change": 2,
-              "intimacy_change": 1,
-              "consequence": "서로의 마음이 더 가까워집니다."
-            },
-            {
-              "id": "choice_2",
-              "text": "나도 기분이 좋아. 이렇게 늦게까지 얘기할 수 있어서 고마워.",
-              "affection_change": 0,
-              "intimacy_change": 0,
-              "consequence": "친밀도는 그대로지만, 호감도는 조금 감소합니다."
-            },
-            {
-              "id": "choice_3",
-              "text": "너무 늦었는데, 자야지. 내일 또 얘기하자.",
-              "affection_change": 3,
-              "intimacy_change": 2,
-              "consequence": "상대방은 조금 실망해하지만, 당신의 호감도와 친밀도는 상승합니다."
-            }
-          ]
-        },
-        {
-          "sequence": 5,
-          "type": "free_input",
-          "question": "어떤 말을 하고 싶으신가요?",
-          "prompt_hint": "상대방이 당신에게 조금 더 관심을 갖기를 원하는 상황입니다.",
-          "context": "밤늦게 채팅하면서 상대방이 기분이 좋다고 했을 때",
-          "ai_evaluation": {
-            "model": "gpt-4o-mini",
-            "criteria": [
-              "적절한 호칭 사용",
-              "대화 맥락 일치",
-              "예의 바른 표현"
-            ],
-            "scoring": {
-              "excellent": {
-                "affection": 5,
-                "intimacy": 3
-              },
-              "good": {
-                "affection": 3,
-                "intimacy": 2
-              },
-              "normal": {
-                "affection": 1,
-                "intimacy": 1
-              },
-              "poor": {
-                "affection": -1,
-                "intimacy": 0
-              },
-              "inappropriate": {
-                "affection": -3,
-                "intimacy": -2
-              }
-            }
-          }
-        }
-      ],
-      "statistics": {
-        "total_dialogues": 4,
-        "choice_points": 1,
-        "free_input_points": 1,
-        "max_affection_gain": 8,
-        "max_intimacy_gain": 5,
-        "average_play_time": "10-15분"
       },
       "play_stats": {
         "played_count": 0,
