@@ -21103,8 +21103,8 @@
             const charactersArray = Object.values(window.characters || {});
             charactersArray.forEach(char => {
                 const id = char.id || char.character_id;
-                const name = char.name || char.character_name;
-                const mbti = char.mbti || 'MBTI';
+                const name = char.basic_info?.name || char.name || char.character_name;
+                const mbti = char.basic_info?.mbti || char.mbti || 'MBTI';
                 select.innerHTML += `<option value="${id}">${name} (${mbti})</option>`;
             });
 
