@@ -2,14 +2,215 @@
   "character_id": "미나__isfp_1759987044060",
   "character_name": "미나",
   "character_mbti": "ISFP",
-  "total_episodes": 0,
+  "total_episodes": 1,
   "metadata": {
     "version": "2.1.0",
     "schema_type": "character_based_dialogue",
     "created_at": "2025-10-09T06:30:00.000Z",
-    "last_updated": "2025-10-09T07:00:00.000Z"
+    "last_updated": "2025-10-09T11:36:38.643Z"
   },
-  "episodes": {},
+  "episodes": {
+    "ep_미나_scenario_자기야_1759988816785_iwuce5": {
+      "id": "ep_미나_scenario_자기야_1759988816785_iwuce5",
+      "character_id": "미나__isfp_1759987044060",
+      "scenario_template_id": "scenario_자기야_1759988816785",
+      "title": "scenario_자기야_1759988816785 에피소드",
+      "description": "호감도 50, 애정도 30 기반",
+      "trigger_conditions": {
+        "affection_min": 45,
+        "affection_max": 55,
+        "intimacy_min": 25,
+        "intimacy_max": 35,
+        "time_based": null,
+        "event_based": null,
+        "priority": 5
+      },
+      "generation_context": {
+        "base_affection": 50,
+        "base_intimacy": 30,
+        "tone_style": "friendly",
+        "formality": "polite",
+        "scenario_length": "medium"
+      },
+      "status": "pending",
+      "difficulty": "Medium",
+      "estimated_duration": "10-15분",
+      "created_at": "2025-10-09T11:36:38.559Z",
+      "last_edited_at": null,
+      "dialogue_flow": [
+        {
+          "sequence": 1,
+          "type": "narration",
+          "content": "어느 날, 너와 내가 공원 벤치에 앉아 햇볕을 쬐며 이야기를 나누고 있다."
+        },
+        {
+          "sequence": 2,
+          "type": "character_dialogue",
+          "speaker": "undefined",
+          "text": "여기서 이렇게 함께하는 게 참 좋네. 너는 어떻게 생각해?",
+          "emotion": "편안함",
+          "narration": "부드러운 미소를 지으며 너를 바라본다."
+        },
+        {
+          "sequence": 3,
+          "type": "multiple_choice",
+          "question": "그냥 날씨 좋고 편안하다고 대답할래?",
+          "choices": [
+            {
+              "id": "choice_1",
+              "text": "맞아, 날씨가 정말 좋네!",
+              "affection_change": 2,
+              "intimacy_change": 1,
+              "consequence": "서로의 기분이 더 좋아진다."
+            },
+            {
+              "id": "choice_2",
+              "text": "그냥 그래.",
+              "affection_change": 0,
+              "intimacy_change": 0,
+              "consequence": "대화가 조금 어색해진다."
+            },
+            {
+              "id": "choice_3",
+              "text": "너와 함께해서 더 좋지!",
+              "affection_change": 3,
+              "intimacy_change": 2,
+              "consequence": "서로의 관계가 더욱 가까워진다."
+            }
+          ]
+        },
+        {
+          "sequence": 5,
+          "type": "free_input",
+          "question": "이 순간을 어떻게 표현할래?",
+          "prompt_hint": "예를 들어, 날씨나 기분에 대한 표현",
+          "context": "공원에서의 편안한 대화 중",
+          "ai_evaluation": {
+            "model": "gpt-4o-mini",
+            "criteria": [
+              "적절한 호칭 사용",
+              "대화 맥락 일치",
+              "예의 바른 표현"
+            ],
+            "scoring": {
+              "excellent": {
+                "affection": 5,
+                "intimacy": 3
+              },
+              "good": {
+                "affection": 3,
+                "intimacy": 2
+              },
+              "normal": {
+                "affection": 1,
+                "intimacy": 1
+              },
+              "poor": {
+                "affection": -1,
+                "intimacy": 0
+              },
+              "inappropriate": {
+                "affection": -3,
+                "intimacy": -2
+              }
+            }
+          }
+        },
+        {
+          "sequence": 6,
+          "type": "narration",
+          "content": "너의 대답을 듣고 내가 미소를 짓는다."
+        },
+        {
+          "sequence": 7,
+          "type": "character_dialogue",
+          "speaker": "undefined",
+          "text": "그런 기분을 느낄 수 있다니 좋다! 더 많은 이런 순간을 만들고 싶어.",
+          "emotion": "기대감",
+          "narration": "너를 바라보며 기대에 찬 눈빛을 보인다."
+        },
+        {
+          "sequence": 8,
+          "type": "multiple_choice",
+          "question": "앞으로 함께하고 싶은 활동은?",
+          "choices": [
+            {
+              "id": "choice_1",
+              "text": "영화 보러 가고 싶어.",
+              "affection_change": 2,
+              "intimacy_change": 1,
+              "consequence": "영화에 대한 대화가 시작된다."
+            },
+            {
+              "id": "choice_2",
+              "text": "그냥 산책하는 게 좋아.",
+              "affection_change": 0,
+              "intimacy_change": 0,
+              "consequence": "대화가 무난하게 이어진다."
+            },
+            {
+              "id": "choice_3",
+              "text": "같이 요리해보고 싶어!",
+              "affection_change": 3,
+              "intimacy_change": 2,
+              "consequence": "함께 요리할 아이디어로 즐거운 대화가 이어진다."
+            }
+          ]
+        },
+        {
+          "sequence": 9,
+          "type": "free_input",
+          "question": "너의 소중한 추억을 공유해봐.",
+          "prompt_hint": "좋았던 순간이나 경험",
+          "context": "더 가까워지는 대화 중",
+          "ai_evaluation": {
+            "model": "gpt-4o-mini",
+            "criteria": [
+              "적절한 호칭 사용",
+              "대화 맥락 일치",
+              "예의 바른 표현"
+            ],
+            "scoring": {
+              "excellent": {
+                "affection": 5,
+                "intimacy": 3
+              },
+              "good": {
+                "affection": 3,
+                "intimacy": 2
+              },
+              "normal": {
+                "affection": 1,
+                "intimacy": 1
+              },
+              "poor": {
+                "affection": -1,
+                "intimacy": 0
+              },
+              "inappropriate": {
+                "affection": -3,
+                "intimacy": -2
+              }
+            }
+          }
+        }
+      ],
+      "statistics": {
+        "total_dialogues": 8,
+        "choice_points": 2,
+        "free_input_points": 2,
+        "max_affection_gain": 16,
+        "max_intimacy_gain": 10,
+        "average_play_time": "10-15분"
+      },
+      "play_stats": {
+        "played_count": 0,
+        "best_affection_gain": 0,
+        "best_intimacy_gain": 0,
+        "completion_rate": 0
+      }
+    }
+  },
   "schema_description": {
     "purpose": "캐릭터 대화 콘텐츠 관리 (호감도/애정도 기반)",
     "episode_structure": [
