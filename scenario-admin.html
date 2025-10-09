@@ -21021,12 +21021,15 @@
             // 최신순 정렬
             episodes.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
+            // 캐릭터 데이터 가져오기
+            const charactersData = window.characters || {};
+
             container.innerHTML = episodes.map(ep => {
                 const createdDate = new Date(ep.created_at).toLocaleDateString('ko-KR');
-                const character = Object.values(charactersData || {}).find(c =>
+                const character = Object.values(charactersData).find(c =>
                     (c.id || c.character_id) === ep.character_id
                 );
-                const characterName = character ? character.name : ep.character_id;
+                const characterName = character ? (character.basic_info?.name || character.name) : ep.character_id;
 
                 return `
                     <div class="episode-card" style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s;">

@@ -874,7 +874,8 @@ async function handleGenerateEpisode(req, res) {
     generation_context,
     trigger_conditions,
     title,
-    description
+    description,
+    ai_model
   } = req.body;
 
   // 필수 필드 검증
@@ -897,6 +898,7 @@ async function handleGenerateEpisode(req, res) {
   try {
     console.log(`🤖 AI 에피소드 생성 시작: ${character_id} - ${scenario_template_id}`);
     console.log(`📊 호감도: ${base_affection}, 애정도: ${base_intimacy}`);
+    console.log(`🤖 AI 모델: ${ai_model || 'gpt-4o-mini'}`);
 
     // 캐릭터 정보 로드
     const characterInfo = await loadCharacterInfo(character_id);
@@ -907,7 +909,8 @@ async function handleGenerateEpisode(req, res) {
       scenario_template_id,
       base_affection,
       base_intimacy,
-      scenario_length || 'medium'
+      scenario_length || 'medium',
+      ai_model || 'gpt-4o-mini'
     );
 
     // 에피소드 객체 생성
@@ -1084,7 +1087,7 @@ async function handleEvaluateUserInput(req, res) {
 /**
  * OpenAI를 사용하여 dialogue_flow 생성
  */
-async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseAffection, baseIntimacy, scenarioLength) {
+async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseAffection, baseIntimacy, scenarioLength, aiModel = 'gpt-4o-mini') {
   if (!OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY가 설정되지 않았습니다');
   }
@@ -1092,8 +1095,8 @@ async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseA
   const toneStyle = getToneStyle(baseAffection);
   const formality = getFormality(baseIntimacy);
 
-  // 대화 수 결정
-  const dialogueCount = scenarioLength === 'short' ? 4 : scenarioLength === 'long' ? 8 : 6;
+  // 대화 수 결정 (Vercel 10초 제한 고려하여 줄임)
+  const dialogueCount = scenarioLength === 'short' ? 3 : scenarioLength === 'long' ? 5 : 4;
 
   const prompt = `당신은 로맨스 채팅 게임의 대화 콘텐츠 작가입니다.
 
@@ -1211,18 +1214,25 @@ async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseA
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: aiModel,
         messages: [
           { role: 'system', content: '당신은 로맨스 채팅 게임의 전문 대화 작가입니다. 항상 JSON 형식으로만 응답합니다.' },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.8,
-        max_tokens: 2000
+        temperature: 0.7,
+        max_tokens: 1200  // Vercel 10초 제한 고려
       })
     });
 
     if (!response.ok) {
       const errorText = await response.text();
+
+      // OpenAI content policy 거부 감지
+      if (response.status === 400 || errorText.includes('content_policy') ||
+          errorText.includes('content_filter') || errorText.includes('safety')) {
+        throw new Error('content policy violation: AI 모델이 콘텐츠 정책 위반으로 생성을 거부했습니다');
+      }
+
       throw new Error(`OpenAI API 오류: ${response.status} - ${errorText}`);
     }
 
