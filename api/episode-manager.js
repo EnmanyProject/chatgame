@@ -17,8 +17,10 @@ const GITHUB_OWNER = 'EnmanyProject';
 const GITHUB_REPO = 'chatgame';
 const GITHUB_BRANCH = 'main';
 
-// OpenAI API 설정
+// AI API 설정
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || '';
 
 // 기본 에피소드 디렉토리
 const EPISODES_DIR = 'data/episodes';
@@ -1096,12 +1098,22 @@ async function handleEvaluateUserInput(req, res) {
  */
 
 /**
- * OpenAI를 사용하여 dialogue_flow 생성
+ * AI를 사용하여 dialogue_flow 생성 (OpenAI/Groq/Claude 지원)
  * 🆕 episode_type에 따라 다른 구조 생성
  */
 async function generateDialogueFlowWithAI(characterInfo, scenarioInfo, baseAffection, baseIntimacy, scenarioLength, aiModel = 'gpt-4o-mini', episodeType = 'choice_based') {
-  if (!OPENAI_API_KEY) {
+  // AI 제공자 감지
+  const provider = detectAIProvider(aiModel);
+
+  // API 키 검증
+  if (provider === 'openai' && !OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY가 설정되지 않았습니다');
+  }
+  if (provider === 'groq' && !GROQ_API_KEY) {
+    throw new Error('GROQ_API_KEY가 설정되지 않았습니다');
+  }
+  if (provider === 'claude' && !ANTHROPIC_API_KEY) {
+    throw new Error('ANTHROPIC_API_KEY가 설정되지 않았습니다');
   }
 
   const toneStyle = getToneStyle(baseAffection);
@@ -1391,37 +1403,91 @@ ${scenarioInfo.ai_generated_context}
 - narration만 가득한 대화를 생성하지 마세요`;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: aiModel,
-        messages: [
-          { role: 'system', content: '당신은 로맨스 채팅 게임의 전문 대화 작가입니다. 항상 JSON 형식으로만 응답합니다.' },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.7,
-        max_tokens: episodeType === 'choice_based' ? 3000 : 2500  // 🆕 대사 비중 증가에 따른 토큰 수 증가 (Vercel 30초 제한)
-      })
-    });
+    let response, content;
 
-    if (!response.ok) {
-      const errorText = await response.text();
+    // 제공자별 API 호출
+    if (provider === 'openai') {
+      response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: aiModel,
+          messages: [
+            { role: 'system', content: '당신은 로맨스 채팅 게임의 전문 대화 작가입니다. 항상 JSON 형식으로만 응답합니다.' },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.7,
+          max_tokens: episodeType === 'choice_based' ? 3000 : 2500
+        })
+      });
 
-      // OpenAI content policy 거부 감지
-      if (response.status === 400 || errorText.includes('content_policy') ||
-          errorText.includes('content_filter') || errorText.includes('safety')) {
-        throw new Error('content policy violation: AI 모델이 콘텐츠 정책 위반으로 생성을 거부했습니다');
+      if (!response.ok) {
+        const errorText = await response.text();
+        if (response.status === 400 || errorText.includes('content_policy') ||
+            errorText.includes('content_filter') || errorText.includes('safety')) {
+          throw new Error('content policy violation: AI 모델이 콘텐츠 정책 위반으로 생성을 거부했습니다');
+        }
+        throw new Error(`OpenAI API 오류: ${response.status} - ${errorText}`);
       }
 
-      throw new Error(`OpenAI API 오류: ${response.status} - ${errorText}`);
-    }
+      const data = await response.json();
+      content = data.choices[0].message.content;
 
-    const data = await response.json();
-    const content = data.choices[0].message.content;
+    } else if (provider === 'groq') {
+      response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${GROQ_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: aiModel,
+          messages: [
+            { role: 'system', content: '당신은 로맨스 채팅 게임의 전문 대화 작가입니다. 항상 JSON 형식으로만 응답합니다.' },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.7,
+          max_tokens: episodeType === 'choice_based' ? 3000 : 2500
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Groq API 오류: ${response.status} - ${errorText}`);
+      }
+
+      const data = await response.json();
+      content = data.choices[0].message.content;
+
+    } else if (provider === 'claude') {
+      response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: aiModel,
+          max_tokens: episodeType === 'choice_based' ? 3000 : 2500,
+          messages: [{
+            role: 'user',
+            content: `당신은 로맨스 채팅 게임의 전문 대화 작가입니다. 항상 JSON 형식으로만 응답합니다.\n\n${prompt}`
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Claude API 오류: ${response.status} - ${errorText}`);
+      }
+
+      const data = await response.json();
+      content = data.content[0].text;
+    }
 
     // JSON 추출 (코드 블록 제거)
     const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/\[[\s\S]*\]/);
@@ -1453,16 +1519,38 @@ ${scenarioInfo.ai_generated_context}
       console.warn(`⚠️ 주관식 부족: ${freeInputPoints}개 (요청: ${freeInputCount}개)`);
     }
 
-    console.log(`✅ OpenAI dialogue_flow 생성 완료: ${dialogueFlow.length}개 대화`);
+    console.log(`✅ ${provider.toUpperCase()} dialogue_flow 생성 완료: ${dialogueFlow.length}개 대화`);
     console.log(`📊 캐릭터 대사: ${dialogueFlow.filter(d => d.type === 'character_dialogue').length}개`);
     console.log(`📊 선택지: ${choicePoints}개, 주관식: ${freeInputPoints}개`);
 
     return dialogueFlow;
 
   } catch (error) {
-    console.error('❌ OpenAI API 호출 실패:', error);
+    console.error(`❌ ${provider.toUpperCase()} API 호출 실패:`, error);
     throw error;
   }
+}
+
+/**
+ * AI 모델명으로 제공자 감지
+ */
+function detectAIProvider(modelName) {
+  if (!modelName) return 'openai';
+
+  const model = modelName.toLowerCase();
+
+  // Groq (Llama 모델)
+  if (model.includes('llama') || model.includes('mixtral') || model.includes('gemma')) {
+    return 'groq';
+  }
+
+  // Claude (Anthropic)
+  if (model.includes('claude') || model.includes('sonnet') || model.includes('opus') || model.includes('haiku')) {
+    return 'claude';
+  }
+
+  // 기본값: OpenAI
+  return 'openai';
 }
 
 /**
