@@ -100,6 +100,36 @@ grep "systemVersion" scenario-admin.html
 
 ## 📊 버전 히스토리
 
+### 레거시 파일 정리 (2025-10-11) - 구형 시스템 파일 15개 제거 (Maintenance)
+**작업 내용**:
+- 🗑️ **레거시 파일 15개 완전 삭제**:
+  * **HTML (2개)**: episode-player.html, multi-scenario-game.html
+  * **API (5개)**: episodes.js, episode-test.js, scenario.js, scenarios.js, scenarios-validate.js
+  * **테스트 (5개)**: integration-test.html, test-scenarios.js, test_fallback_prompt.js, test_scenario_generation.js, verify_fallback_accuracy.js
+  * **유틸리티 (3개)**: fix-character-photos.js, test-photo-api-detailed.js, test-photo-debug.js
+
+- 💾 **안전 백업**:
+  * 모든 파일 `.legacy-backup/20251011/` 디렉토리에 백업
+  * 필요 시 복원 가능
+
+- 📋 **삭제 이유**:
+  * Phase 1-3 구형 시스템 → v1.8+ 완전 대체
+  * Acts & Beats → v1.7.0 기승전결 전환 완료
+  * Fallback 시스템 → v1.5.0 제거됨
+  * 테스트 파일 → 개발 완료 후 불필요
+
+- 🎯 **주의 파일 (향후 정리 예정, 8개)**:
+  * chat-ui.html, scenarios-acts.js, scenarios-beats.js
+  * scenario-builder.js, scenario-preview.js, scenario-ui-components.js
+  * episode-player.js, lib/ 전체
+
+**영향도**: 안전 (모든 파일이 대체되었거나 더 이상 사용되지 않음)
+
+**Git**: 커밋 `16f7b33`, 푸시 완료 ✅
+**작업 유형**: chore (코드베이스 정리)
+
+---
+
 ### v2.2.2 (2025-10-10) - speaker undefined 수정 + 캐릭터 대사 비중 대폭 증가 (Patch Update)
 **작업 내용**:
 - 🎭 **speaker 필드 "undefined" 문제 완전 해결**:
