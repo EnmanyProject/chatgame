@@ -2,12 +2,12 @@
   "character_id": "소운__enfp_1760055948109",
   "character_name": "소운",
   "character_mbti": "INFP",
-  "total_episodes": 1,
+  "total_episodes": 2,
   "metadata": {
     "version": "2.1.0",
     "schema_type": "character_based_dialogue",
     "created_at": "2025-10-10T00:27:15.475Z",
-    "last_updated": "2025-10-10T03:07:00.347Z"
+    "last_updated": "2025-10-10T04:48:28.109Z"
   },
   "episodes": {
     "ep_소운_scenario_우리_사귈까_1760007114571_4bvrer": {
@@ -158,6 +158,167 @@
         "free_input_points": 0,
         "max_affection_gain": 7,
         "max_intimacy_gain": 5,
+        "average_play_time": "12-18분"
+      },
+      "play_stats": {
+        "played_count": 0,
+        "best_affection_gain": 0,
+        "best_intimacy_gain": 0,
+        "completion_rate": 0
+      }
+    },
+    "ep_소운_scenario_우리_사귈까_1760007114571_2syhk5": {
+      "id": "ep_소운_scenario_우리_사귈까_1760007114571_2syhk5",
+      "character_id": "소운__enfp_1760055948109",
+      "scenario_template_id": "scenario_우리_사귈까_1760007114571",
+      "title": "scenario_우리_사귈까_1760007114571 에피소드",
+      "description": "호감도 23, 애정도 23 기반",
+      "episode_type": "choice_based",
+      "trigger_conditions": {
+        "affection_min": 18,
+        "affection_max": 28,
+        "intimacy_min": 18,
+        "intimacy_max": 28,
+        "time_based": null,
+        "event_based": null,
+        "priority": 5
+      },
+      "generation_context": {
+        "base_affection": 23,
+        "base_intimacy": 23,
+        "tone_style": "polite",
+        "formality": "polite",
+        "scenario_length": "medium",
+        "episode_type": "choice_based"
+      },
+      "status": "pending",
+      "difficulty": "Medium",
+      "estimated_duration": "12-18분",
+      "created_at": "2025-10-10T04:48:28.024Z",
+      "last_edited_at": null,
+      "dialogue_flow": [
+        {
+          "sequence": 1,
+          "type": "character_dialogue",
+          "text": "안녕? 갑자기 연락해서 미안해.",
+          "emotion": "긴장한",
+          "narration": "메신저를 열고 보낸 첫 메시지에 떨리는 손길을 느끼며"
+        },
+        {
+          "sequence": 2,
+          "type": "narration",
+          "content": "여자는 과거의 추억을 떠올리며 캐릭터의 답장을 기다린다."
+        },
+        {
+          "sequence": 3,
+          "type": "character_dialogue",
+          "text": "미안할 필요 없어. 사실, 너한테 조금 호감이 있었어. 이렇게 말하는 게 어색하네.",
+          "emotion": "긴장한",
+          "narration": "고백의 용기를 내어 호감을 털어놓는다."
+        },
+        {
+          "sequence": 4,
+          "type": "multiple_choice",
+          "question": "그럼, 어떤 반응이 기대되나요?",
+          "choices": [
+            {
+              "id": "choice_1",
+              "text": "감사해요. 나도 너에게 호감이 있어.",
+              "affection_change": 5,
+              "intimacy_change": 3,
+              "consequence": "서로에 대한 호감이 깊어지며 떨리는 순간"
+            },
+            {
+              "id": "choice_2",
+              "text": "정말? 나도 너를 좋아했어.",
+              "affection_change": 3,
+              "intimacy_change": 2,
+              "consequence": "서로의 호감이 공감으로 이어지며 달콤한 분위기"
+            },
+            {
+              "id": "choice_3",
+              "text": "응... 그래? 그건 놀랍다.",
+              "affection_change": 1,
+              "intimacy_change": 1,
+              "consequence": "서로의 거리가 좁혀지며 조금 어색한 미소"
+            }
+          ]
+        },
+        {
+          "sequence": 5,
+          "type": "character_dialogue",
+          "text": "정말? 나도 너를 좋아했어. 우리, 좀 더 친해지면 좋을 것 같아.",
+          "emotion": "기쁜",
+          "narration": "서로의 호감이 공감으로 이어지는 듯한 미소를 지으며"
+        },
+        {
+          "sequence": 6,
+          "type": "character_dialogue",
+          "text": "그럼, 혹시 너는 어떤 여자를 좋아했어?",
+          "emotion": "궁금한",
+          "narration": "여자에게 호기심을 품고 새로운 이야기를 시작하려 한다."
+        },
+        {
+          "sequence": 7,
+          "type": "narration",
+          "content": "여자는 그의 과거 이야기에 흥미로운 반응을 기대한다."
+        },
+        {
+          "sequence": 8,
+          "type": "character_dialogue",
+          "text": "그녀는 독서에 빠져들면서 참 매력 있었어. 그리고 너와 이야기하는 게 가장 행복했어.",
+          "emotion": "회상하는",
+          "narration": "과거의 추억을 회상하며 심쿵한 미소를 지으며"
+        },
+        {
+          "sequence": 9,
+          "type": "multiple_choice",
+          "question": "어떤 반응을 보일까요?",
+          "choices": [
+            {
+              "id": "choice_1",
+              "text": "그럼 나랑 어울리지 않을까?",
+              "affection_change": 3,
+              "intimacy_change": 2,
+              "consequence": "서로의 공감이 깊어지며 새로운 시작의 기대"
+            },
+            {
+              "id": "choice_2",
+              "text": "매력 있게 보이는데, 나도 그런 사람이 되고 싶어.",
+              "affection_change": 4,
+              "intimacy_change": 3,
+              "consequence": "서로의 공감과 이해가 깊어지며 새로운 마음의 연결"
+            },
+            {
+              "id": "choice_3",
+              "text": "그래? 그런 사람이랑 이야기하는 게 행복하겠다.",
+              "affection_change": 2,
+              "intimacy_change": 1,
+              "consequence": "서로의 공감을 나누며 새로운 이야기의 시작"
+            }
+          ]
+        },
+        {
+          "sequence": 10,
+          "type": "character_dialogue",
+          "text": "매력 있게 보이는데, 나도 그런 사람이 되고 싶어. 우리 좀 더 가까워지고 싶어.",
+          "emotion": "감격스러운",
+          "narration": "새로운 마음의 연결을 공감하며 서로에 대한 이해가 깊어지는 느낌"
+        },
+        {
+          "sequence": 11,
+          "type": "character_dialogue",
+          "text": "이번 주 토요일에 만날까? 좀 더 이야기 나누고 싶어.",
+          "emotion": "신나는",
+          "narration": "새로운 시작을 꿈꾸며 설레이는 마음을 담아"
+        }
+      ],
+      "statistics": {
+        "total_dialogues": 11,
+        "choice_points": 2,
+        "free_input_points": 0,
+        "max_affection_gain": 9,
+        "max_intimacy_gain": 6,
         "average_play_time": "12-18분"
       },
       "play_stats": {
