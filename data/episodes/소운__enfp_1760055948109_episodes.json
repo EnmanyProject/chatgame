@@ -2,123 +2,14 @@
   "character_id": "소운__enfp_1760055948109",
   "character_name": "소운",
   "character_mbti": "INFP",
-  "total_episodes": 1,
+  "total_episodes": 0,
   "metadata": {
     "version": "2.1.0",
     "schema_type": "character_based_dialogue",
     "created_at": "2025-10-10T00:27:15.475Z",
-    "last_updated": "2025-10-10T02:58:07.263Z"
+    "last_updated": "2025-10-10T03:05:48.830Z"
   },
-  "episodes": {
-    "ep_소운_scenario_자기야_1759988816785_p3ijth": {
-      "id": "ep_소운_scenario_자기야_1759988816785_p3ijth",
-      "character_id": "소운__enfp_1760055948109",
-      "scenario_template_id": "scenario_자기야_1759988816785",
-      "title": "만날래?",
-      "description": "호감도 50, 애정도 44 기반",
-      "episode_type": "choice_based",
-      "trigger_conditions": {
-        "affection_min": 45,
-        "affection_max": 55,
-        "intimacy_min": 39,
-        "intimacy_max": 49,
-        "time_based": null,
-        "event_based": null,
-        "priority": 5
-      },
-      "generation_context": {
-        "base_affection": 50,
-        "base_intimacy": 44,
-        "tone_style": "friendly",
-        "formality": "casual",
-        "scenario_length": "long",
-        "episode_type": "choice_based"
-      },
-      "status": "pending",
-      "difficulty": "Hard",
-      "estimated_duration": "18-25분",
-      "created_at": "2025-10-10T02:58:07.147Z",
-      "last_edited_at": null,
-      "dialogue_flow": [
-        {
-          "sequence": 1,
-          "type": "narration",
-          "content": "길을 걷다가 갑자기 비밀번호를 잊어버린 것을 떠올립니다."
-        },
-        {
-          "sequence": 2,
-          "type": "character_dialogue",
-          "speaker": "undefined",
-          "text": "어떡하지... 비밀번호가 또 까맣게 잊어버렸어. 정말 바보 같아.",
-          "emotion": "걱정",
-          "narration": "주머니 속에서 휴대폰을 꺼내며 얼굴을 찡그리는 표정을 지어냅니다."
-        },
-        {
-          "sequence": 3,
-          "type": "multiple_choice",
-          "question": "어떻게 할까요?",
-          "choices": [
-            {
-              "id": "choice_1",
-              "text": "친구에게 비밀번호를 물어본다.",
-              "affection_change": 2,
-              "intimacy_change": 1,
-              "consequence": "친구와의 관계가 더 가까워집니다."
-            },
-            {
-              "id": "choice_2",
-              "text": "자주 사용하는 다른 비밀번호를 입력해본다.",
-              "affection_change": 0,
-              "intimacy_change": 0,
-              "consequence": "비밀번호가 틀려 더욱 당황스러워합니다."
-            },
-            {
-              "id": "choice_3",
-              "text": "기억나려고 더 머리를 쥐어짜본다.",
-              "affection_change": 3,
-              "intimacy_change": 2,
-              "consequence": "조금씩 기억이 돌아와 기쁨을 느낍니다."
-            }
-          ]
-        },
-        {
-          "sequence": 4,
-          "type": "character_dialogue",
-          "speaker": "undefined",
-          "text": "친구에게 물어보면 됐었어. 이제 알겠어, 고마워.",
-          "emotion": "감사",
-          "narration": "마음이 가벼워지는 미소를 띠며 휴대폰을 품에 안아보입니다."
-        },
-        {
-          "sequence": 5,
-          "type": "narration",
-          "content": "비밀번호를 찾아 해피한 기분으로 다음 일정을 확인하려 합니다."
-        },
-        {
-          "sequence": 6,
-          "type": "character_dialogue",
-          "speaker": "undefined",
-          "text": "이번 주 일정은 또 뭐가 있지?",
-          "emotion": "궁금",
-          "narration": "눈을 반짝이며 휴대폰 화면을 탭합니다."
-        }
-      ],
-      "statistics": {
-        "total_dialogues": 6,
-        "choice_points": 1,
-        "free_input_points": 0,
-        "max_affection_gain": 3,
-        "max_intimacy_gain": 2,
-        "average_play_time": "18-25분"
-      },
-      "play_stats": {
-        "played_count": 0,
-        "best_affection_gain": 0,
-        "best_intimacy_gain": 0,
-        "completion_rate": 0
-      }
-    }
-  },
+  "episodes": {},
   "schema_description": {
     "purpose": "캐릭터 대화 콘텐츠 관리 (호감도/애정도 기반)",
     "episode_structure": [
