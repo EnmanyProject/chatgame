@@ -1,24 +1,127 @@
 # 📌 현재 작업 가이드 (MASTER)
 
-**최종 업데이트**: 2025-10-09 오후
-**현재 Phase**: 에피소드 관리 시스템 완성
+**최종 업데이트**: 2025-10-10 새벽
+**현재 Phase**: 에피소드 AI 생성 시스템 완전 개선
 
 ---
 
 ## 🎯 현재 상태
 
-**작업**: 3대 문서 백업 시스템 구축 완료 ✅
-**버전**: v1.19.6
+**작업**: AI 대화 생성 시스템 완전 개선 ✅
+**버전**: Episode Manager API v2.2.2 / Scenario Admin v1.19.6
 **상태**: 완료
 **다음**: 사용자 요청 대기
 
 **최근 완료**:
-- 에피소드 관리 시스템 완전 구현 (v1.19.5)
-- 3대 문서 백업 시스템 구축 (v1.19.6)
+- AI 대화 생성 시나리오+캐릭터 상세 정보 반영 (v2.2.1)
+- speaker undefined 수정 + 캐릭터 대사 비중 대폭 증가 (v2.2.2)
 
 ---
 
-## ✅ 최근 완료 작업 (2025-10-09)
+## ✅ 최근 완료 작업
+
+### 🌟 새벽 작업: AI 대화 생성 시스템 완전 개선 (2025-10-10)
+
+**Episode Manager API v2.2.1 → v2.2.2** - AI 대화 생성 품질 대폭 향상
+
+#### v2.2.2: speaker undefined 수정 + 캐릭터 대사 비중 대폭 증가 (Patch Update)
+
+**핵심 개선**:
+1. **speaker 필드 "undefined" 문제 완전 해결**
+   - AI 프롬프트에 명확한 경고 추가: `speaker는 반드시 "${characterInfo.name}"`
+   - 후처리 검증 시스템 추가: undefined/빈 값 자동 교체
+   - 검증 로깅으로 수정 내역 추적
+
+2. **캐릭터 대사 비중 60% → 80%로 대폭 증가**
+   - 대화 구조 변경: narration 우선 → character_dialogue 우선
+   - 사이클당 대사 개수 증가: 2개 → 3개
+   - 총 대화 개수 증가: ~10-16개 → ~16-26개
+   - 명시적 지시: "대화의 80%는 캐릭터 대사"
+
+3. **AI 생성 토큰 증가**
+   - choice_based: 2000 → 3000 tokens
+   - free_input_based: 1800 → 2500 tokens
+   - 근거: Vercel 타임아웃 30초 (10초 아님)
+
+4. **필수 구조 강화**
+   ```
+   반복 N번:
+   1. character_dialogue (캐릭터가 먼저)
+   2. narration (간단하게)
+   3. character_dialogue (추가 대사)
+   4. multiple_choice/free_input (선택)
+   5. character_dialogue (반응 대사 - 필수!)
+   ```
+
+**기술적 세부사항**:
+- Lines 1102-1390: AI 프롬프트 완전 개편
+- Lines 1428-1458: 후처리 검증 시스템 추가
+- Lines 1113-1125: 대화 개수 계산식 변경 (× 3 + 1 → × 5 + 1)
+- Line 1407: max_tokens 증가
+
+**Git**: 커밋 `ca8d4cc`, 푸시 완료 ✅
+
+---
+
+#### v2.2.1: AI 대화 생성 시나리오+캐릭터 상세 정보 반영 (Patch Update)
+
+**핵심 개선**:
+1. **시나리오 정보 완전 로드 시스템**
+   - `loadScenarioInfo()` 함수 신규 추가 (Lines 1461-1504)
+   - GitHub API에서 scenario-database.json 실시간 로드
+   - 제목, 설명, 장르, 섹시 레벨, 분위기 전달
+   - **가장 중요**: ai_generated_context (600-900자 스토리) 포함
+
+2. **캐릭터 정보 대폭 확장**
+   - `loadCharacterInfo()` 개선 (Lines 1506-1559)
+   - 4개 필드 → 10+ 필드로 확장
+   - 추가된 정보: 나이, 직업, 성격 특성, 취미, 좋아하는 주제, 피하는 주제
+
+3. **AI 프롬프트에 상세 정보 반영**
+   ```
+   **📖 시나리오 정보:**
+   - 제목: ${scenarioInfo.title}
+   - 설명: ${scenarioInfo.description}
+   - 장르: ${scenarioInfo.genre} (섹시 레벨: ${scenarioInfo.sexy_level}/10)
+   - 분위기: ${scenarioInfo.mood}
+
+   **📚 시나리오 배경 스토리:**
+   ${scenarioInfo.ai_generated_context}  ← 600-900자 스토리!
+
+   **💁 캐릭터 정보:**
+   - 이름: ${characterInfo.name}
+   - 나이: ${characterInfo.age}세
+   - 직업: ${characterInfo.occupation}
+   - MBTI: ${characterInfo.mbti}
+   - 성격: ${characterInfo.personality}
+   - 성격 특성: ${characterInfo.personality_traits?.join(', ')}
+   - 취미: ${characterInfo.hobbies?.join(', ')}
+   - 말투: ${characterInfo.speech_style}
+   - 좋아하는 주제: ${characterInfo.favorite_topics?.join(', ')}
+   - 피하는 주제: ${characterInfo.disliked_topics?.join(', ')}
+
+   🚨 중요: 위의 "시나리오 배경 스토리"를 반드시 참고하여 대화를 생성하세요!
+   ```
+
+4. **문제 해결**
+   - **이전**: 시나리오 ID만 전달 (예: "scenario_도와줘_1759987337551")
+   - **현재**: 전체 스토리 컨텍스트 전달 → AI가 정확히 참고
+
+**기술적 세부사항**:
+- Lines 1461-1504: loadScenarioInfo() 함수 추가
+- Lines 1506-1559: loadCharacterInfo() 개선
+- Lines 910-923: handleGenerateEpisode()에서 시나리오 정보 로드
+- Lines 1102-1197: AI 프롬프트 대폭 확장
+
+**사용자 피드백 반영**:
+- "시나리오를 참조하지 않고 그냥 만드는 것 같다" ✅ 해결
+- "API 응답시간 10초 제한 늘려줘" → Vercel 이미 30초임을 확인
+
+**Git**: 커밋 `f8a5d2a`, 푸시 완료 ✅
+
+---
+
+## ✅ 이전 완료 작업 (2025-10-09)
 
 ### 📦 저녁 작업: 3대 문서 백업 시스템 구축 (v1.19.6)
 

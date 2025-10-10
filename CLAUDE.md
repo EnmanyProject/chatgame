@@ -100,6 +100,73 @@ grep "systemVersion" scenario-admin.html
 
 ## 📊 버전 히스토리
 
+### v2.2.2 (2025-10-10) - speaker undefined 수정 + 캐릭터 대사 비중 대폭 증가 (Patch Update)
+**작업 내용**:
+- 🎭 **speaker 필드 "undefined" 문제 완전 해결**:
+  * AI 프롬프트에 명확한 경고: `speaker는 반드시 "${characterInfo.name}"`
+  * 후처리 검증 시스템: undefined/빈 값 자동 교체
+  * 검증 로깅으로 수정 내역 추적
+- 💬 **캐릭터 대사 비중 60% → 80%로 대폭 증가**:
+  * 대화 구조 변경: narration 우선 → character_dialogue 우선
+  * 사이클당 대사 개수: 2개 → 3개
+  * 총 대화 개수: ~10-16개 → ~16-26개
+  * 명시적 지시: "대화의 80%는 캐릭터 대사"
+- 📈 **AI 생성 토큰 증가**:
+  * choice_based: 2000 → 3000 tokens
+  * free_input_based: 1800 → 2500 tokens
+  * 근거: Vercel 타임아웃 30초 (10초 아님)
+- 🏗️ **필수 구조 강화**:
+  * 반복 N번: character_dialogue → narration → character_dialogue → choice → character_dialogue
+
+**기술적 세부사항**:
+- api/episode-manager.js Lines 1102-1390: AI 프롬프트 완전 개편
+- api/episode-manager.js Lines 1428-1458: 후처리 검증 시스템 추가
+- api/episode-manager.js Lines 1113-1125: 대화 개수 계산식 변경 (× 3 + 1 → × 5 + 1)
+- api/episode-manager.js Line 1407: max_tokens 증가
+
+**사용자 피드백 반영**:
+- "생성된 대사의 화자가 왜 undefined지" ✅ 해결
+- "캐릭터의 대사가 훨씬 많고 자연스러워야해" ✅ 해결
+
+**Git**: 커밋 `ca8d4cc`, 푸시 완료 ✅
+**영향**: api/episode-manager.js Lines 1102-1458
+
+---
+
+### v2.2.1 (2025-10-10) - AI 대화 생성 시나리오+캐릭터 상세 정보 반영 (Patch Update)
+**작업 내용**:
+- 📖 **시나리오 정보 완전 로드 시스템**:
+  * `loadScenarioInfo()` 함수 신규 추가 (Lines 1461-1504)
+  * GitHub API에서 scenario-database.json 실시간 로드
+  * 제목, 설명, 장르, 섹시 레벨, 분위기 전달
+  * **가장 중요**: ai_generated_context (600-900자 스토리) 포함
+- 👤 **캐릭터 정보 대폭 확장**:
+  * `loadCharacterInfo()` 개선 (Lines 1506-1559)
+  * 4개 필드 → 10+ 필드로 확장
+  * 추가: 나이, 직업, 성격 특성, 취미, 좋아하는 주제, 피하는 주제
+- 🤖 **AI 프롬프트에 상세 정보 반영**:
+  * 시나리오: 제목, 설명, 장르, 섹시 레벨, 분위기, **전체 배경 스토리(600-900자)**
+  * 캐릭터: 이름, 나이, 직업, MBTI, 성격, 성격 특성, 취미, 말투, 좋아하는/피하는 주제
+  * 명시적 지시: "🚨 중요: 위의 '시나리오 배경 스토리'를 반드시 참고하여 대화를 생성하세요!"
+- 🎯 **문제 해결**:
+  * **이전**: 시나리오 ID만 전달 (예: "scenario_도와줘_1759987337551")
+  * **현재**: 전체 스토리 컨텍스트 전달 → AI가 정확히 참고
+
+**기술적 세부사항**:
+- api/episode-manager.js Lines 1461-1504: loadScenarioInfo() 함수 추가
+- api/episode-manager.js Lines 1506-1559: loadCharacterInfo() 개선
+- api/episode-manager.js Lines 910-923: handleGenerateEpisode()에서 시나리오 정보 로드
+- api/episode-manager.js Lines 1102-1197: AI 프롬프트 대폭 확장
+
+**사용자 피드백 반영**:
+- "시나리오를 참조하지 않고 그냥 만드는 것 같다" ✅ 해결
+- "API 응답시간 10초 제한 늘려줘" → Vercel 이미 30초임을 확인
+
+**Git**: 커밋 `f8a5d2a`, 푸시 완료 ✅
+**영향**: api/episode-manager.js Lines 910-923, 1102-1559
+
+---
+
 ### v1.19.6 (2025-10-09) - 3대 문서 백업 시스템 구축 (Patch Update)
 **작업 내용**:
 - 📦 **문서 백업 시스템**: v1.19.5 마일스톤 시점의 3대 문서 백업
