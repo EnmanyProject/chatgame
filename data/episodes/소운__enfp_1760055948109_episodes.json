@@ -1,0 +1,278 @@
+{
+  "character_id": "소운__enfp_1760055948109",
+  "character_name": "소운",
+  "character_mbti": "INFP",
+  "total_episodes": 2,
+  "metadata": {
+    "version": "2.1.0",
+    "schema_type": "character_based_dialogue",
+    "created_at": "2025-10-10T00:27:15.475Z",
+    "last_updated": "2025-10-10T02:40:50.661Z"
+  },
+  "episodes": {
+    "ep_소운_scenario_자기야_1759988816785_fjq8i6": {
+      "id": "ep_소운_scenario_자기야_1759988816785_fjq8i6",
+      "character_id": "소운__enfp_1760055948109",
+      "scenario_template_id": "scenario_자기야_1759988816785",
+      "title": "scenario_자기야_1759988816785 에피소드",
+      "description": "호감도 16, 애정도 12 기반",
+      "trigger_conditions": {
+        "affection_min": 11,
+        "affection_max": 21,
+        "intimacy_min": 7,
+        "intimacy_max": 17,
+        "time_based": null,
+        "event_based": null,
+        "priority": 5
+      },
+      "generation_context": {
+        "base_affection": 16,
+        "base_intimacy": 12,
+        "tone_style": "cold",
+        "formality": "formal",
+        "scenario_length": "short"
+      },
+      "status": "pending",
+      "difficulty": "Easy",
+      "estimated_duration": "5-10분",
+      "created_at": "2025-10-10T00:27:15.389Z",
+      "last_edited_at": null,
+      "dialogue_flow": [
+        {
+          "sequence": 1,
+          "type": "narration",
+          "content": "따뜻한 저녁, 당신과 내가 서로의 관심사에 대해 이야기하고 있다."
+        },
+        {
+          "sequence": 2,
+          "type": "character_dialogue",
+          "speaker": "undefined",
+          "text": "요즘 어떤 취미를 가지고 있어요? 저는 책 읽는 걸 정말 좋아해요.",
+          "emotion": "호기심",
+          "narration": "조금은 긴장된 분위기 속에서도 상대방에게 관심을 보이는 모습."
+        },
+        {
+          "sequence": 3,
+          "type": "multiple_choice",
+          "question": "당신의 취미에 대해 이야기해보세요.",
+          "choices": [
+            {
+              "id": "choice_1",
+              "text": "저는 음악 감상을 좋아해요.",
+              "affection_change": 2,
+              "intimacy_change": 1,
+              "consequence": "서로의 취미에 대해 더 깊이 이야기할 기회가 생긴다."
+            },
+            {
+              "id": "choice_2",
+              "text": "특별한 취미는 없어요.",
+              "affection_change": 0,
+              "intimacy_change": 0,
+              "consequence": "상대방이 아쉬워하며 더 많은 질문을 하게 된다."
+            },
+            {
+              "id": "choice_3",
+              "text": "저는 요리를 즐겨요!",
+              "affection_change": 3,
+              "intimacy_change": 2,
+              "consequence": "서로의 취미에 대한 공감대가 생기고 더욱 가까워진다."
+            }
+          ]
+        },
+        {
+          "sequence": 5,
+          "type": "free_input",
+          "question": "당신의 취미에 대해 자세히 설명해보세요.",
+          "prompt_hint": "어떤 점이 매력적인지 이야기해보세요.",
+          "context": "상대방에게 자신의 취미를 소개하는 상황.",
+          "ai_evaluation": {
+            "model": "gpt-4o-mini",
+            "criteria": [
+              "적절한 호칭 사용",
+              "대화 맥락 일치",
+              "예의 바른 표현"
+            ],
+            "scoring": {
+              "excellent": {
+                "affection": 5,
+                "intimacy": 3
+              },
+              "good": {
+                "affection": 3,
+                "intimacy": 2
+              },
+              "normal": {
+                "affection": 1,
+                "intimacy": 1
+              },
+              "poor": {
+                "affection": -1,
+                "intimacy": 0
+              },
+              "inappropriate": {
+                "affection": -3,
+                "intimacy": -2
+              }
+            }
+          }
+        }
+      ],
+      "statistics": {
+        "total_dialogues": 4,
+        "choice_points": 1,
+        "free_input_points": 1,
+        "max_affection_gain": 8,
+        "max_intimacy_gain": 5,
+        "average_play_time": "5-10분"
+      },
+      "play_stats": {
+        "played_count": 0,
+        "best_affection_gain": 0,
+        "best_intimacy_gain": 0,
+        "completion_rate": 0
+      }
+    },
+    "ep_소운_scenario_우리_사귈까_1760007114571_p70vwe": {
+      "id": "ep_소운_scenario_우리_사귈까_1760007114571_p70vwe",
+      "character_id": "소운__enfp_1760055948109",
+      "scenario_template_id": "scenario_우리_사귈까_1760007114571",
+      "title": "사귀자 ",
+      "description": "호감도 50, 애정도 44 기반",
+      "trigger_conditions": {
+        "affection_min": 45,
+        "affection_max": 55,
+        "intimacy_min": 39,
+        "intimacy_max": 49,
+        "time_based": null,
+        "event_based": null,
+        "priority": 5
+      },
+      "generation_context": {
+        "base_affection": 50,
+        "base_intimacy": 44,
+        "tone_style": "friendly",
+        "formality": "casual",
+        "scenario_length": "long"
+      },
+      "status": "pending",
+      "difficulty": "Hard",
+      "estimated_duration": "15-20분",
+      "created_at": "2025-10-10T02:40:50.557Z",
+      "last_edited_at": null,
+      "dialogue_flow": [
+        {
+          "sequence": 1,
+          "type": "narration",
+          "content": "당신과 상대는 서로를 좋아하지만 관계는 아직 매우 친구적인 수준입니다. 어느 날, 당신은 상대방에게 연락을 하려고 합니다."
+        },
+        {
+          "sequence": 2,
+          "type": "character_dialogue",
+          "speaker": "당신",
+          "text": "안녕! 요즘 어떻게 지내?",
+          "emotion": "친근함",
+          "narration": "당신은 자연스럽게 상대방에게 인사를 건네며 관심을 표현합니다."
+        },
+        {
+          "sequence": 3,
+          "type": "multiple_choice",
+          "question": "오늘 무슨 일이 있었나요?",
+          "choices": [
+            {
+              "id": "choice_1",
+              "text": "아무것도 특별한 일은 없었어.",
+              "affection_change": 1,
+              "intimacy_change": 0,
+              "consequence": "친구 사이로의 대화가 이어집니다."
+            },
+            {
+              "id": "choice_2",
+              "text": "오늘은 너와 대화하기를 기다렸어.",
+              "affection_change": 3,
+              "intimacy_change": 2,
+              "consequence": "상대방은 당신의 진심에 감동받습니다."
+            },
+            {
+              "id": "choice_3",
+              "text": "너에게 들려줄만한 재미있는 이야기가 있어.",
+              "affection_change": 2,
+              "intimacy_change": 1,
+              "consequence": "상대방은 흥미롭게 대화에 참여합니다."
+            }
+          ]
+        },
+        {
+          "sequence": 5,
+          "type": "free_input",
+          "question": "오늘 하루 어땠는지 이야기해봐.",
+          "prompt_hint": "무슨 일이 있었는지, 기분 좋은 순간은?",
+          "context": "당신과 상대의 대화가 이어지고 있는 상황",
+          "ai_evaluation": {
+            "model": "gpt-4o-mini",
+            "criteria": [
+              "적절한 호칭 사용",
+              "대화 맥락 일치",
+              "예의 바른 표현"
+            ],
+            "scoring": {
+              "excellent": {
+                "affection": 5,
+                "intimacy": 3
+              },
+              "good": {
+                "affection": 3,
+                "intimacy": 2
+              },
+              "normal": {
+                "affection": 1,
+                "intimacy": 1
+              },
+              "poor": {
+                "affection": -1,
+                "intimacy": 0
+              },
+              "inappropriate": {
+                "affection": -3,
+                "intimacy": -2
+              }
+            }
+          }
+        }
+      ],
+      "statistics": {
+        "total_dialogues": 4,
+        "choice_points": 1,
+        "free_input_points": 1,
+        "max_affection_gain": 8,
+        "max_intimacy_gain": 5,
+        "average_play_time": "15-20분"
+      },
+      "play_stats": {
+        "played_count": 0,
+        "best_affection_gain": 0,
+        "best_intimacy_gain": 0,
+        "completion_rate": 0
+      }
+    }
+  },
+  "schema_description": {
+    "purpose": "캐릭터 대화 콘텐츠 관리 (호감도/애정도 기반)",
+    "episode_structure": [
+      "에피소드 = 대사 + 객관식 선택지 + 주관식 입력",
+      "호감도: 대화 톤/표현에 영향",
+      "애정도: 호칭/허용 답변에 영향"
+    ],
+    "dialogue_flow": [
+      "narration - 상황 설명",
+      "character_dialogue - 캐릭터 대사",
+      "multiple_choice - 객관식 선택지 (호감도/애정도 변화)",
+      "free_input - 주관식 입력 (AI 판정)"
+    ],
+    "lifecycle": [
+      "pending - 생성됨, 트리거 대기",
+      "sent - 채팅방 전송됨",
+      "playing - 유저 플레이 중",
+      "completed - 완료됨"
+    ]
+  }
+}
