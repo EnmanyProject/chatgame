@@ -907,10 +907,14 @@ async function handleGenerateEpisode(req, res) {
     // 캐릭터 정보 로드
     const characterInfo = await loadCharacterInfo(character_id);
 
-    // AI로 dialogue_flow 생성 (🆕 episode_type 전달)
+    // 🆕 시나리오 정보 로드
+    const scenarioInfo = await loadScenarioInfo(scenario_template_id);
+    console.log(`📖 시나리오 로드: ${scenarioInfo.title}`);
+
+    // AI로 dialogue_flow 생성 (🆕 scenarioInfo 전달)
     const dialogueFlow = await generateDialogueFlowWithAI(
       characterInfo,
-      scenario_template_id,
+      scenarioInfo,  // 🆕 시나리오 ID가 아닌 상세 정보 전달
       base_affection,
       base_intimacy,
       scenario_length || 'medium',
@@ -1095,7 +1099,7 @@ async function handleEvaluateUserInput(req, res) {
  * OpenAI를 사용하여 dialogue_flow 생성
  * 🆕 episode_type에 따라 다른 구조 생성
  */
-async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseAffection, baseIntimacy, scenarioLength, aiModel = 'gpt-4o-mini', episodeType = 'choice_based') {
+async function generateDialogueFlowWithAI(characterInfo, scenarioInfo, baseAffection, baseIntimacy, scenarioLength, aiModel = 'gpt-4o-mini', episodeType = 'choice_based') {
   if (!OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY가 설정되지 않았습니다');
   }
@@ -1125,15 +1129,28 @@ async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseA
     // 선택지 전용 프롬프트
     prompt = `당신은 로맨스 채팅 게임의 전문 대화 작가입니다.
 
-**캐릭터 정보:**
+**📖 시나리오 정보:**
+- 제목: ${scenarioInfo.title}
+- 설명: ${scenarioInfo.description}
+- 장르: ${scenarioInfo.genre} (섹시 레벨: ${scenarioInfo.sexy_level}/10)
+- 분위기: ${scenarioInfo.mood}
+
+**📚 시나리오 배경 스토리:**
+${scenarioInfo.ai_generated_context}
+
+**💁 캐릭터 정보:**
 - 이름: ${characterInfo.name}
+- 나이: ${characterInfo.age}세
+- 직업: ${characterInfo.occupation || '대학생'}
 - MBTI: ${characterInfo.mbti}
-- 성격: ${characterInfo.personality || '친근함'}
-- 말투: ${characterInfo.speech_style || '자연스러움'}
+- 성격: ${characterInfo.personality || '친근하고 다정함'}
+- 성격 특성: ${characterInfo.personality_traits?.join(', ') || '긍정적, 배려심 많음'}
+- 취미: ${characterInfo.hobbies?.join(', ') || '독서, 음악 감상'}
+- 말투: ${characterInfo.speech_style || '자연스럽고 친근함'}
+- 좋아하는 주제: ${characterInfo.favorite_topics?.join(', ') || '일상, 취미'}
+- 피하는 주제: ${characterInfo.disliked_topics?.join(', ') || '과거 연애, 정치'}
 
-**시나리오:** ${scenarioTemplate}
-
-**현재 관계 상태:**
+**💕 현재 관계 상태:**
 - 호감도: ${baseAffection}/100 (톤: ${toneStyle})
 - 애정도: ${baseIntimacy}/100 (호칭: ${formality})
 
@@ -1156,6 +1173,11 @@ async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseA
 - emotion(감정), narration(행동 묘사) 필드 활용
 - 톤: ${toneStyle}, 호칭: ${formality}를 반영
 
+**🚨 중요: 위의 "시나리오 배경 스토리"를 반드시 참고하여 대화를 생성하세요!**
+- 시나리오의 상황과 분위기를 정확히 반영
+- 캐릭터의 성격 특성과 MBTI를 대사에 녹여내기
+- 시나리오의 감정선을 대화 흐름에 적용
+
 **톤 가이드 (호감도 ${baseAffection}):**
 - 0-20: 차갑고 무뚝뚝
 - 21-40: 정중하고 예의바름
@@ -1175,15 +1197,28 @@ async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseA
     // 주관식 전용 프롬프트
     prompt = `당신은 로맨스 채팅 게임의 전문 대화 작가입니다.
 
-**캐릭터 정보:**
+**📖 시나리오 정보:**
+- 제목: ${scenarioInfo.title}
+- 설명: ${scenarioInfo.description}
+- 장르: ${scenarioInfo.genre} (섹시 레벨: ${scenarioInfo.sexy_level}/10)
+- 분위기: ${scenarioInfo.mood}
+
+**📚 시나리오 배경 스토리:**
+${scenarioInfo.ai_generated_context}
+
+**💁 캐릭터 정보:**
 - 이름: ${characterInfo.name}
+- 나이: ${characterInfo.age}세
+- 직업: ${characterInfo.occupation || '대학생'}
 - MBTI: ${characterInfo.mbti}
-- 성격: ${characterInfo.personality || '친근함'}
-- 말투: ${characterInfo.speech_style || '자연스러움'}
+- 성격: ${characterInfo.personality || '친근하고 다정함'}
+- 성격 특성: ${characterInfo.personality_traits?.join(', ') || '긍정적, 배려심 많음'}
+- 취미: ${characterInfo.hobbies?.join(', ') || '독서, 음악 감상'}
+- 말투: ${characterInfo.speech_style || '자연스럽고 친근함'}
+- 좋아하는 주제: ${characterInfo.favorite_topics?.join(', ') || '일상, 취미'}
+- 피하는 주제: ${characterInfo.disliked_topics?.join(', ') || '과거 연애, 정치'}
 
-**시나리오:** ${scenarioTemplate}
-
-**현재 관계 상태:**
+**💕 현재 관계 상태:**
 - 호감도: ${baseAffection}/100 (톤: ${toneStyle})
 - 애정도: ${baseIntimacy}/100 (호칭: ${formality})
 
@@ -1207,6 +1242,11 @@ async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseA
 - 대사는 구체적이고 감정이 드러나게
 - emotion(감정), narration(행동 묘사) 필드 활용
 - 톤: ${toneStyle}, 호칭: ${formality}를 반영
+
+**🚨 중요: 위의 "시나리오 배경 스토리"를 반드시 참고하여 대화를 생성하세요!**
+- 시나리오의 상황과 분위기를 정확히 반영
+- 캐릭터의 성격 특성과 MBTI를 대사에 녹여내기
+- 시나리오의 감정선을 대화 흐름에 적용
 
 **톤 가이드 (호감도 ${baseAffection}):**
 - 0-20: 차갑고 무뚝뚝
@@ -1459,7 +1499,52 @@ ${criteria.map((c, i) => `${i + 1}. ${c}`).join('\n')}
 }
 
 /**
- * 캐릭터 정보 로드 (characters.json)
+ * 시나리오 정보 로드 (scenario-database.json)
+ */
+async function loadScenarioInfo(scenario_id) {
+  try {
+    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/data/scenarios/scenario-database.json?ref=${GITHUB_BRANCH}`;
+
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`시나리오 정보 로드 실패: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = Buffer.from(data.content, 'base64').toString('utf8');
+    const scenarioData = JSON.parse(content);
+
+    const scenario = scenarioData.scenarios[scenario_id];
+
+    if (!scenario) {
+      throw new Error(`시나리오를 찾을 수 없습니다: ${scenario_id}`);
+    }
+
+    return {
+      id: scenario.id || scenario.scenario_id,
+      title: scenario.title || '제목 없음',
+      description: scenario.description || '',
+      ai_generated_context: scenario.ai_generated_context || '',
+      mood: scenario.mood || '편안한',
+      genre: scenario.metadata?.genre || 'flutter',
+      sexy_level: scenario.metadata?.sexy_level || 5,
+      tags: scenario.tags || []
+    };
+
+  } catch (error) {
+    console.error(`❌ 시나리오 정보 로드 실패 (${scenario_id}):`, error);
+    throw error;
+  }
+}
+
+/**
+ * 캐릭터 정보 로드 (characters.json) - 🆕 더 상세한 정보 포함
  */
 async function loadCharacterInfo(character_id) {
   try {
@@ -1490,12 +1575,21 @@ async function loadCharacterInfo(character_id) {
       throw new Error(`캐릭터를 찾을 수 없습니다: ${character_id}`);
     }
 
+    // 🆕 더 상세한 캐릭터 정보 추출
     return {
       id: character.id || character.character_id,
       name: character.name || character.character_name,
       mbti: character.mbti || 'INFP',
+      age: character.age || 25,
+      occupation: character.occupation || '',
       personality: character.personality_summary || character.personality || '',
-      speech_style: character.speech_style || ''
+      personality_traits: character.personality_traits || [],
+      hobbies: character.hobbies || [],
+      speech_style: character.speech_style || '',
+      favorite_topics: character.favorite_topics || [],
+      disliked_topics: character.disliked_topics || [],
+      // AI 소개 (있으면 포함)
+      ai_introduction: character.ai_introduction || ''
     };
 
   } catch (error) {
