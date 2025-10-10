@@ -2,9 +2,9 @@
   "metadata": {
     "version": "1.0.0",
     "created_date": "2025-10-03",
-    "total_scenarios": 3,
+    "total_scenarios": 4,
     "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-10-09T10:51:55.749Z",
+    "last_updated": "2025-10-10T05:07:27.260Z",
     "data_source": "github_api_only"
   },
   "scenarios": {
@@ -137,6 +137,39 @@
         ],
         "estimated_duration": "long",
         "ai_model": "openai",
+        "target_affection_gain": 15
+      },
+      "structure": {}
+    },
+    "scenario_우리집에_놀러와_1760072844766": {
+      "id": "scenario_우리집에_놀러와_1760072844766",
+      "scenario_id": "scenario_우리집에_놀러와_1760072844766",
+      "title": "우리집에 놀러와 ",
+      "description": "집에 심심하다며 놀러오라는 대화 ",
+      "background_setting": "멤신저 대화",
+      "mood": "편안한",
+      "active_status": true,
+      "created_date": "2025-10-10",
+      "last_modified": "2025-10-10T05:07:27.259Z",
+      "ai_generated_context": "여자는 소파에 앉아 한숨을 쉬었다. 오늘은 유난히 심심한 날이었다. 주말에도 별로 할 일이 없다니! 그래서 그녀는 말해버리기로 했다. '어떡해, 너무 지루해!'라며 메신저를 열고 그에게 메시지를 보냈다. '우리집에 놀러와!' 두근거림이 커지며 문자를 보냈다. 그가 어떻게 반응할지 기대되는 마음에 미소가 번졌다.\n\n그는 평소처럼 유쾌한 반응을 보였다. '진짜? 지금 가도 돼?' 그녀는 그 답변을 받고 더 설레였다. '응응! 집에서 맛있는 간식도 준비해둘게!' 그녀의 말에 행복함이 가득 차 올랐다. '너랑 나만 있으면 얼마나 재밌을까!' 하고 내심 기대하는 마음이 커졌다.\n\n그가 집에 오기로 결심하는 듯한 메시지를 보냈다. '좋아! 몇 시에 만나? 점심 같이 먹을까?' 그녀는 팔짝 뛰며 기뻐했다. '완전 좋아! 12시쯤 어때?' 시간과 계획이 정해지며 서로의 기대감이 커졌다. '그럼, 기다릴게! 빨리 도착해!' 마음속에서 행복한 두근거림이 계속되었다. \n\n마침내 구체적인 약속이 정해지자, 그녀는 정말로 즐거운 하루가 될 것이라는 확신에 휩싸였다. '곧 보자!'라는 메시지를 마지막으로 보낸 후, 여자는 기분 좋게 방을 정리하기 시작했다. 오늘은 특별한 날이 분명했다!",
+      "custom_context": "",
+      "available_characters": [],
+      "episode_count": 0,
+      "tags": [
+        "집에",
+        "심심하다며",
+        "놀러오라는",
+        "대화",
+        "편안한"
+      ],
+      "source": "scenario_admin",
+      "updated_by": "scenario_manager_github_only",
+      "metadata": {
+        "genre": "temptation",
+        "sexy_level": 5,
+        "tags": [],
+        "estimated_duration": "medium",
+        "ai_model": "claude",
         "target_affection_gain": 15
       },
       "structure": {}
