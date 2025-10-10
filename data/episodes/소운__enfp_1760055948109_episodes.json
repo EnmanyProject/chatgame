@@ -2,136 +2,14 @@
   "character_id": "소운__enfp_1760055948109",
   "character_name": "소운",
   "character_mbti": "INFP",
-  "total_episodes": 2,
+  "total_episodes": 1,
   "metadata": {
     "version": "2.1.0",
     "schema_type": "character_based_dialogue",
     "created_at": "2025-10-10T00:27:15.475Z",
-    "last_updated": "2025-10-10T02:40:50.661Z"
+    "last_updated": "2025-10-10T02:56:38.581Z"
   },
   "episodes": {
-    "ep_소운_scenario_자기야_1759988816785_fjq8i6": {
-      "id": "ep_소운_scenario_자기야_1759988816785_fjq8i6",
-      "character_id": "소운__enfp_1760055948109",
-      "scenario_template_id": "scenario_자기야_1759988816785",
-      "title": "scenario_자기야_1759988816785 에피소드",
-      "description": "호감도 16, 애정도 12 기반",
-      "trigger_conditions": {
-        "affection_min": 11,
-        "affection_max": 21,
-        "intimacy_min": 7,
-        "intimacy_max": 17,
-        "time_based": null,
-        "event_based": null,
-        "priority": 5
-      },
-      "generation_context": {
-        "base_affection": 16,
-        "base_intimacy": 12,
-        "tone_style": "cold",
-        "formality": "formal",
-        "scenario_length": "short"
-      },
-      "status": "pending",
-      "difficulty": "Easy",
-      "estimated_duration": "5-10분",
-      "created_at": "2025-10-10T00:27:15.389Z",
-      "last_edited_at": null,
-      "dialogue_flow": [
-        {
-          "sequence": 1,
-          "type": "narration",
-          "content": "따뜻한 저녁, 당신과 내가 서로의 관심사에 대해 이야기하고 있다."
-        },
-        {
-          "sequence": 2,
-          "type": "character_dialogue",
-          "speaker": "undefined",
-          "text": "요즘 어떤 취미를 가지고 있어요? 저는 책 읽는 걸 정말 좋아해요.",
-          "emotion": "호기심",
-          "narration": "조금은 긴장된 분위기 속에서도 상대방에게 관심을 보이는 모습."
-        },
-        {
-          "sequence": 3,
-          "type": "multiple_choice",
-          "question": "당신의 취미에 대해 이야기해보세요.",
-          "choices": [
-            {
-              "id": "choice_1",
-              "text": "저는 음악 감상을 좋아해요.",
-              "affection_change": 2,
-              "intimacy_change": 1,
-              "consequence": "서로의 취미에 대해 더 깊이 이야기할 기회가 생긴다."
-            },
-            {
-              "id": "choice_2",
-              "text": "특별한 취미는 없어요.",
-              "affection_change": 0,
-              "intimacy_change": 0,
-              "consequence": "상대방이 아쉬워하며 더 많은 질문을 하게 된다."
-            },
-            {
-              "id": "choice_3",
-              "text": "저는 요리를 즐겨요!",
-              "affection_change": 3,
-              "intimacy_change": 2,
-              "consequence": "서로의 취미에 대한 공감대가 생기고 더욱 가까워진다."
-            }
-          ]
-        },
-        {
-          "sequence": 5,
-          "type": "free_input",
-          "question": "당신의 취미에 대해 자세히 설명해보세요.",
-          "prompt_hint": "어떤 점이 매력적인지 이야기해보세요.",
-          "context": "상대방에게 자신의 취미를 소개하는 상황.",
-          "ai_evaluation": {
-            "model": "gpt-4o-mini",
-            "criteria": [
-              "적절한 호칭 사용",
-              "대화 맥락 일치",
-              "예의 바른 표현"
-            ],
-            "scoring": {
-              "excellent": {
-                "affection": 5,
-                "intimacy": 3
-              },
-              "good": {
-                "affection": 3,
-                "intimacy": 2
-              },
-              "normal": {
-                "affection": 1,
-                "intimacy": 1
-              },
-              "poor": {
-                "affection": -1,
-                "intimacy": 0
-              },
-              "inappropriate": {
-                "affection": -3,
-                "intimacy": -2
-              }
-            }
-          }
-        }
-      ],
-      "statistics": {
-        "total_dialogues": 4,
-        "choice_points": 1,
-        "free_input_points": 1,
-        "max_affection_gain": 8,
-        "max_intimacy_gain": 5,
-        "average_play_time": "5-10분"
-      },
-      "play_stats": {
-        "played_count": 0,
-        "best_affection_gain": 0,
-        "best_intimacy_gain": 0,
-        "completion_rate": 0
-      }
-    },
     "ep_소운_scenario_우리_사귈까_1760007114571_p70vwe": {
       "id": "ep_소운_scenario_우리_사귈까_1760007114571_p70vwe",
       "character_id": "소운__enfp_1760055948109",
