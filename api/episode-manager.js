@@ -876,7 +876,8 @@ async function handleGenerateEpisode(req, res) {
     trigger_conditions,
     title,
     description,
-    ai_model
+    ai_model,
+    episode_type  // 🆕 'choice_based' or 'free_input_based'
   } = req.body;
 
   // 필수 필드 검증
@@ -888,6 +889,7 @@ async function handleGenerateEpisode(req, res) {
   }
 
   const { base_affection, base_intimacy, scenario_length } = generation_context;
+  const finalEpisodeType = episode_type || 'choice_based';  // 기본값: 선택지 전용
 
   if (base_affection === undefined || base_intimacy === undefined) {
     return res.status(400).json({
@@ -899,19 +901,21 @@ async function handleGenerateEpisode(req, res) {
   try {
     console.log(`🤖 AI 에피소드 생성 시작: ${character_id} - ${scenario_template_id}`);
     console.log(`📊 호감도: ${base_affection}, 애정도: ${base_intimacy}`);
+    console.log(`🎯 에피소드 타입: ${finalEpisodeType}`);
     console.log(`🤖 AI 모델: ${ai_model || 'gpt-4o-mini'}`);
 
     // 캐릭터 정보 로드
     const characterInfo = await loadCharacterInfo(character_id);
 
-    // AI로 dialogue_flow 생성
+    // AI로 dialogue_flow 생성 (🆕 episode_type 전달)
     const dialogueFlow = await generateDialogueFlowWithAI(
       characterInfo,
       scenario_template_id,
       base_affection,
       base_intimacy,
       scenario_length || 'medium',
-      ai_model || 'gpt-4o-mini'
+      ai_model || 'gpt-4o-mini',
+      finalEpisodeType  // 🆕 에피소드 타입 전달
     );
 
     // 에피소드 객체 생성
@@ -923,6 +927,7 @@ async function handleGenerateEpisode(req, res) {
       scenario_template_id,
       title: title || `${characterInfo.name}과의 ${scenario_template_id}`,
       description: description || `호감도 ${base_affection}, 애정도 ${base_intimacy} 기반 에피소드`,
+      episode_type: finalEpisodeType,  // 🆕 에피소드 타입 저장
 
       // 트리거 조건
       trigger_conditions: trigger_conditions || {
@@ -941,12 +946,13 @@ async function handleGenerateEpisode(req, res) {
         base_intimacy,
         tone_style: getToneStyle(base_affection),
         formality: getFormality(base_intimacy),
-        scenario_length: scenario_length || 'medium'
+        scenario_length: scenario_length || 'medium',
+        episode_type: finalEpisodeType  // 🆕 타입 정보 포함
       },
 
       status: 'pending',
       difficulty: getDifficulty(base_affection, base_intimacy),
-      estimated_duration: getEstimatedDuration(scenario_length),
+      estimated_duration: getEstimatedDuration(scenario_length, finalEpisodeType),  // 🆕 타입별 다른 시간
       created_at: new Date().toISOString(),
       last_edited_at: null,
 
@@ -1087,8 +1093,9 @@ async function handleEvaluateUserInput(req, res) {
 
 /**
  * OpenAI를 사용하여 dialogue_flow 생성
+ * 🆕 episode_type에 따라 다른 구조 생성
  */
-async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseAffection, baseIntimacy, scenarioLength, aiModel = 'gpt-4o-mini') {
+async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseAffection, baseIntimacy, scenarioLength, aiModel = 'gpt-4o-mini', episodeType = 'choice_based') {
   if (!OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY가 설정되지 않았습니다');
   }
@@ -1096,10 +1103,27 @@ async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseA
   const toneStyle = getToneStyle(baseAffection);
   const formality = getFormality(baseIntimacy);
 
-  // 대화 수 결정 (Vercel 10초 제한 고려하여 줄임)
-  const dialogueCount = scenarioLength === 'short' ? 3 : scenarioLength === 'long' ? 5 : 4;
+  // 🆕 타입별 대화 개수 및 구조 결정
+  let choiceCount, freeInputCount, totalDialogues;
 
-  const prompt = `당신은 로맨스 채팅 게임의 대화 콘텐츠 작가입니다.
+  if (episodeType === 'choice_based') {
+    // 선택지 전용: 최소 3번의 선택지
+    choiceCount = scenarioLength === 'short' ? 3 : scenarioLength === 'long' ? 5 : 4;
+    freeInputCount = 0;
+    totalDialogues = choiceCount * 3 + 1;  // (narration + character_dialogue + multiple_choice + character_response) * N + closing
+  } else {
+    // 주관식 전용: 2-3번의 주관식
+    choiceCount = 0;
+    freeInputCount = scenarioLength === 'short' ? 2 : scenarioLength === 'long' ? 3 : 3;
+    totalDialogues = freeInputCount * 3 + 1;  // (narration + character_dialogue + free_input + character_response) * N + closing
+  }
+
+  // 🆕 타입별 다른 프롬프트 생성
+  let prompt;
+
+  if (episodeType === 'choice_based') {
+    // 선택지 전용 프롬프트
+    prompt = `당신은 로맨스 채팅 게임의 전문 대화 작가입니다.
 
 **캐릭터 정보:**
 - 이름: ${characterInfo.name}
@@ -1113,16 +1137,24 @@ async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseA
 - 호감도: ${baseAffection}/100 (톤: ${toneStyle})
 - 애정도: ${baseIntimacy}/100 (호칭: ${formality})
 
-**생성 요구사항:**
-메신저 대화 형식으로 ${dialogueCount}개 정도의 대화 흐름을 만들어주세요.
+**🎯 생성 요구사항 (선택지 전용 에피소드):**
+메신저 대화 형식으로 **최소 ${choiceCount}번의 선택지**를 포함한 대화를 만들어주세요.
 
-**대화 흐름 구조:**
-1. narration: 상황 설명
-2. character_dialogue: 캐릭터 대사
-3. multiple_choice: 객관식 선택지 3개 (각각 호감도/애정도 변화값 포함)
-4. character_dialogue: 선택에 따른 반응
-5. free_input: 주관식 입력 질문 (AI 평가 기준 포함)
-6. ...반복
+**필수 구조 (반복 ${choiceCount}번):**
+1. **narration**: 상황 설명 (구체적으로)
+2. **character_dialogue**: ${characterInfo.name}의 대사 (감정과 행동 묘사 포함)
+3. **multiple_choice**: 객관식 선택지 3개
+   - 각 선택지마다 affection_change, intimacy_change 값 포함
+   - 선택지는 다양한 감정 반응을 유도 (긍정/중립/부정)
+4. **character_dialogue**: 선택에 대한 ${characterInfo.name}의 반응 대사 (필수!)
+
+**마지막**: character_dialogue로 대화를 자연스럽게 마무리
+
+**캐릭터 대사 작성 지침:**
+- 매 선택지마다 캐릭터의 반응 대사를 **반드시** 포함
+- 대사는 구체적이고 감정이 드러나게
+- emotion(감정), narration(행동 묘사) 필드 활용
+- 톤: ${toneStyle}, 호칭: ${formality}를 반영
 
 **톤 가이드 (호감도 ${baseAffection}):**
 - 0-20: 차갑고 무뚝뚝
@@ -1138,7 +1170,63 @@ async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseA
 - 61-80: 애칭
 - 81-100: 특별한 애칭
 
-다음 JSON 형식으로 응답해주세요:
+다음 JSON 형식으로 응답해주세요 (총 ${totalDialogues}개 정도):`;
+  } else {
+    // 주관식 전용 프롬프트
+    prompt = `당신은 로맨스 채팅 게임의 전문 대화 작가입니다.
+
+**캐릭터 정보:**
+- 이름: ${characterInfo.name}
+- MBTI: ${characterInfo.mbti}
+- 성격: ${characterInfo.personality || '친근함'}
+- 말투: ${characterInfo.speech_style || '자연스러움'}
+
+**시나리오:** ${scenarioTemplate}
+
+**현재 관계 상태:**
+- 호감도: ${baseAffection}/100 (톤: ${toneStyle})
+- 애정도: ${baseIntimacy}/100 (호칭: ${formality})
+
+**🎯 생성 요구사항 (주관식 전용 에피소드):**
+메신저 대화 형식으로 **${freeInputCount}번의 주관식 입력**을 포함한 대화를 만들어주세요.
+
+**필수 구조 (반복 ${freeInputCount}번):**
+1. **narration**: 상황 설명 (구체적으로)
+2. **character_dialogue**: ${characterInfo.name}의 대사 (감정과 행동 묘사 포함)
+3. **free_input**: 주관식 질문
+   - question: 유저에게 자유롭게 답하도록 유도하는 질문
+   - prompt_hint: 어떻게 답하면 좋을지 힌트
+   - context: 상황 설명
+   - ai_evaluation: 평가 기준 (criteria 배열 포함)
+4. **character_dialogue**: 질문 후 기대하는 분위기나 추가 대사
+
+**마지막**: character_dialogue로 대화를 자연스럽게 마무리
+
+**캐릭터 대사 작성 지침:**
+- 매 주관식마다 캐릭터의 대사를 **반드시** 포함
+- 대사는 구체적이고 감정이 드러나게
+- emotion(감정), narration(행동 묘사) 필드 활용
+- 톤: ${toneStyle}, 호칭: ${formality}를 반영
+
+**톤 가이드 (호감도 ${baseAffection}):**
+- 0-20: 차갑고 무뚝뚝
+- 21-40: 정중하고 예의바름
+- 41-60: 친근하고 편안함
+- 61-80: 따뜻하고 다정함
+- 81-100: 애교 섞인 밝은 톤
+
+**호칭 가이드 (애정도 ${baseIntimacy}):**
+- 0-20: ~님, ~씨 (존칭)
+- 21-40: 이름 호칭
+- 41-60: 오빠, 언니 등
+- 61-80: 애칭
+- 81-100: 특별한 애칭
+
+다음 JSON 형식으로 응답해주세요 (총 ${totalDialogues}개 정도):`;
+  }
+
+  // 공통 JSON 예시 추가
+  prompt += `
 \`\`\`json
 [
   {
@@ -1153,7 +1241,10 @@ async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseA
     "text": "대사 내용",
     "emotion": "감정",
     "narration": "행동 묘사"
-  },
+  },`;
+
+  if (episodeType === 'choice_based') {
+    prompt += `
   {
     "sequence": 3,
     "type": "multiple_choice",
@@ -1183,7 +1274,18 @@ async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseA
     ]
   },
   {
-    "sequence": 5,
+    "sequence": 4,
+    "type": "character_dialogue",
+    "speaker": "${characterInfo.name}",
+    "text": "선택에 대한 반응 대사",
+    "emotion": "감정",
+    "narration": "행동 묘사"
+  },
+  ...반복 (총 ${choiceCount}번)...`;
+  } else {
+    prompt += `
+  {
+    "sequence": 3,
     "type": "free_input",
     "question": "자유롭게 답변해보세요",
     "prompt_hint": "힌트",
@@ -1203,9 +1305,23 @@ async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseA
         "inappropriate": { "affection": -3, "intimacy": -2 }
       }
     }
+  },
+  {
+    "sequence": 4,
+    "type": "character_dialogue",
+    "speaker": "${characterInfo.name}",
+    "text": "질문 후 추가 대사",
+    "emotion": "감정",
+    "narration": "행동 묘사"
+  },
+  ...반복 (총 ${freeInputCount}번)...`;
   }
+
+  prompt += `
 ]
-\`\`\``;
+\`\`\`
+
+**중요: 마지막은 반드시 character_dialogue로 대화를 자연스럽게 마무리하세요!**`;
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -1221,7 +1337,7 @@ async function generateDialogueFlowWithAI(characterInfo, scenarioTemplate, baseA
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 1200  // Vercel 10초 제한 고려
+        max_tokens: episodeType === 'choice_based' ? 2000 : 1800  // 🆕 타입별 다른 토큰 수 (Vercel 10초 제한 고려)
       })
     });
 
@@ -1421,13 +1537,23 @@ function getDifficulty(affection, intimacy) {
 }
 
 /**
- * 예상 플레이 시간
+ * 예상 플레이 시간 (🆕 타입별 다른 시간)
  */
-function getEstimatedDuration(scenarioLength) {
-  switch (scenarioLength) {
-    case 'short': return '5-10분';
-    case 'long': return '15-20분';
-    default: return '10-15분';
+function getEstimatedDuration(scenarioLength, episodeType = 'choice_based') {
+  if (episodeType === 'choice_based') {
+    // 선택지 전용: 더 많은 선택지와 대사
+    switch (scenarioLength) {
+      case 'short': return '8-12분';
+      case 'long': return '18-25분';
+      default: return '12-18분';
+    }
+  } else {
+    // 주관식 전용: 생각하는 시간 필요
+    switch (scenarioLength) {
+      case 'short': return '10-15분';
+      case 'long': return '20-30분';
+      default: return '15-20분';
+    }
   }
 }
 
