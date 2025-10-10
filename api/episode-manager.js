@@ -1107,13 +1107,13 @@ async function generateDialogueFlowWithAI(characterInfo, scenarioInfo, baseAffec
 
   // API 키 검증
   if (provider === 'openai' && !OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY가 설정되지 않았습니다');
+    throw new Error('🔑 OPENAI_API_KEY가 Vercel 환경변수에 설정되지 않았습니다.\n\n해결 방법:\n1. Vercel 대시보드 → Settings → Environment Variables\n2. OPENAI_API_KEY 추가 후 재배포');
   }
   if (provider === 'groq' && !GROQ_API_KEY) {
-    throw new Error('GROQ_API_KEY가 설정되지 않았습니다');
+    throw new Error('🔑 GROQ_API_KEY가 Vercel 환경변수에 설정되지 않았습니다.\n\n해결 방법:\n1. Vercel 대시보드 → Settings → Environment Variables\n2. GROQ_API_KEY 추가 후 재배포');
   }
   if (provider === 'claude' && !ANTHROPIC_API_KEY) {
-    throw new Error('ANTHROPIC_API_KEY가 설정되지 않았습니다');
+    throw new Error('🔑 ANTHROPIC_API_KEY가 Vercel 환경변수에 설정되지 않았습니다.\n\n해결 방법:\n1. Vercel 대시보드 → Settings → Environment Variables\n2. ANTHROPIC_API_KEY 추가 (값: sk-ant-로 시작)\n3. 재배포 (Deployments → Redeploy)');
   }
 
   const toneStyle = getToneStyle(baseAffection);
