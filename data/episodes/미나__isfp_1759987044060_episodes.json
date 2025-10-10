@@ -2,137 +2,14 @@
   "character_id": "미나__isfp_1759987044060",
   "character_name": "미나",
   "character_mbti": "ISFP",
-  "total_episodes": 1,
+  "total_episodes": 0,
   "metadata": {
     "version": "2.1.0",
     "schema_type": "character_based_dialogue",
     "created_at": "2025-10-09T06:30:00.000Z",
-    "last_updated": "2025-10-09T16:00:24.635Z"
+    "last_updated": "2025-10-10T00:22:39.638Z"
   },
-  "episodes": {
-    "ep_미나_scenario_자기야_1759988816785_6ty7e0": {
-      "id": "ep_미나_scenario_자기야_1759988816785_6ty7e0",
-      "character_id": "미나__isfp_1759987044060",
-      "scenario_template_id": "scenario_자기야_1759988816785",
-      "title": "scenario_자기야_1759988816785 에피소드",
-      "description": "호감도 50, 애정도 70 기반",
-      "trigger_conditions": {
-        "affection_min": 45,
-        "affection_max": 55,
-        "intimacy_min": 65,
-        "intimacy_max": 75,
-        "time_based": null,
-        "event_based": null,
-        "priority": 5
-      },
-      "generation_context": {
-        "base_affection": 50,
-        "base_intimacy": 70,
-        "tone_style": "friendly",
-        "formality": "intimate",
-        "scenario_length": "short"
-      },
-      "status": "pending",
-      "difficulty": "Hard",
-      "estimated_duration": "5-10분",
-      "created_at": "2025-10-09T16:00:24.533Z",
-      "last_edited_at": null,
-      "dialogue_flow": [
-        {
-          "sequence": 1,
-          "type": "narration",
-          "content": "집에서 편안한 저녁을 보내고 있는 두 사람. 서로의 존재를 느끼며 대화를 나누고 있다."
-        },
-        {
-          "sequence": 2,
-          "type": "character_dialogue",
-          "speaker": "undefined",
-          "text": "오늘 하루 어땠어? 나랑 이야기하는 게 제일 즐거워.",
-          "emotion": "기분 좋음",
-          "narration": "부드러운 미소를 지으며 상대방을 바라본다."
-        },
-        {
-          "sequence": 3,
-          "type": "multiple_choice",
-          "question": "너는 오늘 어떤 일이 있었어?",
-          "choices": [
-            {
-              "id": "choice_1",
-              "text": "재미있는 일 있었어!",
-              "affection_change": 2,
-              "intimacy_change": 1,
-              "consequence": "상대방이 더 많은 이야기를 듣고 싶어한다."
-            },
-            {
-              "id": "choice_2",
-              "text": "그냥 평범했어.",
-              "affection_change": 0,
-              "intimacy_change": 0,
-              "consequence": "상대방이 조금 실망한 기색을 보인다."
-            },
-            {
-              "id": "choice_3",
-              "text": "슬픈 일이 있었어.",
-              "affection_change": 3,
-              "intimacy_change": 2,
-              "consequence": "상대방이 걱정하며 위로의 말을 건넨다."
-            }
-          ]
-        },
-        {
-          "sequence": 5,
-          "type": "free_input",
-          "question": "오늘 하루의 이야기를 들려줘.",
-          "prompt_hint": "기쁜 일, 슬픈 일 다 좋아.",
-          "context": "상대방과의 깊은 대화를 원함.",
-          "ai_evaluation": {
-            "model": "gpt-4o-mini",
-            "criteria": [
-              "적절한 호칭 사용",
-              "대화 맥락 일치",
-              "예의 바른 표현"
-            ],
-            "scoring": {
-              "excellent": {
-                "affection": 5,
-                "intimacy": 3
-              },
-              "good": {
-                "affection": 3,
-                "intimacy": 2
-              },
-              "normal": {
-                "affection": 1,
-                "intimacy": 1
-              },
-              "poor": {
-                "affection": -1,
-                "intimacy": 0
-              },
-              "inappropriate": {
-                "affection": -3,
-                "intimacy": -2
-              }
-            }
-          }
-        }
-      ],
-      "statistics": {
-        "total_dialogues": 4,
-        "choice_points": 1,
-        "free_input_points": 1,
-        "max_affection_gain": 8,
-        "max_intimacy_gain": 5,
-        "average_play_time": "5-10분"
-      },
-      "play_stats": {
-        "played_count": 0,
-        "best_affection_gain": 0,
-        "best_intimacy_gain": 0,
-        "completion_rate": 0
-      }
-    }
-  },
+  "episodes": {},
   "schema_description": {
     "purpose": "캐릭터 대화 콘텐츠 관리 (호감도/애정도 기반)",
     "episode_structure": [
