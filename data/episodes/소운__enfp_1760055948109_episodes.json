@@ -2,14 +2,172 @@
   "character_id": "소운__enfp_1760055948109",
   "character_name": "소운",
   "character_mbti": "INFP",
-  "total_episodes": 0,
+  "total_episodes": 1,
   "metadata": {
     "version": "2.1.0",
     "schema_type": "character_based_dialogue",
     "created_at": "2025-10-10T00:27:15.475Z",
-    "last_updated": "2025-10-10T03:05:48.830Z"
+    "last_updated": "2025-10-10T03:07:00.347Z"
   },
-  "episodes": {},
+  "episodes": {
+    "ep_소운_scenario_우리_사귈까_1760007114571_4bvrer": {
+      "id": "ep_소운_scenario_우리_사귈까_1760007114571_4bvrer",
+      "character_id": "소운__enfp_1760055948109",
+      "scenario_template_id": "scenario_우리_사귈까_1760007114571",
+      "title": "제안 ",
+      "description": "호감도 28, 애정도 30 기반",
+      "episode_type": "choice_based",
+      "trigger_conditions": {
+        "affection_min": 23,
+        "affection_max": 33,
+        "intimacy_min": 25,
+        "intimacy_max": 35,
+        "time_based": null,
+        "event_based": null,
+        "priority": 5
+      },
+      "generation_context": {
+        "base_affection": 28,
+        "base_intimacy": 30,
+        "tone_style": "polite",
+        "formality": "polite",
+        "scenario_length": "medium",
+        "episode_type": "choice_based"
+      },
+      "status": "pending",
+      "difficulty": "Medium",
+      "estimated_duration": "12-18분",
+      "created_at": "2025-10-10T03:07:00.208Z",
+      "last_edited_at": null,
+      "dialogue_flow": [
+        {
+          "sequence": 1,
+          "type": "narration",
+          "content": "여자는 그의 대답을 기다리며 긴장된 마음으로 화면을 바라보고 있었다. 고백한 것이 잘한 선택인지, 그의 반응이 두렵기도 했다."
+        },
+        {
+          "sequence": 2,
+          "type": "character_dialogue",
+          "speaker": "undefined",
+          "text": "그런데, 나도 사실 너한테 호감이 있었어. 너는 어떤 여자를 좋아했어?",
+          "emotion": "설렘",
+          "narration": "그는 잠시 머뭇거리다 대답을 준비하는 모습이었다."
+        },
+        {
+          "sequence": 3,
+          "type": "multiple_choice",
+          "question": "그가 어떤 여자를 좋아했는지 궁금한 당신은 어떻게 반응할까요?",
+          "choices": [
+            {
+              "id": "choice_1",
+              "text": "그럼, 혹시 나처럼 다정한 스타일을 좋아하는 건가?",
+              "affection_change": 2,
+              "intimacy_change": 1,
+              "consequence": "그의 마음속에 당신의 모습이 각인된다."
+            },
+            {
+              "id": "choice_2",
+              "text": "그냥 궁금해서 물어본 거야.",
+              "affection_change": 0,
+              "intimacy_change": 0,
+              "consequence": "그의 대답이 당신에게 큰 감정을 주지 않는다."
+            },
+            {
+              "id": "choice_3",
+              "text": "그런 질문은 좀 쑥스러워.",
+              "affection_change": 3,
+              "intimacy_change": 2,
+              "consequence": "그의 마음이 더욱 가까워지는 느낌을 받는다."
+            }
+          ]
+        },
+        {
+          "sequence": 4,
+          "type": "character_dialogue",
+          "speaker": "undefined",
+          "text": "아, 그런 거구나! 사실 다정한 스타일을 좋아해. 너처럼!",
+          "emotion": "기쁨",
+          "narration": "그는 당신의 반응에 밝은 미소를 지었다."
+        },
+        {
+          "sequence": 5,
+          "type": "narration",
+          "content": "여자는 그의 대답을 듣고 마음이 따뜻해지는 것을 느꼈다. 이제는 그와의 거리를 조금 더 좁히고 싶어졌다."
+        },
+        {
+          "sequence": 6,
+          "type": "character_dialogue",
+          "speaker": "undefined",
+          "text": "이번 주 토요일에 만날까? 좀 더 이야기 나누고 싶어.",
+          "emotion": "설렘",
+          "narration": "그의 제안에 여자는 가슴이 두근거렸다."
+        },
+        {
+          "sequence": 7,
+          "type": "multiple_choice",
+          "question": "그의 제안에 대한 당신의 반응은?",
+          "choices": [
+            {
+              "id": "choice_1",
+              "text": "좋아! 정말 기대돼.",
+              "affection_change": 4,
+              "intimacy_change": 3,
+              "consequence": "그의 마음속에 당신의 존재가 더욱 커진다."
+            },
+            {
+              "id": "choice_2",
+              "text": "응, 괜찮아.",
+              "affection_change": 1,
+              "intimacy_change": 1,
+              "consequence": "그의 제안에 큰 흥미를 느끼지 못한다."
+            },
+            {
+              "id": "choice_3",
+              "text": "음... 다른 날은 안 될까?",
+              "affection_change": -1,
+              "intimacy_change": -2,
+              "consequence": "그는 약간 실망한 듯한 반응을 보인다."
+            }
+          ]
+        },
+        {
+          "sequence": 8,
+          "type": "character_dialogue",
+          "speaker": "undefined",
+          "text": "정말? 나도 기대돼! 같이 좋은 시간 보내자.",
+          "emotion": "기쁨",
+          "narration": "그의 얼굴이 밝아지며 당신에게 다가오는 느낌이 들었다."
+        },
+        {
+          "sequence": 9,
+          "type": "narration",
+          "content": "여자는 그의 반응에 한층 더 설레는 기분을 느꼈다. 이제는 그와의 만남이 기다려졌다."
+        },
+        {
+          "sequence": 10,
+          "type": "character_dialogue",
+          "speaker": "undefined",
+          "text": "토요일에 만나는 걸로 하자! 그때까지 잘 지내.",
+          "emotion": "온화함",
+          "narration": "그의 말에 여자는 미소를 지으며 고개를 끄덕였다."
+        }
+      ],
+      "statistics": {
+        "total_dialogues": 10,
+        "choice_points": 2,
+        "free_input_points": 0,
+        "max_affection_gain": 7,
+        "max_intimacy_gain": 5,
+        "average_play_time": "12-18분"
+      },
+      "play_stats": {
+        "played_count": 0,
+        "best_affection_gain": 0,
+        "best_intimacy_gain": 0,
+        "completion_rate": 0
+      }
+    }
+  },
   "schema_description": {
     "purpose": "캐릭터 대화 콘텐츠 관리 (호감도/애정도 기반)",
     "episode_structure": [
