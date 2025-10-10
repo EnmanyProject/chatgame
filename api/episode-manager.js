@@ -1114,12 +1114,14 @@ async function generateDialogueFlowWithAI(characterInfo, scenarioInfo, baseAffec
     // 선택지 전용: 최소 3번의 선택지
     choiceCount = scenarioLength === 'short' ? 3 : scenarioLength === 'long' ? 5 : 4;
     freeInputCount = 0;
-    totalDialogues = choiceCount * 3 + 1;  // (narration + character_dialogue + multiple_choice + character_response) * N + closing
+    // (character_dialogue + narration + character_dialogue + multiple_choice + character_dialogue) * N + closing
+    totalDialogues = choiceCount * 5 + 1;
   } else {
     // 주관식 전용: 2-3번의 주관식
     choiceCount = 0;
     freeInputCount = scenarioLength === 'short' ? 2 : scenarioLength === 'long' ? 3 : 3;
-    totalDialogues = freeInputCount * 3 + 1;  // (narration + character_dialogue + free_input + character_response) * N + closing
+    // (character_dialogue + narration + character_dialogue + free_input + character_dialogue) * N + closing
+    totalDialogues = freeInputCount * 5 + 1;
   }
 
   // 🆕 타입별 다른 프롬프트 생성
@@ -1158,13 +1160,15 @@ ${scenarioInfo.ai_generated_context}
 메신저 대화 형식으로 **최소 ${choiceCount}번의 선택지**를 포함한 대화를 만들어주세요.
 
 **필수 구조 (반복 ${choiceCount}번):**
-1. **narration**: 상황 설명 (구체적으로)
-2. **character_dialogue**: ${characterInfo.name}의 대사 (감정과 행동 묘사 포함)
-3. **multiple_choice**: 객관식 선택지 3개
+1. **character_dialogue**: ${characterInfo.name}의 메시지 (먼저 캐릭터가 말을 건네기)
+2. **narration**: 상황 설명 (간단하게)
+3. **character_dialogue**: ${characterInfo.name}의 추가 대사 (감정과 행동 묘사)
+4. **multiple_choice**: 유저가 답할 선택지 3개
    - 각 선택지마다 affection_change, intimacy_change 값 포함
    - 선택지는 다양한 감정 반응을 유도 (긍정/중립/부정)
-4. **character_dialogue**: 선택에 대한 ${characterInfo.name}의 반응 대사 (필수!)
+5. **character_dialogue**: 유저 선택에 대한 ${characterInfo.name}의 반응 대사 (필수!)
 
+**중요: 대화의 80%는 캐릭터(${characterInfo.name})의 대사여야 합니다!**
 **마지막**: character_dialogue로 대화를 자연스럽게 마무리
 
 **캐릭터 대사 작성 지침:**
@@ -1226,15 +1230,17 @@ ${scenarioInfo.ai_generated_context}
 메신저 대화 형식으로 **${freeInputCount}번의 주관식 입력**을 포함한 대화를 만들어주세요.
 
 **필수 구조 (반복 ${freeInputCount}번):**
-1. **narration**: 상황 설명 (구체적으로)
-2. **character_dialogue**: ${characterInfo.name}의 대사 (감정과 행동 묘사 포함)
-3. **free_input**: 주관식 질문
+1. **character_dialogue**: ${characterInfo.name}의 메시지 (먼저 캐릭터가 말을 건네기)
+2. **narration**: 상황 설명 (간단하게)
+3. **character_dialogue**: ${characterInfo.name}의 추가 대사 (감정과 행동 묘사)
+4. **free_input**: 유저에게 자유 입력을 요청하는 질문
    - question: 유저에게 자유롭게 답하도록 유도하는 질문
    - prompt_hint: 어떻게 답하면 좋을지 힌트
    - context: 상황 설명
    - ai_evaluation: 평가 기준 (criteria 배열 포함)
-4. **character_dialogue**: 질문 후 기대하는 분위기나 추가 대사
+5. **character_dialogue**: 질문 후 기대하는 분위기나 추가 대사 (필수!)
 
+**중요: 대화의 80%는 캐릭터(${characterInfo.name})의 대사여야 합니다!**
 **마지막**: character_dialogue로 대화를 자연스럽게 마무리
 
 **캐릭터 대사 작성 지침:**
@@ -1271,14 +1277,22 @@ ${scenarioInfo.ai_generated_context}
 [
   {
     "sequence": 1,
-    "type": "narration",
-    "content": "상황 설명"
+    "type": "character_dialogue",
+    "speaker": "${characterInfo.name}",
+    "text": "캐릭터가 먼저 대화를 시작하는 메시지",
+    "emotion": "감정",
+    "narration": "행동 묘사"
   },
   {
     "sequence": 2,
+    "type": "narration",
+    "content": "간단한 상황 설명"
+  },
+  {
+    "sequence": 3,
     "type": "character_dialogue",
     "speaker": "${characterInfo.name}",
-    "text": "대사 내용",
+    "text": "추가 대사",
     "emotion": "감정",
     "narration": "행동 묘사"
   },`;
@@ -1286,7 +1300,7 @@ ${scenarioInfo.ai_generated_context}
   if (episodeType === 'choice_based') {
     prompt += `
   {
-    "sequence": 3,
+    "sequence": 4,
     "type": "multiple_choice",
     "question": "질문",
     "choices": [
@@ -1314,18 +1328,20 @@ ${scenarioInfo.ai_generated_context}
     ]
   },
   {
-    "sequence": 4,
+    "sequence": 5,
     "type": "character_dialogue",
     "speaker": "${characterInfo.name}",
-    "text": "선택에 대한 반응 대사",
+    "text": "유저 선택에 대한 ${characterInfo.name}의 반응 대사 (자연스럽고 감정 풍부하게)",
     "emotion": "감정",
     "narration": "행동 묘사"
   },
-  ...반복 (총 ${choiceCount}번)...`;
+  ...위 패턴을 정확히 ${choiceCount}번 반복...
+
+**🚨 주의: speaker 필드는 반드시 "${characterInfo.name}"을 정확히 사용하세요!**`;
   } else {
     prompt += `
   {
-    "sequence": 3,
+    "sequence": 4,
     "type": "free_input",
     "question": "자유롭게 답변해보세요",
     "prompt_hint": "힌트",
@@ -1347,21 +1363,32 @@ ${scenarioInfo.ai_generated_context}
     }
   },
   {
-    "sequence": 4,
+    "sequence": 5,
     "type": "character_dialogue",
     "speaker": "${characterInfo.name}",
-    "text": "질문 후 추가 대사",
+    "text": "질문 후 ${characterInfo.name}의 추가 대사 (자연스럽고 감정 풍부하게)",
     "emotion": "감정",
     "narration": "행동 묘사"
   },
-  ...반복 (총 ${freeInputCount}번)...`;
+  ...위 패턴을 정확히 ${freeInputCount}번 반복...
+
+**🚨 주의: speaker 필드는 반드시 "${characterInfo.name}"을 정확히 사용하세요!**`;
   }
 
   prompt += `
 ]
 \`\`\`
 
-**중요: 마지막은 반드시 character_dialogue로 대화를 자연스럽게 마무리하세요!**`;
+**🚨🚨🚨 필수 준수 사항 🚨🚨🚨**
+1. **speaker 필드**: 모든 character_dialogue의 speaker는 정확히 "${characterInfo.name}"이어야 합니다
+2. **선택지 개수**: ${episodeType === 'choice_based' ? `정확히 ${choiceCount}번의 multiple_choice` : `정확히 ${freeInputCount}번의 free_input`}를 생성하세요
+3. **대사 비중**: 전체 dialogue_flow의 60% 이상이 character_dialogue여야 합니다
+4. **마지막**: 반드시 character_dialogue로 자연스럽게 마무리하세요
+
+**절대 금지:**
+- speaker를 "undefined"나 빈 문자열로 남기지 마세요
+- 선택지/입력 개수를 임의로 줄이지 마세요
+- narration만 가득한 대화를 생성하지 마세요`;
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -1377,7 +1404,7 @@ ${scenarioInfo.ai_generated_context}
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: episodeType === 'choice_based' ? 2000 : 1800  // 🆕 타입별 다른 토큰 수 (Vercel 10초 제한 고려)
+        max_tokens: episodeType === 'choice_based' ? 3000 : 2500  // 🆕 대사 비중 증가에 따른 토큰 수 증가 (Vercel 30초 제한)
       })
     });
 
@@ -1400,9 +1427,35 @@ ${scenarioInfo.ai_generated_context}
     const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/\[[\s\S]*\]/);
     const jsonText = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : content;
 
-    const dialogueFlow = JSON.parse(jsonText);
+    let dialogueFlow = JSON.parse(jsonText);
+
+    // 🆕 후처리: speaker 검증 및 교체
+    dialogueFlow = dialogueFlow.map(item => {
+      if (item.type === 'character_dialogue') {
+        // speaker가 없거나 "undefined"이면 캐릭터 이름으로 교체
+        if (!item.speaker || item.speaker === 'undefined' || item.speaker.trim() === '') {
+          item.speaker = characterInfo.name;
+          console.log(`⚠️ speaker 수정: sequence ${item.sequence} → ${characterInfo.name}`);
+        }
+      }
+      return item;
+    });
+
+    // 🆕 검증: 최소 선택지/입력 개수 확인
+    const choicePoints = dialogueFlow.filter(d => d.type === 'multiple_choice').length;
+    const freeInputPoints = dialogueFlow.filter(d => d.type === 'free_input').length;
+
+    if (episodeType === 'choice_based' && choicePoints < choiceCount) {
+      console.warn(`⚠️ 선택지 부족: ${choicePoints}개 (요청: ${choiceCount}개)`);
+    }
+
+    if (episodeType === 'free_input_based' && freeInputPoints < freeInputCount) {
+      console.warn(`⚠️ 주관식 부족: ${freeInputPoints}개 (요청: ${freeInputCount}개)`);
+    }
 
     console.log(`✅ OpenAI dialogue_flow 생성 완료: ${dialogueFlow.length}개 대화`);
+    console.log(`📊 캐릭터 대사: ${dialogueFlow.filter(d => d.type === 'character_dialogue').length}개`);
+    console.log(`📊 선택지: ${choicePoints}개, 주관식: ${freeInputPoints}개`);
 
     return dialogueFlow;
 
