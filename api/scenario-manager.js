@@ -637,13 +637,32 @@ module.exports = async function handler(req, res) {
         const totalDuration = Date.now() - startTime;
         console.log(`⏱️ Step 1 총 실행 시간: ${totalDuration}ms`);
 
+        // 🔍 structureData 검증
+        if (!structureData || typeof structureData !== 'object') {
+          console.error('❌ structureData가 유효하지 않음:', structureData);
+          throw new Error(`AI가 유효한 JSON 객체를 반환하지 않음: ${JSON.stringify(structureData)}`);
+        }
+
+        if (!structureData.structure || !Array.isArray(structureData.structure)) {
+          console.error('❌ structure 배열이 없음:', structureData);
+          throw new Error(`AI 응답에 structure 배열이 없음. 받은 키: ${Object.keys(structureData).join(', ')}`);
+        }
+
+        if (structureData.structure.length === 0) {
+          console.error('❌ structure 배열이 비어있음');
+          throw new Error('AI가 빈 구조를 반환함. 프롬프트를 확인하세요.');
+        }
+
+        console.log(`✅ structureData 검증 완료: ${structureData.structure.length}개 블록`);
+
         return res.status(200).json({
           success: true,
           structure: structureData,
           message: 'Step 1: 대화 구조 생성 완료',
           debug: {
             ai_model: ai_model || 'openai',
-            duration_ms: totalDuration
+            duration_ms: totalDuration,
+            blocks_count: structureData.structure.length
           }
         });
 
