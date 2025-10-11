@@ -21659,13 +21659,13 @@
                 console.log('✅ AI 응답:', result);
 
                 if (result.success && result.dialogue_script) {
-                    // Tab 2로 전환
-                    switchScenarioTab('script');
-
                     // 기존 블록 초기화
                     const container = document.getElementById('dialogue-blocks-container');
                     container.innerHTML = '';
                     blockIdCounter = 1;
+
+                    // 대화 스크립트 섹션으로 스크롤
+                    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
                     // AI 생성 블록 렌더링
                     result.dialogue_script.forEach(block => {

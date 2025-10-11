@@ -472,6 +472,10 @@ module.exports = async function handler(req, res) {
 
         // OpenAI API
         if (!ai_model || ai_model === 'openai') {
+          if (!process.env.OPENAI_API_KEY) {
+            throw new Error('OPENAI_API_KEY 환경변수가 설정되지 않았습니다. Vercel 환경변수를 확인하세요.');
+          }
+
           const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -491,7 +495,9 @@ module.exports = async function handler(req, res) {
           });
 
           if (!response.ok) {
-            throw new Error(`OpenAI API 오류: ${response.status}`);
+            const errorBody = await response.text();
+            console.error('OpenAI API 에러 응답:', errorBody);
+            throw new Error(`OpenAI API 오류: ${response.status} - ${errorBody.substring(0, 200)}`);
           }
 
           const result = await response.json();
@@ -504,6 +510,10 @@ module.exports = async function handler(req, res) {
         }
         // Groq API (Llama)
         else if (ai_model === 'llama') {
+          if (!process.env.GROQ_API_KEY) {
+            throw new Error('GROQ_API_KEY 환경변수가 설정되지 않았습니다. Vercel 환경변수를 확인하세요.');
+          }
+
           const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -523,7 +533,9 @@ module.exports = async function handler(req, res) {
           });
 
           if (!response.ok) {
-            throw new Error(`Groq API 오류: ${response.status}`);
+            const errorBody = await response.text();
+            console.error('Groq API 에러 응답:', errorBody);
+            throw new Error(`Groq API 오류: ${response.status} - ${errorBody.substring(0, 200)}`);
           }
 
           const result = await response.json();
@@ -535,6 +547,10 @@ module.exports = async function handler(req, res) {
         }
         // Claude API
         else if (ai_model === 'claude') {
+          if (!process.env.ANTHROPIC_API_KEY) {
+            throw new Error('ANTHROPIC_API_KEY 환경변수가 설정되지 않았습니다. Vercel 환경변수를 확인하세요.');
+          }
+
           const response = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: {
@@ -554,7 +570,9 @@ module.exports = async function handler(req, res) {
           });
 
           if (!response.ok) {
-            throw new Error(`Claude API 오류: ${response.status}`);
+            const errorBody = await response.text();
+            console.error('Claude API 에러 응답:', errorBody);
+            throw new Error(`Claude API 오류: ${response.status} - ${errorBody.substring(0, 200)}`);
           }
 
           const result = await response.json();
