@@ -1,178 +1,266 @@
 {
   "metadata": {
-    "version": "1.0.0",
-    "created_date": "2025-10-03",
-    "total_scenarios": 4,
-    "ai_context_engine": "gpt-4o-mini",
-    "last_updated": "2025-10-10T05:07:27.260Z",
-    "data_source": "github_api_only"
+    "version": "2.0.0",
+    "created_date": "2025-10-11",
+    "total_scenarios": 1,
+    "ai_context_engine": "dialogue_script_v2",
+    "last_updated": "2025-10-11T00:00:00.000Z",
+    "data_source": "github_api_only",
+    "schema_migration": "v1.0.0 -> v2.0.0 (메신저 대화형 시스템)"
   },
   "scenarios": {
-    "scenario_도와줘_1759987337551": {
-      "id": "scenario_도와줘_1759987337551",
-      "scenario_id": "scenario_도와줘_1759987337551",
-      "title": "도와줘 ",
-      "description": "집에 바퀴벌레가 있다면서 와서 잡아주면 상으로 뽀뽀 해주겠다고 유혹함 ",
-      "background_setting": "멤신저 대화",
-      "mood": "편안한",
-      "active_status": true,
-      "created_date": "2025-10-09",
-      "last_modified": "2025-10-09T05:22:17.588Z",
-      "ai_generated_context": "여자는 메신저를 열고 떨리는 손가락으로 그의 이름을 눌렀다. 대화방이 열리자마자, 그녀의 가슴은 두근거리기 시작했다. “안녕, 혹시 도와줄 수 있어?” 가벼운 얼굴로 다가가고 싶지만, 바퀴벌레 이야기를 꺼내야 한다는 생각에 그녀는 비밀스럽고 쑥스러운 미소가 자연스럽게 나왔다. 그가 대답하기를 기다리며, 그녀는 기대감으로 가득 차올랐다. “정말 바퀴벌레가 나왔어, 어떡해!” 그녀는 지나치게 뻔뻔해져서, 애교를 부리며 그를 유혹하고 싶었다. “내가 힘들면 나랑 뽀뽀해줄 거지?”라는 말을 하면서도, 남자의 반응이 궁금해서 가슴이 두근거렸다. 그의 답변이 화면에 나타나자 여자는 입가에 미소가 번졌다. “진짜? 그럼 나도 더 열심히 할게!” 그녀의 내심은 그가 웃으며 대답할까 노심초사했다. \n\n자신도 모르게 그녀는 그와의 관계에서의 작은 기대를 품고 있었다. 바퀴벌레가 그녀의 마음속 두근거림을 일으키는 상황이 아닌, 그의 반응을 기다리는 설레는 마음으로 가득 차올랐다. “잡아주면 뽀뽀는 꼭 해줄게!”라는 유쾌한 장난을 던지며, 남자의 반응을 확인하고 싶었다. 그녀는 쏟아지는 감정 속에서 그의 대답을 기다리며, 대화가 그들의 관계를 더 가까워지게 해줄 것이라는 기대감에 가슴이 뛰었다. \n\n그 순간, ‘만약 내가 뽀뽀를 하고 싶다면, 바퀴벌레를 잡아야 할까?’라는 귀여운 고민이 마음 속에 피어났다. 이런 장난스러운 약속을 던지면서도, 그녀는 정말 좋아하는 사람과의 입맞춤에 대한 스릴을 느꼈다. 그녀의 마음속에는 그의 반응에 따라 두 가지 흐름이 동시에 피어났다. “그가 뽀뽀를 원할까?” 혹은 “내가 뽀뽀를 직접 해야 하는 걸까?” 하는 생각들이 함께 뒤엉켜 얼떨떨한 기분에 빠져들었다. \n\n그녀는 그와의 약속을 마음에 새기며, “우리의 관계가 이렇게 새롭게 시작되면 좋겠어!”라는 마음가짐으로 메신저의 입력창에 마지막 메시지를 작성했다. “나, 바퀴벌레 잡아줘서 고마워! 이제 뽀뽀할 시간?” 그렇게 그녀는 서로의 마음을 나누고 싶었던 용기를 내어 그의 반응을 기다렸다. 남자의 긍정적인 대답을 듣는 순간, 그녀의 얼굴에는 웃음이 가득하고, 가슴 속 깊은 곳에서부터 행복한 물결이 퍼져 나갔다. 그녀는 이제 이 순간이 새로운 시작이 될 것이라는 사실에 가슴이 벅차오름을 느끼며, 사랑스러운 기대감으로 가득 차올랐다.",
-      "custom_context": "",
-      "available_characters": [],
-      "episode_count": 0,
-      "tags": [
-        "집에",
-        "바퀴벌레가",
-        "있다면서",
-        "와서",
-        "잡아주면",
-        "상으로",
-        "뽀뽀",
-        "해주겠다고",
-        "유혹함",
-        "편안한"
+    "scenario_늦은_밤의_톡_1760200000000": {
+      "id": "scenario_늦은_밤의_톡_1760200000000",
+      "title": "늦은 밤의 톡",
+      "description": "갑자기 밤늦게 메신저로 연락온 소라와의 설레는 대화",
+      "genre": "crush",
+      "sexy_level": 3,
+      "mood": "balanced",
+      "total_choices": 4,
+      "estimated_duration": "short",
+      "dialogue_script": [
+        {
+          "id": 1,
+          "type": "message",
+          "speaker": "소라",
+          "text": "집에 왔는데 갑자기 네 생각나서 톡해.",
+          "emotion": "neutral",
+          "timestamp": "23:23"
+        },
+        {
+          "id": 2,
+          "type": "message",
+          "speaker": "소라",
+          "text": "오늘도 하루종일 정신없었는데, 이상하게 네 목소리 듣고 싶더라.",
+          "emotion": "longing"
+        },
+        {
+          "id": 3,
+          "type": "user_input",
+          "placeholder": "답장을 입력하세요...",
+          "evaluation_keywords": ["무슨일", "괜찮아", "피곤해", "나도", "보고싶어"]
+        },
+        {
+          "id": 4,
+          "type": "message",
+          "speaker": "소라",
+          "text": "아 그리고... 내일 시간 있어?",
+          "emotion": "shy"
+        },
+        {
+          "id": 5,
+          "type": "message",
+          "speaker": "소라",
+          "text": "같이 커피라도 한잔 하면 좋겠는데...",
+          "emotion": "shy"
+        },
+        {
+          "id": 6,
+          "type": "choice",
+          "question": "소라의 제안에 어떻게 대답할까?",
+          "options": [
+            {
+              "id": "A",
+              "text": "좋아! 몇 시에 만날까?",
+              "affection_change": 3
+            },
+            {
+              "id": "B",
+              "text": "내일은 좀 바쁜데... 다음에?",
+              "affection_change": -1
+            },
+            {
+              "id": "C",
+              "text": "커피 좋지. 장소 정해줘",
+              "affection_change": 2
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "type": "message",
+          "speaker": "소라",
+          "text": "그럼 우리 학교 앞 카페 어때?",
+          "emotion": "excited"
+        },
+        {
+          "id": 8,
+          "type": "message",
+          "speaker": "소라",
+          "text": "거기 분위기 좋던데... 조용하고.",
+          "emotion": "playful"
+        },
+        {
+          "id": 9,
+          "type": "message",
+          "speaker": "소라",
+          "text": "나랑 둘이서 얘기하기 딱 좋은 곳 같아 (웃음)",
+          "emotion": "playful"
+        },
+        {
+          "id": 10,
+          "type": "user_input",
+          "placeholder": "대답을 입력하세요...",
+          "evaluation_keywords": ["좋아", "알겠어", "기대", "설레", "둘이서"]
+        },
+        {
+          "id": 11,
+          "type": "message",
+          "speaker": "소라",
+          "text": "사실... 오늘 너한테 하고 싶은 말이 있었거든.",
+          "emotion": "serious"
+        },
+        {
+          "id": 12,
+          "type": "message",
+          "speaker": "소라",
+          "text": "근데 메신저로는 좀 그래서...",
+          "emotion": "shy"
+        },
+        {
+          "id": 13,
+          "type": "choice",
+          "question": "무슨 말인지 궁금한 상황...",
+          "options": [
+            {
+              "id": "A",
+              "text": "무슨 얘긴데? 지금 말해줘도 돼",
+              "affection_change": 2
+            },
+            {
+              "id": "B",
+              "text": "그래? 내일 직접 듣는 게 좋겠다",
+              "affection_change": 3
+            },
+            {
+              "id": "C",
+              "text": "혹시 안 좋은 얘기야...?",
+              "affection_change": 0
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "type": "message",
+          "speaker": "소라",
+          "text": "아니야... 나쁜 얘기는 아니야.",
+          "emotion": "shy"
+        },
+        {
+          "id": 15,
+          "type": "message",
+          "speaker": "소라",
+          "text": "어떻게 보면 좋은 얘기일 수도 있고...",
+          "emotion": "shy"
+        },
+        {
+          "id": 16,
+          "type": "message",
+          "speaker": "소라",
+          "text": "아 몰라! 내일 보면 알게 될 거야 (///)",
+          "emotion": "excited"
+        },
+        {
+          "id": 17,
+          "type": "user_input",
+          "placeholder": "답장을 입력하세요...",
+          "evaluation_keywords": ["기대", "궁금", "설레", "내일", "기다려"]
+        },
+        {
+          "id": 18,
+          "type": "message",
+          "speaker": "소라",
+          "text": "그나저나 너... 요즘 나한테 관심 있어?",
+          "emotion": "playful"
+        },
+        {
+          "id": 19,
+          "type": "message",
+          "speaker": "소라",
+          "text": "자꾸 나랑 눈 마주치려고 하던데?",
+          "emotion": "playful"
+        },
+        {
+          "id": 20,
+          "type": "choice",
+          "question": "소라가 직구를 날렸다!",
+          "options": [
+            {
+              "id": "A",
+              "text": "...맞아. 요즘 자꾸 네 생각이 나",
+              "affection_change": 5
+            },
+            {
+              "id": "B",
+              "text": "그냥... 친구로서 궁금했어",
+              "affection_change": 0
+            },
+            {
+              "id": "C",
+              "text": "어... 그게 그런 건 아니고...",
+              "affection_change": 1
+            }
+          ]
+        },
+        {
+          "id": 21,
+          "type": "message",
+          "speaker": "소라",
+          "text": "ㅋㅋㅋ 귀엽다",
+          "emotion": "playful"
+        },
+        {
+          "id": 22,
+          "type": "message",
+          "speaker": "소라",
+          "text": "그럼 내일 2시에 보자!",
+          "emotion": "excited"
+        },
+        {
+          "id": 23,
+          "type": "message",
+          "speaker": "소라",
+          "text": "일찍 자고... 내일 멋진 모습으로 나와 ♡",
+          "emotion": "playful"
+        },
+        {
+          "id": 24,
+          "type": "choice",
+          "question": "마지막 답장...",
+          "options": [
+            {
+              "id": "A",
+              "text": "너도 예쁘게 나와줘",
+              "affection_change": 3
+            },
+            {
+              "id": "B",
+              "text": "알겠어, 내일 봐",
+              "affection_change": 1
+            },
+            {
+              "id": "C",
+              "text": "ㅋㅋ 알았어. 잘자",
+              "affection_change": 2
+            }
+          ]
+        },
+        {
+          "id": 25,
+          "type": "message",
+          "speaker": "소라",
+          "text": "응 ♡ 좋은 꿈 꿔~",
+          "emotion": "playful",
+          "timestamp": "23:47"
+        }
       ],
-      "source": "scenario_admin",
-      "updated_by": "scenario_manager_github_only",
       "metadata": {
-        "genre": "temptation",
-        "sexy_level": 8,
-        "tags": [
-          "도움",
-          "보상",
-          "뽀뽀",
-          "유혹"
-        ],
-        "estimated_duration": "short",
         "ai_model": "openai",
-        "target_affection_gain": 15
+        "created_at": "2025-10-11T00:00:00.000Z",
+        "last_modified": "2025-10-11T00:00:00.000Z"
       },
-      "structure": {}
-    },
-    "scenario_자기야_1759988816785": {
-      "id": "scenario_자기야_1759988816785",
-      "scenario_id": "scenario_자기야_1759988816785",
-      "title": "자기야 ",
-      "description": "어떤 여자가 자신한테 메세지를 잘못보냈는데 내용이 애인을 유혹하는 내용으로 보냄 그러다가 친해지는 스토리  ",
-      "background_setting": "멤신저 대화",
-      "mood": "편안한",
-      "active_status": true,
-      "created_date": "2025-10-09",
-      "last_modified": "2025-10-09T05:46:55.816Z",
-      "ai_generated_context": "여자는 아침 햇살 아래에서 메신저 앱을 열었다. 어제의 사건이 아직도 머릿속에서 맴돌고, 자신이 잘못 보낸 메시지가 생각났다. \"네가 그렇게 유혹하면 안 돼!\"라는 내용이 그에게 전송된 것이었다. 그녀는 그 메시지가 그의 눈에 어떻게 비칠지 상상하며, 은근히 긴장감이 돌았다. \"어떡해, 두근거려…\" 그녀는 웃음을 참을 수 없었다.\n\n그녀는 망설임 속에서 메시지를 작성했다. \"안녕! 어제 그 메시지… 다들 붙잡고 잔소리하더라고! 😅\" 그러자 곧바로 그가 반응할지 설레는 마음으로 기다렸다.\n\n잠시 후, 그의 답장이 도착했다. \"그 메시지? 흠... 나쁜 생각은 아니었는데?\" 이 말에 그녀는 얼굴이 붉어졌다. '어머, 내가 뭘 했지?' 하는 생각이 스치며 기분이 두둥실 올라갔다. \"아하! 유혹은 예술이니까?\" 그녀는 농담으로 화답했고, 그의 웃음소리가 귀에 쏙 들어왔다.\n\n이윽고 그녀는 솔직한 질문을 던졌다. \"그럼, 혹시 그런 메시지 좋아해? 😊\" 긴장감이 흐르지 않고, 오히려 즐거움만 가득한 대화가 이어졌다. 서로의 마음을 확인하며, 두 사람의 감정이 더욱 가까워지는 느낌을 받았다.\n\n마지막으로 그녀는 조심스럽게 다음 만남을 제안했다. \"그럼 우리 조만간 커피 한 잔 할래? 다음엔 제대로 이야기하고 싶어!\" 기분 좋은 설렘이 가득한 채로 대화는 마무리됐다.",
-      "custom_context": "",
-      "available_characters": [],
-      "episode_count": 0,
-      "tags": [
-        "어떤",
-        "여자가",
-        "자신한테",
-        "메세지를",
-        "잘못보냈는데",
-        "내용이",
-        "애인을",
-        "유혹하는",
-        "내용으로",
-        "보냄",
-        "그러다가",
-        "친해지는",
-        "스토리",
-        "편안한"
-      ],
-      "source": "scenario_admin",
-      "updated_by": "scenario_manager_github_only",
-      "metadata": {
-        "genre": "temptation",
-        "sexy_level": 10,
-        "tags": [
-          "자기야",
-          "귀가확인"
-        ],
-        "estimated_duration": "long",
-        "ai_model": "openai",
-        "target_affection_gain": 15
-      },
-      "structure": {}
-    },
-    "scenario_우리_사귈까_1760007114571": {
-      "id": "scenario_우리_사귈까_1760007114571",
-      "scenario_id": "scenario_우리_사귈까_1760007114571",
-      "title": "우리 사귈까?",
-      "description": "갑자기 캐릭터가 연락와서 평소에 좋아했다고 고백하면서 어떤 여자를 좋아했냐고 질문을 던지는 상황  ",
-      "background_setting": "멤신저 대화",
-      "mood": "편안한",
-      "active_status": true,
-      "created_date": "2025-10-09",
-      "last_modified": "2025-10-09T10:51:55.749Z",
-      "ai_generated_context": "여자는 평소 느끼던 미묘한 감정을 정리하기 위해 메신저를 열었다. 그의 이름을 눌렀을 때, 가슴이 두근거렸다. '뭐라고 시작해야 할까?' 고민하다가, 결국 \"안녕? 갑자기 연락해서 미안해\"라는 메시지를 보냈다. 그가 답장을 기다리는 동안, 과거의 여러 순간들이 떠올랐다. 그와 나눈 웃음, 눈빛, 그리고 그를 바라볼 때마다 느꼈던 설렘. \n\n그의 답변이 오자, 여자는 가슴속의 떨림이 커지는 것을 느꼈다. \"사실, 너한테 조금 호감이 있었어. 이렇게 말하는 게 어색하네.\" 그녀는 자신이 내뱉은 말이 그에게 어떤 의미일지 궁금했다. 그의 반응을 살피며, 마음속의 희망이 자라나기 시작했다.\n\n대화가 이어지면서, 여자는 그의 관심을 끌고 싶었다. \"그럼, 혹시 너는 어떤 여자를 좋아했어?\" 질문을 던지며 내심 긴장했다. 자신의 감정이 그에게 어떤 영향을 미칠지, 그의 대답이 어떤 기분을 가져올지 기대와 불안이 교차했다.\n\n마지막으로 그는 대답을 하며 그녀를 바라보았다. 여자는 그의 말에 미소 지으며, \"이번 주 토요일에 만날까? 좀 더 이야기 나누고 싶어.\"라고 제안했다. 그 순간, 그녀의 마음에 설렘이 가득 차오르며 새로운 시작을 꿈꾸었다.",
-      "custom_context": "",
-      "available_characters": [],
-      "episode_count": 0,
-      "tags": [
-        "갑자기",
-        "캐릭터가",
-        "연락와서",
-        "평소에",
-        "좋아했다고",
-        "고백하면서",
-        "어떤",
-        "여자를",
-        "좋아했냐고",
-        "질문을",
-        "던지는",
-        "상황",
-        "편안한"
-      ],
-      "source": "scenario_admin",
-      "updated_by": "scenario_manager_github_only",
-      "metadata": {
-        "genre": "flutter",
-        "sexy_level": 4,
-        "tags": [
-          "제안",
-          "사귐",
-          "질문"
-        ],
-        "estimated_duration": "long",
-        "ai_model": "openai",
-        "target_affection_gain": 15
-      },
-      "structure": {}
-    },
-    "scenario_우리집에_놀러와_1760072844766": {
-      "id": "scenario_우리집에_놀러와_1760072844766",
-      "scenario_id": "scenario_우리집에_놀러와_1760072844766",
-      "title": "우리집에 놀러와 ",
-      "description": "집에 심심하다며 놀러오라는 대화 ",
-      "background_setting": "멤신저 대화",
-      "mood": "편안한",
-      "active_status": true,
-      "created_date": "2025-10-10",
-      "last_modified": "2025-10-10T05:07:27.259Z",
-      "ai_generated_context": "여자는 소파에 앉아 한숨을 쉬었다. 오늘은 유난히 심심한 날이었다. 주말에도 별로 할 일이 없다니! 그래서 그녀는 말해버리기로 했다. '어떡해, 너무 지루해!'라며 메신저를 열고 그에게 메시지를 보냈다. '우리집에 놀러와!' 두근거림이 커지며 문자를 보냈다. 그가 어떻게 반응할지 기대되는 마음에 미소가 번졌다.\n\n그는 평소처럼 유쾌한 반응을 보였다. '진짜? 지금 가도 돼?' 그녀는 그 답변을 받고 더 설레였다. '응응! 집에서 맛있는 간식도 준비해둘게!' 그녀의 말에 행복함이 가득 차 올랐다. '너랑 나만 있으면 얼마나 재밌을까!' 하고 내심 기대하는 마음이 커졌다.\n\n그가 집에 오기로 결심하는 듯한 메시지를 보냈다. '좋아! 몇 시에 만나? 점심 같이 먹을까?' 그녀는 팔짝 뛰며 기뻐했다. '완전 좋아! 12시쯤 어때?' 시간과 계획이 정해지며 서로의 기대감이 커졌다. '그럼, 기다릴게! 빨리 도착해!' 마음속에서 행복한 두근거림이 계속되었다. \n\n마침내 구체적인 약속이 정해지자, 그녀는 정말로 즐거운 하루가 될 것이라는 확신에 휩싸였다. '곧 보자!'라는 메시지를 마지막으로 보낸 후, 여자는 기분 좋게 방을 정리하기 시작했다. 오늘은 특별한 날이 분명했다!",
-      "custom_context": "",
-      "available_characters": [],
-      "episode_count": 0,
-      "tags": [
-        "집에",
-        "심심하다며",
-        "놀러오라는",
-        "대화",
-        "편안한"
-      ],
-      "source": "scenario_admin",
-      "updated_by": "scenario_manager_github_only",
-      "metadata": {
-        "genre": "temptation",
-        "sexy_level": 5,
-        "tags": [],
-        "estimated_duration": "medium",
-        "ai_model": "claude",
-        "target_affection_gain": 15
-      },
-      "structure": {}
+      "tags": ["늦은밤", "설렘", "짝사랑", "고백", "데이트약속"],
+      "active": true
     }
   },
   "scenario_templates": {
