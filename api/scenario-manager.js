@@ -772,41 +772,34 @@ module.exports = async function handler(req, res) {
         const blocks = structure.structure || structure.blocks; // structure.structure가 실제 배열
 
         if (blocks && Array.isArray(blocks)) {
-          structureGuide = '\n\n# Step 1에서 생성된 대화 구조 (이 흐름을 정확히 따라 작성하세요):\n\n';
+          // 🔑 간결하지만 명확한 구조 가이드 (프롬프트 길이 최적화)
+          structureGuide = '\n\n# 대화 구조 (총 ' + blocks.length + '개 블록):\n';
 
           let messageCount = 0;
           let choiceCount = 0;
 
           blocks.forEach((block, index) => {
-            const blockNum = index + 1;
             if (block.type === 'message') {
               messageCount++;
               const emotion = block.emotion || 'neutral';
               const summary = block.summary || block.title || '대화';
-              structureGuide += `블록 ${blockNum}: [캐릭터 메시지]\n`;
-              structureGuide += `  - 감정: ${emotion}\n`;
-              structureGuide += `  - 내용: ${summary}\n`;
-              structureGuide += `  → 이 내용으로 실제 메신저 대사를 작성하세요.\n\n`;
+              structureGuide += `${index + 1}. 메시지(${emotion}): ${summary}\n`;
             } else if (block.type === 'choice') {
               choiceCount++;
-              const questionSummary = block.question_summary || block.question || '사용자 선택';
+              const questionSummary = block.question_summary || block.question || '선택';
               const optionsCount = block.options_count || block.options?.length || 3;
-              structureGuide += `블록 ${blockNum}: [선택지]\n`;
-              structureGuide += `  - 질문: ${questionSummary}\n`;
-              structureGuide += `  - 옵션 수: ${optionsCount}개\n`;
-              structureGuide += `  → 이 상황에 맞는 구체적인 선택지 ${optionsCount}개를 작성하세요.\n`;
-              structureGuide += `  → 각 선택지는 적극적/중립적/소극적 톤으로 구분하세요.\n`;
-              structureGuide += `  → affection_change는 적극적(+2~+3), 중립적(0~+1), 소극적(-1~0)으로 설정하세요.\n\n`;
+              structureGuide += `${index + 1}. 선택지(${optionsCount}개): ${questionSummary}\n`;
             } else if (block.type === 'user_input') {
-              structureGuide += `블록 ${blockNum}: [사용자 입력]\n`;
-              structureGuide += `  → 사용자가 자유롭게 메시지를 입력할 수 있는 구간입니다.\n\n`;
+              structureGuide += `${index + 1}. 사용자입력\n`;
             }
           });
 
-          structureGuide += `\n📊 총 ${blocks.length}개 블록: 메시지 약 ${messageCount}개, 선택지 ${choiceCount}개\n`;
-          structureGuide += `\n⚠️ 위의 구조를 정확히 따라 dialogue_script 배열을 생성하세요. 블록 순서와 개수를 반드시 맞추세요!`;
+          structureGuide += `\n⚠️ 위 구조를 정확히 따라 dialogue_script를 생성하세요.`;
+          structureGuide += `\n- 메시지: 실제 대사 작성 (speaker, text, emotion, timestamp)`;
+          structureGuide += `\n- 선택지: question + options 배열 (id, text, affection_change)`;
+          structureGuide += `\n- affection_change: 적극적(+2~+3), 중립(0~+1), 소극(-1~0)`;
 
-          console.log(`📋 Step 1 구조 상세 포함: ${blocks.length}개 블록 (메시지 ${messageCount}, 선택지 ${choiceCount})`);
+          console.log(`📋 Step 1 구조 간결 포함: ${blocks.length}개 블록 (메시지 ${messageCount}, 선택지 ${choiceCount})`);
         } else {
           // 구조가 없으면 기본 요약
           console.warn('⚠️ Step 1 구조를 찾을 수 없음, 기본 요약 사용');
@@ -882,6 +875,23 @@ ${structureGuide}
           const result = await response.json();
           console.log('🔍 OpenAI 전체 응답 구조 (Step 2):', JSON.stringify(result, null, 2).substring(0, 1000));
 
+          // 🚨 응답 구조 검증
+          if (!result.choices || !Array.isArray(result.choices) || result.choices.length === 0) {
+            return res.status(500).json({
+              success: false,
+              message: '⚠️ OpenAI 응답에 choices가 없습니다',
+              error_type: 'missing_choices',
+              debug: {
+                provider: 'openai',
+                model: ai_model,
+                response_keys: Object.keys(result),
+                has_error: 'error' in result,
+                error_message: result.error?.message || 'none',
+                full_response: JSON.stringify(result, null, 2).substring(0, 1500)
+              }
+            });
+          }
+
           // 토큰 사용량 확인
           if (result.usage) {
             console.log('📊 토큰 사용량:', {
@@ -891,7 +901,7 @@ ${structureGuide}
             });
           }
 
-          const finishReason = result.choices[0].finish_reason;
+          const finishReason = result.choices[0]?.finish_reason;
           console.log('🏁 OpenAI finish_reason:', finishReason);
 
           if (finishReason === 'length') {
@@ -900,7 +910,7 @@ ${structureGuide}
             throw new Error('OpenAI 콘텐츠 필터에 의해 차단되었습니다. 섹시 레벨을 낮추거나 설명을 순화하세요.');
           }
 
-          const content = result.choices[0].message.content;
+          const content = result.choices[0]?.message?.content;
           lastAIResponse = content || ''; // 디버그용 저장
 
           console.log('📄 OpenAI content 길이:', content?.length || 0);
