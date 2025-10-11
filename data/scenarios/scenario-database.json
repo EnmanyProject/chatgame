@@ -2,13 +2,195 @@
   "metadata": {
     "version": "2.0.0",
     "created_date": "2025-10-11",
-    "total_scenarios": 0,
+    "total_scenarios": 1,
     "ai_context_engine": "dialogue_script_v2",
-    "last_updated": "2025-10-11T05:10:12.512Z",
+    "last_updated": "2025-10-11T12:09:18.685Z",
     "data_source": "github_api_only",
     "schema_migration": "v1.0.0 -> v2.0.0 (메신저 대화형 시스템)"
   },
-  "scenarios": {},
+  "scenarios": {
+    "scenario_우리집에_놀러와_1760184555926": {
+      "id": "scenario_우리집에_놀러와_1760184555926",
+      "scenario_id": "scenario_우리집에_놀러와_1760184555926",
+      "title": "우리집에 놀러와",
+      "description": "집에 놀러오라는 캐릭터와 가면 뭐해줄거냐는 유저의 알콩달콩한 대화",
+      "background_setting": "멤신저 대화",
+      "mood": "light",
+      "genre": "temptation",
+      "sexy_level": 9,
+      "total_choices": 12,
+      "estimated_duration": "medium",
+      "dialogue_script": [
+        {
+          "id": 1,
+          "type": "message",
+          "speaker": "지현",
+          "text": "오늘 집에 놀러와🥳",
+          "emotion": "excited",
+          "timestamp": "19:23"
+        },
+        {
+          "id": 2,
+          "type": "message",
+          "speaker": "유진",
+          "text": "오오! 뭐해줄 건데?🤔",
+          "emotion": "neutral",
+          "timestamp": "19:24"
+        },
+        {
+          "id": 3,
+          "type": "message",
+          "speaker": "지현",
+          "text": "아~ 말해주고 싶어! 🎉",
+          "emotion": "playful",
+          "timestamp": "19:25"
+        },
+        {
+          "id": 4,
+          "type": "choice",
+          "options": [
+            {
+              "id": "A",
+              "text": "맛있는 간식 만들어줄게!🍰",
+              "affection_change": 3
+            },
+            {
+              "id": "B",
+              "text": "영화 마라톤할까?🎬",
+              "affection_change": 1
+            },
+            {
+              "id": "C",
+              "text": "",
+              "affection_change": 1
+            }
+          ],
+          "question": "어떤 걸로 해줄까?"
+        },
+        {
+          "id": 5,
+          "type": "message",
+          "speaker": "유진",
+          "text": "간식! 간식!❤️",
+          "emotion": "neutral",
+          "timestamp": "19:26"
+        },
+        {
+          "id": 6,
+          "type": "message",
+          "speaker": "지현",
+          "text": "너무 귀여워서 내가 더 좋아한다😆",
+          "emotion": "neutral",
+          "timestamp": "19:27"
+        },
+        {
+          "id": 7,
+          "type": "message",
+          "speaker": "유진",
+          "text": "진짜 맛있는 거 만들어줘야 해!😋",
+          "emotion": "playful",
+          "timestamp": "19:28"
+        },
+        {
+          "id": 8,
+          "type": "message",
+          "speaker": "지현",
+          "text": "약속! 그리고 이따가 특급서비스도 있을 거야😉",
+          "emotion": "neutral",
+          "timestamp": "19:29"
+        },
+        {
+          "id": 9,
+          "type": "choice",
+          "options": [
+            {
+              "id": "A",
+              "text": "너에게만 맞춤 음악도 틀어줄게🎶",
+              "affection_change": 2
+            },
+            {
+              "id": "B",
+              "text": "귀여운 룩으로 맞이할게📸",
+              "affection_change": 1
+            },
+            {
+              "id": "C",
+              "text": "",
+              "affection_change": 1
+            }
+          ],
+          "question": "특급서비스는 어떤 걸까?"
+        },
+        {
+          "id": 10,
+          "type": "message",
+          "speaker": "유진",
+          "text": "우와! 음악 듣고 싶어!❤️",
+          "emotion": "excited",
+          "timestamp": "19:30"
+        },
+        {
+          "id": 11,
+          "type": "message",
+          "speaker": "지현",
+          "text": "결정! 내 사랑의 플레이리스트 준비할게😍",
+          "emotion": "neutral",
+          "timestamp": "19:31"
+        },
+        {
+          "id": 12,
+          "type": "message",
+          "speaker": "유진",
+          "text": "완전 기대된다! 🥰",
+          "emotion": "neutral",
+          "timestamp": "19:32"
+        },
+        {
+          "id": 13,
+          "type": "message",
+          "speaker": "지현",
+          "text": "지금 가고 있어?✨",
+          "emotion": "neutral",
+          "timestamp": "19:33"
+        },
+        {
+          "id": 14,
+          "type": "message",
+          "speaker": "유진",
+          "text": "곧 도착할게! 신난다!🕺",
+          "emotion": "excited",
+          "timestamp": "19:34"
+        },
+        {
+          "id": 15,
+          "type": "message",
+          "speaker": "지현",
+          "text": "기다리고 있을게😘",
+          "emotion": "neutral",
+          "timestamp": "19:35"
+        }
+      ],
+      "active_status": true,
+      "created_date": "2025-10-11",
+      "last_modified": "2025-10-11T12:09:18.685Z",
+      "ai_generated_context": "죄송하지만, 제공된 캐릭터 정보가 없습니다. 캐릭터 정보를 제공해 주시면 그에 맞춰 메신저 대화 시나리오를 작성해 드리겠습니다.",
+      "custom_context": "",
+      "available_characters": [],
+      "episode_count": 0,
+      "tags": [
+        "유혹",
+        "부탁"
+      ],
+      "source": "scenario_admin",
+      "updated_by": "scenario_manager_github_only",
+      "metadata": {
+        "ai_model": "openai",
+        "created_at": "2025-10-11T12:09:15.926Z",
+        "last_modified": "2025-10-11T12:09:15.926Z"
+      },
+      "structure": {}
+    }
+  },
   "scenario_templates": {
     "romance_template": {
       "mood_options": [
