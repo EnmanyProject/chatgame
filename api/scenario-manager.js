@@ -1,168 +1,6 @@
 // 시나리오 관리 API - v2.0.0 (GitHub API 전용)
 // 로컬 파일 시스템 의존성 완전 제거
 
-// ============================================================
-// Step 1: AI 재시도 로직 (Exponential Backoff)
-// ============================================================
-/**
- * API 호출을 재시도하는 함수 (지수 백오프)
- * @param {Function} apiCall - 실행할 API 호출 함수
- * @param {number} maxRetries - 최대 재시도 횟수 (기본값: 3)
- * @param {number} baseDelay - 기본 지연 시간 ms (기본값: 1000)
- * @returns {Promise} API 호출 결과
- */
-async function retryWithBackoff(apiCall, maxRetries = 3, baseDelay = 1000) {
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      return await apiCall();
-    } catch (error) {
-      // 마지막 시도면 에러 throw
-      if (i === maxRetries - 1) throw error;
-
-      // 일시적 오류만 재시도 (504 Gateway Timeout, 429 Too Many Requests, 500/503 Server Error)
-      const retryableStatuses = [504, 429, 500, 503];
-      if (error.status && !retryableStatuses.includes(error.status)) {
-        throw error; // 재시도 불가능한 에러는 즉시 throw
-      }
-
-      const delay = baseDelay * Math.pow(2, i); // 1s → 2s → 4s
-      console.log(`⏳ 재시도 ${i + 1}/${maxRetries} (${delay}ms 후)... [에러: ${error.message}]`);
-      await new Promise(resolve => setTimeout(resolve, delay));
-    }
-  }
-}
-
-// ============================================================
-// Step 2: AI 모델 자동 폴백 체인
-// ============================================================
-/**
- * AI 폴백 우선순위 체인
- * OpenAI (빠르고 저렴) → Groq (초고속) → Claude (고품질)
- */
-const AI_FALLBACK_CHAIN = [
-  { provider: 'openai', model: 'gpt-4o-mini', reason: '빠르고 저렴' },
-  { provider: 'groq', model: 'llama-3.1-8b-instant', reason: '초고속' },
-  { provider: 'claude', model: 'claude-3-haiku-20240307', reason: '고품질 폴백' }
-];
-
-/**
- * AI 모델 폴백을 통한 안전한 생성
- * @param {Object} params - 생성 파라미터 (title, description, genre 등)
- * @param {Function} generateFunc - AI 생성 함수 (provider, model, params)
- * @returns {Promise} { success: true, result, provider, model }
- */
-async function generateWithFallback(params, generateFunc) {
-  let lastError;
-
-  for (const { provider, model, reason } of AI_FALLBACK_CHAIN) {
-    try {
-      console.log(`🤖 ${provider} (${model}) 시도... (${reason})`);
-
-      const result = await retryWithBackoff(() =>
-        generateFunc(provider, model, params)
-      );
-
-      console.log(`✅ ${provider} 성공`);
-      return { success: true, result, provider, model };
-
-    } catch (error) {
-      console.warn(`❌ ${provider} 실패:`, error.message);
-      lastError = error;
-      // 다음 모델로 자동 폴백
-    }
-  }
-
-  // 모든 AI 모델 실패
-  throw new Error(`모든 AI 모델 실패: ${lastError.message}\n\n해결 방법:\n- API 키 설정 확인 (Vercel 환경변수)\n- 인터넷 연결 확인\n- 잠시 후 다시 시도`);
-}
-
-// ============================================================
-// Step 3: dialogue_script 검증 강화
-// ============================================================
-/**
- * dialogue_script 구조 검증 함수
- * @param {Array} script - 검증할 dialogue_script 배열
- * @param {Object} params - 검증 파라미터 (total_choices 등)
- * @returns {Object} { valid: boolean, errors: string[], stats: Object }
- */
-function validateDialogueScript(script, params = {}) {
-  const errors = [];
-
-  // 1. 필수 필드 검증
-  script.forEach((block, index) => {
-    if (!block.id) errors.push(`Block ${index}: id 누락`);
-    if (!block.type) errors.push(`Block ${index}: type 누락`);
-
-    if (block.type === 'message') {
-      if (!block.speaker) errors.push(`Block ${index}: speaker 누락`);
-      if (!block.text) errors.push(`Block ${index}: text 누락`);
-      if (block.speaker === 'undefined') {
-        errors.push(`Block ${index}: speaker = 'undefined' (invalid)`);
-      }
-
-      // emotion 검증 (8개 감정만 허용)
-      const validEmotions = ['neutral', 'shy', 'excited', 'sad', 'angry', 'longing', 'playful', 'serious'];
-      if (block.emotion && !validEmotions.includes(block.emotion)) {
-        errors.push(`Block ${index}: 유효하지 않은 emotion '${block.emotion}' (허용: ${validEmotions.join(', ')})`);
-      }
-    }
-
-    if (block.type === 'choice') {
-      if (!block.options || !Array.isArray(block.options)) {
-        errors.push(`Block ${index}: options 배열 누락`);
-      } else if (block.options.length !== 3) {
-        errors.push(`Block ${index}: 선택지는 정확히 3개여야 함 (현재: ${block.options.length})`);
-      }
-
-      // affection_change 범위 검증 (-5 ~ 5)
-      block.options?.forEach((opt, i) => {
-        if (typeof opt.affection_change !== 'number') {
-          errors.push(`Block ${index}, Option ${i}: affection_change가 숫자가 아님`);
-        } else if (opt.affection_change < -5 || opt.affection_change > 5) {
-          errors.push(`Block ${index}, Option ${i}: affection_change 범위 초과 (${opt.affection_change}, 허용: -5~5)`);
-        }
-      });
-    }
-
-    if (block.type === 'user_input') {
-      if (!block.placeholder) {
-        errors.push(`Block ${index}: placeholder 누락`);
-      }
-    }
-  });
-
-  // 2. 선택지 개수 검증 (80% 이상)
-  const choiceCount = script.filter(b => b.type === 'choice').length;
-  const expectedChoices = params.total_choices || 0;
-
-  if (expectedChoices > 0 && choiceCount < expectedChoices * 0.8) {
-    errors.push(`선택지 부족: ${choiceCount}/${expectedChoices} (최소 ${Math.ceil(expectedChoices * 0.8)}개 필요)`);
-  }
-
-  // 3. 대화/선택지 비율 검증 (2~5 사이)
-  const messageCount = script.filter(b => b.type === 'message').length;
-  const ratio = choiceCount > 0 ? messageCount / choiceCount : 0;
-
-  if (choiceCount > 0 && (ratio < 2 || ratio > 5)) {
-    errors.push(`대화/선택지 비율 이상: ${ratio.toFixed(1)} (권장: 2~5)`);
-  }
-
-  // 통계 계산
-  const stats = {
-    total_blocks: script.length,
-    messages: messageCount,
-    choices: choiceCount,
-    user_inputs: script.filter(b => b.type === 'user_input').length,
-    ratio: ratio > 0 ? ratio.toFixed(1) : 'N/A'
-  };
-
-  return {
-    valid: errors.length === 0,
-    errors,
-    stats
-  };
-}
-
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -697,8 +535,8 @@ module.exports = async function handler(req, res) {
                 { role: 'user', content: userPrompt }
               ],
               response_format: { type: "json_object" },
-              temperature: 0.7, // Step 1은 구조만이므로 빠르게
-              max_tokens: 600 // Vercel 10초 제한 대응 (구조만 간결하게)
+              temperature: 0.8,
+              max_tokens: 1200 // 충분한 구조 생성
             })
           });
           const apiDuration = Date.now() - apiStartTime;
@@ -746,8 +584,8 @@ module.exports = async function handler(req, res) {
                 { role: 'user', content: userPrompt }
               ],
               response_format: { type: "json_object" },
-              temperature: 0.7, // Step 1은 구조만이므로 빠르게
-              max_tokens: 600 // Vercel 10초 제한 대응 (구조만 간결하게)
+              temperature: 0.8,
+              max_tokens: 1200 // 충분한 구조 생성
             })
           });
           const apiDuration = Date.now() - apiStartTime;
@@ -790,8 +628,8 @@ module.exports = async function handler(req, res) {
             },
             body: JSON.stringify({
               model: ai_model || 'claude-3-5-sonnet-20241022', // 사용자가 선택한 Claude 모델 사용
-              max_tokens: 600, // Vercel 10초 제한 대응 (구조만 간결하게)
-              temperature: 0.7, // Step 1은 구조만이므로 빠르게
+              max_tokens: 1200, // 충분한 구조 생성
+              temperature: 0.8,
               messages: [{
                 role: 'user',
                 content: `${systemPrompt}\n\n${userPrompt}\n\n반드시 JSON 형식으로만 응답하세요.`
@@ -978,7 +816,7 @@ module.exports = async function handler(req, res) {
               ],
               response_format: { type: "json_object" },
               temperature: toneSettings.temperature,
-              max_tokens: 1200
+              max_tokens: 2000 // 충분한 대화 생성
             })
           });
           const apiDuration = Date.now() - apiStartTime;
@@ -1028,7 +866,7 @@ module.exports = async function handler(req, res) {
               ],
               response_format: { type: "json_object" },
               temperature: toneSettings.temperature,
-              max_tokens: 1200
+              max_tokens: 2000 // 충분한 대화 생성
             })
           });
           const apiDuration = Date.now() - apiStartTime;
@@ -1073,7 +911,7 @@ module.exports = async function handler(req, res) {
             },
             body: JSON.stringify({
               model: ai_model || 'claude-3-5-sonnet-20241022', // 사용자가 선택한 Claude 모델 사용
-              max_tokens: 1200,
+              max_tokens: 2000, // 충분한 대화 생성
               temperature: toneSettings.temperature,
               messages: [{
                 role: 'user',
