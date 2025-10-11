@@ -1440,6 +1440,152 @@
             display: block;
         }
 
+        /* ========== Dialogue Block Styles ========== */
+        .dialogue-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            flex-wrap: wrap;
+        }
+
+        .dialogue-timeline {
+            padding: 20px 0;
+        }
+
+        .dialogue-block {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .dialogue-block:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .message-block {
+            border-left: 4px solid #667eea;
+        }
+
+        .choice-block {
+            border-left: 4px solid #f093fb;
+            background: linear-gradient(135deg, #fff9fc 0%, #ffffff 100%);
+        }
+
+        .input-block {
+            border-left: 4px solid #4ade80;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+        }
+
+        .block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .block-number {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .block-type {
+            font-weight: 600;
+            color: #666;
+            flex: 1;
+            margin-left: 10px;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .choice-options {
+            margin-top: 10px;
+        }
+
+        .choice-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .option-label {
+            font-weight: bold;
+            color: #667eea;
+            min-width: 30px;
+        }
+
+        .option-text {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        .block-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #f0f0f0;
+            flex-wrap: wrap;
+        }
+
+        .block-meta label {
+            font-size: 0.9em;
+            color: #666;
+            margin: 0;
+        }
+
+        .block-meta select, .block-meta input {
+            padding: 4px 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .block-speaker, .block-text, .input-placeholder, .input-keywords, .choice-question {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .block-text {
+            resize: vertical;
+            font-family: inherit;
+        }
+
         /* ========== Acts & Beats 타임라인 컨트롤 패널 ========== */
         .structure-editor {
             padding: 20px;
@@ -5245,10 +5391,22 @@
             </div>
 
             <div class="modal-body">
+                <!-- Tab Navigation -->
+                <div class="scenario-tabs">
+                    <button type="button" class="scenario-tab active" data-tab="basic" onclick="switchScenarioTab('basic')">
+                        📋 기본 정보
+                    </button>
+                    <button type="button" class="scenario-tab" data-tab="script" onclick="switchScenarioTab('script')">
+                        📝 대화 스크립트
+                    </button>
+                </div>
+
                 <form id="scenarioForm">
                     <input type="hidden" id="scenarioId" />
 
-                    <!-- 메타데이터 -->
+                    <!-- Tab 1: Basic Info -->
+                    <div id="scenario-tab-basic" class="scenario-tab-content active">
+                        <!-- 메타데이터 -->
                     <div class="form-group">
                         <label for="scenarioTitle">📝 시나리오 제목 *</label>
                         <input type="text" id="scenarioTitle" required placeholder="예: 카페에서의 우연한 만남" />
@@ -5311,12 +5469,19 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="scenarioDuration">⏱️ 예상 플레이 시간</label>
-                        <select id="scenarioDuration">
-                            <option value="short">짧음 (10-15분)</option>
-                            <option value="medium" selected>보통 (20-30분)</option>
-                            <option value="long">길게 (40분 이상)</option>
+                        <label for="scenarioTotalChoices">🎯 선택지 개수 (플레이 시간과 직결) *</label>
+                        <select id="scenarioTotalChoices" required>
+                            <option value="4">4개 (초짧음, 5-10분)</option>
+                            <option value="8">8개 (짧음, 10-15분)</option>
+                            <option value="12" selected>12개 (보통, 15-20분)</option>
+                            <option value="16">16개 (보통, 20-25분)</option>
+                            <option value="20">20개 (길게, 25-30분)</option>
+                            <option value="24">24개 (길게, 30-35분)</option>
+                            <option value="28">28개 (매우 길게, 35-40분)</option>
+                            <option value="32">32개 (매우 길게, 40-45분)</option>
+                            <option value="36">36개 (최대, 45-60분)</option>
                         </select>
+                        <small>선택지 개수가 많을수록 대화가 길어집니다. 12-16개 권장</small>
                     </div>
 
                     <div class="form-group">
@@ -5327,14 +5492,6 @@
                             <option value="llama">Llama 3.1 (Groq)</option>
                         </select>
                         <small>시나리오 생성에 사용할 AI 모델을 선택하세요</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="aiGeneratedStory">📚 AI 생성 스토리 (편집 가능)</label>
-                        <textarea id="aiGeneratedStory" rows="8"
-                                  placeholder="'🤖 AI 자동 생성' 버튼을 클릭하면 여기에 메신저 대화 배경 스토리가 자동으로 생성됩니다. 생성 후 자유롭게 편집할 수 있습니다..."
-                                  style="background-color: #ffffff; border: 2px solid #dee2e6;"></textarea>
-                        <small style="color: #6c757d;">Acts & Beats 구조를 바탕으로 자동 생성되는 배경 스토리입니다. 생성 후 자유롭게 수정 가능합니다.</small>
                     </div>
 
                     <div class="form-group">
@@ -5354,85 +5511,27 @@
                             </button>
                         </div>
                     </div>
+                    </div>
+                    <!-- End Tab 1 -->
 
-                    <!-- 기승전결 구조 섹션 -->
-                    <div class="form-group" style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #eee;">
-                        <div class="structure-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <div>
-                                <h3 style="margin: 0; color: #333;">📖 기승전결 구조</h3>
-                                <p style="margin: 5px 0 0 0; font-size: 13px; color: #999;">대화의 뼈대가 되는 4단계 스토리 구조를 설계하세요</p>
-                            </div>
-                            <button type="button" onclick="generateAIStoryStructure()" style="padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.3s;">
-                                🤖 AI 자동 생성
-                            </button>
-                        </div>
-
-                        <div id="story-structure-container" style="display: grid; gap: 20px;">
-                            <!-- 기 (도입) -->
-                            <div class="story-stage-card" data-stage="beginning">
-                                <div class="stage-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 15px; border-radius: 8px 8px 0 0; font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
-                                    <span>📌 기 (起) - 도입</span>
-                                    <span style="font-size: 11px; opacity: 0.9;">호감도 목표: 0~5</span>
-                                </div>
-                                <div class="stage-body" style="padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 8px 8px;">
-                                    <input type="text" id="beginning-title" placeholder="제목 (예: 술자리의 설렘)"
-                                           style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px; font-weight: 600;">
-                                    <textarea id="beginning-summary" rows="2" placeholder="요약 (1-2문장, 예: 친구들과 술자리에서 분위기가 무르익고...)"
-                                              style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px; resize: vertical;"></textarea>
-                                    <input type="text" id="beginning-goal" placeholder="목표 (예: 자연스러운 분위기 조성)"
-                                           style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px;">
-                                </div>
+                    <!-- Tab 2: Dialogue Script Editor -->
+                    <div id="scenario-tab-script" class="scenario-tab-content">
+                        <div style="padding: 20px;">
+                            <!-- Control Panel -->
+                            <div class="dialogue-controls">
+                                <button type="button" class="btn btn-primary" onclick="addMessageBlock()">💬 대사 추가</button>
+                                <button type="button" class="btn btn-success" onclick="addChoiceBlock()">🎯 선택지 추가 (3개 옵션)</button>
+                                <button type="button" class="btn btn-info" onclick="addUserInputBlock()">⌨️ 주관식 추가</button>
+                                <button type="button" class="btn btn-warning" onclick="previewDialogue()">👁️ 미리보기</button>
                             </div>
 
-                            <!-- 승 (전개) -->
-                            <div class="story-stage-card" data-stage="buildup">
-                                <div class="stage-header" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 12px 15px; border-radius: 8px 8px 0 0; font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
-                                    <span>🔥 승 (承) - 전개</span>
-                                    <span style="font-size: 11px; opacity: 0.9;">호감도 목표: 5~10</span>
-                                </div>
-                                <div class="stage-body" style="padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 8px 8px;">
-                                    <input type="text" id="buildup-title" placeholder="제목 (예: 순간의 선택)"
-                                           style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px; font-weight: 600;">
-                                    <textarea id="buildup-summary" rows="2" placeholder="요약 (예: 취기가 오르고 순간적으로 키스를...)"
-                                              style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px; resize: vertical;"></textarea>
-                                    <input type="text" id="buildup-goal" placeholder="목표 (예: 감정의 폭발)"
-                                           style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px;">
-                                </div>
-                            </div>
-
-                            <!-- 전 (위기) -->
-                            <div class="story-stage-card" data-stage="climax">
-                                <div class="stage-header" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 12px 15px; border-radius: 8px 8px 0 0; font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
-                                    <span>⚡ 전 (轉) - 위기</span>
-                                    <span style="font-size: 11px; opacity: 0.9;">호감도 목표: 3~8</span>
-                                </div>
-                                <div class="stage-body" style="padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 8px 8px;">
-                                    <input type="text" id="climax-title" placeholder="제목 (예: 다음날의 어색함)"
-                                           style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px; font-weight: 600;">
-                                    <textarea id="climax-summary" rows="2" placeholder="요약 (예: 후회와 어색함, 진심이 궁금해짐)"
-                                              style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px; resize: vertical;"></textarea>
-                                    <input type="text" id="climax-goal" placeholder="목표 (예: 관계의 불확실성)"
-                                           style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px;">
-                                </div>
-                            </div>
-
-                            <!-- 결 (결말) -->
-                            <div class="story-stage-card" data-stage="resolution">
-                                <div class="stage-header" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 12px 15px; border-radius: 8px 8px 0 0; font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
-                                    <span>✨ 결 (結) - 결말</span>
-                                    <span style="font-size: 11px; opacity: 0.9;">호감도 목표: 10~15</span>
-                                </div>
-                                <div class="stage-body" style="padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 8px 8px;">
-                                    <input type="text" id="resolution-title" placeholder="제목 (예: 진심의 확인)"
-                                           style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px; font-weight: 600;">
-                                    <textarea id="resolution-summary" rows="2" placeholder="요약 (예: 용기내어 진심 확인, 관계 발전)"
-                                              style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px; resize: vertical;"></textarea>
-                                    <input type="text" id="resolution-goal" placeholder="목표 (예: 호감도 상승 및 관계 진전)"
-                                           style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px;">
-                                </div>
+                            <!-- Block Container -->
+                            <div id="dialogue-blocks-container" class="dialogue-timeline">
+                                <!-- Blocks dynamically added here -->
                             </div>
                         </div>
                     </div>
+                    <!-- End Tab 2 -->
                 </form>
             </div>
 
@@ -9831,7 +9930,8 @@
             const genre = document.getElementById('scenarioGenre').value;
             const sexyLevel = parseInt(document.getElementById('scenarioSexyLevel').value);
             const tagsInput = document.getElementById('scenarioTags').value;
-            const duration = document.getElementById('scenarioDuration').value;
+            const tone = document.getElementById('scenarioTone')?.value || 'balanced';
+            const totalChoices = parseInt(document.getElementById('scenarioTotalChoices')?.value || 12);
 
             // AI 모델 선택값 가져오기 (모달 내 select 필드)
             const modelSelector = document.getElementById('scenarioAiModel');
@@ -9844,39 +9944,10 @@
 
             const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
 
-            // AI 생성 스토리 가져오기
-            const aiGeneratedStory = document.getElementById('aiGeneratedStory').value;
+            // 📝 대화 스크립트 수집 (Step 2)
+            const dialogueScript = collectDialogueScript();
 
-            // 📖 기승전결 구조 데이터 수집
-            // 기승전결 구조 (영어 속성명 사용)
-            const storyStructure = {
-                beginning: {
-                    title: document.getElementById('beginning-title')?.value || '',
-                    summary: document.getElementById('beginning-summary')?.value || '',
-                    goal: document.getElementById('beginning-goal')?.value || '',
-                    affection_range: "0~5"
-                },
-                buildup: {
-                    title: document.getElementById('buildup-title')?.value || '',
-                    summary: document.getElementById('buildup-summary')?.value || '',
-                    goal: document.getElementById('buildup-goal')?.value || '',
-                    affection_range: "5~10"
-                },
-                climax: {
-                    title: document.getElementById('climax-title')?.value || '',
-                    summary: document.getElementById('climax-summary')?.value || '',
-                    goal: document.getElementById('climax-goal')?.value || '',
-                    affection_range: "3~8"
-                },
-                resolution: {
-                    title: document.getElementById('resolution-title')?.value || '',
-                    summary: document.getElementById('resolution-summary')?.value || '',
-                    goal: document.getElementById('resolution-goal')?.value || '',
-                    affection_range: "10~15"
-                }
-            };
-
-            console.log('📖 기승전결 구조 수집:', storyStructure);
+            console.log('📝 대화 스크립트 수집:', dialogueScript);
 
             // 제목을 기반으로 고유한 ID 생성
             const titleKey = title.toLowerCase()
@@ -9891,16 +9962,16 @@
                 scenario_id: scenarioId,
                 title,
                 description,
-                ai_generated_context: aiGeneratedStory || '', // AI 생성 스토리 저장
                 metadata: {
                     genre,
                     sexy_level: sexyLevel,
+                    tone,
                     tags,
-                    estimated_duration: duration,
-                    ai_model: selectedModel, // AI 모델 정보 저장
-                    target_affection_gain: 15 // 기본 목표 호감도
+                    total_choices: totalChoices,
+                    ai_model: selectedModel,
+                    target_affection_gain: 15
                 },
-                story_structure: storyStructure, // 기승전결 구조 저장
+                dialogue_script: dialogueScript, // 대화 스크립트 저장 (Step 2)
                 created_date: new Date().toISOString().split('T')[0],
                 dialogue_count: 0,
                 action: currentMode === 'create' ? 'create' : 'update'
@@ -20983,6 +21054,216 @@
 
     <!-- 🆕 에피소드 관리 v2.1 JavaScript -->
     <script>
+        // ========== Dialogue Script Editor Functions (Step 2) ==========
+        let blockIdCounter = 1;
+
+        // Tab switching
+        function switchScenarioTab(tabName) {
+            document.querySelectorAll('.scenario-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.scenario-tab-content').forEach(content => content.classList.remove('active'));
+
+            const selectedTab = document.querySelector(`.scenario-tab[data-tab="${tabName}"]`);
+            const selectedContent = document.getElementById(`scenario-tab-${tabName}`);
+
+            if (selectedTab) selectedTab.classList.add('active');
+            if (selectedContent) selectedContent.classList.add('active');
+        }
+
+        // Add message block
+        function addMessageBlock() {
+            const container = document.getElementById('dialogue-blocks-container');
+            const id = blockIdCounter++;
+
+            const html = `
+                <div class="dialogue-block message-block" data-id="${id}">
+                    <div class="block-header">
+                        <span class="block-number">#${id}</span>
+                        <span class="block-type">💬 대사</span>
+                        <button type="button" class="btn-delete" onclick="deleteBlock(${id})">🗑️</button>
+                    </div>
+                    <div class="block-content">
+                        <input type="text" placeholder="화자 (예: 소라)" class="block-speaker">
+                        <textarea placeholder="대사 내용" class="block-text" rows="2"></textarea>
+                        <div class="block-meta">
+                            <label>감정:</label>
+                            <select class="block-emotion">
+                                <option value="neutral">😐 평범</option>
+                                <option value="shy">😳 부끄러움</option>
+                                <option value="excited">😆 흥분</option>
+                                <option value="sad">😢 슬픔</option>
+                                <option value="angry">😠 화남</option>
+                                <option value="longing">🥺 그리움</option>
+                                <option value="playful">😏 장난스러움</option>
+                                <option value="serious">😤 진지함</option>
+                            </select>
+                            <label>시간:</label>
+                            <input type="text" placeholder="19:23 (선택)" class="block-timestamp" style="width: 80px;">
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        // Add choice block
+        function addChoiceBlock() {
+            const container = document.getElementById('dialogue-blocks-container');
+            const id = blockIdCounter++;
+
+            const html = `
+                <div class="dialogue-block choice-block" data-id="${id}">
+                    <div class="block-header">
+                        <span class="block-number">#${id}</span>
+                        <span class="block-type">🎯 선택지</span>
+                        <button type="button" class="btn-delete" onclick="deleteBlock(${id})">🗑️</button>
+                    </div>
+                    <div class="block-content">
+                        <textarea placeholder="질문 (선택사항)" class="choice-question" rows="1"></textarea>
+                        <div class="choice-options">
+                            <div class="choice-option">
+                                <span class="option-label">A)</span>
+                                <input type="text" placeholder="선택지 1 (적극적)" class="option-text">
+                                <label>호감도:</label>
+                                <input type="number" min="-5" max="10" value="3" class="option-affection" style="width: 50px;">
+                            </div>
+                            <div class="choice-option">
+                                <span class="option-label">B)</span>
+                                <input type="text" placeholder="선택지 2 (중립적)" class="option-text">
+                                <label>호감도:</label>
+                                <input type="number" min="-5" max="10" value="0" class="option-affection" style="width: 50px;">
+                            </div>
+                            <div class="choice-option">
+                                <span class="option-label">C)</span>
+                                <input type="text" placeholder="선택지 3 (소극적)" class="option-text">
+                                <label>호감도:</label>
+                                <input type="number" min="-5" max="10" value="1" class="option-affection" style="width: 50px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        // Add user input block
+        function addUserInputBlock() {
+            const container = document.getElementById('dialogue-blocks-container');
+            const id = blockIdCounter++;
+
+            const html = `
+                <div class="dialogue-block input-block" data-id="${id}">
+                    <div class="block-header">
+                        <span class="block-number">#${id}</span>
+                        <span class="block-type">⌨️ 주관식</span>
+                        <button type="button" class="btn-delete" onclick="deleteBlock(${id})">🗑️</button>
+                    </div>
+                    <div class="block-content">
+                        <input type="text" placeholder="입력창 힌트 (예: 답장을 입력하세요...)" class="input-placeholder">
+                        <label>AI 평가 키워드 (쉼표 구분):</label>
+                        <input type="text" placeholder="예: 궁금, 걱정, 관심" class="input-keywords">
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        // Delete block
+        function deleteBlock(blockId) {
+            const block = document.querySelector(`.dialogue-block[data-id="${blockId}"]`);
+            if (block && confirm('이 블록을 삭제하시겠습니까?')) {
+                block.remove();
+            }
+        }
+
+        // Preview dialogue
+        function previewDialogue() {
+            const script = collectDialogueScript();
+
+            if (script.length === 0) {
+                alert('대화 스크립트가 비어 있습니다. 먼저 블록을 추가해주세요.');
+                return;
+            }
+
+            let preview = '📝 대화 스크립트 미리보기\n\n';
+            script.forEach((block, index) => {
+                preview += `--- Block ${index + 1} ---\n`;
+                if (block.type === 'message') {
+                    preview += `💬 ${block.speaker || '(화자 없음)'}: ${block.text || '(내용 없음)'}\n`;
+                    preview += `   감정: ${block.emotion || 'neutral'}`;
+                    if (block.timestamp) preview += ` | 시간: ${block.timestamp}`;
+                    preview += '\n';
+                } else if (block.type === 'choice') {
+                    if (block.question) preview += `질문: ${block.question}\n`;
+                    block.options.forEach(opt => {
+                        preview += `   ${opt.id}) ${opt.text || '(선택지 없음)'} [호감도: ${opt.affection_change}]\n`;
+                    });
+                } else if (block.type === 'user_input') {
+                    preview += `⌨️ 주관식 입력\n`;
+                    preview += `   힌트: ${block.placeholder || '(힌트 없음)'}\n`;
+                    if (block.evaluation_keywords.length > 0) {
+                        preview += `   평가 키워드: ${block.evaluation_keywords.join(', ')}\n`;
+                    }
+                }
+                preview += '\n';
+            });
+
+            alert(preview);
+        }
+
+        // Collect dialogue script data
+        function collectDialogueScript() {
+            const blocks = document.querySelectorAll('#dialogue-blocks-container .dialogue-block');
+            const script = [];
+
+            blocks.forEach((block, index) => {
+                const type = block.classList.contains('message-block') ? 'message' :
+                             block.classList.contains('choice-block') ? 'choice' : 'user_input';
+
+                if (type === 'message') {
+                    const obj = {
+                        id: index + 1,
+                        type: 'message',
+                        speaker: block.querySelector('.block-speaker')?.value || '',
+                        text: block.querySelector('.block-text')?.value || '',
+                        emotion: block.querySelector('.block-emotion')?.value || 'neutral'
+                    };
+                    const timestamp = block.querySelector('.block-timestamp')?.value;
+                    if (timestamp) obj.timestamp = timestamp;
+                    script.push(obj);
+                } else if (type === 'choice') {
+                    const options = [];
+                    block.querySelectorAll('.choice-option').forEach((opt, i) => {
+                        options.push({
+                            id: String.fromCharCode(65 + i),
+                            text: opt.querySelector('.option-text')?.value || '',
+                            affection_change: parseInt(opt.querySelector('.option-affection')?.value || 0)
+                        });
+                    });
+                    const obj = {
+                        id: index + 1,
+                        type: 'choice',
+                        options: options
+                    };
+                    const question = block.querySelector('.choice-question')?.value;
+                    if (question) obj.question = question;
+                    script.push(obj);
+                } else if (type === 'user_input') {
+                    const keywords = block.querySelector('.input-keywords')?.value || '';
+                    script.push({
+                        id: index + 1,
+                        type: 'user_input',
+                        placeholder: block.querySelector('.input-placeholder')?.value || '',
+                        evaluation_keywords: keywords ? keywords.split(',').map(k => k.trim()) : []
+                    });
+                }
+            });
+
+            return script;
+        }
+
         // 호감도/애정도 슬라이더 업데이트 함수
         function updateAffectionDisplay() {
             const value = parseInt(document.getElementById('affectionSlider').value);
