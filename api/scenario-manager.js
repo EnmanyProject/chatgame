@@ -913,11 +913,22 @@ ${structureGuide}
           const content = result.choices[0]?.message?.content;
           lastAIResponse = content || ''; // 디버그용 저장
 
+          // 🚨 CRITICAL DEBUG: content의 실제 상태 체크
+          console.log('🔬 content 상세 디버깅:');
+          console.log('  - typeof:', typeof content);
+          console.log('  - content === undefined:', content === undefined);
+          console.log('  - content === null:', content === null);
+          console.log('  - content === "":', content === '');
+          console.log('  - content?.length:', content?.length);
+          console.log('  - content 미리보기:', JSON.stringify(content)?.substring(0, 100));
+
           console.log('📄 OpenAI content 길이:', content?.length || 0);
           console.log('📄 OpenAI 원시 응답 (Step 2):', content?.substring(0, 200) || '(빈 응답)');
 
           // 🔍 빈 응답 체크 - 클라이언트에 상세 정보 전송
-          if (!content || content.trim() === '') {
+          if (content === undefined || content === null || content === '' || (typeof content === 'string' && content.trim() === '')) {
+            console.error('❌ 빈 응답 감지! 상세 정보를 클라이언트로 전송합니다.');
+
             return res.status(500).json({
               success: false,
               message: '⚠️ OpenAI가 빈 응답을 반환했습니다',
@@ -939,8 +950,30 @@ ${structureGuide}
             });
           }
 
-          const parsed = JSON.parse(content);
-          console.log('📋 파싱된 객체 키:', Object.keys(parsed));
+          // JSON 파싱 시도 (에러 시 상세 정보 전송)
+          let parsed;
+          try {
+            parsed = JSON.parse(content);
+            console.log('📋 파싱된 객체 키:', Object.keys(parsed));
+          } catch (parseError) {
+            console.error('❌ JSON 파싱 실패:', parseError.message);
+            return res.status(500).json({
+              success: false,
+              message: '⚠️ OpenAI 응답을 JSON으로 파싱할 수 없습니다',
+              error_type: 'json_parse_error',
+              debug: {
+                provider: 'openai',
+                model: ai_model,
+                parse_error: parseError.message,
+                content_type: typeof content,
+                content_length: content?.length || 0,
+                content_preview: content?.substring(0, 1000) || '(없음)',
+                is_empty: !content || content.trim() === '',
+                finish_reason: result.choices?.[0]?.finish_reason,
+                usage: result.usage
+              }
+            });
+          }
 
           dialogueScript = parsed.dialogue_script || [];
 
