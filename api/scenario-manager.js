@@ -485,13 +485,16 @@ module.exports = async function handler(req, res) {
 }`;
 
         let structureData;
+        const startTime = Date.now();
 
         // OpenAI API
         if (!ai_model || ai_model === 'openai') {
+          console.log('🤖 OpenAI API 호출 시작...');
           if (!process.env.OPENAI_API_KEY) {
             throw new Error('OPENAI_API_KEY 환경변수가 설정되지 않았습니다.');
           }
 
+          const apiStartTime = Date.now();
           const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -506,26 +509,125 @@ module.exports = async function handler(req, res) {
               ],
               response_format: { type: "json_object" },
               temperature: toneSettings.temperature,
-              max_tokens: 800 // 구조만 생성 - 빠름!
+              max_tokens: 800
             })
           });
+          const apiDuration = Date.now() - apiStartTime;
+          console.log(`⏱️ OpenAI API 응답 시간: ${apiDuration}ms`);
 
           if (!response.ok) {
             const errorBody = await response.text();
-            throw new Error(`OpenAI API 오류: ${response.status} - ${errorBody}`);
+            console.error('❌ OpenAI API 에러:', response.status, errorBody.substring(0, 200));
+            throw new Error(`OpenAI API 오류: ${response.status} - ${errorBody.substring(0, 200)}`);
           }
 
           const result = await response.json();
           const content = result.choices[0].message.content;
           structureData = JSON.parse(content);
 
-          console.log('✅ Step 1 완료: 구조 생성됨', structureData.structure?.length || 0, '개 블록');
+          console.log('✅ Step 1 완료 (OpenAI):', structureData.structure?.length || 0, '개 블록');
         }
+        // Groq API
+        else if (ai_model === 'groq') {
+          console.log('🤖 Groq API 호출 시작...');
+          if (!process.env.GROQ_API_KEY) {
+            throw new Error('GROQ_API_KEY 환경변수가 설정되지 않았습니다.');
+          }
+
+          const apiStartTime = Date.now();
+          const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: 'llama-3.1-70b-versatile',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt }
+              ],
+              response_format: { type: "json_object" },
+              temperature: toneSettings.temperature,
+              max_tokens: 800
+            })
+          });
+          const apiDuration = Date.now() - apiStartTime;
+          console.log(`⏱️ Groq API 응답 시간: ${apiDuration}ms`);
+
+          if (!response.ok) {
+            const errorBody = await response.text();
+            console.error('❌ Groq API 에러:', response.status, errorBody.substring(0, 200));
+            throw new Error(`Groq API 오류: ${response.status} - ${errorBody.substring(0, 200)}`);
+          }
+
+          const result = await response.json();
+          const content = result.choices[0].message.content;
+          structureData = JSON.parse(content);
+
+          console.log('✅ Step 1 완료 (Groq):', structureData.structure?.length || 0, '개 블록');
+        }
+        // Claude API
+        else if (ai_model === 'claude') {
+          console.log('🤖 Claude API 호출 시작...');
+          if (!process.env.ANTHROPIC_API_KEY) {
+            throw new Error('ANTHROPIC_API_KEY 환경변수가 설정되지 않았습니다.');
+          }
+
+          const apiStartTime = Date.now();
+          const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': process.env.ANTHROPIC_API_KEY,
+              'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+              model: 'claude-3-5-sonnet-20241022',
+              max_tokens: 800,
+              temperature: toneSettings.temperature,
+              messages: [{
+                role: 'user',
+                content: `${systemPrompt}\n\n${userPrompt}\n\n반드시 JSON 형식으로만 응답하세요.`
+              }]
+            })
+          });
+          const apiDuration = Date.now() - apiStartTime;
+          console.log(`⏱️ Claude API 응답 시간: ${apiDuration}ms`);
+
+          if (!response.ok) {
+            const errorBody = await response.text();
+            console.error('❌ Claude API 에러:', response.status, errorBody.substring(0, 200));
+            throw new Error(`Claude API 오류: ${response.status} - ${errorBody.substring(0, 200)}`);
+          }
+
+          const result = await response.json();
+          const content = result.content[0].text;
+
+          // Claude는 JSON 마크다운으로 감쌀 수 있음
+          let cleanContent = content.trim();
+          if (cleanContent.startsWith('```json')) {
+            cleanContent = cleanContent.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+          } else if (cleanContent.startsWith('```')) {
+            cleanContent = cleanContent.replace(/```\n?/g, '');
+          }
+
+          structureData = JSON.parse(cleanContent);
+
+          console.log('✅ Step 1 완료 (Claude):', structureData.structure?.length || 0, '개 블록');
+        }
+
+        const totalDuration = Date.now() - startTime;
+        console.log(`⏱️ Step 1 총 실행 시간: ${totalDuration}ms`);
 
         return res.status(200).json({
           success: true,
           structure: structureData,
-          message: 'Step 1: 대화 구조 생성 완료'
+          message: 'Step 1: 대화 구조 생성 완료',
+          debug: {
+            ai_model: ai_model || 'openai',
+            duration_ms: totalDuration
+          }
         });
 
       } catch (error) {
@@ -600,13 +702,16 @@ module.exports = async function handler(req, res) {
 메신저 대화답게 자연스럽고 감정적으로 작성하세요.`;
 
         let dialogueScript;
+        const startTime = Date.now();
 
         // OpenAI API
         if (!ai_model || ai_model === 'openai') {
+          console.log('🤖 OpenAI API 호출 시작 (Step 2)...');
           if (!process.env.OPENAI_API_KEY) {
             throw new Error('OPENAI_API_KEY 환경변수가 설정되지 않았습니다.');
           }
 
+          const apiStartTime = Date.now();
           const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -621,13 +726,16 @@ module.exports = async function handler(req, res) {
               ],
               response_format: { type: "json_object" },
               temperature: toneSettings.temperature,
-              max_tokens: 1200 // Vercel 10초 제한 대응 - 간결한 프롬프트로 충분
+              max_tokens: 1200
             })
           });
+          const apiDuration = Date.now() - apiStartTime;
+          console.log(`⏱️ OpenAI API 응답 시간 (Step 2): ${apiDuration}ms`);
 
           if (!response.ok) {
             const errorBody = await response.text();
-            throw new Error(`OpenAI API 오류: ${response.status} - ${errorBody}`);
+            console.error('❌ OpenAI API 에러 (Step 2):', response.status, errorBody.substring(0, 200));
+            throw new Error(`OpenAI API 오류: ${response.status} - ${errorBody.substring(0, 200)}`);
           }
 
           const result = await response.json();
@@ -635,17 +743,116 @@ module.exports = async function handler(req, res) {
           const parsed = JSON.parse(content);
           dialogueScript = parsed.dialogue_script || [];
 
-          console.log('✅ Step 2 완료: 상세 대화 생성됨', dialogueScript.length, '개 블록');
+          console.log('✅ Step 2 완료 (OpenAI):', dialogueScript.length, '개 블록');
+        }
+        // Groq API
+        else if (ai_model === 'groq') {
+          console.log('🤖 Groq API 호출 시작 (Step 2)...');
+          if (!process.env.GROQ_API_KEY) {
+            throw new Error('GROQ_API_KEY 환경변수가 설정되지 않았습니다.');
+          }
+
+          const apiStartTime = Date.now();
+          const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: 'llama-3.1-70b-versatile',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt }
+              ],
+              response_format: { type: "json_object" },
+              temperature: toneSettings.temperature,
+              max_tokens: 1200
+            })
+          });
+          const apiDuration = Date.now() - apiStartTime;
+          console.log(`⏱️ Groq API 응답 시간 (Step 2): ${apiDuration}ms`);
+
+          if (!response.ok) {
+            const errorBody = await response.text();
+            console.error('❌ Groq API 에러 (Step 2):', response.status, errorBody.substring(0, 200));
+            throw new Error(`Groq API 오류: ${response.status} - ${errorBody.substring(0, 200)}`);
+          }
+
+          const result = await response.json();
+          const content = result.choices[0].message.content;
+          const parsed = JSON.parse(content);
+          dialogueScript = parsed.dialogue_script || [];
+
+          console.log('✅ Step 2 완료 (Groq):', dialogueScript.length, '개 블록');
+        }
+        // Claude API
+        else if (ai_model === 'claude') {
+          console.log('🤖 Claude API 호출 시작 (Step 2)...');
+          if (!process.env.ANTHROPIC_API_KEY) {
+            throw new Error('ANTHROPIC_API_KEY 환경변수가 설정되지 않았습니다.');
+          }
+
+          const apiStartTime = Date.now();
+          const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': process.env.ANTHROPIC_API_KEY,
+              'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+              model: 'claude-3-5-sonnet-20241022',
+              max_tokens: 1200,
+              temperature: toneSettings.temperature,
+              messages: [{
+                role: 'user',
+                content: `${systemPrompt}\n\n${userPrompt}\n\n반드시 JSON 형식으로만 응답하세요.`
+              }]
+            })
+          });
+          const apiDuration = Date.now() - apiStartTime;
+          console.log(`⏱️ Claude API 응답 시간 (Step 2): ${apiDuration}ms`);
+
+          if (!response.ok) {
+            const errorBody = await response.text();
+            console.error('❌ Claude API 에러 (Step 2):', response.status, errorBody.substring(0, 200));
+            throw new Error(`Claude API 오류: ${response.status} - ${errorBody.substring(0, 200)}`);
+          }
+
+          const result = await response.json();
+          const content = result.content[0].text;
+
+          // Claude는 JSON 마크다운으로 감쌀 수 있음
+          let cleanContent = content.trim();
+          if (cleanContent.startsWith('```json')) {
+            cleanContent = cleanContent.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+          } else if (cleanContent.startsWith('```')) {
+            cleanContent = cleanContent.replace(/```\n?/g, '');
+          }
+
+          const parsed = JSON.parse(cleanContent);
+          dialogueScript = parsed.dialogue_script || [];
+
+          console.log('✅ Step 2 완료 (Claude):', dialogueScript.length, '개 블록');
         }
 
         if (!dialogueScript || dialogueScript.length === 0) {
           throw new Error('dialogue_script가 비어있습니다');
         }
 
+        const totalDuration = Date.now() - startTime;
+        console.log(`⏱️ Step 2 총 실행 시간: ${totalDuration}ms`);
+
         return res.status(200).json({
           success: true,
           dialogue_script: dialogueScript,
-          message: 'Step 2: 상세 대화 생성 완료'
+          message: 'Step 2: 상세 대화 생성 완료',
+          debug: {
+            ai_model: ai_model || 'openai',
+            duration_ms: totalDuration,
+            blocks_count: dialogueScript.length
+          }
         });
 
       } catch (error) {

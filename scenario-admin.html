@@ -21689,6 +21689,11 @@
                 const step1Result = await step1Response.json();
                 console.log('✅ Step 1 완료:', step1Result);
 
+                // 디버그 정보 표시
+                if (step1Result.debug) {
+                    console.log(`⏱️ Step 1 실행 시간: ${step1Result.debug.duration_ms}ms (${step1Result.debug.ai_model})`);
+                }
+
                 if (!step1Result.success || !step1Result.structure) {
                     throw new Error('Step 1: 구조 생성 실패 - ' + (step1Result.message || '알 수 없는 오류'));
                 }
@@ -21733,6 +21738,12 @@
                 const step2Result = await step2Response.json();
                 console.log('✅ Step 2 완료:', step2Result);
 
+                // 디버그 정보 표시
+                if (step2Result.debug) {
+                    console.log(`⏱️ Step 2 실행 시간: ${step2Result.debug.duration_ms}ms (${step2Result.debug.ai_model})`);
+                    console.log(`📊 생성된 블록: ${step2Result.debug.blocks_count}개`);
+                }
+
                 if (step2Result.success && step2Result.dialogue_script) {
                     // 기존 블록 초기화
                     const container = document.getElementById('dialogue-blocks-container');
@@ -21743,7 +21754,7 @@
                     container.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
                     // AI 생성 블록 렌더링
-                    result.dialogue_script.forEach(block => {
+                    step2Result.dialogue_script.forEach(block => {
                         if (block.type === 'message') {
                             addMessageBlock();
                             const lastBlock = container.querySelector('.dialogue-block:last-child');
@@ -21795,7 +21806,11 @@
                         }
                     });
 
-                    alert(`✅ 2단계 AI 대화 생성 완료!\n\n📐 Step 1: 구조 생성 ✅\n📝 Step 2: 상세 대화 생성 ✅\n\n📊 생성된 블록: ${step2Result.dialogue_script.length}개\n🎯 선택지: ${structure.total_choices || totalChoices}개\n🎨 분위기: ${mood}\n🤖 AI 모델: ${aiModel || 'openai'}\n\n💡 Vercel 10초 제한 우회 성공!`);
+                    const step1Time = step1Result.debug?.duration_ms || '?';
+                    const step2Time = step2Result.debug?.duration_ms || '?';
+                    const totalTime = (parseInt(step1Time) + parseInt(step2Time)) || '?';
+
+                    alert(`✅ 2단계 AI 대화 생성 완료!\n\n📐 Step 1: 구조 생성 ✅ (${step1Time}ms)\n📝 Step 2: 상세 대화 생성 ✅ (${step2Time}ms)\n⏱️ 총 실행 시간: ${totalTime}ms\n\n📊 생성된 블록: ${step2Result.dialogue_script.length}개\n🎯 선택지: ${structure.total_choices || totalChoices}개\n🎨 분위기: ${mood}\n🤖 AI 모델: ${aiModel || 'openai'}\n\n💡 Vercel 10초 제한 우회 ${totalTime < 20000 ? '성공' : '실패 - 시간 초과'}!`);
                 } else {
                     throw new Error(step2Result.message || '알 수 없는 오류가 발생했습니다.');
                 }
