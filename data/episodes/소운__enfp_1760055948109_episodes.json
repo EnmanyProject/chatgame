@@ -2,12 +2,12 @@
   "character_id": "소운__enfp_1760055948109",
   "character_name": "소운",
   "character_mbti": "INFP",
-  "total_episodes": 1,
+  "total_episodes": 2,
   "metadata": {
     "version": "2.1.0",
     "schema_type": "character_based_dialogue",
     "created_at": "2025-10-10T00:27:15.475Z",
-    "last_updated": "2025-10-11T01:13:15.956Z"
+    "last_updated": "2025-10-11T01:20:46.392Z"
   },
   "episodes": {
     "ep_소운_scenario_자기야_1759988816785_atey1h": {
@@ -270,6 +270,141 @@
         "free_input_points": 0,
         "max_affection_gain": 14,
         "max_intimacy_gain": 10,
+        "average_play_time": "12-18분"
+      },
+      "play_stats": {
+        "played_count": 0,
+        "best_affection_gain": 0,
+        "best_intimacy_gain": 0,
+        "completion_rate": 0
+      }
+    },
+    "ep_소운_scenario_우리_사귈까_1760007114571_04jhvq": {
+      "id": "ep_소운_scenario_우리_사귈까_1760007114571_04jhvq",
+      "character_id": "소운__enfp_1760055948109",
+      "scenario_template_id": "scenario_우리_사귈까_1760007114571",
+      "title": "scenario_우리_사귈까_1760007114571 에피소드",
+      "description": "호감도 50, 애정도 30 기반",
+      "episode_type": "choice_based",
+      "trigger_conditions": {
+        "affection_min": 45,
+        "affection_max": 55,
+        "intimacy_min": 25,
+        "intimacy_max": 35,
+        "time_based": null,
+        "event_based": null,
+        "priority": 5
+      },
+      "generation_context": {
+        "base_affection": 50,
+        "base_intimacy": 30,
+        "tone_style": "friendly",
+        "formality": "polite",
+        "scenario_length": "medium",
+        "episode_type": "choice_based"
+      },
+      "status": "pending",
+      "difficulty": "Medium",
+      "estimated_duration": "12-18분",
+      "created_at": "2025-10-11T01:20:46.290Z",
+      "last_edited_at": null,
+      "dialogue_flow": [
+        {
+          "sequence": 1,
+          "type": "character_dialogue",
+          "text": "안녕 ☀️ 어제 그 메시지… 다들 붙잡고 잔소리하더라고! 😅 친구들이 '너 완전히 정신 나갔어?'라면서 한참 놀렸어. 너무 부끄러워서 어제 밤 잠도 못 잤어 ㅠㅠ",
+          "emotion": "embarrassed",
+          "narration": "아침 햇살이 창문을 비추는 시간. 시은은 여전히 전날 보낸 메시지를 떠올리며 휴대폰을 켠다. 그녀의 손가락이 화면 위를 빠르게 움직이며, 볼이 살짝 붉어진다."
+        },
+        {
+          "sequence": 2,
+          "type": "narration",
+          "content": "메시지를 보내고 나서도 계속 화면을 응시하며 답장을 기다린다. 창밖의 햇살이 그녀의 얼굴을 비춘다."
+        },
+        {
+          "sequence": 3,
+          "type": "character_dialogue",
+          "text": "그럼, 너한테 조금 호감이 있었어. 이렇게 말하는 게 어색하네. 😅",
+          "emotion": "shy",
+          "narration": "손가락으로 입을 가리고 고개를 살짝 숙인다."
+        },
+        {
+          "sequence": 4,
+          "type": "multiple_choice",
+          "question": "그럼, 혹시 너는 어떤 여자를 좋아했어?",
+          "choices": [
+            {
+              "id": "choice_1",
+              "text": "전쟁영화에 빠집니다. ",
+              "affection_change": 2,
+              "intimacy_change": 1,
+              "consequence": "정말 좋아하는 사람에게 물어본다."
+            },
+            {
+              "id": "choice_2",
+              "text": "그냥 친구라고 말한다. ",
+              "affection_change": 0,
+              "intimacy_change": 0,
+              "consequence": "그냥 친구라고 말하며 변명한다."
+            },
+            {
+              "id": "choice_3",
+              "text": "별 것 아니라고 말한다. ",
+              "affection_change": 3,
+              "intimacy_change": 2,
+              "consequence": "별 것 아니라는 듯이 말하며 웃는다."
+            }
+          ]
+        },
+        {
+          "sequence": 5,
+          "type": "character_dialogue",
+          "text": "하하, 그땐 진짜로 그랬어. 😅 전날 밤까지 친구들이 한참 떠들었다는 말야. ",
+          "emotion": "laugh",
+          "narration": "웃으면서 전날 밤 친구들이 떠든 것을 들려준다."
+        },
+        {
+          "sequence": 6,
+          "type": "multiple_choice",
+          "question": "그럼, 이번 주 토요일에 만날까?",
+          "choices": [
+            {
+              "id": "choice_1",
+              "text": "그럼, 이번 주 토요일에 만날까?",
+              "affection_change": 4,
+              "intimacy_change": 3,
+              "consequence": "그냥 만나기로 하자고 한다."
+            },
+            {
+              "id": "choice_2",
+              "text": "아직 안 괜찮아?",
+              "affection_change": 1,
+              "intimacy_change": 1,
+              "consequence": "아직 안 괜찮아 한답니다."
+            },
+            {
+              "id": "choice_3",
+              "text": "별일 없으면요",
+              "affection_change": 2,
+              "intimacy_change": 2,
+              "consequence": "별일 없으면요 말한다."
+            }
+          ]
+        },
+        {
+          "sequence": 7,
+          "type": "character_dialogue",
+          "text": "이번 주 토요일에 만날까? 좀 더 이야기 나누고 싶어. ",
+          "emotion": "hopeful",
+          "narration": "얼굴이 밝아지며 웃는다."
+        }
+      ],
+      "statistics": {
+        "total_dialogues": 7,
+        "choice_points": 2,
+        "free_input_points": 0,
+        "max_affection_gain": 7,
+        "max_intimacy_gain": 5,
         "average_play_time": "12-18분"
       },
       "play_stats": {
