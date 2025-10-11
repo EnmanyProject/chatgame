@@ -9330,19 +9330,23 @@
             document.getElementById('scenarioDescription').value = scenario.description;
 
             // 메타데이터 로드
-            if (scenario.metadata) {
-                document.getElementById('scenarioGenre').value = scenario.metadata.genre || 'sweet_romance';
-                document.getElementById('scenarioSexyLevel').value = scenario.metadata.sexy_level || 5;
-                document.getElementById('sexyLevelValue').textContent = scenario.metadata.sexy_level || 5;
-                document.getElementById('scenarioTags').value = scenario.metadata.tags ? scenario.metadata.tags.join(', ') : '';
-                document.getElementById('scenarioDuration').value = scenario.metadata.estimated_duration || 'medium';
-            } else {
-                // 기본값 설정
-                document.getElementById('scenarioGenre').value = 'sweet_romance';
-                document.getElementById('scenarioSexyLevel').value = 5;
-                document.getElementById('sexyLevelValue').textContent = 5;
-                document.getElementById('scenarioTags').value = '';
-                document.getElementById('scenarioDuration').value = 'medium';
+            if (scenario.genre) {
+                document.getElementById('scenarioGenre').value = scenario.genre || 'crush';
+            }
+            if (scenario.sexy_level !== undefined) {
+                document.getElementById('scenarioSexyLevel').value = scenario.sexy_level;
+                document.getElementById('sexyLevelValue').textContent = scenario.sexy_level;
+            }
+            if (scenario.mood) {
+                const moodSelect = document.getElementById('scenarioMood');
+                if (moodSelect) moodSelect.value = scenario.mood;
+            }
+            if (scenario.total_choices !== undefined) {
+                const choicesSelect = document.getElementById('scenarioTotalChoices');
+                if (choicesSelect) choicesSelect.value = scenario.total_choices;
+            }
+            if (scenario.tags && scenario.tags.length > 0) {
+                document.getElementById('scenarioTags').value = scenario.tags.join(', ');
             }
 
             // AI 생성 스토리 로드
@@ -9352,50 +9356,11 @@
 
             // AI 모델 로드
             if (scenario.metadata && scenario.metadata.ai_model) {
-                document.getElementById('scenarioAiModel').value = scenario.metadata.ai_model;
+                const aiModelSelect = document.getElementById('scenarioAiModel');
+                if (aiModelSelect) aiModelSelect.value = scenario.metadata.ai_model;
             }
 
-            // 기승전결 구조 로드 (영어 속성명 사용)
-            if (scenario.story_structure) {
-                const structure = scenario.story_structure;
-
-                // 기 (Beginning)
-                if (structure.beginning) {
-                    document.getElementById('beginning-title').value = structure.beginning.title || '';
-                    document.getElementById('beginning-summary').value = structure.beginning.summary || '';
-                    document.getElementById('beginning-goal').value = structure.beginning.goal || '';
-                }
-
-                // 승 (Buildup)
-                if (structure.buildup) {
-                    document.getElementById('buildup-title').value = structure.buildup.title || '';
-                    document.getElementById('buildup-summary').value = structure.buildup.summary || '';
-                    document.getElementById('buildup-goal').value = structure.buildup.goal || '';
-                }
-
-                // 전 (Climax)
-                if (structure.climax) {
-                    document.getElementById('climax-title').value = structure.climax.title || '';
-                    document.getElementById('climax-summary').value = structure.climax.summary || '';
-                    document.getElementById('climax-goal').value = structure.climax.goal || '';
-                }
-
-                // 결 (Resolution)
-                if (structure.resolution) {
-                    document.getElementById('resolution-title').value = structure.resolution.title || '';
-                    document.getElementById('resolution-summary').value = structure.resolution.summary || '';
-                    document.getElementById('resolution-goal').value = structure.resolution.goal || '';
-                }
-            } else {
-                // 기본값으로 초기화
-                ['beginning', 'buildup', 'climax', 'resolution'].forEach(stage => {
-                    document.getElementById(`${stage}-title`).value = '';
-                    document.getElementById(`${stage}-summary`).value = '';
-                    document.getElementById(`${stage}-goal`).value = '';
-                });
-            }
-
-            // 📝 대화 스크립트 로드 (v2.0.0 - Step 4)
+            // 📝 v2.0.0: 대화 스크립트 로드 (Step 4)
             if (scenario.dialogue_script && scenario.dialogue_script.length > 0) {
                 console.log('📝 대화 스크립트 로드 시작:', scenario.dialogue_script.length, '개 블록');
                 renderDialogueBlocks(scenario.dialogue_script);
