@@ -573,7 +573,10 @@ module.exports = async function handler(req, res) {
         // 상세 대화 생성용 프롬프트
         const systemPrompt = dialoguePrompts.system_prompt;
 
-        const userPrompt = `다음 조건과 구조를 바탕으로 실제 메신저 대화를 작성하세요:
+        // 구조를 간결하게 요약 (프롬프트 크기 최소화)
+        const structureSummary = `총 ${structure.total_messages || 15}개 메시지, ${structure.total_choices || 3}개 선택지`;
+
+        const userPrompt = `다음 조건으로 실제 메신저 대화를 작성하세요:
 
 제목: ${title}
 설명: ${description}
@@ -581,42 +584,20 @@ module.exports = async function handler(req, res) {
 섹시 레벨: ${sexy_level}/10
 분위기: ${mood} - ${toneSettings.instruction}
 
-아래는 이미 설계된 대화 구조입니다. 이 구조를 따라 실제 대사를 작성하세요:
-
-${JSON.stringify(structure, null, 2)}
-
-# 작성 규칙
-1. 메신저 대화 형식 (연속 메시지 허용)
-2. 구조의 각 블록을 실제 대사로 변환
-3. 감정 태그: neutral, shy, excited, sad, angry, longing, playful, serious
-4. 말줄임(...), 이모티콘 표현: (///), (웃음) 등
-5. 시간은 저녁~밤 시간대 (19:00~23:00)
+대화 규모: ${structureSummary}
 
 # 출력 형식 (JSON)
 {
   "dialogue_script": [
-    {
-      "id": 1,
-      "type": "message",
-      "speaker": "캐릭터명",
-      "text": "실제 대사",
-      "emotion": "neutral",
-      "timestamp": "19:23"
-    },
-    {
-      "id": 5,
-      "type": "choice",
-      "question": "질문?",
-      "options": [
+    { "id": 1, "type": "message", "speaker": "캐릭터명", "text": "대사", "emotion": "neutral", "timestamp": "19:23" },
+    { "id": 5, "type": "choice", "question": "질문?", "options": [
         { "id": "A", "text": "선택지1", "affection_change": 3 },
-        { "id": "B", "text": "선택지2", "affection_change": 0 },
-        { "id": "C", "text": "선택지3", "affection_change": 1 }
-      ]
-    }
+        { "id": "B", "text": "선택지2", "affection_change": 0 }
+    ]}
   ]
 }
 
-구조를 참고하되 실제 감정적이고 자연스러운 대화로 작성하세요.`;
+메신저 대화답게 자연스럽고 감정적으로 작성하세요.`;
 
         let dialogueScript;
 
@@ -640,7 +621,7 @@ ${JSON.stringify(structure, null, 2)}
               ],
               response_format: { type: "json_object" },
               temperature: toneSettings.temperature,
-              max_tokens: 2000 // 상세 대화 생성 - 구조가 있어서 여전히 빠름
+              max_tokens: 1200 // Vercel 10초 제한 대응 - 간결한 프롬프트로 충분
             })
           });
 
