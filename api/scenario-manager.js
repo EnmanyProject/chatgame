@@ -864,6 +864,29 @@ module.exports = async function handler(req, res) {
           console.log('📄 OpenAI content 길이:', content?.length || 0);
           console.log('📄 OpenAI 원시 응답 (Step 2):', content?.substring(0, 200) || '(빈 응답)');
 
+          // 🔍 빈 응답 체크 - 클라이언트에 상세 정보 전송
+          if (!content || content.trim() === '') {
+            return res.status(500).json({
+              success: false,
+              message: '⚠️ OpenAI가 빈 응답을 반환했습니다',
+              error_type: 'empty_response',
+              debug: {
+                provider: 'openai',
+                model: ai_model,
+                finish_reason: result.choices?.[0]?.finish_reason || 'unknown',
+                usage: result.usage || {},
+                prompt_lengths: {
+                  system: systemPrompt.length,
+                  user: userPrompt.length,
+                  total: systemPrompt.length + userPrompt.length
+                },
+                has_choices: Array.isArray(result.choices) && result.choices.length > 0,
+                response_keys: Object.keys(result),
+                full_response_preview: JSON.stringify(result, null, 2).substring(0, 1000)
+              }
+            });
+          }
+
           const parsed = JSON.parse(content);
           console.log('📋 파싱된 객체 키:', Object.keys(parsed));
 
@@ -914,6 +937,29 @@ module.exports = async function handler(req, res) {
           lastAIResponse = content; // 디버그용 저장
 
           console.log('📄 Groq 원시 응답 (Step 2):', content.substring(0, 200));
+
+          // 🔍 빈 응답 체크 - 클라이언트에 상세 정보 전송
+          if (!content || content.trim() === '') {
+            return res.status(500).json({
+              success: false,
+              message: '⚠️ Groq가 빈 응답을 반환했습니다',
+              error_type: 'empty_response',
+              debug: {
+                provider: 'groq',
+                model: ai_model,
+                finish_reason: result.choices?.[0]?.finish_reason || 'unknown',
+                usage: result.usage || {},
+                prompt_lengths: {
+                  system: systemPrompt.length,
+                  user: userPrompt.length,
+                  total: systemPrompt.length + userPrompt.length
+                },
+                has_choices: Array.isArray(result.choices) && result.choices.length > 0,
+                response_keys: Object.keys(result),
+                full_response_preview: JSON.stringify(result, null, 2).substring(0, 1000)
+              }
+            });
+          }
 
           const parsed = JSON.parse(content);
           console.log('📋 파싱된 객체 키:', Object.keys(parsed));
@@ -974,6 +1020,30 @@ module.exports = async function handler(req, res) {
           lastAIResponse = cleanContent; // 디버그용 저장
 
           console.log('📄 Claude 정제된 응답 (Step 2):', cleanContent.substring(0, 200));
+
+          // 🔍 빈 응답 체크 - 클라이언트에 상세 정보 전송
+          if (!cleanContent || cleanContent.trim() === '') {
+            return res.status(500).json({
+              success: false,
+              message: '⚠️ Claude가 빈 응답을 반환했습니다',
+              error_type: 'empty_response',
+              debug: {
+                provider: 'claude',
+                model: ai_model,
+                stop_reason: result.stop_reason || 'unknown',
+                usage: result.usage || {},
+                prompt_lengths: {
+                  system: systemPrompt.length,
+                  user: userPrompt.length,
+                  total: systemPrompt.length + userPrompt.length
+                },
+                has_content: Array.isArray(result.content) && result.content.length > 0,
+                response_keys: Object.keys(result),
+                original_content: content?.substring(0, 500) || '(없음)',
+                full_response_preview: JSON.stringify(result, null, 2).substring(0, 1000)
+              }
+            });
+          }
 
           const parsed = JSON.parse(cleanContent);
           console.log('📋 파싱된 객체 키:', Object.keys(parsed));
