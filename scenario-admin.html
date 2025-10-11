@@ -9338,8 +9338,8 @@
                 document.getElementById('sexyLevelValue').textContent = scenario.sexy_level;
             }
             if (scenario.mood) {
-                const moodSelect = document.getElementById('scenarioMood');
-                if (moodSelect) moodSelect.value = scenario.mood;
+                const toneSelect = document.getElementById('scenarioTone');
+                if (toneSelect) toneSelect.value = scenario.mood;
             }
             if (scenario.total_choices !== undefined) {
                 const choicesSelect = document.getElementById('scenarioTotalChoices');
@@ -9347,11 +9347,6 @@
             }
             if (scenario.tags && scenario.tags.length > 0) {
                 document.getElementById('scenarioTags').value = scenario.tags.join(', ');
-            }
-
-            // AI 생성 스토리 로드
-            if (scenario.ai_generated_context) {
-                document.getElementById('aiGeneratedStory').value = scenario.ai_generated_context;
             }
 
             // AI 모델 로드
@@ -10039,22 +10034,24 @@
                 ? `scenario_${titleKey}_${Date.now()}`
                 : document.getElementById('scenarioId').value;
 
+            // v2.0.0 스키마 준수
             const scenarioData = {
                 scenario_id: scenarioId,
                 title,
                 description,
+                genre,                  // 최상위
+                sexy_level: sexyLevel,  // 최상위
+                mood: tone,             // 최상위 (mood로 저장)
+                tags,                   // 최상위
+                total_choices: totalChoices,  // 최상위
+                estimated_duration: totalChoices <= 8 ? 'short' : totalChoices <= 20 ? 'medium' : 'long',
+                dialogue_script: dialogueScript,
                 metadata: {
-                    genre,
-                    sexy_level: sexyLevel,
-                    tone,
-                    tags,
-                    total_choices: totalChoices,
                     ai_model: selectedModel,
-                    target_affection_gain: 15
+                    created_at: new Date().toISOString(),
+                    last_modified: new Date().toISOString()
                 },
-                dialogue_script: dialogueScript, // 대화 스크립트 저장 (Step 2)
-                created_date: new Date().toISOString().split('T')[0],
-                dialogue_count: 0,
+                active: true,
                 action: currentMode === 'create' ? 'create' : 'update'
             };
 
