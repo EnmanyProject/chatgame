@@ -4715,6 +4715,61 @@
             background: #e74c3c;
             color: white;
         }
+
+        /* 📝 대화 미리보기 스타일 (Step 5) */
+        .messenger-preview {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .preview-message {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin-bottom: 8px;
+            max-width: 80%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            align-self: flex-start;
+        }
+
+        .preview-message.character {
+            background: #667eea;
+            color: white;
+        }
+
+        .preview-timestamp {
+            font-size: 0.75em;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .preview-choice-block {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 12px;
+            border: 2px solid #ffc107;
+        }
+
+        .preview-choice-option {
+            background: white;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid #e0e0e0;
+            transition: border-color 0.2s;
+        }
+
+        .preview-choice-option:hover {
+            border-color: #667eea;
+        }
     </style>
 </head>
 <body>
@@ -6932,6 +6987,21 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('scenarioDetailModal')">닫기</button>
                 <button type="button" class="btn btn-primary" onclick="editCurrentScenario()">✏️ 편집</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📝 대화 미리보기 모달 (Step 5) -->
+    <div id="dialoguePreviewModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>💬 대화 미리보기</h2>
+                <span class="close" onclick="closePreviewModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="preview-chat-container" class="messenger-preview">
+                    <!-- 메신저 스타일 렌더링 -->
+                </div>
             </div>
         </div>
     </div>
@@ -21371,6 +21441,84 @@
             });
 
             console.log(`✅ ${dialogueScript.length}개 대화 블록 렌더링 완료`);
+        }
+
+        // 👁️ 대화 미리보기 함수 (Step 5)
+        function previewDialogue() {
+            const dialogueScript = collectDialogueScript();
+
+            if (dialogueScript.length === 0) {
+                alert('📭 대화가 비어있습니다.\n\n💡 대화 블록을 추가하거나 AI 자동 생성을 사용하세요.');
+                return;
+            }
+
+            const container = document.getElementById('preview-chat-container');
+            container.innerHTML = '';
+
+            dialogueScript.forEach(block => {
+                if (block.type === 'message') {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = 'preview-message character';
+                    msgDiv.innerHTML = `
+                        <div><strong>${block.speaker || '캐릭터'}</strong></div>
+                        <div style="margin-top: 5px;">${block.text || ''}</div>
+                        ${block.timestamp ? `<div class="preview-timestamp">${block.timestamp}</div>` : ''}
+                        <div style="font-size: 0.8em; opacity: 0.8; margin-top: 5px;">${getEmotionEmoji(block.emotion)}</div>
+                    `;
+                    container.appendChild(msgDiv);
+                } else if (block.type === 'choice') {
+                    const choiceDiv = document.createElement('div');
+                    choiceDiv.className = 'preview-choice-block';
+                    const optionsHTML = block.options ? block.options.map(opt => `
+                        <div class="preview-choice-option">
+                            ${opt.id || '?'}) ${opt.text || '선택지'}
+                            <span style="color: #667eea; font-weight: 600;">
+                                (${opt.affection_change > 0 ? '+' : ''}${opt.affection_change || 0})
+                            </span>
+                        </div>
+                    `).join('') : '';
+
+                    choiceDiv.innerHTML = `
+                        ${block.question ? `<div style="font-weight: bold; margin-bottom: 10px;">${block.question}</div>` : ''}
+                        ${optionsHTML}
+                    `;
+                    container.appendChild(choiceDiv);
+                } else if (block.type === 'user_input') {
+                    const inputDiv = document.createElement('div');
+                    inputDiv.className = 'preview-message';
+                    inputDiv.style.background = '#e3f2fd';
+                    inputDiv.innerHTML = `
+                        <div style="font-weight: 600;">⌨️ 주관식 입력</div>
+                        <div style="font-size: 0.85em; color: #666; margin-top: 5px;">
+                            ${block.placeholder || '답장을 입력하세요...'}
+                        </div>
+                    `;
+                    container.appendChild(inputDiv);
+                }
+            });
+
+            console.log(`✅ ${dialogueScript.length}개 블록 미리보기 생성`);
+            document.getElementById('dialoguePreviewModal').style.display = 'block';
+        }
+
+        // 감정 이모지 매핑 헬퍼 (Step 5)
+        function getEmotionEmoji(emotion) {
+            const map = {
+                neutral: '😐',
+                shy: '😳',
+                excited: '😆',
+                sad: '😢',
+                angry: '😠',
+                longing: '🥺',
+                playful: '😏',
+                serious: '😤'
+            };
+            return map[emotion] || '😐';
+        }
+
+        // 미리보기 모달 닫기 (Step 5)
+        function closePreviewModal() {
+            document.getElementById('dialoguePreviewModal').style.display = 'none';
         }
 
         // 🤖 AI 대화 스크립트 자동 생성 함수
