@@ -871,10 +871,18 @@ function checkTimeCondition(current_time, time_condition) {
  * 캐릭터 정보와 호감도/애정도를 기반으로 대화 콘텐츠 생성
  */
 async function handleGenerateEpisode(req, res) {
+  // 🔍 디버깅: 받은 요청 페이로드 전체 출력
+  console.log('🔍 [DEBUG] 받은 요청 body:', JSON.stringify(req.body, null, 2));
+
+  // 🆕 프론트엔드 페이로드 구조에 맞춰 필드명 수정
   const {
-    character_id,
-    scenario_template_id,
-    generation_context,
+    characterId,           // camelCase로 변경
+    character_id,          // 하위 호환성 유지
+    template,              // 새 필드명
+    scenario_template_id,  // 하위 호환성 유지
+    affection,             // generation_context 밖에 있음
+    intimacy,              // generation_context 밖에 있음
+    generation_context,    // 기존 구조도 지원
     trigger_conditions,
     title,
     description,
@@ -882,38 +890,66 @@ async function handleGenerateEpisode(req, res) {
     episode_type  // 🆕 'choice_based' or 'free_input_based'
   } = req.body;
 
-  // 필수 필드 검증
-  if (!character_id || !scenario_template_id || !generation_context) {
+  // 🆕 유연한 필드 매핑 (camelCase, snake_case 모두 지원)
+  const finalCharacterId = characterId || character_id;
+  const finalScenarioId = template || scenario_template_id;
+
+  console.log('🔍 [DEBUG] 매핑된 값:', { finalCharacterId, finalScenarioId, affection, intimacy });
+
+  // 필수 필드 검증 (유연하게)
+  if (!finalCharacterId || !finalScenarioId) {
+    console.error('❌ [DEBUG] 필수 필드 누락:', { finalCharacterId, finalScenarioId });
     return res.status(400).json({
       success: false,
-      message: '필수 필드 누락: character_id, scenario_template_id, generation_context'
+      message: '필수 필드 누락: characterId (또는 character_id), template (또는 scenario_template_id)'
     });
   }
 
-  const { base_affection, base_intimacy, scenario_length } = generation_context;
+  // 🆕 호감도/애정도 값 추출 (유연하게)
+  let base_affection, base_intimacy, scenario_length;
+
+  if (generation_context) {
+    // 기존 구조 (generation_context 객체 사용)
+    base_affection = generation_context.base_affection;
+    base_intimacy = generation_context.base_intimacy;
+    scenario_length = generation_context.scenario_length;
+    console.log('🔍 [DEBUG] generation_context에서 추출:', { base_affection, base_intimacy, scenario_length });
+  } else {
+    // 새 구조 (affection, intimacy 직접 사용)
+    base_affection = affection;
+    base_intimacy = intimacy;
+    scenario_length = 'medium';  // 기본값
+    console.log('🔍 [DEBUG] 직접 필드에서 추출:', { base_affection, base_intimacy });
+  }
+
   const finalEpisodeType = episode_type || 'choice_based';  // 기본값: 선택지 전용
 
   if (base_affection === undefined || base_intimacy === undefined) {
+    console.error('❌ [DEBUG] 호감도/애정도 누락:', { base_affection, base_intimacy });
     return res.status(400).json({
       success: false,
-      message: 'generation_context에 base_affection과 base_intimacy 필요'
+      message: '호감도(affection)와 애정도(intimacy)가 필요합니다'
     });
   }
 
   try {
-    console.log(`🤖 AI 에피소드 생성 시작: ${character_id} - ${scenario_template_id}`);
+    console.log(`🤖 AI 에피소드 생성 시작: ${finalCharacterId} - ${finalScenarioId}`);
     console.log(`📊 호감도: ${base_affection}, 애정도: ${base_intimacy}`);
     console.log(`🎯 에피소드 타입: ${finalEpisodeType}`);
     console.log(`🤖 AI 모델: ${ai_model || 'gpt-4o-mini'}`);
 
     // 캐릭터 정보 로드
-    const characterInfo = await loadCharacterInfo(character_id);
+    console.log(`🔍 [DEBUG] 캐릭터 정보 로드 시작: ${finalCharacterId}`);
+    const characterInfo = await loadCharacterInfo(finalCharacterId);
+    console.log(`✅ [DEBUG] 캐릭터 정보 로드 완료: ${characterInfo.name}`);
 
     // 🆕 시나리오 정보 로드
-    const scenarioInfo = await loadScenarioInfo(scenario_template_id);
-    console.log(`📖 시나리오 로드: ${scenarioInfo.title}`);
+    console.log(`🔍 [DEBUG] 시나리오 정보 로드 시작: ${finalScenarioId}`);
+    const scenarioInfo = await loadScenarioInfo(finalScenarioId);
+    console.log(`✅ [DEBUG] 시나리오 로드 완료: ${scenarioInfo.title}`);
 
     // AI로 dialogue_flow 생성 (🆕 scenarioInfo 전달)
+    console.log(`🔍 [DEBUG] AI dialogue_flow 생성 시작...`);
     const dialogueFlow = await generateDialogueFlowWithAI(
       characterInfo,
       scenarioInfo,  // 🆕 시나리오 ID가 아닌 상세 정보 전달
@@ -923,15 +959,16 @@ async function handleGenerateEpisode(req, res) {
       ai_model || 'gpt-4o-mini',
       finalEpisodeType  // 🆕 에피소드 타입 전달
     );
+    console.log(`✅ [DEBUG] AI dialogue_flow 생성 완료: ${dialogueFlow.length}개 대화`);
 
     // 에피소드 객체 생성
-    const episode_id = generateEpisodeId(character_id, scenario_template_id);
+    const episode_id = generateEpisodeId(finalCharacterId, finalScenarioId);
 
     const newEpisode = {
       id: episode_id,
-      character_id,
-      scenario_template_id,
-      title: title || `${characterInfo.name}과의 ${scenario_template_id}`,
+      character_id: finalCharacterId,
+      scenario_template_id: finalScenarioId,
+      title: title || `${characterInfo.name}과의 ${finalScenarioId}`,
       description: description || `호감도 ${base_affection}, 애정도 ${base_intimacy} 기반 에피소드`,
       episode_type: finalEpisodeType,  // 🆕 에피소드 타입 저장
 
@@ -984,12 +1021,14 @@ async function handleGenerateEpisode(req, res) {
     };
 
     // 캐릭터 에피소드 파일에 저장
-    const episodeData = await loadCharacterEpisodes(character_id);
+    console.log(`🔍 [DEBUG] 에피소드 저장 시작: ${finalCharacterId}`);
+    const episodeData = await loadCharacterEpisodes(finalCharacterId);
     episodeData.episodes[episode_id] = newEpisode;
     episodeData.total_episodes = Object.keys(episodeData.episodes).length;
     episodeData.metadata.last_updated = new Date().toISOString();
 
-    await saveCharacterEpisodes(character_id, episodeData);
+    await saveCharacterEpisodes(finalCharacterId, episodeData);
+    console.log(`✅ [DEBUG] 에피소드 저장 완료`);
 
     console.log(`✅ AI 에피소드 생성 완료: ${episode_id}`);
     console.log(`📝 대화 수: ${dialogueFlow.length}, 선택지: ${newEpisode.statistics.choice_points}, 주관식: ${newEpisode.statistics.free_input_points}`);
