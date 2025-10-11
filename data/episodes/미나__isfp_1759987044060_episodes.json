@@ -2,14 +2,357 @@
   "character_id": "미나__isfp_1759987044060",
   "character_name": "미나",
   "character_mbti": "ISFP",
-  "total_episodes": 0,
+  "total_episodes": 1,
   "metadata": {
     "version": "2.1.0",
     "schema_type": "character_based_dialogue",
     "created_at": "2025-10-09T06:30:00.000Z",
-    "last_updated": "2025-10-11T03:11:20.738Z"
+    "last_updated": "2025-10-11T03:11:52.653Z"
   },
-  "episodes": {},
+  "episodes": {
+    "ep_미나_scenario_도와줘_1759987337551_xu3fcs": {
+      "id": "ep_미나_scenario_도와줘_1759987337551_xu3fcs",
+      "character_id": "미나__isfp_1759987044060",
+      "scenario_template_id": "scenario_도와줘_1759987337551",
+      "title": "미나의 유혹 ",
+      "description": "호감도 23, 애정도 26 기반",
+      "episode_type": "choice_based",
+      "trigger_conditions": {
+        "affection_min": 18,
+        "affection_max": 28,
+        "intimacy_min": 21,
+        "intimacy_max": 31,
+        "time_based": null,
+        "event_based": null,
+        "priority": 5
+      },
+      "generation_context": {
+        "base_affection": 23,
+        "base_intimacy": 26,
+        "tone_style": "polite",
+        "formality": "polite",
+        "scenario_length": "long",
+        "episode_type": "choice_based"
+      },
+      "status": "pending",
+      "difficulty": "Medium",
+      "estimated_duration": "18-25분",
+      "created_at": "2025-10-11T03:11:52.515Z",
+      "last_edited_at": null,
+      "dialogue_flow": [
+        {
+          "sequence": 1,
+          "type": "character_dialogue",
+          "text": "안녕, 혹시 도와줄 수 있어? 🤔 어제 밤에 바퀴벌레가 집에 나타났어! 😨 너무 무서워서 못 자겠어. 도와주면 고마울 것 같아 🙏",
+          "emotion": "worried",
+          "narration": "그녀는 메신저를 열고 떨리는 손가락으로 그의 이름을 눌렀다. 대화방이 열리자마자, 그녀의 가슴은 두근거리기 시작했다."
+        },
+        {
+          "sequence": 2,
+          "type": "narration",
+          "content": "그녀는 기대감으로 가득 차올랐다. 그의 답변이 화면에 나타나자 여자는 입가에 미소가 번졌다."
+        },
+        {
+          "sequence": 3,
+          "type": "character_dialogue",
+          "text": "정말 바퀴벌레가 나왔어, 어떡해! 😨 내가 힘들면 나랑 뽀뽀해줄 거지? 🤗 애교를 부리며 그를 유혹하고 싶었다.",
+          "emotion": "playful",
+          "narration": "그녀는 지나치게 뻔뻔해져서 그를 유혹하고 싶었다. 남자의 반응이 궁금해서 가슴이 두근거렸다."
+        },
+        {
+          "sequence": 4,
+          "type": "multiple_choice",
+          "question": "어떻게 대답할까?",
+          "choices": [
+            {
+              "id": "choice_1",
+              "text": "뭐야, 바퀴벌레라고? 😂",
+              "affection_change": 0,
+              "intimacy_change": 0,
+              "consequence": "그녀는 그의 ответ이 기대와 달라 실망했다."
+            },
+            {
+              "id": "choice_2",
+              "text": "바퀴벌레를 잡아줄게! 🐜",
+              "affection_change": 2,
+              "intimacy_change": 1,
+              "consequence": "그녀는 그의 대답에 기뻐했다."
+            },
+            {
+              "id": "choice_3",
+              "text": "뽀뽀는 무슨 소리야? 🙄",
+              "affection_change": -1,
+              "intimacy_change": 0,
+              "consequence": "그녀는 그의回答에 실망하고 화가 났다."
+            }
+          ]
+        },
+        {
+          "sequence": 5,
+          "type": "character_dialogue",
+          "text": "진짜? 그럼 나도 더 열심히 할게! 🤩",
+          "emotion": "excited",
+          "narration": "그녀는 그의回答에 기뻐했다. 그녀는 이제 그의 반응을 기다리며, 대화가 그들의 관계를 더 가까워지게 해줄 것이라는 기대감에 가슴이 뛰었다."
+        },
+        {
+          "sequence": 6,
+          "type": "narration",
+          "content": "그녀는 쏟아지는 감정 속에서 그의 대답을 기다리며, 대화가 그들의 관계를 더 가까워지게 해줄 것이라는 기대감에 가슴이 뛰었다."
+        },
+        {
+          "sequence": 7,
+          "type": "character_dialogue",
+          "text": "만약 내가 뽀뽀를 하고 싶다면, 바퀴벌레를 잡아야 할까? 🤔",
+          "emotion": "curious",
+          "narration": "그녀는 이런 장난스러운 약속을 던지면서도, 그녀는 정말 좋아하는 사람과의 입맞춤에 대한 스릴을 느꼈다."
+        },
+        {
+          "sequence": 8,
+          "type": "multiple_choice",
+          "question": "어떻게 생각할까?",
+          "choices": [
+            {
+              "id": "choice_4",
+              "text": "그럼 바퀴벌레를 잡으러 가야지! 🐜",
+              "affection_change": 3,
+              "intimacy_change": 2,
+              "consequence": "그녀는 그의 대답에 기뻐했다."
+            },
+            {
+              "id": "choice_5",
+              "text": "뽀뽀는 무슨 소리야? 🙄",
+              "affection_change": -1,
+              "intimacy_change": 0,
+              "consequence": "그녀는 그의回答에 실망하고 화가 났다."
+            },
+            {
+              "id": "choice_6",
+              "text": "그냥 집에서 편하게 있어 😴",
+              "affection_change": 0,
+              "intimacy_change": 0,
+              "consequence": "그녀는 그의 답변이 기대와 달라 실망했다."
+            }
+          ]
+        },
+        {
+          "sequence": 9,
+          "type": "character_dialogue",
+          "text": "나, 바퀴벌레 잡아줘서 고마워! 🙏 이제 뽀뽀할 시간? 🤗",
+          "emotion": "happy",
+          "narration": "그녀는 그의回答에 기뻐했다. 그녀는 이제 그의 반응을 기다리며, 대화가 그들의 관계를 더 가까워지게 해줄 것이라는 기대감에 가슴이 뛰었다."
+        },
+        {
+          "sequence": 10,
+          "type": "narration",
+          "content": "그녀는 그의 대답을 기다리며, 대화가 그들의 관계를 더 가까워지게 해줄 것이라는 기대감에 가슴이 뛰었다."
+        },
+        {
+          "sequence": 11,
+          "type": "character_dialogue",
+          "text": "우리의 관계가 이렇게 새롭게 시작되면 좋겠어! 🌟",
+          "emotion": "hopeful",
+          "narration": "그녀는 그의回答에 기뻐했다. 그녀는 이제 그의 반응을 기다리며, 대화가 그들의 관계를 더 가까워지게 해줄 것이라는 기대감에 가슴이 뛰었다."
+        },
+        {
+          "sequence": 12,
+          "type": "multiple_choice",
+          "question": "어떻게 대답할까?",
+          "choices": [
+            {
+              "id": "choice_7",
+              "text": "나도 그럴 수 있으면 좋겠어! 🙏",
+              "affection_change": 3,
+              "intimacy_change": 2,
+              "consequence": "그녀는 그의 대답에 기뻐했다."
+            },
+            {
+              "id": "choice_8",
+              "text": "너무 무리야 🙄",
+              "affection_change": -1,
+              "intimacy_change": 0,
+              "consequence": "그녀는 그의回答에 실망하고 화가 났다."
+            },
+            {
+              "id": "choice_9",
+              "text": "그냥 친구로 지내자 🤝",
+              "affection_change": 0,
+              "intimacy_change": 0,
+              "consequence": "그녀는 그의 답변이 기대와 달라 실망했다."
+            }
+          ]
+        },
+        {
+          "sequence": 13,
+          "type": "character_dialogue",
+          "text": "진짜로 바퀴벌레를 잡아줘서 고마워! 🙏",
+          "emotion": "grateful",
+          "narration": "그녀는 그의回答에 기뻐했다. 그녀는 이제 그의 반응을 기다리며, 대화가 그들의 관계를 더 가까워지게 해줄 것이라는 기대감에 가슴이 뛰었다."
+        },
+        {
+          "sequence": 14,
+          "type": "narration",
+          "content": "그녀는 그의 대답을 기다리며, 대화가 그들의 관계를 더 가까워지게 해줄 것이라는 기대감에 가슴이 뛰었다."
+        },
+        {
+          "sequence": 15,
+          "type": "character_dialogue",
+          "text": "우리 이제正式으로 사귈 수 있을까? 🤔",
+          "emotion": "curious",
+          "narration": "그녀는 그의回答에 기뻐했다. 그녀는 이제 그의 반응을 기다리며, 대화가 그들의 관계를 더 가까워지게 해줄 것이라는 기대감에 가슴이 뛰었다."
+        },
+        {
+          "sequence": 16,
+          "type": "multiple_choice",
+          "question": "어떻게 대답할까?",
+          "choices": [
+            {
+              "id": "choice_10",
+              "text": "나도 그렇게 생각해! 🙏",
+              "affection_change": 3,
+              "intimacy_change": 2,
+              "consequence": "그녀는 그의 대답에 기뻐했다."
+            },
+            {
+              "id": "choice_11",
+              "text": "아직은 너무 이르다 🙅‍♀️",
+              "affection_change": -1,
+              "intimacy_change": 0,
+              "consequence": "그녀는 그의回答에 실망하고 화가 났다."
+            },
+            {
+              "id": "choice_12",
+              "text": " 그냥 친구로 지내는 게 좋을 것 같아 🤝",
+              "affection_change": 0,
+              "intimacy_change": 0,
+              "consequence": "그녀는 그의 답변이 기대와 달라 실망했다."
+            }
+          ]
+        },
+        {
+          "sequence": 17,
+          "type": "character_dialogue",
+          "text": "그럼 뽀뽀는 언제 할까? 🤗",
+          "emotion": "playful",
+          "narration": "그녀는 그의回答에 기뻐했다. 그녀는 이제 그의 반응을 기다리며, 대화가 그들의 관계를 더 가까워지게 해줄 것이라는 기대감에 가슴이 뛰었다."
+        },
+        {
+          "sequence": 18,
+          "type": "narration",
+          "content": "그녀는 그의 대답을 기다리며, 대화가 그들의 관계를 더 가까워지게 해줄 것이라는 기대감에 가슴이 뛰었다."
+        },
+        {
+          "sequence": 19,
+          "type": "character_dialogue",
+          "text": "너무 기대돼! 🌟",
+          "emotion": "excited",
+          "narration": "그녀는 그의回答에 기뻐했다. 그녀는 이제 그의 반응을 기다리며, 대화가 그들의 관계를 더 가까워지게 해줄 것이라는 기대감에 가슴이 뛰었다."
+        },
+        {
+          "sequence": 20,
+          "type": "multiple_choice",
+          "question": "어떻게 대답할까?",
+          "choices": [
+            {
+              "id": "choice_13",
+              "text": "나도 기대하고 있어! 🙏",
+              "affection_change": 3,
+              "intimacy_change": 2,
+              "consequence": "그녀는 그의 대답에 기뻐했다."
+            },
+            {
+              "id": "choice_14",
+              "text": "너무 서두르지 말자 🙅‍♀️",
+              "affection_change": -1,
+              "intimacy_change": 0,
+              "consequence": "그녀는 그의回答에 실망하고 화가 났다."
+            },
+            {
+              "id": "choice_15",
+              "text": "그냥 친구로 지내는 게 좋을 것 같아 🤝",
+              "affection_change": 0,
+              "intimacy_change": 0,
+              "consequence": "그녀는 그의 답변이 기대와 달라 실망했다."
+            }
+          ]
+        },
+        {
+          "sequence": 21,
+          "type": "character_dialogue",
+          "text": "진짜로 기대돼! 🌟",
+          "emotion": "excited",
+          "narration": "그녀는 그의回答에 기뻐했다. 그녀는 이제 그의 반응을 기다리며, 대화가 그들의 관계를 더 가까워지게 해줄 것이라는 기대감에 가슴이 뛰었다."
+        },
+        {
+          "sequence": 22,
+          "type": "narration",
+          "content": "그녀는 그의 대답을 기다리며, 대화가 그들의 관계를 더 가까워지게 해줄 것이라는 기대감에 가슴이 뛰었다."
+        },
+        {
+          "sequence": 23,
+          "type": "character_dialogue",
+          "text": "너무 행복해! 😊",
+          "emotion": "happy",
+          "narration": "그녀는 그의回答에 기뻐했다. 그녀는 이제 그의 반응을 기다리며, 대화가 그들의 관계를 더 가까워지게 해줄 것이라는 기대감에 가슴이 뛰었다."
+        },
+        {
+          "sequence": 24,
+          "type": "multiple_choice",
+          "question": "어떻게 대답할까?",
+          "choices": [
+            {
+              "id": "choice_16",
+              "text": "나도 행복해! 🙏",
+              "affection_change": 3,
+              "intimacy_change": 2,
+              "consequence": "그녀는 그의 대답에 기뻐했다."
+            },
+            {
+              "id": "choice_17",
+              "text": "너무 이르다 🙅‍♀️",
+              "affection_change": -1,
+              "intimacy_change": 0,
+              "consequence": "그녀는 그의回答에 실망하고 화가 났다."
+            },
+            {
+              "id": "choice_18",
+              "text": "그냥 친구로 지내는 게 좋을 것 같아 🤝",
+              "affection_change": 0,
+              "intimacy_change": 0,
+              "consequence": "그녀는 그의 답변이 기대와 달라 실망했다."
+            }
+          ]
+        },
+        {
+          "sequence": 25,
+          "type": "character_dialogue",
+          "text": "너무 기대돼! 🌟",
+          "emotion": "excited",
+          "narration": "그녀는 그의回答에 기뻐했다. 그녀는 이제 그의 반응을 기다리며, 대화가 그들의 관계를 더 가까워지게 해줄 것이라는 기대감에 가슴이 뛰었다."
+        },
+        {
+          "sequence": 26,
+          "type": "character_dialogue",
+          "text": "너무 행복해! 😊",
+          "emotion": "happy",
+          "narration": "그녀는 그의回答에 기뻐했다. 그녀는 이제 그의 반응을 기다리며, 대화가 그들의 관계를 더 가까워지게 해줄 것이라는 기대감에 가슴이 뛰었다."
+        }
+      ],
+      "statistics": {
+        "total_dialogues": 26,
+        "choice_points": 6,
+        "free_input_points": 0,
+        "max_affection_gain": 17,
+        "max_intimacy_gain": 11,
+        "average_play_time": "18-25분"
+      },
+      "play_stats": {
+        "played_count": 0,
+        "best_affection_gain": 0,
+        "best_intimacy_gain": 0,
+        "completion_rate": 0
+      }
+    }
+  },
   "schema_description": {
     "purpose": "캐릭터 대화 콘텐츠 관리 (호감도/애정도 기반)",
     "episode_structure": [
