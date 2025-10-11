@@ -427,26 +427,57 @@ module.exports = async function handler(req, res) {
 
         const { title, description, genre, sexy_level, mood, total_choices, ai_model } = req.body;
 
+        console.log('📥 받은 파라미터:', {
+          title: title ? '✅' : '❌',
+          description: description ? '✅' : '❌',
+          genre: genre || 'none',
+          sexy_level: sexy_level || 'none',
+          mood: mood || 'none',
+          total_choices: total_choices || 'none',
+          ai_model: ai_model || 'openai'
+        });
+
         if (!title || !description || !genre || !sexy_level || !mood || !total_choices) {
           return res.status(400).json({
             success: false,
-            message: '필수 파라미터가 누락되었습니다'
+            message: '필수 파라미터가 누락되었습니다',
+            received: { title, description, genre, sexy_level, mood, total_choices }
           });
         }
 
         // AI 프롬프트 로드
+        console.log('📂 ai-prompts.json 로드 시작...');
         const promptsData = await loadFromGitHub('data/ai-prompts.json');
+        console.log('📂 파일 로드 완료, JSON 파싱 시작...');
         const prompts = JSON.parse(promptsData);
+        console.log('✅ JSON 파싱 완료');
 
         if (!prompts.dialogue_generation) {
           throw new Error('dialogue_generation 프롬프트가 없습니다');
         }
 
         const dialoguePrompts = prompts.dialogue_generation;
-        const toneSettings = prompts.tone_settings[mood];
+
+        // tone_settings 체크 및 기본값 처리
+        let toneSettings = prompts.tone_settings[mood];
+        if (!toneSettings) {
+          console.warn(`⚠️ tone_settings[${mood}] 없음, balanced 사용`);
+          toneSettings = prompts.tone_settings['balanced'];
+        }
+
+        if (!toneSettings) {
+          throw new Error(`tone_settings를 찾을 수 없습니다. 사용 가능한 mood: ${Object.keys(prompts.tone_settings).join(', ')}`);
+        }
 
         // 메시지 개수 계산: 선택지 개수 × 6
         const totalMessages = parseInt(total_choices) * 6;
+
+        console.log('📝 프롬프트 생성 정보:', {
+          mood,
+          toneSettings: toneSettings ? '✅' : '❌',
+          toneName: toneSettings?.name,
+          temperature: toneSettings?.temperature
+        });
 
         // 프롬프트 변수 치환
         let userPrompt = dialoguePrompts.user_prompt_template
@@ -501,11 +532,24 @@ module.exports = async function handler(req, res) {
           }
 
           const result = await response.json();
+
+          if (!result.choices || !result.choices[0] || !result.choices[0].message) {
+            console.error('OpenAI API 응답 형식 오류:', result);
+            throw new Error('OpenAI API 응답에 choices가 없습니다: ' + JSON.stringify(result).substring(0, 200));
+          }
+
           const content = result.choices[0].message.content;
+          console.log('🤖 OpenAI 응답 길이:', content.length, '자');
 
           // JSON 파싱
           const parsed = JSON.parse(content);
           dialogueScript = parsed.dialogue_script || [];
+
+          if (!dialogueScript || dialogueScript.length === 0) {
+            throw new Error('dialogue_script가 비어있습니다');
+          }
+
+          console.log('✅ OpenAI 대화 스크립트 파싱 완료:', dialogueScript.length, '개 블록');
 
         }
         // Groq API (Llama)
@@ -539,10 +583,23 @@ module.exports = async function handler(req, res) {
           }
 
           const result = await response.json();
+
+          if (!result.choices || !result.choices[0] || !result.choices[0].message) {
+            console.error('Groq API 응답 형식 오류:', result);
+            throw new Error('Groq API 응답에 choices가 없습니다: ' + JSON.stringify(result).substring(0, 200));
+          }
+
           const content = result.choices[0].message.content;
+          console.log('🤖 Groq 응답 길이:', content.length, '자');
 
           const parsed = JSON.parse(content);
           dialogueScript = parsed.dialogue_script || [];
+
+          if (!dialogueScript || dialogueScript.length === 0) {
+            throw new Error('dialogue_script가 비어있습니다');
+          }
+
+          console.log('✅ Groq 대화 스크립트 파싱 완료:', dialogueScript.length, '개 블록');
 
         }
         // Claude API
@@ -576,7 +633,14 @@ module.exports = async function handler(req, res) {
           }
 
           const result = await response.json();
+
+          if (!result.content || !result.content[0] || !result.content[0].text) {
+            console.error('Claude API 응답 형식 오류:', result);
+            throw new Error('Claude API 응답에 content가 없습니다: ' + JSON.stringify(result).substring(0, 200));
+          }
+
           const content = result.content[0].text;
+          console.log('🤖 Claude 응답 길이:', content.length, '자');
 
           // JSON 추출 (코드 블록 제거)
           const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/\{[\s\S]*\}/);
@@ -584,6 +648,12 @@ module.exports = async function handler(req, res) {
 
           const parsed = JSON.parse(jsonText);
           dialogueScript = parsed.dialogue_script || [];
+
+          if (!dialogueScript || dialogueScript.length === 0) {
+            throw new Error('dialogue_script가 비어있습니다');
+          }
+
+          console.log('✅ Claude 대화 스크립트 파싱 완료:', dialogueScript.length, '개 블록');
         }
 
         console.log(`✅ 대화 스크립트 생성 완료: ${dialogueScript.length}개 블록`);
