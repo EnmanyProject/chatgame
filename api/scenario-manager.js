@@ -425,7 +425,21 @@ module.exports = async function handler(req, res) {
       try {
         console.log('📐 Step 1: 대화 구조 생성 시작...');
 
-        const { title, description, genre, sexy_level, mood, total_choices, ai_model } = req.body;
+        const { title, description, genre, sexy_level, mood, total_choices } = req.body;
+        let { ai_model } = req.body;
+
+        // 🔍 모델명으로부터 제공자 추출
+        let provider = 'openai'; // 기본값
+        if (ai_model) {
+          if (ai_model.startsWith('gpt-') || ai_model === 'openai') {
+            provider = 'openai';
+          } else if (ai_model.startsWith('llama-') || ai_model.startsWith('mixtral-') || ai_model.startsWith('gemma') || ai_model === 'groq') {
+            provider = 'groq';
+          } else if (ai_model.startsWith('claude-') || ai_model === 'claude') {
+            provider = 'claude';
+          }
+        }
+        console.log(`🤖 모델: ${ai_model} → 제공자: ${provider}`);
 
         if (!title || !description || !genre || !sexy_level || !mood || !total_choices) {
           return res.status(400).json({
@@ -488,7 +502,7 @@ module.exports = async function handler(req, res) {
         const startTime = Date.now();
 
         // OpenAI API
-        if (!ai_model || ai_model === 'openai') {
+        if (provider === 'openai') {
           console.log('🤖 OpenAI API 호출 시작...');
           if (!process.env.OPENAI_API_KEY) {
             throw new Error('OPENAI_API_KEY 환경변수가 설정되지 않았습니다.');
@@ -502,7 +516,7 @@ module.exports = async function handler(req, res) {
               'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
             },
             body: JSON.stringify({
-              model: 'gpt-4o-mini',
+              model: ai_model || 'gpt-4o-mini', // 사용자가 선택한 OpenAI 모델 사용
               messages: [
                 { role: 'system', content: systemPrompt },
                 { role: 'user', content: userPrompt }
@@ -537,7 +551,7 @@ module.exports = async function handler(req, res) {
           }
         }
         // Groq API
-        else if (ai_model === 'groq') {
+        else if (provider === 'groq') {
           console.log('🤖 Groq API 호출 시작...');
           if (!process.env.GROQ_API_KEY) {
             throw new Error('GROQ_API_KEY 환경변수가 설정되지 않았습니다.');
@@ -551,7 +565,7 @@ module.exports = async function handler(req, res) {
               'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
             },
             body: JSON.stringify({
-              model: 'llama-3.1-70b-versatile',
+              model: ai_model || 'llama-3.1-8b-instant', // 사용자가 선택한 Groq 모델 사용
               messages: [
                 { role: 'system', content: systemPrompt },
                 { role: 'user', content: userPrompt }
@@ -585,7 +599,7 @@ module.exports = async function handler(req, res) {
           }
         }
         // Claude API
-        else if (ai_model === 'claude') {
+        else if (provider === 'claude') {
           console.log('🤖 Claude API 호출 시작...');
           if (!process.env.ANTHROPIC_API_KEY) {
             throw new Error('ANTHROPIC_API_KEY 환경변수가 설정되지 않았습니다.');
@@ -600,7 +614,7 @@ module.exports = async function handler(req, res) {
               'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify({
-              model: 'claude-3-5-sonnet-20241022',
+              model: ai_model || 'claude-3-5-sonnet-20241022', // 사용자가 선택한 Claude 모델 사용
               max_tokens: 800,
               temperature: toneSettings.temperature,
               messages: [{
@@ -681,7 +695,21 @@ module.exports = async function handler(req, res) {
       try {
         console.log('📝 Step 2: 상세 대화 생성 시작...');
 
-        const { title, description, genre, sexy_level, mood, structure, ai_model } = req.body;
+        const { title, description, genre, sexy_level, mood, structure } = req.body;
+        let { ai_model } = req.body;
+
+        // 🔍 모델명으로부터 제공자 추출
+        let provider = 'openai'; // 기본값
+        if (ai_model) {
+          if (ai_model.startsWith('gpt-') || ai_model === 'openai') {
+            provider = 'openai';
+          } else if (ai_model.startsWith('llama-') || ai_model.startsWith('mixtral-') || ai_model.startsWith('gemma') || ai_model === 'groq') {
+            provider = 'groq';
+          } else if (ai_model.startsWith('claude-') || ai_model === 'claude') {
+            provider = 'claude';
+          }
+        }
+        console.log(`🤖 모델: ${ai_model} → 제공자: ${provider}`);
 
         if (!title || !description || !structure) {
           return res.status(400).json({
@@ -755,7 +783,7 @@ module.exports = async function handler(req, res) {
               'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
             },
             body: JSON.stringify({
-              model: 'gpt-4o-mini',
+              model: ai_model || 'gpt-4o-mini', // 사용자가 선택한 OpenAI 모델 사용
               messages: [
                 { role: 'system', content: systemPrompt },
                 { role: 'user', content: userPrompt }
@@ -782,7 +810,7 @@ module.exports = async function handler(req, res) {
           console.log('✅ Step 2 완료 (OpenAI):', dialogueScript.length, '개 블록');
         }
         // Groq API
-        else if (ai_model === 'groq') {
+        else if (provider === 'groq') {
           console.log('🤖 Groq API 호출 시작 (Step 2)...');
           if (!process.env.GROQ_API_KEY) {
             throw new Error('GROQ_API_KEY 환경변수가 설정되지 않았습니다.');
@@ -796,7 +824,7 @@ module.exports = async function handler(req, res) {
               'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
             },
             body: JSON.stringify({
-              model: 'llama-3.1-70b-versatile',
+              model: ai_model || 'llama-3.1-8b-instant', // 사용자가 선택한 Groq 모델 사용
               messages: [
                 { role: 'system', content: systemPrompt },
                 { role: 'user', content: userPrompt }
@@ -823,7 +851,7 @@ module.exports = async function handler(req, res) {
           console.log('✅ Step 2 완료 (Groq):', dialogueScript.length, '개 블록');
         }
         // Claude API
-        else if (ai_model === 'claude') {
+        else if (provider === 'claude') {
           console.log('🤖 Claude API 호출 시작 (Step 2)...');
           if (!process.env.ANTHROPIC_API_KEY) {
             throw new Error('ANTHROPIC_API_KEY 환경변수가 설정되지 않았습니다.');
@@ -838,7 +866,7 @@ module.exports = async function handler(req, res) {
               'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify({
-              model: 'claude-3-5-sonnet-20241022',
+              model: ai_model || 'claude-3-5-sonnet-20241022', // 사용자가 선택한 Claude 모델 사용
               max_tokens: 1200,
               temperature: toneSettings.temperature,
               messages: [{
@@ -1046,7 +1074,7 @@ module.exports = async function handler(req, res) {
               'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
             },
             body: JSON.stringify({
-              model: 'llama-3.1-70b-versatile',
+              model: ai_model || 'llama-3.1-8b-instant', // 사용자가 선택한 Groq 모델 사용
               messages: [
                 { role: 'system', content: systemPrompt },
                 { role: 'user', content: userPrompt }
@@ -1084,7 +1112,7 @@ module.exports = async function handler(req, res) {
 
         }
         // Claude API
-        else if (ai_model === 'claude') {
+        else if (provider === 'claude') {
           if (!process.env.ANTHROPIC_API_KEY) {
             throw new Error('ANTHROPIC_API_KEY 환경변수가 설정되지 않았습니다. Vercel 환경변수를 확인하세요.');
           }
