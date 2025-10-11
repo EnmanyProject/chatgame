@@ -509,7 +509,7 @@ module.exports = async function handler(req, res) {
               ],
               response_format: { type: "json_object" },
               temperature: toneSettings.temperature,
-              max_tokens: 800
+              max_tokens: 1200 // JSON 잘림 방지를 위해 증가 (800→1200)
             })
           });
           const apiDuration = Date.now() - apiStartTime;
@@ -523,9 +523,18 @@ module.exports = async function handler(req, res) {
 
           const result = await response.json();
           const content = result.choices[0].message.content;
-          structureData = JSON.parse(content);
 
-          console.log('✅ Step 1 완료 (OpenAI):', structureData.structure?.length || 0, '개 블록');
+          console.log('📄 OpenAI 원시 응답 길이:', content.length, '자');
+          console.log('📄 응답 미리보기:', content.substring(0, 100) + '...');
+
+          try {
+            structureData = JSON.parse(content);
+            console.log('✅ Step 1 완료 (OpenAI):', structureData.structure?.length || 0, '개 블록');
+          } catch (parseError) {
+            console.error('❌ JSON 파싱 실패:', parseError.message);
+            console.error('📄 전체 응답:', content);
+            throw new Error(`JSON 파싱 실패: ${parseError.message}\n응답: ${content.substring(0, 500)}`);
+          }
         }
         // Groq API
         else if (ai_model === 'groq') {
@@ -549,7 +558,7 @@ module.exports = async function handler(req, res) {
               ],
               response_format: { type: "json_object" },
               temperature: toneSettings.temperature,
-              max_tokens: 800
+              max_tokens: 1200 // JSON 잘림 방지
             })
           });
           const apiDuration = Date.now() - apiStartTime;
@@ -563,9 +572,17 @@ module.exports = async function handler(req, res) {
 
           const result = await response.json();
           const content = result.choices[0].message.content;
-          structureData = JSON.parse(content);
 
-          console.log('✅ Step 1 완료 (Groq):', structureData.structure?.length || 0, '개 블록');
+          console.log('📄 Groq 원시 응답 길이:', content.length, '자');
+
+          try {
+            structureData = JSON.parse(content);
+            console.log('✅ Step 1 완료 (Groq):', structureData.structure?.length || 0, '개 블록');
+          } catch (parseError) {
+            console.error('❌ JSON 파싱 실패:', parseError.message);
+            console.error('📄 전체 응답:', content);
+            throw new Error(`JSON 파싱 실패: ${parseError.message}\n응답: ${content.substring(0, 500)}`);
+          }
         }
         // Claude API
         else if (ai_model === 'claude') {
