@@ -5472,7 +5472,7 @@
                     <div class="form-group">
                         <label for="scenarioGenre">🎭 장르 (감정 기반) *</label>
                         <select id="scenarioGenre" required>
-                            <option value="">장르 선택</option>
+                            <option value="" disabled selected>장르를 선택하세요</option>
                             <option value="anger">① 분노 (Anger) - 상처, 오해, 폭발, 후회</option>
                             <option value="jealousy">② 질투 (Jealousy) - 불안, 시선, 비교, 의심</option>
                             <option value="unrequited">③ 짝사랑 (Unrequited) - 망설임, 설렘, 단념, 기대</option>
@@ -21622,6 +21622,26 @@
                 return;
             }
 
+            if (!genre) {
+                alert('❌ 장르(감정 기반)를 선택하세요.');
+                return;
+            }
+
+            if (!mood) {
+                alert('❌ 분위기를 선택하세요.');
+                return;
+            }
+
+            if (!sexyLevel) {
+                alert('❌ 섹시 레벨을 설정하세요.');
+                return;
+            }
+
+            if (!totalChoices) {
+                alert('❌ 선택지 개수를 선택하세요.');
+                return;
+            }
+
             // 버튼 로딩 상태
             const btn = event.target;
             const originalText = btn.textContent;
@@ -21652,7 +21672,16 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    // 에러 응답 본문 파싱
+                    let errorMessage = `HTTP ${response.status}`;
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorMessage;
+                        console.error('❌ API 에러 상세:', errorData);
+                    } catch (e) {
+                        console.error('❌ 에러 응답 파싱 실패:', e);
+                    }
+                    throw new Error(errorMessage);
                 }
 
                 const result = await response.json();
