@@ -100,6 +100,124 @@ grep "systemVersion" scenario-admin.html
 
 ## 📊 버전 히스토리
 
+### 레거시 파일 정리 (2025-10-11) - 구형 시스템 파일 15개 제거 (Maintenance)
+**작업 내용**:
+- 🗑️ **레거시 파일 15개 완전 삭제**:
+  * **HTML (2개)**: episode-player.html, multi-scenario-game.html
+  * **API (5개)**: episodes.js, episode-test.js, scenario.js, scenarios.js, scenarios-validate.js
+  * **테스트 (5개)**: integration-test.html, test-scenarios.js, test_fallback_prompt.js, test_scenario_generation.js, verify_fallback_accuracy.js
+  * **유틸리티 (3개)**: fix-character-photos.js, test-photo-api-detailed.js, test-photo-debug.js
+
+- 💾 **안전 백업**:
+  * 모든 파일 `.legacy-backup/20251011/` 디렉토리에 백업
+  * 필요 시 복원 가능
+
+- 📋 **삭제 이유**:
+  * Phase 1-3 구형 시스템 → v1.8+ 완전 대체
+  * Acts & Beats → v1.7.0 기승전결 전환 완료
+  * Fallback 시스템 → v1.5.0 제거됨
+  * 테스트 파일 → 개발 완료 후 불필요
+
+- 🎯 **주의 파일 (향후 정리 예정, 8개)**:
+  * chat-ui.html, scenarios-acts.js, scenarios-beats.js
+  * scenario-builder.js, scenario-preview.js, scenario-ui-components.js
+  * episode-player.js, lib/ 전체
+
+**영향도**: 안전 (모든 파일이 대체되었거나 더 이상 사용되지 않음)
+
+**Git**: 커밋 `16f7b33`, 푸시 완료 ✅
+**작업 유형**: chore (코드베이스 정리)
+
+---
+
+### v2.2.2 (2025-10-10) - speaker undefined 수정 + 캐릭터 대사 비중 대폭 증가 (Patch Update)
+**작업 내용**:
+- 🎭 **speaker 필드 "undefined" 문제 완전 해결**:
+  * AI 프롬프트에 명확한 경고: `speaker는 반드시 "${characterInfo.name}"`
+  * 후처리 검증 시스템: undefined/빈 값 자동 교체
+  * 검증 로깅으로 수정 내역 추적
+- 💬 **캐릭터 대사 비중 60% → 80%로 대폭 증가**:
+  * 대화 구조 변경: narration 우선 → character_dialogue 우선
+  * 사이클당 대사 개수: 2개 → 3개
+  * 총 대화 개수: ~10-16개 → ~16-26개
+  * 명시적 지시: "대화의 80%는 캐릭터 대사"
+- 📈 **AI 생성 토큰 증가**:
+  * choice_based: 2000 → 3000 tokens
+  * free_input_based: 1800 → 2500 tokens
+  * 근거: Vercel 타임아웃 30초 (10초 아님)
+- 🏗️ **필수 구조 강화**:
+  * 반복 N번: character_dialogue → narration → character_dialogue → choice → character_dialogue
+
+**기술적 세부사항**:
+- api/episode-manager.js Lines 1102-1390: AI 프롬프트 완전 개편
+- api/episode-manager.js Lines 1428-1458: 후처리 검증 시스템 추가
+- api/episode-manager.js Lines 1113-1125: 대화 개수 계산식 변경 (× 3 + 1 → × 5 + 1)
+- api/episode-manager.js Line 1407: max_tokens 증가
+
+**사용자 피드백 반영**:
+- "생성된 대사의 화자가 왜 undefined지" ✅ 해결
+- "캐릭터의 대사가 훨씬 많고 자연스러워야해" ✅ 해결
+
+**Git**: 커밋 `ca8d4cc`, 푸시 완료 ✅
+**영향**: api/episode-manager.js Lines 1102-1458
+
+---
+
+### v2.2.1 (2025-10-10) - AI 대화 생성 시나리오+캐릭터 상세 정보 반영 (Patch Update)
+**작업 내용**:
+- 📖 **시나리오 정보 완전 로드 시스템**:
+  * `loadScenarioInfo()` 함수 신규 추가 (Lines 1461-1504)
+  * GitHub API에서 scenario-database.json 실시간 로드
+  * 제목, 설명, 장르, 섹시 레벨, 분위기 전달
+  * **가장 중요**: ai_generated_context (600-900자 스토리) 포함
+- 👤 **캐릭터 정보 대폭 확장**:
+  * `loadCharacterInfo()` 개선 (Lines 1506-1559)
+  * 4개 필드 → 10+ 필드로 확장
+  * 추가: 나이, 직업, 성격 특성, 취미, 좋아하는 주제, 피하는 주제
+- 🤖 **AI 프롬프트에 상세 정보 반영**:
+  * 시나리오: 제목, 설명, 장르, 섹시 레벨, 분위기, **전체 배경 스토리(600-900자)**
+  * 캐릭터: 이름, 나이, 직업, MBTI, 성격, 성격 특성, 취미, 말투, 좋아하는/피하는 주제
+  * 명시적 지시: "🚨 중요: 위의 '시나리오 배경 스토리'를 반드시 참고하여 대화를 생성하세요!"
+- 🎯 **문제 해결**:
+  * **이전**: 시나리오 ID만 전달 (예: "scenario_도와줘_1759987337551")
+  * **현재**: 전체 스토리 컨텍스트 전달 → AI가 정확히 참고
+
+**기술적 세부사항**:
+- api/episode-manager.js Lines 1461-1504: loadScenarioInfo() 함수 추가
+- api/episode-manager.js Lines 1506-1559: loadCharacterInfo() 개선
+- api/episode-manager.js Lines 910-923: handleGenerateEpisode()에서 시나리오 정보 로드
+- api/episode-manager.js Lines 1102-1197: AI 프롬프트 대폭 확장
+
+**사용자 피드백 반영**:
+- "시나리오를 참조하지 않고 그냥 만드는 것 같다" ✅ 해결
+- "API 응답시간 10초 제한 늘려줘" → Vercel 이미 30초임을 확인
+
+**Git**: 커밋 `f8a5d2a`, 푸시 완료 ✅
+**영향**: api/episode-manager.js Lines 910-923, 1102-1559
+
+---
+
+### v1.19.6 (2025-10-09) - 3대 문서 백업 시스템 구축 (Patch Update)
+**작업 내용**:
+- 📦 **문서 백업 시스템**: v1.19.5 마일스톤 시점의 3대 문서 백업
+- 💾 **백업 파일 생성**:
+  * PROJECT_v1.19.5_2025-10-09.md (21KB)
+  * MASTER_v1.19.5_2025-10-09.md (7.1KB)
+  * CLAUDE_v1.19.5_2025-10-09.md (80KB)
+- 📂 **백업 위치**: `.claude-code/backup/` 디렉토리
+- 🔄 **복구 방법**: 간단한 cp 명령으로 복구 가능
+
+**백업 시점 주요 내용**:
+- 시나리오 관리 시스템 완성 (AI 생성 + 분위기 조절 + 섹시 레벨)
+- 에피소드 관리 시스템 완성 (dialogue_flow 4가지 타입)
+- 상세보기 모달 연결 (메타데이터 + 통계 표시)
+- GitHub API 완전 통합
+
+**Git**: 커밋 `24f945b`, 푸시 완료 ✅
+**백업 총 크기**: 108KB (2,352줄)
+
+---
+
 ### v1.19.5 (2025-10-09) - 에피소드 상세보기 기능 연결 완성 (Patch Update)
 **작업 내용**:
 - 🔗 **상세보기 버튼 연결**: stub 함수를 실제 상세보기 기능으로 교체
