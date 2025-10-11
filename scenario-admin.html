@@ -21729,6 +21729,14 @@
                         const errorData = await step2Response.json();
                         errorMessage = errorData.message || errorMessage;
                         console.error('❌ Step 2 에러:', errorData);
+
+                        // 디버그 정보 명시적 출력
+                        if (errorData.debug) {
+                            console.error('🔍 Step 2 디버그 정보:');
+                            console.error('  - AI 응답 길이:', errorData.debug.lastAIResponseLength);
+                            console.error('  - AI 응답 미리보기:', errorData.debug.lastAIResponsePreview);
+                            console.error('  - Provider:', errorData.debug.provider);
+                        }
                     } catch (e) {
                         console.error('❌ Step 2 에러 파싱 실패:', e);
                     }
