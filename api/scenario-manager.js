@@ -767,8 +767,51 @@ module.exports = async function handler(req, res) {
         // 상세 대화 생성용 프롬프트
         const systemPrompt = dialoguePrompts.system_prompt;
 
-        // 구조를 간결하게 요약 (프롬프트 크기 최소화)
-        const structureSummary = `총 ${structure.total_messages || 15}개 메시지, ${structure.total_choices || 3}개 선택지`;
+        // 🔑 Step 1 구조를 상세히 포함 (AI가 따라갈 가이드)
+        let structureGuide = '';
+        const blocks = structure.structure || structure.blocks; // structure.structure가 실제 배열
+
+        if (blocks && Array.isArray(blocks)) {
+          structureGuide = '\n\n# Step 1에서 생성된 대화 구조 (이 흐름을 정확히 따라 작성하세요):\n\n';
+
+          let messageCount = 0;
+          let choiceCount = 0;
+
+          blocks.forEach((block, index) => {
+            const blockNum = index + 1;
+            if (block.type === 'message') {
+              messageCount++;
+              const emotion = block.emotion || 'neutral';
+              const summary = block.summary || block.title || '대화';
+              structureGuide += `블록 ${blockNum}: [캐릭터 메시지]\n`;
+              structureGuide += `  - 감정: ${emotion}\n`;
+              structureGuide += `  - 내용: ${summary}\n`;
+              structureGuide += `  → 이 내용으로 실제 메신저 대사를 작성하세요.\n\n`;
+            } else if (block.type === 'choice') {
+              choiceCount++;
+              const questionSummary = block.question_summary || block.question || '사용자 선택';
+              const optionsCount = block.options_count || block.options?.length || 3;
+              structureGuide += `블록 ${blockNum}: [선택지]\n`;
+              structureGuide += `  - 질문: ${questionSummary}\n`;
+              structureGuide += `  - 옵션 수: ${optionsCount}개\n`;
+              structureGuide += `  → 이 상황에 맞는 구체적인 선택지 ${optionsCount}개를 작성하세요.\n`;
+              structureGuide += `  → 각 선택지는 적극적/중립적/소극적 톤으로 구분하세요.\n`;
+              structureGuide += `  → affection_change는 적극적(+2~+3), 중립적(0~+1), 소극적(-1~0)으로 설정하세요.\n\n`;
+            } else if (block.type === 'user_input') {
+              structureGuide += `블록 ${blockNum}: [사용자 입력]\n`;
+              structureGuide += `  → 사용자가 자유롭게 메시지를 입력할 수 있는 구간입니다.\n\n`;
+            }
+          });
+
+          structureGuide += `\n📊 총 ${blocks.length}개 블록: 메시지 약 ${messageCount}개, 선택지 ${choiceCount}개\n`;
+          structureGuide += `\n⚠️ 위의 구조를 정확히 따라 dialogue_script 배열을 생성하세요. 블록 순서와 개수를 반드시 맞추세요!`;
+
+          console.log(`📋 Step 1 구조 상세 포함: ${blocks.length}개 블록 (메시지 ${messageCount}, 선택지 ${choiceCount})`);
+        } else {
+          // 구조가 없으면 기본 요약
+          console.warn('⚠️ Step 1 구조를 찾을 수 없음, 기본 요약 사용');
+          structureGuide = `\n\n대화 규모: 총 ${structure.total_messages || 15}개 메시지, ${structure.total_choices || 3}개 선택지\n\n제목과 설명을 바탕으로 자연스러운 메신저 대화를 생성하세요.`;
+        }
 
         const userPrompt = `다음 조건으로 실제 메신저 대화를 작성하세요:
 
@@ -777,8 +820,7 @@ module.exports = async function handler(req, res) {
 장르: ${genre}
 섹시 레벨: ${sexy_level}/10
 분위기: ${mood} - ${toneSettings.instruction}
-
-대화 규모: ${structureSummary}
+${structureGuide}
 
 # 출력 형식 (JSON)
 {
@@ -791,7 +833,7 @@ module.exports = async function handler(req, res) {
   ]
 }
 
-메신저 대화답게 자연스럽고 감정적으로 작성하세요.`;
+⚠️ 중요: 위의 Step 1 구조를 정확히 따라 각 블록에 대한 실제 대사와 선택지를 작성하세요.`;
 
         console.log('📏 Step 2 프롬프트 길이:', {
           systemPrompt: systemPrompt.length,
