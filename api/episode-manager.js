@@ -1532,10 +1532,11 @@ narration에 다음과 같은 구체적 표현을 반드시 포함:
             { role: 'system', content: '당신은 로맨스 채팅 게임의 전문 대화 작가입니다. 항상 JSON 형식으로만 응답합니다.' },
             { role: 'user', content: prompt }
           ],
-          temperature: 0.85,  // 🆕 v2.3.0: 창의성 증가 (0.7 → 0.85)
-          max_tokens: 6000,  // 🆕 v2.3.0: 토큰 2배 증가 (3000 → 6000)
-          presence_penalty: 0.6,  // 🆕 v2.3.0: 반복 방지
-          frequency_penalty: 0.3  // 🆕 v2.3.0: 다양성 증가
+          response_format: { type: "json_object" },  // 🆕 JSON Mode: 유효한 JSON 보장
+          temperature: 0.7,  // 🔧 JSON 안정성을 위해 낮춤 (0.85 → 0.7)
+          max_tokens: 6000,
+          presence_penalty: 0.6,
+          frequency_penalty: 0.3
         })
       });
 
@@ -1564,8 +1565,9 @@ narration에 다음과 같은 구체적 표현을 반드시 포함:
             { role: 'system', content: '당신은 로맨스 채팅 게임의 전문 대화 작가입니다. 항상 JSON 형식으로만 응답합니다.' },
             { role: 'user', content: prompt }
           ],
-          temperature: 0.85,  // 🆕 v2.3.0: 창의성 증가
-          max_tokens: 6000,  // 🆕 v2.3.0: 토큰 2배 증가
+          response_format: { type: "json_object" },  // 🆕 JSON Mode: 유효한 JSON 보장
+          temperature: 0.7,  // 🔧 JSON 안정성을 위해 낮춤
+          max_tokens: 6000,
           presence_penalty: 0.6,
           frequency_penalty: 0.3
         })
@@ -1589,8 +1591,8 @@ narration에 다음과 같은 구체적 표현을 반드시 포함:
         },
         body: JSON.stringify({
           model: aiModel,
-          max_tokens: 6000,  // 🆕 v2.3.0: 토큰 2배 증가
-          temperature: 0.85,  // 🆕 v2.3.0: 창의성 증가 (Claude는 temperature 지원)
+          max_tokens: 6000,
+          temperature: 0.7,  // 🔧 JSON 안정성을 위해 낮춤 (0.85 → 0.7)
           messages: [{
             role: 'user',
             content: `당신은 로맨스 채팅 게임의 전문 대화 작가입니다. 항상 JSON 형식으로만 응답합니다.\n\n${prompt}`
