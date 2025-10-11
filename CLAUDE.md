@@ -100,6 +100,51 @@ grep "systemVersion" scenario-admin.html
 
 ## 📊 버전 히스토리
 
+### v1.19.7 (2025-10-11) - 시나리오 AI 생성 Step 2 빈 응답 문제 디버깅 (Patch Update) ❌ 미해결
+**작업 내용**:
+- 🔍 **근본 원인 발견**: Step 2가 Step 1의 20초 작업 결과를 완전히 무시
+  * Step 1: 13개 블록 상세 구조 생성 (20초 소요)
+  * Step 2: "총 15개 메시지" 요약만 받음 → AI가 무엇을 생성할지 모름 → 빈 응답 반환
+
+- ✅ **코드 수정 완료** (api/scenario-manager.js Lines 770-814):
+  * Step 1 구조를 Step 2 프롬프트에 상세 포함
+  * 각 블록별 타입, 감정, 요약, 선택지 개수 명시
+  * 프롬프트 최적화 (70% 길이 감소, 명확성 유지)
+  * 예시: "1. 메시지(excited): 집에 놀러와 초대\n2. 선택지(3개): 어떤 걸로 해줄까?"
+
+- 🔧 **디버깅 시스템 5개 레이어 추가**:
+  1. OpenAI 응답 구조 검증 (Lines 885-900)
+  2. Content 상태 상세 검사 (Lines 916-923)
+  3. 빈 응답 조기 감지 및 디버그 정보 전송 (Lines 929-950)
+  4. JSON 파싱 에러 처리 및 content 미리보기 (Lines 953-976)
+  5. 프론트엔드 명시적 로깅 (scenario-admin.html Lines 21733-21739)
+
+- 📝 **Git 커밋**:
+  * f73e644: Frontend debug info explicit logging
+  * bc3c6d1: Empty response diagnostics
+  * 4c6b25a: Prompt optimization + validation
+  * ebe8128: Comprehensive error diagnostics
+  * f13602a: Step 1 structure in Step 2 prompt (핵심 수정)
+
+- ✅ **3대 문서 백업**: PROJECT.md, MASTER.md, CLAUDE.md 백업 완료
+
+**❌ 미해결 사항**:
+- 실제 시나리오 생성 테스트 미완료
+- 수정 코드가 실제로 문제를 해결하는지 미확인
+- Vercel 배포 확인 필요
+
+**다음 작업**:
+1. Vercel 배포 확인 (이미 push됨)
+2. scenario-admin.html 새로고침
+3. 시나리오 생성 테스트
+4. Step 1 구조가 Step 2 프롬프트에 포함되었는지 확인
+5. AI가 정상적으로 dialogue_script 생성하는지 확인
+
+**Git**: 커밋 `f13602a` (핵심), 푸시 완료 ✅
+**상태**: 코드 수정 완료, 테스트 대기
+
+---
+
 ### 레거시 파일 정리 (2025-10-11) - 구형 시스템 파일 15개 제거 (Maintenance)
 **작업 내용**:
 - 🗑️ **레거시 파일 15개 완전 삭제**:
