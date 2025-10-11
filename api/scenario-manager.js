@@ -792,6 +792,7 @@ module.exports = async function handler(req, res) {
 메신저 대화답게 자연스럽고 감정적으로 작성하세요.`;
 
         let dialogueScript;
+        let lastAIResponse = ''; // 디버그용 AI 원시 응답 저장
         const startTime = Date.now();
 
         // OpenAI API
@@ -830,6 +831,7 @@ module.exports = async function handler(req, res) {
 
           const result = await response.json();
           const content = result.choices[0].message.content;
+          lastAIResponse = content; // 디버그용 저장
 
           console.log('📄 OpenAI 원시 응답 (Step 2):', content.substring(0, 200));
 
@@ -880,6 +882,7 @@ module.exports = async function handler(req, res) {
 
           const result = await response.json();
           const content = result.choices[0].message.content;
+          lastAIResponse = content; // 디버그용 저장
 
           console.log('📄 Groq 원시 응답 (Step 2):', content.substring(0, 200));
 
@@ -939,6 +942,8 @@ module.exports = async function handler(req, res) {
             cleanContent = cleanContent.replace(/```\n?/g, '');
           }
 
+          lastAIResponse = cleanContent; // 디버그용 저장
+
           console.log('📄 Claude 정제된 응답 (Step 2):', cleanContent.substring(0, 200));
 
           const parsed = JSON.parse(cleanContent);
@@ -954,7 +959,26 @@ module.exports = async function handler(req, res) {
         }
 
         if (!dialogueScript || dialogueScript.length === 0) {
-          throw new Error('dialogue_script가 비어있습니다');
+          // AI 응답 분석
+          let parsed;
+          try {
+            parsed = JSON.parse(lastAIResponse);
+          } catch (e) {
+            throw new Error(`AI 응답을 JSON으로 파싱할 수 없습니다.\n\n원시 응답 (처음 500자):\n${lastAIResponse.substring(0, 500)}`);
+          }
+
+          const debugInfo = {
+            provider,
+            ai_model,
+            responseKeys: Object.keys(parsed),
+            hasDialogueScript: 'dialogue_script' in parsed,
+            dialogueScriptType: parsed.dialogue_script ? typeof parsed.dialogue_script : 'undefined',
+            dialogueScriptLength: Array.isArray(parsed.dialogue_script) ? parsed.dialogue_script.length : 0,
+            firstKey: Object.keys(parsed)[0],
+            responsePreview: lastAIResponse.substring(0, 500)
+          };
+
+          throw new Error(`dialogue_script가 비어있거나 잘못된 형식입니다.\n\n디버그 정보:\n${JSON.stringify(debugInfo, null, 2)}`);
         }
 
         // Step 3: dialogue_script 검증 (임시 비활성화 - 이전 작동하던 버전으로 복구)
