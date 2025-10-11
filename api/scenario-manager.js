@@ -992,10 +992,19 @@ module.exports = async function handler(req, res) {
 
           const result = await response.json();
           const content = result.choices[0].message.content;
+
+          console.log('📄 OpenAI 원시 응답 (Step 2):', content.substring(0, 200));
+
           const parsed = JSON.parse(content);
+          console.log('📋 파싱된 객체 키:', Object.keys(parsed));
+
           dialogueScript = parsed.dialogue_script || [];
 
           console.log('✅ Step 2 완료 (OpenAI):', dialogueScript.length, '개 블록');
+
+          if (dialogueScript.length === 0) {
+            console.error('❌ dialogue_script가 비어있음. 전체 응답:', JSON.stringify(parsed, null, 2));
+          }
         }
         // Groq API
         else if (provider === 'groq') {
@@ -1033,10 +1042,19 @@ module.exports = async function handler(req, res) {
 
           const result = await response.json();
           const content = result.choices[0].message.content;
+
+          console.log('📄 Groq 원시 응답 (Step 2):', content.substring(0, 200));
+
           const parsed = JSON.parse(content);
+          console.log('📋 파싱된 객체 키:', Object.keys(parsed));
+
           dialogueScript = parsed.dialogue_script || [];
 
           console.log('✅ Step 2 완료 (Groq):', dialogueScript.length, '개 블록');
+
+          if (dialogueScript.length === 0) {
+            console.error('❌ dialogue_script가 비어있음. 전체 응답:', JSON.stringify(parsed, null, 2));
+          }
         }
         // Claude API
         else if (provider === 'claude') {
@@ -1083,10 +1101,18 @@ module.exports = async function handler(req, res) {
             cleanContent = cleanContent.replace(/```\n?/g, '');
           }
 
+          console.log('📄 Claude 정제된 응답 (Step 2):', cleanContent.substring(0, 200));
+
           const parsed = JSON.parse(cleanContent);
+          console.log('📋 파싱된 객체 키:', Object.keys(parsed));
+
           dialogueScript = parsed.dialogue_script || [];
 
           console.log('✅ Step 2 완료 (Claude):', dialogueScript.length, '개 블록');
+
+          if (dialogueScript.length === 0) {
+            console.error('❌ dialogue_script가 비어있음. 전체 응답:', JSON.stringify(parsed, null, 2));
+          }
         }
 
         if (!dialogueScript || dialogueScript.length === 0) {
