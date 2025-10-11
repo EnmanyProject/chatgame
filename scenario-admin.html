@@ -9044,10 +9044,38 @@
                 // Acts & Beats 구조 확인
                 const hasActsBeats = scenario.structure && scenario.structure.acts && scenario.structure.acts.length > 0;
 
+                // 📝 대화 스크립트 확인 (v2.0.0)
+                const hasDialogueScript = scenario.dialogue_script && scenario.dialogue_script.length > 0;
+
                 // 시나리오 콘텐츠 HTML 생성
                 let contentHTML = '';
 
-                if (hasAIStory) {
+                if (hasDialogueScript) {
+                    // ✨ v2.0.0 대화 스크립트 미리보기 (최우선)
+                    const firstMessages = scenario.dialogue_script
+                        .filter(b => b.type === 'message')
+                        .slice(0, 3);
+
+                    const choiceCount = scenario.dialogue_script.filter(b => b.type === 'choice').length;
+                    const totalBlocks = scenario.dialogue_script.length;
+
+                    const preview = firstMessages.length > 0
+                        ? firstMessages.map(m => `<strong>${m.speaker}:</strong> ${m.text.substring(0, 40)}${m.text.length > 40 ? '...' : ''}`).join('<br>')
+                        : '대화 없음';
+
+                    contentHTML = `
+                        <div class="dialogue-preview" style="margin-top: 15px; padding: 15px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 8px; border-left: 4px solid #667eea;">
+                            <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #667eea; font-weight: 600;">💬 대화 스크립트 (v2.0)</h4>
+                            <div style="font-size: 12px; color: #333; line-height: 1.8; margin-bottom: 8px;">
+                                ${preview}
+                            </div>
+                            <div style="font-size: 11px; color: #666; display: flex; gap: 10px;">
+                                <span>📊 총 ${totalBlocks}개 블록</span>
+                                <span>🎯 선택지 ${choiceCount}개</span>
+                            </div>
+                        </div>
+                    `;
+                } else if (hasAIStory) {
                     // AI 생성 스토리가 있으면 미리보기 표시
                     const preview = aiStory.substring(0, 150) + (aiStory.length > 150 ? '...' : '');
                     contentHTML = `
@@ -9292,6 +9320,20 @@
                     document.getElementById(`${stage}-summary`).value = '';
                     document.getElementById(`${stage}-goal`).value = '';
                 });
+            }
+
+            // 📝 대화 스크립트 로드 (v2.0.0 - Step 4)
+            if (scenario.dialogue_script && scenario.dialogue_script.length > 0) {
+                console.log('📝 대화 스크립트 로드 시작:', scenario.dialogue_script.length, '개 블록');
+                renderDialogueBlocks(scenario.dialogue_script);
+            } else {
+                // 대화 블록 컨테이너 초기화
+                const container = document.getElementById('dialogue-blocks-container');
+                if (container) {
+                    container.innerHTML = '';
+                    blockIdCounter = 1;
+                }
+                console.log('📭 대화 스크립트 없음 - 빈 편집기');
             }
 
             // 백그라운드 스크롤 비활성화
@@ -21263,6 +21305,72 @@
             });
 
             return script;
+        }
+
+        // 📖 대화 블록 렌더링 함수 (Step 4 - Load)
+        function renderDialogueBlocks(dialogueScript) {
+            const container = document.getElementById('dialogue-blocks-container');
+            if (!container) {
+                console.error('❌ dialogue-blocks-container를 찾을 수 없습니다.');
+                return;
+            }
+
+            container.innerHTML = '';
+            blockIdCounter = 1;
+
+            dialogueScript.forEach((block, index) => {
+                if (block.type === 'message') {
+                    addMessageBlock();
+                    const lastBlock = container.querySelector('.dialogue-block:last-child');
+                    if (lastBlock) {
+                        const speaker = lastBlock.querySelector('.block-speaker');
+                        const text = lastBlock.querySelector('.block-text');
+                        const emotion = lastBlock.querySelector('.block-emotion');
+                        const timestamp = lastBlock.querySelector('.block-timestamp');
+
+                        if (speaker) speaker.value = block.speaker || '';
+                        if (text) text.value = block.text || '';
+                        if (emotion) emotion.value = block.emotion || 'neutral';
+                        if (timestamp && block.timestamp) timestamp.value = block.timestamp;
+                    }
+                } else if (block.type === 'choice') {
+                    addChoiceBlock();
+                    const lastBlock = container.querySelector('.dialogue-block:last-child');
+                    if (lastBlock) {
+                        const question = lastBlock.querySelector('.choice-question');
+                        if (question && block.question) {
+                            question.value = block.question;
+                        }
+
+                        const options = lastBlock.querySelectorAll('.choice-option');
+                        if (block.options && Array.isArray(block.options)) {
+                            block.options.forEach((opt, i) => {
+                                if (options[i]) {
+                                    const optText = options[i].querySelector('.option-text');
+                                    const optAffection = options[i].querySelector('.option-affection');
+                                    if (optText) optText.value = opt.text || '';
+                                    if (optAffection) optAffection.value = opt.affection_change || 0;
+                                }
+                            });
+                        }
+                    }
+                } else if (block.type === 'user_input') {
+                    addUserInputBlock();
+                    const lastBlock = container.querySelector('.dialogue-block:last-child');
+                    if (lastBlock) {
+                        const placeholder = lastBlock.querySelector('.input-placeholder');
+                        const keywords = lastBlock.querySelector('.input-keywords');
+
+                        if (placeholder) placeholder.value = block.placeholder || '';
+                        if (keywords && block.evaluation_keywords) {
+                            keywords.value = (Array.isArray(block.evaluation_keywords) ?
+                                block.evaluation_keywords.join(', ') : '');
+                        }
+                    }
+                }
+            });
+
+            console.log(`✅ ${dialogueScript.length}개 대화 블록 렌더링 완료`);
         }
 
         // 🤖 AI 대화 스크립트 자동 생성 함수
