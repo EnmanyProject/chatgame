@@ -1412,10 +1412,16 @@ narration에 다음과 같은 구체적 표현을 반드시 포함:
     "text": "에이, 진짜 실수였어! 그냥 장난이었는데 말이야 😳 그런 말 하지 마~ 부끄럽잖아ㅋㅋ",
     "emotion": "shy",
     "narration": "손가락으로 입을 가리고 고개를 살짝 숙인다. 메시지를 보낸 후 한숨을 내쉬며 침대에 몸을 던진다."
-  },
+  }
+]
+\`\`\`
+`;
 
+  // 🆕 에피소드 타입별 예시 추가
   if (episodeType === 'choice_based') {
     prompt += `
+**선택지 전용 에피소드 추가 예시:**
+\`\`\`json
   {
     "sequence": 4,
     "type": "multiple_choice",
@@ -1451,12 +1457,15 @@ narration에 다음과 같은 구체적 표현을 반드시 포함:
     "text": "유저 선택에 대한 ${characterInfo.name}의 반응 대사 (자연스럽고 감정 풍부하게)",
     "emotion": "감정",
     "narration": "행동 묘사"
-  },
-  ...위 패턴을 정확히 ${choiceCount}번 반복...
+  }
+\`\`\`
+...위 패턴을 정확히 ${choiceCount}번 반복...
 
 **🚨 주의: speaker 필드는 반드시 "${characterInfo.name}"을 정확히 사용하세요!**`;
   } else {
     prompt += `
+**주관식 전용 에피소드 추가 예시:**
+\`\`\`json
   {
     "sequence": 4,
     "type": "free_input",
@@ -1486,15 +1495,14 @@ narration에 다음과 같은 구체적 표현을 반드시 포함:
     "text": "질문 후 ${characterInfo.name}의 추가 대사 (자연스럽고 감정 풍부하게)",
     "emotion": "감정",
     "narration": "행동 묘사"
-  },
-  ...위 패턴을 정확히 ${freeInputCount}번 반복...
+  }
+\`\`\`
+...위 패턴을 정확히 ${freeInputCount}번 반복...
 
 **🚨 주의: speaker 필드는 반드시 "${characterInfo.name}"을 정확히 사용하세요!**`;
   }
 
   prompt += `
-]
-\`\`\`
 
 **🚨🚨🚨 필수 준수 사항 🚨🚨🚨**
 1. **speaker 필드**: 모든 character_dialogue의 speaker는 정확히 "${characterInfo.name}"이어야 합니다
