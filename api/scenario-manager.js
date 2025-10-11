@@ -697,8 +697,8 @@ module.exports = async function handler(req, res) {
                 { role: 'user', content: userPrompt }
               ],
               response_format: { type: "json_object" },
-              temperature: toneSettings.temperature,
-              max_tokens: 1200 // JSON 잘림 방지를 위해 증가 (800→1200)
+              temperature: 0.7, // Step 1은 구조만이므로 빠르게
+              max_tokens: 600 // Vercel 10초 제한 대응 (구조만 간결하게)
             })
           });
           const apiDuration = Date.now() - apiStartTime;
@@ -746,8 +746,8 @@ module.exports = async function handler(req, res) {
                 { role: 'user', content: userPrompt }
               ],
               response_format: { type: "json_object" },
-              temperature: toneSettings.temperature,
-              max_tokens: 1200 // JSON 잘림 방지
+              temperature: 0.7, // Step 1은 구조만이므로 빠르게
+              max_tokens: 600 // Vercel 10초 제한 대응 (구조만 간결하게)
             })
           });
           const apiDuration = Date.now() - apiStartTime;
@@ -790,8 +790,8 @@ module.exports = async function handler(req, res) {
             },
             body: JSON.stringify({
               model: ai_model || 'claude-3-5-sonnet-20241022', // 사용자가 선택한 Claude 모델 사용
-              max_tokens: 800,
-              temperature: toneSettings.temperature,
+              max_tokens: 600, // Vercel 10초 제한 대응 (구조만 간결하게)
+              temperature: 0.7, // Step 1은 구조만이므로 빠르게
               messages: [{
                 role: 'user',
                 content: `${systemPrompt}\n\n${userPrompt}\n\n반드시 JSON 형식으로만 응답하세요.`
