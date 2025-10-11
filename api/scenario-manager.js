@@ -388,6 +388,177 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // 📝 대화 스크립트 자동 생성 (v2.0.0)
+    if (action === 'generate_dialogue_script') {
+      try {
+        console.log('📝 대화 스크립트 AI 생성 시작...');
+
+        const { title, description, genre, sexy_level, mood, total_choices, ai_model } = req.body;
+
+        if (!title || !description || !genre || !sexy_level || !mood || !total_choices) {
+          return res.status(400).json({
+            success: false,
+            message: '필수 파라미터가 누락되었습니다'
+          });
+        }
+
+        // AI 프롬프트 로드
+        const promptsData = await loadFromGitHub('data/ai-prompts.json');
+        const prompts = JSON.parse(promptsData);
+
+        if (!prompts.dialogue_generation) {
+          throw new Error('dialogue_generation 프롬프트가 없습니다');
+        }
+
+        const dialoguePrompts = prompts.dialogue_generation;
+        const toneSettings = prompts.tone_settings[mood];
+
+        // 메시지 개수 계산: 선택지 개수 × 6
+        const totalMessages = parseInt(total_choices) * 6;
+
+        // 프롬프트 변수 치환
+        let userPrompt = dialoguePrompts.user_prompt_template
+          .replace('{title}', title)
+          .replace('{description}', description)
+          .replace('{genre}', genre)
+          .replace('{sexy_level}', sexy_level)
+          .replace('{mood}', toneSettings.name)
+          .replace('{total_choices}', total_choices)
+          .replace('{total_messages}', totalMessages);
+
+        const systemPrompt = dialoguePrompts.system_prompt + '\n\n' + toneSettings.instruction;
+
+        console.log('🔧 AI 파라미터:', {
+          ai_model,
+          total_messages: totalMessages,
+          total_choices: total_choices,
+          mood: mood,
+          temperature: toneSettings.temperature
+        });
+
+        let dialogueScript;
+
+        // OpenAI API
+        if (!ai_model || ai_model === 'openai') {
+          const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: 'gpt-4o-mini',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt }
+              ],
+              response_format: { type: "json_object" },
+              temperature: toneSettings.temperature,
+              max_tokens: parseInt(total_choices) * 200
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error(`OpenAI API 오류: ${response.status}`);
+          }
+
+          const result = await response.json();
+          const content = result.choices[0].message.content;
+
+          // JSON 파싱
+          const parsed = JSON.parse(content);
+          dialogueScript = parsed.dialogue_script || [];
+
+        }
+        // Groq API (Llama)
+        else if (ai_model === 'llama') {
+          const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: 'llama-3.1-70b-versatile',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt }
+              ],
+              response_format: { type: "json_object" },
+              temperature: toneSettings.temperature,
+              max_tokens: parseInt(total_choices) * 200
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error(`Groq API 오류: ${response.status}`);
+          }
+
+          const result = await response.json();
+          const content = result.choices[0].message.content;
+
+          const parsed = JSON.parse(content);
+          dialogueScript = parsed.dialogue_script || [];
+
+        }
+        // Claude API
+        else if (ai_model === 'claude') {
+          const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': process.env.ANTHROPIC_API_KEY,
+              'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+              model: 'claude-3-5-sonnet-20241022',
+              max_tokens: parseInt(total_choices) * 200,
+              temperature: toneSettings.temperature,
+              messages: [{
+                role: 'user',
+                content: `${systemPrompt}\n\n${userPrompt}`
+              }]
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error(`Claude API 오류: ${response.status}`);
+          }
+
+          const result = await response.json();
+          const content = result.content[0].text;
+
+          // JSON 추출 (코드 블록 제거)
+          const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/\{[\s\S]*\}/);
+          const jsonText = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : content;
+
+          const parsed = JSON.parse(jsonText);
+          dialogueScript = parsed.dialogue_script || [];
+        }
+
+        console.log(`✅ 대화 스크립트 생성 완료: ${dialogueScript.length}개 블록`);
+
+        return res.json({
+          success: true,
+          dialogue_script: dialogueScript,
+          metadata: {
+            ai_model,
+            total_blocks: dialogueScript.length,
+            total_choices: total_choices,
+            mood: mood
+          }
+        });
+
+      } catch (error) {
+        console.error('❌ 대화 스크립트 생성 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: `대화 스크립트 생성 실패: ${error.message}`,
+          error_details: error.stack?.split('\n').slice(0, 5).join('\n')
+        });
+      }
+    }
+
     return res.status(400).json({ success: false, message: 'Unknown action' });
 
   } catch (error) {

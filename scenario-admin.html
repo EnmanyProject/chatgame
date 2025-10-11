@@ -5519,6 +5519,7 @@
                         <div style="padding: 20px;">
                             <!-- Control Panel -->
                             <div class="dialogue-controls">
+                                <button type="button" class="btn" onclick="generateAIDialogue()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 700; flex: 1; max-width: 200px;">🤖 AI 자동 생성</button>
                                 <button type="button" class="btn btn-primary" onclick="addMessageBlock()">💬 대사 추가</button>
                                 <button type="button" class="btn btn-success" onclick="addChoiceBlock()">🎯 선택지 추가 (3개 옵션)</button>
                                 <button type="button" class="btn btn-info" onclick="addUserInputBlock()">⌨️ 주관식 추가</button>
@@ -21262,6 +21263,134 @@
             });
 
             return script;
+        }
+
+        // 🤖 AI 대화 스크립트 자동 생성 함수
+        async function generateAIDialogue() {
+            // Tab 1 데이터 수집
+            const title = document.getElementById('scenarioTitle').value;
+            const description = document.getElementById('scenarioDescription').value;
+            const genre = document.getElementById('scenarioGenre').value;
+            const sexyLevel = document.getElementById('scenarioSexyLevel').value;
+            const mood = document.getElementById('scenarioTone').value;
+            const totalChoices = document.getElementById('scenarioTotalChoices').value;
+            const aiModel = document.getElementById('scenarioAiModel').value;
+
+            // 필수 필드 검증
+            if (!title || !description) {
+                alert('❌ 제목과 설명을 먼저 입력하세요.');
+                return;
+            }
+
+            // 버튼 로딩 상태
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = '🤖 AI 생성 중...';
+
+            try {
+                console.log('🤖 AI 대화 스크립트 생성 시작...', {
+                    title, description, genre, sexyLevel, mood, totalChoices, aiModel
+                });
+
+                const response = await fetch('/api/scenario-manager', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('githubToken')}`
+                    },
+                    body: JSON.stringify({
+                        action: 'generate_dialogue_script',
+                        title,
+                        description,
+                        genre,
+                        sexy_level: sexyLevel,
+                        mood,
+                        total_choices: totalChoices,
+                        ai_model: aiModel
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                console.log('✅ AI 응답:', result);
+
+                if (result.success && result.dialogue_script) {
+                    // Tab 2로 전환
+                    switchScenarioTab('script');
+
+                    // 기존 블록 초기화
+                    const container = document.getElementById('dialogue-blocks-container');
+                    container.innerHTML = '';
+                    blockIdCounter = 1;
+
+                    // AI 생성 블록 렌더링
+                    result.dialogue_script.forEach(block => {
+                        if (block.type === 'message') {
+                            addMessageBlock();
+                            const lastBlock = container.querySelector('.dialogue-block:last-child');
+                            if (lastBlock) {
+                                const speaker = lastBlock.querySelector('.block-speaker');
+                                const text = lastBlock.querySelector('.block-text');
+                                const emotion = lastBlock.querySelector('.block-emotion');
+                                const timestamp = lastBlock.querySelector('.block-timestamp');
+
+                                if (speaker) speaker.value = block.speaker || '';
+                                if (text) text.value = block.text || '';
+                                if (emotion) emotion.value = block.emotion || 'neutral';
+                                if (timestamp && block.timestamp) timestamp.value = block.timestamp;
+                            }
+                        } else if (block.type === 'choice') {
+                            addChoiceBlock();
+                            const lastBlock = container.querySelector('.dialogue-block:last-child');
+                            if (lastBlock) {
+                                const question = lastBlock.querySelector('.choice-question');
+                                if (question && block.question) {
+                                    question.value = block.question;
+                                }
+
+                                const options = lastBlock.querySelectorAll('.choice-option');
+                                if (block.options && Array.isArray(block.options)) {
+                                    block.options.forEach((opt, i) => {
+                                        if (options[i]) {
+                                            const optText = options[i].querySelector('.option-text');
+                                            const optAffection = options[i].querySelector('.option-affection');
+                                            if (optText) optText.value = opt.text || '';
+                                            if (optAffection) optAffection.value = opt.affection_change || 0;
+                                        }
+                                    });
+                                }
+                            }
+                        } else if (block.type === 'user_input') {
+                            addUserInputBlock();
+                            const lastBlock = container.querySelector('.dialogue-block:last-child');
+                            if (lastBlock) {
+                                const placeholder = lastBlock.querySelector('.input-placeholder');
+                                const keywords = lastBlock.querySelector('.input-keywords');
+
+                                if (placeholder) placeholder.value = block.placeholder || '';
+                                if (keywords && block.evaluation_keywords) {
+                                    keywords.value = (Array.isArray(block.evaluation_keywords) ?
+                                        block.evaluation_keywords.join(', ') : '');
+                                }
+                            }
+                        }
+                    });
+
+                    alert(`✅ AI 대화 생성 완료!\n\n📊 생성된 블록: ${result.dialogue_script.length}개\n🎯 선택지: ${result.metadata?.total_choices || totalChoices}개\n🎨 분위기: ${mood}\n🤖 AI 모델: ${aiModel || 'openai'}`);
+                } else {
+                    throw new Error(result.message || '알 수 없는 오류가 발생했습니다.');
+                }
+            } catch (error) {
+                console.error('❌ AI 대화 생성 오류:', error);
+                alert(`❌ 생성 실패\n\n${error.message}\n\n해결 방법:\n1. GitHub 토큰이 유효한지 확인\n2. AI 모델 API 키가 설정되었는지 확인\n3. 인터넷 연결 상태 확인`);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
         }
 
         // 호감도/애정도 슬라이더 업데이트 함수
