@@ -2,58 +2,13 @@
   "metadata": {
     "version": "2.0.0",
     "created_date": "2025-10-11",
-    "total_scenarios": 1,
+    "total_scenarios": 0,
     "ai_context_engine": "dialogue_script_v2",
-    "last_updated": "2025-10-11T04:32:42.303Z",
+    "last_updated": "2025-10-11T05:10:12.512Z",
     "data_source": "github_api_only",
     "schema_migration": "v1.0.0 -> v2.0.0 (메신저 대화형 시스템)"
   },
-  "scenarios": {
-    "scenario_우리집에_놀러와_1760157160268": {
-      "id": "scenario_우리집에_놀러와_1760157160268",
-      "scenario_id": "scenario_우리집에_놀러와_1760157160268",
-      "title": "우리집에 놀러와 ",
-      "description": "캐릭터가 유저를 외롭다며 자기집에 놀러오라고 꼬시니까 유저가 가면 뭐해줄거냐고 묻는 대화  ",
-      "background_setting": "멤신저 대화",
-      "mood": "편안한",
-      "active_status": true,
-      "created_date": "2025-10-11",
-      "last_modified": "2025-10-11T04:32:42.303Z",
-      "ai_generated_context": "죄송하지만, 캐릭터 정보를 제공받지 못했습니다. 캐릭터 정보를 제공해주시면 메신저 대화 시나리오를 작성해드리겠습니다.",
-      "custom_context": "",
-      "available_characters": [],
-      "episode_count": 0,
-      "tags": [
-        "캐릭터가",
-        "유저를",
-        "외롭다며",
-        "자기집에",
-        "놀러오라고",
-        "꼬시니까",
-        "유저가",
-        "가면",
-        "뭐해줄거냐고",
-        "묻는",
-        "대화",
-        "편안한"
-      ],
-      "source": "scenario_admin",
-      "updated_by": "scenario_manager_github_only",
-      "metadata": {
-        "genre": "temptation",
-        "sexy_level": 9,
-        "tone": "light",
-        "tags": [
-          "유혹",
-          "부탁"
-        ],
-        "total_choices": 16,
-        "ai_model": "openai",
-        "target_affection_gain": 15
-      },
-      "structure": {}
-    }
-  },
+  "scenarios": {},
   "scenario_templates": {
     "romance_template": {
       "mood_options": [
