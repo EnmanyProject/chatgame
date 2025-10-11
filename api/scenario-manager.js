@@ -615,13 +615,16 @@ module.exports = async function handler(req, res) {
 async function createNewScenario(data) {
   console.log('🎯 받은 데이터 전체:', JSON.stringify(data, null, 2));
 
+  // v2.0.0 호환성: mood와 tone 파라미터 모두 지원 (mood가 canonical)
+  const mood_value = data.mood || data.tone || '편안한';
+
   const {
     id = data.scenario_id || `scenario_${Date.now()}`,
     scenario_id = data.id || `scenario_${Date.now()}`,
     title = '새로운 시나리오',
     description = '',
     background_setting = '멤신저 대화',
-    mood = '편안한',
+    mood = mood_value,
     available_characters = [],
     created_date = new Date().toISOString().split('T')[0],
     episode_count = 0,
@@ -631,7 +634,12 @@ async function createNewScenario(data) {
     ai_generated_context = '',
     custom_context = '',
     metadata = {}, // 메타데이터 (장르, 섹시 레벨, AI 모델 등)
-    structure = {} // Acts & Beats 구조
+    structure = {}, // Acts & Beats 구조
+    genre = data.genre,
+    sexy_level = data.sexy_level,
+    total_choices = data.total_choices,
+    estimated_duration = data.estimated_duration,
+    dialogue_script = data.dialogue_script || []
   } = data;
 
   console.log('📝 시나리오 생성 데이터:', {
@@ -654,13 +662,19 @@ async function createNewScenario(data) {
   });
   console.log('✅ AI 컨텍스트 생성 성공');
   
+  // v2.0.0 스키마 준수: 평면 구조 + dialogue_script
   const newScenario = {
     id: scenario_id,
     scenario_id: scenario_id, // API 호환성을 위해 둘 다 설정
     title,
     description,
     background_setting,
-    mood,
+    mood, // canonical field name (v2.0.0)
+    genre: genre || 'crush', // v2.0.0: 최상위
+    sexy_level: sexy_level || 5, // v2.0.0: 최상위
+    total_choices: total_choices || 12, // v2.0.0: 최상위
+    estimated_duration: estimated_duration || 'medium', // v2.0.0: 최상위
+    dialogue_script: dialogue_script || [], // v2.0.0: 대화 스크립트
     active_status: active,
     created_date,
     last_modified: new Date().toISOString(),
@@ -671,8 +685,8 @@ async function createNewScenario(data) {
     tags: tags.length > 0 ? tags : extractTags(description, mood),
     source,
     updated_by: 'scenario_manager_github_only',
-    metadata: metadata || {}, // 메타데이터 저장
-    structure: structure || {} // Acts & Beats 구조 저장
+    metadata: metadata || {}, // v2.0.0: 간소화된 메타데이터 (ai_model, timestamps만)
+    structure: structure || {} // v1.x 호환성: Acts & Beats 구조
   };
 
   // 데이터베이스에 저장
@@ -1356,14 +1370,20 @@ async function saveScenarioToDatabase(scenario) {
 async function updateScenario(data) {
   const db = await loadScenarioDatabase();
   const scenario = db.scenarios[data.scenario_id];
-  
+
   if (!scenario) {
     throw new Error('Scenario not found');
   }
-  
+
+  // v2.0.0 호환성: tone → mood 자동 변환
+  if (data.tone && !data.mood) {
+    data.mood = data.tone;
+    delete data.tone; // tone 파라미터 제거하여 중복 방지
+  }
+
   Object.assign(scenario, data);
-  scenario.last_modified = new Date().toISOString().split('T')[0];
-  
+  scenario.last_modified = new Date().toISOString();
+
   await saveScenarioToDatabase(scenario);
   return scenario;
 }
@@ -1385,7 +1405,7 @@ async function regenerateAIContext(data) {
       title: data.title || scenario.title,
       description: data.description || scenario.description,
       background_setting: data.background_setting || scenario.background_setting,
-      mood: data.mood || scenario.mood,
+      mood: data.mood || data.tone || scenario.mood, // v2.0.0: mood/tone 모두 지원
       available_characters: data.available_characters || scenario.available_characters || []
     });
 
@@ -1407,7 +1427,7 @@ async function regenerateAIContext(data) {
       title: data.title,
       description: data.description,
       background_setting: data.background_setting,
-      mood: data.mood,
+      mood: data.mood || data.tone, // v2.0.0: mood/tone 모두 지원
       available_characters: data.available_characters || [],
       characters: data.characters || [] // 캐릭터 전체 데이터도 전달
     });
