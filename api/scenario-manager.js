@@ -1306,8 +1306,9 @@ async function loadScenarioDatabase() {
     console.log('🐙 GitHub API 전용 시나리오 데이터베이스 로드 시작...');
 
     // GitHub API에서만 데이터 로드 (로컬 파일 의존성 완전 제거)
-    const githubData = await loadFromGitHub();
-    if (githubData) {
+    const githubDataString = await loadFromGitHub();
+    if (githubDataString) {
+      const githubData = JSON.parse(githubDataString);
       console.log('✅ GitHub에서 시나리오 데이터 로드 성공:', Object.keys(githubData.scenarios).length + '개');
       return githubData;
     }
@@ -1612,15 +1613,14 @@ async function saveToGitHub(db, filePath) {
 }
 
 // 🐙 GitHub에서 시나리오 데이터 로드 함수
-async function loadFromGitHub() {
+async function loadFromGitHub(filePath = 'data/scenarios/scenario-database.json') {
   const REPO_OWNER = 'EnmanyProject';
   const REPO_NAME = 'chatgame';
-  const FILE_PATH = 'data/scenarios/scenario-database.json';
 
   try {
-    console.log('🐙 GitHub에서 시나리오 데이터 로드 시도...');
+    console.log('🐙 GitHub에서 파일 로드 시도:', filePath);
 
-    const getFileUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+    const getFileUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`;
     const response = await fetch(getFileUrl, {
       method: 'GET',
       headers: {
@@ -1632,21 +1632,18 @@ async function loadFromGitHub() {
     if (response.ok) {
       const fileData = await response.json();
       const decodedContent = Buffer.from(fileData.content, 'base64').toString('utf8');
-      const scenarioData = JSON.parse(decodedContent);
 
-      console.log('✅ GitHub에서 시나리오 데이터 로드 성공:', {
-        총시나리오수: scenarioData.metadata?.total_scenarios || 0,
-        버전: scenarioData.metadata?.version || 'unknown'
-      });
+      console.log('✅ GitHub에서 파일 로드 성공:', filePath);
 
-      return scenarioData;
+      // JSON 문자열 반환 (파싱하지 않음 - 호출자가 결정)
+      return decodedContent;
     } else {
-      console.log('📂 GitHub에 저장된 시나리오 파일이 없음');
+      console.log('📂 GitHub에 저장된 파일이 없음:', filePath);
       return null;
     }
 
   } catch (error) {
-    console.warn('⚠️ GitHub 시나리오 로드 실패:', error.message);
+    console.warn('⚠️ GitHub 파일 로드 실패:', error.message);
     return null;
   }
 }
