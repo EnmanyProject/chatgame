@@ -9287,10 +9287,21 @@
         function openScenarioModal(mode, scenarioId = null) {
             currentMode = mode;
             const modal = document.getElementById('scenarioModal');
+            if (!modal) {
+                console.error('❌ scenarioModal을 찾을 수 없습니다.');
+                return;
+            }
 
             if (mode === 'create') {
-                document.getElementById('scenarioModalTitle').textContent = '새 시나리오 만들기';
-                document.getElementById('scenarioForm').reset();
+                const modalTitle = document.getElementById('scenarioModalTitle');
+                if (modalTitle) {
+                    modalTitle.textContent = '새 시나리오 만들기';
+                }
+
+                const form = document.getElementById('scenarioForm');
+                if (form) {
+                    form.reset();
+                }
 
                 // v2.0.0: 대화 스크립트 컨테이너 초기화
                 const dialogueContainer = document.getElementById('dialogue-blocks-container');
@@ -9324,29 +9335,47 @@
             }
 
             currentMode = 'edit';
-            document.getElementById('scenarioModalTitle').textContent = '시나리오 수정';
-            document.getElementById('scenarioId').value = scenarioId;
-            document.getElementById('scenarioTitle').value = scenario.title;
-            document.getElementById('scenarioDescription').value = scenario.description;
+
+            // 모달 제목 및 기본 필드 설정
+            const modalTitle = document.getElementById('scenarioModalTitle');
+            if (modalTitle) modalTitle.textContent = '시나리오 수정';
+
+            const idField = document.getElementById('scenarioId');
+            if (idField) idField.value = scenarioId;
+
+            const titleField = document.getElementById('scenarioTitle');
+            if (titleField) titleField.value = scenario.title || '';
+
+            const descField = document.getElementById('scenarioDescription');
+            if (descField) descField.value = scenario.description || '';
 
             // 메타데이터 로드
             if (scenario.genre) {
-                document.getElementById('scenarioGenre').value = scenario.genre || 'crush';
+                const genreSelect = document.getElementById('scenarioGenre');
+                if (genreSelect) genreSelect.value = scenario.genre || 'crush';
             }
+
             if (scenario.sexy_level !== undefined) {
-                document.getElementById('scenarioSexyLevel').value = scenario.sexy_level;
-                document.getElementById('sexyLevelValue').textContent = scenario.sexy_level;
+                const sexyLevelInput = document.getElementById('scenarioSexyLevel');
+                if (sexyLevelInput) sexyLevelInput.value = scenario.sexy_level;
+
+                const sexyLevelValue = document.getElementById('sexyLevelValue');
+                if (sexyLevelValue) sexyLevelValue.textContent = scenario.sexy_level;
             }
+
             if (scenario.mood) {
                 const toneSelect = document.getElementById('scenarioTone');
                 if (toneSelect) toneSelect.value = scenario.mood;
             }
+
             if (scenario.total_choices !== undefined) {
                 const choicesSelect = document.getElementById('scenarioTotalChoices');
                 if (choicesSelect) choicesSelect.value = scenario.total_choices;
             }
+
             if (scenario.tags && scenario.tags.length > 0) {
-                document.getElementById('scenarioTags').value = scenario.tags.join(', ');
+                const tagsField = document.getElementById('scenarioTags');
+                if (tagsField) tagsField.value = scenario.tags.join(', ');
             }
 
             // AI 모델 로드
@@ -9372,7 +9401,8 @@
             // 백그라운드 스크롤 비활성화
             document.body.style.overflow = 'hidden';
 
-            document.getElementById('scenarioModal').style.display = 'block';
+            const modal = document.getElementById('scenarioModal');
+            if (modal) modal.style.display = 'block';
         }
 
 
@@ -10001,18 +10031,34 @@
         }
 
         async function saveScenario() {
-            const title = document.getElementById('scenarioTitle').value;
-            const description = document.getElementById('scenarioDescription').value;
-            const genre = document.getElementById('scenarioGenre').value;
-            const sexyLevel = parseInt(document.getElementById('scenarioSexyLevel').value);
-            const tagsInput = document.getElementById('scenarioTags').value;
-            const tone = document.getElementById('scenarioTone')?.value || 'balanced';
-            const totalChoices = parseInt(document.getElementById('scenarioTotalChoices')?.value || 12);
-
-            // AI 모델 선택값 가져오기 (모달 내 select 필드)
+            // DOM 요소 가져오기 with null checks
+            const titleField = document.getElementById('scenarioTitle');
+            const descField = document.getElementById('scenarioDescription');
+            const genreField = document.getElementById('scenarioGenre');
+            const sexyLevelField = document.getElementById('scenarioSexyLevel');
+            const tagsField = document.getElementById('scenarioTags');
+            const toneField = document.getElementById('scenarioTone');
+            const choicesField = document.getElementById('scenarioTotalChoices');
             const modelSelector = document.getElementById('scenarioAiModel');
+
+            // 필수 필드 존재 여부 확인
+            if (!titleField || !descField || !genreField) {
+                console.error('❌ 필수 DOM 요소를 찾을 수 없습니다.');
+                alert('시나리오 폼 요소를 찾을 수 없습니다. 페이지를 새로고침하세요.');
+                return;
+            }
+
+            // 값 추출
+            const title = titleField.value.trim();
+            const description = descField.value.trim();
+            const genre = genreField.value;
+            const sexyLevel = sexyLevelField ? parseInt(sexyLevelField.value) : 5;
+            const tagsInput = tagsField ? tagsField.value : '';
+            const tone = toneField ? toneField.value : 'balanced';
+            const totalChoices = choicesField ? parseInt(choicesField.value) : 12;
             const selectedModel = modelSelector ? modelSelector.value : 'claude';
 
+            // 필수 값 검증
             if (!title || !description || !genre) {
                 alert('제목, 설명, 장르는 필수 항목입니다.');
                 return;
