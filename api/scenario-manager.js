@@ -161,6 +161,38 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // 🗑️ Step 6: 모든 시나리오 초기화 (v2.0.0 전환용)
+    if (action === 'reset_all_scenarios') {
+      try {
+        console.log('⚠️ === 모든 시나리오 초기화 요청 ===');
+        console.log('📦 받은 빈 데이터 구조:', JSON.stringify(req.body.data, null, 2));
+
+        const emptyData = req.body.data;
+
+        // GitHub에 빈 데이터 저장
+        console.log('📤 GitHub에 빈 scenario-database.json 저장 중...');
+        await saveToGitHub('data/scenarios/scenario-database.json', JSON.stringify(emptyData, null, 2));
+
+        console.log('✅ GitHub에 빈 데이터 저장 완료');
+        console.log('🎉 === 모든 시나리오 초기화 완료 ===');
+
+        return res.json({
+          success: true,
+          message: '모든 시나리오가 삭제되었습니다. v2.0.0으로 전환 완료!'
+        });
+      } catch (error) {
+        console.error('❌ === 모든 시나리오 초기화 실패 ===');
+        console.error('❌ 오류 상세:', error);
+        console.error('❌ 스택 트레이스:', error.stack);
+
+        return res.status(500).json({
+          success: false,
+          message: `시나리오 초기화 실패: ${error.message}`,
+          error_details: error.stack
+        });
+      }
+    }
+
     // AI 시나리오 구조 자동 생성
     if (action === 'generate_scenario_structure') {
       try {
