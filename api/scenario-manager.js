@@ -705,6 +705,8 @@ module.exports = async function handler(req, res) {
 
     // 📝 Step 2: 구조 기반 상세 대화 생성 (v2.0.0 - 2단계 생성 방식)
     if (action === 'generate_dialogue_from_structure') {
+      let lastAIResponse = ''; // catch 블록에서도 접근 가능하도록 상위 스코프에 선언
+
       try {
         console.log('📝 Step 2: 상세 대화 생성 시작...');
 
@@ -791,8 +793,14 @@ module.exports = async function handler(req, res) {
 
 메신저 대화답게 자연스럽고 감정적으로 작성하세요.`;
 
+        console.log('📏 Step 2 프롬프트 길이:', {
+          systemPrompt: systemPrompt.length,
+          userPrompt: userPrompt.length,
+          total: systemPrompt.length + userPrompt.length
+        });
+
         let dialogueScript;
-        let lastAIResponse = ''; // 디버그용 AI 원시 응답 저장
+        // lastAIResponse는 이미 상위 스코프에 선언됨
         const startTime = Date.now();
 
         // OpenAI API
@@ -830,10 +838,31 @@ module.exports = async function handler(req, res) {
           }
 
           const result = await response.json();
-          const content = result.choices[0].message.content;
-          lastAIResponse = content; // 디버그용 저장
+          console.log('🔍 OpenAI 전체 응답 구조 (Step 2):', JSON.stringify(result, null, 2).substring(0, 1000));
 
-          console.log('📄 OpenAI 원시 응답 (Step 2):', content.substring(0, 200));
+          // 토큰 사용량 확인
+          if (result.usage) {
+            console.log('📊 토큰 사용량:', {
+              prompt_tokens: result.usage.prompt_tokens,
+              completion_tokens: result.usage.completion_tokens,
+              total_tokens: result.usage.total_tokens
+            });
+          }
+
+          const finishReason = result.choices[0].finish_reason;
+          console.log('🏁 OpenAI finish_reason:', finishReason);
+
+          if (finishReason === 'length') {
+            console.warn('⚠️ max_tokens 부족! 응답이 잘렸습니다.');
+          } else if (finishReason === 'content_filter') {
+            throw new Error('OpenAI 콘텐츠 필터에 의해 차단되었습니다. 섹시 레벨을 낮추거나 설명을 순화하세요.');
+          }
+
+          const content = result.choices[0].message.content;
+          lastAIResponse = content || ''; // 디버그용 저장
+
+          console.log('📄 OpenAI content 길이:', content?.length || 0);
+          console.log('📄 OpenAI 원시 응답 (Step 2):', content?.substring(0, 200) || '(빈 응답)');
 
           const parsed = JSON.parse(content);
           console.log('📋 파싱된 객체 키:', Object.keys(parsed));
@@ -1001,10 +1030,17 @@ module.exports = async function handler(req, res) {
 
       } catch (error) {
         console.error('❌ Step 2 상세 대화 생성 실패:', error);
+        console.error('📄 전체 에러 스택:', error.stack);
+
         return res.status(500).json({
           success: false,
           message: `Step 2 상세 대화 생성 실패: ${error.message}`,
-          error_details: error.stack?.split('\n').slice(0, 5).join('\n')
+          error_details: error.stack?.split('\n').slice(0, 10).join('\n'),
+          debug: {
+            lastAIResponseLength: lastAIResponse?.length || 0,
+            lastAIResponsePreview: lastAIResponse?.substring(0, 300) || '(없음)',
+            provider: req.body.ai_model || 'openai'
+          }
         });
       }
     }
