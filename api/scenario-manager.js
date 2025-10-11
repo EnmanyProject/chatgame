@@ -590,18 +590,31 @@ module.exports = async function handler(req, res) {
         const { title, description, genre, sexy_level, mood, total_choices } = req.body;
         let { ai_model } = req.body;
 
+        // 🔍 프론트엔드에서 provider 이름으로 보내는 경우 실제 모델명으로 변환
+        const modelMapping = {
+          'openai': 'gpt-4o-mini',
+          'groq': 'llama-3.1-8b-instant',
+          'llama': 'llama-3.1-8b-instant',
+          'claude': 'claude-3-5-sonnet-20241022'
+        };
+
+        if (ai_model && modelMapping[ai_model]) {
+          console.log(`🔄 모델명 정규화: ${ai_model} → ${modelMapping[ai_model]}`);
+          ai_model = modelMapping[ai_model];
+        }
+
         // 🔍 모델명으로부터 제공자 추출
         let provider = 'openai'; // 기본값
         if (ai_model) {
-          if (ai_model.startsWith('gpt-') || ai_model === 'openai') {
+          if (ai_model.startsWith('gpt-')) {
             provider = 'openai';
-          } else if (ai_model.startsWith('llama-') || ai_model.startsWith('mixtral-') || ai_model.startsWith('gemma') || ai_model === 'groq') {
+          } else if (ai_model.startsWith('llama-') || ai_model.startsWith('mixtral-') || ai_model.startsWith('gemma')) {
             provider = 'groq';
-          } else if (ai_model.startsWith('claude-') || ai_model === 'claude') {
+          } else if (ai_model.startsWith('claude-')) {
             provider = 'claude';
           }
         }
-        console.log(`🤖 모델: ${ai_model} → 제공자: ${provider}`);
+        console.log(`🤖 최종 모델: ${ai_model} → 제공자: ${provider}`);
 
         if (!title || !description || !genre || !sexy_level || !mood || !total_choices) {
           return res.status(400).json({
@@ -860,18 +873,31 @@ module.exports = async function handler(req, res) {
         const { title, description, genre, sexy_level, mood, structure } = req.body;
         let { ai_model } = req.body;
 
+        // 🔍 프론트엔드에서 provider 이름으로 보내는 경우 실제 모델명으로 변환
+        const modelMapping = {
+          'openai': 'gpt-4o-mini',
+          'groq': 'llama-3.1-8b-instant',
+          'llama': 'llama-3.1-8b-instant',
+          'claude': 'claude-3-5-sonnet-20241022'
+        };
+
+        if (ai_model && modelMapping[ai_model]) {
+          console.log(`🔄 모델명 정규화 (Step 2): ${ai_model} → ${modelMapping[ai_model]}`);
+          ai_model = modelMapping[ai_model];
+        }
+
         // 🔍 모델명으로부터 제공자 추출
         let provider = 'openai'; // 기본값
         if (ai_model) {
-          if (ai_model.startsWith('gpt-') || ai_model === 'openai') {
+          if (ai_model.startsWith('gpt-')) {
             provider = 'openai';
-          } else if (ai_model.startsWith('llama-') || ai_model.startsWith('mixtral-') || ai_model.startsWith('gemma') || ai_model === 'groq') {
+          } else if (ai_model.startsWith('llama-') || ai_model.startsWith('mixtral-') || ai_model.startsWith('gemma')) {
             provider = 'groq';
-          } else if (ai_model.startsWith('claude-') || ai_model === 'claude') {
+          } else if (ai_model.startsWith('claude-')) {
             provider = 'claude';
           }
         }
-        console.log(`🤖 모델: ${ai_model} → 제공자: ${provider}`);
+        console.log(`🤖 최종 모델 (Step 2): ${ai_model} → 제공자: ${provider}`);
 
         if (!title || !description || !structure) {
           return res.status(400).json({
