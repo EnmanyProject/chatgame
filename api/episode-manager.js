@@ -110,7 +110,10 @@ module.exports = async function handler(req, res) {
  * 캐릭터의 에피소드 목록 조회
  */
 async function handleList(req, res, character_id) {
+  console.log(`🔍 [DEBUG] handleList 호출: character_id=${character_id}`);
+
   if (!character_id) {
+    console.error('❌ [DEBUG] character_id 누락');
     return res.status(400).json({
       success: false,
       message: 'character_id가 필요합니다'
@@ -118,22 +121,45 @@ async function handleList(req, res, character_id) {
   }
 
   try {
+    console.log(`🔍 [DEBUG] loadCharacterEpisodes 호출 중...`);
     const episodeData = await loadCharacterEpisodes(character_id);
-
-    return res.status(200).json({
-      success: true,
+    console.log(`✅ [DEBUG] loadCharacterEpisodes 완료:`, {
       character_id: episodeData.character_id,
       character_name: episodeData.character_name,
       total_episodes: episodeData.total_episodes,
-      episodes: episodeData.episodes
+      episodes_count: Object.keys(episodeData.episodes || {}).length
     });
 
+    // 🆕 데이터 검증
+    if (!episodeData || typeof episodeData !== 'object') {
+      console.error(`⚠️ [DEBUG] 유효하지 않은 episodeData:`, typeof episodeData);
+      return res.status(500).json({
+        success: false,
+        message: '에피소드 데이터 구조가 올바르지 않습니다'
+      });
+    }
+
+    // 🆕 안전한 응답 생성 (모든 필드 기본값 보장)
+    const response = {
+      success: true,
+      character_id: episodeData.character_id || character_id,
+      character_name: episodeData.character_name || 'Unknown',
+      total_episodes: episodeData.total_episodes || 0,
+      episodes: episodeData.episodes || {}
+    };
+
+    console.log(`✅ [DEBUG] 응답 전송 준비 완료`);
+    return res.status(200).json(response);
+
   } catch (error) {
-    console.error(`❌ 에피소드 목록 로드 실패 (${character_id}):`, error);
+    console.error(`❌ [DEBUG] 에피소드 목록 로드 실패 (${character_id}):`, error);
+    console.error('❌ [DEBUG] 에러 스택:', error.stack);
+
     return res.status(500).json({
       success: false,
       message: '에피소드 목록을 불러올 수 없습니다',
-      error: error.message
+      error: error.message || 'Unknown error',
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 }
