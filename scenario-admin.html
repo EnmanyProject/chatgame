@@ -21605,7 +21605,7 @@
             document.getElementById('dialoguePreviewModal').style.display = 'none';
         }
 
-        // 🤖 AI 대화 스크립트 자동 생성 함수
+        // 🤖 AI 대화 스크립트 2단계 자동 생성 함수
         async function generateAIDialogue() {
             // Tab 1 데이터 수집
             const title = document.getElementById('scenarioTitle').value;
@@ -21646,21 +21646,24 @@
             const btn = event.target;
             const originalText = btn.textContent;
             btn.disabled = true;
-            btn.textContent = '🤖 AI 생성 중...';
 
             try {
-                console.log('🤖 AI 대화 스크립트 생성 시작...', {
+                console.log('🤖 2단계 AI 대화 생성 시작...', {
                     title, description, genre, sexyLevel, mood, totalChoices, aiModel
                 });
 
-                const response = await fetch('/api/scenario-manager', {
+                // ============== Step 1: 대화 구조 생성 (빠름, 3-5초) ==============
+                btn.textContent = '📐 1단계: 구조 생성 중...';
+                console.log('📐 Step 1: 대화 구조 생성 시작...');
+
+                const step1Response = await fetch('/api/scenario-manager', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${localStorage.getItem('githubToken')}`
                     },
                     body: JSON.stringify({
-                        action: 'generate_dialogue_script',
+                        action: 'generate_dialogue_structure',
                         title,
                         description,
                         genre,
@@ -21671,23 +21674,66 @@
                     })
                 });
 
-                if (!response.ok) {
-                    // 에러 응답 본문 파싱
-                    let errorMessage = `HTTP ${response.status}`;
+                if (!step1Response.ok) {
+                    let errorMessage = `Step 1 실패: HTTP ${step1Response.status}`;
                     try {
-                        const errorData = await response.json();
+                        const errorData = await step1Response.json();
                         errorMessage = errorData.message || errorMessage;
-                        console.error('❌ API 에러 상세:', errorData);
+                        console.error('❌ Step 1 에러:', errorData);
                     } catch (e) {
-                        console.error('❌ 에러 응답 파싱 실패:', e);
+                        console.error('❌ Step 1 에러 파싱 실패:', e);
                     }
                     throw new Error(errorMessage);
                 }
 
-                const result = await response.json();
-                console.log('✅ AI 응답:', result);
+                const step1Result = await step1Response.json();
+                console.log('✅ Step 1 완료:', step1Result);
 
-                if (result.success && result.dialogue_script) {
+                if (!step1Result.success || !step1Result.structure) {
+                    throw new Error('Step 1: 구조 생성 실패 - ' + (step1Result.message || '알 수 없는 오류'));
+                }
+
+                const structure = step1Result.structure;
+                console.log(`📐 구조 생성 완료: ${structure.structure?.length || 0}개 블록, ${structure.total_choices || 0}개 선택지`);
+
+                // ============== Step 2: 구조 기반 상세 대화 생성 (5-8초) ==============
+                btn.textContent = '📝 2단계: 상세 대화 생성 중...';
+                console.log('📝 Step 2: 상세 대화 생성 시작...');
+
+                const step2Response = await fetch('/api/scenario-manager', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('githubToken')}`
+                    },
+                    body: JSON.stringify({
+                        action: 'generate_dialogue_from_structure',
+                        title,
+                        description,
+                        genre,
+                        sexy_level: sexyLevel,
+                        mood,
+                        structure: structure,
+                        ai_model: aiModel
+                    })
+                });
+
+                if (!step2Response.ok) {
+                    let errorMessage = `Step 2 실패: HTTP ${step2Response.status}`;
+                    try {
+                        const errorData = await step2Response.json();
+                        errorMessage = errorData.message || errorMessage;
+                        console.error('❌ Step 2 에러:', errorData);
+                    } catch (e) {
+                        console.error('❌ Step 2 에러 파싱 실패:', e);
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                const step2Result = await step2Response.json();
+                console.log('✅ Step 2 완료:', step2Result);
+
+                if (step2Result.success && step2Result.dialogue_script) {
                     // 기존 블록 초기화
                     const container = document.getElementById('dialogue-blocks-container');
                     container.innerHTML = '';
@@ -21749,9 +21795,9 @@
                         }
                     });
 
-                    alert(`✅ AI 대화 생성 완료!\n\n📊 생성된 블록: ${result.dialogue_script.length}개\n🎯 선택지: ${result.metadata?.total_choices || totalChoices}개\n🎨 분위기: ${mood}\n🤖 AI 모델: ${aiModel || 'openai'}`);
+                    alert(`✅ 2단계 AI 대화 생성 완료!\n\n📐 Step 1: 구조 생성 ✅\n📝 Step 2: 상세 대화 생성 ✅\n\n📊 생성된 블록: ${step2Result.dialogue_script.length}개\n🎯 선택지: ${structure.total_choices || totalChoices}개\n🎨 분위기: ${mood}\n🤖 AI 모델: ${aiModel || 'openai'}\n\n💡 Vercel 10초 제한 우회 성공!`);
                 } else {
-                    throw new Error(result.message || '알 수 없는 오류가 발생했습니다.');
+                    throw new Error(step2Result.message || '알 수 없는 오류가 발생했습니다.');
                 }
             } catch (error) {
                 console.error('❌ AI 대화 생성 오류:', error);

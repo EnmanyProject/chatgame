@@ -420,6 +420,263 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // 📐 Step 1: 대화 구조만 빠르게 생성 (v2.0.0 - 2단계 생성 방식)
+    if (action === 'generate_dialogue_structure') {
+      try {
+        console.log('📐 Step 1: 대화 구조 생성 시작...');
+
+        const { title, description, genre, sexy_level, mood, total_choices, ai_model } = req.body;
+
+        if (!title || !description || !genre || !sexy_level || !mood || !total_choices) {
+          return res.status(400).json({
+            success: false,
+            message: '필수 파라미터가 누락되었습니다',
+            received: { title, description, genre, sexy_level, mood, total_choices }
+          });
+        }
+
+        // AI 프롬프트 로드
+        const promptsData = await loadFromGitHub('data/ai-prompts.json');
+        const prompts = JSON.parse(promptsData);
+
+        if (!prompts.dialogue_generation) {
+          throw new Error('dialogue_generation 프롬프트가 없습니다');
+        }
+
+        const dialoguePrompts = prompts.dialogue_generation;
+
+        // tone_settings 체크
+        let toneSettings = prompts.tone_settings[mood];
+        if (!toneSettings) {
+          console.warn(`⚠️ tone_settings[${mood}] 없음, balanced 사용`);
+          toneSettings = prompts.tone_settings['balanced'];
+        }
+
+        // 구조 생성용 간결한 프롬프트
+        const systemPrompt = `당신은 한국 로맨스 메신저 대화 구조 설계자입니다.
+대화의 전체 흐름과 구조만 간결하게 설계합니다.
+
+각 블록은 다음 정보만 포함:
+- type: "message" (캐릭터 메시지) | "choice" (선택지) | "user_input" (사용자 입력)
+- summary: 1-2문장 요약 (실제 대사 아님)
+- emotion: neutral, shy, excited, sad, angry, longing, playful, serious 중 하나
+
+선택지는 5-7개 메시지마다 1개씩 배치하고, 각 옵션의 affection_change만 표시합니다.
+반드시 JSON 형식으로만 응답하세요.`;
+
+        const userPrompt = `다음 조건으로 메신저 대화 구조를 설계하세요:
+
+제목: ${title}
+설명: ${description}
+장르: ${genre}
+섹시 레벨: ${sexy_level}/10
+분위기: ${mood}
+선택지 개수: ${total_choices}개
+
+출력 형식 (JSON):
+{
+  "structure": [
+    { "id": 1, "type": "message", "summary": "캐릭터가 먼저 톡을 보냄", "emotion": "neutral" },
+    { "id": 5, "type": "choice", "question_summary": "어떻게 답할까?", "options_count": 3 },
+    ...
+  ],
+  "total_messages": 예상 메시지 수,
+  "total_choices": ${total_choices}
+}`;
+
+        let structureData;
+
+        // OpenAI API
+        if (!ai_model || ai_model === 'openai') {
+          if (!process.env.OPENAI_API_KEY) {
+            throw new Error('OPENAI_API_KEY 환경변수가 설정되지 않았습니다.');
+          }
+
+          const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: 'gpt-4o-mini',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt }
+              ],
+              response_format: { type: "json_object" },
+              temperature: toneSettings.temperature,
+              max_tokens: 800 // 구조만 생성 - 빠름!
+            })
+          });
+
+          if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(`OpenAI API 오류: ${response.status} - ${errorBody}`);
+          }
+
+          const result = await response.json();
+          const content = result.choices[0].message.content;
+          structureData = JSON.parse(content);
+
+          console.log('✅ Step 1 완료: 구조 생성됨', structureData.structure?.length || 0, '개 블록');
+        }
+
+        return res.status(200).json({
+          success: true,
+          structure: structureData,
+          message: 'Step 1: 대화 구조 생성 완료'
+        });
+
+      } catch (error) {
+        console.error('❌ Step 1 구조 생성 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: `Step 1 구조 생성 실패: ${error.message}`,
+          error_details: error.stack?.split('\n').slice(0, 5).join('\n')
+        });
+      }
+    }
+
+    // 📝 Step 2: 구조 기반 상세 대화 생성 (v2.0.0 - 2단계 생성 방식)
+    if (action === 'generate_dialogue_from_structure') {
+      try {
+        console.log('📝 Step 2: 상세 대화 생성 시작...');
+
+        const { title, description, genre, sexy_level, mood, structure, ai_model } = req.body;
+
+        if (!title || !description || !structure) {
+          return res.status(400).json({
+            success: false,
+            message: '필수 파라미터가 누락되었습니다 (title, description, structure 필요)',
+            received: { title, description, structure: structure ? '있음' : '없음' }
+          });
+        }
+
+        // AI 프롬프트 로드
+        const promptsData = await loadFromGitHub('data/ai-prompts.json');
+        const prompts = JSON.parse(promptsData);
+
+        if (!prompts.dialogue_generation) {
+          throw new Error('dialogue_generation 프롬프트가 없습니다');
+        }
+
+        const dialoguePrompts = prompts.dialogue_generation;
+
+        // tone_settings 체크
+        let toneSettings = prompts.tone_settings[mood];
+        if (!toneSettings) {
+          console.warn(`⚠️ tone_settings[${mood}] 없음, balanced 사용`);
+          toneSettings = prompts.tone_settings['balanced'];
+        }
+
+        // 상세 대화 생성용 프롬프트
+        const systemPrompt = dialoguePrompts.system_prompt;
+
+        const userPrompt = `다음 조건과 구조를 바탕으로 실제 메신저 대화를 작성하세요:
+
+제목: ${title}
+설명: ${description}
+장르: ${genre}
+섹시 레벨: ${sexy_level}/10
+분위기: ${mood} - ${toneSettings.instruction}
+
+아래는 이미 설계된 대화 구조입니다. 이 구조를 따라 실제 대사를 작성하세요:
+
+${JSON.stringify(structure, null, 2)}
+
+# 작성 규칙
+1. 메신저 대화 형식 (연속 메시지 허용)
+2. 구조의 각 블록을 실제 대사로 변환
+3. 감정 태그: neutral, shy, excited, sad, angry, longing, playful, serious
+4. 말줄임(...), 이모티콘 표현: (///), (웃음) 등
+5. 시간은 저녁~밤 시간대 (19:00~23:00)
+
+# 출력 형식 (JSON)
+{
+  "dialogue_script": [
+    {
+      "id": 1,
+      "type": "message",
+      "speaker": "캐릭터명",
+      "text": "실제 대사",
+      "emotion": "neutral",
+      "timestamp": "19:23"
+    },
+    {
+      "id": 5,
+      "type": "choice",
+      "question": "질문?",
+      "options": [
+        { "id": "A", "text": "선택지1", "affection_change": 3 },
+        { "id": "B", "text": "선택지2", "affection_change": 0 },
+        { "id": "C", "text": "선택지3", "affection_change": 1 }
+      ]
+    }
+  ]
+}
+
+구조를 참고하되 실제 감정적이고 자연스러운 대화로 작성하세요.`;
+
+        let dialogueScript;
+
+        // OpenAI API
+        if (!ai_model || ai_model === 'openai') {
+          if (!process.env.OPENAI_API_KEY) {
+            throw new Error('OPENAI_API_KEY 환경변수가 설정되지 않았습니다.');
+          }
+
+          const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: 'gpt-4o-mini',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt }
+              ],
+              response_format: { type: "json_object" },
+              temperature: toneSettings.temperature,
+              max_tokens: 2000 // 상세 대화 생성 - 구조가 있어서 여전히 빠름
+            })
+          });
+
+          if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(`OpenAI API 오류: ${response.status} - ${errorBody}`);
+          }
+
+          const result = await response.json();
+          const content = result.choices[0].message.content;
+          const parsed = JSON.parse(content);
+          dialogueScript = parsed.dialogue_script || [];
+
+          console.log('✅ Step 2 완료: 상세 대화 생성됨', dialogueScript.length, '개 블록');
+        }
+
+        if (!dialogueScript || dialogueScript.length === 0) {
+          throw new Error('dialogue_script가 비어있습니다');
+        }
+
+        return res.status(200).json({
+          success: true,
+          dialogue_script: dialogueScript,
+          message: 'Step 2: 상세 대화 생성 완료'
+        });
+
+      } catch (error) {
+        console.error('❌ Step 2 상세 대화 생성 실패:', error);
+        return res.status(500).json({
+          success: false,
+          message: `Step 2 상세 대화 생성 실패: ${error.message}`,
+          error_details: error.stack?.split('\n').slice(0, 5).join('\n')
+        });
+      }
+    }
+
     // 📝 대화 스크립트 자동 생성 (v2.0.0)
     if (action === 'generate_dialogue_script') {
       try {
@@ -521,7 +778,7 @@ module.exports = async function handler(req, res) {
               ],
               response_format: { type: "json_object" },
               temperature: toneSettings.temperature,
-              max_tokens: parseInt(total_choices) * 200
+              max_tokens: Math.min(1500, parseInt(total_choices) * 150) // Vercel 10초 제한 대응
             })
           });
 
@@ -572,7 +829,7 @@ module.exports = async function handler(req, res) {
               ],
               response_format: { type: "json_object" },
               temperature: toneSettings.temperature,
-              max_tokens: parseInt(total_choices) * 200
+              max_tokens: Math.min(1500, parseInt(total_choices) * 150) // Vercel 10초 제한 대응
             })
           });
 
