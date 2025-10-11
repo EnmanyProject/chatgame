@@ -9292,12 +9292,12 @@
                 document.getElementById('scenarioModalTitle').textContent = '새 시나리오 만들기';
                 document.getElementById('scenarioForm').reset();
 
-                // 기승전결 구조 초기화 (필드 비우기) - 영어 속성명 사용
-                ['beginning', 'buildup', 'climax', 'resolution'].forEach(stage => {
-                    document.getElementById(`${stage}-title`).value = '';
-                    document.getElementById(`${stage}-summary`).value = '';
-                    document.getElementById(`${stage}-goal`).value = '';
-                });
+                // v2.0.0: 대화 스크립트 컨테이너 초기화
+                const dialogueContainer = document.getElementById('dialogue-blocks-container');
+                if (dialogueContainer) {
+                    dialogueContainer.innerHTML = '';
+                }
+                blockIdCounter = 1; // 블록 ID 카운터 초기화
             } else if (mode === 'edit' && scenarioId) {
                 editScenario(scenarioId);
                 return;
