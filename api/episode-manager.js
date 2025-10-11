@@ -1607,11 +1607,33 @@ narration에 다음과 같은 구체적 표현을 반드시 포함:
       content = data.content[0].text;
     }
 
+    // 🆕 AI 응답 전체 로깅 (디버깅용)
+    console.log('🔍 [DEBUG] AI 응답 첫 500자:', content.substring(0, 500));
+    console.log('🔍 [DEBUG] AI 응답 마지막 500자:', content.substring(content.length - 500));
+
     // JSON 추출 (코드 블록 제거)
     const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/\[[\s\S]*\]/);
     const jsonText = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : content;
 
-    let dialogueFlow = JSON.parse(jsonText);
+    console.log('🔍 [DEBUG] 추출된 JSON 첫 500자:', jsonText.substring(0, 500));
+
+    let dialogueFlow;
+    try {
+      dialogueFlow = JSON.parse(jsonText);
+    } catch (parseError) {
+      console.error('❌ JSON 파싱 실패:', parseError.message);
+      console.error('❌ JSON 파싱 위치:', parseError.message.match(/position (\d+)/)?.[1]);
+
+      // 문제 위치 주변 텍스트 출력
+      if (parseError.message.includes('position')) {
+        const position = parseInt(parseError.message.match(/position (\d+)/)?.[1] || '0');
+        const start = Math.max(0, position - 100);
+        const end = Math.min(jsonText.length, position + 100);
+        console.error('❌ 문제 부분:', jsonText.substring(start, end));
+      }
+
+      throw new Error(`JSON 파싱 실패: ${parseError.message}\n\n문제 해결 방법:\n1. AI 모델 변경 (gpt-4o 또는 claude-3-5-sonnet-20241022 권장)\n2. 시나리오 길이를 "짧음"으로 선택\n3. 다시 시도`);
+    }
 
     // 🆕 후처리: speaker 검증 및 교체
     dialogueFlow = dialogueFlow.map(item => {
