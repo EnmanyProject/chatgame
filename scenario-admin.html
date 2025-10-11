@@ -5449,21 +5449,12 @@
             </div>
 
             <div class="modal-body">
-                <!-- Tab Navigation -->
-                <div class="scenario-tabs">
-                    <button type="button" class="scenario-tab active" data-tab="basic" onclick="switchScenarioTab('basic')">
-                        📋 기본 정보
-                    </button>
-                    <button type="button" class="scenario-tab" data-tab="script" onclick="switchScenarioTab('script')">
-                        📝 대화 스크립트
-                    </button>
-                </div>
-
                 <form id="scenarioForm">
                     <input type="hidden" id="scenarioId" />
 
-                    <!-- Tab 1: Basic Info -->
-                    <div id="scenario-tab-basic" class="scenario-tab-content active">
+                    <!-- 기본 정보 섹션 -->
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <h3 style="margin-top: 0; margin-bottom: 15px; color: #667eea;">📋 기본 정보</h3>
                         <!-- 메타데이터 -->
                     <div class="form-group">
                         <label for="scenarioTitle">📝 시나리오 제목 *</label>
@@ -5570,27 +5561,27 @@
                         </div>
                     </div>
                     </div>
-                    <!-- End Tab 1 -->
+                    <!-- End 기본 정보 섹션 -->
 
-                    <!-- Tab 2: Dialogue Script Editor -->
-                    <div id="scenario-tab-script" class="scenario-tab-content">
-                        <div style="padding: 20px;">
-                            <!-- Control Panel -->
-                            <div class="dialogue-controls">
-                                <button type="button" class="btn" onclick="generateAIDialogue()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 700; flex: 1; max-width: 200px;">🤖 AI 자동 생성</button>
-                                <button type="button" class="btn btn-primary" onclick="addMessageBlock()">💬 대사 추가</button>
-                                <button type="button" class="btn btn-success" onclick="addChoiceBlock()">🎯 선택지 추가 (3개 옵션)</button>
-                                <button type="button" class="btn btn-info" onclick="addUserInputBlock()">⌨️ 주관식 추가</button>
-                                <button type="button" class="btn btn-warning" onclick="previewDialogue()">👁️ 미리보기</button>
-                            </div>
+                    <!-- 대화 스크립트 섹션 -->
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                        <h3 style="margin-top: 0; margin-bottom: 15px; color: #667eea;">📝 대화 스크립트</h3>
 
-                            <!-- Block Container -->
-                            <div id="dialogue-blocks-container" class="dialogue-timeline">
-                                <!-- Blocks dynamically added here -->
-                            </div>
+                        <!-- Control Panel -->
+                        <div class="dialogue-controls">
+                            <button type="button" class="btn" onclick="generateAIDialogue()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 700; flex: 1; max-width: 200px;">🤖 AI 자동 생성</button>
+                            <button type="button" class="btn btn-primary" onclick="addMessageBlock()">💬 대사 추가</button>
+                            <button type="button" class="btn btn-success" onclick="addChoiceBlock()">🎯 선택지 추가 (3개 옵션)</button>
+                            <button type="button" class="btn btn-info" onclick="addUserInputBlock()">⌨️ 주관식 추가</button>
+                            <button type="button" class="btn btn-warning" onclick="previewDialogue()">👁️ 미리보기</button>
+                        </div>
+
+                        <!-- Block Container -->
+                        <div id="dialogue-blocks-container" class="dialogue-timeline">
+                            <!-- Blocks dynamically added here -->
                         </div>
                     </div>
-                    <!-- End Tab 2 -->
+                    <!-- End 대화 스크립트 섹션 -->
                 </form>
             </div>
 
@@ -21275,17 +21266,6 @@
         let blockIdCounter = 1;
 
         // Tab switching
-        function switchScenarioTab(tabName) {
-            document.querySelectorAll('.scenario-tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.scenario-tab-content').forEach(content => content.classList.remove('active'));
-
-            const selectedTab = document.querySelector(`.scenario-tab[data-tab="${tabName}"]`);
-            const selectedContent = document.getElementById(`scenario-tab-${tabName}`);
-
-            if (selectedTab) selectedTab.classList.add('active');
-            if (selectedContent) selectedContent.classList.add('active');
-        }
-
         // Add message block
         function addMessageBlock() {
             const container = document.getElementById('dialogue-blocks-container');
