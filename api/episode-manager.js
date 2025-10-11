@@ -1283,31 +1283,71 @@ ${scenarioInfo.ai_generated_context}
 다음 JSON 형식으로 응답해주세요 (총 ${totalDialogues}개 정도):`;
   }
 
-  // 공통 JSON 예시 추가
+  // 🆕 v2.3.0 개선: 더 상세한 JSON 예시와 요구사항 추가
   prompt += `
+
+✅ **필수 1: 캐릭터 대사 길이 (매우 중요!)**
+- 각 character_dialogue의 text는 최소 3문장, 평균 100-200자
+- 짧은 대사는 절대 금지! 반드시 3문장 이상 작성
+- 이모티콘을 자연스럽게 포함 (최소 1개 이상)
+
+예시 (좋은 대사):
+"안녕 ☀️ 어제 그 메시지… 다들 붙잡고 잔소리하더라고! 😅 친구들이 '너 완전히 정신 나갔어?'라면서 한참 놀렸어. 너무 부끄러워서 어제 밤 잠도 못 잤어 ㅠㅠ"
+
+예시 (나쁜 대사 - 절대 금지!):
+"안녕! 오늘 뭐해?" ❌
+"어제 미안해." ❌
+
+✅ **필수 2: narration 상세 묘사**
+- 각 character_dialogue의 narration은 2-4문장, 80-150자
+- 반드시 포함: 행동 묘사 + 심리 묘사 + 환경/분위기 묘사
+- 구체적인 행동 표현 사용
+
+예시 (좋은 narration):
+"아침 햇살이 창문을 비추는 시간. 시은은 여전히 전날 보낸 메시지를 떠올리며 휴대폰을 켠다. 그녀의 손가락이 화면 위를 빠르게 움직이며, 볼이 살짝 붉어진다. 메시지를 보내고 나서도 계속 화면을 응시하며 답장을 기다린다."
+
+예시 (나쁜 narration - 절대 금지!):
+"시은이 메시지를 보낸다." ❌
+"그녀가 휴대폰을 본다." ❌
+
+✅ **필수 3: 구체적 행동/감정 표현**
+narration에 다음과 같은 구체적 표현을 반드시 포함:
+
+- 얼굴 표정: "볼을 살짝 붉히며", "미소를 머금고", "눈을 반짝이며"
+- 손/몸 동작: "손가락으로 입을 가리고", "고개를 살짝 숙이며", "휴대폰을 꼭 쥐고"
+- 심리 상태: "가슴이 두근거린다", "입술을 깨문다", "숨을 깊게 들이마신다"
+- 환경/시간: "아침 햇살이 비추고", "방 안이 고요하다", "시계가 10시를 가리킨다"
+
+✅ **필수 4: 시나리오 배경 완전 반영**
+위의 "시나리오 배경 스토리" 600-900자의 모든 요소를 대화에 녹여내세요:
+- 배경 스토리에 나온 시간대/장소를 정확히 사용
+- 캐릭터의 과거 행동/발언을 대화에서 언급
+- 스토리의 감정 흐름을 대화에 반영
+- 스토리에 나온 구체적 사물/상황을 대화에 포함
+
 \`\`\`json
 [
   {
     "sequence": 1,
     "type": "character_dialogue",
     "speaker": "${characterInfo.name}",
-    "text": "캐릭터가 먼저 대화를 시작하는 메시지",
-    "emotion": "감정",
-    "narration": "행동 묘사"
+    "text": "안녕 ☀️ 어제 그 메시지… 다들 붙잡고 잔소리하더라고! 😅 친구들이 '너 완전히 정신 나갔어?'라면서 한참 놀렸어. 너무 부끄러워서 어제 밤 잠도 못 잤어 ㅠㅠ",
+    "emotion": "embarrassed",
+    "narration": "아침 햇살이 창문을 비추는 시간. 시은은 여전히 전날 보낸 메시지를 떠올리며 휴대폰을 켠다. 그녀의 손가락이 화면 위를 빠르게 움직이며, 볼이 살짝 붉어진다."
   },
   {
     "sequence": 2,
     "type": "narration",
-    "content": "간단한 상황 설명"
+    "content": "메시지를 보내고 나서도 계속 화면을 응시하며 답장을 기다린다. 창밖의 햇살이 그녀의 얼굴을 비춘다."
   },
   {
     "sequence": 3,
     "type": "character_dialogue",
     "speaker": "${characterInfo.name}",
-    "text": "추가 대사",
-    "emotion": "감정",
-    "narration": "행동 묘사"
-  },`;
+    "text": "에이, 진짜 실수였어! 그냥 장난이었는데 말이야 😳 그런 말 하지 마~ 부끄럽잖아ㅋㅋ",
+    "emotion": "shy",
+    "narration": "손가락으로 입을 가리고 고개를 살짝 숙인다. 메시지를 보낸 후 한숨을 내쉬며 침대에 몸을 던진다."
+  },
 
   if (episodeType === 'choice_based') {
     prompt += `
@@ -1419,8 +1459,10 @@ ${scenarioInfo.ai_generated_context}
             { role: 'system', content: '당신은 로맨스 채팅 게임의 전문 대화 작가입니다. 항상 JSON 형식으로만 응답합니다.' },
             { role: 'user', content: prompt }
           ],
-          temperature: 0.7,
-          max_tokens: episodeType === 'choice_based' ? 3000 : 2500
+          temperature: 0.85,  // 🆕 v2.3.0: 창의성 증가 (0.7 → 0.85)
+          max_tokens: 6000,  // 🆕 v2.3.0: 토큰 2배 증가 (3000 → 6000)
+          presence_penalty: 0.6,  // 🆕 v2.3.0: 반복 방지
+          frequency_penalty: 0.3  // 🆕 v2.3.0: 다양성 증가
         })
       });
 
@@ -1449,8 +1491,10 @@ ${scenarioInfo.ai_generated_context}
             { role: 'system', content: '당신은 로맨스 채팅 게임의 전문 대화 작가입니다. 항상 JSON 형식으로만 응답합니다.' },
             { role: 'user', content: prompt }
           ],
-          temperature: 0.7,
-          max_tokens: episodeType === 'choice_based' ? 3000 : 2500
+          temperature: 0.85,  // 🆕 v2.3.0: 창의성 증가
+          max_tokens: 6000,  // 🆕 v2.3.0: 토큰 2배 증가
+          presence_penalty: 0.6,
+          frequency_penalty: 0.3
         })
       });
 
@@ -1472,7 +1516,8 @@ ${scenarioInfo.ai_generated_context}
         },
         body: JSON.stringify({
           model: aiModel,
-          max_tokens: episodeType === 'choice_based' ? 3000 : 2500,
+          max_tokens: 6000,  // 🆕 v2.3.0: 토큰 2배 증가
+          temperature: 0.85,  // 🆕 v2.3.0: 창의성 증가 (Claude는 temperature 지원)
           messages: [{
             role: 'user',
             content: `당신은 로맨스 채팅 게임의 전문 대화 작가입니다. 항상 JSON 형식으로만 응답합니다.\n\n${prompt}`
